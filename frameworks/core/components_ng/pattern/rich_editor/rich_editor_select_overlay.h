@@ -77,7 +77,6 @@ public:
     bool IsSingleHandleMoving();
     bool NeedRefreshMenu();
     float GetHandleHotZoneRadius();
-    RectF GetHandleRectWithTransform(const RectF& handleRect);
     RectF GetVisibleRect();
     bool IsMenuShow();
     bool IsSingleLineChanged();

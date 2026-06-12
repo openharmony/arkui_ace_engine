@@ -183,8 +183,17 @@ public:
     void GetLocalPointWithTransform(OffsetF& localPoint);
     // original local rect to transformed local rect.
     void GetLocalRectWithTransform(RectF& localRect);
+    // transformed global rect to original local rect.
+    void RevertLocalRectWithTransform(RectF& rect);
 
     OffsetF GetPaintOffsetWithoutTransform();
+
+    // local/global coordinate conversion with render transform.
+    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
+    RectF ConvertToGlobalRectWithTransform(const RectF& localRect);
+    OffsetF ConvertToLocalOffsetWithTransform(const OffsetF& globalOffset);
+    RectF ConvertToLocalRectWithTransform(const RectF& globalRect);
+
     RectF GetPaintRectWithTransform();
     OffsetF GetPaintRectOffsetWithTransform();
     RectF GetVisibleContentRectWithTransform(float epsilon);

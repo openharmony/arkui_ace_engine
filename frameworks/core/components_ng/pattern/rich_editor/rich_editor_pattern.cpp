@@ -3992,21 +3992,21 @@ std::function<void(const RectF& firstHandle, const RectF& secondHandle)> RichEdi
 
 RectF RichEditorPattern::CalcAIEntityRectWithHandles()
 {
-    auto firstHandleRect = selectOverlay_->GetHandleRectWithTransform(textSelector_.firstHandle);
-    auto secondHandleRect = selectOverlay_->GetHandleRectWithTransform(textSelector_.secondHandle);
-    if (firstHandleRect.Top() == secondHandleRect.Top()) {
-        return firstHandleRect.CombineRectT(secondHandleRect);
+    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    auto firstHandleLocal = textSelector_.firstHandle;
+    firstHandleLocal.SetOffset(firstHandleLocal.GetOffset() - paintOffset);
+    auto secondHandleLocal = textSelector_.secondHandle;
+    secondHandleLocal.SetOffset(secondHandleLocal.GetOffset() - paintOffset);
+    if (firstHandleLocal.Top() == secondHandleLocal.Top()) {
+        return ConvertToGlobalRectWithTransform(firstHandleLocal.CombineRectT(secondHandleLocal));
     }
-    auto top = std::min(firstHandleRect.Top(), secondHandleRect.Top());
-    auto bottom = std::max(firstHandleRect.Bottom(), secondHandleRect.Bottom());
-    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
-    auto left = textContentGlobalOffset.GetX();
-    auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
-    RectF aiRect = RectT(left, top, right - left, bottom - top);
-    auto offset = GetPaintRectGlobalOffset(); // component offset relative to window
-    aiRect -= offset; // aiRect offset relative to component
-    aiRect = aiRect.IntersectRectT(contentRect_) + offset;
-    return aiRect;
+    auto top = std::min(firstHandleLocal.Top(), secondHandleLocal.Top());
+    auto bottom = std::max(firstHandleLocal.Bottom(), secondHandleLocal.Bottom());
+    auto left = contentRect_.GetX();
+    auto right = contentRect_.GetX() + contentRect_.Width();
+    RectF aiRectLocal = RectT(left, top, right - left, bottom - top);
+    aiRectLocal = aiRectLocal.IntersectRectT(contentRect_);
+    return ConvertToGlobalRectWithTransform(aiRectLocal);
 }
 
 std::pair<int32_t, int32_t> RichEditorPattern::GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& item)
@@ -4495,7 +4495,7 @@ bool RichEditorPattern::HandleUrlSpanShowShadow(const Offset& localLocation, con
 
     auto localLocationOffset = localLocation;
     if (selectOverlay_->HasRenderTransform()) {
-        localLocationOffset = ConvertGlobalToLocalOffset(globalOffset);
+        localLocationOffset = ConvertToLocalOffsetWithTransform(globalOffset);
     }
 
     PointF textOffset = {static_cast<float>(localLocationOffset.GetX()) - GetTextRect().GetX(),
@@ -4549,19 +4549,25 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     }
 }
 
-Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
+Offset RichEditorPattern::ConvertToLocalOffsetWithTransform(const Offset& globalOffset)
 {
-    auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
-    selectOverlay_->RevertLocalPointWithTransform(localPoint);
+    auto localPoint = selectOverlay_->ConvertToLocalOffsetWithTransform(OffsetF(globalOffset.GetX(), globalOffset.GetY()));
     return Offset(localPoint.GetX(), localPoint.GetY());
+}
+
+RectF RichEditorPattern::ConvertToLocalRectWithTransform(const RectF& globalRect)
+{
+    return selectOverlay_->ConvertToLocalRectWithTransform(globalRect);
 }
 
 OffsetF RichEditorPattern::ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset)
 {
-    std::vector<OffsetF> points = { localOffset };
-    selectOverlay_->GetGlobalPointsWithTransform(points);
-    CHECK_NULL_RETURN(!points.empty(), localOffset);
-    return OffsetF(points[0].GetX(), points[0].GetY());
+    return selectOverlay_->ConvertToGlobalOffsetWithTransform(localOffset);
+}
+
+RectF RichEditorPattern::ConvertToGlobalRectWithTransform(const RectF& localRect)
+{
+    return selectOverlay_->ConvertToGlobalRectWithTransform(localRect);
 }
 
 bool RichEditorPattern::HasRenderTransform()
@@ -4612,7 +4618,7 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     isLongPress_ = true;
     auto localOffset = info.GetLocalLocation();
     if (selectOverlay_->HasRenderTransform()) {
-        localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+        localOffset = ConvertToLocalOffsetWithTransform(info.GetGlobalLocation());
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
@@ -9815,7 +9821,7 @@ Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)
     auto offset = host->GetPaintRectOffset(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
-        localOffset = ConvertGlobalToLocalOffset(globalOffset);
+        localOffset = ConvertToLocalOffsetWithTransform(globalOffset);
     }
     return ConvertTouchOffsetToTextOffset(localOffset);
 }
@@ -9926,14 +9932,11 @@ void RichEditorPattern::SetHandleInfo(TextDragInfo& info)
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo.has_value());
     if (selectOverlayInfo->firstHandle.isShow) {
-        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+        info.firstHandle = selectOverlayInfo->firstHandle.GetPaintRect();
     }
     if (selectOverlayInfo->secondHandle.isShow) {
-        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+        info.secondHandle = selectOverlayInfo->secondHandle.GetPaintRect();
     }
-    CHECK_NULL_VOID(HasRenderTransform());
-    info.firstHandle.SetOffset(selectOverlayInfo->firstHandle.GetPaintRect().GetOffset());
-    info.secondHandle.SetOffset(selectOverlayInfo->secondHandle.GetPaintRect().GetOffset());
 }
 
 void RichEditorPattern::SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor)
@@ -10212,7 +10215,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
     auto offset = host->GetPaintRectOffsetNG(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
-        localOffset = ConvertGlobalToLocalOffset(globalOffset);
+        localOffset = ConvertToLocalOffsetWithTransform(globalOffset);
     }
     auto eventHub = host->GetEventHub<EventHub>();
     if (GreatNotEqual(range.second, range.first)) {
@@ -11765,16 +11768,6 @@ RectF RichEditorPattern::GetVisibleContentRect()
     return SelectOverlayClient::GetVisibleContentRect(parent, contentRect);
 }
 
-void RichEditorPattern::ConvertLocalToGlobalRect(RectF& localRect)
-{
-    if (HasRenderTransform()) {
-        selectOverlay_->GetGlobalRectWithTransform(localRect);
-        return;
-    }
-    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
-    localRect.SetOffset(localRect.GetOffset() + paintOffset);
-}
-
 void RichEditorPattern::AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects)
 {
     if (pos == SelectRectsType::LEFT_TOP_POINT) {
@@ -11799,7 +11792,7 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
         auto caretWidth = GetCaretWidth();
         auto selectRect = RectF(caretOffset, SizeF(caretWidth, caretHeight));
-        ConvertLocalToGlobalRect(selectRect);
+        selectRect = ConvertToGlobalRectWithTransform(selectRect);
         return selectRect.IntersectRectT(contentRect);
     }
     AdjustSelectRects(pos, selectRects);
@@ -11824,8 +11817,8 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
     }
     RectF localSelectArea = { selectAreaLeft + richTextRect_.GetX(), frontRect.GetY() + richTextRect_.GetY(),
         selectAreaRight - selectAreaLeft, backRect.Bottom() - frontRect.Top() };
-    ConvertLocalToGlobalRect(localSelectArea);
-    return localSelectArea.IntersectRectT(contentRect);
+    auto globalSelectArea = ConvertToGlobalRectWithTransform(localSelectArea);
+    return globalSelectArea.IntersectRectT(contentRect);
 }
 
 void RichEditorPattern::AppendSelectRect(std::vector<RectF>& selectRects)

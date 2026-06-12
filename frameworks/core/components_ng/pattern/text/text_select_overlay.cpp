@@ -529,7 +529,7 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     auto isDragging = GetIsHandleDragging();
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->UpdateParentGlobalOffset();
@@ -739,7 +739,10 @@ void TextSelectOverlay::GetVisibleDragViewHandles(RectF& first, RectF& second)
     CHECK_NULL_VOID(selectOverlayInfo);
     RectF firstHandle;
     RectF secondHandle;
-    if (!GetDragViewHandleRects(firstHandle, secondHandle)) {
+    if (hasTransform_) {
+        firstHandle = ConvertToGlobalRectWithTransform(selectOverlayInfo->firstHandle.localPaintRect);
+        secondHandle = ConvertToGlobalRectWithTransform(selectOverlayInfo->secondHandle.localPaintRect);
+    } else if (!GetDragViewHandleRects(firstHandle, secondHandle)) {
         return;
     }
     if (selectOverlayInfo->firstHandle.isShow) {

@@ -78,18 +78,11 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*path, RSClipOp::INTERSECT, true);
     PaintSelBackground(canvas, textDragPattern, richEditor);
     canvas.Restore();
-    if (firstHandle_ && isFirstHandleAnimated_) {
-        auto selectPosition = pattern->GetSelectPosition();
-        auto rect = firstHandle_->Get();
-        auto startY = rect.Top() - selectPosition.globalY_;
-        PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
-    }
-    if (secondHandle_ && isSecondHandleAnimated_) {
-        auto selectPosition = pattern->GetSelectPosition();
-        auto rect = secondHandle_->Get();
-        auto startY = rect.Bottom() - selectPosition.globalY_;
-        PaintHandle(canvas, secondHandle_->Get(), false, rect.Left() - selectPosition.globalX_, startY);
-    }
+
+    auto selectPosition = pattern->GetSelectPosition();
+
+    PaintHandle(canvas, true, selectPosition);
+    PaintHandle(canvas, false, selectPosition);
 }
 
 void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
@@ -226,15 +219,23 @@ void RichEditorDragOverlayModifier::PaintSelBackground(RSCanvas& canvas, RefPtr<
     canvas.DetachBrush();
 }
 
-void RichEditorDragOverlayModifier::PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool isFirstHandle,
-    float startX, float startY)
+void RichEditorDragOverlayModifier::PaintHandle(RSCanvas& canvas, bool isFirstHandle,
+    const SelectPositionInfo& selectPosition)
 {
+    auto handle = isFirstHandle ? firstHandle_ : secondHandle_;
+    auto isAnimated = isFirstHandle ? isFirstHandleAnimated_ : isSecondHandleAnimated_;
+    CHECK_NULL_VOID(handle && isAnimated);
     if (!isAnimating_ || type_ == DragAnimType::DEFAULT) {
         return;
     }
+    auto handleRect = handle->Get();
     if (NearZero(handleOpacity_->Get()) || NearZero(handleRect.Width())) {
         return;
     }
+    auto [scaleX, scaleY] = dragScaleXY_;
+    float startX = handleRect.Left() - selectPosition.globalX_;
+    float startY = isFirstHandle ? (handleRect.Top() - selectPosition.globalY_)
+        : (handleRect.Bottom() - selectPosition.globalY_);
     auto rectTopX = (handleRect.Right() - handleRect.Left()) / CONSTANT_DOUBLE + startX;
     auto centerOffset = OffsetF(rectTopX, 0.0);
     OffsetF startPoint(0.0, 0.0);
@@ -254,6 +255,9 @@ void RichEditorDragOverlayModifier::PaintHandle(RSCanvas& canvas, const RectF& h
         endPoint.SetY(-outerHandleRadius - handleRectHeight);
     }
     canvas.Save();
+    if (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f)) {
+        canvas.Scale(1.0f / scaleX, 1.0f / scaleY);
+    }
     canvas.Translate(centerOffset.GetX(), centerOffset.GetY());
     PaintHandleRing(canvas);
     PaintHandleHold(canvas, handleRect, startPoint, endPoint);

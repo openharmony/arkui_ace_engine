@@ -920,7 +920,13 @@ public:
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
     bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
-    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
+
+    // local/global coordinate conversion with render transform.
+    Offset ConvertToLocalOffsetWithTransform(const Offset& globalOffset);
+    RectF ConvertToLocalRectWithTransform(const RectF& globalRect);
+    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset) override;
+    RectF ConvertToGlobalRectWithTransform(const RectF& localRect);
+
     bool HasRenderTransform();
     VectorF GetHostScale() const;
 
@@ -962,7 +968,6 @@ private:
     Color GetUrlPressColor();
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     RefPtr<RichEditorScrollController> scrollController_;
-    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
@@ -1214,7 +1219,6 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
     RectF GetVisibleContentRect();
-    void ConvertLocalToGlobalRect(RectF& localRect);
     void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
     RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);

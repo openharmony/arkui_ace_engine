@@ -33,6 +33,7 @@ struct TextDragInfo {
     bool isSecondHandleAnimation = true;
     std::optional<Color> dragBackgroundColor;
     bool isDragShadowNeeded = true;
+    std::pair<float, float> scaleXY = { 1.0f, 1.0f };
 };
 } // namespace OHOS::Ace::NG
 

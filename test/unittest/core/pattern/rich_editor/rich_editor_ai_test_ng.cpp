@@ -765,11 +765,11 @@ HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level2)
 }
 
 /**
- * @tc.name: CalcAIEntityRectWithHandles
- * @tc.desc: Test CalcAIEntityRectWithHandles
+ * @tc.name: CalcAIEntityRectWithHandles001
+ * @tc.desc: Test CalcAIEntityRectWithHandles when firstHandleLocal.Top() == secondHandleLocal.Top()
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CalcAIEntityRectWithHandles, TestSize.Level2)
+HWTEST_F(RichEditorAITestOneNg, CalcAIEntityRectWithHandles001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -781,13 +781,51 @@ HWTEST_F(RichEditorAITestOneNg, CalcAIEntityRectWithHandles, TestSize.Level2)
     pattern->contentRect_ = RectF(10, 10, 200, 200);
     auto aiRect = pattern->CalcAIEntityRectWithHandles();
     EXPECT_EQ(aiRect, RectF(20, 20, 60, 20));
+
+    // Set up parent node with scale transform for hasTransform_ case
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->AddChild(richEditorNode_);
+    auto parentRenderContext = parentNode->GetRenderContext();
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->UpdatePaintRect(RectF(10.0f, 0.0f, 200.0f, 200.0f));
+    parentRenderContext->UpdateTransformScale(VectorF(2.0f, 2.0f));
     pattern->selectOverlay_->hasTransform_ = true;
     aiRect = pattern->CalcAIEntityRectWithHandles();
-    EXPECT_EQ(aiRect, RectF(30, 20, 60, 20));
-    pattern->selectOverlay_->hasTransform_ = false;
+    EXPECT_EQ(aiRect, RectF(20, 20, 60, 20));
+}
+
+/**
+ * @tc.name: CalcAIEntityRectWithHandles002
+ * @tc.desc: Test CalcAIEntityRectWithHandles when firstHandleLocal.Top() != secondHandleLocal.Top()
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, CalcAIEntityRectWithHandles002, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
     pattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
-    aiRect = pattern->CalcAIEntityRectWithHandles();
+    pattern->parentGlobalOffset_ = OffsetF(0, 0);
+    pattern->contentRect_ = RectF(10, 10, 200, 200);
+    auto aiRect = pattern->CalcAIEntityRectWithHandles();
     EXPECT_EQ(aiRect, RectF(10, 20, 200, 40));
+
+    // Set up parent node with scale transform for hasTransform_ case
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->AddChild(richEditorNode_);
+    auto parentRenderContext = parentNode->GetRenderContext();
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->UpdatePaintRect(RectF(10.0f, 0.0f, 200.0f, 200.0f));
+    parentRenderContext->UpdateTransformScale(VectorF(2.0f, 2.0f));
+    pattern->selectOverlay_->hasTransform_ = true;
+    aiRect = pattern->CalcAIEntityRectWithHandles();
+    EXPECT_EQ(aiRect, RectF(20, 20, 200, 40));
 }
 
 /**

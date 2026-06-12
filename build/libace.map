@@ -906,6 +906,7 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::CheckSwitchToMode(OHOS::Ace::NG::HandleLevelMode)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CheckTouchInHostNode(OHOS::Ace::NG::PointT<float> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CloseOverlay(bool, OHOS::Ace::NG::CloseReason)";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::ConvertToGlobalOffsetWithTransform(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetAncestorNodeViewPort()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetGlobalRectWithTransform(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetHandleLocalPaintRect(OHOS::Ace::NG::DragHandleIndex)";
@@ -954,6 +955,8 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateViewPort()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetVisibleContentRectWithTransform(float)";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::ConvertToGlobalRectWithTransform(OHOS::Ace::NG::RectT<float> const&)";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::ConvertToLocalOffsetWithTransform(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>, Ark_BorderRadiuses>(Ark_BorderRadiuses const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator!=(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
@@ -2084,6 +2087,7 @@
       "OHOS::Ace::NG::TextPattern::CloseKeyboard(bool)";
       "OHOS::Ace::NG::TextPattern::ContentChangeByDetaching(OHOS::Ace::NG::PipelineContext*)";
       "OHOS::Ace::NG::TextPattern::CopyBindSelectionMenuParams(OHOS::Ace::NG::SelectOverlayInfo&, std::__h::shared_ptr<OHOS::Ace::NG::SelectionMenuParams>)";
+      "OHOS::Ace::NG::TextPattern::ConvertToGlobalOffsetWithTransform(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::TextPattern::CreateAIEntityMenu()";
       "OHOS::Ace::NG::TextPattern::CreateAccessibilityProperty()";
       "OHOS::Ace::NG::TextPattern::CreateEventHub()";
