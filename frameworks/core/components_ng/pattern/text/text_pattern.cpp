@@ -5207,6 +5207,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (oneStepDragController_) {
         SetEnableEventResponse();
     }
+    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
     ProcessOverlayAfterLayout();
     return true;
 }
@@ -5397,7 +5398,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
-    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
 }
 
 bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
