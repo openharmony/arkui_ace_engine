@@ -22,9 +22,6 @@ export interface Colors {
     warning: ResourceColor;
     alert: ResourceColor;
     confirm: ResourceColor;
-    primary: ResourceColor;
-    onPrimary: ResourceColor;
-    container: ResourceColor;
     fontPrimary: ResourceColor;
     fontSecondary: ResourceColor;
     fontTertiary: ResourceColor;
@@ -72,6 +69,9 @@ export interface Colors {
     interactiveActive: ResourceColor;
     interactiveSelect: ResourceColor;
     interactiveClick: ResourceColor;
+    primary?: ResourceColor;
+    onPrimary?: ResourceColor;
+    container?: ResourceColor;
 }
 
 export type CustomColors = Partial<Colors>;

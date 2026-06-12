@@ -27,9 +27,6 @@ export class ArkColorsImpl implements Colors {
     warning: ResourceColor = _r(125830979, 10001, '', '');
     alert: ResourceColor = _r(125830980, 10001, '', '');
     confirm: ResourceColor = _r(125830981, 10001, '', '');
-    primary: ResourceColor = _r(125836896, 10001, '', '');
-    onPrimary: ResourceColor = _r(125836897, 10001, '', '');
-    container: ResourceColor = _r(125836898, 10001, '', '');
 
     fontPrimary: ResourceColor = _r(125830982, 10001, '', '');
     fontSecondary: ResourceColor = _r(125830983, 10001, '', '');
@@ -99,9 +96,6 @@ export class ArkColorsImpl implements Colors {
         dst.warning = src.warning;
         dst.alert = src.alert;
         dst.confirm = src.confirm;
-        dst.primary = src.primary;
-        dst.onPrimary = src.onPrimary;
-        dst.container = src.container;
 
         dst.fontPrimary = src.fontPrimary;
         dst.fontSecondary = src.fontSecondary;
