@@ -446,6 +446,122 @@ void VideoStateMachinePattern::SetVideoControllerAsync(
     }
 }
 
+void VideoStateMachinePattern::PostSerialBgTask(std::function<void()> task, const std::string& name)
+{
+    // Always check host/context validity before enqueuing.
+    auto host = GetHost();
+    auto context = host ? host->GetContext() : nullptr;
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: component detached, dropping task name=%{public}s",
+            hostId_, name.c_str());
+        return;
+    }
+
+    bool needStartDrain = false;
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        auto queueSizeBeforePush = serialBgTaskQueue_.size();
+        serialBgTaskQueue_.push({name, std::move(task)});
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: name=%{public}s, queueSizeBefore=%{public}zu, isDraining=%{public}d",
+            hostId_, name.c_str(), queueSizeBeforePush, isDrainingSerialBgQueue_);
+        if (!isDrainingSerialBgQueue_) {
+            isDrainingSerialBgQueue_ = true;
+            needStartDrain = true;
+        }
+    }
+
+    if (!needStartDrain) {
+        return;
+    }
+
+    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] PostSerialBgTask: posting first drain task",
+        hostId_);
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+        }
+    }, "ArkUIVideoSerialDrain");
+    if (!posted) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] PostSerialBgTask: first drain PostTask failed, resetting flag",
+            hostId_);
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        isDrainingSerialBgQueue_ = false;
+    }
+}
+
+void VideoStateMachinePattern::DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor)
+{
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] DrainNextSerialBgTaskOnBg: enter", hostId_);
+    SerialBgTask current;
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        if (serialBgTaskQueue_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] DrainNextSerialBgTaskOnBg: queue empty, stop draining", hostId_);
+            isDrainingSerialBgQueue_ = false;
+            return;
+        }
+        current = std::move(serialBgTaskQueue_.front());
+        serialBgTaskQueue_.pop();
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: dequeued name=%{public}s, remaining=%{public}zu",
+            hostId_, current.name.c_str(), serialBgTaskQueue_.size());
+    }
+
+    if (current.task) {
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: executing name=%{public}s", hostId_, current.name.c_str());
+        current.task();
+        TAG_LOGI(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: executed name=%{public}s", hostId_, current.name.c_str());
+    } else {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: empty task name=%{public}s", hostId_, current.name.c_str());
+    }
+
+    bool needPostNext = false;
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        if (serialBgTaskQueue_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] DrainNextSerialBgTaskOnBg: no more tasks, stop draining", hostId_);
+            isDrainingSerialBgQueue_ = false;
+            return;
+        }
+        needPostNext = true;
+    }
+
+    if (!needPostNext) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] DrainNextSerialBgTaskOnBg: posting next drain", hostId_);
+    bool posted = bgTaskExecutor.PostTask([weak = WeakClaim(this), bgTaskExecutor] {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->DrainNextSerialBgTaskOnBg(bgTaskExecutor);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_VIDEO,
+                "Video pattern destroyed, skip serial drain");
+        }
+    }, "ArkUIVideoSerialDrain");
+    if (!posted) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] DrainNextSerialBgTaskOnBg: next drain PostTask failed, resetting flag",
+            hostId_);
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        isDrainingSerialBgQueue_ = false;
+    }
+}
+
 void VideoStateMachinePattern::ResetMediaPlayerOnBg(VideoControllerAsync::AsyncCommandCallback callback)
 {
     CHECK_NULL_VOID(mediaPlayer_);
@@ -467,8 +583,7 @@ void VideoStateMachinePattern::ResetMediaPlayerOnBg(VideoControllerAsync::AsyncC
     stateManager_->SetPendingCommand(VideoPlaybackCommand::RESET, std::move(callback), VideoPlaybackCommand::RESET);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    bgTaskExecutor.PostTask(
+    PostSerialBgTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
         videoSrc, id = instanceId_, showFirstFrame = showFirstFrame_, uiTaskExecutor, hostId = hostId_] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
@@ -483,7 +598,7 @@ void VideoStateMachinePattern::ResetMediaPlayerOnBg(VideoControllerAsync::AsyncC
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
-                videoPattern->stateManager_->ClearPendingCommand();
+                videoPattern->stateManager_->ClearPendingCommand("Failed to create media player");
                 videoPattern->FireError(ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED,
                     "Failed to create the media player");
             }, "ArkUIVideoCreatePlayerFailed");
@@ -499,7 +614,7 @@ void VideoStateMachinePattern::ResetMediaPlayerOnBg(VideoControllerAsync::AsyncC
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
-                videoPattern->stateManager_->ClearPendingCommand();
+                videoPattern->stateManager_->ClearPendingCommand("Invalid video source");
                 videoPattern->FireError(ERROR_CODE_VIDEO_SOURCE_INVALID, "Not a valid source");
                 }, "ArkUIVideoFireError");
             return;
@@ -527,7 +642,7 @@ void VideoStateMachinePattern::ResetStatus()
 {
     isInitialState_ = true;
     // Clear any pending command during reset
-    stateManager_->ClearPendingCommand();
+    stateManager_->ClearPendingCommand("State reset by system");
     // NOTE: Do NOT reset state machine here.
     // State transition should be driven by player callbacks.
     // Only reset internal flags.
@@ -554,7 +669,7 @@ bool VideoStateMachinePattern::TransitionToIfAllowed(VideoPlaybackState newState
 
 void VideoStateMachinePattern::OnCreatedStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered CREATED state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered CREATED state", hostId_);
     ChangePlayButtonTag();
 
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
@@ -567,14 +682,14 @@ void VideoStateMachinePattern::OnCreatedStateEntered()
         
         if (mediaPlayer_->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Video[%{public}d] Auto PrepareAsync failed", hostId_);
-            stateManager_->ClearPendingCommand();
+            stateManager_->ClearPendingCommand("PrepareAsync failed");
         }
     }
 }
 
 void VideoStateMachinePattern::OnPreparedStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PREPARED state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PREPARED state", hostId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(mediaPlayer_);
@@ -636,9 +751,9 @@ void VideoStateMachinePattern::OnPreparedStateEntered()
         
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask(
-            [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_] {
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        PostSerialBgTask(
+            [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_, uiTaskExecutor] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
                 TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Auto-trigger mediaPlayer play", hostId);
@@ -647,11 +762,15 @@ void VideoStateMachinePattern::OnPreparedStateEntered()
                 auto pattern = weakThis.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (ret != 0) {
-                    TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Auto-trigger Play() failed: ret=%{public}d", hostId, ret);
-                    pattern->stateManager_->ClearPendingCommand();
+                    TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Auto-play failed: ret=%{public}d", hostId, ret);
+                    uiTaskExecutor.PostTask([weakThis]() {
+                        auto p = weakThis.Upgrade();
+                        if (p) {
+                            p->stateManager_->ClearPendingCommand("Auto-play failed");
+                        }
+                    }, "ArkUIVideoClearPending");
                 }
-            },
-            "ArkUIVideoAutoPlay");
+            }, "ArkUIVideoAutoPlay");
     } else if (stateManager_->GetPreviousState() == VideoPlaybackState::STOPPED) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Auto-trigger Play (from STOPPED, sync)", hostId_);
         Start();
@@ -665,7 +784,7 @@ void VideoStateMachinePattern::OnPreparedStateEntered()
 
 void VideoStateMachinePattern::OnPlayingStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PLAYING state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PLAYING state", hostId_);
     auto eventHub = GetEventHub<VideoEventHub>();
     if (eventHub) {
         eventHub->FireStartEvent();
@@ -676,7 +795,7 @@ void VideoStateMachinePattern::OnPlayingStateEntered()
 
 void VideoStateMachinePattern::OnPausedStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PAUSED state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered PAUSED state", hostId_);
     auto eventHub = GetEventHub<VideoEventHub>();
     if (eventHub) {
         eventHub->FirePauseEvent();
@@ -687,11 +806,12 @@ void VideoStateMachinePattern::OnPausedStateEntered()
 
 void VideoStateMachinePattern::OnStoppedStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered STOPPED state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered STOPPED state", hostId_);
     currentPos_ = 0;
     OnUpdateTime(currentPos_, CURRENT_POS);
     auto eventHub = GetEventHub<VideoEventHub>();
     if (eventHub) {
+        eventHub->FireUpdateEvent(static_cast<double>(currentPos_));
         eventHub->FireStopEvent();
     }
     ChangePlayButtonTag();
@@ -699,7 +819,7 @@ void VideoStateMachinePattern::OnStoppedStateEntered()
 
 void VideoStateMachinePattern::OnCompletedStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered COMPLETED state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered COMPLETED state", hostId_);
     currentPos_ = duration_;
     OnUpdateTime(currentPos_, CURRENT_POS);
     auto eventHub = GetEventHub<VideoEventHub>();
@@ -711,7 +831,7 @@ void VideoStateMachinePattern::OnCompletedStateEntered()
 
 void VideoStateMachinePattern::OnErrorStateEntered()
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered ERROR state", hostId_);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Entered ERROR state", hostId_);
     auto eventHub = GetEventHub<VideoEventHub>();
     if (eventHub) {
         eventHub->FireErrorEvent(lastErrorCode_, lastErrorMessage_);
@@ -860,7 +980,7 @@ void VideoStateMachinePattern::OnCurrentTimeChange(uint32_t currentPos)
 
 void VideoStateMachinePattern::ChangePlayerStatus(const PlaybackStatus& status)
 {
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] ChangePlayerStatus enter: status=%{public}s, %{public}s",
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] ChangePlayerStatus enter: status=%{public}s, %{public}s",
         hostId_, StatusToString(status).c_str(), stateManager_->GetStateInfo().c_str());
     switch (status) {
         case PlaybackStatus::STARTED:
@@ -893,7 +1013,7 @@ void VideoStateMachinePattern::ChangePlayerStatus(const PlaybackStatus& status)
         default:
             break;
     }
-    TAG_LOGD(AceLogTag::ACE_VIDEO, "Video[%{public}d] ChangePlayerStatus exit: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] ChangePlayerStatus exit: %{public}s",
         hostId_, stateManager_->GetStateInfo().c_str());
 }
 
@@ -927,7 +1047,7 @@ void VideoStateMachinePattern::OnError(const std::string& errorId)
     lastErrorCode_ = ERROR_CODE_VIDEO_SOURCE_INVALID;
     lastErrorMessage_ = errorId.empty() ? "Unknown error" : errorId;
     // Clear any pending command before error handling
-    stateManager_->ClearPendingCommand();
+    stateManager_->ClearPendingCommand("Video error occurred: " + errorId);
     stateManager_->HandleStateTransition(VideoPlaybackCommand::ERROR);
 }
 
@@ -946,7 +1066,7 @@ void VideoStateMachinePattern::OnError(int32_t code, const std::string& message)
     lastErrorCode_ = code;
     lastErrorMessage_ = message;
     // Clear any pending command before error handling
-    stateManager_->ClearPendingCommand();
+    stateManager_->ClearPendingCommand("Video error occurred: " + message);
     stateManager_->HandleStateTransition(VideoPlaybackCommand::ERROR);
 }
 
@@ -1043,8 +1163,7 @@ void VideoStateMachinePattern::UpdateLooping()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
+        PostSerialBgTask([weak = WeakClaim(RawPtr(mediaPlayer_)), loop = loop_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetLooping(loop);
@@ -1068,8 +1187,7 @@ void VideoStateMachinePattern::UpdateSpeed()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
 
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask(
+        PostSerialBgTask(
             [weak = WeakClaim(RawPtr(mediaPlayer_)),
             weakThis = WeakClaim(this),
             progress = progressRate_] {
@@ -1179,8 +1297,7 @@ void VideoStateMachinePattern::UpdateMuted()
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        bgTaskExecutor.PostTask(
+        PostSerialBgTask(
             [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
@@ -1191,8 +1308,7 @@ void VideoStateMachinePattern::UpdateMuted()
                     mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
                     mediaPlayer->SetVolume(currentVolume, currentVolume);
                 }
-            },
-            "ArkUIVideoUpdateMuted");
+            }, "ArkUIVideoUpdateMuted");
     }
 }
 
@@ -2004,7 +2120,7 @@ void VideoStateMachinePattern::Start(VideoControllerAsync::AsyncCommandCallback 
         stateManager_->SetPendingCommand(VideoPlaybackCommand::PREPARE, std::move(callback), VideoPlaybackCommand::PLAY);
         if (mediaPlayer_->PrepareAsync() != 0) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Start() PrepareAsync failed", hostId_);
-            stateManager_->ClearPendingCommand();
+            stateManager_->ClearPendingCommand("PrepareAsync failed on Start()");
             return;
         }
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Start() exit: waiting for PREPARED callback", hostId_);
@@ -2012,9 +2128,9 @@ void VideoStateMachinePattern::Start(VideoControllerAsync::AsyncCommandCallback 
     }
     // Set pending command right before posting the actual play task
     stateManager_->SetPendingCommand(VideoPlaybackCommand::PLAY, std::move(callback));
-    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    bgTaskExecutor.PostTask(
-        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_] {
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    PostSerialBgTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_, uiTaskExecutor] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer play", hostId);
@@ -2024,8 +2140,13 @@ void VideoStateMachinePattern::Start(VideoControllerAsync::AsyncCommandCallback 
             CHECK_NULL_VOID(pattern);
             
             if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] mediaPlayer Play() failed: ret=%{public}d", hostId, ret);
-                pattern->stateManager_->ClearPendingCommand();
+                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Media player Play() failed: ret=%{public}d", hostId, ret);
+                uiTaskExecutor.PostTask([weakThis]() {
+                    auto p = weakThis.Upgrade();
+                    if (p) {
+                        p->stateManager_->ClearPendingCommand("Media player Play() failed");
+                    }
+                }, "ArkUIVideoClearPending");
                 return;
             }
             
@@ -2041,8 +2162,7 @@ void VideoStateMachinePattern::Start(VideoControllerAsync::AsyncCommandCallback 
                 pattern->ReportChangeEventOnUIThread(
                     currentStatus, pattern->GetLastProgressRate(), pattern->GetCurrentPos());
             }
-        },
-        "ArkUIVideoPlay");
+        }, "ArkUIVideoPlay");
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Start() exit: async play task posted", hostId_);
 }
 
@@ -2086,9 +2206,9 @@ void VideoStateMachinePattern::Pause(VideoControllerAsync::AsyncCommandCallback 
     stateManager_->SetPendingCommand(VideoPlaybackCommand::PAUSE, std::move(callback));
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer pause", hostId_);
 
-    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    bgTaskExecutor.PostTask(
-        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_] {
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    PostSerialBgTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_, uiTaskExecutor] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer pause on bg thread", hostId);
@@ -2098,8 +2218,13 @@ void VideoStateMachinePattern::Pause(VideoControllerAsync::AsyncCommandCallback 
             CHECK_NULL_VOID(pattern);
             
             if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] mediaPlayer Pause() failed: ret=%{public}d", hostId, ret);
-                pattern->stateManager_->ClearPendingCommand();
+                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Media player Pause() failed: ret=%{public}d", hostId, ret);
+                uiTaskExecutor.PostTask([weakThis]() {
+                    auto p = weakThis.Upgrade();
+                    if (p) {
+                        p->stateManager_->ClearPendingCommand("Media player Pause() failed");
+                    }
+                }, "ArkUIVideoClearPending");
                 return;
             }
             
@@ -2115,8 +2240,7 @@ void VideoStateMachinePattern::Pause(VideoControllerAsync::AsyncCommandCallback 
                 pattern->ReportChangeEventOnUIThread(
                     currentStatus, pattern->GetLastProgressRate(), pattern->GetCurrentPos());
             }
-        },
-        "ArkUIVideoPause");
+        }, "ArkUIVideoPause");
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Pause() exit, %{public}s",
         hostId_, stateManager_->GetStateInfo().c_str());
 }
@@ -2161,9 +2285,9 @@ void VideoStateMachinePattern::Stop(VideoControllerAsync::AsyncCommandCallback c
     stateManager_->SetPendingCommand(VideoPlaybackCommand::STOP, std::move(callback));
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop", hostId_);
 
-    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    bgTaskExecutor.PostTask(
-        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_] {
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    PostSerialBgTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), weakThis = WeakClaim(this), hostId = hostId_, uiTaskExecutor] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop on bg thread", hostId);
@@ -2173,14 +2297,18 @@ void VideoStateMachinePattern::Stop(VideoControllerAsync::AsyncCommandCallback c
             CHECK_NULL_VOID(pattern);
             
             if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] mediaPlayer Stop() failed: ret=%{public}d", hostId, ret);
-                pattern->stateManager_->ClearPendingCommand();
+                TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Media player Stop() failed: ret=%{public}d", hostId, ret);
+                uiTaskExecutor.PostTask([weakThis]() {
+                    auto p = weakThis.Upgrade();
+                    if (p) {
+                        p->stateManager_->ClearPendingCommand("Media player Stop() failed");
+                    }
+                }, "ArkUIVideoClearPending");
                 return;
             }
             
             pattern->SetIsSeeking(false);
-        },
-        "ArkUIVideoStop");
+        }, "ArkUIVideoStop");
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Stop() exit, waiting for STOPPED callback", hostId_);
 }
 
@@ -2384,11 +2512,22 @@ void VideoStateMachinePattern::FullScreen()
 
 VideoStateMachinePattern::~VideoStateMachinePattern()
 {
+    {
+        std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
+        if (!serialBgTaskQueue_.empty()) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] ~VideoStateMachinePattern: clearing %{public}zu unexecuted serial tasks",
+                hostId_, serialBgTaskQueue_.size());
+            std::queue<SerialBgTask> empty;
+            serialBgTaskQueue_.swap(empty);
+        }
+        isDrainingSerialBgQueue_ = false;
+    }
     // Clear pending command only if this pattern owns the state manager.
     // When state manager is shared (e.g., with fullscreen pattern),
     // the context will point to a different pattern.
     if (stateManager_ && stateManager_->IsCurrentContext(this)) {
-        stateManager_->ClearPendingCommand();
+        stateManager_->ClearPendingCommand("Component detached");
     }
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (renderContextForMediaPlayer_) {
@@ -2413,7 +2552,7 @@ void VideoStateMachinePattern::RecoverState(const RefPtr<VideoStateMachinePatter
 {
     CHECK_NULL_VOID(videoPattern);
     // Clear any pending command from old pattern
-    stateManager_->ClearPendingCommand();
+    stateManager_->ClearPendingCommand("State recovered from fullscreen");
     currentPos_ = videoPattern->GetCurrentPos();
     OnUpdateTime(currentPos_, CURRENT_POS);
 

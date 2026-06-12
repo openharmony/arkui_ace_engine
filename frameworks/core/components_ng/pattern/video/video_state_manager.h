@@ -227,7 +227,7 @@ void HandleStateTransition(VideoPlaybackCommand command,
         VideoControllerAsync::AsyncCommandCallback callback = nullptr,
         VideoPlaybackCommand originalIntent = VideoPlaybackCommand::NONE);
 
-    void ClearPendingCommand();
+    void ClearPendingCommand(const std::string& reason = "operation failed");
 
     /**
      * @brief Check if a new command can override current pending command.

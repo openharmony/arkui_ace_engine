@@ -1617,4 +1617,63 @@ HWTEST_F(VideoStateManagerTestNg, VideoStateManagerGetOriginalIntent001, TestSiz
     EXPECT_EQ(manager->GetOriginalIntent(), VideoPlaybackCommand::PLAY);
 }
 
+/**
+ * @tc.name: VideoStateManagerSetPendingCommandOverride001
+ * @tc.desc: Test SetPendingCommand invokes old callback with failure when overridden.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateManagerTestNg, VideoStateManagerSetPendingCommandOverride001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<VideoStateManager>(WeakPtr<VideoStateMachinePattern>());
+    bool oldCallbackCalled = false;
+    std::string oldCallbackReason;
+    auto oldCallback = [&oldCallbackCalled, &oldCallbackReason](bool success, const std::string& reason) {
+        oldCallbackCalled = true;
+        oldCallbackReason = reason;
+    };
+
+    manager->SetPendingCommand(VideoPlaybackCommand::PLAY, oldCallback);
+    EXPECT_TRUE(manager->HasPendingCommand());
+    EXPECT_EQ(manager->GetPendingCommand(), VideoPlaybackCommand::PLAY);
+
+    bool newCallbackCalled = false;
+    auto newCallback = [&newCallbackCalled](bool success, const std::string& reason) {
+        newCallbackCalled = true;
+    };
+    manager->SetPendingCommand(VideoPlaybackCommand::STOP, newCallback);
+
+    EXPECT_TRUE(oldCallbackCalled);
+    EXPECT_FALSE(oldCallbackReason.empty());
+    EXPECT_NE(oldCallbackReason.find("Overridden by"), std::string::npos);
+    EXPECT_NE(oldCallbackReason.find("STOP"), std::string::npos);
+    EXPECT_EQ(manager->GetPendingCommand(), VideoPlaybackCommand::STOP);
+}
+
+/**
+ * @tc.name: VideoStateManagerClearPendingCommandWithReason001
+ * @tc.desc: Test ClearPendingCommand with reason passes the reason to the callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateManagerTestNg, VideoStateManagerClearPendingCommandWithReason001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<VideoStateManager>(WeakPtr<VideoStateMachinePattern>());
+    bool callbackCalled = false;
+    bool callbackSuccess = true;
+    std::string callbackReason;
+    auto callback = [&callbackCalled, &callbackSuccess, &callbackReason](bool success, const std::string& reason) {
+        callbackCalled = true;
+        callbackSuccess = success;
+        callbackReason = reason;
+    };
+
+    manager->SetPendingCommand(VideoPlaybackCommand::PLAY, callback);
+    EXPECT_TRUE(manager->HasPendingCommand());
+
+    manager->ClearPendingCommand("Media player Play() failed");
+    EXPECT_FALSE(manager->HasPendingCommand());
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(callbackSuccess);
+    EXPECT_EQ(callbackReason, "Media player Play() failed");
+}
+
 } // namespace OHOS::Ace::NG

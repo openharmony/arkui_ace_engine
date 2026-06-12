@@ -129,6 +129,10 @@ void VideoStateManager::ClearMatchedPending(VideoPlaybackCommand command)
         }
         
         originalIntent_ = VideoPlaybackCommand::NONE;
+        // NOTE: The callback here is always a JS bridge lambda that internally
+        // PostTask's to the JS thread (see js_video_controller_async.cpp).
+        // Therefore it does NOT execute JS synchronously and cannot re-enter
+        // C++ to issue a new command within this call stack.
         if (pendingCallback_) {
             TAG_LOGI(AceLogTag::ACE_VIDEO, "[SM-PENDING] Invoking callback: success=true");
             pendingCallback_(true, "");
@@ -139,6 +143,8 @@ void VideoStateManager::ClearMatchedPending(VideoPlaybackCommand command)
             VideoStateMachine::CommandToString(pendingCommand_));
         pendingCommand_ = VideoPlaybackCommand::NONE;
         originalIntent_ = VideoPlaybackCommand::NONE;
+        // NOTE: See comment above. Callback is async-posted to JS thread,
+        // so no re-entrant C++ command can occur here.
         if (pendingCallback_) {
             pendingCallback_(false, "overridden by reset");
             pendingCallback_ = nullptr;
@@ -524,7 +530,15 @@ void VideoStateManager::SetPendingCommand(VideoPlaybackCommand command,
     } else if (pendingCommand_ != command) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "[SM-PENDING] Override: %{public}s -> %{public}s",
             VideoStateMachine::CommandToString(pendingCommand_),
-            GetStateInfo().c_str());
+            VideoStateMachine::CommandToString(command));
+        // Invoke the old callback with failure to prevent frontend Promise from hanging.
+        // NOTE: The callback originates from JS bridge (js_video_controller_async.cpp) and
+        // internally PostTask's to the JS thread. It does NOT execute JS synchronously,
+        // so it cannot re-enter C++ to issue a new command within this call stack.
+        if (pendingCallback_) {
+            pendingCallback_(false, "Overridden by " + std::string(VideoStateMachine::CommandToString(command)));
+            pendingCallback_ = nullptr;
+        }
     }
 
     pendingCommand_ = command;
@@ -534,15 +548,17 @@ void VideoStateManager::SetPendingCommand(VideoPlaybackCommand command,
     }
 }
 
-void VideoStateManager::ClearPendingCommand()
+void VideoStateManager::ClearPendingCommand(const std::string& reason)
 {
     if (pendingCommand_ != VideoPlaybackCommand::NONE) {
-        TAG_LOGI(AceLogTag::ACE_VIDEO, "[SM-PENDING] Clear pending: %{public}s",
-            GetStateInfo().c_str());
+        TAG_LOGI(AceLogTag::ACE_VIDEO, "[SM-PENDING] Clear pending: %{public}s, reason=%{public}s",
+            GetStateInfo().c_str(), reason.c_str());
         pendingCommand_ = VideoPlaybackCommand::NONE;
         originalIntent_ = VideoPlaybackCommand::NONE;
+        // NOTE: See comment in SetPendingCommand. Callback is async-posted to JS,
+        // so no synchronous re-entrant C++ command can occur here.
         if (pendingCallback_) {
-            pendingCallback_(false, "operation failed");
+            pendingCallback_(false, reason);
             pendingCallback_ = nullptr;
         }
     } else {
