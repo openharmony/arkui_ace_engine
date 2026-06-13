@@ -701,3 +701,4 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition023, T
         (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f;
     EXPECT_NEAR(result.GetX(), expectedX, 0.01f);
 }
+} // namespace OHOS::Ace::NG
