@@ -1672,7 +1672,7 @@ bool MenuPattern::IsUseDistortionAnimation() const
 {
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
-    if (!menuSystemMaterial) {
+    if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
     auto menuSystemMaterialType =
@@ -1696,7 +1696,7 @@ bool MenuPattern::IsUseEdgeLightAnimation() const
 {
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
-    if (!menuSystemMaterial) {
+    if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
     auto menuSystemMaterialType =
