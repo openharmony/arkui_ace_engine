@@ -636,9 +636,12 @@ public:
     std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
         const FrostedGlassParam& param, float dipScale) override;
 
+    void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) override;
+    void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) override;
+
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
-        
+
     void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) override;
 
     void UpdateEdgeLightFilter(const SizeF& frameSize) override;

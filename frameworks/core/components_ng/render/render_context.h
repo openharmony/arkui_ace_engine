@@ -49,6 +49,7 @@ class Filter;
 enum class Gravity;
 class Blender;
 class RSNGFilterBase;
+class RSNGShaderBase;
 class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
@@ -369,6 +370,9 @@ public:
     {
         return nullptr;
     }
+    virtual void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) {}
+
+    virtual void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) {}
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}

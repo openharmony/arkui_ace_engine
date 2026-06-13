@@ -9079,6 +9079,22 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenRenderContext::CreateFrostedGlassFil
     return RosenEffectConverter::ConvertToFrostedGlassFilter(param, dipScale);
 }
 
+void RosenRenderContext::SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetBackgroundNGFilterEC, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundNGFilter(materialFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetMaterialShaderECSub, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetMaterialShader(materialFilter);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::SetMaterialWithQualityLevel(
     const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
 {

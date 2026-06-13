@@ -6559,7 +6559,16 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
             if (preConfig->colorInvert) {
                 renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
             }
-            renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            int32_t preStyle = static_cast<int32_t>(preConfig->key.style);
+            if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+                preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+                renderContext->SetMaterialShaderECSub(nullptr);
+            } else if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+                       preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+                renderContext->SetBackgroundNGFilterEC(nullptr);
+            } else {
+                renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            }
             auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
             if (transparencyCallbackId.has_value()) {
                 TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
@@ -6828,6 +6837,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
     CHECK_NULL_VOID(pattern);
     auto preConfig = renderContext->GetImmersiveMaterialConfig();
     if (config->key.level == UiMaterialLevel::SMOOTH) {
+        if (frameNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+            return;
+        }
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
@@ -6857,13 +6869,29 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         return;
     }
     // gentle or exquisite
-    auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
-    if (preConfig && preConfig->colorInvert && !config->colorInvert) {
-        // reset color picker
-        renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+    int32_t style = static_cast<int32_t>(config->key.style);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(*config);
+        renderContext->SetBackgroundNGFilterEC(materialFilter);
+        if (config->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
+        } else if (preConfig && preConfig->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
+        }
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
+        renderContext->SetMaterialShaderECSub(materialFilter);
+    } else {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
+        if (preConfig && preConfig->colorInvert && !config->colorInvert) {
+            // reset color picker
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+        }
+        renderContext->SetMaterialWithQualityLevel(
+            materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     }
-    renderContext->SetMaterialWithQualityLevel(
-        materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     if (config->applyShadow) {
         Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
         renderContext->UpdateBackShadow(shadow);

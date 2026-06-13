@@ -2754,6 +2754,8 @@ frameworks/core/components_ng/render/adapter/render_texture_impl.h @arkuilayout1
 frameworks/core/components_ng/render/adapter/rich_editor_paragraph.cpp @arkui_rich_editor
 frameworks/core/components_ng/render/adapter/rich_editor_paragraph.h @arkui_rich_editor
 frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp @arkuicodepulse
+frameworks/core/components_ng/render/adapter/rosen_effect_converter.h @arkuicodepulse
+frameworks/core/components_ng/render/adapter/rosen_effect_converter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/sampler_manager.h @arkuicodepulse
@@ -2854,6 +2856,7 @@ frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout1
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout1
 frameworks/core/components_ng/render/snapshot_param.h @ArkUI_Event
 frameworks/core/components_ng/render/sheet_popup_shape.h @arkuicodepulse
+frameworks/core/components_ng/render/ui_material_filter_creator @arkuicodepulse
 frameworks/core/components_ng/token_theme/ @arkui_framework_resource
 frameworks/core/drawable/ @arkui001
 frameworks/core/pipeline_ng/ @arkui_architecture
@@ -3236,6 +3239,7 @@ interfaces/inner_api/ui_service_manager/ @ArkUI_ability_group
 interfaces/inner_api/ui_session/ @arkui_framework_xnode
 interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
+interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h @arkuicodepulse
 interfaces/inner_api/ace_kit/src/ @arkui_framework_xnode
 
 [NAPI Interfaces]
@@ -3277,6 +3281,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.a
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.components.ArkLazyColumnLayout.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.uiMaterial @arkuicodepulse
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/pasteButton.ets @harylee
@@ -3610,6 +3615,7 @@ test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/components_ng/base/ @arkui_framework_xnode
+test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp @arkuicodepulse
 test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
 test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
@@ -4316,6 +4322,7 @@ frameworks/core/components_ng/render/adapter/matrix_util.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/transition_modifier.h @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/txt_text_effect.cpp @huawei_g_five
 frameworks/core/components_ng/render/adapter/txt_text_effect.h @huawei_g_five
+frameworks/core/components_ng/render/adapter/ui_material_filter_creator.cpp @arkuicodepulse
 frameworks/core/components_ng/render/detached_rs_node_manager.h @arkui_framework_xnode
 frameworks/core/components_ng/render/text_effect.h @huawei_g_five
 frameworks/core/interfaces/ani/ani_api.h @arkui_framework_xnode

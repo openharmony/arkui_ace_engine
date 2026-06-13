@@ -207,4 +207,22 @@ void UiMaterialDestroyMaterial(ani_env* env, ani_object aniClass, ani_long ptr)
     CHECK_NULL_VOID(modifier);
     modifier->getVisualEffectAniModifier()->destroyMaterial(pointer);
 }
+
+ani_long UiMaterialConvertToECMaterial(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto* pointer = reinterpret_cast<OHOS::Ace::UiMaterial*>(ptr);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    auto* result = modifier->getVisualEffectAniModifier()->convertToECMaterial(pointer);
+    return reinterpret_cast<ani_long>(result);
+}
+
+ani_long UiMaterialConvertToECSubMaterial(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto* pointer = reinterpret_cast<OHOS::Ace::UiMaterial*>(ptr);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    auto* result = modifier->getVisualEffectAniModifier()->convertToECSubMaterial(pointer);
+    return reinterpret_cast<ani_long>(result);
+}
 } // namespace OHOS::Ace::Ani
