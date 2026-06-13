@@ -458,7 +458,8 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, OnVisibleIndexesChangeEmpty_001, TestSize
 
 /**
  * @tc.name: OnVisibleIndexesChangeReset_001
- * @tc.desc: Verify replacing the callback refires the current visible range without requiring a scroll change.
+ * @tc.desc: Verify replacing the callback (as attribute re-application does on state updates) does not refire
+ *           when the visible range is unchanged, matching LazyVGridLayout behavior.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowLayoutCoreTest, OnVisibleIndexesChangeReset_001, TestSize.Level1)
@@ -490,9 +491,12 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, OnVisibleIndexesChangeReset_001, TestSize
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushUITasks();
 
+    EXPECT_EQ(secondCallbackCount, 0);
+
+    pattern_->OnInActive();
     EXPECT_EQ(secondCallbackCount, 1);
-    EXPECT_EQ(secondRange.first, 0);
-    EXPECT_EQ(secondRange.second, 3);
+    EXPECT_EQ(secondRange.first, -1);
+    EXPECT_EQ(secondRange.second, -1);
     pattern_->SetOnVisibleIndexesChange(nullptr);
 }
 
@@ -578,11 +582,12 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, OnActiveKeepsSizeCache_001, TestSize.Leve
 }
 
 /**
- * @tc.name: VisibleRangeNoVisibleItems_001
- * @tc.desc: Verify visible range is empty when measured items do not intersect the visible viewport.
+ * @tc.name: VisibleAndCachedRangeNoIntersection_001
+ * @tc.desc: Verify the visible and cached ranges stay empty when measured items do not intersect the
+ *           corresponding viewport.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, VisibleRangeNoVisibleItems_001, TestSize.Level1)
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, VisibleAndCachedRangeNoIntersection_001, TestSize.Level1)
 {
     auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
     layoutInfo->SetTotalItemCount(2);
@@ -590,101 +595,65 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, VisibleRangeNoVisibleItems_001, TestSize.
     layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 150.0f, .endPos = 200.0f });
 
     layoutInfo->UpdateVisibleRange(0.0f, 50.0f);
-
     EXPECT_EQ(layoutInfo->startIndex_, -1);
     EXPECT_EQ(layoutInfo->endIndex_, -1);
 
     layoutInfo->UpdateVisibleRange(50.0f, 50.0f);
-
     EXPECT_EQ(layoutInfo->startIndex_, -1);
     EXPECT_EQ(layoutInfo->endIndex_, -1);
-}
-
-/**
- * @tc.name: CachedRangeNoCachedItems_001
- * @tc.desc: Verify cache range stays empty when measured items do not intersect the cache viewport.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, CachedRangeNoCachedItems_001, TestSize.Level1)
-{
-    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
-    layoutInfo->SetTotalItemCount(2);
-    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 100.0f, .endPos = 150.0f });
-    layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 150.0f, .endPos = 200.0f });
 
     layoutInfo->UpdateCachedRange(0.0f, 50.0f);
-
     EXPECT_EQ(layoutInfo->cachedStartIndex_, -1);
     EXPECT_EQ(layoutInfo->cachedEndIndex_, -1);
 }
 
 /**
- * @tc.name: NeedPredictUsesShortestLane_001
- * @tc.desc: Verify predict continues while any lane can still place an item inside the cache window.
+ * @tc.name: NeedPredictGates_001
+ * @tc.desc: NeedPredict gating: predict continues while any lane can still place an item inside the cache
+ *           window; cache overlap alone cannot start predict while the parent-extended view window is still
+ *           fully before content; a parent-started offscreen preload can finish its cache window after a
+ *           partial first pass.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictUsesShortestLane_001, TestSize.Level1)
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictGates_001, TestSize.Level1)
 {
-    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
-    layoutInfo->SetTotalItemCount(3);
-    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
-    layoutInfo->SetPosMap(1, { .laneIdx = 1, .startPos = 0.0f, .endPos = 500.0f });
-    layoutInfo->laneEndPos_ = { 100.0f, 500.0f };
-    layoutInfo->UpdateCachedRange(0.0f, 300.0f);
+    // Shortest lane drives predict: lane 0 (100) can still take an item before cacheEnd 300; not after 320.
+    auto shortestLane = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    shortestLane->SetTotalItemCount(3);
+    shortestLane->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    shortestLane->SetPosMap(1, { .laneIdx = 1, .startPos = 0.0f, .endPos = 500.0f });
+    shortestLane->laneEndPos_ = { 100.0f, 500.0f };
+    shortestLane->UpdateCachedRange(0.0f, 300.0f);
+    EXPECT_EQ(shortestLane->cachedEndIndex_, 1);
+    EXPECT_TRUE(shortestLane->NeedPredict());
+    shortestLane->laneEndPos_ = { 320.0f, 500.0f };
+    EXPECT_FALSE(shortestLane->NeedPredict());
 
-    EXPECT_EQ(layoutInfo->cachedEndIndex_, 1);
-    EXPECT_TRUE(layoutInfo->NeedPredict());
+    // Offscreen cache-only window fully before content: no predict.
+    auto beforeContent = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    beforeContent->SetTotalItemCount(3);
+    beforeContent->totalMainSize_ = 600.0f;
+    beforeContent->extendedViewStartPos_ = -568.0f;
+    beforeContent->extendedViewEndPos_ = 0.0f;
+    beforeContent->UpdateVisibleRange(-568.0f, 0.0f);
+    beforeContent->UpdateCachedRange(-852.0f, 284.0f);
+    EXPECT_EQ(beforeContent->startIndex_, -1);
+    EXPECT_EQ(beforeContent->cachedEndIndex_, -1);
+    EXPECT_FALSE(beforeContent->NeedPredict());
 
-    layoutInfo->laneEndPos_ = { 320.0f, 500.0f };
-
-    EXPECT_FALSE(layoutInfo->NeedPredict());
-}
-
-/**
- * @tc.name: NeedPredictSkipsOffscreenCacheOnlyWindow_001
- * @tc.desc: Verify cache overlap alone cannot start predict while the parent-extended view window is
- *           still fully before content.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictSkipsOffscreenCacheOnlyWindow_001, TestSize.Level1)
-{
-    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
-    layoutInfo->SetTotalItemCount(3);
-    layoutInfo->totalMainSize_ = 600.0f;
-    layoutInfo->extendedViewStartPos_ = -568.0f;
-    layoutInfo->extendedViewEndPos_ = 0.0f;
-    layoutInfo->UpdateVisibleRange(-568.0f, 0.0f);
-    layoutInfo->UpdateCachedRange(-852.0f, 284.0f);
-
-    EXPECT_EQ(layoutInfo->startIndex_, -1);
-    EXPECT_EQ(layoutInfo->endIndex_, -1);
-    EXPECT_EQ(layoutInfo->cachedStartIndex_, -1);
-    EXPECT_EQ(layoutInfo->cachedEndIndex_, -1);
-    EXPECT_FALSE(layoutInfo->NeedPredict());
-}
-
-/**
- * @tc.name: NeedPredictContinuesStartedOffscreenCacheBuild_001
- * @tc.desc: Verify a parent-started offscreen preload can finish its cache window after a partial first pass.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictContinuesStartedOffscreenCacheBuild_001, TestSize.Level1)
-{
-    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
-    layoutInfo->SetTotalItemCount(3);
-    layoutInfo->totalMainSize_ = 600.0f;
-    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
-    layoutInfo->laneEndPos_ = { 100.0f, 0.0f };
-    layoutInfo->extendedViewStartPos_ = -568.0f;
-    layoutInfo->extendedViewEndPos_ = 0.0f;
-    layoutInfo->UpdateVisibleRange(-568.0f, 0.0f);
-    layoutInfo->UpdateCachedRange(-852.0f, 284.0f);
-
-    EXPECT_EQ(layoutInfo->startIndex_, 0);
-    EXPECT_EQ(layoutInfo->endIndex_, 0);
-    EXPECT_EQ(layoutInfo->cachedStartIndex_, 0);
-    EXPECT_EQ(layoutInfo->cachedEndIndex_, 0);
-    EXPECT_TRUE(layoutInfo->NeedPredict());
+    // Same window with a started build (item 0 measured): predict continues to finish the cache.
+    auto startedBuild = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    startedBuild->SetTotalItemCount(3);
+    startedBuild->totalMainSize_ = 600.0f;
+    startedBuild->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    startedBuild->laneEndPos_ = { 100.0f, 0.0f };
+    startedBuild->extendedViewStartPos_ = -568.0f;
+    startedBuild->extendedViewEndPos_ = 0.0f;
+    startedBuild->UpdateVisibleRange(-568.0f, 0.0f);
+    startedBuild->UpdateCachedRange(-852.0f, 284.0f);
+    EXPECT_EQ(startedBuild->startIndex_, 0);
+    EXPECT_EQ(startedBuild->cachedEndIndex_, 0);
+    EXPECT_TRUE(startedBuild->NeedPredict());
 }
 
 /**
@@ -1734,6 +1703,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, OffscreenAfterContentKeepsWindowEmpty_001
     LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
     algorithm.totalItemCount_ = 4;
     algorithm.totalMainSize_ = 210.0f;
+    algorithm.prevBodyMainSize_ = 210.0f; // what Measure() captures: prev section minus (zero) edge slots
     algorithm.mainGap_ = 10.0f;
     algorithm.viewStart_ = 500.0f;
     algorithm.viewEnd_ = 600.0f;
@@ -1769,6 +1739,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, OffscreenBeforeContentKeepsWindowEmpty_00
     LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
     algorithm.totalItemCount_ = 4;
     algorithm.totalMainSize_ = 210.0f;
+    algorithm.prevBodyMainSize_ = 210.0f; // what Measure() captures: prev section minus (zero) edge slots
     algorithm.mainGap_ = 10.0f;
     algorithm.viewStart_ = -500.0f;
     algorithm.viewEnd_ = -50.0f;
@@ -2026,6 +1997,51 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeDeactivatesOldVisibl
 }
 
 /**
+ * @tc.name: ColumnsTemplateChangeSyncsCachedItemGeometry_001
+ * @tc.desc: Verify a visible item that becomes cached after columnsTemplate changes syncs its paint rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeSyncsCachedItemGeometry_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    constexpr int32_t cachedOnlyIndex = 6;
+    auto oldVisibleChild = GetChildFrameNode(frameNode_, cachedOnlyIndex);
+    ASSERT_NE(oldVisibleChild, nullptr);
+    auto geometryNode = oldVisibleChild->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = oldVisibleChild->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Seed the old render rect so the regression fails if cache relayout only updates GeometryNode.
+    oldVisibleChild->ForceSyncGeometryNode();
+    auto oldPaintRect = renderContext->GetPaintRectWithoutTransform();
+    EXPECT_TRUE(LessNotEqual(oldPaintRect.GetY(), LAZY_WATER_FLOW_SCROLL_HEIGHT));
+
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate(AceType::RawPtr(frameNode_), "1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    ASSERT_LT(pattern_->layoutInfo_->layoutedEndIndex_, cachedOnlyIndex);
+    ASSERT_LE(cachedOnlyIndex, pattern_->layoutInfo_->cachedEndIndex_);
+    auto cachedItemPos = pattern_->layoutInfo_->GetPos(cachedOnlyIndex);
+    ASSERT_NE(cachedItemPos, nullptr);
+    EXPECT_TRUE(GreatOrEqual(cachedItemPos->startPos, LAZY_WATER_FLOW_SCROLL_HEIGHT));
+
+    auto frameRect = geometryNode->GetFrameRect();
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    EXPECT_TRUE(GreatOrEqual(frameRect.GetY(), LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    EXPECT_TRUE(NearEqual(paintRect.GetX(), frameRect.GetX()));
+    EXPECT_TRUE(NearEqual(paintRect.GetY(), frameRect.GetY()));
+    EXPECT_TRUE(NearEqual(paintRect.Width(), frameRect.Width()));
+    EXPECT_TRUE(NearEqual(paintRect.Height(), frameRect.Height()));
+}
+
+/**
  * @tc.name: ArkoalaChildReceivesItemRange_001
  * @tc.desc: Verify ActivateContentItemRange forwards the content window to a static lazy child as an
  *           item-local range. Cache expansion is no longer forwarded per child, so cacheStart/End stay 0.
@@ -2129,6 +2145,37 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaWindowSwitchTracksScrollAndRestore
     FlushUITasks();
     EXPECT_GT(updateRangeCount, forwardCount);
     EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
+}
+
+/**
+ * @tc.name: ColumnsTemplateChangeForwardsActiveWindow_001
+ * @tc.desc: Verify changing from two columns to one column forwards the rebuilt active window to a grouped lazy child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeForwardsActiveWindow_001, TestSize.Level1)
+{
+    int32_t updateRangeCount = 0;
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    auto arkoalaNode = CreateArkoalaContent(50, &updateRangeCount);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(arkoalaNode, nullptr);
+    EXPECT_GT(updateRangeCount, 0);
+    EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
+    const int32_t twoColumnEnd = arkoalaNode->activeRangeParam_.end;
+
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate(AceType::RawPtr(frameNode_), "1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    const int32_t updateCountBeforeTemplateChange = updateRangeCount;
+    FlushUITasks();
+
+    EXPECT_GT(updateRangeCount, updateCountBeforeTemplateChange);
+    EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
+    EXPECT_GE(arkoalaNode->activeRangeParam_.end, 4);
+    EXPECT_LT(arkoalaNode->activeRangeParam_.end, twoColumnEnd);
 }
 
 /**
@@ -2584,63 +2631,36 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyWaterFlowLpxAttribute001, TestSize.Le
 }
 
 /**
- * @tc.name: ValidateScrollableParentAcceptsVerticalScroll_001
- * @tc.desc: LazyVWaterFlow must accept a vertical Scroll as its scrollable parent.
+ * @tc.name: ValidateScrollableParent_001
+ * @tc.desc: Parent validation must accept a vertical Scroll / List / WaterFlow as the scrollable parent and
+ *           reject a null node and a non-scrollable container (Stack).
  * @tc.type: FUNC
  */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalScroll_001, TestSize.Level1)
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParent_001, TestSize.Level1)
 {
     CreateScroll();
     CreateLazyWaterFlowLayout();
     CreateContent(5);
     CreateDone();
-
     ASSERT_NE(scrollableFrameNode_, nullptr);
     EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
-}
 
-/**
- * @tc.name: ValidateScrollableParentAcceptsVerticalList_001
- * @tc.desc: LazyVWaterFlow must accept a vertical List as its scrollable parent.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalList_001, TestSize.Level1)
-{
     CreateList();
     CreateLazyWaterFlowLayout();
     CreateContent(5);
     CreateDone();
-
     ASSERT_NE(scrollableFrameNode_, nullptr);
     EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
-}
 
-/**
- * @tc.name: ValidateScrollableParentAcceptsVerticalWaterFlow_001
- * @tc.desc: LazyVWaterFlow must accept a vertical WaterFlow as its scrollable parent.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalWaterFlow_001, TestSize.Level1)
-{
     CreateWaterFlow();
     CreateLazyWaterFlowLayout();
     CreateContent(5);
     CreateDone();
-
     ASSERT_NE(scrollableFrameNode_, nullptr);
     EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
-}
 
-/**
- * @tc.name: ValidateScrollableParentRejectsNullAndNonScrollable_001
- * @tc.desc: LazyVWaterFlow parent validation must reject a null node and a non-scrollable container (Stack).
- * @tc.type: FUNC
- */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentRejectsNullAndNonScrollable_001, TestSize.Level1)
-{
     RefPtr<UINode> nullNode = nullptr;
     EXPECT_FALSE(LazyLayoutUtils::IsVerticalScrollableParent(nullNode));
-
     StackModelNG stackModel;
     stackModel.Create();
     auto stackNode = GetMainFrameNode();
@@ -2648,4 +2668,5 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentRejectsNullAndNon
     EXPECT_FALSE(LazyLayoutUtils::IsVerticalScrollableParent(stackNode));
     CreateDone();
 }
+
 } // namespace OHOS::Ace::NG

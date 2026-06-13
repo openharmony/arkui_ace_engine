@@ -139,9 +139,9 @@ float LazyGridLayoutInfo::UpdatePosWithIter(
     return delta;
 }
 
-void LazyGridLayoutInfo::UpdatePosMap()
+void LazyGridLayoutInfo::UpdatePosMap(float prevBodyMainSize)
 {
-    float prevTotalMainSize_ = totalMainSize_;
+    float prevTotalMainSize_ = prevBodyMainSize;
     if (!Positive(estimateItemSize_)) {
         EstimateItemSize();
     }

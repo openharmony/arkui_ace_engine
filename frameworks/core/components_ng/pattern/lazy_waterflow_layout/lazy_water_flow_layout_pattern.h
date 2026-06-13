@@ -98,7 +98,6 @@ public:
     void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
     {
         onVisibleIndexesChange_ = std::move(onVisibleIndexesChange);
-        ResetVisibleIndexesChangeState();
     }
 
 private:
@@ -108,7 +107,6 @@ private:
     // Sync header/footer positions in the child sequence (header first, footer last). markDirty controls whether to
     // trigger a remeasure when a position move actually happened.
     void SyncHeaderFooter(bool markDirty = true);
-    void ResetVisibleIndexesChangeState();
     void PostIdleTask();
     void ProcessIdleTask(int64_t deadline);
     std::pair<int32_t, int32_t> GetVisibleIndexesRangeForCallback() const;
@@ -120,8 +118,9 @@ private:
     // Header / footer node weak refs to avoid retain cycles.
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
+    bool hasVisibleIndexesChangeFired_ = false;
     std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;
-    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -2, -2 };
+    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -1, -1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyWaterFlowLayoutPattern);
 };

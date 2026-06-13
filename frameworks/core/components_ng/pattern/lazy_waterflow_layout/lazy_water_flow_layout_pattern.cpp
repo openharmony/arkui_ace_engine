@@ -162,11 +162,12 @@ void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange()
 void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range)
 {
     CHECK_NULL_VOID(onVisibleIndexesChange_);
-    if (range == lastVisibleIndexesRange_) {
+    if (hasVisibleIndexesChangeFired_ && range == lastVisibleIndexesRange_) {
         return;
     }
     onVisibleIndexesChange_(range.first, range.second);
     lastVisibleIndexesRange_ = range;
+    hasVisibleIndexesChangeFired_ = true;
 }
 
 void LazyWaterFlowLayoutPattern::OnInActive()
@@ -177,7 +178,6 @@ void LazyWaterFlowLayoutPattern::OnInActive()
     if (layoutInfo_) {
         layoutInfo_->deadline_.reset();
     }
-    ResetVisibleIndexesChangeState();
 }
 
 void LazyWaterFlowLayoutPattern::PostIdleTask()
@@ -214,11 +214,6 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
     layoutInfo_->deadline_ = deadline;
     FrameNode::ProcessOffscreenNode(host, true);
     layoutInfo_->deadline_.reset();
-}
-
-void LazyWaterFlowLayoutPattern::ResetVisibleIndexesChangeState()
-{
-    lastVisibleIndexesRange_ = { -2, -2 };
 }
 
 void LazyWaterFlowLayoutPattern::AddHeader(const RefPtr<UINode>& header)

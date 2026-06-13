@@ -42,7 +42,7 @@ class ACE_EXPORT LazyGridLayoutInfo : public AceType {
     DECLARE_ACE_TYPE(LazyGridLayoutInfo, AceType);
 public:
     void EstimateItemSize();
-    void UpdatePosMap();
+    void UpdatePosMap(float prevBodyMainSize);
     void SetPosMap(int32_t index, const GridItemMainPos& pos);
     void SetCachedPosMap(int32_t index, const GridItemMainPos& pos);
     void SetSpace(float space);

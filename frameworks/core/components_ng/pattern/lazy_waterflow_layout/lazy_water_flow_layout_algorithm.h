@@ -60,9 +60,6 @@ public:
 private:
     struct PrevFrameSnapshot {
         LazyWaterFlowAnchorSnapshot anchor;
-        // Captured header main-axis size at Measure entry; used only by ShiftLanes to absorb header-size deltas
-        // (not needed by the pending baseline).
-        float headerMainSize = 0.0f;
     };
 
     struct LayoutRange {
@@ -85,14 +82,10 @@ private:
     void ApplyFallbackReferencePos(LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef);
     void UpdateGap(const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateItemConstraints(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
-    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
     void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
-    // item index -> raw index: shift by +1 when a header is present.
     int32_t GetRawIndexForItem(int32_t itemIndex) const;
-    // Subtract header / footer from the total child count and return the current content item count.
     int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
-    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
     StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
     float EstimateTotalMainSize(float maxMainSize) const;
     float EstimateBodyHeight(float maxMainSize) const;
@@ -120,7 +113,17 @@ private:
     std::optional<LazyWaterFlowItemMainPos> GetRememberedItemPositionInLane(int32_t index, size_t laneIdx) const;
     std::optional<LazyWaterFlowItemMainPos> GetRememberedItemPosition(int32_t index) const;
     bool PrepareMeasureItems(LayoutWrapper* layoutWrapper, PrevFrameSnapshot& prevFrameSnapshot);
-    void ShiftLanes(float delta);
+    void MeasureHeader(LayoutWrapper* layoutWrapper);
+    void MeasureFooter(LayoutWrapper* layoutWrapper);
+    // Compose the sticky insets forwarded to nested lazy children: parent inset + own sticky edge sizes.
+    void ComposeChildStickyInsets(LayoutWrapper* layoutWrapper);
+    // Resolve the parent-scroll compensation for a header resize; rationale in
+    // HeaderFooterUtils::CalcHeaderResizeAdjust.
+    void UpdateHeaderAdjustOffset();
+    // Body-local: translate the section viewport (viewStart_/viewEnd_/extended*/cache*) down by headerMainSize_.
+    void MakeViewportBodyLocal();
+    // Body height = section total - header - footer; valid only once totalMainSize_ holds THIS frame's total.
+    float GetBodyMainSize() const;
     void SyncLaneGeometry();
     float ResolveFrontBoundary() const;
     float ResolveBackBoundary() const;
@@ -175,14 +178,8 @@ private:
 
     void LayoutItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset);
     LayoutRange GetLayoutRange() const;
-    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
-    // layering, in which case its z-index is raised to the sticky default.
-    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
-        bool isSticky) const;
-    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
         float stickyHeaderPos) const;
-    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
         float stickyFooterPos) const;
     void LayoutContentItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
@@ -205,12 +202,20 @@ private:
     // referencePos compensation when the parent frame shrunk between frames.
     float realMainSize_ = 0.0f;
     float totalMainSize_ = 0.0f;
+    // Previous frame's body extent; keep-empty and adjustOffset deltas carry it forward across edge resizes.
+    float prevBodyMainSize_ = 0.0f;
+    // Composed sticky insets forwarded to nested lazy children (parent inset + own sticky edge sizes).
+    float childStickyTopInset_ = 0.0f;
+    float childStickyBottomInset_ = 0.0f;
     float crossSize_ = 0.0f;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
     // Parent-reserved sticky insets (set before measure); pin this section's header/footer inside them.
     float stickyTopInset_ = 0.0f;
     float stickyBottomInset_ = 0.0f;
+    // Header main-size delta vs last frame and the parent-consumed share folded into adjustOffset_.start.
+    float headerMainSizeDelta_ = 0.0f;
+    float headerAdjustOffset_ = 0.0f;
     // Parent viewExt-expanded layout window in self-local content coords. Infinity = parent provides no bounded upper
     // edge.
     float viewStart_ = 0.0f;
@@ -235,9 +240,7 @@ private:
     // Header / footer FrameNode weak refs to avoid retain cycles.
     WeakPtr<FrameNode> header_;
     WeakPtr<FrameNode> footer_;
-    // Raw indices of header / footer in the child sequence; -1 means not mounted.
-    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
-    // header and footer are not content items and have no item-space counterpart.
+    // Raw host-child index of the mounted header / footer (-1 when absent).
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     ReferenceEdge referenceEdge_ = ReferenceEdge::START;

@@ -323,7 +323,7 @@ float LazyWaterFlowLayoutInfo::GetAverageItemHeight() const
 float LazyWaterFlowLayoutInfo::ResolveLaneFrontPos() const
 {
     if (lanes_.empty()) {
-        return headerMainSize_;
+        return 0.0f;
     }
     float frontPos = std::numeric_limits<float>::max();
     for (const auto& lane : lanes_) {
@@ -358,7 +358,7 @@ void LazyWaterFlowLayoutInfo::EstimateTotalOffset(int32_t prevStart, int32_t sta
     const float average = GetAverageItemHeight();
     const float frontPos = ResolveLaneFrontPos();
     const float prevOffset = totalOffset_;
-    float newOffset = frontPos - headerMainSize_;
+    float newOffset = frontPos;
     if (startIdx > 0 && Positive(average)) {
         newOffset -= EstimateSectionHeight(average, 0, startIdx - 1, mainGap);
     }
@@ -390,14 +390,14 @@ void LazyWaterFlowLayoutInfo::FinalizeAfterDataChangeReset(int32_t prevStart, in
 float LazyWaterFlowLayoutInfo::EstimateTotalHeight(float mainGap) const
 {
     if (totalItemCount_ <= 0) {
-        return headerMainSize_;
+        return 0.0f;
     }
     // Lanes are in self-local content coords (EstimateTotalOffset already materialized any prefix delta), so
     // windowHeight = max(lane.endPos) is content-coord directly.
     // Lanes are in self-local content coords (EstimateTotalOffset already absorbed any prefix delta).
     const int32_t measuredEnd = EndIndex();
     const int32_t measuredStart = StartIndex();
-    float windowEndPos = headerMainSize_;
+    float windowEndPos = 0.0f;
     for (const auto& lane : lanes_) {
         windowEndPos = std::max(windowEndPos, lane.endPos);
     }
@@ -408,8 +408,7 @@ float LazyWaterFlowLayoutInfo::EstimateTotalHeight(float mainGap) const
             return std::max(windowHeight, maxHeight_);
         }
         const auto laneCount = static_cast<float>(std::max(lanes_.size(), static_cast<size_t>(1)));
-        const float height = headerMainSize_ +
-            static_cast<float>(totalItemCount_) * (average + mainGap) / laneCount;
+        const float height = static_cast<float>(totalItemCount_) * (average + mainGap) / laneCount;
         return std::max({ windowHeight, maxHeight_, height });
     }
     if (measuredEnd >= totalItemCount_ - 1) {
@@ -650,7 +649,8 @@ void LazyWaterFlowLayoutInfo::CapturePendingAdjustAnchor()
     hasPendingAdjustAnchor_ = true;
     pendingAnchor_.startIndex = startIndex_;
     pendingAnchor_.endIndex = endIndex_;
-    pendingAnchor_.totalMainSize = totalMainSize_;
+    // Store the body total so UpdateAdjustOffset's totalDelta is a body delta.
+    pendingAnchor_.totalMainSize = totalMainSize_ - headerMainSize_ - footerMainSize_;
     pendingAnchor_.startPos.reset();
     pendingAnchor_.endPos.reset();
     auto startIter = posMap_.find(startIndex_);
@@ -749,8 +749,10 @@ bool LazyWaterFlowLayoutInfo::NeedPredict() const
     if (!std::isfinite(cacheEndPos_) || totalItemCount_ <= 0) {
         return false;
     }
+    // extendedView*Pos_ are body coords; compare against the body content end.
+    const float bodyContentEnd = std::max(0.0f, totalMainSize_ - headerMainSize_ - footerMainSize_);
     const bool extendedViewOverlapsContent = GreatNotEqual(extendedViewEndPos_, 0.0f) &&
-        (!Positive(totalMainSize_) || LessNotEqual(extendedViewStartPos_, totalMainSize_));
+        (!Positive(totalMainSize_) || LessNotEqual(extendedViewStartPos_, bodyContentEnd));
     // An empty offscreen child cannot start its own predict loop from cache overlap alone.
     if (posMap_.empty()) {
         return extendedViewOverlapsContent;
@@ -808,7 +810,7 @@ void LazyWaterFlowLayoutInfo::ResetWithLaneOffset(std::optional<float> laneBaseP
             }
         }
         if (!basePos.has_value()) {
-            basePos = headerMainSize_;
+            basePos = 0.0f;
         }
     }
     for (auto& lane : lanes_) {
@@ -845,7 +847,7 @@ void LazyWaterFlowLayoutInfo::UpdateLanesIndex(int32_t /*updateIdx*/)
 void LazyWaterFlowLayoutInfo::SyncItemPositions(float mainGap)
 {
     posMap_.clear();
-    laneEndPos_.assign(lanes_.size(), headerMainSize_);
+    laneEndPos_.assign(lanes_.size(), 0.0f);
     for (size_t laneIdx = 0; laneIdx < lanes_.size(); ++laneIdx) {
         auto& lane = lanes_[laneIdx];
         NormalizeLaneStart(lane);
