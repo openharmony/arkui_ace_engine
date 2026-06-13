@@ -782,6 +782,9 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
         }
         shader = RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(*(iter->second), newConfig.dipScale);
     }
+#if defined(CROSS_PLATFORM)
+    return shader;
+#else
     auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(shader);
     CHECK_NULL_RETURN(glassEffect, nullptr);
     auto& materialColor = newConfig.materialColor;
@@ -789,6 +792,7 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
         materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
     glassEffect->Setter<Rosen::FrostedGlassEffectMaterialColorTag>(rsColor);
     return shader;
+#endif
 }
 
 std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(
