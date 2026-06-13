@@ -41,8 +41,7 @@ namespace {
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
-constexpr float TARGET_SIZE_WIDTH = 100.0f;
-constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+
 } // namespace
 
 class MenuPatternGetAdjustedPosTestNg : public testing::Test {
@@ -83,9 +82,9 @@ RefPtr<FrameNode> MenuPatternGetAdjustedPosTestNg::CreateMenuFrameNode()
     auto node = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, EMPTY_TEXT, TYPE); });
-    ASSERT_NE(node, nullptr);
+    CHECK_NULL_RETURN(node, nullptr);
     auto geometryNode = node->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
+    CHECK_NULL_RETURN(geometryNode, nullptr);
     return node;
 }
 
