@@ -16,46 +16,43 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_CONSTANTS_H
 
-#include <unordered_map>
+#include <iosfwd>
+#include <memory>
 
-#include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
-#include "base/resource/asset_manager.h"
-#include "base/resource/internal_resource.h"
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/radius.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_style.h"
+
+namespace OHOS::Media {
+class PixelMap;
+}
+
 namespace OHOS::Ace {
+
+class Asset;
+class AssetManager;
+class ResourceAdapter;
+class ResourceInfo;
+class ResourceConfiguration;
+struct RawfileDescription;
+
+enum class ColorScheme : int32_t;
 
 class ACE_FORCE_EXPORT ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
-    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {}
-    ~ThemeConstants() override = default;
+    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter);
+    ~ThemeConstants() override;
 
     /*
      * Init properties at platform.
      */
     static void InitDeviceType();
 
-    void InitResource(const ResourceInfo& resourceInfo)
-    {
-        if (resAdapter_) {
-            resAdapter_->Init(resourceInfo);
-        }
-    }
+    void InitResource(const ResourceInfo& resourceInfo);
 
-    void UpdateConfig(const ResourceConfiguration& config)
-    {
-        if (resAdapter_) {
-            resAdapter_->UpdateConfig(config);
-        }
-    }
+    void UpdateConfig(const ResourceConfiguration& config);
 
     void ParseTheme();
 
@@ -288,49 +285,19 @@ public:
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const;
 
     template<class T>
-    bool GetMediaResource(T& resId, std::ostream& dest) const
-    {
-        if (!resAdapter_) {
-            return false;
-        }
-        return resAdapter_->GetResource(resId, dest);
-    }
+    bool GetMediaResource(T& resId, std::ostream& dest) const;
 
     template<class T>
-    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
-    {
-        if (!resAdapter_) {
-            return false;
-        }
-        return resAdapter_->GetMediaData(resId, len, dest);
-    }
+    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest);
 
     template<class T>
     bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest, const std::string& bundleName,
-        const std::string& moduleName)
-    {
-        if (!resAdapter_) {
-            return false;
-        }
-        return resAdapter_->GetMediaData(resId, len, dest, bundleName, moduleName);
-    }
+        const std::string& moduleName);
 
-    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
-    {
-        if (!resAdapter_) {
-            return false;
-        }
-        return resAdapter_->GetRawFileData(rawFile, len, dest);
-    }
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest);
 
     bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
-        const std::string& bundleName, const std::string& moduleName)
-    {
-        if (!resAdapter_) {
-            return false;
-        }
-        return resAdapter_->GetRawFileData(rawFile, len, dest, bundleName, moduleName);
-    }
+        const std::string& bundleName, const std::string& moduleName);
 
     bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
 
@@ -341,40 +308,19 @@ public:
      */
     void LoadTheme(int32_t themeId);
 
-    RefPtr<ThemeStyle> GetThemeStyle() const
-    {
-        return currentThemeStyle_;
-    }
+    RefPtr<ThemeStyle> GetThemeStyle() const;
 
     void SetColorScheme(ColorScheme colorScheme);
 
-    bool HasCustomStyle(uint32_t key) const
-    {
-        return customStyleMap_.find(key) != customStyleMap_.end();
-    }
+    bool HasCustomStyle(uint32_t key) const;
 
-    void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName)
-    {
-        if (resAdapter_) {
-            resAdapter_->UpdateResourceManager(bundleName, moduleName);
-        }
-    }
+    void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName);
 
-    void UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
-    {
-        resAdapter_ = adapter;
-    }
+    void UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter);
 
-    uint32_t GetResourceLimitKeys() const
-    {
-        CHECK_NULL_RETURN(resAdapter_, 0);
-        return resAdapter_->GetResourceLimitKeys();
-    }
+    uint32_t GetResourceLimitKeys() const;
 
-    RefPtr<ResourceAdapter> GetResourceAdapter()
-    {
-        return resAdapter_;
-    }
+    RefPtr<ResourceAdapter> GetResourceAdapter();
 
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName);
 private:

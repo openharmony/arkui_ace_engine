@@ -17,6 +17,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/window.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "ui/rs_ui_context.h"
