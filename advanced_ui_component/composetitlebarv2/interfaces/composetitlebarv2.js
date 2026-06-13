@@ -36,12 +36,12 @@ const promptAction = requireNapi('promptAction');
 
 let ComposeTitleBarV2MenuItem = class ComposeTitleBarV2MenuItem {
     constructor(j10) {
-        this.isEnabled = true;
+        this.isEnabled = false;
         this.accessibilityLevel = 'auto';
         if (j10) {
             this.value = j10.value;
             this.symbolStyle = j10.symbolStyle;
-            this.isEnabled = j10.isEnabled ?? true;
+            this.isEnabled = j10.isEnabled ?? false;
             this.action = j10.action;
             this.label = j10.label;
             this.accessibilityText = j10.accessibilityText;
@@ -49,7 +49,7 @@ let ComposeTitleBarV2MenuItem = class ComposeTitleBarV2MenuItem {
             this.accessibilityDescription = j10.accessibilityDescription;
         } else {
             this.value = '';
-            this.isEnabled = true;
+            this.isEnabled = false;
             this.accessibilityLevel = 'auto';
         }
     }

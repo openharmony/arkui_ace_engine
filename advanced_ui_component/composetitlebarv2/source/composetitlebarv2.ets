@@ -40,7 +40,7 @@ export class ComposeTitleBarV2MenuItem {
   @Trace
   public symbolStyle?: SymbolGlyphModifier;
   @Trace
-  public isEnabled?: boolean = true;
+  public isEnabled?: boolean = false;
   @Trace
   public action?: OnActionCallback;
   @Trace
@@ -56,7 +56,7 @@ export class ComposeTitleBarV2MenuItem {
     if (params) {
       this.value = params.value;
       this.symbolStyle = params.symbolStyle;
-      this.isEnabled = params.isEnabled ?? true;
+      this.isEnabled = params.isEnabled ?? false;
       this.action = params.action;
       this.label = params.label;
       this.accessibilityText = params.accessibilityText;
@@ -64,7 +64,7 @@ export class ComposeTitleBarV2MenuItem {
       this.accessibilityDescription = params.accessibilityDescription;
     } else {
       this.value = '';
-      this.isEnabled = true;
+      this.isEnabled = false;
       this.accessibilityLevel = 'auto';
     }
   }
