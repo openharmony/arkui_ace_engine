@@ -487,6 +487,18 @@ struct CollapsibleMenuSectionV2 {
             })
             .onClick(() => this.isPopupShown = true)
             .gestureModifier(this.getItemGestureModifier())
+            .bindPopup(this.isPopupShown, {
+              builder: this.popupBuilder,
+              placement: Placement.Bottom,
+              popupColor: Color.White,
+              enableArrow: false,
+              onStateChange: (e: PopupStateChangeParam) => {
+                this.isPopupShown = e.isVisible;
+                if (!e.isVisible) {
+                  this.isMoreIconOnClick = false;
+                }
+              }
+            })
           }
         }
       }

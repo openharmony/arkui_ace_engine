@@ -1029,6 +1029,18 @@ class CollapsibleMenuSectionV2 extends ViewV2 {
                                     });
                                     Button.onClick(() => this.isPopupShown = true);
                                     Button.gestureModifier(this.getItemGestureModifier());
+                                    Button.bindPopup(this.isPopupShown, {
+                                        builder: { builder: this.popupBuilder.bind(this) },
+                                        placement: Placement.Bottom,
+                                        popupColor: Color.White,
+                                        enableArrow: false,
+                                        onStateChange: (e) => {
+                                            this.isPopupShown = e.isVisible;
+                                            if (!e.isVisible) {
+                                                this.isMoreIconOnClick = false;
+                                            }
+                                        }
+                                    });
                                 }, Button);
                                 this.observeComponentCreation2((e5, f5) => {
                                     SymbolGlyph.create(PUBLIC_MORE);
