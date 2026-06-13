@@ -923,7 +923,8 @@ HWTEST_F(MenuItemTestOneNg, MeasureItemViews001, TestSize.Level1)
     algorithm->MeasureItemViews(childConstraint, layoutConstraint, AceType::RawPtr(layoutWrapper));
 }
 
-RefPtr<FrameNode> CreateSelectOverlayExtensionMenuNode(const std::u16string& contentText, const std::u16string& labelText)
+RefPtr<FrameNode> CreateSelectOverlayExtensionMenuNode(const std::u16string& contentText,
+    const std::u16string& labelText)
 {
     auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1, ""));
