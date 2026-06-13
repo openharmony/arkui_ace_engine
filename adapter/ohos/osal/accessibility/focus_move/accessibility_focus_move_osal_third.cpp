@@ -85,7 +85,7 @@ bool FocusStrategyOsalThird::CanSendHoverWithTargetIdByReadableRules(
     auto checkNode = GetCurrentCheckNode();
     CHECK_NULL_RETURN(checkNode, true);
     std::shared_ptr<FocusRulesCheckNode> targetNode;
-    auto changeResult = NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+    auto changeResult = NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode, FocusRuleType::DEFAULT);
     CHECK_NE_RETURN(changeResult, true, true); // changeResult false means not change, send targetId with currentId
     CHECK_NULL_RETURN(targetNode, false); // changeResult true but no targetNode means not find any readable
     targetId = targetNode->GetAccessibilityId();

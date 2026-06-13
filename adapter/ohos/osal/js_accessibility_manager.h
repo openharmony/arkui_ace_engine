@@ -759,6 +759,8 @@ private:
     void DumpInjectActionTest(const std::vector<std::string>& params);
     void DumpExecuteActionTest(const std::vector<std::string>& params);
     void DumpCustomActionTest(const std::vector<std::string>& params);
+    void DumpSetComponentTypeTest(const std::vector<std::string>& params);
+    void DumpClearComponentTypeTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);

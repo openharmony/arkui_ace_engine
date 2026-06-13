@@ -268,6 +268,11 @@ bool AccessibilityFocusStrategy::CanAccessibilityFocus(const std::shared_ptr<Foc
     if (!currentNode->IsAccessibiltyVisible()) {
         return false;
     }
+
+    if (!CheckNodeMatchedFocusType(currentNode, focusRuleType_)) {
+        return false;
+    }
+
     bool isReadable = false;
     auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
@@ -880,5 +885,19 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindAnyScrollAncestor(
 {
     return FindScrollAncestor(condition,
         currentNode, targetNodes, CheckSupportScrollAction::FIND_ANY, true);
+}
+
+bool CheckNodeMatchedFocusType(
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode, Accessibility::FocusRuleType focusRuleType)
+{
+    CHECK_NULL_RETURN(currentNode, false);
+
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+
+    bool isHit = false;
+    auto checkResult = client->CheckNodeIsFocusType(currentNode, focusRuleType, isHit);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isHit;
 }
 } // OHOS::Ace::Framework
