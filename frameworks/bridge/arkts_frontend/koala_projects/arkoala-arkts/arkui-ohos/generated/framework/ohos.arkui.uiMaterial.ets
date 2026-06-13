@@ -21,6 +21,17 @@ import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
+export class uiMaterial_ImmersiveMaterial_serializer {
+    public static write(buffer: SerializerBase, value: uiMaterial.ImmersiveMaterial): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toUiMaterialImmersiveMaterialPtr(value))
+    }
+    public static read(buffer: DeserializerBase): uiMaterial.ImmersiveMaterial {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return extractors.fromUiMaterialImmersiveMaterialPtr(ptr)
+    }
+}
 export class uiMaterial_Material_serializer {
     public static write(buffer: SerializerBase, value: uiMaterial.Material): void {
         let valueSerializer: SerializerBase = buffer

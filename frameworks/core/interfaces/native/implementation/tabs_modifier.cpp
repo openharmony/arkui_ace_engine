@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_static.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -29,6 +31,35 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+RefPtr<ResourceObject> GetResourceObject(const Ark_Resource& resource)
+{
+    Converter::ResourceConverter converter(resource);
+    auto symbolId = converter.ToSymbol();
+    CHECK_NULL_RETURN((symbolId.has_value() && symbolId.value() <= INT32_MAX), nullptr);
+    auto resourceId = static_cast<int32_t>(symbolId.value());
+    std::vector<ResourceObjectParams> resObjParamsList;
+    auto type = Converter::OptConvert<int32_t>(resource.type).value_or(0);
+    auto bundleName = Converter::Convert<std::string>(resource.bundleName);
+    auto moduleName = Converter::Convert<std::string>(resource.moduleName);
+    return AceType::MakeRefPtr<ResourceObject>(
+        resourceId, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
+}
+
+RefPtr<ResourceObject> GetResourceObjectFromOptLength(const Opt_Length& opt)
+{
+    if (opt.tag == InteropTag::INTEROP_TAG_UNDEFINED || opt.value.selector != SELECTOR_ID_2) {
+        return nullptr;
+    }
+    return GetResourceObject(opt.value.value2);
+}
+
+RefPtr<ResourceObject> GetResourceObjectFromOptResourceColor(const Opt_ResourceColor& opt)
+{
+    if (opt.tag == InteropTag::INTEROP_TAG_UNDEFINED || opt.value.selector != SELECTOR_ID_3) {
+        return nullptr;
+    }
+    return GetResourceObject(opt.value.value3);
+}
 std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable_I32& value)
 {
     std::optional<int32_t> result;
@@ -169,6 +200,31 @@ void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src)
         case ARK_TABS_CACHE_MODE_CACHE_LATEST_SWITCHED: dst = TabsCacheMode::CACHE_LATEST_SWITCHED; break;
         default: LOGE("Unexpected enum value in Ark_TabsCacheMode: %{public}d", src);
     }
+}
+
+template<>
+BarFloatingStyleParameters Convert(const Ark_FloatingTabBarStyle& src)
+{
+    BarFloatingStyleParameters dst;
+    if (src.barWidth.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst.smallBarWidth =  Converter::OptConvert<Dimension>(src.barWidth.value.smallBarWidth);
+        dst.mediumBarWidth =  Converter::OptConvert<Dimension>(src.barWidth.value.mediumBarWidth);
+        dst.largeBarWidth =  Converter::OptConvert<Dimension>(src.barWidth.value.largeBarWidth);
+        dst.smallBarWidthObject = GetResourceObjectFromOptLength(src.barWidth.value.smallBarWidth);
+        dst.mediumBarWidthObject = GetResourceObjectFromOptLength(src.barWidth.value.mediumBarWidth);
+        dst.largeBarWidthObject = GetResourceObjectFromOptLength(src.barWidth.value.largeBarWidth);
+    }
+    dst.barSideMargin = Converter::OptConvert<Dimension>(src.barSideMargin);
+    dst.barBottomMargin = Converter::OptConvert<Dimension>(src.barBottomMargin);
+    dst.maskColor = Converter::OptConvert<Color>(src.maskColor);
+    dst.maskHeight = Converter::OptConvert<Dimension>(src.maskHeight);
+    dst.adaptToHandedness = Converter::OptConvert<bool>(src.adaptToHandedness);
+    dst.systemMaterial = Converter::OptConvert<UiMaterial*>(src.systemMaterial).value_or(nullptr);
+    dst.barSideMarginObject = GetResourceObjectFromOptLength(src.barSideMargin);
+    dst.barBottomMarginObject = GetResourceObjectFromOptLength(src.barBottomMargin);
+    dst.maskColorObject = GetResourceObjectFromOptResourceColor(src.maskColor);
+    dst.maskHeightObject = GetResourceObjectFromOptLength(src.maskHeight);
+    return dst;
 }
 }
 
@@ -672,6 +728,19 @@ void SetOnContentDidScrollImpl(Ark_NativePointer node,
     };
     TabsModelStatic::SetOnContentDidScroll(frameNode, std::move(onEvent));
 }
+void SetBarFloatingStyleImpl(Ark_NativePointer node,
+                             const Opt_FloatingTabBarStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        TabsModelNG::ResetBarFloatingStyle(frameNode);
+        return;
+    }
+    auto parameters = Converter::Convert<BarFloatingStyleParameters>(value->value);
+    TabsModelNG::SetBarFloatingStyle(frameNode, parameters);
+}
 void SetBarModeImpl(Ark_NativePointer node,
                     const Opt_BarMode* value,
                     const Opt_ScrollableBarModeOptions* options)
@@ -781,6 +850,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetBarBackgroundEffectImpl,
         TabsAttributeModifier::SetOnContentWillChangeImpl,
         TabsAttributeModifier::SetOnContentDidScrollImpl,
+        TabsAttributeModifier::SetBarFloatingStyleImpl,
         TabsAttributeModifier::SetBarModeImpl,
         TabsAttributeModifier::SetBarHeight1Impl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,

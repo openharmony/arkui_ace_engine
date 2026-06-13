@@ -3979,6 +3979,7 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
     dst->textOptions = Converter::Convert<NavigationTextOptions>(value);
     dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+    dst->material = Converter::OptConvert<UiMaterial*>(value.systemMaterial).value_or(nullptr);
 }
 
 template<>
@@ -4398,6 +4399,16 @@ void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_Br
 
 template<>
 void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<UiMaterial*>(src);
+}
+
+template<>
+void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_ImmersiveMaterial& src)
 {
     if (!src) {
         dst = std::nullopt;

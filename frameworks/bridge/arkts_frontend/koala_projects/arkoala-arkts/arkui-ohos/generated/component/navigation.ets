@@ -43,6 +43,7 @@ import { SymbolGlyphAttribute } from './symbolglyph'
 import { TitleHeight, Color as arkui_component_enums_Color } from './enums'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { TextModifier } from 'arkui.TextModifier'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -52,6 +53,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { TextModifier_serializer } from './../framework/TextModifier'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 // instructive change begin
 import { NavExtender } from './idlize'
 // instructive change end
@@ -1511,6 +1513,18 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setConfigurationAttribute(value: NavigationConfiguration | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            NavigationConfiguration_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_setConfiguration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackButtonIconAttribute(icon: string | PixelMap | global_resource_Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (icon !== undefined) {
@@ -1840,6 +1854,7 @@ export interface NavigationTitleOptions {
     subTitleModifier?: TextModifier;
     enableHoverMode?: boolean;
     scrollEffectOptions?: ScrollEffectOptions;
+    systemMaterial?: uiMaterial.Material;
 }
 export enum BarStyle {
     STANDARD = 0,
@@ -1867,6 +1882,9 @@ export interface NavigationModuleInfo {
     moduleName: string;
     pagePath: string;
     isUserCreateStack?: boolean;
+}
+export interface NavigationConfiguration {
+    stackSizeLimit?: int32;
 }
 export interface NavigationAttribute extends CommonMethod {
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
@@ -1943,6 +1961,9 @@ export interface NavigationAttribute extends CommonMethod {
     }
     enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableVisibilityLifecycleWithContentCover')
+    }
+    configuration(value: NavigationConfiguration | undefined): this {
+        throw new Error('Unimplemented method configuration')
     }
     backButtonIcon(icon: string | PixelMap | global_resource_Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         throw new Error('Unimplemented method backButtonIcon')
@@ -2121,6 +2142,11 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setEnableVisibilityLifecycleWithContentCoverAttribute(value_casted)
+        return this
+    }
+    public configuration(value: NavigationConfiguration | undefined): this {
+        const value_casted = value as (NavigationConfiguration | undefined)
+        this.getPeer()?.setConfigurationAttribute(value_casted)
         return this
     }
     public backButtonIcon(icon: string | PixelMap | global_resource_Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
@@ -2370,6 +2396,30 @@ export class NavContentInfo_serializer {
         }
         const navDestinationIdTmpResult: string | undefined = navDestinationIdTmpBuf
         let value: NavContentInfo = ({name: nameTmpResult, index: indexTmpResult, mode: modeTmpResult, param: paramTmpResult, navDestinationId: navDestinationIdTmpResult} as NavContentInfo)
+        return value
+    }
+}
+export class NavigationConfiguration_serializer {
+    public static write(buffer: SerializerBase, value: NavigationConfiguration): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStackSizeLimit = value.stackSizeLimit
+        if (valueHolderForStackSizeLimit !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStackSizeLimitTmpValue = valueHolderForStackSizeLimit!
+            valueSerializer.writeInt32(valueHolderForStackSizeLimitTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NavigationConfiguration {
+        let valueDeserializer: DeserializerBase = buffer
+        const stackSizeLimitTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let stackSizeLimitTmpBuf: int32 | undefined = undefined
+        if ((stackSizeLimitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stackSizeLimitTmpBuf = valueDeserializer.readInt32()
+        }
+        const stackSizeLimitTmpResult: int32 | undefined = stackSizeLimitTmpBuf
+        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult} as NavigationConfiguration)
         return value
     }
 }
@@ -3471,6 +3521,14 @@ export class NavigationTitleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): NavigationTitleOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -3553,7 +3611,13 @@ export class NavigationTitleOptions_serializer {
             scrollEffectOptionsTmpBuf = ScrollEffectOptions_serializer.read(valueDeserializer)
         }
         const scrollEffectOptionsTmpResult: ScrollEffectOptions | undefined = scrollEffectOptionsTmpBuf
-        let value: NavigationTitleOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, barStyle: barStyleTmpResult, paddingStart: paddingStartTmpResult, paddingEnd: paddingEndTmpResult, mainTitleModifier: mainTitleModifierTmpResult, subTitleModifier: subTitleModifierTmpResult, enableHoverMode: enableHoverModeTmpResult, scrollEffectOptions: scrollEffectOptionsTmpResult} as NavigationTitleOptions)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: uiMaterial.Material | undefined = systemMaterialTmpBuf
+        let value: NavigationTitleOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, barStyle: barStyleTmpResult, paddingStart: paddingStartTmpResult, paddingEnd: paddingEndTmpResult, mainTitleModifier: mainTitleModifierTmpResult, subTitleModifier: subTitleModifierTmpResult, enableHoverMode: enableHoverModeTmpResult, scrollEffectOptions: scrollEffectOptionsTmpResult, systemMaterial: systemMaterialTmpResult} as NavigationTitleOptions)
         return value
     }
 }

@@ -27,6 +27,63 @@
 #include "navigation_context.h"
 #include "nav_destination_scrollable_processor_static.h"
 
+#include "base/json/json_util.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+std::string Convert(const Ark_Object& src)
+{
+    return "{}";
+}
+
+template<>
+std::string Convert(const Map_String_Object& src)
+{
+    if (src.size <= 0 || src.keys == nullptr) {
+        return "";
+    }
+    std::string result = "{";
+    for (Ark_Int32 i = 0; i < src.size; i++) {
+        if (i > 0) {
+            result += ",";
+        }
+        std::string key = Convert<std::string>(src.keys[i]);
+        std::string value = (src.values != nullptr) ? Convert<std::string>(src.values[i]) : "{}";
+        result += "\"" + key + "\":" + value;
+    }
+    result += "}";
+    return result;
+}
+
+void AssignArkValue(Map_String_Object& dst, const std::string& src, ConvContext *ctx)
+{
+    dst = {};
+    if (src.empty()) {
+        return;
+    }
+    auto json = JsonUtil::ParseJsonString(src);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return;
+    }
+    std::vector<std::string> keys;
+    auto child = json->GetChild();
+    while (child && child->IsValid()) {
+        keys.push_back(child->GetKey());
+        child = child->GetNext();
+    }
+    if (keys.empty()) {
+        return;
+    }
+    ConvContext localCtx;
+    dst = localCtx.AllocateMap<Map_String_Object>(keys.size());
+    dst.size = static_cast<Ark_Int32>(keys.size());
+    for (size_t i = 0; i < keys.size(); i++) {
+        AssignArkValue(dst.keys[i], keys[i], &localCtx);
+        dst.values[i] = {};
+    }
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
@@ -445,6 +502,40 @@ void SetFullScreenOverlayImpl(Ark_NativePointer node,
     auto enabled = Converter::OptConvertPtr<bool>(value);
     NavDestinationModelNG::SetFullScreenOverlay(frameNode, enabled);
 }
+void SetOnSaveStateImpl(Ark_NativePointer node,
+                        const Opt_SaveStateCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto callback = [func = CallbackHelper(value->value)]() -> std::string {
+        auto result = func.InvokeWithOptConvertResult<std::string, Opt_Map_String_Object,
+            Callback_Opt_Map_String_Object_Void>();
+        return result.value_or("");
+    };
+    NavDestinationModelNG::SetOnSaveState(frameNode, std::move(callback));
+}
+void SetOnRestoreStateImpl(Ark_NativePointer node,
+                           const Opt_RestoreStateCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto callback = [func = CallbackHelper(value->value)](const std::string& state) {
+        Opt_Map_String_Object optValue = {
+            .tag = InteropTag::INTEROP_TAG_OBJECT,
+            .value = Converter::ArkValue<Map_String_Object>(state)
+        };
+        func.InvokeSync(optValue);
+    };
+    NavDestinationModelNG::SetOnRestoreState(frameNode, std::move(callback));
+}
 void EnableNavigationIndicatorImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
 {
@@ -791,6 +882,8 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SetPreferredOrientationImpl,
         NavDestinationAttributeModifier::SetEnableNavigationIndicatorImpl,
         NavDestinationAttributeModifier::SetFullScreenOverlayImpl,
+        NavDestinationAttributeModifier::SetOnSaveStateImpl,
+        NavDestinationAttributeModifier::SetOnRestoreStateImpl,
         NavDestinationAttributeModifier::SetTitleImpl,
         NavDestinationAttributeModifier::SetHideTitleBar1Impl,
         NavDestinationAttributeModifier::SetBackButtonIconImpl,

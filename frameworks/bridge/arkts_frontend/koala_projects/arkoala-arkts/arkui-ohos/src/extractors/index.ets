@@ -306,6 +306,13 @@ export namespace extractors {
     throw new Error("fromUiMaterialMaterialPtr is not implemented.")
   }
 
+  export function toUiMaterialImmersiveMaterialPtr(value: uiMaterial.ImmersiveMaterial): KPointer {
+    return ArkUIAniModule._Extractors_ToUiMaterialMaterialPtr(value);
+  }
+  export function fromUiMaterialImmersiveMaterialPtr(ptr: KPointer): uiMaterial.ImmersiveMaterial {
+    throw new Error("fromUiMaterialImmersiveMaterialPtr is not implemented.")
+  }
+
   export function toUiEffectVisualEffectPtr(
     value: uiEffect.VisualEffect
   ): KPointer {

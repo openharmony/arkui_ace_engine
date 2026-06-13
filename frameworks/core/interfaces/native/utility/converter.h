@@ -1096,6 +1096,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src);
     template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src);
+    template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_ImmersiveMaterial& src);
     template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);
