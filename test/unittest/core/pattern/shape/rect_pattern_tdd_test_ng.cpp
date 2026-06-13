@@ -492,19 +492,23 @@ HWTEST_F(RectPatternTddTestNg, SetRadiusValueStatic001, TestSize.Level1)
     auto paintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
 
-    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode), Dimension(11.0_vp), Dimension(12.0_vp), RectModel::TOP_LEFT_RADIUS);
+    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode),
+                                Dimension(11.0_vp), Dimension(12.0_vp), RectModel::TOP_LEFT_RADIUS);
     EXPECT_EQ(paintProperty->HasTopLeftRadius(), true);
     EXPECT_FLOAT_EQ(paintProperty->GetTopLeftRadiusValue().GetX().ConvertToPx(), Dimension(11.0_vp).ConvertToPx());
 
-    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode), Dimension(13.0_vp), Dimension(14.0_vp), RectModel::TOP_RIGHT_RADIUS);
+    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode),
+                                Dimension(13.0_vp), Dimension(14.0_vp), RectModel::TOP_RIGHT_RADIUS);
     EXPECT_EQ(paintProperty->HasTopRightRadius(), true);
     EXPECT_FLOAT_EQ(paintProperty->GetTopRightRadiusValue().GetX().ConvertToPx(), Dimension(13.0_vp).ConvertToPx());
 
-    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode), Dimension(15.0_vp), Dimension(16.0_vp), RectModel::BOTTOM_RIGHT_RADIUS);
+    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode),
+                                Dimension(15.0_vp), Dimension(16.0_vp), RectModel::BOTTOM_RIGHT_RADIUS);
     EXPECT_EQ(paintProperty->HasBottomRightRadius(), true);
     EXPECT_FLOAT_EQ(paintProperty->GetBottomRightRadiusValue().GetX().ConvertToPx(), Dimension(15.0_vp).ConvertToPx());
 
-    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode), Dimension(17.0_vp), Dimension(18.0_vp), RectModel::BOTTOM_LEFT_RADIUS);
+    RectModelNG::SetRadiusValue(AceType::RawPtr(frameNode),
+                                Dimension(17.0_vp), Dimension(18.0_vp), RectModel::BOTTOM_LEFT_RADIUS);
     EXPECT_EQ(paintProperty->HasBottomLeftRadius(), true);
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetX().ConvertToPx(), Dimension(17.0_vp).ConvertToPx());
 }
@@ -562,7 +566,8 @@ HWTEST_F(RectPatternTddTestNg, SetRadiusValueResObj001, TestSize.Level1)
     g_isConfigChangePerform = false;
     RefPtr<ResourceObject> radiusXResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
     RefPtr<ResourceObject> radiusYResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
-    rectModelNG.SetRadiusValue(Dimension(10.0_vp), Dimension(20.0_vp), radiusXResObj, radiusYResObj, RectModel::TOP_LEFT_RADIUS);
+    rectModelNG.SetRadiusValue(Dimension(10.0_vp), Dimension(20.0_vp),
+                               radiusXResObj, radiusYResObj, RectModel::TOP_LEFT_RADIUS);
     EXPECT_EQ(paintProperty->HasTopLeftRadius(), false);
 }
 
@@ -752,7 +757,7 @@ HWTEST_F(RectPatternTddTestNg, SetRadiusHeightNegative001, TestSize.Level1)
 
 /**
  * @tc.name: SetRadiusValueStaticInvalidIndex001
- * @tc.desc: Test static SetRadiusValue(FrameNode*, Dimension, Dimension, int32_t) with invalid index does not modify any radius
+ * @tc.desc: Test static SetRadiusValue with invalid index does not modify any radius
  * @tc.type: FUNC
  */
 HWTEST_F(RectPatternTddTestNg, SetRadiusValueStaticInvalidIndex001, TestSize.Level1)
