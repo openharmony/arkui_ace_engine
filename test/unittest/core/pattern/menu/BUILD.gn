@@ -42,6 +42,7 @@ ace_unittest("menu_test_ng") {
     "menu_patternEx_test_two_ng.cpp",
     "menu_patternMore_test_ng.cpp",
     "menu_patternMore_test_two_ng.cpp",
+    "menu_patternMore_test_three_ng.cpp",
     "menu_pattern_test_ng.cpp",
     "menu_pattern_test_two_ng.cpp",
     "menu_view_test_ng.cpp",
