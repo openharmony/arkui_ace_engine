@@ -480,10 +480,12 @@ export class CounterV2Component extends ViewV2 {
         }
         this.inputValue = this.value.toString();
         if (this.numberStyleOptions.min !== undefined) {
-            this.min = this.numberStyleOptions.min;
+            this.min = Number.isFinite(this.numberStyleOptions.min)
+                ? this.numberStyleOptions.min : CounterConstant.COUNTER_MIN_VALUE;
         }
         if (this.numberStyleOptions.max !== undefined) {
-            this.max = this.numberStyleOptions.max;
+            this.max = Number.isFinite(this.numberStyleOptions.max)
+                ? this.numberStyleOptions.max : CounterConstant.COUNTER_MAX_VALUE;
         }
         if (this.min > this.max) {
             this.min = this.max;
@@ -549,10 +551,12 @@ export class CounterV2Component extends ViewV2 {
         this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
         this.inputValue = this.value.toString();
         if (this.inlineStyleOptions.min !== undefined) {
-            this.min = this.inlineStyleOptions.min;
+            this.min = Number.isFinite(this.inlineStyleOptions.min)
+                ? this.inlineStyleOptions.min : CounterConstant.COUNTER_MIN_VALUE;
         }
         if (this.inlineStyleOptions.max !== undefined) {
-            this.max = this.inlineStyleOptions.max;
+            this.max = Number.isFinite(this.inlineStyleOptions.max)
+                ? this.inlineStyleOptions.max : CounterConstant.COUNTER_MAX_VALUE;
         }
         if (this.min > this.max) {
             this.min = this.max;
@@ -2209,6 +2213,7 @@ export class CounterV2Component extends ViewV2 {
                                             this.validateInlineInput();
                                             if (this.value !== oldValue) {
                                                 this.onChange?.(this.value);
+                                                this.updateInlineEnableState();
                                             }
                                         }
                                         this.focusText = FocusText.NONE;
@@ -2315,6 +2320,7 @@ export class CounterV2Component extends ViewV2 {
                                             this.validateInlineInput();
                                             if (this.value !== oldValue) {
                                                 this.onChange?.(this.value);
+                                                this.updateInlineEnableState();
                                             }
                                         }
                                         this.focusText = FocusText.NONE;

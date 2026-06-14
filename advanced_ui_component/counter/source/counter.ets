@@ -462,7 +462,7 @@ export struct CounterComponent {
   private updateInlineStyleOptions() {
     if (this.initFlag) {
       this.initFlag = false;
-      const truncatedValue = Math.trunc(this.inlineStyleOptions.value);
+      const truncatedValue = Math.trunc(this.inlineStyleOptions.value ?? 0);
       this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
