@@ -902,6 +902,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
     template<> void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DistortionMode>& dst, const Ark_DistortionMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
@@ -919,6 +920,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeLightMode>& dst, const Ark_EdgeLightMode& src);
     template<> void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src);
     template<> void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src);
     template<> void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src);
@@ -1095,7 +1097,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src);
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src);
-    template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, uiMaterial_MaterialPeer* const& src);
     template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);

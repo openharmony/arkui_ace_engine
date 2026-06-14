@@ -18,7 +18,7 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
-import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, BindableResourceStr, Bindable, BindableResourceStrArray, PickerDialogButtonStyle, Callback as arkui_component_common_Callback, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, Bindable_Array_ResourceStr_serializer, Bindable_Array_Resource_serializer, Bindable_Array_String_serializer, Bindable_I32_serializer, Bindable_Array_I32_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from './common'
+import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, BindableResourceStr, Bindable, BindableResourceStrArray, PickerDialogButtonStyle, Callback as arkui_component_common_Callback, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, Bindable_Array_ResourceStr_serializer, Bindable_Array_Resource_serializer, Bindable_Array_String_serializer, Bindable_I32_serializer, Bindable_Array_I32_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from './common'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
@@ -27,17 +27,19 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { Dimension, Resource as arkui_component_units_Resource, ResourceStr, ResourceColor, BorderRadiuses, LocalizedBorderRadiuses, Offset, VoidCallback, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, arkui_component_units_Font_serializer, Font as arkui_component_units_Font, Offset_serializer } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { CrownSensitivity, Color as arkui_component_enums_Color, TextOverflow } from './enums'
-import { AttributeModifier, hookTextPickerDivider, hookTextPickerAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, hookTextPickerDivider, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { DialogAlignment } from './alertDialog'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { TextPickerModifier } from './../TextPickerModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export class ArkTextPickerPeer extends ArkCommonMethodPeer {
     textPickerAttributeSet?: TextPickerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -474,6 +476,9 @@ export interface TextPickerDialogOptionsExt extends TextPickerOptions {
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
     selectedBackgroundStyle?: PickerBackgroundStyle;
+    systemMaterial?: SystemUiMaterial;
+    distortionMode?: DistortionMode;
+    edgeLightMode?: EdgeLightMode;
 }
 
 export class ArkTextPickerComponent extends ArkCommonMethodComponent implements TextPickerAttribute {
@@ -2906,6 +2911,30 @@ export class TextPickerDialogOptionsExt_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextPickerDialogOptionsExt {
         let valueDeserializer: DeserializerBase = buffer
@@ -3373,7 +3402,25 @@ export class TextPickerDialogOptionsExt_serializer {
             selectedBackgroundStyleTmpBuf = PickerBackgroundStyle_serializer.read(valueDeserializer)
         }
         const selectedBackgroundStyleTmpResult: PickerBackgroundStyle | undefined = selectedBackgroundStyleTmpBuf
-        let value: TextPickerDialogOptionsExt = ({range: rangeTmpResult, value: valueTmpResult, selected: selectedTmpResult, columnWidths: columnWidthsTmpResult, defaultPickerItemHeight: defaultPickerItemHeightTmpResult, canLoop: canLoopTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, disableTextStyleAnimation: disableTextStyleAnimationTmpResult, defaultTextStyle: defaultTextStyleTmpResult, onAccept: onAcceptTmpResult, onCancel: onCancelTmpResult, onChange: onChangeTmpResult, onScrollStop: onScrollStopTmpResult, onEnterSelectedArea: onEnterSelectedAreaTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, selectedBackgroundStyle: selectedBackgroundStyleTmpResult} as TextPickerDialogOptionsExt)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
+        }
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        let value: TextPickerDialogOptionsExt = ({range: rangeTmpResult, value: valueTmpResult, selected: selectedTmpResult, columnWidths: columnWidthsTmpResult, defaultPickerItemHeight: defaultPickerItemHeightTmpResult, canLoop: canLoopTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, disableTextStyleAnimation: disableTextStyleAnimationTmpResult, defaultTextStyle: defaultTextStyleTmpResult, onAccept: onAcceptTmpResult, onCancel: onCancelTmpResult, onChange: onChangeTmpResult, onScrollStop: onScrollStopTmpResult, onEnterSelectedArea: onEnterSelectedAreaTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, selectedBackgroundStyle: selectedBackgroundStyleTmpResult, systemMaterial: systemMaterialTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult} as TextPickerDialogOptionsExt)
         return value
     }
 }

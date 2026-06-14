@@ -2636,4 +2636,26 @@ void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src)
         default: LOGE("Unexpected enum value in Ark_UnionMode: %{public}d", src);
     }
 }
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<DistortionMode>& dst, const Ark_DistortionMode& src)
+{
+    switch (src) {
+        case ARK_DISTORTION_MODE_DISTORTION_AUTO: dst = DistortionMode::DISTORTION_AUTO; break;
+        case ARK_DISTORTION_MODE_DISTORTION_ENABLED: dst = DistortionMode::DISTORTION_ENABLED; break;
+        case ARK_DISTORTION_MODE_DISTORTION_DISABLED: dst = DistortionMode::DISTORTION_DISABLED; break;
+        default: LOGE("Unexpected enum value in Ark_DistortionMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeLightMode>& dst, const Ark_EdgeLightMode& src)
+{
+    switch (src) {
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO: dst = EdgeLightMode::EDGELIGHT_AUTO; break;
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_ENABLED: dst = EdgeLightMode::EDGELIGHT_ENABLED; break;
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_DISABLED: dst = EdgeLightMode::EDGELIGHT_DISABLED; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeLightMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

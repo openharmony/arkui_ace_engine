@@ -412,6 +412,49 @@ void BuildTextPickerDialog(const T& options, TextPickerDialog& pickerDialog)
     }
 }
 
+template<typename T>
+void BuildTextPickerDialogExt(const T& options, TextPickerDialog& pickerDialog)
+{
+    // selectedValue getRangeVector
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode) {
+        pickerDialog.enableHoverMode = enableHoverMode.value();
+    }
+    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
+    if (alignment) {
+        pickerDialog.alignment = alignment.value();
+    }
+    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
+    if (offset) {
+        pickerDialog.offset = offset.value();
+    }
+    pickerDialog.maskRect = ConvertDimensionRectFromMaskRect(options.maskRect);
+    pickerDialog.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        pickerDialog.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
+    pickerDialog.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
+    pickerDialog.effectOption = Converter::OptConvert<EffectOption>(options.backgroundEffect);
+    pickerDialog.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    if (hoverModeArea) {
+        pickerDialog.hoverModeArea = hoverModeArea.value();
+    }
+    auto systemMaterialPtr = Converter::OptConvert<UiMaterial*>(options.systemMaterial).value_or(nullptr);
+    if (systemMaterialPtr) {
+        pickerDialog.systemMaterial = systemMaterialPtr->Copy();
+    }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(options.distortionMode);
+    if (distortionMode) {
+        pickerDialog.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(options.edgeLightMode);
+    if (edgeLightMode) {
+        pickerDialog.edgeLightMode = edgeLightMode.value();
+    }
+}
+
 TextPickerDialogEvent BuildTextPickerDialogEvents(const Ark_TextPickerDialogOptions& options)
 {
     TextPickerDialogEvent dialogEvent;
@@ -582,7 +625,7 @@ void Show(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* op
             TextPickerDialog textPickerDialog;
             BuildTextPickerSettingData(src, settingData, textPickerDialog);
             TextPickerBackgroundStyleSettingData(src, settingData);
-            BuildTextPickerDialog(src, textPickerDialog);
+            BuildTextPickerDialogExt(src, textPickerDialog);
             auto interEvents = BuildSelectInteractiveEventsExt(src);
             auto dialogEvents = BuildTextPickerDialogEventsExt(src);
             std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(src);

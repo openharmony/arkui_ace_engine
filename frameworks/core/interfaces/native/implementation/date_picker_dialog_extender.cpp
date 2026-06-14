@@ -139,6 +139,18 @@ PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions& op
         dialogInfo.enableHoverMode = enableHoverMode.value();
     }
     dialogInfo.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    auto systemMaterialPtr = Converter::OptConvert<UiMaterial*>(options.systemMaterial).value_or(nullptr);
+    if (systemMaterialPtr) {
+        dialogInfo.systemMaterial = systemMaterialPtr->Copy();
+    }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(options.distortionMode);
+    if (distortionMode) {
+        dialogInfo.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(options.edgeLightMode);
+    if (edgeLightMode) {
+        dialogInfo.edgeLightMode = edgeLightMode.value();
+    }
     return dialogInfo;
 }
 

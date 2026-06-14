@@ -23704,6 +23704,9 @@ typedef struct Ark_CalendarDialogOptions {
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean markToday;
+    Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_CalendarDialogOptions;
 typedef struct Opt_CalendarDialogOptions {
     Ark_Tag tag;
@@ -23745,6 +23748,9 @@ typedef struct Ark_DatePickerDialogOptions {
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
     Opt_Boolean canLoop;
+    Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_DatePickerDialogOptions;
 typedef struct Opt_DatePickerDialogOptions {
     Ark_Tag tag;
@@ -24104,6 +24110,9 @@ typedef struct Ark_TextPickerDialogOptionsExt {
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
     Opt_PickerBackgroundStyle selectedBackgroundStyle;
+    Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_TextPickerDialogOptionsExt;
 typedef struct Opt_TextPickerDialogOptionsExt {
     Ark_Tag tag;
@@ -24142,6 +24151,9 @@ typedef struct Ark_TimePickerDialogOptions {
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
+    Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_TimePickerDialogOptions;
 typedef struct Opt_TimePickerDialogOptions {
     Ark_Tag tag;

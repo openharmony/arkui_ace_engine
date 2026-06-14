@@ -21,20 +21,22 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
-import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, DateRange_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, PickerDialogButtonStyle_serializer, ShadowOptions_serializer } from './common'
+import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, ArkCommonMethodComponent, DateRange_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, PickerDialogButtonStyle_serializer, ShadowOptions_serializer } from './common'
 import { Offset_serializer, Offset, Length, Resource as arkui_component_units_Resource, VoidCallback, ResourceColor } from './units'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
-import { AttributeModifier, hookCalendarPickerAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, extractors, hookCalendarPickerAttributeModifier, AttributeUpdater } from '#handwritten'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { Color as arkui_component_enums_Color } from './enums'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { CalendarPickerModifier } from './../CalendarPickerModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export class CalendarPickerDialogInternal {
     public static fromPtr(ptr: KPointer): CalendarPickerDialog {
         return new CalendarPickerDialog(MaterializedBaseTag.NOP, ptr)
@@ -207,6 +209,9 @@ export interface CalendarDialogOptions extends CalendarOptions {
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     markToday?: boolean;
+    systemMaterial?: SystemUiMaterial;
+    distortionMode?: DistortionMode;
+    edgeLightMode?: EdgeLightMode;
 }
 
 export class ArkCalendarPickerComponent extends ArkCommonMethodComponent implements CalendarPickerAttribute {
@@ -611,6 +616,30 @@ export class CalendarDialogOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): CalendarDialogOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -874,7 +903,25 @@ export class CalendarDialogOptions_serializer {
             markTodayTmpBuf = valueDeserializer.readBoolean()
         }
         const markTodayTmpResult: boolean | undefined = markTodayTmpBuf
-        let value: CalendarDialogOptions = ({hintRadius: hintRadiusTmpResult, selected: selectedTmpResult, start: startTmpResult, end: endTmpResult, disabledDateRange: disabledDateRangeTmpResult, onAccept: onAcceptTmpResult, onCancel: onCancelTmpResult, onChange: onChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, markToday: markTodayTmpResult} as CalendarDialogOptions)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
+        }
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        let value: CalendarDialogOptions = ({hintRadius: hintRadiusTmpResult, selected: selectedTmpResult, start: startTmpResult, end: endTmpResult, disabledDateRange: disabledDateRangeTmpResult, onAccept: onAcceptTmpResult, onCancel: onCancelTmpResult, onChange: onChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, markToday: markTodayTmpResult, systemMaterial: systemMaterialTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult} as CalendarDialogOptions)
         return value
     }
 }

@@ -2777,6 +2777,9 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Converter::ConvContext::Allocate(unsigned long)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerTime, long>(std::__h::optional<OHOS::Ace::PickerTime>&, long const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::DistortionMode, Ark_DistortionMode>(std::__h::optional<OHOS::Ace::DistortionMode>&, Ark_DistortionMode const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::EdgeLightMode, Ark_EdgeLightMode>(std::__h::optional<OHOS::Ace::EdgeLightMode>&, Ark_EdgeLightMode const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::UiMaterial*, uiMaterial_MaterialPeer*>(std::__h::optional<OHOS::Ace::UiMaterial*>&, uiMaterial_MaterialPeer* const&)";
       "OHOS::Ace::DataDetectorMgr::AdjustCursorPosition(int&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>>&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&)";
       "OHOS::Ace::NG::TextBase::TruncateText(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, unsigned long const&) const";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";

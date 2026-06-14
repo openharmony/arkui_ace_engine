@@ -18,13 +18,13 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
-import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, DateTimeOptions, HoverModeAreaType, ArkCommonMethodComponent, Bindable_Date_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from './common'
+import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, DateTimeOptions, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, ArkCommonMethodComponent, Bindable_Date_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CrownSensitivity, Color as arkui_component_enums_Color } from './enums'
-import { AttributeModifier, hookDatePickerAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, extractors, hookDatePickerAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -33,11 +33,13 @@ import { ResourceColor, Resource as arkui_component_units_Resource, Offset, Void
 import { Resource as global_resource_Resource } from 'global.resource'
 import { DialogAlignment } from './alertDialog'
 import { default as intl } from '@ohos.intl'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { DatePickerModifier } from './../DatePickerModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { intl_DateTimeOptions_serializer } from './../framework/ohos.intl'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export class ArkDatePickerPeer extends ArkCommonMethodPeer {
     datePickerAttributeSet?: DatePickerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -244,6 +246,9 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
     canLoop?: boolean;
+    systemMaterial?: SystemUiMaterial;
+    distortionMode?: DistortionMode;
+    edgeLightMode?: EdgeLightMode;
 }
 
 export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
@@ -865,6 +870,30 @@ export class DatePickerDialogOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): DatePickerDialogOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -1196,7 +1225,25 @@ export class DatePickerDialogOptions_serializer {
             canLoopTmpBuf = valueDeserializer.readBoolean()
         }
         const canLoopTmpResult: boolean | undefined = canLoopTmpBuf
-        let value: DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, canLoop: canLoopTmpResult} as DatePickerDialogOptions)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
+        }
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        let value: DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, canLoop: canLoopTmpResult, systemMaterial: systemMaterialTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult} as DatePickerDialogOptions)
         return value
     }
 }
