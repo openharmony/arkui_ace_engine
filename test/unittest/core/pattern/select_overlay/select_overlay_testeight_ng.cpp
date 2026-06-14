@@ -1615,6 +1615,38 @@ HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg004, TestS
 }
 
 /**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg005
+ * @tc.desc: TDD cover default CCM state with unsupported system material falls back to legacy menu material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg005, TestSize.Level1)
+{
+    auto node = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>(SelectOverlayInfo())));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto renderContext = node->selectMenu_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto backupLevel = g_uiMaterialLevel;
+    auto backupState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    AceApplicationInfo::GetInstance().SetUIMaterialState("default");
+
+    node->UpdateSelectMenuBg(nullptr);
+
+    g_uiMaterialLevel = backupLevel;
+    AceApplicationInfo::GetInstance().SetUIMaterialState(backupState);
+
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+    const auto& groupProperty = renderContext->GetBackground();
+    ASSERT_NE(groupProperty, nullptr);
+    BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
+}
+
+/**
  * @tc.name: UpdateContentModifier001
  * @tc.desc: Test UpdateContentModifier with circle show settings.
  * @tc.type: FUNC
