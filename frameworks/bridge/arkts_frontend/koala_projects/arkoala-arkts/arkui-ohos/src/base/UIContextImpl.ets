@@ -186,6 +186,9 @@ export class TextMenuControllerImpl extends TextMenuController {
         GlobalScopeUicontextTextMenu.setMenuOptions(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+    static disableSystemServiceMenuItems(disable: boolean) : void {
+        GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems(disable);
+    }
 }
 
 export class AtomicServiceBarInternal implements AtomicServiceBar {

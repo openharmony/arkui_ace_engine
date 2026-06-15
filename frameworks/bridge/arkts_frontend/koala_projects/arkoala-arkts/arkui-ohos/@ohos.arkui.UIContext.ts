@@ -66,7 +66,7 @@ import { TextLayoutOptions, Paragraph, StyledString, ContextMenu, FrameNodeExten
 import { InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, UIContextGetInfo, SystemOps } from 'arkui/component/idlize';
 import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
-import { GlobalScopeUicontextFontScale } from "#generated"
+import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
 import { RawInputEventType, SmartGestureAction, OperateIntention } from 'arkui/component/enums';
 
@@ -149,6 +149,9 @@ export class MeasureUtils {
 export class TextMenuController {
     public setMenuOptions(options: TextMenuOptions) : void {
         throw Error("setMenuOptions not implemented in TextMenuController!")
+    }
+    static disableSystemServiceMenuItems(disable: boolean) : void {
+        GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems(disable)
     }
 }
 

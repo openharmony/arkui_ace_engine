@@ -5142,6 +5142,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScopeUicontextFontScale_getMaxFontScale(): KDouble
     @ani.unsafe.Direct
     native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _GlobalScopeUicontextTextMenu_disableSystemServiceMenuItems(disable: boolean): void
     @ani.unsafe.Direct
     native static _HierarchicalSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct

@@ -24,4 +24,5 @@ interface GlobalScopeUicontextFontScale {
 [Entity=Class]
 interface GlobalScopeUicontextTextMenu {
     static void setMenuOptions(TextMenuOptions options);
+    static void disableSystemServiceMenuItems(boolean disable);
 };
