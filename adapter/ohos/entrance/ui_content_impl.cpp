@@ -1589,7 +1589,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
-        } else {
+        }
+        // Initialize DC components from the context to avoid temporary dark-mode updates
+        // on the main thread affecting their initialization.
+        if (resourceManager == nullptr || uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             auto config = context->GetConfiguration();
             if (config) {
                 auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
