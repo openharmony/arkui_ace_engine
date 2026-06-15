@@ -3683,4 +3683,128 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnContentChangeRegister01, TestSize.Level1)
     frameNode->OnContentChangeUnregister();
     frameNode->pattern_ = pattern;
 }
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag001
+ * @tc.desc: Test ProcessAllVisibleCallback with WEB_ETS_TAG branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = [&callbackCount](bool isVisible, double ratio) { callbackCount++; };
+    callbackInfo.period = 1;
+
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.8, 0.0);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag002
+ * @tc.desc: Test ProcessAllVisibleCallback with UI_EXTENSION_COMPONENT_ETS_TAG branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag002, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = [&callbackCount](bool isVisible, double ratio) { callbackCount++; };
+    callbackInfo.period = 1;
+
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.8, 0.0);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag003
+ * @tc.desc: Test ProcessAllVisibleCallback with normal tag and DebugEnabled true
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("normalTag", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = [&callbackCount](bool isVisible, double ratio) { callbackCount++; };
+    callbackInfo.period = 1;
+
+    SystemProperties::debugEnabled_ = true;
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.8, 0.0);
+    EXPECT_EQ(callbackCount, 1);
+    SystemProperties::debugEnabled_ = false;
+}
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag004
+ * @tc.desc: Test ProcessAllVisibleCallback with normal tag and DebugEnabled false
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("normalTag", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = [&callbackCount](bool isVisible, double ratio) { callbackCount++; };
+    callbackInfo.period = 1;
+
+    SystemProperties::debugEnabled_ = false;
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.8, 0.0);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag005
+ * @tc.desc: Test ProcessAllVisibleCallback with null callback (isHandled && callback is false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("normalTag", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = nullptr;
+    callbackInfo.period = 1;
+
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.8, 0.0);
+    EXPECT_EQ(callbackCount, 0);
+}
+
+/**
+ * @tc.name: ProcessAllVisibleCallbackWithTag006
+ * @tc.desc: Test ProcessAllVisibleCallback with isHandled false (no ratio triggered)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag006, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("normalTag", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<double> visibleAreaRatios = { 0.5 };
+    int32_t callbackCount = 0;
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = [&callbackCount](bool isVisible, double ratio) { callbackCount++; };
+    callbackInfo.period = 1;
+
+    frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.3, 0.4);
+    EXPECT_EQ(callbackCount, 0);
+}
 } // namespace OHOS::Ace::NG
