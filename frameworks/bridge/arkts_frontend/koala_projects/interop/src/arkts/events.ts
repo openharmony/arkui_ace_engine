@@ -32,6 +32,7 @@ export function wrapSystemApiHandlerCallback() {
         const deserializer = new DeserializerBase(buffer, len)
         const apiKind = deserializer.readInt32()
         handleApiEvent(apiKind, deserializer)
+        deserializer.dispose()
         return 0
     })
 }

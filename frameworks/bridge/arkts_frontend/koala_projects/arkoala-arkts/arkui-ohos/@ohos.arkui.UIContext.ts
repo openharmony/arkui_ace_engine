@@ -753,10 +753,6 @@ export class UIContext {
     isUpdateConfiguration_ = false;
     workerThreadId_: int32  = -1;
 
-    bufferSize = 4096
-    buffer: KBuffer = new KBuffer(this.bufferSize)
-    position: int64 = 0
-    deserializer: DeserializerBase = new DeserializerBase(this.buffer.buffer, this.bufferSize)
     static windowFreeInstanceId: int32 = -1
     static initFlag_ = false
 
@@ -805,18 +801,7 @@ export class UIContext {
     dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
     }
 
-    callCallbacks(): void {
-        if (this.position === 0) {
-            return
-        }
-        this.deserializer.resetCurrentPosition()
-        this.runScopedTask(() => {
-            while (this.deserializer.currentPosition() < this.position) {
-                deserializeAndCallCallback(this.deserializer)
-            }
-        })
-        this.position = 0;
-    }
+    callCallbacks(): void {}
 
     static getCallingScopeUIContext(): UIContext | undefined {
         const instanceId = ArkUIAniModule._GetCallingScopeUIContext();
