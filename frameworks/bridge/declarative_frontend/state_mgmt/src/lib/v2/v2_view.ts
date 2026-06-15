@@ -1133,6 +1133,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     componentRef.childrenWeakrefMap_.clear();
                 }
 
+				const wasPreRendered = componentRef.isPreRendered;
                 componentRef.isPreRendered = false;
                 componentRef.paramsGenerator_ = getParams;
                 componentRef.myReusePool__ = globalPool ?? componentRef.myReusePool__;
@@ -1141,6 +1142,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 ViewV2.createRecycle(componentRef, isActuallyRecycled, reuseId, () => {
                     recycledNode?.aboutToReuseInternal(getParams());
                 });
+				if (wasPreRendered) {
+				  componentRef.updateStateVars(getParams());
+				}
                 if (recycledNode && !isActuallyRecycled) {
                     this.rerender();
                 }

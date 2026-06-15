@@ -119,7 +119,7 @@ class UIUtilsImpl {
         return undefined;
       }
       if (target instanceof ViewPU || target instanceof ViewV2) {
-        return target as PUV2ViewBase;
+        return target.__getCustomComponentContext__Internal() as PUV2ViewBase;  // returns the closure
       }
       return undefined;
     }
