@@ -231,7 +231,9 @@ bool ToastView::ApplyDefaultMaterial(
     const ToastInfo& toastInfo,
     const RefPtr<RenderContext>& renderContext)
 {
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ||
+        (!SystemProperties::IsDeviceSystemMaterialSupported() &&
+        MaterialUtils::GetConfiguredMaterialState() == MaterialState::DEFAULT)) {
         return false;
     }
 
