@@ -162,6 +162,7 @@ if (is_arkui_x) {
       "$ace_root/interfaces/native",
       "$ace_root/interfaces/inner_api/ace_kit/include",
       "//base/global/resource_management/interfaces/inner_api/include",
+      "//foundation/graphic/graphic_2d/rosen/modules/platform/ipc_core",
     ]
 
     configs = [
@@ -186,9 +187,17 @@ if (is_arkui_x) {
       "node/node_model.cpp",
       "node/event_converter.cpp",
       "node/node_model_safely.cpp",
+      "node/container_picker_option.cpp",
+      "node/textpicker_option.cpp",
+      "node/frame_information.cpp",
+      "node/dialog_option.cpp",
+      "node/dialog_model.cpp",
     ]
 
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [
+      "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
 
     cflags_cc = [ "-Wno-missing-braces" ]
 
