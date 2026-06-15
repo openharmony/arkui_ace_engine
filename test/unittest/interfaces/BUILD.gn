@@ -327,6 +327,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/native_styled_string_descriptor.cpp",
     "$ace_root/interfaces/native/node/swiper_option.cpp",
     "$ace_root/interfaces/native/node/textpicker_option.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_styled_string_impl.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
     "native_node_two_part_test.cpp",

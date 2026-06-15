@@ -30,6 +30,7 @@
 #include "span_style_native_impl.h"
 #include "text_native_impl.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/styled_string_impl.h"
 #include "interfaces/native/node/event_converter.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -1056,5 +1057,46 @@ HWTEST_F(NativeStyledStringTest, TestRadialGradientOptions001, TestSize.Level1) 
      * @tc.steps: step6. destroy radial gradient options
      */
     OH_ArkUI_RadialGradientOptions_Destroy(options);
+}
+
+/**
+ * @tc.name: DestroySpanString001
+ * @tc.desc: Test DestroySpanString with null descriptor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, DestroySpanString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call DestroySpanString with null descriptor
+     * @tc.expected: should not crash
+     */
+    OHOS::Ace::StyledStringAdapter::DestroySpanString(nullptr);
+}
+
+/**
+ * @tc.name: DestroySpanString002
+ * @tc.desc: Test DestroySpanString with descriptor that has null spanString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, DestroySpanString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create descriptor with null spanString
+     */
+    auto* descriptor = OH_ArkUI_StyledString_Descriptor_Create();
+    ASSERT_NE(descriptor, nullptr);
+    EXPECT_EQ(descriptor->spanString, nullptr);
+
+    /**
+     * @tc.steps: step2. call DestroySpanString
+     * @tc.expected: should not crash, spanString remains null
+     */
+    OHOS::Ace::StyledStringAdapter::DestroySpanString(descriptor);
+    EXPECT_EQ(descriptor->spanString, nullptr);
+
+    /**
+     * @tc.steps: step3. cleanup
+     */
+    OH_ArkUI_StyledString_Descriptor_Destroy(descriptor);
 }
 } // namespace OHOS::Ace
