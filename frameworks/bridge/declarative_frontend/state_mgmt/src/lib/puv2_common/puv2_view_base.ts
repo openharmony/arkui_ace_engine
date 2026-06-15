@@ -1217,10 +1217,25 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         case 'RecyclePool':
           DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
+        case '-h':
+          view.printDFXHeader('JS DFX Dump Help', command);
+          DumpLog.print(0, this.__debugInfoDumpHelp__Internal());
+          break;
         default:
-          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\nRun with -h to see supported commands.\n`);
       }
     });
+  }
+
+  private __debugInfoDumpHelp__Internal(): string {
+    const fmt = (entries: Array<[string, string]>): string => {
+      const width = Math.max(...entries.map((e: [string, string]) => e[0].length));
+      return entries
+        .map(([k, v]: [string, string]) => `  ${k.padEnd(width)}  ${v}`)
+        .join('\n');
+    };
+    return `\nJS DFX Dump Commands:\n${fmt(stateMgmtDFX.DUMP_HELP_COMMANDS)}` +
+           `\n\nModifiers:\n${fmt(stateMgmtDFX.DUMP_HELP_MODIFIERS)}\n`;
   }
 
   private printDFXHeader(header: string, command: DFXCommand): void {
