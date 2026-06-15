@@ -329,6 +329,9 @@ float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
         return res;
     }
     auto childrenCount = childrenCount_ + repeatDifference_;
+    if (childrenCount <= 0) {
+        return res;
+    }
     float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
     auto lines = (childrenCount) / crossCount_;
     for (int i = 0; i < lines; ++i) {
