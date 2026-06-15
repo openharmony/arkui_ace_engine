@@ -76,6 +76,7 @@ int32_t callBackFlag = 0;
 constexpr float RK356_HEIGHT = 1136.0f;
 const OffsetF OFFSET_ITEM1 = OffsetF(5, 5);
 const Rect WINDOW_RECT(0, 0, 280, 1280);
+constexpr int32_t TEST_THEME_SCOPE_ID = 0;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -2075,6 +2076,68 @@ HWTEST_F(SelectOverlayTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->OnColorConfigurationUpdate();
     EXPECT_FALSE(selectOverlayNode->GetIsExtensionMenu());
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test OnThemeScopeUpdate function when api target version is less than VERSION_TWENTY_SIX.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and call OnThemeScopeUpdate function.
+     * @tc.expected: The function returns true.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(TEST_THEME_SCOPE_ID));
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test OnThemeScopeUpdate function when api target version is greater than or equal to VERSION_TWENTY_SIX.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and call OnThemeScopeUpdate function.
+     * @tc.expected: The function returns true.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(TEST_THEME_SCOPE_ID));
 }
 
 /**
