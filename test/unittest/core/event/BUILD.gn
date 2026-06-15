@@ -180,6 +180,18 @@ ace_unittest("gesture_event_hub_test_ng") {
   }
 }
 
+ace_unittest("event_incremental_tdd_test_ng") {
+  module_name = "Event-TDD-Incremental"
+  type = "new"
+  sources = [
+    "./drag_event/drag_drop_event_test_ng_coverage.cpp",
+    "drag_event_test_ng_branch_coverage.cpp",
+    "drag_event_test_ng_incremental_property_coverage.cpp",
+    "gesture_event_hub_test_ng_branch_coverage.cpp",
+    "gesture_event_hub_test_ng_incremental_coverage.cpp",
+  ]
+}
+
 ace_unittest("input_event_hub_test_ng") {
   module_name = "CommonEvent-Input"
   type = "new"
