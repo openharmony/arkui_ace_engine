@@ -371,6 +371,11 @@ bool SystemProperties::ConfigChangePerform()
     return g_isConfigChangePerform;
 }
 
+void SystemProperties::SetConfigChangePerform()
+{
+    g_isConfigChangePerform = true;
+}
+
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
