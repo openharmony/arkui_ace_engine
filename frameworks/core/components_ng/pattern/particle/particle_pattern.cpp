@@ -45,7 +45,9 @@ void ParticlePattern::OnVisibleChange(bool isVisible)
         CHECK_NULL_VOID(host);
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->OnParticleOptionArrayUpdate(context->GetParticleOptionArray().value());
+        if (context->GetParticleOptionArray().has_value()) {
+            context->OnParticleOptionArrayUpdate(context->GetParticleOptionArray().value());
+        }
     }
 }
 
