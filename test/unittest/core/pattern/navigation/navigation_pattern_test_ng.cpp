@@ -862,23 +862,6 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_010, TestSize.Level1)
     auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
     navigation->contentNode_ = contentNode;
     navigation->navBarNode_ = navBarNode;
-    /**
-     * @tc.steps: step2. set properties of layoutProperty, test OnModifyDone.
-     * @tc.expected: check whether the properties is correct.
-     */
-    pattern->navigationMode_ = NavigationMode::AUTO;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::SPLIT;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::STACK;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::STACK;
-    pattern->DoAnimation(NavigationMode::STACK);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
-
     ASSERT_EQ(pattern->navigationStack_, nullptr);
     pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     ASSERT_NE(pattern->navigationStack_, nullptr);

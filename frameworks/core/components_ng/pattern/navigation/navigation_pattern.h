@@ -797,7 +797,6 @@ private:
     NavigationTransition ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
-    void DoAnimation(NavigationMode usrNavigationMode);
     void HandleForceSplitDragStart();
     void HandleForceSplitDragUpdate(float xOffset);
     void HandleForceSplitDragEnd(bool isDragCanceled = false);
@@ -1111,7 +1110,7 @@ private:
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
-    int32_t lastPreIndex_ = false;
+    int32_t lastPreIndex_ = 0;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;
