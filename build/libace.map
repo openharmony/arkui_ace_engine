@@ -210,6 +210,7 @@
       "OHOS::Ace::TaskExecutor::GetPriorityTypeWithCheck(OHOS::Ace::PriorityType, OHOS::Ace::PriorityType)";
       OHOS::Ace::TaskExecutor::PostDelayedTask*;
       OHOS::Ace::TaskExecutor::PostSyncTask*;
+      OHOS::Ace::TaskRunnerAdapterFactory::Create*;
       "OHOS::Ace::ClipboardProxy::GetInstance()";
       "OHOS::Ace::Color OHOS::Ace::NG::Converter::Convert<OHOS::Ace::Color, int>(int const&)";
       "OHOS::Ace::Color::BLACK";

@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -198,9 +199,14 @@ panda::Local<panda::JSValueRef> JsToggleChangeCallback(panda::JsiRuntimeCallInfo
     if (obj->GetNativePointerFieldCount(vm) < 1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    if (weak->Invalid()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    ToggleModelNG::SetChangeValue(frameNode, value);
+    ToggleModelNG::SetChangeValue(AceType::RawPtr(frameNode), value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -503,7 +509,8 @@ ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             auto toggle =
                 panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfToggle), keysOfToggle, valuesOfToggle);
             toggle->SetNativePointerFieldCount(vm, 1);
-            toggle->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
+            toggle->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, toggle };
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
