@@ -18,6 +18,7 @@
 #include "res_value.h"
 #include "base/utils/string_utils.h"
 #include "base/ressched/taihang_optimizer.h"
+#include "core/components_ng/pattern/stage/page_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
