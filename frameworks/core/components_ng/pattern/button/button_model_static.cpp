@@ -153,6 +153,28 @@ RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
 void ButtonModelStatic::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(frameNode, color);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BackgroundColorFlagByUser, colorFlag, frameNode);
+}
+
+void ButtonModelStatic::BackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    Color backgroundColor = Color::TRANSPARENT;
+    bool colorFlag = false;
+    if (color.has_value()) {
+        backgroundColor = color.value();
+        colorFlag = true;
+    } else {
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        backgroundColor = buttonTheme->GetBgColor(buttonStyleMode, buttonRole);
+    }
+    BackgroundColor(frameNode, backgroundColor, colorFlag);
 }
 
 void ButtonModelStatic::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
