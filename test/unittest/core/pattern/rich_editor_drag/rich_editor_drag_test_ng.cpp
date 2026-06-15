@@ -700,4 +700,130 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragStart001, TestSize.Level0)
     richPattern->HandleDragStart(nullptr, "");
     EXPECT_TRUE(richPattern->isDragSponsor_);
 }
+
+/**
+ * @tc.name: CreateTextDragData001
+ * @tc.desc: Test CreateTextDragData with horizontal scrolling enabled and disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateTextDragData001, TestSize.Level0)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditor = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditor, nullptr);
+    auto dragInfo = std::make_shared<TextDragInfo>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditor, dragInfo);
+    RectF textRect(0, 0, 100, 50);
+    OffsetF localDragOffset(10.0f, 20.0f);
+    OffsetF globalDragOffset(30.0f, 40.0f);
+    RectF leftHandler(0, 0, 0, 20);
+    RectF rightHandler(100, 0, 0, 20);
+
+    // Branch: GetHorizontalScrolling() is false -> contentLeft_ stays nullopt
+    richEditor->isHorizontalScrolling_ = false;
+    auto data = dragPattern->CreateTextDragData(
+        textRect, localDragOffset, globalDragOffset, leftHandler, rightHandler);
+    EXPECT_FALSE(data.contentLeft_.has_value());
+
+    // Branch: GetHorizontalScrolling() is true -> contentLeft_ = contentRect.Left() + offsetXValue
+    richEditor->isHorizontalScrolling_ = true;
+    richEditor->contentRect_ = RectF(50, 0, 200, 100);
+    data = dragPattern->CreateTextDragData(
+        textRect, localDragOffset, globalDragOffset, leftHandler, rightHandler);
+    EXPECT_TRUE(data.contentLeft_.has_value());
+    EXPECT_EQ(data.contentLeft_.value(), 40.0f);
+}
+
+/**
+ * @tc.name: AdjustHandlers001
+ * @tc.desc: Test AdjustHandlers with different handler Y positions and horizontal scrolling states.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, AdjustHandlers001, TestSize.Level0)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditor = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditor, nullptr);
+    auto dragInfo = std::make_shared<TextDragInfo>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditor, dragInfo);
+    RectF contentRect(10, 0, 200, 100);
+
+    // Branch: leftHandler.Y != rightHandler.Y && !isHorizontalScrolling -> early return, no adjustment
+    richEditor->isHorizontalScrolling_ = false;
+    RectF leftHandler(5, 0, 0, 20);
+    RectF rightHandler(250, 30, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 5.0f);
+    EXPECT_EQ(rightHandler.GetX(), 250.0f);
+
+    // Branch: leftHandler.Y == rightHandler.Y -> handlers adjusted to contentRect bounds
+    leftHandler = RectF(5, 0, 0, 20);
+    rightHandler = RectF(250, 0, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 10.0f);
+    EXPECT_EQ(rightHandler.GetX(), 210.0f);
+
+    // Branch: leftHandler.Y != rightHandler.Y && isHorizontalScrolling -> handlers adjusted
+    richEditor->isHorizontalScrolling_ = true;
+    leftHandler = RectF(5, 0, 0, 20);
+    rightHandler = RectF(250, 30, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 10.0f);
+    EXPECT_EQ(rightHandler.GetX(), 210.0f);
+}
+
+/**
+ * @tc.name: AdjustMaxWidth001
+ * @tc.desc: Test AdjustMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, AdjustMaxWidth001, TestSize.Level0)
+{
+    auto info = std::make_shared<TextDragInfo>();
+    RectF contentRect(0.0f, 0.0f, 100.0f, 50.0f);
+    std::vector<RectF> boxes;
+    float width = 0.0f;
+
+    // Branch: richEditor null
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(textPattern, info);
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: NearZero(maxSelectedWidth) + !isHorizontalScrolling
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 2, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditorPattern, info);
+    info->maxSelectedWidth = 0.0f;
+    richEditorPattern->isHorizontalScrolling_ = false;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: !NearZero(maxSelectedWidth) + !isHorizontalScrolling
+    info->maxSelectedWidth = 200.0f;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 200.0f);
+
+    // Branch: NearZero(maxSelectedWidth) + isHorizontalScrolling
+    info->maxSelectedWidth = 0.0f;
+    richEditorPattern->isHorizontalScrolling_ = true;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: !NearZero(maxSelectedWidth) + isHorizontalScrolling
+    info->maxSelectedWidth = 200.0f;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 200.0f);
+}
 } // namespace OHOS::Ace::NG
