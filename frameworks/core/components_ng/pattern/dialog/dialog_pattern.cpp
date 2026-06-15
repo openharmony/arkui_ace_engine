@@ -406,7 +406,7 @@ bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
     dialogProperties.backgroundBlurStyle.has_value() ||
     dialogProperties.blurStyleOption.has_value() || dialogProperties.effectOption.has_value() ||
     dialogProperties.borderWidth.has_value() || dialogProperties.borderColor.has_value() ||
-    dialogProperties.borderStyle.has_value()) {
+    dialogProperties.borderStyle.has_value() || !SystemProperties::IsDeviceSystemMaterialSupported()) {
         return false;
     }
     return true;
