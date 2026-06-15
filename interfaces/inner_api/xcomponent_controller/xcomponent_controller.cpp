@@ -102,14 +102,14 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
     ani_object nativeObj = static_cast<ani_object>(nativeObjRef);
     ani_ref ref;
     if (env->Object_GetFieldByName_Ref(nativeObj, "peer", &ref) != ANI_OK) {
-        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj.peer");
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get peer");
         return nullptr;
     }
     ani_object obj = static_cast<ani_object>(ref);
     ani_long ptr;
     auto ret = env->Object_GetFieldByName_Long(obj, "ptr", &ptr);
     if (ret != ANI_OK) {
-        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj.peer.ptr %{public}d", ret);
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get ptr %{public}d", ret);
         return nullptr;
     }
     auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerNativePeerImpl*>(ptr);
