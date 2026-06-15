@@ -31,8 +31,11 @@ export function wrapSystemApiHandlerCallback() {
     wrapSystemCallback(1, (buffer: KSerializerBuffer, len:int32) => {
         const deserializer = new DeserializerBase(buffer, len)
         const apiKind = deserializer.readInt32()
-        handleApiEvent(apiKind, deserializer)
-        deserializer.dispose()
+        try {
+            handleApiEvent(apiKind, deserializer)
+        } finally {
+            deserializer.dispose()
+        }
         return 0
     })
 }
