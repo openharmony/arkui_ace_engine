@@ -150,6 +150,16 @@ public:
         return depthSpace_;
     }
 
+    void SetRender3DScale(float render3DScale)
+    {
+        render3DScale_ = render3DScale;
+    }
+
+    float GetRender3DScale() const
+    {
+        return render3DScale_;
+    }
+
     int32_t GetBackgroundImageId()
     {
         if (!backgroundImageId_.has_value()) {
@@ -209,6 +219,8 @@ private:
     void TransferCameraParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferLightParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
+    void Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
+    void Get3DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
 #endif
 
     struct TiltShiftResult {
@@ -233,6 +245,8 @@ private:
 #endif
 
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
+    float render3DScale_ = 1.0f;
+    float lastRender3DScale_ = 1.0f;
     ImageSourceInfo depthMap_;
     std::optional<int32_t> backgroundImageId_;
     std::function<void(const DepthComponentCompleteEvent&)> onComplete_;
