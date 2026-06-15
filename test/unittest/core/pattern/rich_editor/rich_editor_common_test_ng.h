@@ -21,7 +21,6 @@
 #define private public
 #define protected public
 
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "test/unittest/core/pattern/test_ng.h"
