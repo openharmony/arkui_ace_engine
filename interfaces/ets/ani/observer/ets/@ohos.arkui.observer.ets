@@ -170,7 +170,7 @@ import { Size } from '@ohos.arkui.node'
         pathStack: NavPathStack;
         uniqueId?: int;
     }
-    export class WindowSizeLayoutBreakpointInfo {
+    export interface WindowSizeLayoutBreakpointInfo {
         widthBreakpoint: WidthBreakpoint;
         heightBreakpoint: HeightBreakpoint;
     }
