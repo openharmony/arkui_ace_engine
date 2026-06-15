@@ -108,7 +108,7 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 }
 
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
-{ 
+{
     std::string pageName;
     int32_t windowId = -1;
     if (!CheckParameterValid(extInfo, windowId, pageName)) {
