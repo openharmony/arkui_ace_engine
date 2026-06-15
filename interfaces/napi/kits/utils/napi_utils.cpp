@@ -16,6 +16,7 @@
 #include "napi_utils.h"
 #include "base/i18n/localization.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "jsnapi.h"

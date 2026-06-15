@@ -28,6 +28,7 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"

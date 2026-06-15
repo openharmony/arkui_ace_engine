@@ -33,6 +33,7 @@
 #include "frameworks/core/common/color_inverter.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
+#include "core/components/theme/resource_adapter.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
 #include "frameworks/core/components_ng/pattern/toggle/toggle_model_ng.h"
