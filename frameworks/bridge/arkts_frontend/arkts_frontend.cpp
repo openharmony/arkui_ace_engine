@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 namespace {
 using namespace arkts::ani_signature;
 const std::string ENTRY_SUFFIX = "/__EntryWrapper";
+constexpr ani_size LOCAL_SCOPE_SIZE = 16;
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 struct AppInfo {
     const char* className;
@@ -73,6 +74,30 @@ const AppInfo KOALA_APP_INFO = {
     "<ctor>",
     "C{std.core.String}C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
     "C{arkui.component.customComponent.EntryPoint}z:",
+};
+
+class ScopedAniLocalScope {
+public:
+    explicit ScopedAniLocalScope(ani_env* env) : env_(env)
+    {
+        active_ = env_ && env_->CreateLocalScope(LOCAL_SCOPE_SIZE) == ANI_OK;
+    }
+
+    ~ScopedAniLocalScope()
+    {
+        if (active_) {
+            env_->DestroyLocalScope();
+        }
+    }
+
+    bool IsActive() const
+    {
+        return active_;
+    }
+
+private:
+    ani_env* env_ = nullptr;
+    bool active_ = false;
 };
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
@@ -145,6 +170,10 @@ bool ParseRouterStateInfo(ani_env* env, ani_ref result, RouterStateInfo& state)
 
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
+    if (!localScope.IsActive()) {
+        return;
+    }
     ani_boolean errorExists;
     env->ExistUnhandledError(&errorExists);
     ani_status status;
@@ -183,6 +212,10 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
+    if (!localScope.IsActive()) {
+        return;
+    }
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 
