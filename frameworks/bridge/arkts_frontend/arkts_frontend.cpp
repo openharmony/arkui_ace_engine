@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "bridge/arkts_frontend/ani_local_scope.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -31,7 +32,6 @@ namespace OHOS::Ace {
 namespace {
 using namespace arkts::ani_signature;
 const std::string ENTRY_SUFFIX = "/__EntryWrapper";
-constexpr ani_size LOCAL_SCOPE_SIZE = 16;
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 struct AppInfo {
     const char* className;
@@ -74,30 +74,6 @@ const AppInfo KOALA_APP_INFO = {
     "<ctor>",
     "C{std.core.String}C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
     "C{arkui.component.customComponent.EntryPoint}z:",
-};
-
-class ScopedAniLocalScope {
-public:
-    explicit ScopedAniLocalScope(ani_env* env) : env_(env)
-    {
-        active_ = env_ && env_->CreateLocalScope(LOCAL_SCOPE_SIZE) == ANI_OK;
-    }
-
-    ~ScopedAniLocalScope()
-    {
-        if (active_) {
-            env_->DestroyLocalScope();
-        }
-    }
-
-    bool IsActive() const
-    {
-        return active_;
-    }
-
-private:
-    ani_env* env_ = nullptr;
-    bool active_ = false;
 };
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)

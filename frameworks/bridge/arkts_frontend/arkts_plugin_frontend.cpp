@@ -17,6 +17,7 @@
 #include <ani.h>
 
 #include "interfaces/inner_api/ace/constants.h"
+#include "bridge/arkts_frontend/ani_local_scope.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline/pipeline_context.h"
 #include "utils/ani_utils.h"
@@ -55,6 +56,10 @@ const AppInfo KOALA_APP_INFO = {
 
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
+    if (!localScope.IsActive()) {
+        return;
+    }
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 
@@ -72,6 +77,10 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
+    if (!localScope.IsActive()) {
+        return;
+    }
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 
