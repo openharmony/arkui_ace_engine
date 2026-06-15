@@ -195,6 +195,7 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.radius = OptConvert<NG::BorderRadiusProperty>(sheetOptions.radius);
     sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
     sheetStyle.showInSubWindow = OptConvert<bool>(sheetOptions.showInSubWindow).value_or(false);
+    sheetStyle.enableBlurSnapshot = OptConvert<bool>(sheetOptions.enableBlurSnapshot).value_or(false);
     sheetStyle.placement = OptConvert<Placement>(sheetOptions.placement);
     sheetStyle.placementOnTarget = OptConvert<bool>(sheetOptions.placementOnTarget).value_or(true);
     Validator::ValidateNonNegative(sheetStyle.width);
