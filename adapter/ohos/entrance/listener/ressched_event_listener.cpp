@@ -33,15 +33,17 @@ constexpr int32_t MAX_PATH_LENGTH = 1024;
 
 bool CheckPath(std::unordered_map<std::string, std::string>& extInfo)
 {
-    CHECK_EQUAL_RETURN(extInfo.find(KEY_PATH), extInfo.end(), false);
-    auto pathStr = extInfo.find(KEY_PATH)->second;
-    return !pathStr.empty() && pathStr.size() < MAX_PATH_LENGTH;
+    auto iter = extInfo.find(KEY_PATH);
+    CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
+    auto pathStr = iter->second;
+    return !pathStr.empty() && pathStr.size() <= MAX_PATH_LENGTH;
 }
 
 bool CheckWindowId(std::unordered_map<std::string, std::string>& extInfo, int32_t& windowId)
 {
-    CHECK_EQUAL_RETURN(extInfo.find(KEY_WINDOW_ID), extInfo.end(), false);
-    auto windowIdStr = extInfo.find(KEY_WINDOW_ID)->second;
+    auto iter = extInfo.find(KEY_WINDOW_ID);
+    CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
+    auto windowIdStr = iter->second;
     CHECK_EQUAL_RETURN(StringUtils::IsNumber(windowIdStr), false, false);
     windowId = StringUtils::StringToInt(windowIdStr, DEFAULT_WINDOW_ID);
     CHECK_EQUAL_RETURN(windowId, DEFAULT_WINDOW_ID, false);
@@ -50,18 +52,17 @@ bool CheckWindowId(std::unordered_map<std::string, std::string>& extInfo, int32_
 
 bool CheckNumber(std::unordered_map<std::string, std::string>& extInfo, const char* parameterKey)
 {
-    CHECK_EQUAL_RETURN(extInfo.find(parameterKey), extInfo.end(), false);
+    auto iter = extInfo.find(parameterKey);
+    CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
     return StringUtils::IsNumber(extInfo.find(parameterKey)->second);
 }
 
 bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::string& pageName)
 {
     auto iter = extInfo.find(KEY_PAGE_NAME);
-    if (iter != extInfo.end()) {
-        pageName = iter->second;
-        return !pageName.empty();
-    }
-    return false;
+    CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
+    pageName = iter->second;
+    return !pageName.empty();
 }
 
 bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
@@ -128,6 +129,7 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
     CHECK_NULL_VOID(pageInfo);
     auto url = pageInfo->GetPageUrl();
     auto currentPageName = context->GetNavDestinationPageName(pageInfo);
+    // In extInfo, pagename is set to url or navDestination pagename.
     if (pageName != url && pageName != currentPageName) {
         LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, url:%{public}s,"
             "currentPageName:%{public}s", pageName.c_str(), url.c_str(), currentPageName.c_str());
