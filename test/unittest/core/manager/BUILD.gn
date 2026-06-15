@@ -13,6 +13,12 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_unittest("active_recognizer_manager_test_ng") {
+  module_name = "Gesture-ActiveRecognizerManager"
+  type = "new"
+  sources = [ "active_recognizer_manager_test_ng.cpp" ]
+}
+
 ace_unittest("avoid_info_manager_test_ng") {
   module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
   type = "new"
@@ -241,6 +247,7 @@ ace_unittest("content_change_manager_test_ng") {
 group("core_manager_unittest") {
   testonly = true
   deps = [
+    ":active_recognizer_manager_test_ng",
     ":avoid_info_manager_test_ng",
     ":content_change_manager_test_ng",
     ":display_sync_manager_test_ng",
