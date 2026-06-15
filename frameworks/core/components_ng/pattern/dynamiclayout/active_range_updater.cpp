@@ -109,6 +109,7 @@ ActiveRangeUpdater::RangeInfo ActiveRangeUpdater::CalculateItemRange(const RefPt
 {
     RangeInfo range;
     CHECK_NULL_RETURN(node, range);
+    CHECK_NULL_RETURN(node->IsActive(), range);
 
     auto geoNode = node->GetGeometryNode();
     CHECK_NULL_RETURN(geoNode, range);
