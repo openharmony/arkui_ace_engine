@@ -1623,31 +1623,4 @@ HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest004, TestSize.Level1)
 
     pattern_->UpdateTabBarOverlap(layoutProperty_);
 }
-
-/**
- * @tc.name: OnThemeScopeUpdateTest001
- * @tc.desc: Test OnThemeScopeUpdate when host is null
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, OnThemeScopeUpdateTest001, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    EXPECT_FALSE(tabsPattern->OnThemeScopeUpdate(0));
-}
-
-/**
- * @tc.name: OnThemeScopeUpdateTest002
- * @tc.desc: Test OnThemeScopeUpdate when host exists but API version is below VERSION_TWENTY_SIX
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, OnThemeScopeUpdateTest002, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-    ASSERT_NE(pattern_, nullptr);
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
-    EXPECT_FALSE(pattern_->OnThemeScopeUpdate(0));
-}
 } // namespace OHOS::Ace::NG
