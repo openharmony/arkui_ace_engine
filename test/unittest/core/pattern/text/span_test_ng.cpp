@@ -20,9 +20,9 @@
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 using namespace testing;
 using namespace testing::ext;

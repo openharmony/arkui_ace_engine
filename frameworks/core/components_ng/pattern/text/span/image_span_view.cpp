@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include <cstdint>
 
 #include "core/components_ng/pattern/text/span_node.h"

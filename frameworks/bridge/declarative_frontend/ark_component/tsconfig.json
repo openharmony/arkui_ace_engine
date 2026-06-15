@@ -15,7 +15,6 @@
         "src/ArkGrid.ts",
         "src/ArkGridCol.ts",
         "src/ArkImage.ts",
-        "src/ArkImageSpan.ts",
         "src/ArkRow.ts",
         "src/ArkLinearIndicator.ts",
         "src/ArkSpan.ts",

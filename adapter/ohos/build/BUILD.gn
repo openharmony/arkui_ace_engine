@@ -40,6 +40,7 @@ component_modules = [
   "calendar_picker",
   "indexer",
   "symbol",
+  "span",
   "rich_editor",
   "menu",
   "lazy_column_layout",
@@ -57,16 +58,20 @@ component_modules_libs = []
 foreach(module, component_modules) {
   sub_name = string_replace(module, "_", "")
   module_name = "arkui_$sub_name"
+  module_path = module
+  if (module == "span") {
+    module_path = "text/span"
+  }
   ohos_shared_library(module_name) {
     deps = []
     if (is_ohos) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_ohos" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_ohos" ]
     } else if (use_mingw_win) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_windows" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_windows" ]
     } else if (use_mac) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_mac" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_mac" ]
     } else if (use_linux) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_linux" ]
     }
 
     deps += [

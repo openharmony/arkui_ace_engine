@@ -6814,11 +6814,11 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
-    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
+    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, void* option);
     void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
     void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
-    void (*setImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setImageSpanBaselineOffset)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isJsView, void* colorResObj);
     void (*resetImageSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setImageSpanOnComplete)(ArkUINodeHandle node, void* callback);
     void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
@@ -6838,6 +6838,8 @@ struct ArkUIImageSpanModifier {
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createImageSpanFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setImageSpanPlaceHolderStyle)(ArkUINodeHandle node, void* style);
 };
 
 struct ArkUIWaterFlowModifier {
@@ -8030,6 +8032,9 @@ struct ArkUISymbolSpanModifier {
     void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
     void (*setCustomSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
+    void (*createModel)(ArkUI_Uint32 index);
+    void (*setSymbolSpanFontFamilies)(ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
+    void (*setSymbolSpanType)(ArkUI_Uint32 value);
 };
 
 struct ArkUIComponent3DModifier {

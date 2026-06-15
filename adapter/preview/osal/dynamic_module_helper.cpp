@@ -105,6 +105,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FolderStack", "folderstack" },
         { "Search", "search" },
         { "TimePicker", "timepicker" },
+        { "ImageSpan", "span" },
+        { "SymbolSpan", "span" },
         { "TimePickerDialog", "timepicker" },
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},

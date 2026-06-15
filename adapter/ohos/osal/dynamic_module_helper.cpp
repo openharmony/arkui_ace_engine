@@ -93,6 +93,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "StepperItem", "stepper" },
         { "SymbolGlyph", "symbol" },
         { "TimePicker", "timepicker" },
+        { "ImageSpan", "span" },
+        { "SymbolSpan", "span" },
         { "TimePickerDialog", "timepicker" },
         { "WaterFlow", "waterflow" },
         { "LazyVWaterFlowLayout", "lazywaterflowlayout" },

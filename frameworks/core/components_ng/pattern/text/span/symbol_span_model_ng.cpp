@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -151,6 +151,7 @@ void SymbolSpanModelNG::ResetVariableFontWeight(FrameNode* frameNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->ResetVariableFontWeight();
+    spanNode->RequestTextFlushDirty();
 }
 
 void SymbolSpanModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
@@ -165,6 +166,7 @@ void SymbolSpanModelNG::ResetEnableVariableFontWeight(FrameNode* frameNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->ResetEnableVariableFontWeight();
+    spanNode->RequestTextFlushDirty();
 }
 
 void SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(FrameNode* frameNode, bool value)
@@ -179,6 +181,7 @@ void SymbolSpanModelNG::ResetEnableDeviceFontWeightCategory(FrameNode* frameNode
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->ResetEnableDeviceFontWeightCategory();
+    spanNode->RequestTextFlushDirty();
 }
 
 void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)

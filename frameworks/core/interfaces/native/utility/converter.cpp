@@ -2461,7 +2461,8 @@ template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Op
     const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)

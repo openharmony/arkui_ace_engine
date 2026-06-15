@@ -71,7 +71,6 @@
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
-#include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
@@ -133,7 +132,6 @@
 #include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -498,7 +496,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     { "FormButton", JSFormButton::JSBind },
 #endif
-    { "SymbolSpan", JSSymbolSpan::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
@@ -690,7 +687,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
-    { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "Component3D", JSSceneView::JSBind },
@@ -735,7 +731,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
-    { "SymbolSpan", JSSymbolSpan::JSBind },
     { "ContainerSpan",  JSContainerSpan::JSBind},
     { "__RectShape__", JSRectShape::JSBind },
     { "__CircleShape__", JSCircleShape::JSBind },

@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_SPAN_BRIDGE_IMAGE_SPAN_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_SPAN_BRIDGE_IMAGE_SPAN_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class ImageSpanBridge {
 public:
+    static void RegisterImageSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetObjectFit(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -45,4 +47,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_SPAN_BRIDGE_IMAGE_SPAN_ARKTS_NATIVE_IMAGE_SPAN_BRIDGE_H

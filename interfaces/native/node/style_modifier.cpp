@@ -15267,7 +15267,7 @@ int32_t SetImageSpanBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeI
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

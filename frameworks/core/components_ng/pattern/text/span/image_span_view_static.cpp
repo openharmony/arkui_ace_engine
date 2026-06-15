@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include <cstdint>
 
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
+#include "core/components_ng/pattern/text/span/image_span_view_static.h"
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {

@@ -67,7 +67,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
@@ -112,7 +111,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -425,7 +423,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
-    JSImageSpan::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
@@ -504,7 +501,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDumpLog::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
-    JSSymbolSpan::JSBind(globalObj);
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB

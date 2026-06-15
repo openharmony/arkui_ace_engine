@@ -449,8 +449,8 @@ class ButtonModifier extends ButtonAttribute
 | LoadingProgress | `pattern/loading_progress/loading_progress_pattern.cpp` | - | 加载进度 |
 | Divider | `pattern/divider/divider_pattern.cpp` | - | 分割线 |
 | Blank | `pattern/blank/blank_pattern.cpp` | - | 空白占位 |
-| Span | `pattern/span/span_pattern.cpp` | - | 文本片段 |
-| ImageSpan | `pattern/image_span/image_span_pattern.cpp` | - | 图片片段 |
+| Span | `pattern/text/span_node.cpp` | - | 文本片段 |
+| ImageSpan | `pattern/text/span/image_span_view.cpp` | - | 图片片段 |
 | Counter | `pattern/counter/counter_pattern.cpp` | [Counter](../pattern/counter/Counter_Knowledge_Base.md) | 计数器 |
 
 > Pattern 路径前缀为 `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/`。

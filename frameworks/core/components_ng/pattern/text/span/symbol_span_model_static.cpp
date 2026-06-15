@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 
-#include "core/components_ng/pattern/text/symbol_span_model_static.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #define ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(name, value, frameNode)                                             \
