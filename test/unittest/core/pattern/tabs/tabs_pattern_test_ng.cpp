@@ -1538,11 +1538,11 @@ HWTEST_F(TabPatternTestNg, GetIsCustomAnimationTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTabBarOverlapTest001
- * @tc.desc: Test UpdateTabBarOverlap without BarOverlap property
+ * @tc.name: UpdateBackBlurStyleTest001
+ * @tc.desc: Test UpdateBackBlurStyle when there is no existing BackBlurStyle (no-op)
  * @tc.type: FUNC
  */
-HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest001, TestSize.Level1)
+HWTEST_F(TabPatternTestNg, UpdateBackBlurStyleTest001, TestSize.Level1)
 {
     auto model = CreateTabs();
     CreateTabContents();
@@ -1550,78 +1550,77 @@ HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest001, TestSize.Level1)
     CreateTabsDone(model);
 
     ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-
-    layoutProperty_->ResetBarOverlap();
-
-    pattern_->UpdateTabBarOverlap(layoutProperty_);
-}
-
-/**
- * @tc.name: UpdateTabBarOverlapTest002
- * @tc.desc: Test UpdateTabBarOverlap with BarOverlap false
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest002, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
     ASSERT_NE(tabBarNode_, nullptr);
-    layoutProperty_->UpdateBarOverlap(false);
-
-    pattern_->UpdateTabBarOverlap(layoutProperty_);
-}
-
-/**
- * @tc.name: UpdateTabBarOverlapTest003
- * @tc.desc: Test UpdateTabBarOverlap with FOLLOWS_WINDOW_ACTIVE_STATE policy
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest003, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-    ASSERT_NE(tabBarNode_, nullptr);
-
-    layoutProperty_->UpdateBarOverlap(true);
-
-    pattern_->UpdateTabBarOverlap(layoutProperty_);
-}
-
-/**
- * @tc.name: UpdateTabBarOverlapTest004
- * @tc.desc: Test UpdateTabBarOverlap with existing background effect
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest004, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-    ASSERT_NE(tabBarNode_, nullptr);
-
-    layoutProperty_->UpdateBarOverlap(true);
 
     auto renderContext = tabBarNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    EffectOption effectOption;
-    renderContext->UpdateBackgroundEffect(effectOption);
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
 
-    pattern_->UpdateTabBarOverlap(layoutProperty_);
+    pattern_->UpdateBackBlurStyle(tabBarNode_);
+
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
+}
+
+/**
+ * @tc.name: UpdateBackBlurStyleTest002
+ * @tc.desc: Test UpdateBackBlurStyle with existing COMPONENT_THICK BackBlurStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateBackBlurStyleTest002, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(tabBarNode_, nullptr);
+
+    auto renderContext = tabBarNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    renderContext->UpdateBackBlurStyle(styleOption);
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
+
+    pattern_->UpdateBackBlurStyle(tabBarNode_);
+
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
+}
+
+/**
+ * @tc.name: UpdateBackBlurStyleTest003
+ * @tc.desc: Test UpdateBackBlurStyle with REGULAR BackBlurStyle and DARK colorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateBackBlurStyleTest003, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(tabBarNode_, nullptr);
+
+    auto renderContext = tabBarNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::REGULAR;
+    styleOption.colorMode = ThemeColorMode::DARK;
+    renderContext->UpdateBackBlurStyle(styleOption);
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+
+    pattern_->UpdateBackBlurStyle(tabBarNode_);
+
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::DARK);
 }
 
 /**
