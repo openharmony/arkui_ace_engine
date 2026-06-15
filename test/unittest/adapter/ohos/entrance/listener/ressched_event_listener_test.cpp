@@ -269,7 +269,7 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake013, TestSize.Level1)
 
 /**
  * @tc.name: OnComponentPreMake014
- * @tc.desc: Test OnComponentPreMake with curPageName is empty return early
+ * @tc.desc: Test OnComponentPreMake with pageInfo is nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(ResschedEventListenerTest, OnComponentPreMake014, TestSize.Level1)

@@ -59,7 +59,7 @@ bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::s
     auto iter = extInfo.find(KEY_PAGE_NAME);
     if (iter != extInfo.end()) {
         pageName = iter->second;
-        return true;
+        return !pageName.empty();
     }
     return false;
 }
@@ -88,18 +88,6 @@ bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
         return false;
     }
     return true;
-}
-
-bool IsPageNameMatch(const std::string& pageName, const std::string& curPageName)
-{
-    std::vector<std::string> splits;
-    StringUtils::StringSplitter(curPageName, ',', splits);
-    for (auto split : splits) {
-        if (pageName == split) {
-            return true;
-        }
-    }
-    return false;
 }
 } // namespace
 
@@ -136,11 +124,13 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
         LOGE("OnComponentPreMake windowId is incorrect, context is nullptr");
         return;
     }
-
-    auto curPageName = context->GetCurrentPageName();
-    if (!IsPageNameMatch(pageName, curPageName)) {
-        LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, curPageName:%{public}s",
-            pageName.c_str(), curPageName.c_str());
+    auto pageInfo = context->GetLastPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto url = pageInfo->GetPageUrl();
+    auto currentPageName = context->GetNavDestinationPageName(pageInfo);
+    if (pageName != url && pageName != currentPageName) {
+        LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, url:%{public}s,"
+            "currentPageName:%{public}s", pageName.c_str(), url.c_str(), currentPageName.c_str());
         return;
     }
 
