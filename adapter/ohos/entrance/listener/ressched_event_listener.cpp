@@ -54,7 +54,7 @@ bool CheckNumber(std::unordered_map<std::string, std::string>& extInfo, const ch
 {
     auto iter = extInfo.find(parameterKey);
     CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
-    return StringUtils::IsNumber(extInfo.find(parameterKey)->second);
+    return StringUtils::IsNumber(iter->second);
 }
 
 bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::string& pageName)
@@ -108,7 +108,7 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 }
 
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
-{
+{ 
     std::string pageName;
     int32_t windowId = -1;
     if (!CheckParameterValid(extInfo, windowId, pageName)) {
