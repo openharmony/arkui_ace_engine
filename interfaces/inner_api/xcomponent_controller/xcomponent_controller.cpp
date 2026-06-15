@@ -95,6 +95,10 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj");
         return nullptr;
     }
+    if (nativeObjRef == nullptr) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue nativeObj is null");
+        return nullptr;
+    }
     ani_object nativeObj = static_cast<ani_object>(nativeObjRef);
     ani_ref ref;
     if (env->Object_GetFieldByName_Ref(nativeObj, "peer", &ref) != ANI_OK) {
