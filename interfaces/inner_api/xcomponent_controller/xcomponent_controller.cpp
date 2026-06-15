@@ -90,16 +90,22 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue env is null");
         return nullptr;
     }
+    ani_ref nativeObjRef;
+    if (env->Object_GetFieldByName_Ref(controller, "nativeObj", &nativeObjRef) != ANI_OK) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj");
+        return nullptr;
+    }
+    ani_object nativeObj = static_cast<ani_object>(nativeObjRef);
     ani_ref ref;
-    if (env->Object_GetFieldByName_Ref(controller, "peer", &ref) != ANI_OK) {
-        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get peer");
+    if (env->Object_GetFieldByName_Ref(nativeObj, "peer", &ref) != ANI_OK) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj.peer");
         return nullptr;
     }
     ani_object obj = static_cast<ani_object>(ref);
     ani_long ptr;
     auto ret = env->Object_GetFieldByName_Long(obj, "ptr", &ptr);
     if (ret != ANI_OK) {
-        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get ptr %{public}d", ret);
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj.peer.ptr %{public}d", ret);
         return nullptr;
     }
     auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerNativePeerImpl*>(ptr);
