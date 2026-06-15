@@ -232,6 +232,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SymbolStyle, ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, IsFontColorResource, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SymbolStyle, FontColorResource, std::vector<RefPtr<ResourceObject>>, PROPERTY_UPDATE_MEASURE_SELF);
 
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);

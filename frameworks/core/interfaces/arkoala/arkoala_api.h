@@ -7989,6 +7989,7 @@ struct ArkUISymbolGlyphModifier {
     void (*resetShaderStyle)(ArkUINodeHandle node);
     void (*setFontColorJs)(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size,
         ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize);
+    bool (*getIsFontColorResource)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolSpanModifier {

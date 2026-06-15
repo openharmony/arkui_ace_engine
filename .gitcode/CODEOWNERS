@@ -3237,6 +3237,7 @@ interfaces/inner_api/ui_session/ @arkui_framework_xnode
 interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/src/ @arkui_framework_xnode
+interfaces/inner_api/ace_kit/src/view/components/symbol.cpp @huawei_g_five
 
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkuicodepulse
@@ -3828,6 +3829,7 @@ test/unittest/core/base/simplified_inspector_test_ng.cpp @arkui_framework_xnode
 test/unittest/interfaces/ @arkui_framework_xnode
 test/unittest/interfaces/drawable_descriptor_test.cpp @arkui001
 test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
+test/unittest/interfaces/ace_kit/symbol_test.cpp @huawei_g_five
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
