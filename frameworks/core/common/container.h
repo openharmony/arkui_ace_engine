@@ -841,7 +841,7 @@ private:
 protected:
     // Container creation timestamp for enhanced error messages
     // Used to provide context when container lookup fails
-    int64_t createTime_;
+    int64_t createTime_ = 0;
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
