@@ -11751,13 +11751,16 @@ const ArkUI_AttributeItem* GetDatePickerCanLoop(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
-int32_t SetDatePickerCanLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+int32_t SetDatePickerCanLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto fullImpl = GetFullImpl();
-    if (!fullImpl || !fullImpl->getNodeModifiers() || !fullImpl->getNodeModifiers()->getDatePickerModifier()) {
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    CHECK_NULL_RETURN(fullImpl->getNodeModifiers(), ERROR_CODE_INTERNAL_ERROR);
     auto datePickerModifier = fullImpl->getNodeModifiers()->getDatePickerModifier();
+    CHECK_NULL_RETURN(datePickerModifier, ERROR_CODE_INTERNAL_ERROR);
+
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         datePickerModifier->resetCanLoop(node->uiNodeHandle);
         return ERROR_CODE_PARAM_INVALID;
