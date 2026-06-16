@@ -76,3 +76,12 @@ ohos_abc("arktoggle") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+ohos_abc("arkimageanimator") {
+  sources = [ "./src/arkimageanimator.ts" ]
+  output_name = "arkimageanimator"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

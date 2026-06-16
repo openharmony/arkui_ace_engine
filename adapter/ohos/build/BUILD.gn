@@ -44,6 +44,7 @@ component_modules = [
   "menu",
   "lazy_column_layout",
   "toggle",
+  "image_animator",
 ]
 
 if (!ace_engine_feature_wearable) {

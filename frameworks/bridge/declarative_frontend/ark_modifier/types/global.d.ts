@@ -105,6 +105,10 @@ interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ImageAnimatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

@@ -100,7 +100,6 @@ private:
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
     static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterWebAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterImageAnimatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

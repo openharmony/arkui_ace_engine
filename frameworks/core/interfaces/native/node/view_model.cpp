@@ -26,6 +26,7 @@
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -575,10 +576,9 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto arkUIImageAnimatorModifier = NG::NodeModifier::GetImageAnimatorModifier();
+    CHECK_NULL_RETURN(arkUIImageAnimatorModifier, nullptr);
+    return arkUIImageAnimatorModifier->createImageAnimatorFrameNode(nodeId);
 }
 
 void* createRadioNode(ArkUI_Int32 nodeId)

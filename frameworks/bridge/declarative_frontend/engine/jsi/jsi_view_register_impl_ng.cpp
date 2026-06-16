@@ -67,7 +67,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
@@ -440,7 +439,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
-    JSImageAnimator::JSBind(globalObj);
     JSProgress::JSBind(globalObj);
     JSGridContainer::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);

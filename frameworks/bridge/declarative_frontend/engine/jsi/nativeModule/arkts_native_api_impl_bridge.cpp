@@ -32,7 +32,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.h"
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_embedded_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
@@ -569,6 +568,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "MenuItemGroup" },
         { "LazyColumnLayout" },
         { "Toggle" },
+        { "ImageAnimator" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1077,7 +1077,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
-    RegisterImageAnimatorAttributes(object, vm);
 
     auto textInput = panda::ObjectRef::New(vm);
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDetectorEnable"),
@@ -4832,62 +4831,6 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
 }
 #endif
 
-void ArkUINativeModule::RegisterImageAnimatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto imageAnimator = panda::ObjectRef::New(vm);
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setState"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetState));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetState"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetState));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDuration"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetDuration));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDuration"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetDuration));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFixedSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFixedSize));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFixedSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFixedSize));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetFillMode));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetFillMode));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setReverse"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetReverse));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetReverse));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImages"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImages));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImages"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImages));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIterations"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetIteration));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIterations"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetIteration));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoMonitorInvisibleArea"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetAutoMonitorInvisibleArea));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAnimatorOnStart"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImageAnimatorOnStart));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnStart"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnStart));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAnimatorOnPause"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImageAnimatorOnPause));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnPause"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnPause));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAnimatorOnRepeat"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImageAnimatorOnRepeat));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnRepeat"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnRepeat));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAnimatorOnCancel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImageAnimatorOnCancel));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnCancel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnCancel));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageAnimatorOnFinish"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetImageAnimatorOnFinish));
-    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnFinish"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnFinish));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
-}
-
 void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto lazyGridLayout = panda::ObjectRef::New(vm);
@@ -5202,7 +5145,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterGridColAttributes(object, vm);
     RegisterGridRowAttributes(object, vm);
     RegisterIndicatorComponentAttributes(object, vm);
-    RegisterImageAnimatorAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);

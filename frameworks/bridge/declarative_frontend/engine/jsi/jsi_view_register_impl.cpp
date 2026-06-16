@@ -71,7 +71,6 @@
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
-#include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
@@ -486,7 +485,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
     { "CanvasGradient", JSCanvasGradient::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -541,7 +539,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },

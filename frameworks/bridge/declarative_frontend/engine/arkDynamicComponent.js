@@ -503,3 +503,17 @@ if (globalThis.LazyColumnLayout === undefined) {
     }
   }
 }
+
+// @ts-ignore
+if (globalThis.ImageAnimator === undefined) {
+  globalThis.ImageAnimator = {
+    create: function () {
+      getUINativeModule().loadNativeModule('ImageAnimator');
+      let module = globalThis.requireNapi('arkui.components.arkimageanimator');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().imageAnimator.create();
+    },
+    name: 'JSImageAnimator'
+  }
+}

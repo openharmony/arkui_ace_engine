@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ template<class T> void ValidateNonEmpty(std::optional<T>& opt)
     }
 }
 ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<int>& value);
-void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
+ACE_FORCE_EXPORT void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
 void ValidatePositive(std::optional<int>& value);
 void ValidateNonNegative(std::optional<V2::GridContainerSize>& value);
 void ValidateBloom(std::optional<float>& opt);
