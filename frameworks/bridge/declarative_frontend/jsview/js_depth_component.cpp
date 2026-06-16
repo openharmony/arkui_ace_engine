@@ -125,6 +125,8 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
     if (backgroundSource.IsImage()) {
         setDepthMapWithCallback(backgroundSource.imageSourceInfo);
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set");
+    } else {
+        setDepthMapWithCallback(ImageSourceInfo());
     }
     info.ReturnSelf();
 }
