@@ -61,6 +61,7 @@ struct DumpInfoArgument {
     int32_t action = 0;
     int32_t eventId = -1;
     int64_t webAccId = -1;
+    int32_t focusMoveRule = -1;
     std::string webAccFun = "tree";
 };
 

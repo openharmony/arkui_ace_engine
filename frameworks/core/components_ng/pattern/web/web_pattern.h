@@ -858,6 +858,9 @@ public:
     std::shared_ptr<NG::TransitionalNodeInfo> GetTransitionalNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
         int32_t direction);
+    std::shared_ptr<NG::TransitionalNodeInfo> GetAccessibilityNodeByParams(int64_t accessibilityId,
+        int32_t direction, int32_t focusRuleType,
+        const std::map<std::string, std::string>& params);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
