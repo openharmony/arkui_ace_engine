@@ -724,6 +724,7 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
 
     GesturePriority priority = GesturePriority::Low;
