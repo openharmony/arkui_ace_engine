@@ -639,6 +639,48 @@ HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedResetStatusTest006
+ * @tc.desc: Test IsNeedResetStatus with group containing non-MultiFingersRecognizer child (continue branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest006, TestSize.Level1)
+{
+    auto mockRecognizer = AceType::MakeRefPtr<MockNGGestureRecognizer>();
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { mockRecognizer, clickRecognizer };
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 0;
+
+    bool result = recognizerGroup->IsNeedResetStatus();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNeedResetStatusTest007
+ * @tc.desc: Test IsNeedResetStatus with group containing non-MultiFingersRecognizer child
+ *           and one child not needing reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest007, TestSize.Level1)
+{
+    auto mockRecognizer = AceType::MakeRefPtr<MockNGGestureRecognizer>();
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { mockRecognizer, clickRecognizer };
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 1;
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    fingersRecognizer->touchPoints_[0] = event;
+
+    bool result = recognizerGroup->IsNeedResetStatus();
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: CheckCurrentFingersTest001
  * @tc.desc: Test CheckCurrentFingers with negative currentFingers_
  * @tc.type: FUNC

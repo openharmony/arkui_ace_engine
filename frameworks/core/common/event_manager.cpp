@@ -538,9 +538,11 @@ bool EventManager::PostEventTouchTest(
     uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& item : hitTestResult) {
         item->SetIsPostEventResult(true);
+        item->SetIsPostTouchEventResult(true);
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
         if (group) {
             group->SetIsPostEventResultRecursively(true);
+            group->SetIsPostTouchEventResultRecursively(true);
             group->SetResponseLinkRecognizersRecursively(responseLinkResult);
             continue;
         }
