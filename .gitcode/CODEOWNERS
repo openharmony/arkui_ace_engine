@@ -3770,6 +3770,7 @@ test/unittest/core/pattern/security_component/ @harylee
 test/unittest/core/pattern/security_component/mock/ @harylee
 test/unittest/core/pattern/select/ @arkuipopupwindow_all
 test/unittest/core/pattern/select_overlay/ @huawei_g_five
+test/unittest/core/pattern/selection_container/ @huawei_g_five
 test/unittest/core/pattern/shape/ @arkuilayout1
 test/unittest/core/pattern/side_bar/ @arkui_navigation
 test/unittest/core/pattern/slider/ @arkuipopupwindow_all
