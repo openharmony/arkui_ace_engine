@@ -450,6 +450,8 @@ public:
     void RemoveSheet(RefPtr<FrameNode> sheetNode);
     void InitSheetWrapperAction(const RefPtr<FrameNode>& sheetNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    RefPtr<FrameNode> MountSheetEffectComponent(
+        const RefPtr<FrameNode>& sheetWrapperNode, NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetPageNode);
     RefPtr<FrameNode> MountSheetWrapperAndChildren(const RefPtr<FrameNode>& sheetNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> GetSheetMap();

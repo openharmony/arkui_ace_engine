@@ -103,6 +103,9 @@
 #endif
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -4997,7 +5000,7 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetWrapper = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     auto wrapperParent = sheetWrapper->GetParent();
     CHECK_NULL_VOID(wrapperParent);
@@ -5157,7 +5160,8 @@ void OverlayManager::UpdateSheetRender(
 
     sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
+    // if use effectComponent, set blur on effectComponent, not on sheetpage
+    if (sheetStyle.backgroundBlurStyle.has_value() && !sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
     sheetNodePattern->SetSheetBorderWidth();
@@ -5254,7 +5258,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
@@ -5284,7 +5288,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ComputeSheetOffset(sheetStyle, sheetNode);
@@ -5407,7 +5411,7 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
         (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
         auto context = sheetNode->GetContext();
@@ -5440,6 +5444,51 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     }
 }
 
+RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
+    const RefPtr<FrameNode>& sheetWrapperNode, NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetPageNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
+    CHECK_NULL_RETURN(sheetPageNode, nullptr);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetNodePattern, nullptr);
+
+    if (!sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
+        return nullptr;
+    }
+    auto sheetECNode = FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<EffectComponentPattern>());
+    CHECK_NULL_RETURN(sheetECNode, nullptr);
+    sheetECNode->MountToParent(sheetWrapperNode);
+    auto eventHub = sheetECNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, nullptr);
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->SetSheetECNode(sheetECNode);
+
+    if (sheetStyle.systemMaterial) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
+    }
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
+        auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
+        CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
+        sheetNodeRSContext->UpdateUseEffect(true);
+    }
+    return sheetECNode;
+#else
+    return nullptr;
+#endif
+}
+
 RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<FrameNode>& sheetNode,
     const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle)
 {
@@ -5455,12 +5504,17 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         sheetWrapperNode->SetThemeScopeId(targetNode->GetThemeScopeId());
         sheetWrapperNode->AllowUseParentTheme(false);
     }
+    auto sheetECNode = MountSheetEffectComponent(sheetWrapperNode, sheetStyle, sheetNode);
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
         return SheetView::CreateSheetMaskShowInSubwindow(sheetNode, sheetWrapperNode, targetNode, sheetStyle);
     }
-    sheetNode->MountToParent(sheetWrapperNode);
+    if (!sheetECNode) {
+        sheetNode->MountToParent(sheetWrapperNode);
+    } else {
+        sheetNode->MountToParent(sheetECNode);
+    }
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
@@ -5917,7 +5971,7 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChang
         CHECK_NULL_VOID(sheetNode);
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         if (sheetPattern->IsShowInSubWindow()) {
-            auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+            auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetParent);
             auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
             CHECK_NULL_VOID(sheetWrapperPattern);
@@ -6052,7 +6106,7 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProp, nullptr);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_RETURN(sheetParent, nullptr);
     if (showInSubWindow) {
         auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();

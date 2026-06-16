@@ -23507,6 +23507,7 @@ typedef struct Ark_SheetOptions {
     Opt_Placement placement;
     Opt_Boolean placementOnTarget;
     Opt_EdgeLightMode edgeLightMode;
+    Opt_Boolean enableBlurSnapshot;
 } Ark_SheetOptions;
 typedef struct Opt_SheetOptions {
     Ark_Tag tag;
