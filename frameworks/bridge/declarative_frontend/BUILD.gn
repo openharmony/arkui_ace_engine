@@ -890,7 +890,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_row.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
-      "jsview/js_image_animator.cpp",
       "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
