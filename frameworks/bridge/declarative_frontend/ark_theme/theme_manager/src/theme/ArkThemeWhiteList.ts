@@ -22,10 +22,10 @@ class ArkThemeWhiteList {
     private static whiteList: Array<string> = [
         'Badge',
         'Button',
-        'DatePicker',
         'JSAlphabetIndexer',
         'JSCounter',
         'JSDataPanel',
+        'JSDatePicker',
         'JSMenu',
         'JSMenuItem',
         'JSPatternLock',

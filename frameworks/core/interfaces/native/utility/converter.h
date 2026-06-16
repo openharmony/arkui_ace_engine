@@ -901,7 +901,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
-    template<> void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);

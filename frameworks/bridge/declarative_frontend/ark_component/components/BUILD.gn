@@ -108,6 +108,7 @@ special_components = [
   "arkcounter",
   "arktoggle",
   "arkimageanimator",
+  "arkdatepicker",
 ]
 
 if (qrcodegen_support) {

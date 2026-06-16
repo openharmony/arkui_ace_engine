@@ -34,6 +34,7 @@
 #endif
 
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 #include "base/error/error_code.h"
@@ -85,8 +86,8 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
@@ -3078,8 +3079,15 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto* modifier = NG::NodeModifier::GetDatepickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    DatePickerUtil::DatePickerDialogInfo dialogInfo = { .dialogProperties = dialogProps,
+        .settingData = settingData,
+        .buttonInfos = buttonInfos,
+        .datePickerNode = nullptr };
+    modifier->setDatePickerDialogViewShow(dialogInfo, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RefPtr<FrameNode> dialogNode = dialogInfo.datePickerNode;
+    CHECK_NULL_VOID(dialogNode);
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);

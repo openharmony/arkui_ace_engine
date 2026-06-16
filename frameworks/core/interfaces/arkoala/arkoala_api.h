@@ -4903,7 +4903,7 @@ struct ArkUITimepickerModifier {
     void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
     void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
     void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
-    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* ojb);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* obj);
     void (*setBackgroundColor)(ArkUI_Uint32 color);
     void (*hasUserDefinedOpacity)();
     void (*setOnEnterSelectedArea)(ArkUINodeHandle node, void* callback);
@@ -8164,6 +8164,29 @@ struct ArkUIDatePickerModifier {
     ArkUI_Bool (*getCanLoop)(ArkUINodeHandle node);
     void (*setCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
     void (*resetCanLoop)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(int32_t nodeId);
+    void (*createTimePicker)(void* theme);
+    void (*createDatePicker)(void* theme);
+    void (*setJSSelectedTime)(void* value);
+    void (*setJSStartDate)(void* value);
+    void (*setJSEndDate)(void* value);
+    void (*setJSSelectedDate)(void* value);
+    void (*setJSDatePickerMode)(ArkUI_Int32 value);
+    void (*setJSChangeEvent)(void* value);
+    void (*setJSSelectedTextStyle)(void* theme, void* textStyle);
+    void (*updateUserSetSelectColor)();
+    void (*setJSTextStyle)(void* theme, void* textStyle);
+    void (*setJSDisappearTextStyle)(void* theme, void* textStyle);
+    void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* obj);
+    void (*hasUserDefinedOpacity)();
+    void (*setUseMilitaryTime)(ArkUI_Bool isUseMilitaryTime);
+    void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+        void* dateAcceptEvent, void* dateChangeEvent, ArkUI_Int32 pickerType, void* pickerDialogEvent,
+        void* buttonInfos);
+    void (*setDatePickerOnDateChangeHandler)(ArkUINodeHandle node, void* extraParam);
 };
 
 struct ArkUISpanModifier {

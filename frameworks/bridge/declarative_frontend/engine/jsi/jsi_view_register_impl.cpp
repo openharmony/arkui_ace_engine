@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_badge.h"
@@ -50,7 +51,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_distortion_component.h"
 #include "bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
@@ -582,10 +582,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DepthComponent", JSDepthComponent::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
-#endif
-    { "DatePicker", JSDatePicker::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "DatePickerDialog", JSDatePickerDialog::JSBind },
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
