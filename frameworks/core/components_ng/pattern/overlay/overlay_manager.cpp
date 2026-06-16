@@ -1737,6 +1737,11 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     // TargetNode may be destroyed when MontPopup is thrown thread.
     auto targetNode = popupInfo.target.Upgrade();
     CHECK_NULL_VOID(targetNode);
+    auto popupInfoInMap = GetPopupInfo(targetId);
+    if (popupInfoInMap.popupNode && popupInfoInMap.popupNode->IsOnMainTree()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Popup Node is already on main tree, stop mounting");
+        return;
+    }
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     ACE_UINODE_TRACE(popupNode);
@@ -8083,6 +8088,11 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     }
     FocusNextOrderNode(topFocusableNode);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+    // Call OnRemoveChild for popup nodes to trigger RemoveOnAreaChangeNode
+    auto pattern = node->GetPattern<PopupBasePattern>();
+    if (pattern) {
+        pattern->OnRemoveChild(node);
+    }
 }
 
 RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)
