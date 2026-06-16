@@ -1699,7 +1699,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             }
         }
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        auto obj = func->ExecuteJS(1, &jsVal);
+        auto obj = func->ExecuteJSWithObjCheck(1, &jsVal);
         if (obj->IsObject()) {
             JSRef<JSObject> result = JSRef<JSObject>::Cast(obj);
             float width = 0;
@@ -1775,7 +1775,7 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         customSpanOptionsObj->SetProperty<float>("baseline", customSpanOptions.baseline);
         auto customSpanOptionsVal = JSRef<JSVal>::Cast(customSpanOptionsObj);
         JSRef<JSVal> params[] = { jsVal, customSpanOptionsVal };
-        func->ExecuteJS(2, params);
+        func->ExecuteJSWithObjCheck(2, params);
         if (unwrapCanvas) {
             unwrapCanvas->RestoreCanvas();
             unwrapCanvas->ResetCanvas();
