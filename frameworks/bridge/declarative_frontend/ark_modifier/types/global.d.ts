@@ -145,6 +145,10 @@ interface RichEditorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ImageSpanComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface RowSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -170,6 +174,10 @@ interface StepperItemComponentModule {
 }
 
 interface SymbolGlyphComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface SymbolSpanComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

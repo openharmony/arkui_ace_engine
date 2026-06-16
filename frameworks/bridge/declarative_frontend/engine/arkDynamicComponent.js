@@ -334,6 +334,20 @@ if (globalThis.SymbolGlyph === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.SymbolSpan === undefined) {
+  globalThis.SymbolSpan = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('SymbolSpan');
+      let module = globalThis.requireNapi('arkui.components.arksymbolspan');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().symbolSpan.jsCreate(params);
+    },
+    name: 'JSSymbolSpan'
+  };
+}
+
+// @ts-ignore
 if (globalThis.PatternLock === undefined) {
   globalThis.PatternLock = {
     create: function(value) {
@@ -460,6 +474,24 @@ if (globalThis.Search === undefined) {
       getUINativeModule().search.jsCreate(params);
     },
     name: 'JSSearch'
+  };
+}
+
+// @ts-ignore
+if (globalThis.ImageSpan === undefined) {
+  globalThis.ImageSpan = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("ImageSpan");
+      var module = globalThis.requireNapi('arkui.components.arkimagespan');
+      module.exportView();
+      module.loadComponent();
+      if (!ViewStackProcessor.UsesNewPipeline()) {
+        return;
+      }
+      Image.createImageSpan(params);
+      getUINativeModule().imageSpan.create();
+    },
+    name: 'JSImageSpan'
   };
 }
 

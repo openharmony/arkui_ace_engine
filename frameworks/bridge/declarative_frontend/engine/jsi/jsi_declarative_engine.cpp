@@ -818,6 +818,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
 #endif
         { "Gauge", "arkui.components.arkgauge" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "ImageSpan", "arkui.components.arkimagespan" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
         { "Marquee", "arkui.components.arkmarquee" },
         { "Menu", "arkui.components.arkmenu" },
@@ -826,6 +827,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Radio", "arkui.components.arkradio" },
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },
+        { "SymbolSpan", "arkui.components.arksymbolspan" },
         { "RowSplit", "arkui.components.arkrowsplit" },
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },

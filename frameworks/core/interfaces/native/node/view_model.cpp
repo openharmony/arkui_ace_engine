@@ -60,7 +60,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
@@ -128,10 +128,11 @@ void* createSpanNode(ArkUI_Int32 nodeId)
 
 void* createImageSpanNode(ArkUI_Int32 nodeId)
 {
-    auto imageSpanNode = ImageSpanView::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(imageSpanNode, nullptr);
-    imageSpanNode->IncRefCount();
-    return AceType::RawPtr(imageSpanNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto imageSpanModifier = nodeModifier->getImageSpanModifier();
+    CHECK_NULL_RETURN(imageSpanModifier, nullptr);
+    return imageSpanModifier->createImageSpanFrameNode(nodeId);
 }
 
 void* createImageNode(ArkUI_Int32 nodeId)

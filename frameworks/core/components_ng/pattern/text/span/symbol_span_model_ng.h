@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SYMBOL_SPAN_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SYMBOL_SPAN_MODEL_NG_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SYMBOL_SPAN_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SYMBOL_SPAN_MODEL_NG_H
 
 #include <functional>
 #include <string>
 
-#include "core/components_ng/pattern/text/symbol_span_model.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SymbolSpanModelNG : public SymbolSpanModel {
+class ACE_FORCE_EXPORT SymbolSpanModelNG : public SymbolSpanModel {
 public:
     void Create(const uint32_t& unicode) override;
 
@@ -57,4 +57,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SYMBOL_SPAN_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SYMBOL_SPAN_MODEL_NG_H

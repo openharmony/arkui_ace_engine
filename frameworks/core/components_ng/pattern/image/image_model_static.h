@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
-class ACE_EXPORT ImageModelStatic {
+class ACE_FORCE_EXPORT ImageModelStatic {
 public:
     static void SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info);
     static void SetPixelMap(FrameNode* frameNode, const RefPtr<PixelMap>& pixelMap);
