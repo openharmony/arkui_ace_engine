@@ -192,6 +192,7 @@ if (is_arkui_x) {
       "node/frame_information.cpp",
       "node/dialog_option.cpp",
       "node/dialog_model.cpp",
+      "node/swiper_option.cpp",
     ]
 
     deps = [
