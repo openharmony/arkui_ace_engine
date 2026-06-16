@@ -32,6 +32,16 @@ namespace uiMaterial {
         REGULAR = 2,
         THICK = 3,
         ULTRA_THICK = 4,
+        ULTRA_THIN_EC = 5,
+        THIN_EC = 6,
+        REGULAR_EC = 7,
+        THICK_EC = 8,
+        ULTRA_THICK_EC = 9,
+        ULTRA_THIN_EC_SUB = 10,
+        THIN_EC_SUB = 11,
+        REGULAR_EC_SUB = 12,
+        THICK_EC_SUB = 13,
+        ULTRA_THICK_EC_SUB = 14,
     }
     export interface LightEffectOptions {
         color?: ResourceColor,
@@ -79,6 +89,9 @@ namespace uiMaterial {
         getNativeObject(): long {
             return this.materialObj_;
         }
+        setNativeObject(ptr: long): void {
+            this.materialObj_ = ptr;
+        }
     }
     export class ImmersiveMaterial extends Material {
         constructor(options?: ImmersiveOptions) {
@@ -107,6 +120,22 @@ namespace uiMaterial {
             let val = input as LightEffectOptions;
             return { color: val.color } as LightEffectOptionsInner;
         }
+    }
+    export function convertToECMaterial(material: ImmersiveMaterial): ImmersiveMaterial {
+        let nativePtr = material.getNativeObject();
+        let newPtr = ArkUIAniModule._UiMaterial_ConvertToECMaterial(nativePtr);
+        let result = new ImmersiveMaterial();
+        result.setNativeObject(newPtr);
+        result.registerCleaner(newPtr);
+        return result;
+    }
+    export function convertToECSubMaterial(material: ImmersiveMaterial): ImmersiveMaterial {
+        let nativePtr = material.getNativeObject();
+        let newPtr = ArkUIAniModule._UiMaterial_ConvertToECSubMaterial(nativePtr);
+        let result = new ImmersiveMaterial();
+        result.setNativeObject(newPtr);
+        result.registerCleaner(newPtr);
+        return result;
     }
 }
 

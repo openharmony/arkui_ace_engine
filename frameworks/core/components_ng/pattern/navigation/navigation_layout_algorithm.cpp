@@ -1195,19 +1195,14 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
     if (pattern->IsForceSplitSuccess() && forceSplitMgr->IsForceSplitDragging()) {
-        float dragRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
-            forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
-        float frameWidth = navigationGeometryNode->GetFrameSize().Width();
-        float navBarOrPrimarNodeWidth = (frameWidth - realDividerWidth_) * (1.0f - dragRatio);
-        float dividerWidth = IsDividerDisabled(hostNode) ? 0.0f : realDividerWidth_;
         if (!IsDividerDisabled(hostNode)) {
-            LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, navBarOrPrimarNodeWidth,
+            LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_.Width(),
                           NavBarPosition::START);
         }
-        LayoutDragBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarOrPrimarNodeWidth,
+        LayoutDragBar(layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_.Width(),
                       NavBarPosition::START);
         LayoutForceSplitMaskNodes(
-            layoutWrapper, hostNode, navigationLayoutProperty, navBarOrPrimarNodeWidth, dividerWidth);
+            layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_.Width(), realDividerWidth_);
         return;
     }
 

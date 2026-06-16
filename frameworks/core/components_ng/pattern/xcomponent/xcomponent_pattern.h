@@ -377,6 +377,7 @@ public:
     ArkUI_AccessibilityProvider* GetNativeProvider();
     void PushType(StatisticEventType type);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    static std::string GetCompensationAngleFromFeatureManager();
 protected:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
@@ -572,6 +573,9 @@ private:
     int32_t foldDisplayCallbackId_ = -1;
     float xcomponentTouchSdrRatio_ = 0.0f;
     float xcomponentSizeSdrRatio_ = 0.0f;
+    static std::string compensationAngleFromFeatureManager_;
+    static std::atomic<bool> compensationAngleFlag_;
+    static std::mutex angleMtx_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -45,7 +45,6 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
-#include "rich_editor/rich_editor_module.h"
 #include "text_based_modifier/text_based_modifier_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
@@ -119,12 +118,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_WithEnv_setSystemEnvProperty",
-            "lC{std.core.String}d:",
+            "lC{std.core.String}Y:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
         },
         ani_native_function {
             "_WithEnv_setCustomEnvProperty",
-            nullptr,
+            "liY:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
         },
         ani_native_function {
@@ -144,12 +143,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CustomNode_registerOnCustomEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
         },
         ani_native_function {
             "_CustomNode_registerOnSystemEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
         },
         ani_native_function {
@@ -907,6 +906,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
         },
         ani_native_function {
+            "_UiMaterial_ConvertToECMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConvertToECMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_ConvertToECSubMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConvertToECSubMaterial)
+        },
+        ani_native_function {
             "_CreateViewStackProcessor",
             ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
@@ -1110,11 +1119,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
-        },
-        ani_native_function {
-            "_RichEditor_Transfer_PixelMap",
-            "C{@ohos.multimedia.image.image.PixelMap}:l",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::RichEditorTransferPixelMap)
         },
         ani_native_function {
             "_PersistentStorage_Get",

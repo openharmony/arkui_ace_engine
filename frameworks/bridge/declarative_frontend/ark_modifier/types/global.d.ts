@@ -105,6 +105,10 @@ interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ImageAnimatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -187,4 +191,8 @@ interface WaterFlowComponentModule {
 
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
+}
+
+interface DatePickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

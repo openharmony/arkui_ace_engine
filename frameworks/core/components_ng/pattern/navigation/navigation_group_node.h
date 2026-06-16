@@ -93,6 +93,13 @@ public:
     {
         return relatedPageDestinationNode_;
     }
+    const RefPtr<UINode>& GetRelatedPageOrForceSplitPlaceholder() const
+    {
+        if (relatedPageDestinationNode_) {
+            return relatedPageDestinationNode_;
+        }
+        return forceSplitPlaceHolderNode_;
+    }
 
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
@@ -453,8 +460,6 @@ public:
     }
     RefPtr<FrameNode> GetOrCreateMaskNode(bool isLeft);
     void UpdateMaskNodeVisibility(bool isLeft, VisibleType type);
-    RefPtr<FrameNode> GetMaskContentNode(bool isLeft);
-    void UpdateMaskNodeContent(bool isLeft);
     //-------for force split------- end  ------
 
 protected:

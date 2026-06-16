@@ -72,6 +72,11 @@ template("napi_measure_static") {
       deps += [ config.libace_target ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+    }
+
     subsystem_name = "arkui"
     part_name = ace_engine_part
   }

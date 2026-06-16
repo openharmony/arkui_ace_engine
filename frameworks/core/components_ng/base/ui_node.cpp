@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
+#include "ui/base/versions.h"
 
 namespace OHOS::Ace::NG {
 
@@ -89,6 +90,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     } while (false);
 #endif
     instanceId_ = Container::CurrentId();
+    // Snapshot the thread's isolated state at node creation time.
+    // This determines the node's IsolatedThread identity for its entire lifecycle.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
     if (SystemProperties::ConfigChangePerform()) {
@@ -189,6 +193,15 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
     context_ = context;
     context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
+    // IsolatedThread consistency validation: warn if node and pipeline
+    // belong to different thread domains (e.g., node created in dc thread
+    // attaching to non-dc pipeline, or vice versa).
+    if (isIsolatedThread_ != context->IsIsolatedThread()) {
+        LOGW("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+            "context instanceId=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        LogBacktrace();
+    }
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
     }
@@ -730,6 +743,14 @@ void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addD
     if (child->GetParent()) {
         return;
     }
+    // IsolatedThread consistency validation: error if parent and child
+    // belong to different thread domains during adoption.
+    if (isIsolatedThread_ != child->IsIsolatedThread()) {
+        LOGE("AdoptChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
+            "child=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, child->GetId(), child->IsIsolatedThread());
+        LogBacktrace();
+    }
     auto prevParent = child->GetAdoptParent();
     if (child->IsAdopted() && prevParent && prevParent->GetId() != this->GetId()) {
         prevParent->RemoveAdoptedChild(child);
@@ -774,6 +795,14 @@ void UINode::DoAddChild(
 {
     if (DetectLoop(child, this)) {
         return;
+    }
+    // IsolatedThread consistency validation: error if parent and child
+    // belong to different thread domains during child addition.
+    if (isIsolatedThread_ != child->isIsolatedThread_) {
+        LOGE("DoAddChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
+            "child=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, child->nodeId_, child->isIsolatedThread_);
+        LogBacktrace();
     }
     children_.insert(it, child);
 
@@ -1888,20 +1917,53 @@ PipelineContext* UINode::GetContext() const
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
     }
+    // IsolatedThread consistency validation: warn if node and resolved pipeline
+    // belong to different thread domains during context resolution.
+    if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
+        LOGW("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+            "pipeline instanceId=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        LogBacktrace();
+    }
     return context;
 }
 
 PipelineContext* UINode::GetAttachedContext() const
 {
+    // IsolatedThread consistency validation: warn if node and attached pipeline
+    // belong to different thread domains.
+    if (context_ && isIsolatedThread_ != context_->IsIsolatedThread()) {
+        LOGW("GetAttachedContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+            "pipeline instanceId=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
+        LogBacktrace();
+    }
     return context_;
 }
 
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {
+        // IsolatedThread consistency validation: warn if node and attached pipeline
+        // belong to different thread domains (cached context path).
+        if (isIsolatedThread_ != context_->IsIsolatedThread()) {
+            LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+                "pipeline instanceId=%{public}d isolated=%{public}d",
+                nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
+            LogBacktrace();
+        }
         return context_;
     }
-    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    auto* context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    // IsolatedThread consistency validation: warn if node and resolved pipeline
+    // belong to different thread domains (fallback resolution path).
+    if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
+        LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+            "pipeline instanceId=%{public}d isolated=%{public}d",
+            nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        LogBacktrace();
+    }
+    return context;
 }
 
 RefPtr<PipelineContext> UINode::GetContextRefPtr() const
@@ -3199,5 +3261,92 @@ void UINode::AddFlexLayouts()
     if (nodeInfo_) {
         nodeInfo_->flexLayouts++;
     }
+}
+
+void UINode::UpdateModalUiextensionCount(bool addNode)
+{
+    if (addNode) {
+        modalUiextensionCount_++;
+    } else {
+        modalUiextensionCount_--;
+    }
+}
+
+void UINode::SetDepth(int32_t depth)
+{
+    depth_ = depth;
+    for (auto& child : children_) {
+        child->SetDepth(depth_ + 1);
+    }
+}
+
+void UINode::SetHostPageId(int32_t id)
+{
+    hostPageId_ = id;
+    for (auto& child : children_) {
+        child->SetHostPageId(id);
+    }
+}
+
+void UINode::FlushUpdateAndMarkDirty()
+{
+    for (const auto& child : children_) {
+        child->FlushUpdateAndMarkDirty();
+    }
+}
+
+void UINode::MarkForceMeasure()
+{
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    for (const auto& child : children_) {
+        child->MarkForceMeasure();
+    }
+}
+
+void UINode::SetAccessibilityNodeVirtual()
+{
+    isAccessibilityVirtualNode_ = true;
+    for (auto& it : GetChildren()) {
+        it->SetAccessibilityNodeVirtual();
+    }
+}
+
+void UINode::SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
+{
+    parentForAccessibilityVirtualNode_ = parent;
+    for (auto& it : GetChildren()) {
+        it->SetAccessibilityVirtualNodeParent(parent);
+    }
+}
+
+void UINode::setIsMoving(bool isMoving)
+{
+    isMoving_ = isMoving;
+    for (auto& child : children_) {
+        child->setIsMoving(isMoving);
+    }
+}
+
+void UINode::SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+{
+    for (const auto& child : GetChildren()) {
+        child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
+}
+
+RefPtr<UINode> UINode::GetLastChild() const
+{
+    if (children_.empty()) {
+        return nullptr;
+    }
+    return children_.back();
+}
+
+RefPtr<UINode> UINode::GetFirstChild() const
+{
+    if (children_.empty()) {
+        return nullptr;
+    }
+    return children_.front();
 }
 } // namespace OHOS::Ace::NG

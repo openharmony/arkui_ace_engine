@@ -23,9 +23,11 @@
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -43,7 +45,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #ifdef QRCODEGEN_SUPPORT
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #endif
@@ -404,10 +406,9 @@ void* createCanvasNode(ArkUI_Int32 nodeId)
 
 void* createDatePickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetDatePickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createTimePickerNode(ArkUI_Int32 nodeId)
@@ -575,10 +576,9 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto arkUIImageAnimatorModifier = NG::NodeModifier::GetImageAnimatorModifier();
+    CHECK_NULL_RETURN(arkUIImageAnimatorModifier, nullptr);
+    return arkUIImageAnimatorModifier->createImageAnimatorFrameNode(nodeId);
 }
 
 void* createRadioNode(ArkUI_Int32 nodeId)

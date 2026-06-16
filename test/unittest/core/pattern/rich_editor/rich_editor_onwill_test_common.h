@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_RICH_EDITOR_ONWILL_TEST_COMMON_H
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_recursive_macro.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

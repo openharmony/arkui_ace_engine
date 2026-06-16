@@ -38,7 +38,6 @@
 #include "list_item_group_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "parallelize_ui_ani_modifier.h"
-#include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
 #include "paste_button_ani_modifier.h"
 #include "save_button_ani_modifier.h"
@@ -88,7 +87,6 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
-        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,

@@ -51,8 +51,7 @@ float LazyColumnLayoutInfo::UpdatePosMapStart(int32_t updatedStart, int32_t upda
             prevPos += gap * (estimateItemSize_ + space_);
         }
     } else {
-        // h/f/s: the body baseline starts at headerMainSize_; the prefix sum is anchored there.
-        prevPos = headerMainSize_ + updatedStart * (estimateItemSize_ + space_);
+        prevPos = updatedStart * (estimateItemSize_ + space_);
     }
     if (NearEqual(startIter->second.startPos, prevPos)) {
         return 0;
@@ -141,10 +140,9 @@ float LazyColumnLayoutInfo::UpdatePosWithIter(
     return delta;
 }
 
-void LazyColumnLayoutInfo::UpdatePosMap()
+void LazyColumnLayoutInfo::UpdatePosMap(float prevBodyMainSize)
 {
-    // Exclude the constant footer so it does not leak into the inter-frame adjustOffset.
-    float prevTotalMainSize_ = totalMainSize_ - footerMainSize_;
+    float prevTotalMainSize_ = prevBodyMainSize;
     if (!Positive(estimateItemSize_)) {
         auto estimateItemSize = GetEstimateItemSize();
         if (Positive(estimateItemSize)) {
@@ -185,9 +183,7 @@ void LazyColumnLayoutInfo::SetSpace(float space)
     if (!NearEqual(space, space_)) {
         space_ = space;
         int32_t prevIndex = -1;
-        // h/f/s: body baseline is headerMainSize_; without this anchor the first item snaps back to 0 and overlaps
-        // the header whenever space changes at runtime.
-        float prevPos = headerMainSize_;
+        float prevPos = 0.0f;
         for (auto it = posMap_.begin(); it != posMap_.end(); it++) {
             UpdatePosWithIter(it, prevIndex, prevPos);
         }

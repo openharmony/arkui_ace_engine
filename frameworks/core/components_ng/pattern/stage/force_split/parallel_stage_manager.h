@@ -136,6 +136,9 @@ public:
     }
     void OnStageNodeStructureChanged() override;
 
+    bool IsVirtualStackBasedSplit() const;
+    RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
+
 private:
     class StageOptScope {
     public:
@@ -199,7 +202,6 @@ private:
 
     void RebuildRouterColumnNodesIfNeeded() const;
     void InvalidateRouterColumnNodes() const;
-    bool IsVirtualStackBasedSplit() const;
     void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
     void OnWindowStateChangeInVirtualStackBasedSplit(bool show);
     bool PushPageInVirtualStackBasedSplit(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
@@ -225,7 +227,6 @@ private:
     void FireRouterShowByVisibleDiff(const RouterVisiblePages& preVisiblePages,
         const RouterVisiblePages& newVisiblePages, PageTransitionType transitionType = PageTransitionType::NONE);
     RouterVisiblePages GetRouterVisiblePagesForCurrentStackTree() const;
-    RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
     RouterVisiblePages GetRouterVisiblePages();
     RouterVisiblePages ResolveRouterVisiblePagesFromStackPages(
         const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& secondaryFallbackPage) const;

@@ -45,6 +45,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
 class UINodeTestNgTwo : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -1533,5 +1534,4 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo076, TestSize.Level1)
     EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(-1), nullptr);
     EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(999999), nullptr);
 }
-
 } // namespace OHOS::Ace::NG

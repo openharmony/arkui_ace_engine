@@ -29,7 +29,6 @@
 #include "core/animation/property_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/declaration/common/common_background_style.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_component.h"

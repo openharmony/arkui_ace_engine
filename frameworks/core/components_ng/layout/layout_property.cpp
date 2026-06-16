@@ -2619,4 +2619,224 @@ bool LayoutProperty::GetIsUserSetBackgroundColor() const
 {
     return isUserSetBackgroundColor_;
 }
+
+const std::optional<LayoutConstraintF>& LayoutProperty::GetLayoutConstraint() const
+{
+    return layoutConstraint_;
+}
+
+const std::optional<LayoutConstraintF>& LayoutProperty::GetContentLayoutConstraint() const
+{
+    return contentConstraint_;
+}
+
+const std::optional<LayoutConstraintF>& LayoutProperty::GetParentLayoutConstraint() const
+{
+    return parentLayoutConstraint_;
+}
+
+MagicItemProperty& LayoutProperty::GetMagicItemProperty()
+{
+    return magicItemProperty_;
+}
+
+const std::unique_ptr<PaddingProperty>& LayoutProperty::GetPaddingProperty() const
+{
+    return padding_;
+}
+
+const std::unique_ptr<PaddingProperty>& LayoutProperty::GetSafeAreaPaddingProperty() const
+{
+    return safeAreaPadding_;
+}
+
+const std::unique_ptr<MarginProperty>& LayoutProperty::GetMarginProperty() const
+{
+    return margin_;
+}
+
+const std::unique_ptr<BorderWidthProperty>& LayoutProperty::GetBorderWidthProperty() const
+{
+    return borderWidth_;
+}
+
+const std::unique_ptr<BorderWidthProperty>& LayoutProperty::GetOuterBorderWidthProperty() const
+{
+    return outerBorderWidth_;
+}
+
+const std::unique_ptr<PositionProperty>& LayoutProperty::GetPositionProperty() const
+{
+    return positionProperty_;
+}
+
+const std::unique_ptr<MeasureProperty>& LayoutProperty::GetCalcLayoutConstraint() const
+{
+    return calcLayoutConstraint_;
+}
+
+const std::unique_ptr<FlexItemProperty>& LayoutProperty::GetFlexItemProperty() const
+{
+    return flexItemProperty_;
+}
+
+uint32_t LayoutProperty::GetBackgroundIgnoresLayoutSafeAreaEdges() const
+{
+    return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+}
+
+uint32_t LayoutProperty::GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const
+{
+    return localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+}
+
+MeasureType LayoutProperty::GetMeasureType(MeasureType defaultType) const
+{
+    return measureType_.value_or(defaultType);
+}
+
+void LayoutProperty::UpdatePixelRound(uint16_t value)
+{
+    pixelRoundFlag_ = value;
+}
+
+uint16_t LayoutProperty::GetPixelRound() const
+{
+    return pixelRoundFlag_;
+}
+
+std::tuple<std::string, bool, bool> LayoutProperty::GetGeometryTransitionInfo() const
+{
+    return geometryTransitionInfo_;
+}
+
+void LayoutProperty::UpdateMeasureType(MeasureType measureType)
+{
+    if (measureType_ == measureType) {
+        return;
+    }
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    measureType_ = measureType;
+}
+
+void LayoutProperty::MarkUserDefinedHeightConfigured()
+{
+    userDefinedHeightConfigured_ = true;
+}
+
+bool LayoutProperty::HasUserDefinedHeightConfig() const
+{
+    return userDefinedHeightConfigured_;
+}
+
+void LayoutProperty::UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint)
+{
+    parentLayoutConstraint_ = parentConstraint;
+}
+
+void LayoutProperty::SetLayoutRect(const NG::RectF& rect)
+{
+    if (layoutRect_ != rect) {
+        propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+        layoutRect_ = rect;
+    }
+}
+
+void LayoutProperty::ResetLayoutRect()
+{
+    if (layoutRect_) {
+        propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+        layoutRect_.reset();
+    }
+}
+
+std::optional<NG::RectF> LayoutProperty::GetLayoutRect() const
+{
+    return layoutRect_;
+}
+
+bool LayoutProperty::IsUserSetVisibility()
+{
+    return isUserSetVisibility_;
+}
+
+const std::unique_ptr<SafeAreaInsets>& LayoutProperty::GetSafeAreaInsets() const
+{
+    return safeAreaInsets_;
+}
+
+const std::unique_ptr<SafeAreaExpandOpts>& LayoutProperty::GetSafeAreaExpandOpts() const
+{
+    return safeAreaExpandOpts_;
+}
+
+const std::unique_ptr<IgnoreLayoutSafeAreaOpts>& LayoutProperty::GetIgnoreLayoutSafeAreaOpts() const
+{
+    return ignoreLayoutSafeAreaOpts_;
+}
+
+bool LayoutProperty::IsIgnoreOptsValid() const
+{
+    return ignoreLayoutSafeAreaOpts_ && ignoreLayoutSafeAreaOpts_->NeedIgnoreLayoutSafeArea();
+}
+
+bool LayoutProperty::IsUsingPosition() const
+{
+    return usingPosition_;
+}
+
+void LayoutProperty::SetUsingPosition(bool usingPosition)
+{
+    usingPosition_ = usingPosition;
+}
+
+void LayoutProperty::SetIsOverlayNode(bool isOverlayNode)
+{
+    isOverlayNode_ = isOverlayNode;
+}
+
+bool LayoutProperty::IsOverlayNode() const
+{
+    return isOverlayNode_;
+}
+
+void LayoutProperty::UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
+{
+    needPositionLocalizedEdges_ = needPositionLocalizedEdges;
+}
+
+bool LayoutProperty::IsPositionLocalizedEdges() const
+{
+    return needPositionLocalizedEdges_;
+}
+
+void LayoutProperty::UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
+{
+    needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
+}
+
+bool LayoutProperty::IsOffsetLocalizedEdges() const
+{
+    return needOffsetLocalizedEdges_;
+}
+
+void LayoutProperty::ResetMarkAnchorStart()
+{
+    markAnchorStart_.reset();
+}
+
+void LayoutProperty::UpdateMarkAnchorStart(const Dimension& markAnchorStart)
+{
+    markAnchorStart_ = markAnchorStart;
+}
+
+void LayoutProperty::SetNeedLazyLayout(bool value)
+{
+    needLazyLayout_ = true;
+}
+
+bool LayoutProperty::GetNeedLazyLayout() const
+{
+    return needLazyLayout_;
+}
 } // namespace OHOS::Ace::NG

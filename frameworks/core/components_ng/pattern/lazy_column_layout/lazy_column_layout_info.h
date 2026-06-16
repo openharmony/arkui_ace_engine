@@ -41,7 +41,7 @@ class ACE_EXPORT LazyColumnLayoutInfo : public AceType {
     DECLARE_ACE_TYPE(LazyColumnLayoutInfo, AceType);
 public:
     float GetEstimateItemSize();
-    void UpdatePosMap();
+    void UpdatePosMap(float prevBodyMainSize);
     void SetPosMap(int32_t index, const ColumnItemMainPos& pos);
     void SetCachedPosMap(int32_t index, const ColumnItemMainPos& pos);
     void SetSpace(float space);

@@ -33,6 +33,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
+#include "core/event/resample_algo.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef RELAXED_INTERACTION_SUPPORT
@@ -600,13 +601,11 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
     auto currentReferee = refereeNG_;
     auto key = eventHandleId / EVENT_HANDLE;
     if (isNewReferee) {
-        auto iter = postEventRefereeWithStrategyNG_.find(key);
-        if (iter == postEventRefereeWithStrategyNG_.end() || (iter != postEventRefereeWithStrategyNG_.end() &&
-            !postEventRefereeWithStrategyNG_[key])) {
-            auto gestureReferee = AceType::MakeRefPtr<NG::GestureReferee>();
-            postEventRefereeWithStrategyNG_[key] = gestureReferee;
-        }
         currentReferee = postEventRefereeWithStrategyNG_[key];
+        if (!currentReferee) {
+            currentReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+            postEventRefereeWithStrategyNG_[key] = currentReferee;
+        }
     } else {
         // Post once use referee with refereeNG_, use upper-level referee more than once.
         if (key == POST_ONCE || key == 0) {

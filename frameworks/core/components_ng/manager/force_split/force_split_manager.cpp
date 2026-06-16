@@ -31,7 +31,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SPLIT_RATIO = 0.5f;
-constexpr uint32_t DRAG_MASK_NODE_FOREGROUND_COLOR = 0xAAFFFFFF;
 }
 
 ForceSplitManager::ForceSplitManager()
@@ -99,13 +98,69 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed mode:%{public}d", delayedMode_.value());
         delayedMode_ = std::nullopt;
     }
-    mode_ = mode;
-    UpdateForceSplitRatio();
-    if (isForceSplitEnable_ == isForceSplit) {
+    if (isForceSplitEnable_ == isForceSplit && mode_ == mode) {
         return;
     }
-    isForceSplitEnable_ = isForceSplit;
-    OnForceSplitEnableChange();
+    /**
+     * There are following scenarios:
+     * 1. isForceSplit -> false
+     * 2. isForceSplit -> true, mode -> WIDE_SPLIT
+     * 3. isForceSplit -> true, mode -> SQUARE_SPLIT
+     */
+    if (isForceSplitEnable_ != isForceSplit) {
+        isForceSplitEnable_ = isForceSplit;
+        if (!isForceSplit || mode_ == mode) {
+            /**
+             * 2 -> 1 or 3 -> 1
+             * 1 -> 2 or 1 -> 3, but mode did not change
+             */
+            OnForceSplitEnableChange();
+            return;
+        }
+        // 1 -> 2 or 1 -> 3, and mode did change
+        ChangeForceSplitModeTo(mode);
+        OnForceSplitEnableChange();
+        return;
+    }
+    if (!isForceSplitEnable_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Ignore changes to the mode(new: %{public}d), when forceSplit is disabled.", mode);
+        return;
+    }
+    // only mode change
+    ChangeForceSplitModeTo(mode);
+}
+
+bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
+{
+    if (mode == ForceSplitMode::NOT_SPLIT) {
+        return false;
+    } else if (mode == ForceSplitMode::WIDE_SPLIT) {
+        return wideSplitIsDraggable_;
+    } else {
+        return squareSplitIsDraggable_;
+    }
+}
+
+void ForceSplitManager::ChangeForceSplitModeTo(ForceSplitMode mode)
+{
+    bool preIsDraggable = IsDraggable(mode_);
+    bool curIsDraggable = IsDraggable(mode);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplit mode change from %{public}d to %{public}d ",
+        static_cast<int32_t>(mode_), static_cast<int32_t>(mode));
+    mode_ = mode;
+    if (preIsDraggable != curIsDraggable) {
+        NotifyIsDraggableChange(curIsDraggable);
+    }
+    auto splitRatio = CalcCurrentSplitRatio();
+    if (curIsDraggable) {
+        NotifyWindowFirstTimeDraggableRatioIfNeeded(splitRatio);
+    }
+    if (NearEqual(splitRatio, splitRatio_)) {
+        return;
+    }
+    splitRatio_ = splitRatio;
+    OnForceSplitRatioUpdate(splitRatio_);
 }
 
 void ForceSplitManager::OnForceSplitEnableChange()
@@ -272,15 +327,87 @@ void ForceSplitManager::RemoveForceSplitRatioListener(int32_t nodeId)
     }
 }
 
+void ForceSplitManager::AddIsDraggableChangeListener(int32_t nodeId, std::function<void(bool isDraggable)>&& listener)
+{
+    isDraggableListeners_[nodeId] = std::move(listener);
+}
+
+void ForceSplitManager::RemoveIsDraggableChangeListener(int32_t nodeId)
+{
+    auto it = isDraggableListeners_.find(nodeId);
+    if (it != isDraggableListeners_.end()) {
+        isDraggableListeners_.erase(it);
+    }
+}
+
+void ForceSplitManager::NotifyIsDraggableChange(bool isDraggable)
+{
+    auto listeners = isDraggableListeners_;
+    for (auto pair : listeners) {
+        if (pair.second) {
+            pair.second(isDraggable);
+        }
+    }
+}
+
+void ForceSplitManager::NotifyWindowFirstTimeDraggableRatioIfNeeded(float ratio)
+{
+    if (!IsSplitDraggable()) {
+        return;
+    }
+    bool needNotify = false;
+    if (mode_ == ForceSplitMode::WIDE_SPLIT && !preWideSplitWindowNotifyRatio_.has_value()) {
+        preWideSplitWindowNotifyRatio_ = ratio;
+        needNotify = true;
+    } else if (mode_ == ForceSplitMode::SQUARE_SPLIT && !preSquareSplitWindowNotifyRatio_.has_value()) {
+        preSquareSplitWindowNotifyRatio_ = ratio;
+        needNotify = true;
+    }
+    if (!needNotify) {
+        return;
+    }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto winMgr = context->GetWindowManager();
+    CHECK_NULL_VOID(winMgr);
+    // When entering the draggable state for the first time,
+    // it is also necessary to notify the window side of the initial ratio.
+    winMgr->UpdateForceSplitRatio(ratio);
+}
+
+void ForceSplitManager::NotifyWindowDraggableRatioChangeIfNeeded(float ratio)
+{
+    if (!IsSplitDraggable()) {
+        return;
+    }
+    bool needNotify = false;
+    if (mode_ == ForceSplitMode::WIDE_SPLIT &&
+        preWideSplitWindowNotifyRatio_.has_value() && preWideSplitWindowNotifyRatio_.value() != ratio) {
+        preWideSplitWindowNotifyRatio_ = ratio;
+        needNotify = true;
+    } else if (mode_ == ForceSplitMode::SQUARE_SPLIT &&
+        preSquareSplitWindowNotifyRatio_.has_value() && preSquareSplitWindowNotifyRatio_.value() != ratio) {
+        preSquareSplitWindowNotifyRatio_ = ratio;
+        needNotify = true;
+    }
+    if (!needNotify) {
+        return;
+    }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto winMgr = context->GetWindowManager();
+    CHECK_NULL_VOID(winMgr);
+    // when the user actually drags in the corresponding mode and the ratio of the dragged column changes,
+    // it is necessary to notify the window side of the ratio.
+    winMgr->UpdateForceSplitRatio(ratio);
+}
+
 void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
 {
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     FlushArkUIHook();
-    auto winMgr = context->GetWindowManager();
-    if (winMgr && IsSplitDraggable()) {
-        winMgr->UpdateForceSplitRatio(ratio);
-    }
+    NotifyWindowDraggableRatioChangeIfNeeded(ratio);
     // Update Dialog ratio
     auto listeners = forceSplitRatioListeners_;
     for (auto pair : listeners) {
@@ -305,16 +432,6 @@ void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
     auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
     CHECK_NULL_VOID(navNode);
     navNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void ForceSplitManager::UpdateForceSplitRatio()
-{
-    auto splitRatio = CalcCurrentSplitRatio();
-    if (NearEqual(splitRatio, splitRatio_)) {
-        return;
-    }
-    splitRatio_ = splitRatio;
-    OnForceSplitRatioUpdate(splitRatio_);
 }
 
 bool ForceSplitManager::IsPagePair(const std::string& from, const std::string& to) const
@@ -363,8 +480,16 @@ bool ForceSplitManager::IsSplitDraggable() const
     return squareSplitIsDraggable_;
 }
 
-void ForceSplitManager::SetSplitRatioDirectly(float ratio)
+void ForceSplitManager::SetDragStoppedRatio(float ratio)
 {
+    if (mode_ == ForceSplitMode::WIDE_SPLIT && wideSplitIsDraggable_) {
+        wideSplitRatio_ = ratio;
+    } else if (mode_ == ForceSplitMode::SQUARE_SPLIT && squareSplitIsDraggable_) {
+        squareSplitRatio_ = ratio;
+    }
+    if (NearEqual(splitRatio_, ratio)) {
+        return;
+    }
     splitRatio_ = ratio;
     OnForceSplitRatioUpdate(ratio);
 }
@@ -388,74 +513,26 @@ RefPtr<FrameNode> ForceSplitManager::CreateDragMaskNode()
     CHECK_NULL_RETURN(context, nullptr);
     auto stackNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto stackNode = FrameNode::CreateFrameNode(
-        V2::STACK_ETS_TAG, stackNodeId, AceType::MakeRefPtr<StackPattern>());
+        "ForceSplitDragMask", stackNodeId, AceType::MakeRefPtr<StackPattern>());
     CHECK_NULL_RETURN(stackNode, nullptr);
-    auto stackLayoutProperty = stackNode->GetLayoutProperty<StackLayoutProperty>();
-    CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
-    stackLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    auto imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_RETURN(imageNode, nullptr);
-    auto imagePattern = imageNode->GetPattern<ImagePattern>();
-    if (imagePattern) {
-        imagePattern->SetSyncLoad(true);
+    auto layoutProperty = stackNode->GetLayoutProperty<StackLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+        .edges = SAFE_AREA_EDGE_ALL };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    auto renderContext = stackNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    styleOption.scale = 1.0;
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    renderContext->UpdateFrontBlurStyle(styleOption, sysOptions);
+    if (renderContext->GetFrontBlurRadius().has_value()) {
+        renderContext->UpdateFrontBlurRadius(Dimension());
     }
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    auto fullPercent = CalcLength(1.0, DimensionUnit::PERCENT);
-    auto fullSize = CalcSize(fullPercent, fullPercent);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(fullSize);
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateAutoResize(false);
-    auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
-    if (imageRenderProperty) {
-        imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
-    }
-    stackNode->AddChild(imageNode);
-    auto stackRenderContext = stackNode->GetRenderContext();
-    CHECK_NULL_RETURN(stackRenderContext, nullptr);
-    Color foregroundColor = Color(DRAG_MASK_NODE_FOREGROUND_COLOR);
-    stackRenderContext->UpdateForegroundColor(foregroundColor);
-    stackRenderContext->UpdateForegroundColorFlag(true);
-    stackRenderContext->UpdateFrontBlurRadius(40.77_vp);
-    imageNode->MarkModifyDone();
     stackNode->MarkModifyDone();
     return stackNode;
-}
-
-void ForceSplitManager::UpdateDragMaskNodeContent(
-    const RefPtr<FrameNode>& maskNode, RefPtr<FrameNode> contentNode)
-{
-    CHECK_NULL_VOID(maskNode);
-    CHECK_NULL_VOID(contentNode);
-    const auto& children = maskNode->GetChildren();
-    if (maskNode->GetTag() != V2::STACK_ETS_TAG || children.empty()) {
-        return;
-    }
-    auto imageNode = AceType::DynamicCast<FrameNode>(children.front());
-    if (!imageNode || imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
-        return;
-    }
-    auto pixelMap = CreateSnapshot(contentNode);
-    if (!pixelMap) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Failed to get snapshot for drag maskNode");
-        return;
-    }
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    ImageSourceInfo sourceInfo(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    imageNode->MarkModifyDone();
-}
-
-RefPtr<OHOS::Ace::PixelMap> ForceSplitManager::CreateSnapshot(RefPtr<FrameNode> node)
-{
-    CHECK_NULL_RETURN(node, nullptr);
-    if (createSnapshotCallback_) {
-        return createSnapshotCallback_(node);
-    }
-    return nullptr;
 }
 } // namespace OHOS::Ace::NG

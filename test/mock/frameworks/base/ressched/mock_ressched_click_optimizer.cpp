@@ -25,7 +25,7 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 }
 
 void ResSchedClickOptimizer::GetComponentTextRecursive(
-    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain)
+    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, const int32_t maxNodes)
 {
 }
 } // namespace OHOS::Ace

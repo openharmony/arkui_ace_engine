@@ -133,39 +133,21 @@ interface CommandPath {
 class LengthMetrics {
   private unit_: LengthUnit;
   private value_: number;
-  private res_: Resource | undefined;
+  public unit: LengthUnit;
+  public value: number;
+  public res: Resource;
   private autoRefresh_: boolean | undefined;
   constructor(value: number, unit?: LengthUnit, res?: Resource) {
     if (unit in LengthUnit) {
-        this.unit_ = unit;
-        this.value_ = value;
+        this.unit = unit;
+        this.value = value;
     } else {
-        this.unit_ = LengthUnit.VP;
-        this.value_ = unit === undefined ? value : 0;
+        this.unit = LengthUnit.VP;
+        this.value = unit === undefined ? value : 0;
     }
-    this.res_ = res === undefined ? undefined : res;
-    Object.defineProperty(this, 'value', {
-      enumerable: true,
-      configurable: true,
-      get: (): number => {
-        this.updateValue();
-        return this.value_;
-      },
-      set: (v: number): void => {
-        this.value_ = v;
-      }
-    });
-    Object.defineProperty(this, 'unit', {
-      enumerable: true,
-      configurable: true,
-      get: (): LengthUnit => {
-        this.updateValue();
-        return this.unit_;
-      },
-      set: (v: LengthUnit): void => {
-        this.unit_ = v;
-      }
-    });
+    this.res = res === undefined ? undefined : res;
+    this.value_ = this.value;
+    this.unit_ = this.unit;
   }
   static px(value: number) {
     return new LengthMetrics(value, LengthUnit.PX);
@@ -187,8 +169,8 @@ class LengthMetrics {
     return new LengthMetrics(length[0], length[1], res);
   }
   private updateValue(): void {
-    if (this.autoRefresh_ && this.res_ !== undefined) {
-      const length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(this.res_);
+    if (this.autoRefresh_ && this.res !== undefined) {
+      const length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(this.res);
       if (length === undefined) {
         JSXNodeLogConsole.warn('Failed to obtain the length metrics resource when refresh length value.');
         return;
@@ -197,15 +179,54 @@ class LengthMetrics {
       this.unit_ = length[1];
     }
   }
-  get res(): Resource | undefined {
-    return this.res_;
-  }
   public autoRefresh(value: boolean): LengthMetrics {
+    if (this.autoRefresh_ === value) {
+      return this;
+    }
     this.autoRefresh_ = value;
+    this.value_ = this.value;
+    this.unit_ = this.unit;
+    if (value) {
+      Object.defineProperty(this, 'value', {
+        enumerable: true,
+        configurable: true,
+        get: (): number => {
+          this.updateValue();
+          return this.value_;
+        },
+        set: (v: number): void => {
+          this.value_ = v;
+        }
+      });
+      Object.defineProperty(this, 'unit', {
+        enumerable: true,
+        configurable: true,
+        get: (): LengthUnit => {
+          this.updateValue();
+          return this.unit_;
+        },
+        set: (v: LengthUnit): void => {
+          this.unit_ = v;
+        }
+      });
+    } else {
+      Object.defineProperty(this, 'value', {
+        value: this.value_,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+      Object.defineProperty(this, 'unit', {
+        value: this.unit_,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+    }
     return this;
   }
   toJSON() {
-    return { unit: this.unit_, value: this.value_, res: this.res_ , autoRefresh_: this.autoRefresh_ };
+    return { unit: this.unit, value: this.value, res: this.res, autoRefresh: this.autoRefresh_ };
   }
 }
 
@@ -420,18 +441,23 @@ class ColorMetrics {
     return new ColorMetrics(red, green, blue, alpha);
   }
   get color(): string {
+    this.refreshColorValue();
     return `rgba(${this.red_}, ${this.green_}, ${this.blue_}, ${this.alpha_ / MAX_CHANNEL_VALUE})`;
   }
   get red(): number {
+    this.refreshColorValue();
     return this.red_;
   }
   get green(): number {
+    this.refreshColorValue();
     return this.green_;
   }
   get blue(): number {
+    this.refreshColorValue();
     return this.blue_;
   }
   get alpha(): number {
+    this.refreshColorValue();
     return this.alpha_;
   }
   setResourceId(resourceId: number): void {

@@ -32,6 +32,26 @@ const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::STACK_ETS_TAG,
     OHOS::Ace::V2::CUSTOM_ETS_TAG
 };
+
+const std::unordered_set<std::string> SMART_LAYOUT_ENABLED_COMPONENTS = {
+    OHOS::Ace::V2::COLUMN_ETS_TAG,
+    OHOS::Ace::V2::ROW_ETS_TAG,
+    OHOS::Ace::V2::FLEX_ETS_TAG,
+};
+
+bool IsComponentSupportSmartLayout(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, false);
+    if (SMART_LAYOUT_ENABLED_COMPONENTS.find(hostNode->GetTag()) == SMART_LAYOUT_ENABLED_COMPONENTS.end()) {
+        return false;
+    }
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->IsScrollAble()) {
+        return false;
+    }
+    return true;
+}
 }
 
 static inline void UnionRect(std::optional<RectF>& unionRect, const RectF& rect)
@@ -144,7 +164,8 @@ void OverflowCollector::AccumulateFromWrapper(const RefPtr<LayoutWrapper>& child
     }
     auto geometryNode = child->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    UnionRect(overflowCollectResult_.totalChildFrameRect, geometryNode->GetMarginFrameRect());
+    const auto& childRect = useFrameRect_ ? geometryNode->GetFrameRect() : geometryNode->GetMarginFrameRect();
+    UnionRect(overflowCollectResult_.totalChildFrameRect, childRect);
 }
 
 bool LayoutAlgorithm::ShouldDoOverflowWork()
@@ -153,9 +174,9 @@ bool LayoutAlgorithm::ShouldDoOverflowWork()
 }
 
 OverflowCollectResult LayoutAlgorithm::CollectOverflowFromFrameNode(
-    FrameNode* hostNode, bool earlyBreakWhenDisabled)
+    FrameNode* hostNode, bool earlyBreakWhenDisabled, bool useFrameRect)
 {
-    OverflowCollector collector(earlyBreakWhenDisabled);
+    OverflowCollector collector(earlyBreakWhenDisabled, useFrameRect);
     CHECK_NULL_RETURN(hostNode, collector.Result());
     int32_t childCount = hostNode->GetTotalChildCount();
     for (int32_t i = 0; i < childCount; i++) {
@@ -203,13 +224,18 @@ bool LayoutAlgorithm::IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCo
 
 void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 {
-    if (!FeatureParam::IsPageOverflowEnabled() && !FeatureParam::IsSmartLayoutEnabled()) {
+    CHECK_NULL_VOID(layoutWrapper);
+    if (HandleContentOverflowWithSmartLayout(layoutWrapper)) {
         return;
     }
-
-    CHECK_NULL_VOID(layoutWrapper);
+    if (!FeatureParam::IsPageOverflowEnabled()) {
+        return;
+    }
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
+        return;
+    }
     auto pattern = hostNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     const auto &vOverflowHandler =
@@ -218,25 +244,62 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 
     vOverflowHandler->SetOverflowDisabledFlag(
         vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
+    vOverflowHandler->HandleContentOverflow();
+}
 
-    // Determine if smart layout should execute this frame
-    bool shouldExecuteSmartLayout = FeatureParam::IsSmartLayoutEnabled() &&
-        !pattern->IsScrollAble() && vOverflowHandler->IsOverflow();
-    // State change detection: restore scales when transitioning from executed to not-executed
-    if (vOverflowHandler->WasSmartLayoutExecuted() && !shouldExecuteSmartLayout) {
-        vOverflowHandler->RestoreScales(layoutWrapper);
-        vOverflowHandler->SetSmartLayoutExecuted(false);
+bool LayoutAlgorithm::HandleContentOverflowWithSmartLayout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (!FeatureParam::IsSmartLayoutEnabled() || !IsComponentSupportSmartLayout(layoutWrapper->GetHostNode())) {
+        return false;
     }
+    TryRestoreSmartLayoutForHost(layoutWrapper);
+    if (!IsContentOverflowForSmartLayout(layoutWrapper)) {
+        return false;
+    }
+    SmartLayoutAlgorithm smartLayoutAlgorithm;
+    return smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+}
 
-    if (shouldExecuteSmartLayout) {
-        SmartLayoutAlgorithm smartLayoutAlgorithm;
-        smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
-        vOverflowHandler->SetSmartLayoutExecuted(true);
-    } else if (FeatureParam::IsPageOverflowEnabled()) {
-        if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
-            return;
-        }
-        vOverflowHandler->HandleContentOverflow();
+bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+
+    // 收集子节点包围盒
+    auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
+    if (collectResult.overflowDisabled || !collectResult.totalChildFrameRect.has_value()) {
+        return false;
+    }
+    const auto& childRect = collectResult.totalChildFrameRect.value();
+
+    // 父容器在本地坐标系下的区域
+    auto geometry = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, false);
+    auto frameSize = geometry->GetFrameSize();
+    RectF parentRect(0.0f, 0.0f, frameSize.Width(), frameSize.Height());
+
+    // 子节点包围盒是否超出父容器
+    constexpr double MAX_GAP = 2.0;
+    return LessNotEqual(childRect.Top(), parentRect.Top() - MAX_GAP) ||
+        GreatNotEqual(childRect.Bottom(), parentRect.Bottom() + MAX_GAP) ||
+        LessNotEqual(childRect.Left(), parentRect.Left() - MAX_GAP) ||
+        GreatNotEqual(childRect.Right(), parentRect.Right() + MAX_GAP);
+}
+
+void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
+    for (const auto& child : children) {
+        CHECK_NULL_CONTINUE(child);
+        auto hostNode = child->GetHostNode();
+        CHECK_NULL_CONTINUE(hostNode);
+        auto renderContext = hostNode->GetRenderContext();
+        CHECK_NULL_CONTINUE(renderContext);
+        auto scale = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+        renderContext->SetScale(scale.x, scale.y);
     }
 }
 

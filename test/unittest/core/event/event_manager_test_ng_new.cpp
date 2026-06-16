@@ -18,6 +18,7 @@
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
@@ -1029,5 +1030,176 @@ HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
 
     eventManager->SetResponseLinkRecognizers(result, responseLinkRecognizers);
     EXPECT_TRUE(responseLinkRecognizers.size() == 1);
+}
+
+/**
+ * @tc.name: EventManagerGetOrCreateActiveRecognizerManager001
+ * @tc.desc: Test GetOrCreateActiveRecognizerManager creates new manager when null
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerGetOrCreateActiveRecognizerManager001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    EXPECT_EQ(eventManager->activeRecognizerManager_, nullptr);
+
+    auto manager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(eventManager->activeRecognizerManager_, manager);
+    EXPECT_FALSE(manager->HasActiveRecognizers());
+}
+
+/**
+ * @tc.name: EventManagerGetOrCreateActiveRecognizerManager002
+ * @tc.desc: Test GetOrCreateActiveRecognizerManager returns existing manager when already created
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerGetOrCreateActiveRecognizerManager002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto manager1 = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(manager1, nullptr);
+
+    auto manager2 = eventManager->GetOrCreateActiveRecognizerManager();
+    EXPECT_EQ(manager1, manager2);
+    EXPECT_EQ(eventManager->activeRecognizerManager_, manager1);
+}
+
+/**
+ * @tc.name: EventManagerTouchTestCheckAndClean001
+ * @tc.desc: Test TouchTest L122 branch: lastDownFingerNumber_==0 && DOWN && !needAppend
+ *           → CheckAndCleanBeforeNewTouch called, SUCCEED recognizer cleaned
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTouchTestCheckAndClean001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    activeManager->RegisterRecognizer(recognizer, 0);
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+
+    const int nodeId = 20001;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, nodeId, nullptr);
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->lastDownFingerNumber_ = 0;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, false);
+
+    EXPECT_FALSE(activeManager->HasActiveRecognizers());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestCheckAndClean002
+ * @tc.desc: Test TouchTest L122 branch: lastDownFingerNumber_!=0
+ *           → CheckAndCleanBeforeNewTouch NOT called, recognizers preserved
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTouchTestCheckAndClean002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    activeManager->RegisterRecognizer(recognizer, 0);
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+
+    const int nodeId = 20002;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, nodeId, nullptr);
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->lastDownFingerNumber_ = 2;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, false);
+
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestCheckAndClean003
+ * @tc.desc: Test TouchTest L122 branch: needAppend=true
+ *           → !needAppend is false, CheckAndCleanBeforeNewTouch NOT called
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTouchTestCheckAndClean003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    activeManager->RegisterRecognizer(recognizer, 0);
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+
+    const int nodeId = 20003;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, nodeId, nullptr);
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->lastDownFingerNumber_ = 0;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+}
+
+/**
+ * @tc.name: EventManagerTouchTestCheckAndClean004
+ * @tc.desc: Test TouchTest L122 branch: UP event (not DOWN)
+ *           → touchPoint.type != DOWN, CheckAndCleanBeforeNewTouch NOT called
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTouchTestCheckAndClean004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    activeManager->RegisterRecognizer(recognizer, 0);
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
+
+    const int nodeId = 20004;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, nodeId, nullptr);
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::UP;
+
+    TouchRestrict touchRestrict;
+    Offset offset;
+    eventManager->lastDownFingerNumber_ = 0;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, false);
+
+    EXPECT_TRUE(activeManager->HasActiveRecognizers());
 }
 } // namespace OHOS::Ace::NG

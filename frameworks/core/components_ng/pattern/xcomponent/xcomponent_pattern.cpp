@@ -80,6 +80,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+std::atomic<bool> XComponentPattern::compensationAngleFlag_{false};
+std::mutex XComponentPattern::angleMtx_;
+std::string XComponentPattern::compensationAngleFromFeatureManager_ = "";
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
@@ -438,21 +441,38 @@ Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
         default: return Rosen::ScreenRotation::INVALID_SCREEN_ROTATION;
     }
 }
- 
-std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
+
+std::string XComponentPattern::GetCompensationAngleFromFeatureManager()
 {
-    std::string tempAngleConfigJson = angleConfigJson;
+    if (compensationAngleFlag_.load(std::memory_order_acquire)) {
+        return compensationAngleFromFeatureManager_;
+    }
+    std::lock_guard<std::mutex> lock(angleMtx_);
+    if (compensationAngleFlag_.load(std::memory_order_relaxed)) {
+        return compensationAngleFromFeatureManager_;
+    }
     if (SystemProperties::IsSensorCorrectionEnabled()) {
         LOGI("Sensor Correction is Enabled");
         std::string featureManagerAngleConfig;
         auto featureResult = FeatureManager::GetInstance().GetFeatureParam(ANGLE_KEY, featureManagerAngleConfig);
         if (featureResult == FeatureManager::SUCCESS) {
-            tempAngleConfigJson = featureManagerAngleConfig;
-            LOGI("featureManagerAngleConfig is %{public}s", tempAngleConfigJson.c_str());
+            compensationAngleFromFeatureManager_ = featureManagerAngleConfig;
+            LOGI("featureManagerAngleConfig is %{public}s", compensationAngleFromFeatureManager_.c_str());
         }
     } else {
         LOGI("Sensor Correction is not Enabled");
         // can return when the feature manager is enable.
+    }
+    compensationAngleFlag_.store(true, std::memory_order_release);
+    return compensationAngleFromFeatureManager_;
+}
+ 
+std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
+{
+    std::string tempAngleConfigJson = angleConfigJson;
+    std::string compensationAngleFromFeatureManager = XComponentPattern::GetCompensationAngleFromFeatureManager();
+    if (!compensationAngleFromFeatureManager.empty()) {
+        tempAngleConfigJson = compensationAngleFromFeatureManager;
     }
     if (tempAngleConfigJson.empty()) {
         LOGE("UIContent set compensation angle empty");
@@ -470,6 +490,9 @@ std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& ang
     }
     auto result = angleConfig->ToString();
     LOGI("get angle info: %{public}s", result.c_str());
+    if (result.empty()) {
+        return nullptr;
+    }
     return JsonUtil::ParseJsonString(result);
 }
  

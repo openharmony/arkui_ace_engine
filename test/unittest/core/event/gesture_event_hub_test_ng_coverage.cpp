@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_interaction_interface.h"
@@ -903,5 +904,128 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset005, TestSize.Le
     gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));
+}
+
+/**
+ * @tc.name: GestureEventHubRegisterBasicRecognizers002
+ * @tc.desc: Test RegisterBasicRecognizers with valid host and pipeline — registers non-group recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubRegisterBasicRecognizers002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::list<RefPtr<NGGestureRecognizer>> recognizers = { recognizer };
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    EXPECT_EQ(activeManager->GetActiveRecognizerCount(), 0);
+
+    gestureEventHub->RegisterBasicRecognizers(recognizers, TOUCH_ID);
+    EXPECT_EQ(activeManager->GetActiveRecognizerCount(), 1);
+}
+
+/**
+ * @tc.name: GestureEventHubRegisterBasicRecognizers003
+ * @tc.desc: Test RegisterBasicRecognizers with RecognizerGroup where IsRemainChildOnResetStatus is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubRegisterBasicRecognizers003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::vector<RefPtr<NGGestureRecognizer>> groupChildren = { clickRecognizer };
+    auto exclusiveGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(groupChildren);
+    EXPECT_FALSE(exclusiveGroup->IsRemainChildOnResetStatus());
+
+    std::list<RefPtr<NGGestureRecognizer>> recognizers = { exclusiveGroup };
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    size_t initialCount = activeManager->GetActiveRecognizerCount();
+
+    gestureEventHub->RegisterBasicRecognizers(recognizers, TOUCH_ID);
+    EXPECT_EQ(activeManager->GetActiveRecognizerCount(), initialCount);
+}
+
+/**
+ * @tc.name: GestureEventHubRegisterBasicRecognizers004
+ * @tc.desc: Test RegisterBasicRecognizers with RecognizerGroup where IsRemainChildOnResetStatus is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubRegisterBasicRecognizers004, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::vector<RefPtr<NGGestureRecognizer>> groupChildren = { clickRecognizer };
+    auto exclusiveGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(groupChildren);
+    exclusiveGroup->RemainChildOnResetStatus();
+    EXPECT_TRUE(exclusiveGroup->IsRemainChildOnResetStatus());
+
+    std::list<RefPtr<NGGestureRecognizer>> recognizers = { exclusiveGroup };
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    size_t initialCount = activeManager->GetActiveRecognizerCount();
+
+    gestureEventHub->RegisterBasicRecognizers(recognizers, TOUCH_ID);
+    EXPECT_EQ(activeManager->GetActiveRecognizerCount(), initialCount + 1);
+}
+
+/**
+ * @tc.name: GestureEventHubRegisterBasicRecognizers006
+ * @tc.desc: Test RegisterBasicRecognizers with mixed recognizers (non-group + group with remain=true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubRegisterBasicRecognizers006, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::vector<RefPtr<NGGestureRecognizer>> groupChildren = { clickRecognizer };
+    auto exclusiveGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(groupChildren);
+    exclusiveGroup->RemainChildOnResetStatus();
+
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGERS, PanDirection{}, DISTANCE.ConvertToPx());
+
+    std::list<RefPtr<NGGestureRecognizer>> recognizers = { panRecognizer, exclusiveGroup };
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto activeManager = eventManager->GetOrCreateActiveRecognizerManager();
+    ASSERT_NE(activeManager, nullptr);
+    size_t initialCount = activeManager->GetActiveRecognizerCount();
+
+    gestureEventHub->RegisterBasicRecognizers(recognizers, TOUCH_ID);
+    EXPECT_EQ(activeManager->GetActiveRecognizerCount(), initialCount + 2);
 }
 } // namespace OHOS::Ace::NG

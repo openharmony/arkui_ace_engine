@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/state_style_manager.h"
 
 #include "base/error/error_code.h"
 #include "base/log/dump_log.h"
@@ -44,6 +45,74 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
+
+FocusPattern::FocusPattern(const FocusPattern& focusPattern)
+{
+    focusType_ = focusPattern.GetFocusType();
+    focusable_ = focusPattern.GetFocusable();
+    styleType_ = focusPattern.GetStyleType();
+    if (focusPattern.GetFocusPaintParams()) {
+        SetFocusPaintParams(*focusPattern.GetFocusPaintParams());
+    }
+    isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+}
+
+FocusHub::FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
+    : FocusState(eventHub), FocusEventHandler()
+{
+    focusable_ = focusPattern.GetFocusable();
+    focusType_ = focusPattern.GetFocusType();
+    focusStyleType_ = focusPattern.GetStyleType();
+    if (focusPattern.GetFocusPaintParams()) {
+        SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+    }
+    isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+}
+
+FocusHub::FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern)
+    : FocusState(frameNode), FocusEventHandler()
+{
+    focusable_ = focusPattern.GetFocusable();
+    focusType_ = focusPattern.GetFocusType();
+    focusStyleType_ = focusPattern.GetStyleType();
+    if (focusPattern.GetFocusPaintParams()) {
+        SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+    }
+    isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+}
+
+void FocusHub::SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
+{
+    CHECK_NULL_VOID(paramsPtr);
+    if (!focusPaintParamsPtr_) {
+        focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    }
+    if (paramsPtr->HasPaintRect()) {
+        focusPaintParamsPtr_->SetPaintRect(paramsPtr->GetPaintRect());
+    }
+    if (paramsPtr->HasPaintColor()) {
+        focusPaintParamsPtr_->SetPaintColor(paramsPtr->GetPaintColor());
+    }
+    if (paramsPtr->HasPaintWidth()) {
+        focusPaintParamsPtr_->SetPaintWidth(paramsPtr->GetPaintWidth());
+    }
+    if (paramsPtr->HasFocusPadding()) {
+        focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
+    }
+}
+
+void FocusHub::SetFocusType(FocusType type)
+{
+    if (focusType_ != type && type == FocusType::DISABLE) {
+        RemoveSelf(BlurReason::FOCUS_SWITCH);
+    }
+    focusType_ = type;
+
+    if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
+        focusDepend_ = FocusDependence::AUTO;
+    }
+}
+
 namespace {
 template <bool isReverse>
 __attribute__((noinline)) bool AnyOfUINodeInner(const std::list<RefPtr<UINode>>& children,
@@ -3287,5 +3356,62 @@ size_t FocusHub::GetFocusableCount()
         }
     });
     return count;
+}
+
+void FocusHub::SetTabIndex(int32_t tabIndex)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->tabIndex_ = tabIndex;
+}
+
+void FocusHub::SetIsDefaultFocus(bool isDefaultFocus)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->isDefaultFocus_ = isDefaultFocus;
+}
+
+void FocusHub::SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->isDefaultGroupFocus_ = isDefaultGroupFocus;
+}
+
+void FocusHub::SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->defaultFocusNode_ = node;
+}
+
+void FocusHub::SetIsDefaultHasFocused(bool isDefaultHasFocused)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->isDefaultHasFocused_ = isDefaultHasFocused;
+}
+
+void FocusHub::SetIsDefaultGroupHasFocused(bool isDefaultGroupHasFocused)
+{
+    if (!focusCallbackEvents_) {
+        focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+    }
+    focusCallbackEvents_->isDefaultGroupHasFocused_ = isDefaultGroupHasFocused;
+}
+
+bool FocusHub::IsFocusStepForward(FocusStep step, bool isRtl)
+{
+    bool isForward = (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+    if (isRtl && (step == FocusStep::RIGHT || step == FocusStep::LEFT)) {
+        isForward = !isForward;
+    }
+    return isForward;
 }
 } // namespace OHOS::Ace::NG

@@ -18,18 +18,15 @@
 
 #include <cstdint>
 #include <functional>
-#include "ui/properties/gradient_property.h"
 
+#include "ui/properties/gradient_property.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
@@ -39,12 +36,9 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/opinc_type.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/canvas_draw_function.h"
-#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
 
@@ -55,6 +49,7 @@ class Filter;
 enum class Gravity;
 class Blender;
 class RSNGFilterBase;
+class RSNGShaderBase;
 class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
@@ -291,30 +286,15 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption()
-    {
-        return oneCenterTransition_;
-    }
-    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value)
-    {
-        oneCenterTransition_ = value;
-    }
+    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption();
+    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value);
     virtual void OnNodeDisappear(bool recursive) {}
     virtual void OnNodeAppear(bool recursive) {}
-    virtual bool HasTransitionOutAnimation() const
-    {
-        return false;
-    }
+    virtual bool HasTransitionOutAnimation() const;
 
-    virtual bool HasDisappearTransition() const
-    {
-        return false;
-    }
+    virtual bool HasDisappearTransition() const;
 
-    virtual bool IsSynced() const
-    {
-        return isSynced_;
-    }
+    virtual bool IsSynced() const;
 
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
@@ -390,6 +370,9 @@ public:
     {
         return nullptr;
     }
+    virtual void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) {}
+
+    virtual void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) {}
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}
@@ -439,24 +422,15 @@ public:
     virtual void SetMarkNodeGroup(bool isNodeGroup) {}
     virtual void SetLayerMark(bool isLayer) {}
 
-    virtual RectF GetPaintRectWithTransform()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithTransform();
     virtual int32_t GetRotateDegree() { return 0; }
     virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 
-    virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
-    {
-        return {};
-    }
+    virtual std::pair<RectF, bool> GetPaintRectWithTranslate();
 
-    virtual Matrix4 GetLocalTransformMatrix()
-    {
-        return Matrix4();
-    }
+    virtual Matrix4 GetLocalTransformMatrix();
 
     virtual void GetPointWithRevert(PointF& point) {}
 
@@ -466,39 +440,21 @@ public:
 
     virtual void GetPointTransformRotate(PointF& point) {}
 
-    virtual Matrix4 GetMatrixWithTransformRotate()
-    {
-        return {};
-    }
+    virtual Matrix4 GetMatrixWithTransformRotate();
 
-    virtual RectF GetPaintRectWithoutTransform()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithoutTransform();
 
-    virtual RectF GetPaintRectWithTransformWithoutDegree()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithTransformWithoutDegree();
 
     // get position property
-    virtual RectF GetPropertyOfPosition()
-    {
-        return {};
-    }
+    virtual RectF GetPropertyOfPosition();
 
     // stop the property animation and get the current paint rect.
-    virtual OffsetF GetShowingTranslateProperty()
-    {
-        return OffsetF();
-    }
+    virtual OffsetF GetShowingTranslateProperty();
 
     virtual void CancelTranslateXYAnimation() {}
 
-    virtual OffsetF GetTranslateXYProperty()
-    {
-        return OffsetF();
-    }
+    virtual OffsetF GetTranslateXYProperty();
 
     // update translateXY in backend.
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
@@ -533,40 +489,16 @@ public:
     bool HasSharedTransition() const;
     bool HasSharedTransitionOption() const;
 
-    void SetIsModalRootNode(bool isModalRootNode)
-    {
-        isModalRootNode_ = isModalRootNode;
-    }
+    void SetIsModalRootNode(bool isModalRootNode);
 
-    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree)
-    {
-        isNeedRebuildRSTree_ = isNeedRebuildRSTree;
-    }
+    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree);
 
-    std::optional<BlurStyleOption> GetBackBlurStyle() const
-    {
-        return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
-    }
-    std::optional<Dimension> GetBackBlurRadius() const
-    {
-        return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
-    }
-    std::optional<EffectOption> GetBackgroundEffect() const
-    {
-        return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
-    }
-    std::optional<BlurOption> GetBackdropBlurOption() const
-    {
-        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
-    }
-    std::optional<BlurStyleOption> GetFrontBlurStyle() const
-    {
-        return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
-    }
-    std::optional<Dimension> GetFrontBlurRadius() const
-    {
-        return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
-    }
+    std::optional<BlurStyleOption> GetBackBlurStyle() const;
+    std::optional<Dimension> GetBackBlurRadius() const;
+    std::optional<EffectOption> GetBackgroundEffect() const;
+    std::optional<BlurOption> GetBackdropBlurOption() const;
+    std::optional<BlurStyleOption> GetFrontBlurStyle() const;
+    std::optional<Dimension> GetFrontBlurRadius() const;
 
     virtual void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
@@ -839,21 +771,12 @@ public:
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
-    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
-    {
-        return 0;
-    }
+    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed);
 
-    virtual bool IsUniRenderEnabled()
-    {
-        return true;
-    }
+    virtual bool IsUniRenderEnabled();
     virtual void SetRenderFrameOffset(const OffsetF& offset) {}
 
-    virtual bool DoTextureExport(uint64_t /* surfaceId */)
-    {
-        return false;
-    }
+    virtual bool DoTextureExport(uint64_t /* surfaceId */);
 
     virtual bool StopTextureExport()
     {
@@ -876,10 +799,7 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
-    void SetNeedAnimateFlag(bool isNeedAnimate)
-    {
-        isNeedAnimate_ = isNeedAnimate;
-    }
+    void SetNeedAnimateFlag(bool isNeedAnimate);
 
     virtual uint64_t GetNodeId() const
     {
@@ -960,10 +880,7 @@ public:
 
     virtual void UpdateSubmenuDistortionParam() {}
 
-    void SetIsFree(bool isFree)
-    {
-        isFree_ = isFree;
-    }
+    void SetIsFree(bool isFree);
     virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}

@@ -376,4 +376,29 @@ bool Pattern::HandleTextBoxComponentCommand(
     CHECK_NULL_RETURN(params && params->IsObject(), false);
     return true;
 }
+
+void Pattern::DetachFromFrameNode(FrameNode* frameNode)
+{
+    onDetach_ = true;
+    OnDetachFromFrameNode(frameNode);
+    onDetach_ = false;
+    frameNode_.Reset();
+}
+
+void Pattern::AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
+{
+    if (frameNode_ == frameNode) {
+        return;
+    }
+    frameNode_ = frameNode;
+    OnAttachToFrameNode();
+}
+
+RefPtr<FrameNode> Pattern::GetHost() const
+{
+    if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+        LOGF_ABORT("fatal: can't GetHost at detaching period");
+    }
+    return frameNode_.Upgrade();
+}
 } // namespace OHOS::Ace::NG

@@ -16,8 +16,9 @@
 #include "arkoala_api_generated.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/pattern/date_picker/bridge/date_picker_dialog_extender.h"
+#include "frameworks/core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
 #include "frameworks/core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
-#include "frameworks/core/interfaces/native/implementation/date_picker_dialog_extender.h"
 #include "frameworks/core/interfaces/native/implementation/text_picker_dialog_extender.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -41,7 +42,16 @@ void ShowTextPickerDialogImpl(const Ark_Union_TextPickerDialogOptions_TextPicker
 }
 void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
 {
-    DatePickerDialogExtender::Show(options);
+    static const NG::DatePickerUtil::ArkUIDatePickerDialogModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        // Dynamically load the independently compiled so library
+        // from frameworks/core/components_ng/pattern/picker directory
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DatePickerDialog");
+        CHECK_NULL_VOID(module);
+        cachedModifier =
+            reinterpret_cast<const NG::DatePickerUtil::ArkUIDatePickerDialogModifier*>(module->GetStaticModifier());
+    }
+    cachedModifier->showDatePickerDialog(options);
 }
 } // namespace DialogExtenderAccessor
 const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()

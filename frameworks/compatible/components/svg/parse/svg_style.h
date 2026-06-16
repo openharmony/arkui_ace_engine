@@ -33,7 +33,8 @@ public:
     static RefPtr<SvgNode> Create();
     static void ParseCssStyle(const std::string& styleValue, const PushAttr& callback);
     static void ParseCssAttrs(const std::string& styleName, const std::string& attrs, const PushAttr& callback);
-    static std::vector<std::string> SplitString(const std::string& srcString, const std::string& splitString);
+    static std::vector<std::string> SplitString(
+        const std::string& srcString, const std::string& splitString, size_t maxCount = 1024);
 };
 
 } // namespace OHOS::Ace

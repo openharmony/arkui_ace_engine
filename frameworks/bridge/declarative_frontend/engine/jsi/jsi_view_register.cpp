@@ -43,7 +43,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "core/components_ng/pattern/picker/picker_types.h"
+#include "core/components_ng/pattern/date_picker/picker_types.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"

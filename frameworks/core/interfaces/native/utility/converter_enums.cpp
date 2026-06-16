@@ -2583,7 +2583,7 @@ void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_Dist
 }
 
 template<>
-void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
 {
     switch (src) {
         case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;

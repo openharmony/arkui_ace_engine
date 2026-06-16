@@ -58,45 +58,14 @@ public:
     {}
     ~DragEvent() override = default;
 
-    const GestureEventFunc& GetActionStartEventFunc() const
-    {
-        return actionStart_;
-    }
-
-    const GestureEventFunc& GetActionUpdateEventFunc() const
-    {
-        return actionUpdate_;
-    }
-
-    const GestureEventFunc& GetActionEndEventFunc() const
-    {
-        return actionEnd_;
-    }
-
-    const GestureEventNoParameter& GetActionCancelEventFunc() const
-    {
-        return actionCancel_;
-    }
-
-    const GestureEventFunc& GetLongPressEventFunc() const
-    {
-        return actionLongPress_;
-    }
-
-    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress)
-    {
-        actionLongPress_ = std::move(actionLongPress);
-    }
-
-    const std::vector<KeyCode>& GetPressedKeyCodes() const
-    {
-        return pressedKeyCodes_;
-    }
-
-    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
-    {
-        pressedKeyCodes_ = pressedKeyCodes;
-    }
+    const GestureEventFunc& GetActionStartEventFunc() const;
+    const GestureEventFunc& GetActionUpdateEventFunc() const;
+    const GestureEventFunc& GetActionEndEventFunc() const;
+    const GestureEventNoParameter& GetActionCancelEventFunc() const;
+    const GestureEventFunc& GetLongPressEventFunc() const;
+    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress);
+    const std::vector<KeyCode>& GetPressedKeyCodes() const;
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
 
 private:
     GestureEventFunc actionStart_;
@@ -130,10 +99,7 @@ public:
         customCallback_ = dragEvent;
     }
 
-    bool HasDragEvent() const
-    {
-        return static_cast<bool>(userCallback_);
-    }
+    bool HasDragEvent() const;
 
     void ClearDragEvent()
     {
@@ -183,20 +149,11 @@ public:
     virtual void RestartDragTask(const GestureEvent& info);
     static void UpdateDragNodePosition(
         const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode, float width, float height);
-    PanDirection GetDirection() const
-    {
-        return direction_;
-    }
+    PanDirection GetDirection() const;
 
-    int32_t GetFingers() const
-    {
-        return fingers_;
-    }
+    int32_t GetFingers() const;
 
-    float GetDistance() const
-    {
-        return distance_;
-    }
+    float GetDistance() const;
 
     bool IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode);
     void StartDragTaskForWeb(const GestureEvent& info);
@@ -208,67 +165,34 @@ public:
         }
     }
 
-    void SetIsNotInPreviewState(bool isNotInPreviewState)
-    {
-        isNotInPreviewState_ = isNotInPreviewState;
-    }
+    void SetIsNotInPreviewState(bool isNotInPreviewState);
 
     virtual bool GetIsNotInPreviewState() const
     {
         return isNotInPreviewState_;
     }
 
-    void SetIsDragUserReject(bool isDragUserReject)
-    {
-        isDragUserReject_ = isDragUserReject;
-    }
+    void SetIsDragUserReject(bool isDragUserReject);
 
-    bool IsDragUserReject() const
-    {
-        return isDragUserReject_;
-    }
+    bool IsDragUserReject() const;
 
-    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
-    {
-        defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
-    }
+    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted);
 
-    bool IsDefaultOnDragStartExecuted() const
-    {
-        return defaultOnDragStartExecuted_;
-    }
+    bool IsDefaultOnDragStartExecuted() const;
 
     const OptionsAfterApplied& GetOptionsAfterApplied();
 
-    void SetIsForDragDrop(bool isForDragDrop)
-    {
-        isForDragDrop_ = isForDragDrop;
-    }
+    void SetIsForDragDrop(bool isForDragDrop);
 
-    void SetRestartDrag(bool isRestartDrag)
-    {
-        isRestartDrag_ = isRestartDrag;
-    }
+    void SetRestartDrag(bool isRestartDrag);
 
-    bool GetRestartDrag() const
-    {
-        return isRestartDrag_;
-    }
+    bool GetRestartDrag() const;
 
-    bool GetIsNewFwk() const
-    {
-        return isNewFwk_;
-    }
+    bool GetIsNewFwk() const;
 
-    void SetIsNewFwk(bool isNewFwk)
-    {
-        isNewFwk_ = isNewFwk;
-    }
+    void SetIsNewFwk(bool isNewFwk);
 
-    int32_t GetLastTouchFingerId()
-    {
-        return lastTouchFingerId_;
-    }
+    int32_t GetLastTouchFingerId();
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
@@ -323,24 +247,15 @@ public:
     virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
 
 
-    void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
-    {
-        isThumbnailCallbackTriggered_ = isThumbnailCallbackTriggered;
-    }
+    void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered);
 
     void TryTriggerThumbnailCallback();
 
     void GetThumbnailPixelMap(bool isSync);
 
-    void RecordTouchDownPoint(const TouchEvent& downTouchEvent)
-    {
-        touchDownPoint_ = downTouchEvent;
-    }
+    void RecordTouchDownPoint(const TouchEvent& downTouchEvent);
 
-    const TouchEvent& GetTouchDownPoint()
-    {
-        return touchDownPoint_;
-    }
+    const TouchEvent& GetTouchDownPoint();
 
     virtual void NotifyTransDragWindowToFwk() {}
 

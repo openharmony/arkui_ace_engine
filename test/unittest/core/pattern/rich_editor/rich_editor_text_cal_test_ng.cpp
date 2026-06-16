@@ -91,10 +91,17 @@ int32_t RichEditorTextCalTestNg::CheckMaxLines(int32_t maxLines)
  */
 HWTEST_F(RichEditorTextCalTestNg, GetChildByIndex001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern and set caret position
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 0;
+
+    /**
+     * @tc.steps: step2. AddSpan
+     */
     AddSpan(INIT_VALUE_1);
     auto ret1 = richEditorPattern->GetChildByIndex(1);
     EXPECT_EQ(ret1, nullptr);

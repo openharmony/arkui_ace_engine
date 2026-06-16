@@ -244,4 +244,39 @@ void OuterScrollBarLayoutInfo::ToJson(std::unique_ptr<JsonValue>& json) const
     json->Put("fired in", std::to_string(layoutTime_).c_str());
 }
 
+bool NestedScrollOptions::NeedParent() const
+{
+    return forward != NestedScrollMode::SELF_ONLY || backward != NestedScrollMode::SELF_ONLY;
+}
+
+bool NestedScrollOptions::NeedParent(bool forward) const
+{
+    return forward ? this->forward != NestedScrollMode::SELF_ONLY : backward != NestedScrollMode::SELF_ONLY;
+}
+
+bool NestedScrollOptions::operator==(const NestedScrollOptions& other) const
+{
+    return forward == other.forward && backward == other.backward;
+}
+
+bool NestedScrollOptions::operator!=(const NestedScrollOptions& other) const
+{
+    return !(*this == other);
+}
+
+bool ScrollBarMargin::operator==(const ScrollBarMargin& other) const
+{
+    return this->start_ == other.start_ && this->end_ == other.end_;
+}
+
+bool ScrollBarMargin::operator!=(const ScrollBarMargin& other) const
+{
+    return !(*this == other);
+}
+
+std::string ScrollBarMargin::ToString() const
+{
+    return "ScrollBarMargin start: " + start_.ToString() + ", end: " + end_.ToString();
+}
+
 } // namespace OHOS::Ace

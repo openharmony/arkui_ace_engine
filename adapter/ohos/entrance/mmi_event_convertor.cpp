@@ -484,10 +484,22 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return event;
 }
 
+bool IsTouchTypeUnknownUpdate(int32_t orgAction)
+{
+    switch (orgAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_SWIPE_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
+            return false;
+        default:
+            return true;
+    }
+}
+
 void SetTouchEventType(int32_t orgAction, TouchEvent& event)
 {
     auto touchType = ConvertTouchEventType(orgAction);
-    if (touchType == TouchType::UNKNOWN) {
+    if (touchType == TouchType::UNKNOWN && IsTouchTypeUnknownUpdate(orgAction)) {
         TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
         return;
     }

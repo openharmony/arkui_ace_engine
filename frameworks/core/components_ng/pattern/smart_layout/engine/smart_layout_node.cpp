@@ -84,6 +84,11 @@ bool SmartLayoutNode::SolveLayout()
     bool result = engine_->Solve();
     if (result) {
         SyncData();
+        for (const auto& child : children_) {
+            if (child != nullptr) {
+                child->SyncData();
+            }
+        }
     } else {
         SMT_LOGE("localsmt failed to find a solution for the given constraints");
     }

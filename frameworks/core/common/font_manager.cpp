@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/font_collection.h"

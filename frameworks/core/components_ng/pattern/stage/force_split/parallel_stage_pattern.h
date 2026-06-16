@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS::Ace::NG {
 enum class PageMode {
@@ -114,12 +115,20 @@ public:
     {
         return hasDragBarNode_;
     }
+    bool HasLeftMaskNode() const
+    {
+        return hasLeftMaskNode_;
+    }
+    bool HasRightMaskNode() const
+    {
+        return hasRightMaskNode_;
+    }
+    int32_t GetNonPageChildrenSize() const;
 
     void InitForceSplitDragIfNeeded();
 
     RefPtr<FrameNode> GetOrCreateMaskNode(bool isLeft);
-    RefPtr<FrameNode> GetMaskContentNode(bool isLeft);
-    void UpdateMaskNodeContent(bool isLeft);
+    RefPtr<FrameNode> GetOrCreateDragBarNode();
 
 private:
     void FireModeChangeCallback();
@@ -132,18 +141,33 @@ private:
     void UpdateDividerNode(const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect = true);
     void UpdateDividerNodeInVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode);
 
-    void CreateDragBarNodeIfNeeded();
     RefPtr<FrameNode> CreateDragBarItemNode();
-    void InitForceSplitDragEvent();
+    void InitDragBarEvent();
+    void InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleForceSplitDragStart();
     void HandleForceSplitDragUpdate(float xOffset);
-    void HandleForceSplitDragEnd();
+    void HandleForceSplitDragEnd(bool isDragCanceled = false);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown();
+    void HandleTouchUp();
     void ShowForceSplitMask();
     void RemoveForceSplitMask();
-    void CreateForceSplitSnapProperty();
-    void PlayForceSplitSnapAnimation(float fromRatio, float toRatio);
-    void OnForceSplitSnapAnimationFinish(float finalRatio);
-    void StopForceSplitSnapAnimation();
+    void PlayForceSplitSnapAnimation(ForceSplitMode mode, float fromRatio, float toRatio);
+    void OnForceSplitSnapAnimationEnd(float toRatio);
+    void OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio);
+    void OnForceSplitIsDraggableChange(bool isDraggable);
+    void OnForceSplitDragStart();
+    void OnForceSplitDragEnd();
+    void UpdateForceSplitScaleAndTranslateByRatio(float ratio);
+    void UpdateForceSplitScaleAndTranslate(
+        float primaryScale, float primaryTranslateX, float secondaryScale, float secondaryTranslateX);
+    void AddDragBarHotZoneRect();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    int32_t GetDragBarNodePosition() const;
+    int32_t GetLeftMaskNodePosition() const;
+    int32_t GetRightMaskNodePosition() const;
+    void AbortForceSplitDragging();
 
     WeakPtr<FrameNode> homePageNode_;
     RefPtr<FrameNode> dividerNode_;
@@ -155,10 +179,17 @@ private:
     bool hasDragBarNode_ = false;
     std::function<void()> modeChangeCallback_;
     std::function<void(bool)> windowStateChangeCallback_;
-    RefPtr<PanEvent> forceSplitDragEvent_;
+    RefPtr<PanEvent> forceSplitDragEvent_ = nullptr;
+    RefPtr<TouchEventImpl> touchEvent_ = nullptr;
     RefPtr<FrameNode> leftMaskNode_ = nullptr;
+    bool hasLeftMaskNode_ = false;
     RefPtr<FrameNode> rightMaskNode_ = nullptr;
+    bool hasRightMaskNode_ = false;
     std::shared_ptr<AnimationUtils::Animation> forceSplitSnapAnimation_;
+    bool forceSplitSnapAnimationAborted_ = false;
+    float primaryPartitionWidth_ = 0.0f;
+    float forceSplitDividerWidth_ = 1.0f;
+    float secondaryPartitionWidth_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelStagePattern);
 };

@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/ani_utils.h"
@@ -30,6 +31,9 @@ namespace OHOS::Ace::Ani {
 namespace {
 constexpr int32_t LOCAL_SCOPE_SIZE = 16;
 constexpr ani_size KEY_VALUE_ARGC = 2;
+constexpr ArkUI_Int32 FRONTEND_DIRECTION_LTR = 0;
+constexpr ArkUI_Int32 FRONTEND_DIRECTION_RTL = 1;
+constexpr ArkUI_Int32 FRONTEND_DIRECTION_AUTO = 2;
 
 ani_ref GetUndefinedRef(ani_env* env)
 {
@@ -159,13 +163,65 @@ std::string KeyToString(ani_env* env, ani_string key)
     return AniUtils::ANIStringToStdString(env, key);
 }
 
+bool IsValidDirection(ArkUI_Int32 value)
+{
+    switch (value) {
+        case FRONTEND_DIRECTION_LTR:
+        case FRONTEND_DIRECTION_RTL:
+        case FRONTEND_DIRECTION_AUTO:
+            return true;
+        default:
+            return false;
+    }
+}
+
+std::optional<ArkUIAniSystemEnvValue> ConvertSystemEnvValue(ani_env* env, const std::string& key, ani_ref value)
+{
+    if (key == NG::ENV_KEY_DIRECTION) {
+        CHECK_NULL_RETURN(env, std::nullopt);
+        CHECK_NULL_RETURN(value, std::nullopt);
+        ani_enum_item enumItem = static_cast<ani_enum_item>(value);
+        CHECK_NULL_RETURN(enumItem, std::nullopt);
+        ani_int directionValue = 0;
+        if (env->EnumItem_GetValue_Int(enumItem, &directionValue) != ANI_OK) {
+            return std::nullopt;
+        }
+        if (!IsValidDirection(static_cast<ArkUI_Int32>(directionValue))) {
+            return std::nullopt;
+        }
+        ArkUIAniSystemEnvValue result;
+        result.type = ARKUI_ANI_ENV_VALUE_TYPE_ENUM;
+        result.intValue = static_cast<ArkUI_Int32>(directionValue);
+        return result;
+    }
+    if (key == NG::ENV_KEY_FONT_SCALE) {
+        double fontScale = 0.0;
+        if (!AniUtils::GetOptionalDouble(env, value, fontScale)) {
+            return std::nullopt;
+        }
+        ArkUIAniSystemEnvValue result;
+        result.type = ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE;
+        result.doubleValue = fontScale;
+        return result;
+    }
+    return std::nullopt;
+}
+
 ani_ref ConvertQueryResultToAniRef(ani_env* env, const ArkUIAniEnvironmentQueryResult& result)
 {
     CHECK_NULL_RETURN(env, nullptr);
     switch (result.type) {
-        case ARKUI_ANI_ENV_VALUE_TYPE_NUMBER: {
-            auto numberObj = AniUtils::CreateDoubleObject(env, result.numberValue);
-            return numberObj ? reinterpret_cast<ani_ref>(numberObj) : GetUndefinedRef(env);
+        case ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE: {
+            auto doubleObj = AniUtils::CreateDoubleObject(env, result.doubleValue);
+            return doubleObj ? reinterpret_cast<ani_ref>(doubleObj) : GetUndefinedRef(env);
+        }
+        case ARKUI_ANI_ENV_VALUE_TYPE_ENUM: {
+            CHECK_NULL_RETURN(result.enumName, GetUndefinedRef(env));
+            ani_enum_item enumItem = nullptr;
+            if (!AniUtils::GetEnumItem(env, static_cast<ani_size>(result.intValue), result.enumName, enumItem)) {
+                return GetUndefinedRef(env);
+            }
+            return reinterpret_cast<ani_ref>(enumItem);
         }
         case ARKUI_ANI_ENV_VALUE_TYPE_CUSTOM: {
             auto holder = std::any_cast<std::shared_ptr<AniGlobalRefHolder>>(&result.customValue);
@@ -181,7 +237,7 @@ ani_ref ConvertQueryResultToAniRef(ani_env* env, const ArkUIAniEnvironmentQueryR
 }
 
 void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm, const std::string& key,
-    const std::optional<ArkUIAniEnvironmentQueryResult>& value, const char* warning)
+    const std::optional<ArkUIAniEnvironmentQueryResult>& value, bool isCustom, const char* warning)
 {
     CHECK_NULL_VOID(callback);
     ScopedAniEnv scopedEnv(vm);
@@ -190,11 +246,18 @@ void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, 
     ScopedLocalScope localScope(env);
     CHECK_NULL_VOID(localScope.IsActive());
 
-    auto keyInt = AniUtils::StdStringToANIInt(env, key);
-    CHECK_NULL_VOID(keyInt);
-    ani_object keyIntObj = AniUtils::CreateInt32(env, static_cast<int32_t>(keyInt.value()));
-    CHECK_NULL_VOID(keyIntObj);
-    ani_ref params[2] = { reinterpret_cast<ani_ref>(keyIntObj), nullptr };
+    ani_ref params[2] = { nullptr, nullptr };
+    if (isCustom) {
+        auto keyInt = AniUtils::StdStringToANIInt(env, key);
+        CHECK_NULL_VOID(keyInt);
+        ani_object keyIntObj = AniUtils::CreateInt32(env, static_cast<int32_t>(keyInt.value()));
+        CHECK_NULL_VOID(keyIntObj);
+        params[0] = reinterpret_cast<ani_ref>(keyIntObj);
+    } else {
+        auto keyString = AniUtils::StdStringToANIString(env, key);
+        CHECK_NULL_VOID(keyString);
+        params[0] = reinterpret_cast<ani_ref>(keyString.value());
+    }
     ani_size argc = 1;
     if (value) {
         params[1] = ConvertQueryResultToAniRef(env, *value);
@@ -210,13 +273,13 @@ void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, 
 void CallCustomEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm,
     const std::string& key, const std::optional<ArkUIAniEnvironmentQueryResult>& value)
 {
-    CallEnvUpdateCallback(callback, vm, key, value, "WithEnv custom environment update callback failed");
+    CallEnvUpdateCallback(callback, vm, key, value, true, "WithEnv custom environment update callback failed");
 }
 
 void CallSystemEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm,
     const std::string& key, const std::optional<ArkUIAniEnvironmentQueryResult>& value)
 {
-    CallEnvUpdateCallback(callback, vm, key, value, "WithEnv system environment update callback failed");
+    CallEnvUpdateCallback(callback, vm, key, value, false, "WithEnv system environment update callback failed");
 }
 } // namespace
 
@@ -239,12 +302,17 @@ void WithEnvRemoveSystemEnvProperty(ani_env* env, [[maybe_unused]] ani_object an
 }
 
 void WithEnvSetSystemEnvProperty(
-    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_string key, ani_double value)
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_string key, ani_ref value)
 {
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(key);
     const auto* withEnvModifier = GetWithEnvModifier();
     CHECK_NULL_VOID(withEnvModifier);
     CHECK_NULL_VOID(withEnvModifier->setSystemEnvProperty);
-    withEnvModifier->setSystemEnvProperty(ToNodeHandle(ptr), KeyToString(env, key), value);
+    auto keyValue = KeyToString(env, key);
+    auto convertedValue = ConvertSystemEnvValue(env, keyValue, value);
+    CHECK_NULL_VOID(convertedValue);
+    withEnvModifier->setSystemEnvProperty(ToNodeHandle(ptr), keyValue, *convertedValue);
 }
 
 void WithEnvSetCustomEnvProperty(

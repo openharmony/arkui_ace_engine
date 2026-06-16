@@ -57,6 +57,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -1703,8 +1704,8 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
         corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
         corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
-    } else {
-        variantPara->position = params.depth;
+    } else if (params.depth.has_value()) {
+        variantPara->position = params.depth.value();
     }
     variantPara->occlusionWeight = params.occlusionWeight;
     rsNode_->SetSpatialEffectPara(variantPara);
@@ -9076,6 +9077,22 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenRenderContext::CreateFrostedGlassFil
     const FrostedGlassParam& param, float dipScale)
 {
     return RosenEffectConverter::ConvertToFrostedGlassFilter(param, dipScale);
+}
+
+void RosenRenderContext::SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetBackgroundNGFilterEC, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundNGFilter(materialFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetMaterialShaderECSub, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetMaterialShader(materialFilter);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::SetMaterialWithQualityLevel(

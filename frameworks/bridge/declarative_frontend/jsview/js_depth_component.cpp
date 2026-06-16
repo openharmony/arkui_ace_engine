@@ -65,7 +65,7 @@ void JSDepthComponent::Create(const JSCallbackInfo& info)
 
         NG::DepthComponentModel::Create(background);
         if (info.Length() > 1) {
-            ParseAndSetDepthSpace(info[1]);
+            ParseAndSetOptions(info[1]);
         }
         return;
     }
@@ -73,7 +73,7 @@ void JSDepthComponent::Create(const JSCallbackInfo& info)
     auto background = ParseBackgroundSource(info[0]);
     NG::DepthComponentModel::Create(background);
     if (info.Length() > 1) {
-        ParseAndSetDepthSpace(info[1]);
+        ParseAndSetOptions(info[1]);
     }
 }
 
@@ -355,7 +355,7 @@ bool JSDepthComponent::SetOhosPath(const std::string& uri, std::string& ohosPath
     return true;
 }
 
-void JSDepthComponent::ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue)
+void JSDepthComponent::ParseAndSetOptions(const JSRef<JSVal>& optionsValue)
 {
     if (!optionsValue->IsObject()) {
         return;
@@ -367,6 +367,14 @@ void JSDepthComponent::ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue)
         int32_t depthSpace = depthSpaceValue->ToNumber<int32_t>();
         OHOS::Ace::DepthSpaceType depthSpaceEnum = static_cast<OHOS::Ace::DepthSpaceType>(depthSpace);
         NG::DepthComponentModel::SetDepthSpace(depthSpaceEnum);
+    }
+
+    auto render3DScaleValue = jsObject->GetProperty("render3DScale");
+    if (render3DScaleValue->IsNumber()) {
+        float render3DScale = render3DScaleValue->ToNumber<float>();
+        if (GreatNotEqual(render3DScale, 0.0f) && LessOrEqual(render3DScale, 1.0f)) {
+            NG::DepthComponentModel::SetRender3DScale(render3DScale);
+        }
     }
 }
 

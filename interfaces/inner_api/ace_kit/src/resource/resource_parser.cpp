@@ -20,7 +20,9 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::Kit {
 static RefPtr<Ace::ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)

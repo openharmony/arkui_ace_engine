@@ -14,6 +14,7 @@
  */
 
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/resource_adapter.h"
 #include "mock_theme_style.h"
 
 namespace OHOS::Ace {
@@ -272,5 +273,62 @@ RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternNa
 std::shared_ptr<Media::PixelMap> ThemeConstants::GetPixelMap(uint32_t key) const
 {
     return nullptr;
+}
+
+ThemeConstants::ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {}
+
+ThemeConstants::~ThemeConstants() = default;
+
+void ThemeConstants::InitResource(const ResourceInfo& resourceInfo) {}
+
+void ThemeConstants::UpdateConfig(const ResourceConfiguration& config) {}
+
+RefPtr<ThemeStyle> ThemeConstants::GetThemeStyle() const
+{
+    return currentThemeStyle_;
+}
+
+bool ThemeConstants::HasCustomStyle(uint32_t key) const
+{
+    return customStyleMap_.find(key) != customStyleMap_.end();
+}
+
+void ThemeConstants::UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName) {}
+
+void ThemeConstants::UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
+{
+    resAdapter_ = adapter;
+}
+
+uint32_t ThemeConstants::GetResourceLimitKeys() const
+{
+    CHECK_NULL_RETURN(resAdapter_, 0);
+    return resAdapter_->GetResourceLimitKeys();
+}
+
+RefPtr<ResourceAdapter> ThemeConstants::GetResourceAdapter()
+{
+    return resAdapter_;
+}
+
+bool ThemeConstants::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    return false;
+}
+
+bool ThemeConstants::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return false;
+}
+
+bool ThemeConstants::CloseRawFileDescription(const std::string& rawfileName) const
+{
+    return false;
+}
+
+bool ThemeConstants::GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    return false;
 }
 } // namespace OHOS::Ace

@@ -15,6 +15,7 @@
 
 #include <gmock/gmock.h>
 
+#include "core/common/thp_extra_manager.h"
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
@@ -35,6 +36,7 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
@@ -544,8 +546,6 @@ void PipelineContext::ChangeDarkModeBrightness() {}
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
-
-void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
@@ -1991,4 +1991,44 @@ bool PipelineContext::GetIsRequestVsync()
     CHECK_NULL_RETURN(window_, false);
     return window_->GetIsRequestVsync();
 }
+
+RectF PipelineContext::GetRootRect()
+{
+    return {};
+}
+
+void PipelineContext::SetAreaChangeNodeMinDepth(int32_t depth) {}
+
+void PipelineContext::SetIsDisappearChangeNodeMinDepth(int32_t depth) {}
+
+int32_t PipelineContext::RegisterSurfaceChangedCallback(
+    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId) {}
+
+void PipelineContext::RemoveGestureTask(const DelayedTask& task) {}
+
+void PipelineContext::UnregisterSurfacePositionChangedCallback(int32_t callbackId) {}
+
+int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId) {}
+
+int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::OnSurfaceDensityChanged(double density) {}
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void PipelineBase::OnSurfaceDensityChanged(double density) {}
+
 } // namespace OHOS::Ace::NG

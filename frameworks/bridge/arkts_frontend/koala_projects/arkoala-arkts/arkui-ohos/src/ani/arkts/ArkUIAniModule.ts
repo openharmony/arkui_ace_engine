@@ -69,7 +69,7 @@ export class ArkUIAniModule {
     native static _SetDynamicLayoutGridLayoutAlgorithm(ptr: KPointer, value: GridLayoutAlgorithm): void;
     native static _WithEnv_construct(id: KInt): KPointer;
     native static _WithEnv_removeSystemEnvProperty(ptr: KPointer, key: string): void;
-    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: KDouble): void;
+    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: Any): void;
     native static _WithEnv_setCustomEnvProperty(ptr: KPointer, key: KInt, value: Any): void;
     native static _WithEnv_removeCustomEnvProperty(ptr: KPointer, key: KInt): void;
     native static _CustomNode_findCustomValueByKey(ptr: KPointer, key: KInt): Any | undefined;
@@ -336,6 +336,8 @@ export class ArkUIAniModule {
 
     native static _UiMaterial_ConstructMaterial(value: uiMaterial.MaterialOptions | undefined): long
     native static _UiMaterial_DestroyMaterial(value: long): void
+    native static _UiMaterial_ConvertToECMaterial(value: long): long
+    native static _UiMaterial_ConvertToECSubMaterial(value: long): long
 
     native static _CreateViewStackProcessor(): KPointer
 
@@ -374,9 +376,6 @@ export class ArkUIAniModule {
 
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
-
-    // for RichEditor
-    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string, areaMode: KInt): string

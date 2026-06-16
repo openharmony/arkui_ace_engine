@@ -96,6 +96,7 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
 
 #ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
@@ -136,6 +137,58 @@ bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
     return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
 }
 
+UiMaterialStyle ConvertToECStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        return static_cast<UiMaterialStyle>(style - UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+UiMaterialStyle ConvertToECSubStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+bool CheckNotLegalStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) < static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) ||
+        static_cast<int32_t>(from) > static_cast<int32_t>(UiMaterialStyle::MAX)) {
+        return true;
+    }
+    return false;
+}
+
+void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECStyle(newOptions->style);
+    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->applyShadow = false;
+    newOptions->disableLightEffect = true;
+    newOptions->interactive = false;
+    newOptions->lightEffectOptions = std::nullopt;
+    newOptions->colorResObj = nullptr;
+}
+
+void ConvertToImmersiveOptionsECSub(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECSubStyle(newOptions->style);
+}
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -6508,6 +6561,44 @@ void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Fi
     ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
 }
 
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveEC(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return nullptr;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return nullptr;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, nullptr);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, nullptr);
+    ConvertToImmersiveOptionsEC(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
+    return newMaterial;
+}
+
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return material;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return material;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, material);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, material);
+    ConvertToImmersiveOptionsECSub(options);
+    newMaterial->SetImmersiveOptions(*options);
+    return newMaterial;
+}
+
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6559,7 +6650,16 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
             if (preConfig->colorInvert) {
                 renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
             }
-            renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            int32_t preStyle = static_cast<int32_t>(preConfig->key.style);
+            if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+                preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+                renderContext->SetMaterialShaderECSub(nullptr);
+            } else if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+                       preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+                renderContext->SetBackgroundNGFilterEC(nullptr);
+            } else {
+                renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            }
             auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
             if (transparencyCallbackId.has_value()) {
                 TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
@@ -6828,6 +6928,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
     CHECK_NULL_VOID(pattern);
     auto preConfig = renderContext->GetImmersiveMaterialConfig();
     if (config->key.level == UiMaterialLevel::SMOOTH) {
+        if (frameNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+            return;
+        }
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
@@ -6857,13 +6960,29 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         return;
     }
     // gentle or exquisite
-    auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
-    if (preConfig && preConfig->colorInvert && !config->colorInvert) {
-        // reset color picker
-        renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+    int32_t style = static_cast<int32_t>(config->key.style);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(*config);
+        renderContext->SetBackgroundNGFilterEC(materialFilter);
+        if (config->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
+        } else if (preConfig && preConfig->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
+        }
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
+        renderContext->SetMaterialShaderECSub(materialFilter);
+    } else {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
+        if (preConfig && preConfig->colorInvert && !config->colorInvert) {
+            // reset color picker
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+        }
+        renderContext->SetMaterialWithQualityLevel(
+            materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     }
-    renderContext->SetMaterialWithQualityLevel(
-        materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     if (config->applyShadow) {
         Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
         renderContext->UpdateBackShadow(shadow);

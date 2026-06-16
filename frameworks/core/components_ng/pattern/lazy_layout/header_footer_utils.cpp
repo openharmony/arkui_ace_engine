@@ -106,6 +106,48 @@ float HeaderFooterUtils::MeasureHeaderFooter(LayoutWrapper* layoutWrapper, int32
     return std::max(GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis), 0.0f);
 }
 
+float HeaderFooterUtils::MeasureEdgeMainSize(LayoutWrapper* layoutWrapper, const WeakPtr<FrameNode>& edge,
+    int32_t rawIndex, const LayoutConstraintF& constraint, Axis axis)
+{
+    if (!edge.Upgrade() || rawIndex < 0) {
+        return 0.0f;
+    }
+    return MeasureHeaderFooter(layoutWrapper, rawIndex, constraint, axis);
+}
+
+void HeaderFooterUtils::LayoutEdge(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
+    bool isSticky, bool isRtl, float crossSize)
+{
+    if (rawIndex < 0) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto child = layoutWrapper->GetChildByIndex(rawIndex);
+    if (!child) {
+        child = layoutWrapper->GetOrCreateChildByIndex(rawIndex);
+    }
+    CHECK_NULL_VOID(child);
+    auto hostNode = child->GetHostNode();
+    // Once promoted by sticky the zIndex stays at 1 even after sticky toggles off; for a header/footer with no
+    // overlapping sibling the value is visually neutral, and not restoring sidesteps the ambiguity between
+    // framework-set 1 and user-set 1.
+    if (isSticky) {
+        EnsureStickyDefaultZIndex(hostNode);
+    }
+    auto geometryNode = child->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto finalOffset = offset;
+    if (isRtl) {
+        finalOffset.SetX(offset.GetX() + crossSize - geometryNode->GetMarginFrameSize().Width());
+    }
+    geometryNode->SetMarginFrameOffset(finalOffset);
+    // Header / footer must always be in the render tree on every layout pass. GetChildByIndex() above does not
+    // activate the child, so a stale inactive state from a prior frame would otherwise suppress
+    // SyncGeometryProperties() and freeze the edge at its previous rendered position.
+    child->SetActive(true);
+    child->Layout();
+}
+
 void HeaderFooterUtils::EnsureStickyDefaultZIndex(const RefPtr<FrameNode>& edgeNode)
 {
     CHECK_NULL_VOID(edgeNode);

@@ -111,6 +111,8 @@ build_component_ng("pattern_ng") {
     "custom_node_ext/custom_node_ext_layout_algorithm.cpp",
     "custom_node_ext/custom_node_ext_model_ng.cpp",
     "custom_node_ext/custom_node_ext_pattern.cpp",
+    "date_picker/picker_data.cpp",
+    "date_picker/picker_theme.cpp",
     "depth_component/depth_component_accessibility_property.cpp",
     "depth_component/depth_component_layout_algorithm.cpp",
     "depth_component/depth_component_model.cpp",
@@ -200,10 +202,6 @@ build_component_ng("pattern_ng") {
     "image/image_pattern.cpp",
     "image/image_pattern_multi_thread.cpp",
     "image/image_render_property.cpp",
-    "image_animator/image_animator_model_ng.cpp",
-    "image_animator/image_animator_model_static.cpp",
-    "image_animator/image_animator_pattern.cpp",
-    "image_animator/image_animator_pattern_multi_thread.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_algorithm.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_info.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_model.cpp",
@@ -342,18 +340,6 @@ build_component_ng("pattern_ng") {
     "particle/particle_model_ng.cpp",
     "particle/particle_pattern.cpp",
     "pattern.cpp",
-    "picker/date_time_animation_controller.cpp",
-    "picker/datepicker_accessibility_property.cpp",
-    "picker/datepicker_column_accessibility_property.cpp",
-    "picker/datepicker_column_layout_algorithm.cpp",
-    "picker/datepicker_column_pattern.cpp",
-    "picker/datepicker_model_ng.cpp",
-    "picker/datepicker_model_static.cpp",
-    "picker/datepicker_paint_method.cpp",
-    "picker/datepicker_pattern.cpp",
-    "picker/datepicker_pattern_multi_thread.cpp",
-    "picker/picker_data.cpp",
-    "picker/picker_theme.cpp",
     "picker_utils/picker_column_pattern.cpp",
     "picker_utils/picker_column_pattern_multi_thread.cpp",
     "picker_utils/toss_animation_controller.cpp",
@@ -646,7 +632,6 @@ build_component_ng("pattern_ng") {
 
   if (!ace_engine_feature_wearable) {
     sources += [
-      "picker/datepicker_dialog_view.cpp",
       "text_picker/textpicker_dialog_view.cpp",
     ]
   }

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"

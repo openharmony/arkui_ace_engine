@@ -766,14 +766,23 @@ struct ArkUIAniDynamicLayoutModifier {
 
 enum ArkUIAniEnvironmentValueType {
     ARKUI_ANI_ENV_VALUE_TYPE_NONE = 0,
-    ARKUI_ANI_ENV_VALUE_TYPE_NUMBER,
+    ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE,
+    ARKUI_ANI_ENV_VALUE_TYPE_ENUM,
     ARKUI_ANI_ENV_VALUE_TYPE_CUSTOM,
 };
 
 struct ArkUIAniEnvironmentQueryResult {
-    ArkUI_Int32 type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
-    double numberValue = 0.0;
+    ArkUIAniEnvironmentValueType type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    ArkUI_Int32 intValue = 0;
+    double doubleValue = 0.0;
+    const char* enumName = nullptr;
     std::any customValue;
+};
+
+struct ArkUIAniSystemEnvValue {
+    ArkUIAniEnvironmentValueType type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    ArkUI_Int32 intValue = 0;
+    double doubleValue = 0.0;
 };
 
 using ArkUIAniEnvironmentUpdateCallback =
@@ -782,7 +791,7 @@ using ArkUIAniEnvironmentUpdateCallback =
 struct ArkUIAniWithEnvModifier {
     ArkUINodeHandle (*construct)(ArkUI_Int32 id);
     void (*removeSystemEnvProperty)(ArkUINodeHandle node, const std::string& key);
-    void (*setSystemEnvProperty)(ArkUINodeHandle node, const std::string& key, double value);
+    void (*setSystemEnvProperty)(ArkUINodeHandle node, const std::string& key, ArkUIAniSystemEnvValue value);
     void (*removeCustomEnvProperty)(ArkUINodeHandle node, const std::string& key);
     void (*setCustomEnvProperty)(ArkUINodeHandle node, const std::string& key, std::any value);
     bool (*findCustomEnvValueByKey)(
@@ -876,9 +885,6 @@ struct ArkUIAniVideoModifier {
 };
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
-};
-struct ArkUIAniRichEditorModifier {
-    ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
     std::string (*persistentStorageGet)(const std::string& key, const int32_t areaMode);
@@ -987,6 +993,8 @@ struct ArkUIAniCommonNodeAniModifier {
 struct ArkUIAniVisualEffectModifier {
     OHOS::Ace::UiMaterial* (*constructMaterial)(int32_t type);
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
+    OHOS::Ace::UiMaterial* (*convertToECMaterial)(OHOS::Ace::UiMaterial* ptr);
+    OHOS::Ace::UiMaterial* (*convertToECSubMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
 struct ArkUIAniDetachedFreeRootModifier {
@@ -1034,7 +1042,6 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
-    const ArkUIAniRichEditorModifier* (*getRichEditorAniModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();

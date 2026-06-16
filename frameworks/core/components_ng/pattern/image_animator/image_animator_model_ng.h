@@ -20,7 +20,9 @@
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ImageAnimatorModelNG : public OHOS::Ace::ImageAnimatorModel {
+const char IMAGE_ETS_TAG[] = "Image";
+const char IMAGE_ANIMATOR_ETS_TAG[] = "ImageAnimator";
+class ACE_FORCE_EXPORT ImageAnimatorModelNG : public OHOS::Ace::ImageAnimatorModel {
 public:
     void Create() override;
     void SetImages(const std::vector<ImageProperties>& images) override;
@@ -38,6 +40,7 @@ public:
     void SetOnCancel(std::function<void()>&& OnCancel) override;
     void SetOnFinish(std::function<void()>&& OnFinish) override;
 
+    static void CreateImageAnimator();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images);
     static void SetIsReverse(FrameNode* frameNode, bool isReverse);

@@ -3206,4 +3206,42 @@ HWTEST_F(SwiperPatternTestNg, SwiperIsPreMakeTest001, TestSize.Level1)
     bool isPreMake = host->IsPreMake();
     EXPECT_FALSE(isPreMake);
 }
+
+/**
+ * @tc.name: StopPropertyTranslateAnimation001
+ * @tc.desc: StopPropertyTranslateAnimation early return when propertyAnimationIsRunning_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, StopPropertyTranslateAnimation001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->propertyAnimationIsRunning_ = false;
+    swiperPattern->syncCancelAniIsFailed_ = false;
+    swiperPattern->fastAnimationRunning_ = true;
+    swiperPattern->StopPropertyTranslateAnimation(true, false, false);
+    EXPECT_TRUE(swiperPattern->fastAnimationRunning_);
+    EXPECT_FALSE(swiperPattern->propertyAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: StopPropertyTranslateAnimation002
+ * @tc.desc: StopPropertyTranslateAnimation early return when syncCancelAniIsFailed_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, StopPropertyTranslateAnimation002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->propertyAnimationIsRunning_ = true;
+    swiperPattern->syncCancelAniIsFailed_ = true;
+    swiperPattern->fastAnimationRunning_ = true;
+    swiperPattern->StopPropertyTranslateAnimation(true, false, false);
+    EXPECT_TRUE(swiperPattern->fastAnimationRunning_);
+    EXPECT_TRUE(swiperPattern->syncCancelAniIsFailed_);
+}
 } // namespace OHOS::Ace::NG

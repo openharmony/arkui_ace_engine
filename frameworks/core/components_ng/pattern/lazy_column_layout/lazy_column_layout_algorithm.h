@@ -73,9 +73,14 @@ private:
     void CalculateVisibleEndIndex();
     void CheckCacheRecycle();
     void MeasureItemsLazy(LayoutWrapper* layoutWrapper);
-    // Measure the header (if mounted) and update layoutInfo_->headerMainSize_.
+    void ShiftLayoutWindow(float delta);
+    void CaptureFrameBaseline();
+    void MeasurePredictItems(LayoutWrapper* layoutWrapper, const RefPtr<LazyColumnLayoutProperty>& layoutProperty,
+        const OptionalSizeF& contentIdealSize);
     void MeasureHeader(LayoutWrapper* layoutWrapper);
-    // Measure the footer (if mounted) and update layoutInfo_->footerMainSize_.
+    // Resolve the parent-scroll compensation for a header resize; rationale in
+    // HeaderFooterUtils::CalcHeaderResizeAdjust.
+    void UpdateHeaderAdjustOffset();
     void MeasureFooter(LayoutWrapper* layoutWrapper);
     // Compose the insets forwarded to child sections: this column's received inset plus its own sticky
     // header/footer size. Updates childStickyTopInset_ / childStickyBottomInset_.
@@ -93,24 +98,16 @@ private:
     void PredictLayoutBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void FixIndexRange(int32_t& startIndex, int32_t& endIndex);
     void SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper);
+    // Refresh the active child range after predict moved the cache window; keeps header/footer active alongside it.
+    void UpdatePredictActiveRange(LayoutWrapper* layoutWrapper);
     float CalculateCrossOffset(float crossSize, float childCrossSize) const;
 
-    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
     void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
-    // item index -> raw index: shift by +1 when a header is present.
     int32_t GetRawIndexForItem(int32_t itemIndex) const;
-    // Subtract header / footer from the total child count and return the current content item count.
     int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
-    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
     StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
-    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
-    // layering, in which case its z-index is raised to the sticky default.
-    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
-        float crossSize, bool isSticky) const;
-    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutHeader(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset,
         StickyStyle stickyStyle, float stickyHeaderPos) const;
-    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutFooter(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset,
         StickyStyle stickyStyle, float stickyFooterPos) const;
     // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
@@ -120,6 +117,10 @@ private:
 
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
+    // Last frame's body extent (captured before the edges are remeasured); keeps edge resizes out of adjustOffset_.
+    float prevBodyMainSize_ = 0.0f;
+    // False only on the very first layout (previous total == 0); a recycled child re-entering still counts as laid.
+    bool hadMeasuredItems_ = true;
     bool needAllLayout_ = true;
     bool forwardLayout_ = true;
     float referencePos_ = 0.0f;
@@ -133,6 +134,9 @@ private:
     float stickyBottomInset_ = 0.0f;
     float childStickyTopInset_ = 0.0f;
     float childStickyBottomInset_ = 0.0f;
+    // Header main-size delta vs last frame and the parent-consumed share folded into adjustOffset_.start.
+    float headerMainSizeDelta_ = 0.0f;
+    float headerAdjustOffset_ = 0.0f;
     float space_ = 0.0f;
     LayoutConstraintF childLayoutConstraint_;
     // Constraint used when measuring header / footer; full cross size, infinite main.

@@ -15,8 +15,9 @@
 
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "ui/base/utils/utils.h"
 
 extern const char _binary_measure_js_start[];
 extern const char _binary_measure_abc_start[];
@@ -28,8 +29,14 @@ extern const char* _binary_measure_js_end;
 extern const char* _binary_measure_abc_end;
 #endif
 
+#define METRIC_PREFIX_MEASURE_UTIL "Utils.MeasureUtils."
+
 namespace OHOS::Ace::Napi {
 namespace {
+uint32_t measureTextCount = 0;
+uint32_t measureTextSizeCount = 0;
+int32_t reportInterval = 10;
+
 Dimension MeasureStringToDimensionWithUnit(const std::string& value, bool& useDefaultUnit,
     DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f, bool isCalc = false)
 {
@@ -170,6 +177,9 @@ static std::optional<Dimension> HandleDimensionType(
 
 static napi_value JSMeasureText(napi_env env, napi_callback_info info)
 {
+    if (measureTextCount++ % reportInterval == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(METRIC_PREFIX_MEASURE_UTIL "measureText", 1);
+    }
     size_t argc = 1;
     napi_value result = nullptr;
     napi_value argv = nullptr;
@@ -214,11 +224,8 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     context.fontFamily = fontFamily;
     context.letterSpacing = letterSpace;
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        return nullptr;
-    }
-    double textWidth = delegate->MeasureText(context);
-    napi_create_double(env, textWidth, &result);
+    CHECK_NULL_RETURN(delegate, nullptr);
+    napi_create_double(env, delegate->MeasureText(context), &result);
     return result;
 }
 
@@ -335,6 +342,9 @@ static void SetContextProperty(
 
 static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
 {
+    if (measureTextSizeCount++ % reportInterval == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(METRIC_PREFIX_MEASURE_UTIL "measureTextSize", 1);
+    }
     size_t argc = 1;
     napi_value result = nullptr;
     napi_value argv = nullptr;
@@ -354,16 +364,12 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     }
     SetContextProperty(contextParamMap, context, env);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(delegate, nullptr);
     Size textSize = delegate->MeasureTextSize(context);
 
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        return result;
-    }
+    CHECK_EQUAL_RETURN(scope == nullptr, true, result);
 
     napi_value resultArray[2] = { 0 };
     napi_create_double(env, textSize.Width(), &resultArray[0]);

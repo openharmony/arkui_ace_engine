@@ -38,6 +38,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "ui/resource/resource_configuration.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
@@ -283,17 +284,7 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density)
-    {
-        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-        // thread.
-        std::lock_guard lock(densityChangeMutex_);
-        for (auto&& [id, callback] : densityChangedCallbacks_) {
-            if (callback) {
-                callback(density);
-            }
-        }
-    }
+    virtual void OnSurfaceDensityChanged(double density);
 
     void SendUpdateVirtualNodeFocusEvent();
 
@@ -310,25 +301,9 @@ public:
         return 1.0;
     }
 
-    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
-    {
-        if (callback) {
-            // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-            // thread.
-            std::lock_guard lock(densityChangeMutex_);
-            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
-            return densityChangeCallbackId_;
-        }
-        return 0;
-    }
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback);
 
-    void UnregisterDensityChangedCallback(int32_t callbackId)
-    {
-        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-        // thread.
-        std::lock_guard lock(densityChangeMutex_);
-        densityChangedCallbacks_.erase(callbackId);
-    }
+    void UnregisterDensityChangedCallback(int32_t callbackId);
 
     virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
@@ -636,15 +611,7 @@ public:
 
     const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager();
 
-    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
-    {
-        std::call_once(displaySyncFlag_, [this]() {
-            if (!uiDisplaySyncManager_) {
-                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
-            }
-        });
-        return uiDisplaySyncManager_;
-    }
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager();
 
     Window* GetWindow()
     {
@@ -1048,16 +1015,7 @@ public:
     {
         virtualKeyBoardCallback_.erase(nodeId);
     }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const
-    {
-        bool isConsume = false;
-        for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
-            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard, isCustomKeyboard)) {
-                isConsume = true;
-            }
-        }
-        return isConsume;
-    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const;
 
     using configChangedCallback = std::function<void()>;
     void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
@@ -1069,14 +1027,7 @@ public:
         configChangedCallback_.erase(nodeId);
     }
 
-    void NotifyConfigurationChange()
-    {
-        for (const auto& [nodeId, callback] : configChangedCallback_) {
-            if (callback) {
-                callback();
-            }
-        }
-    }
+    void NotifyConfigurationChange();
 
     virtual void NotifyColorModeChange(uint32_t colorMode) {}
 
@@ -1086,12 +1037,7 @@ public:
         postRTTaskCallback_ = std::move(callback);
     }
 
-    void PostTaskToRT(std::function<void()>&& task)
-    {
-        if (postRTTaskCallback_) {
-            postRTTaskCallback_(std::move(task));
-        }
-    }
+    void PostTaskToRT(std::function<void()>&& task);
 
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 

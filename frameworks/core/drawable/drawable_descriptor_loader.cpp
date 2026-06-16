@@ -26,6 +26,8 @@
 #include "base/image/file_uri_helper.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 namespace {

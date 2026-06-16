@@ -21,7 +21,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 

@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 #include "2d_graphics/include/utils/matrix.h"
+#include "base/image/pixel_map.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t POSITION_TWO = 2;

@@ -33,6 +33,8 @@ public:
     static void SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background);
     static void SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace);
     static void SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSpaceType depthSpace);
+    static void SetRender3DScale(float render3DScale);
+    static void SetRender3DScale(FrameNode* frameNode, float render3DScale);
     static void SetDepthMap(const ImageSourceInfo& depthMap);
     static void SetDepthMap(FrameNode* frameNode, const ImageSourceInfo& depthMap);
     using DepthMapErrorCallback = std::function<void(int32_t errorCode, const std::string& errorMessage)>;

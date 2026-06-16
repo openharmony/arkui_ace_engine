@@ -117,6 +117,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "ImageAnimator", "imageanimator" },
+        { "DatePicker", "datepicker" },
+        { "DatePickerDialog", "datepicker" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

@@ -84,7 +84,6 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_luminance_sampling_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -310,7 +309,8 @@ void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const Ref
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false,
+    bool isDynamicUIContent = false)
 {
     std::string bundleName = "";
     std::string moduleName = "";
@@ -335,7 +335,9 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    if (context && context->GetResourceManager()) {
+    // Avoid temporary dark-mode updates on the main thread affecting DC components.
+    // DC creates its own resource manager instead of using the one from the host context.
+    if (context && context->GetResourceManager() && !isDynamicUIContent) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
         resourceAdapter->SetBundleName(bundleName);
         resourceAdapter->SetModuleName(moduleName);
@@ -415,23 +417,6 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(node);
     };
     navMgr->SetUnregisterColorPickerCallback(std::move(unregisterCallback));
-}
-
-void InitForceSplitManagerCallback(const RefPtr<NG::PipelineContext>& context)
-{
-    CHECK_NULL_VOID(context);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_VOID(forceSplitMgr);
-    auto createSnapshotCallback = [](RefPtr<NG::FrameNode> node) -> RefPtr<OHOS::Ace::PixelMap> {
-        NG::SnapshotOptions options;
-        auto result = NG::ComponentSnapshot::GetSync(node, options);
-        if (result.first != ERROR_CODE_NO_ERROR) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Failed to get snapshot, errorCode:%{public}d", result.first);
-            return nullptr;
-        }
-        return OHOS::Ace::PixelMap::Create(result.second);
-    };
-    forceSplitMgr->SetCreateSnapshotCallback(std::move(createSnapshotCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -3062,11 +3047,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
-                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock(),
+                                    isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
 
         if (SystemProperties::GetResourceDecoupling()) {
-            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
+            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo,
+                false, isDynamicUIContent);
         } else {
             ThemeConstants::InitDeviceType();
             auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -3098,7 +3085,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto newPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         if (newPipeline) {
             InitNavigationManagerCallback(newPipeline);
-            InitForceSplitManagerCallback(newPipeline);
         }
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");
@@ -4038,8 +4024,9 @@ void AceContainer::UpdateResource()
         if (pipelineContext_->IsFormRender()) {
             ReleaseResourceAdapter();
         }
-        InitResourceAndThemeManager(
-            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
+        bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo,
+            true, isDynamicUIContent);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();

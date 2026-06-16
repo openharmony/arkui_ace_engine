@@ -490,6 +490,13 @@ void ContainerScope::MarkIsolatedThread()
     isIsolatedThread_ = true;
 }
 
+// Returns thread-local flag; true when this thread operates an independent
+// container set (dc/card scenario), false for main UI thread and other normal threads.
+bool ContainerScope::IsIsolatedThread()
+{
+    return isIsolatedThread_;
+}
+
 // Register an instance ID to the thread-local container set.
 void ContainerScope::AddLocal(int32_t id)
 {

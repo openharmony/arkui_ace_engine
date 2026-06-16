@@ -93,26 +93,17 @@ private:
     void UpdateGridItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void UpdateGap(const RefPtr<LazyGridLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
-    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
     void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
-    // item index -> raw index: shift by +1 when a header is present.
     int32_t GetRawIndexForItem(int32_t itemIndex) const;
-    // Subtract header / footer from the total child count and return the current content item count.
     int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
-    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
     StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
-    // Measure the header into edgeLayoutConstraint_; updates layoutInfo_->headerMainSize_ and returns the size.
     float MeasureHeader(LayoutWrapper* layoutWrapper);
-    // Measure the footer into edgeLayoutConstraint_; updates layoutInfo_->footerMainSize_ and returns the size.
+    // Resolve the parent-scroll compensation for a header resize; rationale in
+    // HeaderFooterUtils::CalcHeaderResizeAdjust.
+    void UpdateHeaderAdjustOffset();
     float MeasureFooter(LayoutWrapper* layoutWrapper);
-    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
-    // layering, in which case its z-index is raised to the sticky default.
-    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
-        bool isSticky) const;
-    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
         float stickyHeaderPos) const;
-    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
         float stickyFooterPos) const;
     // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
@@ -121,6 +112,10 @@ private:
     void ActivateContentItemRange(LayoutWrapper* layoutWrapper, int32_t rawStart, int32_t rawEnd) const;
     void MeasureGridItemAll(LayoutWrapper* layoutWrapper);
     void MeasureGridItemLazy(LayoutWrapper* layoutWrapper);
+    void ShiftLayoutWindow(float delta);
+    void ResolveContentCrossSize(const LayoutConstraintF& contentConstraint, OptionalSizeF& contentIdealSize) const;
+    void CaptureFrameBaseline();
+    void MeasurePredictItems(LayoutWrapper* layoutWrapper, const PaddingPropertyF& padding);
     void GetStartIndexInfo(int32_t& index, float& pos);
     void GetEndIndexInfo(int32_t& index, float& pos);
     void CheckRecycle();
@@ -159,6 +154,10 @@ private:
     std::vector<double> crossLens_;
     std::vector<double> crossPos_;
     float totalMainSize_ = 0.0f;
+    // Last frame's body extent (captured before the edges are remeasured); keeps edge resizes out of adjustOffset_.
+    float prevBodyMainSize_ = 0.0f;
+    // False only on the very first layout (previous total == 0); a recycled child re-entering still counts as laid.
+    bool hadMeasuredItems_ = true;
     float realMainSize_ = 0.0f;
     bool needAllLayout_ = true;
     int32_t lanes_ = 1;
@@ -174,6 +173,9 @@ private:
     // Parent-reserved sticky insets, applied to this grid's own header/footer.
     float stickyTopInset_ = 0.0f;
     float stickyBottomInset_ = 0.0f;
+    // Header main-size delta vs last frame and the parent-consumed share folded into adjustOffset_.start.
+    float headerMainSizeDelta_ = 0.0f;
+    float headerAdjustOffset_ = 0.0f;
 
     // cache
     float cacheSize_ = 0.5f;

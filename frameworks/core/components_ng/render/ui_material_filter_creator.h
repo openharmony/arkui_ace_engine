@@ -21,6 +21,7 @@
 namespace OHOS::Rosen {
 class Filter;
 class RSNGFilterBase;
+class RSNGShaderBase;
 }
 
 namespace OHOS::Ace {
@@ -29,6 +30,7 @@ enum class UiMaterialLevel;
 enum class UiMaterialStyle;
 enum class ColorMode;
 enum class UiMaterialTransparency;
+struct FrostedGlassParam;
 struct ImmersiveMaterialConfig;
 }
 
@@ -37,6 +39,8 @@ namespace OHOS::Ace::NG {
 class UiMaterialFilterCreator {
 public:
     static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialFilter(const ImmersiveMaterialConfig& params);
+    static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialECFilter(const ImmersiveMaterialConfig& params);
+    static std::shared_ptr<Rosen::RSNGShaderBase> ConvertToUiMaterialECSubShader(const ImmersiveMaterialConfig& params);
     static std::shared_ptr<OHOS::Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
 };
 } // namespace OHOS::Ace::NG

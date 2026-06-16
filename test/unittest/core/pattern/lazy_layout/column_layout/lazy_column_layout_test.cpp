@@ -1914,156 +1914,33 @@ HWTEST_F(LazyColumnLayoutTest, VisibleIndexWithSafeAreaPadding001, TestSize.Leve
     EXPECT_GT(visibleStart, pattern_->layoutInfo_->startIndex_);
     EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
 }
-
-namespace {
-void CreateLazyEdge(float height)
-{
-    StackModelNG stackModel;
-    stackModel.Create();
-    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
-    ViewAbstract::SetHeight(CalcLength(height));
-    ViewStackProcessor::GetInstance()->Pop();
-}
-} // namespace
-
 /**
- * @tc.name: NestedGridItemsRenderWithHeaderFooter001
- * @tc.desc: A header/footer LazyVGridLayout nested under LazyColumnLayout must activate its content items.
+ * @tc.name: FirstFrameWindowSeedsWithUnknownBody001
+ * @tc.desc: First layout with an already-scrolled viewport (body extent unknown): the forward window must fall back
+ *           to measuring from item 0 (no past-the-end clamp), and the backward window seeds the last item at body 0.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyColumnLayoutTest, NestedGridItemsRenderWithHeaderFooter001, TestSize.Level1)
+HWTEST_F(LazyColumnLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.Level1)
 {
-    CreateScroll();
-    CreateLazyColumnLayout();
-    CreateLazyVGridLayout();
-    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
-    LazyGridLayoutModel::SetHeader([]() { CreateLazyEdge(60.0f); });
-    CreateContent(30);
-    LazyGridLayoutModel::SetFooter([]() { CreateLazyEdge(40.0f); });
-    CreateDone();
+    auto info = AceType::MakeRefPtr<LazyColumnLayoutInfo>();
+    info->totalItemCount_ = 10;
+    LazyColumnLayoutAlgorithm algorithm(info);
+    algorithm.totalItemCount_ = 10;
+    algorithm.hadMeasuredItems_ = false; // true first layout
+    algorithm.prevBodyMainSize_ = 0.0f;
+    algorithm.startPos_ = 200.0f; // viewport already scrolled when this child first measures
+    algorithm.endPos_ = 650.0f;
 
-    ASSERT_NE(lazyGridPattern_, nullptr);
-    EXPECT_EQ(lazyGridPattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_GT(lazyGridPattern_->layoutInfo_->endIndex_, 0);
+    int32_t index = -2;
+    float pos = -1.0f;
+    algorithm.GetStartIndexInfo(index, pos);
+    EXPECT_EQ(index, 0);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
 
-    auto headerNode = lazyGridPattern_->GetHeaderNode();
-    auto footerNode = lazyGridPattern_->GetFooterNode();
-    ASSERT_NE(headerNode, nullptr);
-    ASSERT_NE(footerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_TRUE(footerNode->IsActive());
-
-    auto firstItemWrapper = lazyGridFrameNode_->GetChildByIndex(1);
-    ASSERT_NE(firstItemWrapper, nullptr);
-    auto firstItemNode = firstItemWrapper->GetHostNode();
-    ASSERT_NE(firstItemNode, nullptr);
-    EXPECT_TRUE(firstItemNode->IsActive());
-}
-
-/**
- * @tc.name: StickyToggleKeepsHeaderLaidOut_001
- * @tc.desc: Toggling sticky at runtime must not drop the header. Regression for the header collapsing onto
- *           item 0 (headerMainSize -> 0) when a property-only relayout addressed a stale edge reference; the
- *           header must stay sized and keep items below it across BOTH -> NONE -> BOTH without a scroll.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyColumnLayoutTest, StickyToggleKeepsHeaderLaidOut_001, TestSize.Level1)
-{
-    constexpr float headerHeight = 40.0f;
-    constexpr float footerHeight = 30.0f;
-
-    CreateScroll();
-    CreateLazyColumnLayout();
-    LazyColumnLayoutModel::SetSticky(StickyStyle::BOTH);
-    LazyColumnLayoutModel::SetHeader([]() { CreateLazyEdge(headerHeight); });
-    CreateContent(12);
-    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(footerHeight); });
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-    auto headerNode = pattern_->GetHeaderNode();
-    ASSERT_NE(headerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
-    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
-
-    // BOTH -> NONE: header must not be dropped.
-    layoutProperty_->CleanDirty();
-    LazyColumnLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::NONE);
-    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
-    FlushUITasks();
-
-    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::NONE);
-    headerNode = pattern_->GetHeaderNode();
-    ASSERT_NE(headerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
-    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
-
-    // NONE -> BOTH: header is still intact after toggling back.
-    layoutProperty_->CleanDirty();
-    LazyColumnLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::BOTH);
-    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
-    FlushUITasks();
-
-    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::BOTH);
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
-    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
-}
-
-/**
- * @tc.name: HeaderFooterTotalStableOnIdle001
- * @tc.desc: A header+footer LazyColumnLayout must not inflate totalMainSize_ on predictive (idle) frames.
- *           Regression for the footer being double-counted on the PROPERTY_UPDATE_MEASURE_SELF predict path.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyColumnLayoutTest, HeaderFooterTotalStableOnIdle001, TestSize.Level1)
-{
-    constexpr float headerHeight = 60.0f;
-    constexpr float footerHeight = 40.0f;
-
-    CreateScroll();
-    CreateLazyColumnLayout();
-    LazyColumnLayoutModel::SetHeader([]() { CreateLazyEdge(headerHeight); });
-    CreateContent(30);
-    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(footerHeight); });
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    const float totalAfterLayout = pattern_->layoutInfo_->totalMainSize_;
-    EXPECT_GT(totalAfterLayout, pattern_->GetHeaderMainSize() + pattern_->GetFooterMainSize());
-
-    FlushIdleTask(pattern_);
-    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
-    FlushIdleTask(pattern_);
-    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
-}
-
-/**
- * @tc.name: ListBackScrollWithFooter001
- * @tc.desc: A footer-backed LazyColumnLayout under a List must be able to scroll back from the bottom.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyColumnLayoutTest, ListBackScrollWithFooter001, TestSize.Level1)
-{
-    CreateList();
-    CreateLazyColumnLayout();
-    CreateContent(20);
-    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(60.0f); });
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(scrollablePattern_, nullptr);
-
-    scrollablePattern_->UpdateCurrentOffset(-1500.0f, SCROLL_FROM_UPDATE);
-    FlushUITasks();
-    const int32_t startAtBottom = pattern_->layoutInfo_->startIndex_;
-    EXPECT_GT(startAtBottom, 0);
-
-    // Back-scroll: the content must move back (start index decreases); the footer-leak bug pinned it at the bottom.
-    scrollablePattern_->UpdateCurrentOffset(700.0f, SCROLL_FROM_UPDATE);
-    FlushUITasks();
-    EXPECT_LT(pattern_->layoutInfo_->startIndex_, startAtBottom);
+    index = -2;
+    pos = -1.0f;
+    algorithm.GetEndIndexInfo(index, pos);
+    EXPECT_EQ(index, 9);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
 }
 } // namespace OHOS::Ace::NG

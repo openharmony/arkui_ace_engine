@@ -22,9 +22,6 @@ export class ArkSystemColors implements Colors {
     public warning: ResourceColor;
     public alert: ResourceColor;
     public confirm: ResourceColor;
-    public primary: ResourceColor;
-    public onPrimary: ResourceColor;
-    public container: ResourceColor;
 
     public fontPrimary: ResourceColor;
     public fontSecondary: ResourceColor;
@@ -138,9 +135,6 @@ export class ArkSystemColors implements Colors {
         this.interactiveActive = _r(125831022, 10001, '', '', 'sys.color.interactive_active');
         this.interactiveSelect = _r(125831023, 10001, '', '', 'sys.color.interactive_select');
         this.interactiveClick = _r(125831024, 10001, '', '', 'sys.color.interactive_click');
-        this.primary = _r('', '', 'sys.color.primary');
-        this.onPrimary = _r('', '', 'sys.color.on_primary');
-        this.container = _r('', '', 'sys.color.container');
     }
 }
 
@@ -149,9 +143,6 @@ export class ArkSystemCustomColors implements CustomColors {
     public warning?: ResourceColor;
     public alert?: ResourceColor;
     public confirm?: ResourceColor;
-    public primary?: ResourceColor;
-    public onPrimary?: ResourceColor;
-    public container?: ResourceColor;
 
     public fontPrimary?: ResourceColor;
     public fontSecondary?: ResourceColor;

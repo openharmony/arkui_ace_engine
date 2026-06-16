@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/list/list_properties.h"

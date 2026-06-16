@@ -1,0 +1,1166 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
+
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/common/container.h"
+
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
+
+namespace OHOS::Ace {
+#ifndef CROSS_PLATFORM
+DatePickerModel* GetDatePickerModelImpl()
+{
+    // Load the datePicker loader from frameworks/compatible/components/picker directory
+    static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("datePicker");
+    static DatePickerModel* instance = loader ? reinterpret_cast<DatePickerModel*>(loader->CreateModel()) : nullptr;
+    return instance;
+}
+DatePickerDialogModel* GetDatePickerDialogModelImpl()
+{
+    // Load the datePicker loader from frameworks/compatible/components/picker directory
+    static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("datePickerDialog");
+    static DatePickerDialogModel* instance =
+        loader ? reinterpret_cast<DatePickerDialogModel*>(loader->CreateModel()) : nullptr;
+    return instance;
+}
+#endif
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t POS_0 = 0;
+constexpr int32_t POS_1 = 1;
+constexpr int32_t POS_2 = 2;
+constexpr int YEAR_1900 = 1900;
+constexpr int YEAR_1970 = 1970;
+constexpr int YEAR_2100 = 2100;
+constexpr int NUM_1 = 1;
+constexpr int NUM_12 = 12;
+constexpr int NUM_31 = 31;
+const char DEFAULT_DELIMITER = '|';
+const int32_t ERROR_INT_CODE = -1;
+thread_local std::string g_strValue;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+
+ArkUI_Bool GetPickerThemeByFrameNode(FrameNode* frameNode, RefPtr<PickerTheme>& theme)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return true;
+}
+
+void InitDatePickerTextStyle(const char* fontInfo, uint32_t color, int32_t style, NG::PickerTextStyle& textStyle)
+{
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+}
+
+void GetColorResourceObject(FrameNode* frameNode, PickerTextStyle& textStyle)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> colorResObj;
+        Color result = textStyle.textColor.value();
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        if (colorResObj) {
+            textStyle.textColor = result;
+            textStyle.textColorResObj = colorResObj;
+        }
+    }
+}
+
+void SetDatePickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* fontFamilyRawPtr,
+    void* textColorRawPtr)
+{
+    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
+    if (fontSizePtr) {
+        textStyle.fontSizeResObj = AceType::Claim(fontSizePtr);
+    }
+
+    auto* fontFamilyPtr = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
+    if (fontFamilyPtr) {
+        textStyle.fontFamilyResObj = AceType::Claim(fontFamilyPtr);
+    }
+
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    if (textColorPtr) {
+        textStyle.textColorResObj = AceType::Claim(textColorPtr);
+    }
+}
+
+ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getSelectedTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
+    std::string families;
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
+    g_strValue = g_strValue + families + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
+    return g_strValue.c_str();
+}
+
+void SetSelectedTextStyleBase(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isNeedGetResObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
+    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+{
+    SetSelectedTextStyleBase(node, fontInfo, color, style, false);
+}
+
+void SetSelectedTextStylePtr(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isDefaultColor)
+{
+    SetSelectedTextStyleBase(node, fontInfo, color, style, !isDefaultColor);
+}
+
+void SetSelectedTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
+    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+void ResetSelectedTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    auto selectedStyle = theme->GetOptionStyle(true, false);
+    textStyle.textColor = selectedStyle.GetTextColor();
+    textStyle.fontSize = selectedStyle.GetFontSize();
+    textStyle.fontWeight = selectedStyle.GetFontWeight();
+    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getNormalTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
+    g_strValue = g_strValue + families + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
+    return g_strValue.c_str();
+}
+
+void SetDatePickerTextStyleBase(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isNeedGetResObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
+    DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+void SetDatePickerTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+{
+    SetDatePickerTextStyleBase(node, fontInfo, color, style, false);
+}
+
+void SetDatePickerTextStylePtr(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isDefaultColor)
+{
+    SetDatePickerTextStyleBase(node, fontInfo, color, style, !isDefaultColor);
+}
+
+void SetDatePickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
+    DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+void ResetDatePickerTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    auto normalStyle = theme->GetOptionStyle(false, false);
+    textStyle.textColor = normalStyle.GetTextColor();
+    textStyle.fontSize = normalStyle.GetFontSize();
+    textStyle.fontWeight = normalStyle.GetFontWeight();
+    DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
+    g_strValue = g_strValue + families + ";";
+    g_strValue =
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
+    return g_strValue.c_str();
+}
+
+void SetDisappearTextStyleBase(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isNeedGetResObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    InitDatePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+void SetDisappearTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+{
+    SetDisappearTextStyleBase(node, fontInfo, color, style, false);
+}
+
+void SetDisappearTextStylePtr(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style,
+    bool isDefaultColor)
+{
+    SetDisappearTextStyleBase(node, fontInfo, color, style, !isDefaultColor);
+}
+
+void SetDisappearTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PickerTheme> theme;
+    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
+    InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
+        textStyle);
+    SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
+        textStyleStruct->textColorRawPtr);
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+void ResetDisappearTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    auto disappearStyle = theme->GetDisappearOptionStyle();
+    textStyle.textColor = disappearStyle.GetTextColor();
+    textStyle.fontSize = disappearStyle.GetFontSize();
+    textStyle.fontWeight = disappearStyle.GetFontWeight();
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+ArkUI_Int32 GetLunar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::getLunar(frameNode);
+}
+
+void SetLunar(ArkUINodeHandle node, int lunar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetShowLunar(frameNode, lunar);
+}
+
+void ResetLunar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetShowLunar(frameNode, false);
+}
+
+ArkUI_Uint32 GetDatePickerBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::getBackgroundColor(frameNode);
+}
+
+void SetDatePickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+
+void SetDatePickerBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    DatePickerModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
+void ResetDatePickerBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
+}
+
+ArkUI_CharPtr GetStartDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getStartDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
+}
+
+void SetStartDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pickerDate = PickerDate(year, month, day);
+    if (pickerDate.GetYear() < YEAR_1900) {
+        pickerDate.SetYear(YEAR_1970);
+        pickerDate.SetMonth(1);
+        pickerDate.SetDay(1);
+    }
+    DatePickerModelNG::SetStartDate(frameNode, pickerDate);
+}
+
+void ResetStartDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetStartDate(frameNode, PickerDate(YEAR_1970, NUM_1, NUM_1));
+}
+
+ArkUI_CharPtr GetEndDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getEndDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
+}
+
+void SetEndDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEndDate(frameNode, PickerDate(year, month, day));
+}
+
+void ResetEndDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEndDate(frameNode, PickerDate(YEAR_2100, NUM_12, NUM_31));
+}
+
+ArkUI_CharPtr GetSelectedDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getSelectedDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
+}
+
+void SetSelectedDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetSelectedDate(frameNode, PickerDate(year, month, day));
+}
+
+void ResetSelectedDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    time_t now = time(nullptr);
+    auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
+    PickerDate pickerDate(currentTm->tm_year + YEAR_1900, currentTm->tm_mon + NUM_1, currentTm->tm_mday);
+
+    DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
+}
+
+void SetDatePickerMode(ArkUINodeHandle node, int value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value > static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+        return;
+    }
+    DatePickerModelNG::SetMode(frameNode, static_cast<DatePickerMode>(value));
+}
+
+void ResetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetMode(frameNode, DatePickerMode::DATE);
+}
+
+ArkUI_Int32 GetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(DatePickerModelNG::getMode(frameNode));
+}
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return DatePickerModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, true);
+}
+
+void SetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
+ArkUI_Bool GetCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::GetCanLoop(frameNode);
+}
+
+void SetCanLoop(ArkUINodeHandle node, int isLoop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetCanLoop(frameNode, isLoop);
+}
+
+void ResetCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetCanLoop(frameNode, true);
+}
+
+void SetDatePickerOnDateChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDateChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    DatePickerModelNG::SetOnDateChange(frameNode, std::move(*onDateChange));
+}
+
+void ResetDatePickerOnDateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetOnDateChange(frameNode, nullptr);
+}
+
+void SetDatePickerOnDateChangeHandler(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDateChange = [extraParam](const BaseEventInfo* info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_DATE_PICKER_DATE_CHANGE;
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
+        if (!argsPtr) {
+            event.componentAsyncEvent.data[0].i32 = 1970;
+            event.componentAsyncEvent.data[1].i32 = 1;
+            event.componentAsyncEvent.data[2].i32 = 1;
+            event.componentAsyncEvent.data[3].i32 = 0;
+            event.componentAsyncEvent.data[4].i32 = 0;
+        }
+        auto year = argsPtr->GetValue("year");
+        auto month = argsPtr->GetValue("month");
+        auto day = argsPtr->GetValue("day");
+        auto hour = argsPtr->GetValue("hour");
+        auto minute = argsPtr->GetValue("minute");
+        if (year && year->IsNumber()) {
+            event.componentAsyncEvent.data[0].i32 = year->GetInt();
+        }
+        if (month && month->IsNumber()) {
+            event.componentAsyncEvent.data[1].i32 = month->GetInt();
+        }
+        if (day && day->IsNumber()) {
+            event.componentAsyncEvent.data[2].i32 = day->GetInt();
+        }
+        if (hour && hour->IsNumber()) {
+            event.componentAsyncEvent.data[3].i32 = hour->GetInt();
+        }
+        if (minute && minute->IsNumber()) {
+            event.componentAsyncEvent.data[4].i32 = minute->GetInt();
+        }
+        SendArkUISyncEvent(&event);
+    };
+    DatePickerModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
+}
+
+void SetDatePickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    DatePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetDatePickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetOnChange(frameNode, nullptr);
+}
+
+ArkUINodeHandle CreateFrameNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+}
+
+void CreateTimePicker(void* theme)
+{
+    CHECK_NULL_VOID(theme);
+    DatePickerModelNG::GetInstance()->CreateTimePicker(
+        AceType::Claim(reinterpret_cast<PickerTheme*>(theme)));
+}
+
+void CreateDatePicker(void* theme)
+{
+    CHECK_NULL_VOID(theme);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(
+        AceType::Claim(reinterpret_cast<PickerTheme*>(theme)));
+}
+
+void SetJSSelectedTime(void* value)
+{
+    CHECK_NULL_VOID(value);
+    DatePickerModelNG::GetInstance()->SetSelectedTime((*reinterpret_cast<PickerTime*>(value)));
+}
+
+void SetJSStartDate(void* value)
+{
+    CHECK_NULL_VOID(value);
+    DatePickerModelNG::GetInstance()->SetStartDate(
+        *reinterpret_cast<PickerDate*>(value));
+}
+
+void SetJSEndDate(void* value)
+{
+    CHECK_NULL_VOID(value);
+    DatePickerModelNG::GetInstance()->SetEndDate(
+        *reinterpret_cast<PickerDate*>(value));
+}
+
+void SetJSSelectedDate(void* value)
+{
+    CHECK_NULL_VOID(value);
+    DatePickerModelNG::GetInstance()->SetSelectedDate(
+        *reinterpret_cast<PickerDate*>(value));
+}
+
+void SetJSDatePickerMode(ArkUI_Int32 value)
+{
+    DatePickerModelNG::GetInstance()->SetMode(static_cast<DatePickerMode>(value));
+}
+
+void SetJSChangeEvent(void* value)
+{
+    CHECK_NULL_VOID(value);
+    DatePickerModel::GetInstance()->SetChangeEvent(std::move((*reinterpret_cast<DateChangeEvent*>(value))));
+}
+
+void SetJSSelectedTextStyle(void* theme, void* textStyle)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(textStyle);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(AceType::Claim((reinterpret_cast<Ace::PickerTheme*>(theme))),
+        (*reinterpret_cast<NG::PickerTextStyle*>(textStyle)));
+}
+
+void UpdateUserSetSelectColor()
+{
+    DatePickerModelNG::GetInstance()->UpdateUserSetSelectColor();
+}
+
+void SetJSTextStyle(void* theme, void* textStyle)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(textStyle);
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(AceType::Claim((reinterpret_cast<Ace::PickerTheme*>(theme))),
+        (*reinterpret_cast<NG::PickerTextStyle*>(textStyle)));
+}
+
+void SetJSDisappearTextStyle(void* theme, void* textStyle)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(textStyle);
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(
+        AceType::Claim((reinterpret_cast<Ace::PickerTheme*>(theme))),
+        (*reinterpret_cast<NG::PickerTextStyle*>(textStyle)));
+}
+
+void HasUserDefinedDisappearFontFamily(ArkUI_Bool isHas)
+{
+    DatePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(isHas);
+}
+
+void HasUserDefinedNormalFontFamily(ArkUI_Bool isHas)
+{
+    DatePickerModel::GetInstance()->HasUserDefinedNormalFontFamily(isHas);
+}
+
+void HasUserDefinedSelectedFontFamily(ArkUI_Bool isHas)
+{
+    DatePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(isHas);
+}
+
+void SetBackgroundColorWithResourceObj(ArkUI_Uint32 color, void* ojb)
+{
+    ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(
+        Color(color), AceType::Claim((reinterpret_cast<ResourceObject*>(ojb))));
+}
+
+void HasUserDefinedOpacity()
+{
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+}
+
+void SetUseMilitaryTime(int isUseMilitaryTime)
+{
+    DatePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void Show(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+    void* dateAcceptEvent, void* dateChangeEvent, ArkUI_Int32 pickerType, void* pickerDialogEvent, void* buttonInfos)
+{
+    DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(*reinterpret_cast<PickerDialogInfo*>(pickerDialog),
+        *reinterpret_cast<NG::DatePickerSettingData*>(settingData),
+        std::move(*reinterpret_cast<std::function<void()>*>(cancelEvent)),
+        std::move(*reinterpret_cast<std::function<void(const std::string&)>*>(acceptEvent)),
+        std::move(*reinterpret_cast<std::function<void(const std::string&)>*>(changeEvent)),
+        std::move(*reinterpret_cast<std::function<void(const std::string&)>*>(dateAcceptEvent)),
+        std::move(*reinterpret_cast<std::function<void(const std::string&)>*>(dateChangeEvent)),
+        static_cast<DatePickerType>(pickerType), *reinterpret_cast<PickerDialogEvent*>(pickerDialogEvent),
+        *reinterpret_cast<std::vector<ButtonInfo>*>(buttonInfos));
+}
+
+#ifndef CROSS_PLATFORM
+void SetLunarImpl(ArkUINodeHandle node, int lunar)
+{
+    GetDatePickerModelImpl()->SetShowLunar(lunar);
+}
+
+void ResetLunarImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetShowLunar(false);
+}
+
+void SetStartDateImpl(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto pickerDate = PickerDate(year, month, day);
+    if (pickerDate.GetYear() < YEAR_1900) {
+        pickerDate.SetYear(YEAR_1970);
+        pickerDate.SetMonth(1);
+        pickerDate.SetDay(1);
+    }
+    GetDatePickerModelImpl()->SetStartDate(pickerDate);
+}
+
+void ResetStartDateImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetStartDate(PickerDate(YEAR_1970, NUM_1, NUM_1));
+}
+
+void SetEndDateImpl(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    GetDatePickerModelImpl()->SetEndDate(PickerDate(year, month, day));
+}
+
+void ResetEndDateImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetEndDate(PickerDate(YEAR_2100, NUM_12, NUM_31));
+}
+
+void SetSelectedDateImpl(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    GetDatePickerModelImpl()->SetSelectedDate(PickerDate(year, month, day));
+}
+
+void ResetSelectedDateImpl(ArkUINodeHandle node)
+{
+    time_t now = time(nullptr);
+    auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
+    PickerDate pickerDate(currentTm->tm_year + YEAR_1900, currentTm->tm_mon + NUM_1, currentTm->tm_mday);
+    GetDatePickerModelImpl()->SetSelectedDate(pickerDate);
+}
+
+void SetDatePickerBackgroundColorImpl(ArkUINodeHandle node, uint32_t color)
+{
+    GetDatePickerModelImpl()->SetBackgroundColor(Color(color));
+}
+
+void SetDatePickerBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, uint32_t color, ArkUI_Int32 colorSpace)
+{
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    GetDatePickerModelImpl()->SetBackgroundColor(backgroundColor);
+}
+
+void ResetDatePickerBackgroundColorImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetBackgroundColor(Color(Color::TRANSPARENT));
+}
+
+void SetDatePickerModeImpl(ArkUINodeHandle node, int value)
+{
+    if (value < 0 || value > static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+        return;
+    }
+    GetDatePickerModelImpl()->SetMode(static_cast<DatePickerMode>(value));
+}
+
+void ResetDatePickerModeImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetMode(DatePickerMode::DATE);
+}
+
+void SetDatePickerOnChangeImpl(ArkUINodeHandle node, void* callback)
+{
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    GetDatePickerModelImpl()->SetOnChange(std::move(*onChange));
+}
+
+void ResetDatePickerOnChangeImpl(ArkUINodeHandle node)
+{
+    GetDatePickerModelImpl()->SetOnChange(nullptr);
+}
+
+void CreateTimePickerImpl(void* theme)
+{
+    CHECK_NULL_VOID(theme);
+    GetDatePickerModelImpl()->CreateTimePicker(AceType::Claim(reinterpret_cast<PickerTheme*>(theme)));
+}
+
+void CreateDatePickerImpl(void* theme)
+{
+    CHECK_NULL_VOID(theme);
+    GetDatePickerModelImpl()->CreateDatePicker(AceType::Claim(reinterpret_cast<PickerTheme*>(theme)));
+}
+
+void SetJSSelectedTimeImpl(void* value) {}
+void SetJSStartDateImpl(void* value) {}
+void SetJSEndDateImpl(void* value) {}
+void SetJSSelectedDateImpl(void* value) {}
+void SetJSDatePickerModeImpl(ArkUI_Int32 value) {}
+void SetJSChangeEventImpl(void* value) {}
+void SetJSSelectedTextStyleImpl(void* theme, void* textStyle) {}
+void UpdateUserSetSelectColorImpl() {}
+void SetJSTextStyleImpl(void* theme, void* textStyle) {}
+void SetJSDisappearTextStyleImpl(void* theme, void* textStyle) {}
+void HasUserDefinedDisappearFontFamilyImpl(ArkUI_Bool isHas) {}
+void HasUserDefinedNormalFontFamilyImpl(ArkUI_Bool isHas) {}
+void HasUserDefinedSelectedFontFamilyImpl(ArkUI_Bool isHas) {}
+void SetBackgroundColorWithResourceObjImpl(ArkUI_Uint32 color, void* ojb) {}
+void HasUserDefinedOpacityImpl() {}
+void SetUseMilitaryTimeImpl(ArkUI_Bool isUseMilitaryTime) {}
+void ShowImpl(void* pickerDialog, void* settingData, void* cancelEvent,
+    void* acceptEvent, void* changeEvent, void* dateAcceptEvent, void* dateChangeEvent,
+    ArkUI_Int32 pickerType, void* pickerDialogEvent, void* buttonInfos) {}
+#endif
+} // namespace
+
+namespace NodeModifier {
+const ArkUIDatePickerModifier* GetDatePickerDynamicModifier()
+{
+    static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
+    if (!isCurrentUseNewPipeline) {
+#ifndef CROSS_PLATFORM
+        CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+        static const ArkUIDatePickerModifier modifierImpl = {
+            .getSelectedTextStyle = nullptr,
+            .setSelectedTextStyle = nullptr,
+            .setSelectedTextStylePtr = nullptr,
+            .setSelectedTextStyleWithResObj = nullptr,
+            .resetSelectedTextStyle = nullptr,
+            .getDatePickerTextStyle = nullptr,
+            .setDatePickerTextStyle = nullptr,
+            .setDatePickerTextStylePtr = nullptr,
+            .setDatePickerTextStyleWithResObj = nullptr,
+            .resetDatePickerTextStyle = nullptr,
+            .getDisappearTextStyle = nullptr,
+            .setDisappearTextStyle = nullptr,
+            .setDisappearTextStylePtr = nullptr,
+            .setDisappearTextStyleWithResObj = nullptr,
+            .resetDisappearTextStyle = nullptr,
+            .getLunar = nullptr,
+            .setLunar = SetLunarImpl,
+            .resetLunar = ResetLunarImpl,
+            .getStartDate = nullptr,
+            .setStartDate = SetStartDateImpl,
+            .resetStartDate = ResetStartDateImpl,
+            .getEndDate = nullptr,
+            .setEndDate = SetEndDateImpl,
+            .resetEndDate = ResetEndDateImpl,
+            .getSelectedDate = nullptr,
+            .setSelectedDate = SetSelectedDateImpl,
+            .resetSelectedDate = ResetSelectedDateImpl,
+            .getDatePickerBackgroundColor = nullptr,
+            .setDatePickerBackgroundColor = SetDatePickerBackgroundColorImpl,
+            .setDatePickerBackgroundColorWithColorSpace = SetDatePickerBackgroundColorWithColorSpaceImpl,
+            .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColorImpl,
+            .getDatePickerMode = nullptr,
+            .setDatePickerMode = SetDatePickerModeImpl,
+            .resetDatePickerMode = ResetDatePickerModeImpl,
+            .getEnableHapticFeedback = nullptr,
+            .setEnableHapticFeedback = nullptr,
+            .resetEnableHapticFeedback = nullptr,
+            .setDatePickerDigitalCrownSensitivity = nullptr,
+            .resetDatePickerDigitalCrownSensitivity = nullptr,
+            .setDatePickerOnDateChange = nullptr,
+            .resetDatePickerOnDateChange = nullptr,
+            .setDatePickerOnChange = SetDatePickerOnChangeImpl,
+            .resetDatePickerOnChange = ResetDatePickerOnChangeImpl,
+            .getCanLoop = nullptr,
+            .setCanLoop = nullptr,
+            .resetCanLoop = nullptr,
+            .createFrameNode = nullptr,
+            .createTimePicker = CreateTimePickerImpl,
+            .createDatePicker = CreateDatePickerImpl,
+            .setJSSelectedTime = SetJSSelectedTimeImpl,
+            .setJSStartDate = SetJSStartDateImpl,
+            .setJSEndDate = SetJSEndDateImpl,
+            .setJSSelectedDate = SetJSSelectedDateImpl,
+            .setJSDatePickerMode = SetJSDatePickerModeImpl,
+            .setJSChangeEvent = SetJSChangeEventImpl,
+            .setJSSelectedTextStyle = SetJSSelectedTextStyleImpl,
+            .updateUserSetSelectColor = UpdateUserSetSelectColorImpl,
+            .setJSTextStyle = SetJSTextStyleImpl,
+            .setJSDisappearTextStyle = SetJSDisappearTextStyleImpl,
+            .hasUserDefinedDisappearFontFamily = HasUserDefinedDisappearFontFamilyImpl,
+            .hasUserDefinedNormalFontFamily = HasUserDefinedNormalFontFamilyImpl,
+            .hasUserDefinedSelectedFontFamily = HasUserDefinedSelectedFontFamilyImpl,
+            .setBackgroundColorWithResourceObj = SetBackgroundColorWithResourceObjImpl,
+            .hasUserDefinedOpacity = HasUserDefinedOpacityImpl,
+            .setUseMilitaryTime = SetUseMilitaryTimeImpl,
+            .show = ShowImpl,
+            .setDatePickerOnDateChangeHandler = nullptr,
+        };
+        CHECK_INITIALIZED_FIELDS_END(modifierImpl, 0, 0, 0); // don't move this line
+        return &modifierImpl;
+#endif
+    }
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDatePickerModifier modifier = {
+        .getSelectedTextStyle = GetSelectedTextStyle,
+        .setSelectedTextStyle = SetSelectedTextStyle,
+        .setSelectedTextStylePtr = SetSelectedTextStylePtr,
+        .setSelectedTextStyleWithResObj = SetSelectedTextStyleWithResObj,
+        .resetSelectedTextStyle = ResetSelectedTextStyle,
+        .getDatePickerTextStyle = GetDatePickerTextStyle,
+        .setDatePickerTextStyle = SetDatePickerTextStyle,
+        .setDatePickerTextStylePtr = SetDatePickerTextStylePtr,
+        .setDatePickerTextStyleWithResObj = SetDatePickerTextStyleWithResObj,
+        .resetDatePickerTextStyle = ResetDatePickerTextStyle,
+        .getDisappearTextStyle = GetDisappearTextStyle,
+        .setDisappearTextStyle = SetDisappearTextStyle,
+        .setDisappearTextStylePtr = SetDisappearTextStylePtr,
+        .setDisappearTextStyleWithResObj = SetDisappearTextStyleWithResObj,
+        .resetDisappearTextStyle = ResetDisappearTextStyle,
+        .getLunar = GetLunar,
+        .setLunar = SetLunar,
+        .resetLunar = ResetLunar,
+        .getStartDate = GetStartDate,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .getEndDate = GetEndDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .getSelectedDate = GetSelectedDate,
+        .setSelectedDate = SetSelectedDate,
+        .resetSelectedDate = ResetSelectedDate,
+        .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColorWithColorSpace = SetDatePickerBackgroundColorWithColorSpace,
+        .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
+        .getDatePickerMode = GetDatePickerMode,
+        .setDatePickerMode = SetDatePickerMode,
+        .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .setDatePickerDigitalCrownSensitivity = SetDatePickerDigitalCrownSensitivity,
+        .resetDatePickerDigitalCrownSensitivity = ResetDatePickerDigitalCrownSensitivity,
+        .setDatePickerOnDateChange = SetDatePickerOnDateChangeExt,
+        .resetDatePickerOnDateChange = ResetDatePickerOnDateChange,
+        .setDatePickerOnChange = SetDatePickerOnChangeExt,
+        .resetDatePickerOnChange = ResetDatePickerOnChange,
+        .getCanLoop = GetCanLoop,
+        .setCanLoop = SetCanLoop,
+        .resetCanLoop = ResetCanLoop,
+        .createFrameNode = CreateFrameNode,
+        .createTimePicker = CreateTimePicker,
+        .createDatePicker = CreateDatePicker,
+        .setJSSelectedTime = SetJSSelectedTime,
+        .setJSStartDate = SetJSStartDate,
+        .setJSEndDate = SetJSEndDate,
+        .setJSSelectedDate = SetJSSelectedDate,
+        .setJSDatePickerMode = SetJSDatePickerMode,
+        .setJSChangeEvent = SetJSChangeEvent,
+        .setJSSelectedTextStyle = SetJSSelectedTextStyle,
+        .updateUserSetSelectColor = UpdateUserSetSelectColor,
+        .setJSTextStyle = SetJSTextStyle,
+        .setJSDisappearTextStyle = SetJSDisappearTextStyle,
+        .hasUserDefinedDisappearFontFamily = HasUserDefinedDisappearFontFamily,
+        .hasUserDefinedNormalFontFamily = HasUserDefinedNormalFontFamily,
+        .hasUserDefinedSelectedFontFamily = HasUserDefinedSelectedFontFamily,
+        .setBackgroundColorWithResourceObj = SetBackgroundColorWithResourceObj,
+        .hasUserDefinedOpacity = HasUserDefinedOpacity,
+        .setUseMilitaryTime = SetUseMilitaryTime,
+        .show = Show,
+        .setDatePickerOnDateChangeHandler = SetDatePickerOnDateChangeHandler,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
+    return &modifier;
+}
+
+const CJUIDatePickerModifier* GetCJUIDatepickerModifier()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIDatePickerModifier modifier = {
+        .getSelectedTextStyle = GetSelectedTextStyle,
+        .setSelectedTextStyle = SetSelectedTextStyle,
+        .resetSelectedTextStyle = ResetSelectedTextStyle,
+        .getDatePickerTextStyle = GetDatePickerTextStyle,
+        .setDatePickerTextStyle = SetDatePickerTextStyle,
+        .resetDatePickerTextStyle = ResetDatePickerTextStyle,
+        .getDisappearTextStyle = GetDisappearTextStyle,
+        .setDisappearTextStyle = SetDisappearTextStyle,
+        .resetDisappearTextStyle = ResetDisappearTextStyle,
+        .getLunar = GetLunar,
+        .setLunar = SetLunar,
+        .resetLunar = ResetLunar,
+        .getStartDate = GetStartDate,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .getEndDate = GetEndDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .getSelectedDate = GetSelectedDate,
+        .setSelectedDate = SetSelectedDate,
+        .resetSelectedDate = ResetSelectedDate,
+        .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColorWithColorSpace = SetDatePickerBackgroundColorWithColorSpace,
+        .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
+        .getDatePickerMode = GetDatePickerMode,
+        .setDatePickerMode = SetDatePickerMode,
+        .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .getCanLoop = GetCanLoop,
+        .setCanLoop = SetCanLoop,
+        .resetCanLoop = ResetCanLoop,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
+    return &modifier;
+}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG
