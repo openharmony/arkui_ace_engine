@@ -61,7 +61,7 @@ public:
     {
         return isForceSplitSupported_ && isRouter_ == isRouter;
     }
-    void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false);
+    void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode);
     bool IsForceSplitEnable(bool isRouter) const;
     void SetNavigationForceSplitEnableInternal(bool enableSplit);
     bool GetDisableNavForceSplitInternal() const
@@ -218,8 +218,6 @@ private:
     bool IsTopFullScreenPage();
     bool IsWindowConditionMatched();
     bool HasForceSplitTargetNavigation();
-    void RegisterSurfaceChangeCallbackIfNeeded();
-    void ChangeForceSplitModeIfNeeded();
     void FlushArkUIHook();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
@@ -256,14 +254,8 @@ private:
     int32_t appIconId_ = 0;
     // for navigation force split, we need disable forcesplit before router transition.
     bool disableNavForceSplitInternal_ = false;
-    // When the window actively notifies ArkUI to enable/disable force split, it may need to work
-    // in coordination with subsequent UpdateViewportConfig. For example, in rotation scenarios,
-    // the application rotation animation may include a split/stack switching animation.
-    std::optional<int32_t> surfaceChangeCallbackId_;
-    std::optional<bool> delayedIsForceSplitEnable_;
     std::optional<Color> splitDividerColorLight_;
     std::optional<Color> splitDividerColorDark_;
-    std::optional<ForceSplitMode> delayedMode_;
 };
 } // namespace OHOS::Ace::NG
 

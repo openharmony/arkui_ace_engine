@@ -4087,6 +4087,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto updateForceSplitRuntimeConfigTask =
+        [weakContext = WeakPtr(context), config = config.GetForceSplitDisplayConfig()]() {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->SetForceSplitEnable(config.enableForceSplit, config.mode);
+    };
     auto updateforceSplitTask = [weakContext = WeakPtr(context)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -4129,11 +4137,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateForceSplitRuntimeConfigTask();
         updateforceSplitTask();
         updateDensityTask(); // ensure density has been updated before load first page
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
+        taskExecutor->PostTask(std::move(updateForceSplitRuntimeConfigTask),
+            TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplitRuntimeConfigTask");
         taskExecutor->PostTask(
             std::move(updateforceSplitTask), TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplit");
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
@@ -5860,32 +5871,6 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
-{
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}d needUpdateViewport:%{public}d",
-             isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
-    ContainerScope scope(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, mode, needUpdateViewport]() {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto forceSplitMgr = context->GetForceSplitManager();
-        CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, mode, needUpdateViewport);
-    };
-    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
-        forceSplitTask();
-        return;
-    }
-    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
-}
-
 void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig)
 {
     ContainerScope scope(instanceId_);
@@ -5913,6 +5898,11 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& s
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
     }
+    /**
+     * As long as the application supports force split, regardless of whether it is enabled or not,
+     * the SetForceSplitEnable interface will be called.
+     */
+    forceSplitMgr->SetForceSplitSupported(true);
     NG::ForceSplitUtils::LogForceSplitParam(splitConfig->isRouter, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     forceSplitMgr->SetIsRouter(splitConfig->isRouter);

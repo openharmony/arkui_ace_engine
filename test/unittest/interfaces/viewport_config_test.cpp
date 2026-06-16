@@ -96,8 +96,8 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
     if (viewConfig != viewConfigTest2) {
         GTEST_LOG_(INFO) << "ViewportConfigTest operator!=";
     }
-    ASSERT_EQ(
-        toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) transformHint: 0 displayId: 0");
+    ASSERT_EQ(toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) "
+                        "transformHint: 0 displayId: 0 forceSplitDisplayConfig: disable forceSplit, mode: 0");
 }
 
 /**
