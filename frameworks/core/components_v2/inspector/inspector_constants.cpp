@@ -138,7 +138,7 @@ const char TAB_BAR_ETS_TAG[] = "TabBar";
 
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
-const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
+ACE_FORCE_EXPORT const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 const char BAR_ITEM_ETS_TAG[] = "BarItem";
 const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
@@ -149,14 +149,14 @@ const char BACK_BUTTON_ETS_TAG[] = "BackButton";
 const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[] = "SplitPlaceholderContentNode";
-const char NAVBAR_ETS_TAG[] = "NavBar";
+ACE_FORCE_EXPORT const char NAVBAR_ETS_TAG[] = "NavBar";
 const char PRIMARY_CONTENT_NODE_ETS_TAG[] = "PrimaryContent";
 
 // navRouter view
 const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouter";
 
 // navDestination view
-const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
+ACE_FORCE_EXPORT const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
@@ -224,7 +224,7 @@ const char NAVIGATOR_ETS_TAG[] = "Navigator";
 
 // panel
 const char PANEL_COMPONENT_TAG[] = "SlidingPanelComponentV2";
-const char PANEL_ETS_TAG[] = "Panel";
+ACE_FORCE_EXPORT const char PANEL_ETS_TAG[] = "Panel";
 const char PANEL_CLOSE_ICON_ETS_TAG[] = "CloseIcon";
 
 // pattern-lock
@@ -346,7 +346,7 @@ const char BADGE_ETS_TAG[] = "Badge";
 // search
 const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
 const char SEARCH_ETS_TAG[] = "Search";
-const char SEARCH_Field_ETS_TAG[] = "SearchField";
+ACE_FORCE_EXPORT const char SEARCH_Field_ETS_TAG[] = "SearchField";
 
 // formComponent
 const char FORM_COMPONENT_TAG[] = "FormComponent";
@@ -394,8 +394,8 @@ const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
 const char SHEET_MASK_TAG[] = "SheetMask";
-const char SHEET_PAGE_TAG[] = "SheetPage";
-const char SHEET_WRAPPER_TAG[] = "SheetWrapper";
+ACE_FORCE_EXPORT const char SHEET_PAGE_TAG[] = "SheetPage";
+ACE_FORCE_EXPORT const char SHEET_WRAPPER_TAG[] = "SheetWrapper";
 
 // full screen modal
 const char MODAL_PAGE_TAG[] = "ModalPage";
@@ -475,14 +475,14 @@ const char MENU_DIVIDER_TAG[] = "MenuDivider";
 
 // textarea
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
-const char TEXTAREA_ETS_TAG[] = "TextArea";
+ACE_FORCE_EXPORT const char TEXTAREA_ETS_TAG[] = "TextArea";
 
 // textdrag
 const char TEXTDRAG_ETS_TAG[] = "TextDrag";
 
 // textinput
 const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
-const char TEXTINPUT_ETS_TAG[] = "TextInput";
+ACE_FORCE_EXPORT const char TEXTINPUT_ETS_TAG[] = "TextInput";
 
 // texttimer
 const char TEXTTIMER_COMPONENT_TAG[] = "TextTimerComponent";
@@ -490,7 +490,7 @@ const char TEXTTIMER_ETS_TAG[] = "TextTimer";
 
 // select
 const char SELECT_COMPONENT_TAG[] = "SelectComponent";
-const char SELECT_ETS_TAG[] = "Select";
+ACE_FORCE_EXPORT const char SELECT_ETS_TAG[] = "Select";
 
 // select_popup
 const char SELECT_POPUP_COMPONENT_TAG[] = "SelectPopupComponent";

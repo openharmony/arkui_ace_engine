@@ -25,6 +25,7 @@ component_modules = [
   "gauge",
   "hyperlink",
   "text_clock",
+  "text_field",
   "checkbox",
   "patternlock",
   "qrcode",

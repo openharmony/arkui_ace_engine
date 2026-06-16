@@ -577,7 +577,7 @@ public:
         return dragTotalMovePosition_;
     }
 
-    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+    ACE_FORCE_EXPORT bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
     
     void SetDragAction(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction>& dragAction)
     {

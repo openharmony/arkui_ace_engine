@@ -38,6 +38,8 @@ interface ArkComponentCreator {
   createBadgeComponent?: (node: NodePtr, type: ModifierType) => ArkBadgeComponent;
   createProgressComponent?: (node: NodePtr, type: ModifierType) => ArkProgressComponent;
   createTextTimerComponent?: (node: NodePtr, type: ModifierType) => ArkTextTimerComponent;
+  createTextAreaComponent?: (node: NodePtr, type: ModifierType) => ArkTextAreaComponent;
+  createTextInputComponent?: (node: NodePtr, type: ModifierType) => ArkTextInputComponent;
 }
 
 const __componentCreator__ : ArkComponentCreator = {};
@@ -1315,7 +1317,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['TextInput', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextInput', (node: NodePtr, type: ModifierType): ArkTextInputComponent => {
-        return new ArkTextInputComponent(node, type);
+        if (__componentCreator__.createTextInputComponent === undefined) {
+          getUINativeModule().loadNativeModule('TextInput');
+          let module = globalThis.requireNapi('arkui.components.arktextinput');
+          __componentCreator__.createTextInputComponent = module.createComponent;
+        }
+        return __componentCreator__.createTextInputComponent!(node, type);
       })
     }],
     ['GridCol', (context: UIContext): FrameNode => {
@@ -1501,7 +1508,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['TextArea', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
-        return new ArkTextAreaComponent(node, type);
+        if (__componentCreator__.createTextAreaComponent === undefined) {
+          getUINativeModule().loadNativeModule('TextArea');
+          let module = globalThis.requireNapi('arkui.components.arktextarea');
+          __componentCreator__.createTextAreaComponent = module.createComponent;
+        }
+        return __componentCreator__.createTextAreaComponent!(node, type);
       })
     }],
     ['Checkbox', (context: UIContext): FrameNode => {

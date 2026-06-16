@@ -188,6 +188,13 @@ interface SearchComponentModule {
 interface SelectComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
+interface TextAreaComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TextInputComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
 
 interface SideBarContainerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;

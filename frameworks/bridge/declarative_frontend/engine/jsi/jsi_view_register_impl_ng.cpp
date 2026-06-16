@@ -439,8 +439,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPageTransition::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
-    JSTextArea::JSBind(globalObj);
-    JSTextInput::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);

@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
 constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
+const char SEARCH_ETS_TAG[] = "Search";
 } // namespace
 
 void TextFieldManagerNG::ClearOnFocusTextField()
@@ -105,7 +106,7 @@ int32_t TextFieldManagerNG::GetSessionId(const RefPtr<NG::FrameNode>& host)
     if (textFieldPattern) {
         return textFieldPattern->GetSessionId();
     }
-    if (host->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (host->GetTag() == SEARCH_ETS_TAG) {
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_RETURN(textFieldFrameNode, -1);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();

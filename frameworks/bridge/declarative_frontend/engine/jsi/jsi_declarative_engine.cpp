@@ -841,6 +841,8 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TextArea", "arkui.components.arktextarea" },
+        { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "Toggle", "arkui.components.arktoggle" },

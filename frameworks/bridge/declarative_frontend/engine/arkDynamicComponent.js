@@ -381,6 +381,33 @@ if (globalThis.TextPickerDialog === undefined) {
   }
 }
 
+if (globalThis.TextInput === undefined) {
+  globalThis.TextInput = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextInput');
+      let module = globalThis.requireNapi('arkui.components.arktextinput');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().textInput.create(params);
+    },
+    name: 'JSTextInput'
+  }
+}
+
+// @ts-ignore
+if (globalThis.TextArea === undefined) {
+  globalThis.TextArea = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextArea');
+      let module = globalThis.requireNapi('arkui.components.arktextarea');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().textArea.create(params);
+    },
+    name: 'JSTextArea'
+  }
+}
+
 // @ts-ignore
 if (globalThis.DataPanel === undefined) {
   globalThis.DataPanel = {

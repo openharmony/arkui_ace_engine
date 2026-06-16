@@ -1748,7 +1748,7 @@ struct CJUITextAreaModifier {
     void (*resetTextAreaOnChange)(ArkUINodeHandle node);
     void (*setTextAreaEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaEnterKeyType)(ArkUINodeHandle node);
-    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback, void* resRawPtr);
     void (*resetTextAreaInputFilter)(ArkUINodeHandle node);
     void (*setTextAreaOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnTextSelectionChange)(ArkUINodeHandle node);
@@ -1957,7 +1957,8 @@ struct CJUITextInputModifier {
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
-    void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
+    void (*setTextInputCustomKeyboard)(
+        ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance, bool isJsView);
     ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);

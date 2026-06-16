@@ -6690,7 +6690,7 @@ int32_t SetInputCustomKeyboard(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         supportAvoidance = static_cast<bool>(item->value[0].i32);
     }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCustomKeyboard(
-        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance);
+        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance, false);
     return ERROR_CODE_NO_ERROR;
 }
 

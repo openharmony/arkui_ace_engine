@@ -53,7 +53,7 @@ public:
     static void ReleaseNativePtrFunc(void* env, void* nativePtr, void* data);
     static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
-    static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent* infoPtr);
+    ACE_FORCE_EXPORT static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent* infoPtr);
     static Local<panda::ObjectRef> CreateClickEventInfo(EcmaVM* vm, const ClickInfo* infoPtr);
     static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo* infoPtr);
     static Local<panda::ObjectRef> CreateMouseInfoObj(EcmaVM* vm, MouseInfo& info);
@@ -84,7 +84,7 @@ public:
     static ArkUINativeModuleValue MoveTo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeRawPtr(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    ACE_FORCE_EXPORT static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnAppear(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDisappear(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -93,6 +93,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"QRCode", "qrcode"},
         {"PatternLock", "patternlock"},
         {"TextClock", "textclock"},
+        { "TextInput", "textfield" },
+        { "TextArea", "textfield" },
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },

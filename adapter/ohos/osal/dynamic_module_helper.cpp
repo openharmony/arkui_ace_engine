@@ -73,6 +73,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
         {"TextClock", "textclock"},
+        { "TextInput", "textfield" },
+        { "TextArea", "textfield" },
         { "FlowItem", "waterflow" },
         { "FolderStack", "folderstack" },
         {"DynamicLayout", "dynamiclayout"},

@@ -1075,7 +1075,7 @@ ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Number& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Float64& src)
 {
     return Convert<Dimension>(src);
 }
@@ -3830,13 +3830,13 @@ TextRange Convert(const Ark_TextRange& src)
     return dst;
 }
 template<>
-bool Convert(const Ark_LineSpacingOptions& src)
+ACE_FORCE_EXPORT bool Convert(const Ark_LineSpacingOptions& src)
 {
     return Converter::OptConvert<bool>(src.onlyBetweenLines).value_or(false);
 }
 
 template<>
-OverflowMode Convert(const Ark_MaxLinesOptions& src)
+ACE_FORCE_EXPORT OverflowMode Convert(const Ark_MaxLinesOptions& src)
 {
     auto overflowMode = Converter::OptConvert<OverflowMode>(src.overflowMode);
     return overflowMode.value();

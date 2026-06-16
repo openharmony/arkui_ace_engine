@@ -2763,6 +2763,26 @@ bool ArkTSUtils::ParseJsColorStrategy(
     return false;
 }
 
+void ParsePasswordIconSource(const EcmaVM* vm, const Local<JSValueRef>& jsIconSrc,
+    std::string& iconResult, std::string& bundleResult, std::string& moduleResult)
+{
+    if (jsIconSrc->IsString(vm)) {
+        iconResult = jsIconSrc->ToString(vm)->ToString(vm);
+    }
+    if (!jsIconSrc->IsObject(vm)) {
+        return;
+    }
+
+    auto obj = jsIconSrc->ToObject(vm);
+    auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    if (bundle->IsString(vm) && module->IsString(vm)) {
+        bundleResult = bundle->ToString(vm)->ToString(vm);
+        moduleResult = module->ToString(vm)->ToString(vm);
+    }
+    ArkTSUtils::ParseJsMedia(vm, jsIconSrc, iconResult);
+}
+
 bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
     const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result)
 {
@@ -2778,39 +2798,8 @@ bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &js
         return false;
     }
 
-    if (jsOnIconSrc->IsString(vm)) {
-        result.showResult = jsOnIconSrc->ToString(vm)->ToString(vm);
-    }
-
-    if (jsOnIconSrc->IsObject(vm)) {
-        auto obj = jsOnIconSrc->ToObject(vm);
-        std::string bundleName;
-        std::string moduleName;
-        auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-        auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString(vm) && module->IsString(vm)) {
-            result.showBundleName = bundle->ToString(vm)->ToString(vm);
-            result.showModuleName = module->ToString(vm)->ToString(vm);
-        }
-        ParseJsMedia(vm, jsOnIconSrc, result.showResult);
-    }
-
-    if (jsOffIconSrc->IsString(vm)) {
-        result.hideResult = jsOffIconSrc->ToString(vm)->ToString(vm);
-    }
-
-    if (jsOffIconSrc->IsObject(vm)) {
-        auto obj = jsOffIconSrc->ToObject(vm);
-        std::string bundleName;
-        std::string moduleName;
-        auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-        auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString(vm) && module->IsString(vm)) {
-            result.hideBundleName = bundle->ToString(vm)->ToString(vm);
-            result.hideModuleName = module->ToString(vm)->ToString(vm);
-        }
-        ParseJsMedia(vm, jsOffIconSrc, result.hideResult);
-    }
+    ParsePasswordIconSource(vm, jsOnIconSrc, result.showResult, result.showBundleName, result.showModuleName);
+    ParsePasswordIconSource(vm, jsOffIconSrc, result.hideResult, result.hideBundleName, result.hideModuleName);
     return true;
 }
 
@@ -2858,6 +2847,43 @@ void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, 
     if (SystemProperties::ConfigChangePerform()) {
         resObjs.push_back(resObj);
     }
+}
+
+void ArkTSUtils::GetNewPadding(
+    const EcmaVM* vm, const Local<JSValueRef>& value, bool& hasRegist, NG::PaddingProperty& padding)
+{
+    if (value->IsObject(vm)) {
+        auto paddingObj = value->ToObject(vm);
+        CommonCalcDimension commonCalcDimension;
+        ArkTSUtils::ParseCommonMarginOrPaddingCorner(vm, paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            Framework::CommonCalcDimension frameworkCommonCalcDimension;
+            frameworkCommonCalcDimension.left = commonCalcDimension.left;
+            frameworkCommonCalcDimension.right = commonCalcDimension.right;
+            frameworkCommonCalcDimension.top = commonCalcDimension.top;
+            frameworkCommonCalcDimension.bottom = commonCalcDimension.bottom;
+            frameworkCommonCalcDimension.leftResObj = commonCalcDimension.leftResObj;
+            frameworkCommonCalcDimension.rightResObj = commonCalcDimension.rightResObj;
+            frameworkCommonCalcDimension.topResObj = commonCalcDimension.topResObj;
+            frameworkCommonCalcDimension.bottomResObj = commonCalcDimension.bottomResObj;
+            padding = Framework::JSViewAbstract::GetEdgePaddingsOrSafeAreaPaddings(frameworkCommonCalcDimension);
+            return;
+        }
+    }
+
+    CalcDimension length;
+    RefPtr<ResourceObject> lengthResObj;
+    if (!ParseJsDimensionVp(vm, value, length, lengthResObj)) {
+        // use default value.
+        length.Reset();
+    }
+    if (SystemProperties::ConfigChangePerform() && lengthResObj) {
+        NG::ViewAbstract::SetPadding(lengthResObj);
+        hasRegist = true;
+        return;
+    }
+    padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
 }
 
 void ArkTSUtils::ParseMargin(
@@ -2949,7 +2975,7 @@ bool ArkTSUtils::ParseResponseRegion(
     }
     return true;
 }
-bool ArkTSUtils::CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject)
+bool ArkTSUtils::CheckLengthMetrics(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObject)
 {
     if (jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "start")) ||
         jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "end")) ||
@@ -5537,7 +5563,7 @@ bool ArkTSUtils::ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRe
         borderRadius.AddResource(resourceName, resObj, std::move(updateFunc));                \
     }
 
-inline panda::Local<panda::StringRef> GetCachedString(EcmaVM* vm, Framework::ArkUIIndex index)
+inline panda::Local<panda::StringRef> GetCachedString(const EcmaVM* vm, Framework::ArkUIIndex index)
 {
     return panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(index));
 }
@@ -6105,7 +6131,7 @@ NG::BorderColorProperty ArkTSUtils::GetBorderColor(const CommonColor& commonColo
 }
 
 void ParseLocalizedMarginOrLocalizedPaddingCorner(
-    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, LocalizedCalcDimension& localizedCalcDimension)
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, LocalizedCalcDimension& localizedCalcDimension)
 {
     auto jsStart = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::START));
     if (jsStart->IsObject(vm)) {
@@ -6205,7 +6231,7 @@ void ArkTSUtils::SetSymbolModifier(
 }
 
 void ArkTSUtils::ParseMarginOrPaddingCorner(
-    EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension)
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension)
 {
     CalcDimension leftDimen;
     RefPtr<ResourceObject> leftResObj;
@@ -6249,7 +6275,7 @@ void ArkTSUtils::ParseMarginOrPaddingCorner(
 }
 
 bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
-    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension)
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (ArkTSUtils::CheckLengthMetrics(vm, object)) {
         LocalizedCalcDimension localizedCalcDimension;

@@ -100,7 +100,7 @@ void ConvContext::Clear()
     storage_.clear();
 }
 
-void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_Int32& dst, const uint32_t& src)
 {
     dst = static_cast<Ark_Int32>(src);
 }

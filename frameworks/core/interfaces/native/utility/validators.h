@@ -40,9 +40,9 @@ ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<float>& value);
 ACE_FORCE_EXPORT void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
 ACE_FORCE_EXPORT void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 ACE_FORCE_EXPORT void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
-void ValidateNonNegative(std::optional<CalcDimension>& opt);
+ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<CalcDimension>& opt);
 void ValidatePositive(std::optional<CalcDimension>& opt);
-void ValidateNonPercent(std::optional<CalcDimension>& opt);
+ACE_FORCE_EXPORT void ValidateNonPercent(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<std::string>& opt);
 template<class T> void ValidateNonEmpty(std::optional<T>& opt)

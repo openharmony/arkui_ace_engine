@@ -574,8 +574,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
-    { "TextArea", JSTextArea::JSBind },
-    { "TextInput", JSTextInput::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
