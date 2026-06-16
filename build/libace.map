@@ -2294,6 +2294,8 @@
       "OHOS::Ace::NG::TextPattern::UpdateSpanItemDragStatus(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&, bool)";
       "OHOS::Ace::NG::TextPattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextPattern::GetFallbackLineSpacingStyleOptimizeFlag()";
+      "OHOS::Ace::NG::TextPattern::GetIsFontColorResource()";
+      "OHOS::Ace::NG::TextPattern::SetFontColorResource(std::__h::vector<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>>> const&)";
       "OHOS::Ace::NG::TextSelectOverlay::AllowSearch()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowShare()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowTranslate()";
@@ -3732,6 +3734,10 @@
       OHOS::Ace::Kit::Property::*;
       OHOS::Ace::Kit::ResourceParser::*;
       OHOS::Ace::Kit::Stack::*;
+      "OHOS::Ace::Kit::Symbol::Create(OHOS::Ace::RefPtr<OHOS::Ace::Kit::FrameNode>&)";
+      "OHOS::Ace::Kit::Symbol::SetIsFontColorResource(bool)";
+      "OHOS::Ace::Kit::Symbol::GetSymbolFontColor()";
+      "OHOS::Ace::Kit::Symbol::GetSymbolFontObjColor()";
       OHOS::Ace::Kit::Tabs::*;
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::Kit::ThemeFactory::*;
