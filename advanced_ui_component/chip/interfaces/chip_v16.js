@@ -1265,11 +1265,11 @@ export class ChipComponent extends ViewPU {
       Button.size(this.getChipSize());
       Button.enabled(this.isChipEnabled());
       Button.direction(this.chipDirection);
-      Button.systemMaterial(this.getBackgroundSystemMaterial());
-      Button.backgroundColor(this.getChipBackgroundColor());
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
+      Button.backgroundColor(this.getChipBackgroundColor());
+      Button.systemMaterial(this.getBackgroundSystemMaterial());
       Button.responseRegion(this.getChipResponseRegion());
       Button.scale(ObservedObject.GetRawObject(this.chipScale));
       Button.opacity(this.chipOpacity);
@@ -2043,9 +2043,15 @@ export class ChipComponent extends ViewPU {
   getChipBackgroundColor() {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
+      if (!!this.activatedBackgroundSystemMaterial) {
+        return undefined;
+      }
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor()
         ? themeChipNode.focusActivatedBgColor
         : this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
+    }
+    if (!!this.backgroundSystemMaterial) {
+      return undefined;
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor()
       ? themeChipNode.focusBgColor
