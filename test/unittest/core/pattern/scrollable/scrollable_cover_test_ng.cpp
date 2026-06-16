@@ -1934,32 +1934,36 @@ HWTEST_F(ScrollableCoverTestNg, InitTouchEvent001, TestSize.Level1)
     scrollable->isTouching_ = false;
     scrollPn->scrollableEvent_->scrollable_ = scrollable;
     auto gestureHub = scroll_->GetOrCreateGestureEventHub();
-    TouchEventInfo touchEventInfo("default");
-    TouchLocationInfo touch(0);
-    touch.SetTouchType(TouchType::DOWN);
-    touchEventInfo.AddTouchLocationInfo(std::move(touch));
+    auto createTouchEventInfo = [](TouchType touchType) {
+        TouchEventInfo info("default");
+        TouchLocationInfo touch(0);
+        touch.SetTouchType(touchType);
+        info.AddTouchLocationInfo(std::move(touch));
+
+        TouchLocationInfo changedTouch(0);
+        changedTouch.SetTouchType(touchType);
+        info.AddChangedTouchLocationInfo(std::move(changedTouch));
+        return info;
+    };
     /**
      * @tc.steps: step1. call callback with TouchType::DOWN.
      */
     auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
-    callback(touchEventInfo);
+    auto downInfo = createTouchEventInfo(TouchType::DOWN);
+    callback(downInfo);
     EXPECT_TRUE(scrollable->isTouching_);
     /**
      * @tc.steps: step2. call callback with TouchType::UP.
      */
-    touchEventInfo.touches_.clear();
-    touch.SetTouchType(TouchType::UP);
-    touchEventInfo.AddTouchLocationInfo(std::move(touch));
-    callback(touchEventInfo);
+    auto upInfo = createTouchEventInfo(TouchType::UP);
+    callback(upInfo);
     EXPECT_FALSE(scrollable->isTouching_);
     /**
      * @tc.steps: step3. call callback with TouchType::CANCEL.
      */
-    touchEventInfo.touches_.clear();
     scrollable->isTouching_ = true;
-    touch.SetTouchType(TouchType::CANCEL);
-    touchEventInfo.AddTouchLocationInfo(std::move(touch));
-    callback(touchEventInfo);
+    auto cancelInfo = createTouchEventInfo(TouchType::CANCEL);
+    callback(cancelInfo);
     EXPECT_FALSE(scrollable->isTouching_);
 }
 

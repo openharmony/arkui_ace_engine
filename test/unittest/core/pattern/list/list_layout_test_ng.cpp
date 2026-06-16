@@ -358,6 +358,30 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StackFromEndItemGroupOverScroll001
+ * @tc.desc: Test top overScroll with stackFromEnd ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, StackFromEndItemGroupOverScroll001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    ASSERT_TRUE(pattern_->IsAtTop());
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(ITEM_MAIN_SIZE);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(false));
+    EXPECT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
  * @tc.name: ContentEndOffset001
  * @tc.desc: Test ContentEndOffset should change behavior of IsAtBottom
  * @tc.type: FUNC

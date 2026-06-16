@@ -1174,7 +1174,8 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         CHECK_NULL_VOID(pattern->scrollableEvent_);
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        switch (info.GetTouches().front().GetTouchType()) {
+        CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+        switch (info.GetChangedTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
                 pattern->OnTouchDown(info);

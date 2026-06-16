@@ -120,7 +120,7 @@ void SelectableContainerPattern::OnEditModeOptionsChanged()
 
 bool SelectableContainerPattern::NeedBackPressHandler() const
 {
-    return GetEnableEditMode();
+    return HasEnableEditModeBinding() && GetEnableEditMode();
 }
 
 bool SelectableContainerPattern::HandleBackPress()
