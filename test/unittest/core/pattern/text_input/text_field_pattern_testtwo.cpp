@@ -1499,6 +1499,30 @@ HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AddTextFireOnChange005
+ * @tc.desc: Test AddTextFireOnChange with preview text (IME composing), textCache_ should stay at committed text
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange005, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->textObscured_ = false;
+    pattern->hasPreviewText_ = true;
+    pattern->bodyTextInPreivewing_ = u"hello";
+    pattern->contentController_->content_ = u"hello\u4f60\u597d";
+    pattern->textCache_ = "hello";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "hello");
+}
+
+/**
  * @tc.name: RegisterFontCallback in form card.
  * @tc.desc: test register form callback.
  * @tc.type: FUNC

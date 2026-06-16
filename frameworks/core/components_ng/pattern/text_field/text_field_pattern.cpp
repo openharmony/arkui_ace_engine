@@ -4729,8 +4729,10 @@ void TextFieldPattern::AddTextFireOnChange()
         auto textCache = layoutProperty->GetValueValue(u"");
         auto newText = pattern->GetTextContentController()->GetTextUtf16Value();
         layoutProperty->UpdateValue(newText);
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16DebugToStr8(textCache),
-            UtfUtils::Str16DebugToStr8(newText));
+        if (!pattern->hasPreviewText_) {
+            host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16DebugToStr8(textCache),
+                UtfUtils::Str16DebugToStr8(newText));
+        }
         ChangeValueInfo changeValueInfo;
         changeValueInfo.value = pattern->GetBodyTextValue();
         changeValueInfo.previewText.offset = pattern->hasPreviewText_ ? pattern->GetPreviewTextStart() : -1;
@@ -4753,7 +4755,7 @@ void TextFieldPattern::AddTextFireOnChange()
         };
 
         pattern->ProcessAccessibilityTextChange(
-            UtfUtils::Str16DebugToStr8(newText),
+            UtfUtils::Str16DebugToStr8(changeValueInfo.value),
             std::move(callback),
             AceLogTag::ACE_TEXT_FIELD
         );
