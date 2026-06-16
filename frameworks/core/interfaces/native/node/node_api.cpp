@@ -2503,6 +2503,12 @@ ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int
     return CustomDialog::OpenCustomDialog(handle, callback);
 }
 
+ArkUI_Int32 OpenCustomDialogWithErrorCallback(
+    ArkUIDialogHandle handle, void* userData, void (*callback)(int32_t errorCode, int32_t dialogId, void* userData))
+{
+    return CustomDialog::OpenCustomDialogWithErrorCallback(handle, userData, callback);
+}
+
 ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
 {
     return CustomDialog::UpdateCustomDialog(handle, callback);
@@ -2587,7 +2593,8 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
         .setSystemMaterial = SetSystemMaterial,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
-        .setBackgroundEffect = SetBackgroundEffect
+        .setBackgroundEffect = SetBackgroundEffect,
+        .openCustomDialogWithErrorCallback = OpenCustomDialogWithErrorCallback,
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

@@ -140,6 +140,16 @@ bool HasGetter(napi_env env, napi_value value, const std::string& key);
 int32_t GetStringFormatStartIndex(bool hasGetter);
 int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext);
 std::string GetLocalizedParamStr(const std::string& paramStr, const std::string& type);
+
+// Property extraction helpers: extract value from named property in one call
+bool GetBoolProperty(napi_env env, napi_value object, const char* name, bool& result);
+bool GetInt32Property(napi_env env, napi_value object, const char* name, int32_t& result);
+bool GetDoubleProperty(napi_env env, napi_value object, const char* name, double& result);
+bool GetStringProperty(napi_env env, napi_value object, const char* name, std::string& result);
+bool GetFunctionProperty(napi_env env, napi_value object, const char* name, napi_ref& result);
+
+// Extract function property and wrap as std::function<void()> (auto-manages napi_ref lifecycle)
+bool GetVoidCallbackProperty(napi_env env, napi_value object, const char* name, std::function<void()>& result);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H
