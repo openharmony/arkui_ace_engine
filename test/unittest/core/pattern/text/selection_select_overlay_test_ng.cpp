@@ -150,6 +150,18 @@ public:
         return std::nullopt;
     }
 
+    HandleVisibleContentResult GetHandleVisibleContentRect(
+        const RectF&, RectF& visibleContentRect, HandleLevelMode) override
+    {
+        visibleContentRect = RectF(0.0f, 0.0f, TEST_WIDTH, TEST_HEIGHT);
+        return HandleVisibleContentResult::NEED_CHECK;
+    }
+
+    std::optional<RectF> GetAncestorNodeViewPortForChild() override
+    {
+        return RectF(0.0f, 0.0f, TEST_WIDTH, TEST_HEIGHT);
+    }
+
     void SetHasSecondHandle(bool has)
     {
         hasSecondHandle_ = has;

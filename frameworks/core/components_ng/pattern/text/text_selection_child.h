@@ -32,6 +32,10 @@ public:
     RefPtr<FrameNode> GetHostNode() const override;
     std::optional<RectF> GetFirstHandleRect() override;
     std::optional<RectF> GetSecondHandleRect() override;
+    HandleVisibleContentResult GetHandleVisibleContentRect(
+        const RectF& paintRect, RectF& visibleContentRect, HandleLevelMode handleLevelMode) override;
+    std::optional<RectF> GetAncestorNodeViewPortForChild() override;
+    std::vector<AncestorNodeViewPortInfo> GetAncestorNodeViewPortInfos() override;
     RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType) override;
     SelectionIndexRange GetSelectionIndexes() const override;
     SelectionIndexRange GetSelectionIndexesByPoints(const OffsetF& firstPoint, const OffsetF& secondPoint) override;
@@ -64,6 +68,7 @@ private:
     bool GetRenderClipValue() const;
     bool CheckChildHasTransformAttr() const;
     void UpdateTransformFlag();
+    bool CanClipHandleWithViewPort();
     OffsetF GetChildPaintOffsetWithoutTransform() const;
     bool GetClipHandleViewPortForChild(const RefPtr<FrameNode>& host, RectF& rect);
 
