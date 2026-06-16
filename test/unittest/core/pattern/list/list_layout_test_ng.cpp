@@ -4205,6 +4205,74 @@ HWTEST_F(ListLayoutTestNg, PartFrameChildrenCachePredictNode001, TestSize.Level1
 }
 
 /**
+ * @tc.name: PartFrameChildrenCachePredictNode002
+ * @tc.desc: Test active nodes in partFrameChildren_ but not on maintree, will be reacquired.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PartFrameChildrenCachePredictNode002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(20, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // cache predict nodes 8,9,10,11 to partFrameChildren_
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 11));
+
+    // test predict nodes exist in partFrameChildren_ but not on maintree
+    auto child_index8 = frameNode_->GetChildByIndex(8, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index8), 8);
+    auto childNode8 = child_index8->GetHostNode();
+    ASSERT_NE(childNode8, nullptr);
+    EXPECT_FALSE(childNode8->IsOnMainTree());
+    auto child_index9 = frameNode_->GetChildByIndex(9, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index9), 9);
+    auto childNode9 = child_index9->GetHostNode();
+    ASSERT_NE(childNode9, nullptr);
+    EXPECT_FALSE(childNode9->IsOnMainTree());
+    auto child_index10 = frameNode_->GetChildByIndex(10, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index10), 10);
+    auto childNode10 = child_index10->GetHostNode();
+    ASSERT_NE(childNode10, nullptr);
+    EXPECT_FALSE(childNode10->IsOnMainTree());
+    auto child_index11 = frameNode_->GetChildByIndex(11, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index11), 11);
+    auto childNode11 = child_index11->GetHostNode();
+    ASSERT_NE(childNode11, nullptr);
+    EXPECT_FALSE(childNode11->IsOnMainTree());
+
+    // set predict nodes 8,9,10,11 to active
+    child_index8->SetActive(true);
+    child_index9->SetActive(true);
+    child_index10->SetActive(true);
+    child_index11->SetActive(true);
+
+    // set active not let nodes attach to main tree
+    EXPECT_FALSE(childNode8->IsOnMainTree());
+    EXPECT_FALSE(childNode9->IsOnMainTree());
+    EXPECT_FALSE(childNode10->IsOnMainTree());
+    EXPECT_FALSE(childNode11->IsOnMainTree());
+
+    // reget predict nodes 8,9,10,11 with isCache false, will be reacquired and attach to main tree
+    auto child_index8_reget = frameNode_->GetChildByIndex(8, false);
+    EXPECT_EQ(child_index8_reget, child_index8);
+    EXPECT_TRUE(childNode8->IsOnMainTree());
+    auto child_index9_reget = frameNode_->GetChildByIndex(9, false);
+    EXPECT_EQ(child_index9_reget, child_index9);
+    EXPECT_TRUE(childNode9->IsOnMainTree());
+    auto child_index10_reget = frameNode_->GetChildByIndex(10, false);
+    EXPECT_EQ(child_index10_reget, child_index10);
+    EXPECT_TRUE(childNode10->IsOnMainTree());
+    auto child_index11_reget = frameNode_->GetChildByIndex(11, false);
+    EXPECT_EQ(child_index11_reget, child_index11);
+    EXPECT_TRUE(childNode11->IsOnMainTree());
+}
+
+/**
  * @tc.name: ListAddDelChildTest001
  * @tc.desc: Test list del child in snap end mode.
  * @tc.type: FUNC

@@ -418,9 +418,21 @@ public:
     bool EnableCachePredictNodes() const
     {
         CHECK_NULL_RETURN(hostNode_, false);
-        auto pattern = hostNode_->GetPattern();
+        const auto& pattern = hostNode_->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
         return pattern->EnableCachePredictNodes();
+    }
+
+    bool NeedReacquireFrameNode(const RefPtr<LayoutWrapper>& child, bool isCache) const
+    {
+        CHECK_NULL_RETURN(child, false);
+        const bool isActive = child->IsActive();
+        bool needReacquire = isActive == isCache;
+        if (!needReacquire && isActive) {
+            const auto hostNode = child->GetHostNode();
+            needReacquire = hostNode && !hostNode->IsOnMainTree();
+        }
+        return needReacquire && EnableCachePredictNodes();
     }
 
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
@@ -433,7 +445,7 @@ public:
                 partFrameNodeChildren_[index] = child;
             }
             return child;
-        } else if (itor->second && (itor->second->IsActive() == isCache) && EnableCachePredictNodes()) {
+        } else if (NeedReacquireFrameNode(itor->second, isCache)) {
             // Re-acquire the node when entering the viewport.
             // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
