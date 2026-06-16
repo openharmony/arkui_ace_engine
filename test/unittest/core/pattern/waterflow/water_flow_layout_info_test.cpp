@@ -71,26 +71,26 @@ HWTEST_F(WaterFlowLayoutInfoTest, GetCrossIndexForNextItem001, TestSize.Level1)
 HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex001, TestSize.Level1)
 {
     WaterFlowLayoutInfo info;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.items_ = ITEM_MAP_1;
     info.endPosArray_ = END_POS_ARRAY_1;
     info.itemInfos_ = ITEM_INFO_1;
 
     info.currentOffset_ = -40.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.currentOffset_ = -90.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 5);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 5);
 
     info.currentOffset_ = -55.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 3);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 3);
 
     info.currentOffset_ = -20.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.currentOffset_ = -115.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 9);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 9);
 }
 
 /**
@@ -107,10 +107,10 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex002, TestSize.Level1)
     info.itemInfos_ = ITEM_INFO_1;
 
     info.currentOffset_ = -1000.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 9);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 9);
 
     info.currentOffset_ = 1000.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 }
 
 /**
@@ -126,13 +126,13 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex003, TestSize.Level1)
     info.endPosArray_ = END_POS_ARRAY_3;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.currentOffset_ = -1.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 1);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 1);
 
     info.currentOffset_ = 1.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 }
 
 /**
@@ -151,13 +151,31 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex004, TestSize.Level1)
     EXPECT_EQ(info.TopMargin(), 10.0f);
 
     info.currentOffset_ = 0.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.currentOffset_ = -10.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 0);
 
     info.currentOffset_ = -11.0f;
-    EXPECT_EQ(info.FastSolveStartIndex(), 1);
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 1);
+}
+
+/**
+ * @tc.name: FastSolveStartIndex005
+ * @tc.desc: Test FastSolveStartIndex with a non-zero front extension bound.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex005, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.items_ = ITEM_MAP_1;
+    info.endPosArray_ = END_POS_ARRAY_1;
+    info.itemInfos_ = ITEM_INFO_1;
+
+    info.currentOffset_ = -55.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(0.0f), 3);
+    EXPECT_EQ(info.FastSolveStartIndex(-20.0f), 0);
+    EXPECT_EQ(info.FastSolveStartIndex(60.0f), 9);
 }
 
 /**
@@ -346,6 +364,54 @@ HWTEST_F(WaterFlowLayoutInfoTest, UpdateStartIndexWhenMeasureInNextFrame, TestSi
     info.measureInNextFrame_ = true;
     info.UpdateStartIndex();
     EXPECT_EQ(info.startIndex_, info.endIndex_);
+}
+
+/**
+ * @tc.name: UpdateStartIndexWithStartFixOffset
+ * @tc.desc: Test UpdateStartIndex includes front contentClip extension in the active range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, UpdateStartIndexWithStartFixOffset, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.items_ = ITEM_MAP_1;
+    info.endPosArray_ = END_POS_ARRAY_1;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = -55.0f;
+    info.UpdateStartIndex();
+    EXPECT_EQ(info.startIndex_, 3);
+
+    info.startFixOffset_ = 20.0f;
+    info.UpdateStartIndex();
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: SyncReportRangeIgnoresFixOffset
+ * @tc.desc: Test report range keeps the old viewport range while active range includes contentClip extension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, SyncReportRangeIgnoresFixOffset, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.items_ = ITEM_MAP_1;
+    info.endPosArray_ = END_POS_ARRAY_1;
+    info.itemInfos_ = ITEM_INFO_1;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = -55.0f;
+    info.startFixOffset_ = 20.0f;
+    info.endFixOffset_ = 30.0f;
+    info.expandHeight_ = 10.0f;
+
+    const float mainSize = 55.0f;
+    info.startIndex_ = info.FastSolveStartIndex(info.GetViewStartBound());
+    info.endIndex_ = info.FastSolveEndIndex(info.GetViewEndBound(mainSize));
+    info.SyncReportRange(mainSize);
+
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.reportStartIndex_, info.FastSolveStartIndex(info.GetViewStartBound(true)));
+    EXPECT_EQ(info.reportEndIndex_, info.FastSolveEndIndex(info.GetViewEndBound(mainSize, true)));
+    EXPECT_NE(info.startIndex_, info.reportStartIndex_);
 }
 
 /**
