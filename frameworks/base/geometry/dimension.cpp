@@ -16,8 +16,10 @@
 #include "base/geometry/dimension.h"
 
 #include <array>
+#include <optional>
 
 #include "core/pipeline/pipeline_base.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -79,6 +81,106 @@ bool CalcDimensionLpx(const CalcDimensionParam& param, double& result)
     return false;
 }
 } // namespace
+
+void Dimension::Reset()
+{
+    value_ = 0.0;
+    unit_ = DimensionUnit::PX;
+}
+
+void Dimension::ResetInvalidValue()
+{
+    if (std::isnan(value_)) {
+        Reset();
+    }
+}
+
+void Dimension::SetValue(double value)
+{
+    value_ = value;
+}
+
+void Dimension::SetUnit(DimensionUnit unit)
+{
+    unit_ = unit;
+}
+
+bool Dimension::IsValid() const
+{
+    return GreatNotEqual(value_, 0.0);
+}
+
+bool Dimension::IsNonNegative() const
+{
+    return NonNegative(value_);
+}
+
+bool Dimension::IsNonPositive() const
+{
+    return NonPositive(value_);
+}
+
+bool Dimension::IsNegative() const
+{
+    return !NonNegative(value_);
+}
+
+double Dimension::ConvertToPx(double dipScale) const
+{
+    if (unit_ == DimensionUnit::VP || unit_ == DimensionUnit::FP) {
+        return value_ * dipScale;
+    }
+    return value_;
+}
+
+double Dimension::GetNativeValue(DimensionUnit unit) const
+{
+    if (unit_ == unit || unit == DimensionUnit::PERCENT) {
+        return value_;
+    } else if (unit == DimensionUnit::PX) {
+        return ConvertToPx();
+    } else if (unit == DimensionUnit::FP) {
+        return ConvertToFp();
+    } else {
+        return ConvertToVp();
+    }
+}
+
+bool Dimension::operator==(const Dimension& dimension) const
+{
+    return (unit_ == dimension.unit_) && NearEqual(value_, dimension.value_);
+}
+
+bool Dimension::operator!=(const Dimension& dimension) const
+{
+    return !operator==(dimension);
+}
+
+Dimension& Dimension::operator+=(const Dimension& dimension)
+{
+    ACE_DCHECK(unit_ == dimension.unit_);
+    value_ += dimension.value_;
+    return *this;
+}
+
+Dimension& Dimension::operator-=(const Dimension& dimension)
+{
+    ACE_DCHECK(unit_ == dimension.unit_);
+    value_ -= dimension.value_;
+    return *this;
+}
+
+bool Dimension::operator>(const Dimension& dimension) const
+{
+    ACE_DCHECK(unit_ == dimension.unit_);
+    return (value_ > dimension.value_);
+}
+
+bool Dimension::operator<(const Dimension& dimension) const
+{
+    ACE_DCHECK(unit_ == dimension.unit_);
+    return (value_ < dimension.value_);
+}
 
 double Dimension::ConvertToVp() const
 {

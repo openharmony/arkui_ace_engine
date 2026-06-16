@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/pipeline_ng/pipeline_context.h"

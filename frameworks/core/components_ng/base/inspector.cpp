@@ -19,6 +19,8 @@
 #include <vector>
 
 #include "base/log/log_wrapper.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
