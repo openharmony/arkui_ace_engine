@@ -1161,7 +1161,10 @@ void IndexerPattern::UpdateBubbleBackgroundView()
             ApplyPopupSystemMaterial();
             return;
         }
-        if (!isGreatOrEqualVersionTwentySix || MaterialUtils::IsMaterialDisabled() ||
+        bool isMaterialDisable = MaterialUtils::IsMaterialDisabled() ||
+                                 (MaterialUtils::GetConfiguredMaterialState() == MaterialState::DEFAULT &&
+                                     !SystemProperties::IsDeviceSystemMaterialSupported());
+        if (!isGreatOrEqualVersionTwentySix || isMaterialDisable ||
             (isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser)) {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), nullptr);
             BlurStyleOption styleOption;

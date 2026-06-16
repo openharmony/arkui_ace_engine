@@ -29,6 +29,7 @@ extern bool g_isResourceDecoupling;
 extern bool g_isConfigChangePerform;
 extern bool g_isMultiInstanceEnabled;
 extern UiMaterialLevel g_uiMaterialLevel;
+extern bool g_isDeviceSystemMaterialSupported;
 
 class APIVersionGuard final {
 public:

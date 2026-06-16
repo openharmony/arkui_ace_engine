@@ -127,6 +127,7 @@ bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
 UiMaterialLevel g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+bool g_isDeviceSystemMaterialSupported = true;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
@@ -526,6 +527,6 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 
 bool SystemProperties::IsDeviceSystemMaterialSupported()
 {
-    return true;
+    return g_isDeviceSystemMaterialSupported;
 }
 } // namespace OHOS::Ace
