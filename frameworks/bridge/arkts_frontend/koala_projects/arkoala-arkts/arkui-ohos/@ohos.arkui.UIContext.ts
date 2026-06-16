@@ -1367,23 +1367,27 @@ export class UIContext {
         }
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const tag : string = (retvalDeserializer.readString() as string)
-        if (tag === 'Swiper') {
-            let ret: Array<SwiperDynamicSyncScene> =
-                [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
-                new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
-            let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+        try {
+            const tag : string = (retvalDeserializer.readString() as string)
+            if (tag === 'Swiper') {
+                let ret: Array<SwiperDynamicSyncScene> =
+                    [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
+                    new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
+                let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+                ArkUIAniModule._Common_Restore_InstanceId();
+                return result;
+            } else if (tag === 'Marquee') {
+                let ret: MarqueeDynamicSyncScene[] = [
+                    new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
+                let result: DynamicSyncScene[] = [ret[0]];
+                ArkUIAniModule._Common_Restore_InstanceId();
+                return result;
+            }
             ArkUIAniModule._Common_Restore_InstanceId();
-            return result;
-        } else if (tag === 'Marquee') {
-            let ret: MarqueeDynamicSyncScene[] = [
-                new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
-            let result: DynamicSyncScene[] = [ret[0]];
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return result;
+            return [];
+        } finally {
+            retvalDeserializer.dispose()
         }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return [];
     }
 
     public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
