@@ -91,6 +91,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"

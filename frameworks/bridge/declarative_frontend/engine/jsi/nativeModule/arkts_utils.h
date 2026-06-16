@@ -16,9 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 
-#include "bridge/declarative_frontend/declarative_frontend.h"
-#include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"

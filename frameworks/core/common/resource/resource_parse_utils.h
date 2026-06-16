@@ -23,6 +23,7 @@
 #include "ui/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 namespace NG {

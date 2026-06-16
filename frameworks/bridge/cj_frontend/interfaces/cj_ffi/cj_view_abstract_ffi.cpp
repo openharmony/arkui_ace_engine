@@ -29,6 +29,7 @@
 #include "pixel_map_impl.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/common/color_inverter.h"
+#include "core/components/theme/resource_adapter.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
