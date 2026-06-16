@@ -647,6 +647,9 @@ void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
     if (type != WindowChangeType::RECT_CHANGE) {
         overlay->HideAllMenusWithoutAnimation(false);
         overlay->HideAllPopupsWithoutAnimation();
+        if (container->IsSubContainer()) {
+            SubwindowManager::GetInstance()->HideToastSubWindowNG(instanceId);
+        }
     }
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
