@@ -52,6 +52,50 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
+    class RelativeContainerGuideLineModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+    
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().relativeContainer.resetGuideLine(node);
+        } else {
+          getUINativeModule().relativeContainer.setGuideLine(node,
+            this.value.ids, this.value.directions, this.value.positions);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+          !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+          !isBaseOrResourceEqual(this.stageValue.positions, this.value.positions);
+      }
+    }
+    (RelativeContainerGuideLineModifier as any).identity = Symbol('relativeContainerGuideLine');
+    
+    class RelativeContainerBarrierModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+    
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().relativeContainer.resetBarrier(node);
+        } else {
+          getUINativeModule().relativeContainer.setBarrier(node,
+            this.value.ids, this.value.directions, this.value.referencedIds);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+          !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+          !isBaseOrResourceEqual(this.stageValue.referencedIds, this.value.referencedIds);
+      }
+    }
+    (RelativeContainerBarrierModifier as any).identity = Symbol('relativeContainerBarrier');
+
     loadComponent.componentObj = { 'component': ArkRelativeContainerComponent };
   }
   return loadComponent.componentObj;
@@ -151,50 +195,6 @@ class ArkRelativeContainerBarrier {
       this.referencedIds === another.referencedIds;
   }
 }
-
-class RelativeContainerGuideLineModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().relativeContainer.resetGuideLine(node);
-    } else {
-      getUINativeModule().relativeContainer.setGuideLine(node,
-        this.value.ids, this.value.directions, this.value.positions);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
-      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
-      !isBaseOrResourceEqual(this.stageValue.positions, this.value.positions);
-  }
-}
-(RelativeContainerGuideLineModifier as any).identity = Symbol('relativeContainerGuideLine');
-
-class RelativeContainerBarrierModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().relativeContainer.resetBarrier(node);
-    } else {
-      getUINativeModule().relativeContainer.setBarrier(node,
-        this.value.ids, this.value.directions, this.value.referencedIds);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
-      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
-      !isBaseOrResourceEqual(this.stageValue.referencedIds, this.value.referencedIds);
-  }
-}
-(RelativeContainerBarrierModifier as any).identity = Symbol('relativeContainerBarrier');
 
 function createComponent(nativePtr: any, classType: any): any {
   loadComponent();

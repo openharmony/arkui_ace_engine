@@ -199,7 +199,6 @@ function createComponent(nativePtr: any, classType?: any): any {
 }
 
 function exportComponent(): void {
-  loadComponent();
   globalThis.ArkGridColComponent = (loadComponent as any).componentObj?.component;
 }
 
@@ -207,4 +206,4 @@ function exportView(): void {
   globalThis.GridCol = JSGridCol;
 }
 
-export default { loadComponent, createComponent, exportComponent, exportView };
+export default { loadComponent, createComponent, exportComponent, exportView }; 

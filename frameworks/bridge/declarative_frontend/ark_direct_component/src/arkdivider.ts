@@ -16,86 +16,6 @@
 /// <reference path='./../../ark_component/src/import.ts' />
 type ComponentObj = { component: any }
 
-class DividerVerticalModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-
-  static identity: Symbol = Symbol('dividerVertical');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().divider.resetVertical(node);
-    } else {
-      getUINativeModule().divider.setVertical(node, this.value!);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
-}
-
-class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
-
-  static identity: Symbol = Symbol('dividerStrokeWidth');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().divider.resetStrokeWidth(node);
-    } else {
-      getUINativeModule().divider.setStrokeWidth(node, this.value!);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
-}
-
-class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
-  constructor(value: LineCapStyle) {
-    super(value);
-  }
-
-  static identity: Symbol = Symbol('dividerLineCap');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().divider.resetLineCap(node);
-    } else {
-      getUINativeModule().divider.setLineCap(node, this.value!);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
-}
-
-class DividerColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
-
-  static identity: Symbol = Symbol('dividerColor');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().divider.resetColor(node);
-    } else {
-      getUINativeModule().divider.setColor(node, this.value!);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
 function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkDividerComponent extends globalThis.__ArkComponent__ {
@@ -132,6 +52,85 @@ function loadComponent(): ComponentObj | undefined {
       }
     }
 
+    class DividerVerticalModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+    
+      static identity: Symbol = Symbol('dividerVertical');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().divider.resetVertical(node);
+        } else {
+          getUINativeModule().divider.setVertical(node, this.value!);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return this.stageValue !== this.value;
+      }
+    }
+    
+    class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
+      constructor(value: number | string) {
+        super(value);
+      }
+    
+      static identity: Symbol = Symbol('dividerStrokeWidth');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().divider.resetStrokeWidth(node);
+        } else {
+          getUINativeModule().divider.setStrokeWidth(node, this.value!);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return this.stageValue !== this.value;
+      }
+    }
+    
+    class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
+      constructor(value: LineCapStyle) {
+        super(value);
+      }
+    
+      static identity: Symbol = Symbol('dividerLineCap');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().divider.resetLineCap(node);
+        } else {
+          getUINativeModule().divider.setLineCap(node, this.value!);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return this.stageValue !== this.value;
+      }
+    }
+    
+    class DividerColorModifier extends ModifierWithKey<ResourceColor> {
+      constructor(value: ResourceColor) {
+        super(value);
+      }
+    
+      static identity: Symbol = Symbol('dividerColor');
+    
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().divider.resetColor(node);
+        } else {
+          getUINativeModule().divider.setColor(node, this.value!);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
     loadComponent.componentObj = { 'component': ArkDividerComponent };
   }
   return loadComponent.componentObj;

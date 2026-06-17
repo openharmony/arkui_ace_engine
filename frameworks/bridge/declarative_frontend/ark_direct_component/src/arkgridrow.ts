@@ -232,7 +232,6 @@ function createComponent(nativePtr: any, classType?: any): any {
 }
 
 function exportComponent(): void {
-  loadComponent();
   globalThis.ArkGridRowComponent = (loadComponent as any).componentObj?.component;
 }
 

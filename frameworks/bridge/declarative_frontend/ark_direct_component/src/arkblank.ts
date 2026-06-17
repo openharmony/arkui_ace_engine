@@ -16,63 +16,6 @@
 /// <reference path='./../../ark_component/src/import.ts' />
 type ComponentObj = { component: any }
 
-class BlankColorModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().blank.resetColor(node);
-    } else {
-      getUINativeModule().blank.setColor(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-(BlankColorModifier as any).identity = Symbol('blankColor');
-
-class BlankHeightModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().blank.resetBlankHeight(node);
-    } else {
-      getUINativeModule().blank.setBlankHeight(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-(BlankHeightModifier as any).identity = Symbol('blankHeight');
-
-class BlankMinModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().blank.resetBlankMin(node);
-    } else {
-      getUINativeModule().blank.setBlankMin(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-(BlankMinModifier as any).identity = Symbol('blankMin');
-
 function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkBlankComponent extends globalThis.__ArkComponent__ {
@@ -101,6 +44,63 @@ function loadComponent(): ComponentObj | undefined {
         return 0;
       }
     }
+    
+    class BlankColorModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+    
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().blank.resetColor(node);
+        } else {
+          getUINativeModule().blank.setColor(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    (BlankColorModifier as any).identity = Symbol('blankColor');
+    
+    class BlankHeightModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+    
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().blank.resetBlankHeight(node);
+        } else {
+          getUINativeModule().blank.setBlankHeight(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    (BlankHeightModifier as any).identity = Symbol('blankHeight');
+    
+    class BlankMinModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+    
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().blank.resetBlankMin(node);
+        } else {
+          getUINativeModule().blank.setBlankMin(node, this.value);
+        }
+      }
+    
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    (BlankMinModifier as any).identity = Symbol('blankMin');
 
     loadComponent.componentObj = { 'component': ArkBlankComponent };
   }
