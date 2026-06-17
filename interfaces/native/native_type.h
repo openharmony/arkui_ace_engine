@@ -54,6 +54,8 @@
 #include "node_attributes/image_span.h"
 #include "node_attributes/custom_span.h"
 #include "node_attributes/progress.h"
+#include "node_attributes/embedded_component.h"
+#include "node_attributes/xcomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -373,20 +375,6 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Declares the Ability base want.
- *
- * @since 20
- */
-typedef struct AbilityBase_Want AbilityBase_Want;
-
-/**
- * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
- *
- * @since 20
- */
-typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
-
-/**
  * @brief Define the Edges describing the position of a component by distances to the container's four edges.
  *
  * @since 21
@@ -462,20 +450,6 @@ typedef enum {
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
-
-/**
- * @brief Enumerates the types of the <b><XComponent></b> component.
- *
- * @since 12
- */
-typedef enum {
-    /** The custom content of EGL/OpenGL ES and media data is displayed individually on the screen. */
-    ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
-    /** The custom content of EGL/OpenGL ES and media data is grouped and displayed together with content
-      * of the component.
-      */
-    ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
-} ArkUI_XComponentType;
 
 /**
  * @brief Enumerates the text copy and paste modes.
@@ -5098,45 +5072,6 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
  *@since 19
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
-
-/**
- * @brief Create an object for the EmbeddedComponent option.
- *
- * @return A pointer to the object of the EmbeddedComponent option.
- * @since 20
- */
-ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
-
-/**
- * @brief Destroy the object by EmbeddedComponent option.
- *
- * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
-
-/**
- * @brief Set the onError of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Common error information about the API invoking failure.
- * @param name Common error name information about the API invoking failure.
- * @param message Common error message information about the API invoking failure.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnError(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
-
-/**
- * @brief Set the onTerminated of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
- * @param want Data returned when the EmbeddedUIExtensionAbility exits.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
 
 /**
  * @brief Create an edge object for position attribute.

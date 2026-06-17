@@ -3105,6 +3105,8 @@ frameworks/core/interfaces/native/utility/error_message_macros.h @arkui_framewor
 frameworks/core/interfaces/native/utility/error_message_manager.h @arkui_framework_xnode
 frameworks/core/interfaces/native/utility/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/BUILD.gn @arkui_architecture
+interfaces/native/node_attributes/embedded_component.h @ArkUI_ability_group
+interfaces/native/node_attributes/xcomponent.h @ArkUI_ability_group
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
 interfaces/native/event/drag_and_drop_impl.cpp @ArkUI_Event
