@@ -1828,4 +1828,31 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNgLpx002, TestSize.Level1)
     EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_BAR_WIDTH));
     EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FADING_EDGE_LENGTH));
 }
+
+/**
+ * @tc.name: ScrollModelNGSetAxisResetOffset001
+ * @tc.desc: Verify switching scroll axis to NONE resets the cached offset instead of reusing it on another axis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, ScrollModelNGSetAxisResetOffset001, TestSize.Level1)
+{
+    auto frameNode = ScrollModelNG::CreateFrameNode(12);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::VERTICAL);
+    pattern->OnModifyDone();
+    pattern->currentOffset_ = -120.0;
+    pattern->lastOffset_ = -120.0;
+
+    ScrollModelNG::SetAxis(AceType::RawPtr(frameNode), Axis::NONE);
+    EXPECT_DOUBLE_EQ(pattern->currentOffset_, 0);
+    pattern->OnModifyDone();
+
+    EXPECT_EQ(pattern->GetAxis(), Axis::NONE);
+    EXPECT_DOUBLE_EQ(pattern->currentOffset_, 0.0);
+    EXPECT_DOUBLE_EQ(pattern->lastOffset_, 0.0);
+    EXPECT_EQ(pattern->GetCurrentOffset(), Offset(0.0, 0.0));
+}
 } // namespace OHOS::Ace::NG
