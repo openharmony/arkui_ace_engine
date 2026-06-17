@@ -54,7 +54,7 @@ AdjustOffset GetLazyChildAdjustOffset(const RefPtr<LayoutWrapper>& itemWrapper)
 }
 
 void UpdateLazyChildConstraint(LayoutConstraintF& childLayoutConstraint, float viewPortLength, float referencePos,
-    Axis axis, float contentStartOffset, float contentEndOffset, bool useInfinityWhenEmpty = false)
+    Axis axis, float contentStartOffset, float contentEndOffset, bool useInfinityWhenEmpty = false, bool forward = true)
 {
     auto viewPosEnd = viewPortLength;
     if (useInfinityWhenEmpty && LessOrEqual(viewPortLength, 0.0f)) {
@@ -64,7 +64,7 @@ void UpdateLazyChildConstraint(LayoutConstraintF& childLayoutConstraint, float v
         .viewPosStart = 0.0f,
         .viewPosEnd = viewPosEnd,
         .referencePos = referencePos,
-        .referenceEdge = ReferenceEdge::START,
+        .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = axis,
     };
     // Pass Scroll's contentStart/EndOffset through the constraint so a change triggers child lazy remeasure.
@@ -152,7 +152,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     UseInitialOffset(axis, selfSize, layoutWrapper);
-    MeasureLazyChildAgain(childWrapper, childLayoutConstraint, axis, selfSize, hasLazyLayoutChild_);
+    MeasureLazyChildAgain(childWrapper, childLayoutConstraint, axis, selfSize, padding, hasLazyLayoutChild_);
 }
 
 OffsetF ScrollLayoutAlgorithm::GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
@@ -235,14 +235,21 @@ SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, cons
     return geometryNode->GetMarginFrameSize();
 }
 
-void ScrollLayoutAlgorithm::MeasureLazyChildAgain(const RefPtr<LayoutWrapper>& childWrapper,
-    LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& selfSize, bool hasLazyLayoutChild)
+void ScrollLayoutAlgorithm::MeasureLazyChildAgain(
+    const RefPtr<LayoutWrapper>& childWrapper, LayoutConstraintF& childLayoutConstraint, Axis axis, SizeF selfSize,
+    const PaddingPropertyF& padding, bool hasLazyLayoutChild)
 {
     CHECK_NULL_VOID(hasLazyLayoutChild);
-    auto lastReferencePos = childLayoutConstraint.viewPosRef.value().referencePos;
-    if (GreatNotEqual(currentOffset_ + contentStartOffset_, lastReferencePos)) {
+    MinusPaddingToSize(padding, selfSize);
+    auto selfMainSize = GetMainAxisSize(selfSize, axis);
+    auto geometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto childSize = geometryNode->GetMarginFrameSize();
+    auto mainSize = GetMainAxisSize(childSize, axis);
+    auto referencePos = currentOffset_ + contentStartOffset_ + mainSize;
+    if (LessNotEqual(referencePos, selfMainSize - contentEndOffset_)) {
         UpdateLazyChildConstraint(childLayoutConstraint, GetMainAxisSize(selfSize, axis),
-            currentOffset_ + contentStartOffset_, axis, contentStartOffset_, contentEndOffset_);
+            selfMainSize - contentEndOffset_, axis, contentStartOffset_, contentEndOffset_, false, false);
         childWrapper->Measure(childLayoutConstraint);
     }
 }
