@@ -37,10 +37,13 @@ public:
         if (!shapeOverlayModifier_) {
             shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
         }
-        return MakeRefPtr<CirclePaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
+        return MakeRefPtr<CirclePaintMethod>(
+            GetAncestorPaintProperty(), shapeOverlayModifier_, &lastFillHdrHeadRoom_, &lastStrokeHdrHeadRoom_);
     }
 
 private:
+    std::optional<float> lastFillHdrHeadRoom_;
+    std::optional<float> lastStrokeHdrHeadRoom_;
     ACE_DISALLOW_COPY_AND_MOVE(CirclePattern);
 };
 } // namespace OHOS::Ace::NG

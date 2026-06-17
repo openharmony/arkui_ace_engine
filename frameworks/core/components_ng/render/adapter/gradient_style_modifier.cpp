@@ -78,7 +78,12 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     for (int32_t index = 0; index < colors.size(); index++) {
         auto colorWithHeadRoom = colors[index].GetColor().GetHeadRoomColor();
         if (colorWithHeadRoom.has_value()) {
-            renderContext->SetHDRColorHeadRoom(colorWithHeadRoom.value().headRoom);
+            float headRoom = colorWithHeadRoom.value().headRoom;
+            if (lastHdrColorHeadRoom_.has_value() && NearEqual(lastHdrColorHeadRoom_.value(), headRoom)) {
+                continue;
+            }
+            lastHdrColorHeadRoom_ = headRoom;
+            renderContext->SetHDRColorHeadRoom(headRoom);
         }
     }
 }
