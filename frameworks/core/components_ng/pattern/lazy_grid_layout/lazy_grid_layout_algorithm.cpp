@@ -487,6 +487,11 @@ void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (LessOrEqual(it->second.startPos - spaceWidth_, startPos_)) {
+        if (it->first >= totalItemCount_) {
+            index = totalItemCount_;
+            pos = prevBodyMainSize_ + spaceWidth_;
+            return;
+        }
         index = LanesFloor(it->first);
         pos = it->second.startPos;
         return;
@@ -543,6 +548,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
 
 void LazyGridLayoutAlgorithm::CheckRecycle()
 {
+    FixIndexRange(layoutInfo_->startIndex_, layoutInfo_->endIndex_);
     auto it = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     while (it != layoutInfo_->posMap_.end()) {
         if (LessNotEqual(it->second.endPos, startPos_)) {
@@ -968,6 +974,9 @@ bool LazyGridLayoutAlgorithm::InitPredictForwardState(int32_t& currIndex, int32_
         mainSize = iter->second.endPos - currPos;
         return true;
     } else {
+        layoutedEndIndex_ = currIndex;
+        cachedEndIndex_ = std::max(layoutInfo_->cachedEndIndex_, currIndex);
+        layoutedEnd_ = layoutedEnd;
         return false;
     }
 }
@@ -1044,6 +1053,11 @@ bool LazyGridLayoutAlgorithm::InitPredictBackwardState(int32_t& currIndex, int32
         mainSize = currPos - iter->second.startPos;
         return true;
     } else {
+        layoutedStartIndex_ = currIndex;
+        cachedStartIndex_ = layoutInfo_->cachedStartIndex_ >= 0
+            ? std::min(layoutInfo_->cachedStartIndex_, currIndex)
+            : currIndex;
+        layoutedStart_ = layoutedStart;
         return false;
     }
 }
