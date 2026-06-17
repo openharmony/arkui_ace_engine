@@ -327,11 +327,11 @@ RefPtr<V2::BreakPoints> ParseBreakpoints(EcmaVM* vm, const Local<JSValueRef>& js
     }
     auto array = panda::Local<panda::ArrayRef>(value);
     breakpoint->breakpoints.clear();
-    if (array->Length(vm) > MAX_NUMBER_BREAKPOINT - 1) {
+    if (ArkTSUtils::GetArrayLength(vm, array) > MAX_NUMBER_BREAKPOINT - 1) {
         return breakpoint;
     }
     double width = -1.0;
-    for (uint32_t i = 0; i < array->Length(vm); i++) {
+    for (uint32_t i = 0; i < ArkTSUtils::GetArrayLength(vm, array); i++) {
         auto threshold = panda::ArrayRef::GetValueAt(vm, array, i);
         if (!threshold->IsString(vm) && !threshold->IsNumber()) {
             continue;

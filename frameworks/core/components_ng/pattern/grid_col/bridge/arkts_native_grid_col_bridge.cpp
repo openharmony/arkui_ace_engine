@@ -128,8 +128,8 @@ void InheritGridColumnsNG(
 RefPtr<V2::GridContainerSize> ParseGridContainerSize(EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t defaultVal)
 {
     if (jsValue->IsNumber()) {
-        auto columnNumber = jsValue->Int32Value(vm);
-        return columnNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(columnNumber)
+        double columnNumber = jsValue->ToNumber(vm)->Value();
+        return columnNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(static_cast<int32_t>(columnNumber))
                                  : AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
     }
     if (jsValue->IsObject(vm)) {
@@ -169,8 +169,8 @@ RefPtr<V2::GridContainerSize> ParseGridContainerSize(EcmaVM* vm, const Local<JSV
 RefPtr<V2::GridContainerSize> ParseSpansNG(EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (jsValue->IsNumber()) {
-        auto spanNumber = jsValue->Int32Value(vm);
-        return spanNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(spanNumber)
+        double spanNumber = jsValue->ToNumber(vm)->Value();
+        return spanNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(static_cast<int32_t>(spanNumber))
                                : AceType::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_SPAN_NUMBER);
     }
     if (jsValue->IsObject(vm)) {
