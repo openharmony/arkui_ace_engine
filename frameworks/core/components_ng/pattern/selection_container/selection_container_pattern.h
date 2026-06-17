@@ -97,6 +97,8 @@ public:
     CopyOptions GetCopyOption() const override;
     std::optional<Color> GetSelectedBackgroundColor() const override;
     void OnModifyDone() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void DumpInfo() override;
     void MarkContainerPropertyUpdate(uint32_t flags);
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     std::u16string GetTextJoinSeparator() const
@@ -170,6 +172,9 @@ private:
     std::function<bool(const MenuItemParam&, const std::u16string&)> onMenuItemClickWithText_;
 
     RefPtr<SelectionSelectOverlay> GetOrCreateSelectionSelectOverlay();
+    std::string GetBindSelectionMenuInJson() const;
+    std::string GetCaretColorStr() const;
+    std::string GetSelectedBackgroundColorStr() const;
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void WriteClipboard(const std::u16string& clipboardText,
