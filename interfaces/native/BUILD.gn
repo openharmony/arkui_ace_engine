@@ -193,6 +193,10 @@ if (is_arkui_x) {
       "node/dialog_option.cpp",
       "node/dialog_model.cpp",
       "node/swiper_option.cpp",
+      "node/grid_layout_option.cpp",
+      "node/list_option.cpp",
+      "node/waterflow_section_option.cpp",
+      "native_interface_accessibility.cpp"
     ]
 
     deps = [
