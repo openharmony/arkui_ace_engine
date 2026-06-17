@@ -2386,4 +2386,64 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetUseAccumulatedLineHeights007, TestS
     EXPECT_FLOAT_EQ(result, expectedResult);
 }
 
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightRegular002
+ * @tc.desc: test GetContentHeight returns 0.0f when childrenCount_ is 0 (regular grid),
+ *           must not return -mainGap (negative).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightRegular002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.hasBigItem_ = false;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+    info.childrenCount_ = 0;
+    info.repeatDifference_ = 0;
+
+    EXPECT_FLOAT_EQ(info.GetContentHeight(1.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeight(10.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeight(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightOfRegularGrid001
+ * @tc.desc: test GetContentHeightOfRegularGrid returns 0.0f when childrenCount is 0,
+ *           regardless of mainGap. Guards against returning -mainGap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightOfRegularGrid001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+    info.childrenCount_ = 0;
+    info.repeatDifference_ = 0;
+
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(1.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(12.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightOfRegularGrid002
+ * @tc.desc: test GetContentHeightOfRegularGrid returns 0.0f when
+ *           childrenCount_ + repeatDifference_ <= 0 (defensive case).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightOfRegularGrid002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+
+    info.childrenCount_ = 2;
+    info.repeatDifference_ = -2;
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(5.0f), 0.0f);
+
+    info.childrenCount_ = 1;
+    info.repeatDifference_ = -5;
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(5.0f), 0.0f);
+}
+
 } // namespace OHOS::Ace::NG
