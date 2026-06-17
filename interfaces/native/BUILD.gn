@@ -193,6 +193,8 @@ if (is_arkui_x) {
       "node/dialog_option.cpp",
       "node/dialog_model.cpp",
       "node/swiper_option.cpp",
+      "node/node_transition_imp.cpp",
+      "node/node_visual_effect.cpp",
       "node/grid_layout_option.cpp",
       "node/list_option.cpp",
       "node/waterflow_section_option.cpp",
