@@ -24,56 +24,63 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto isSubContainer = container->IsSubContainer();
-    auto currentId = Container::CurrentId();
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostTask(
+        [currentId = Container::CurrentId(), arg]() mutable {
+            auto container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+            auto isSubContainer = container->IsSubContainer();
+            auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
 
-    if (isSubContainer) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-        if (parentContainer && (expandDisplay || !parentContainer->IsSubContainer())) {
-            currentId = parentContainerId;
-            container = parentContainer;
-        } else {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
-            return;
-        }
-    }
-    ContainerScope scope(currentId);
+            if (isSubContainer) {
+                auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+                auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+                if (parentContainer && (expandDisplay || !parentContainer->IsSubContainer())) {
+                    currentId = parentContainerId;
+                    container = parentContainer;
+                } else {
+                    TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
+                    return;
+                }
+            }
+            ContainerScope scope(currentId);
 
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
-        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
-        if (embeddedOverlay) {
-            overlayManager = embeddedOverlay;
-        }
-    }
-    RefPtr<NG::FrameNode> dialog;
-    ACE_UINODE_TRACE(dialog);
-    if (arg.isShowInSubWindow) {
-        dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
-        CHECK_NULL_VOID(dialog);
-        if (arg.isModal && !container->IsUIExtensionWindow()) {
-            DialogProperties Maskarg;
-            Maskarg.isMask = true;
-            Maskarg.autoCancel = arg.autoCancel;
-            Maskarg.onWillDismiss = arg.onWillDismiss;
-            Maskarg.shadow = arg.shadow;
-            auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
-            CHECK_NULL_VOID(mask);
-            overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
-        }
-    } else {
-        dialog = overlayManager->ShowDialog(arg, nullptr, false);
-        CHECK_NULL_VOID(dialog);
-    }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
-        ComponentEventType::COMPONENT_EVENT_DIALOG);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
+                auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
+                if (embeddedOverlay) {
+                    overlayManager = embeddedOverlay;
+                }
+            }
+            RefPtr<NG::FrameNode> dialog;
+            ACE_UINODE_TRACE(dialog);
+            if (arg.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (arg.isModal && !container->IsUIExtensionWindow()) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = arg.autoCancel;
+                    Maskarg.onWillDismiss = arg.onWillDismiss;
+                    Maskarg.shadow = arg.shadow;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(arg, nullptr, false);
+                CHECK_NULL_VOID(dialog);
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+                "onVisibleChange", "show", ComponentEventType::COMPONENT_EVENT_DIALOG);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowActionSheet");
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)
