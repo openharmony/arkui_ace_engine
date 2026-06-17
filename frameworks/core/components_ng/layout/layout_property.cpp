@@ -1197,6 +1197,9 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
+        if (pipeline && pipeline->ThrottleRenderTreeRebuild(parent->GetId(), host->GetRenderContext())) {
+            return;
+        }
         parent->RebuildRenderContextTree();
         return;
     }

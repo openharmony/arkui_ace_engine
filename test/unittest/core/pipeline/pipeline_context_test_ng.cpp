@@ -3347,56 +3347,67 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
 }
 
 /**
- * @tc.name: SetAfterRenderZindexRebuild005
- * @tc.desc: Test SetAfterRenderZindexRebuild with boundary values
+ * @tc.name: ThrottleRenderTreeRebuild001
+ * @tc.desc: Test ThrottleRenderTreeRebuild with boundary node ids and the per-node threshold
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, SetAfterRenderZindexRebuild005, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, ThrottleRenderTreeRebuild001, TestSize.Level1)
 {
     /**
-     * @tc.steps: SetAfterRenderZindexRebuild with negative, zero, and max int32 values
-     * @tc.expected: All values are stored correctly
+     * @tc.steps: Call ThrottleRenderTreeRebuild for a boundary id up to the per-vsync limit,
+     *            then once more; other boundary ids (0, INT32_MAX) keep independent counters.
+     * @tc.expected: Calls within the limit return false and defer nothing; the first call over
+     *               the limit returns true and records the id with monotonic flush order.
      */
-    context_->SetAfterRenderZindexRebuild(-1);
-    context_->SetAfterRenderZindexRebuild(0);
-    context_->SetAfterRenderZindexRebuild(INT32_MAX);
+    for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+        EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(-1, nullptr));
+    }
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 3);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, 3);
-    EXPECT_EQ(context_->idUpdateZOrder_[-1], 0);
-    EXPECT_EQ(context_->idUpdateZOrder_[0], 1);
-    EXPECT_EQ(context_->idUpdateZOrder_[INT32_MAX], 2);
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(-1, nullptr));
+    EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(0, nullptr));
+    EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(INT32_MAX, nullptr));
+
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 1);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_[-1], 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 1);
+    EXPECT_EQ(context_->rebuildRenderTreeCount_.size(), 3);
+
+    context_->FlushRebuildRenderTree();
 }
 
 /**
- * @tc.name: FlushZindexUpdate001
- * @tc.desc: Test FlushZindexUpdate with empty map
+ * @tc.name: FlushRebuildRenderTree001
+ * @tc.desc: Test FlushRebuildRenderTree with empty map
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, FlushZindexUpdate001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, FlushRebuildRenderTree001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call FlushZindexUpdate with empty idUpdateZOrder_
+     * @tc.steps: Call FlushRebuildRenderTree with empty deferredRebuildRenderTree_
      * @tc.expected: No crash, map and index are cleared
      */
-    context_->idUpdateZOrderIndex_ = 5;
+    context_->rebuildRenderTreeOrder_ = 5;
 
-    context_->FlushZindexUpdate();
+    context_->FlushRebuildRenderTree();
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
 }
 
 /**
- * @tc.name: FlushZindexUpdate002
- * @tc.desc: Test FlushZindexUpdate with multiple nodes including duplicates
+ * @tc.name: FlushRebuildRenderTree002
+ * @tc.desc: Test FlushRebuildRenderTree with multiple deferred nodes including duplicates
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, FlushZindexUpdate002, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, FlushRebuildRenderTree002, TestSize.Level1)
 {
     /**
-     * @tc.steps: Add multiple nodes with duplicates, then flush
-     * @tc.expected: Nodes are processed and map is cleared
+     * @tc.steps: Saturate the per-node throttle for four nodes, defer them (with duplicates),
+     *            then flush.
+     * @tc.expected: Deferred entries are deduplicated by id keeping the latest order; flush
+     *               rebuilds the registered nodes and clears the maps and counters.
      */
     constexpr int32_t nodeId1 = 1001;
     constexpr int32_t nodeId2 = 1002;
@@ -3412,36 +3423,47 @@ HWTEST_F(PipelineContextTestNg, FlushZindexUpdate002, TestSize.Level1)
     ElementRegister::GetInstance()->AddUINode(frameNode3);
     ElementRegister::GetInstance()->AddUINode(frameNode4);
 
-    context_->SetAfterRenderZindexRebuild(nodeId1);
-    context_->SetAfterRenderZindexRebuild(nodeId2);
-    context_->SetAfterRenderZindexRebuild(nodeId3);
-    context_->SetAfterRenderZindexRebuild(nodeId4);
-    context_->SetAfterRenderZindexRebuild(nodeId1);
-    context_->SetAfterRenderZindexRebuild(nodeId3);
-    context_->SetAfterRenderZindexRebuild(nodeId2);
+    // Exhaust the eager-rebuild budget of every node: all these calls return false and defer nothing.
+    for (int32_t nodeId : { nodeId1, nodeId2, nodeId3, nodeId4 }) {
+        for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+            EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(nodeId, nullptr));
+        }
+    }
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 4);
-    EXPECT_EQ(context_->idUpdateZOrder_[nodeId1], 4);
-    EXPECT_EQ(context_->idUpdateZOrder_[nodeId2], 6);
-    EXPECT_EQ(context_->idUpdateZOrder_[nodeId3], 5);
-    EXPECT_EQ(context_->idUpdateZOrder_[nodeId4], 3);
+    // Over the budget every call defers; duplicates are deduplicated by id, order keeps the latest.
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId1, nullptr)); // order 0
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId2, nullptr)); // order 1
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId3, nullptr)); // order 2
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId4, nullptr)); // order 3
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId1, nullptr)); // order 4 (dup)
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId3, nullptr)); // order 5 (dup)
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId2, nullptr)); // order 6 (dup)
 
-    context_->FlushZindexUpdate();
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 4);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_[nodeId1], 4);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_[nodeId2], 6);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_[nodeId3], 5);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_[nodeId4], 3);
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+    context_->FlushRebuildRenderTree();
+
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
+    EXPECT_EQ(context_->rebuildRenderTreeCount_.size(), 0);
 }
 
 /**
- * @tc.name: FlushZindexUpdate003
- * @tc.desc: Test FlushZindexUpdate with consecutive flush calls
+ * @tc.name: FlushRebuildRenderTree003
+ * @tc.desc: Test FlushRebuildRenderTree with consecutive flush calls and throttle-window reset
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, FlushZindexUpdate003, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, FlushRebuildRenderTree003, TestSize.Level1)
 {
     /**
-     * @tc.steps: Add nodes, flush, then flush again
-     * @tc.expected: No crash on consecutive flushes
+     * @tc.steps: Defer two nodes, flush, then flush again on the empty state.
+     * @tc.expected: No crash on consecutive flushes; flushing resets the per-node counters,
+     *               so a previously throttled node becomes eager again (per-vsync window).
      */
     constexpr int32_t nodeId1 = 1001;
     constexpr int32_t nodeId2 = 1002;
@@ -3451,30 +3473,42 @@ HWTEST_F(PipelineContextTestNg, FlushZindexUpdate003, TestSize.Level1)
     ElementRegister::GetInstance()->AddUINode(frameNode1);
     ElementRegister::GetInstance()->AddUINode(frameNode2);
 
-    context_->SetAfterRenderZindexRebuild(nodeId1);
-    context_->SetAfterRenderZindexRebuild(nodeId2);
+    for (int32_t nodeId : { nodeId1, nodeId2 }) {
+        for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+            EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(nodeId, nullptr));
+        }
+        EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId, nullptr));
+    }
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 2);
 
-    context_->FlushZindexUpdate();
+    context_->FlushRebuildRenderTree();
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
+    EXPECT_EQ(context_->rebuildRenderTreeCount_.size(), 0);
 
-    context_->FlushZindexUpdate();
+    context_->FlushRebuildRenderTree();
 
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
+
+    // The throttle window is per vsync: after the flush the same node is eager again.
+    EXPECT_FALSE(context_->ThrottleRenderTreeRebuild(nodeId1, nullptr));
+    context_->FlushRebuildRenderTree();
 }
 
 /**
- * @tc.name: ZindexWorkflow001
- * @tc.desc: Test complete workflow of SetAfterRenderZindexRebuild and FlushZindexUpdate
+ * @tc.name: RebuildRenderTreeWorkflow001
+ * @tc.desc: Test complete workflow of ThrottleRenderTreeRebuild and FlushRebuildRenderTree
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, ZindexWorkflow001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, RebuildRenderTreeWorkflow001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Add nodes, flush, add more nodes, flush again
-     * @tc.expected: Each flush clears the map correctly
+     * @tc.steps: Throttle nodes into the deferred map (vsync 1), flush, then repeat with other
+     *            nodes (vsync 2). One deferral passes the node's real RenderContext to cover the
+     *            RequestNextFrame path.
+     * @tc.expected: Each flush rebuilds and fully clears the state, starting a fresh window.
      */
     constexpr int32_t nodeId1 = 1001;
     constexpr int32_t nodeId2 = 1002;
@@ -3487,19 +3521,32 @@ HWTEST_F(PipelineContextTestNg, ZindexWorkflow001, TestSize.Level1)
     ElementRegister::GetInstance()->AddUINode(frameNode2);
     ElementRegister::GetInstance()->AddUINode(frameNode3);
 
-    context_->SetAfterRenderZindexRebuild(nodeId1);
-    context_->SetAfterRenderZindexRebuild(nodeId2);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+    // vsync 1: two nodes overflow their budget and are deferred.
+    auto saturate = [this](int32_t nodeId) {
+        for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+            context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+        }
+    };
+    saturate(nodeId1);
+    saturate(nodeId2);
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId1, frameNode1->GetRenderContext()));
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId2, nullptr));
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 2);
 
-    context_->FlushZindexUpdate();
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    context_->FlushRebuildRenderTree();
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeCount_.size(), 0);
 
-    context_->SetAfterRenderZindexRebuild(nodeId3);
-    context_->SetAfterRenderZindexRebuild(nodeId1);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+    // vsync 2: fresh window — previously throttled node is eager again; defer another pair.
+    saturate(nodeId3);
+    saturate(nodeId1);
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId3, nullptr));
+    EXPECT_TRUE(context_->ThrottleRenderTreeRebuild(nodeId1, nullptr));
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 2);
 
-    context_->FlushZindexUpdate();
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    context_->FlushRebuildRenderTree();
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
+    EXPECT_EQ(context_->rebuildRenderTreeCount_.size(), 0);
 }
 } // namespace NG
 } // namespace OHOS::Ace

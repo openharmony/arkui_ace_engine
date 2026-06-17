@@ -1183,7 +1183,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg159, TestSize.Level
 }
 
 // ==========================================================================
-// Batch 8: UpdateDrawLayoutChildObserver, SetCallBackNode, UpdateIdUpdateZOrderIndex,
+// Batch 8: UpdateDrawLayoutChildObserver, SetCallBackNode, ThrottleRenderTreeRebuild(order),
 //          RegisterAttachedNode, RemoveAttachedNode, HandleSubwindow,
 //          GetContainerCustomTitleVisible, GetContainerControlButtonVisible
 // ==========================================================================
@@ -1230,21 +1230,27 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg162, TestSize.Level
 
 /**
  * @tc.name: PipelineContextFourTestNg163
- * @tc.desc: Test UpdateIdUpdateZOrderIndex increments index.
+ * @tc.desc: Test ThrottleRenderTreeRebuild increments flush order only past the per-node limit.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg163, TestSize.Level1)
 {
     AssertValidContext();
-    context_->idUpdateZOrderIndex_ = 0;
+    constexpr int32_t nodeId = 163;
+    // Within the eager budget the flush order does not move.
+    for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+        context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    }
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, 0);
 
-    context_->UpdateIdUpdateZOrderIndex();
-    EXPECT_EQ(context_->GetIdUpdateZOrderIndex(), DEFAULT_SIZE1);
+    // Every deferred (over-limit) call increments the monotonic flush order.
+    context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE1);
 
-    context_->UpdateIdUpdateZOrderIndex();
-    EXPECT_EQ(context_->GetIdUpdateZOrderIndex(), DEFAULT_SIZE2);
+    context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE2);
 
-    context_->idUpdateZOrderIndex_ = 0;
+    context_->FlushRebuildRenderTree();
 }
 
 /**
@@ -1317,7 +1323,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg167, TestSize.Level
 
 // ==========================================================================
 // Batch 9: AddFontNodeNG, RemoveFontNodeNG, IsContainerModalVisible,
-//          StopWindowAnimation, AddDirtyFreezeNode, SetAfterRenderZindexRebuild
+//          StopWindowAnimation, AddDirtyFreezeNode, ThrottleRenderTreeRebuild(defer)
 // ==========================================================================
 
 /**
@@ -1390,25 +1396,32 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg171, TestSize.Level
 
 /**
  * @tc.name: PipelineContextFourTestNg172
- * @tc.desc: Test SetAfterRenderZindexRebuild inserts into map and increments index.
+ * @tc.desc: Test ThrottleRenderTreeRebuild inserts deferred entries past the per-node limit.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg172, TestSize.Level1)
 {
     AssertValidContext();
-    context_->idUpdateZOrder_.clear();
-    context_->idUpdateZOrderIndex_ = 0;
+    constexpr int32_t nodeId1 = 10;
+    constexpr int32_t nodeId2 = 20;
+    // Exhaust the eager budget of both nodes: nothing is deferred yet.
+    for (int32_t nodeId : { nodeId1, nodeId2 }) {
+        for (size_t i = 0; i < PipelineContext::MAX_RENDER_TREE_REBUILD_PER_VSYNC; ++i) {
+            context_->ThrottleRenderTreeRebuild(nodeId, nullptr);
+        }
+    }
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), 0);
 
-    context_->SetAfterRenderZindexRebuild(10);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), DEFAULT_SIZE1);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, DEFAULT_SIZE1);
+    // The first over-limit call per node inserts a deferred entry and advances the order.
+    context_->ThrottleRenderTreeRebuild(nodeId1, nullptr);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), DEFAULT_SIZE1);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE1);
 
-    context_->SetAfterRenderZindexRebuild(20);
-    EXPECT_EQ(context_->idUpdateZOrder_.size(), DEFAULT_SIZE2);
-    EXPECT_EQ(context_->idUpdateZOrderIndex_, DEFAULT_SIZE2);
+    context_->ThrottleRenderTreeRebuild(nodeId2, nullptr);
+    EXPECT_EQ(context_->deferredRebuildRenderTree_.size(), DEFAULT_SIZE2);
+    EXPECT_EQ(context_->rebuildRenderTreeOrder_, DEFAULT_SIZE2);
 
-    context_->idUpdateZOrder_.clear();
-    context_->idUpdateZOrderIndex_ = 0;
+    context_->FlushRebuildRenderTree();
 }
 
 // ==========================================================================
