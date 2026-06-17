@@ -24,6 +24,10 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace {
+class ShapeRect;
+}
+
 namespace OHOS::Ace::NG {
 using UpdateImageCenterCallback = std::function<void(const PointF&)>;
 

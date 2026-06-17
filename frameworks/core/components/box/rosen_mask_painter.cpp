@@ -18,6 +18,7 @@
 #include "include/core/SkPaint.h"
 #endif
 
+#include "base/geometry/shape.h"
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/declaration/common/common_background_style.h"

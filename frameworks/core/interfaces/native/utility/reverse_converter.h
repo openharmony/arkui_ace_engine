@@ -64,6 +64,7 @@ class PickerDate;
 class Rect;
 class RichEditorAbstractSpanResult;
 class SelectionInfo;
+class Shadow;
 class SpanBase;
 class TouchLocationInfo;
 struct MouseHistoricalPoint;
