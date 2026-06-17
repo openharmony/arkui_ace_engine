@@ -53,6 +53,9 @@
 #include "node_attributes/text_area.h"
 #include "node_attributes/rich_editor.h"
 #include "node_attributes/image_span.h"
+#include "node_attributes/image_animator.h"
+#include "node_attributes/image.h"
+#include "node_attributes/picker.h"
 #include "node_attributes/custom_span.h"
 #include "node_attributes/progress.h"
 #include "node_attributes/embedded_component.h"
@@ -140,19 +143,6 @@ typedef struct {
 } ArkUI_GridItemRect;
 
 /**
-
- * @brief Enumerates the selected indicator type of picker.
- *
- * @since 23
- */
-typedef enum {
-    /** background. */
-    ARKUI_PICKER_INDICATOR_BACKGROUND = 0,
-    /** divider. */
-    ARKUI_PICKER_INDICATOR_DIVIDER = 1,
-} ArkUI_PickerIndicatorType;
-
-/**
  * @brief Enumerates the tree operating status for the cross-language option.
  *
  * @since 26.0.0
@@ -180,47 +170,6 @@ typedef enum {
      */
     OH_ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
 } OH_ArkUI_CrossLanguageOperatingStatus;
-
-/**
- * @brief style parameters of background indicator.
- *
- * @since 23
- */
-typedef struct {
-    /**  background color, in 0xARGB format, for example, <b>0xFF1122FF</b> */
-    uint32_t backgroundColor;
-    /** radius of the top left corner. */
-    float topLeftRadius;
-    /** radius of the top right corner */
-    float topRightRadius;
-    /** radius of the bottom left corner */
-    float bottomLeftRadius;
-    /** radius of the bottom right corner. */
-    float bottomRightRadius;
-} ArkUI_PickerIndicatorBackground;
-
-/**
- * @brief style parameters of divider indicator.
- *
- * @since 23
- */
-typedef struct {
-    /** stroke width */
-    float strokeWidth;
-    /** divider color,in 0xARGB format, for example, <b>0xFF1122FF</b> */
-    uint32_t dividerColor;
-    /** the distance between the divider and the beginning of the side of the picker, unit vp. */
-    float startMargin;
-    /** the distance between the divider and the end of the side of the picker (unit: vp). */
-    float endMargin;
-} ArkUI_PickerIndicatorDivider;
-
-/**
- * @brief Definition of indicator style.
- *
- * @since 23
- */
-typedef struct ArkUI_PickerIndicatorStyle ArkUI_PickerIndicatorStyle;
 
 /**
  * @brief Defines the <b>Grid</b> layout options.
@@ -313,13 +262,6 @@ typedef struct ArkUI_SwiperArrowStyle ArkUI_SwiperArrowStyle;
 typedef struct ArkUI_StyledString ArkUI_StyledString;
 
 /**
- * @brief Defines image animator frame infomation.
- *
- * @since 12
-*/
-typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
-
-/**
  * @brief Define the ChildrenMainSize class information for a List.
  *
  * @since 12
@@ -376,22 +318,6 @@ typedef union {
 } ArkUI_NumberValue;
 
 /**
- * @brief Enumerates the image repeat patterns.
- *
- * @since 12
- */
-typedef enum {
-    /** The image is not repeatedly drawn. */
-    ARKUI_IMAGE_REPEAT_NONE = 0,
-    /** The image is repeatedly drawn only along the x-axis. */
-    ARKUI_IMAGE_REPEAT_X,
-    /** The image is repeatedly drawn only along the y-axis. */
-    ARKUI_IMAGE_REPEAT_Y,
-    /** The image is repeatedly drawn along both axes. */
-    ARKUI_IMAGE_REPEAT_XY,
-} ArkUI_ImageRepeat;
-
-/**
  * @brief Enumerates the text copy and paste modes.
  *
  * @since 12
@@ -418,62 +344,6 @@ typedef enum {
     /** Blur. */
     ARKUI_SHADOW_TYPE_BLUR
 } ArkUI_ShadowType;
-
-/**
- * @brief Enumerates the modes of the date picker.
- *
- * @since 18
- */
-typedef enum {
-    /** A mode that displays the date in months, days of month, and years. */
-    ARKUI_DATEPICKER_MODE_DATE = 0,
-    /** A mode that displays the date in months and years. */
-    ARKUI_DATEPICKER_YEAR_AND_MONTH = 1,
-    /** A mode that displays the date in months and days of the month. */
-    ARKUI_DATEPICKER_MONTH_AND_DAY = 2,
-} ArkUI_DatePickerMode;
-
-/**
- * @brief Enumerates the types of the text picker.
- *
- * @since 12
- */
-typedef enum {
-    /** Single-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_SINGLE = 0,
-    /** Multi-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_MULTI,
-    /** Single-column text picker with image resources. */
-    ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT,
-    /** Interconnected multi-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT,
-} ArkUI_TextPickerRangeType;
-
-/**
- * @brief Defines the input structure of the single-column text picker with image resources.
- *
- * @since 12
- */
-typedef struct {
-    /** Image resource. */
-    const char* icon;
-    /** Text information. */
-    const char* text;
-} ARKUI_TextPickerRangeContent;
-
-/**
- * @brief Defines the input structure of the interconnected multi-column text picker.
- *
- * @since 12
- */
-typedef struct {
-    /** Text information. */
-    const char* text;
-    /** Interconnected data. */
-    const ARKUI_TextPickerRangeContent* children;
-    /** Size of the interconnected data array. */
-    int32_t size;
-} ARKUI_TextPickerCascadeRangeContent;
 
 /**
  * @brief 定义无障碍复选框状态类型枚举值。
@@ -944,24 +814,6 @@ typedef enum {
 } ArkUI_AnimationPlayMode;
 
 /**
- * @brief Defines the image size.
- *
- * @since 12
- */
-typedef enum {
-    /** The original image aspect ratio is retained. */
-    ARKUI_IMAGE_SIZE_AUTO = 0,
-    /** Default value. The image is scaled with its aspect ratio retained for both sides to be greater than or equal to
-     * the display boundaries.
-     */
-    ARKUI_IMAGE_SIZE_COVER,
-    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
-     * display boundaries.
-     */
-    ARKUI_IMAGE_SIZE_CONTAIN,
-} ArkUI_ImageSize;
-
-/**
  * @brief Enumerates the adaptive color modes.
  *
  * @since 12
@@ -1047,112 +899,6 @@ typedef enum {
     /** Component ultra-thick material. */
     ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
 } ArkUI_BlurStyle;
-
-/**
- * @brief Defines how the image is resized to fit its container.
- *ImageSpanAlignment
- * @since 12
- */
-typedef enum {
-    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
-     * display boundaries.
-     */
-    ARKUI_OBJECT_FIT_CONTAIN = 0,
-    /** The image is scaled with its aspect ratio retained for both sides to be greater than or equal to the
-     * display boundaries.
-     */
-    ARKUI_OBJECT_FIT_COVER,
-    /** The image is scaled automatically to fit the display area. */
-    ARKUI_OBJECT_FIT_AUTO,
-    /** The image is scaled to fill the display area, and its aspect ratio is not retained. */
-    ARKUI_OBJECT_FIT_FILL,
-    /** The image content is displayed with its aspect ratio retained. The size is smaller than or equal to the
-     * original size.
-     */
-    ARKUI_OBJECT_FIT_SCALE_DOWN,
-    /** The original size is retained. */
-    ARKUI_OBJECT_FIT_NONE,
-    /** Not resized, the image is aligned with the start edge of the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_START,
-    /** Not resized, the image is horizontally centered at the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP,
-    /** Not resized, the image is aligned with the end edge at the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_END,
-    /** Not resized, the image is vertically centered on the start edge of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_START,
-    /** Not resized, the image is horizontally and vertically centered in the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_CENTER,
-    /** Not resized, the image is vertically centered on the end edge of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_END,
-    /** Not resized, the image is aligned with the start edge at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_START,
-    /** Not resized, the image is horizontally centered at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
-    /** Not resized, the image is aligned with the end edge at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
-    /**
-     * Not resized, and is used in conjunction with NODE_IMAGE_IMAGE_MATRIX.
-     *
-     * @since 21
-     */
-    ARKUI_OBJECT_FIT_NONE_MATRIX,
-} ArkUI_ObjectFit;
-
-/**
- * @brief Enumerates the image interpolation effect.
- *
- * @since 12
- */
-typedef enum {
-    /** No image interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_NONE = 0,
-    /** Low quality interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_LOW,
-    /** Medium quality interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_MEDIUM,
-    /** High quality interpolation. This mode produces scaled images of the highest possible quality. */
-    ARKUI_IMAGE_INTERPOLATION_HIGH,
-} ArkUI_ImageInterpolation;
-
-/**
- * @brief Enumerates the image dynamic range mode.
- *
- * @since 21
- */
-typedef enum {
-    /** high dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_HIGH = 0,
-    /** constraint dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_CONSTRAINT,
-    /** standard dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_STANDARD,
-} ArkUI_DynamicRangeMode;
-
-/**
- * @brief Enumerates the image rotate orientation.
- *
- * @since 21
- */
-typedef enum {
-    /** Use EXIF metadata for display orientation, with support for rotation and mirroring. */
-    ARKUI_ORIENTATION_AUTO = 0,
-    /** Display original pixel data without transformation. */
-    ARKUI_ORIENTATION_UP,
-    /** Display the image after rotating it 90 degrees clockwise. */
-    ARKUI_ORIENTATION_RIGHT,
-    /** Display the image after rotating it 180 degrees clockwise. */
-    ARKUI_ORIENTATION_DOWN,
-    /** Display the image after rotating it 270 degrees clockwise. */
-    ARKUI_ORIENTATION_LEFT,
-    /** Display the image after flipping it horizontally. */
-    ARKUI_ORIENTATION_UP_MIRRORED,
-    /** Display the image after flipping it horizontally and then rotating it 90 degrees clockwise. */
-    ARKUI_ORIENTATION_RIGHT_MIRRORED,
-    /** Display the image after flipping it vertically. */
-    ARKUI_ORIENTATION_DOWN_MIRRORED,
-    /** Display the image after flipping it horizontally and then rotating it 270 degrees clockwise. */
-    ARKUI_ORIENTATION_LEFT_MIRRORED,
-} ArkUI_ImageRotateOrientation;
 
 /**
  * @brief Enumerates the blend modes.
@@ -1269,20 +1015,6 @@ typedef enum {
 } ArkUI_Visibility;
 
 /**
- * @brief Enumerates the alignment modes between the calendar picker and the entry component.
- *
- * @since 12
- */
-typedef enum {
-    /** Left aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_START = 0,
-    /** Center aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_CENTER,
-    /** Right aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_END,
-} ArkUI_CalendarAlignment;
-
-/**
  * @brief Enumerates the mask types.
  *
  * @since 12
@@ -1373,18 +1105,6 @@ typedef enum {
     /** Custom direction. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
 } ArkUI_LinearGradientDirection;
-
-/**
- * @brief Enumerates the image rendering modes.
- *
- * @since 12
- */
-typedef enum {
-    /** Render image pixels as they are in the original source image. */
-    ARKUI_IMAGE_RENDER_MODE_ORIGINAL = 0,
-    /** Render image pixels to create a monochrome template image. */
-    ARKUI_IMAGE_RENDER_MODE_TEMPLATE,
-} ArkUI_ImageRenderMode;
 
 /**
  * @brief Enumerates the slide-in and slide-out positions of the component from the screen edge during transition.
@@ -1645,22 +1365,6 @@ typedef enum {
     /** The sliding distance of the ListItem cannot exceed the size of the scratched component.*/
     ARKUI_LIST_ITEM_SWIPE_EDGE_EFFECT_NONE,
 } ArkUI_ListItemSwipeEdgeEffect;
-
-/**
- * @brief 定义帧动画的播放状态。
- *
- * @since 12
-*/
-typedef enum {
-    /** 动画初始状态。 */
-    ARKUI_ANIMATION_STATUS_INITIAL,
-    /** 动画处于播放状态。*/
-    ARKUI_ANIMATION_STATUS_RUNNING,
-    /** 动画处于暂停状态。*/
-    ARKUI_ANIMATION_STATUS_PAUSED,
-    /** 动画处于停止状态。*/
-    ARKUI_ANIMATION_STATUS_STOPPED,
-} ArkUI_AnimationStatus;
 
 /**
  * @brief Enumerates the states before and after execution of the frame-by-frame animation.
@@ -2126,20 +1830,6 @@ typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
 /**
-  * @brief TextPicker single column selector, supports mixing text and images.
-  *
-  * @since 19
-  */
-typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArray;
-
- /**
-   * @brief TextPicker multi column selector, supports mixing text and images.
-   *
-   * @since 19
-   */
-typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
-
-/**
  * @brief Defines a two-dimensional point struct, with coordinates stored as float type.
  *
  * @since 24
@@ -2161,25 +1851,6 @@ typedef struct {
   * @since 23
   */
 typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
-
-/**
- * @brief Create the ArkUI_PickerIndicatorStyle instance.
- *
- * @param ArkUI_PickerIndictorType, enumeration type.
- * @return  ArkUI_PickerIndicatorStyle instance. If the instance returns a null pointer,
- *         it indicates creation failure, and the reason for the failure may be that the address space is full or
- *         the type not supported.
- * @since 23
-*/
-ArkUI_PickerIndicatorStyle* OH_ArkUI_PickerIndicatorStyle_Create(ArkUI_PickerIndicatorType type);
-
-/**
-* @brief Destroy the ArkUI_PickerIndicatorStyle instance.
-*
-* @param ArkUI_PickerIndicatorStyle instance to be destroyed.
-* @since 23
-*/
-void OH_ArkUI_PickerIndicatorStyle_Dispose(ArkUI_PickerIndicatorStyle* style);
 
 /**
 * @brief Set the parameters of background style.
@@ -3521,123 +3192,6 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_List
     void* userData, void (*callback)(float offset, void* userData));
 
 /**
- * @brief 使用图片路径创建帧图片信息，图片格式为svg，png和jpg。
- *
- * @param src 图片路径。
- * @return 帧图片对象指针。
- * @since 12
-*/
-ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromString(char* src);
-
-/**
- * @brief 使用 DrawableDescriptor 对象创建帧图片信息，图片格式为Resource和PixelMap。
- *
- * @param drawable 使用Resource或PixelMap创建的ArkUI_DrawableDescriptor对象指针。
- * @return 帧图片对象指针。
- * @since 12
-*/
-ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromDrawableDescriptor(
-    ArkUI_DrawableDescriptor* drawable);
-
-/**
- * @brief 销毁帧图片对象指针。
- *
- * @param imageInfo 帧图片对象指针。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_Dispose(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片宽度。
- *
- * @param imageInfo 帧图片对象指针。
- * @param width 图片宽度，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t width);
-
-/**
- * @brief 获取图片宽度。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片宽度，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片高度。
- *
- * @param imageInfo 帧图片对象指针。
- * @param height 图片高度，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t height);
-
-/**
- * @brief 获取图片高度。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片高度，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片相对于组件左上角的纵向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @param top 图片相对于组件左上角的纵向坐标，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t top);
-
-/**
- * @brief 获取图片相对于组件左上角的纵向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片相对于组件左上角的纵向坐标，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片相对于组件左上角的横向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @param left 图片相对于组件左上角的横向坐标，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t left);
-
-/**
- * @brief 获取图片相对于组件左上角的横向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片相对于组件左上角的横向坐标，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片的播放时长。
- *
- * @param imageInfo 帧图片对象指针。
- * @param duration 图片的播放时长，单位为毫秒。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t duration);
-
-/**
- * @brief 获取图片的播放时长。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片的播放时长，单位为毫秒，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
  * @brief Create accessibility state.
  *
  * @return accessibility state object. If the object returns a null pointer,
@@ -4251,84 +3805,6 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_Visible
  * @since 21
  */
 bool OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(ArkUI_VisibleAreaEventOptions* option);
-
-/**
- *@brief Creates a TextPickerRangeContent instance.
- *
- *@param length The length of the picker array.
- *@return Returns a <b>TextPickerRangeContent</b> instance.
- *@since 19
- */
-ArkUI_TextPickerRangeContentArray* OH_ArkUI_TextPickerRangeContentArray_Create(int32_t length);
-
-/**
- *@brief Sets the icon of items in a text picker ranges.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@param icon Icon address.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex(
-    ArkUI_TextPickerRangeContentArray* handle, char* icon, int32_t index);
-
-/**
- *@brief Sets the text of items in a text picker ranges.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@param text Text content.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex(
-    ArkUI_TextPickerRangeContentArray* handle, char* text, int32_t index);
-
-/**
- *@brief Destroys the TextPickerRangeContent instance.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentArray* handle);
-
-/**
- *@brief Creates a TextCascadePickerRangeContent instance.
- *
- *@param length The length of the picker arry.
- *@return Returns a <b>TextCascadePickerRangeContent</b> instance.
- *@since 19
- */
-ArkUI_TextCascadePickerRangeContentArray* OH_ArkUI_TextCascadePickerRangeContentArray_Create(int32_t length);
-
-/**
- *@brief Sets the text of items in a multi text picker ranges.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@param text text content.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex(
-    ArkUI_TextCascadePickerRangeContentArray* handle, char* text, int32_t index);
-
-/**
- *@brief Sets the child info of items in a multi text picker ranges.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@param child The child instance.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
-    ArkUI_TextCascadePickerRangeContentArray* handle, ArkUI_TextCascadePickerRangeContentArray* child, int32_t index);
-
-/**
- *@brief Destroys the TextCascadePickerRangeContent instance.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
 
 /**
  * @brief Expand the swipe action.
