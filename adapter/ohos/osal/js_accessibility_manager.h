@@ -591,6 +591,15 @@ private:
         void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
 
+        void UpdateCustomAccessibilityProperty(
+            const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void AddAccessibilityVirtualNode(
+            const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void RemoveAccessibilityVirtualNode(const int64_t elementId,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
             js_ = js;
@@ -635,6 +644,15 @@ private:
         void SetBelongTreeId(const int32_t treeId) override;
         void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+
+        void UpdateCustomAccessibilityProperty(
+            const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void AddAccessibilityVirtualNode(
+            const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void RemoveAccessibilityVirtualNode(const int64_t elementId,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {

@@ -436,4 +436,70 @@ HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerIsVirtua
     EXPECT_TRUE(VirtualNodeContainerIdManager::IsVirtualNodeContainerId(encoded));
     EXPECT_FALSE(VirtualNodeContainerIdManager::IsVirtualNodeContainerId(100));
 }
+
+// ==================== VirtualNodeContainerIdManager ExtractContainerId/ExtractComponentId ====================
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerExtractContainerId001
+ * @tc.desc: Test ExtractContainerId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerExtractContainerId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. encode and extract container ID
+     * @tc.expected: extracted container ID matches
+     */
+    auto encoded = VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(42, 1000);
+    EXPECT_EQ(VirtualNodeContainerIdManager::ExtractContainerId(encoded), 42);
+}
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerExtractComponentId001
+ * @tc.desc: Test ExtractComponentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerExtractComponentId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. encode and extract component ID
+     * @tc.expected: extracted component ID matches
+     */
+    auto encoded = VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(3, 12345);
+    EXPECT_EQ(VirtualNodeContainerIdManager::ExtractComponentId(encoded), 12345);
+}
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerExtractComponentId002
+ * @tc.desc: Test ExtractComponentId with negative componentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerExtractComponentId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. encode with negative componentId and extract
+     * @tc.expected: extracted component ID matches the negative value
+     */
+    auto encoded = VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(3, -999);
+    EXPECT_EQ(VirtualNodeContainerIdManager::ExtractComponentId(encoded), -999);
+}
+
+// ==================== VirtualNodeContainerIdManager GetParentAccessibilityId ====================
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerGetParentAccessibilityId001
+ * @tc.desc: Test GetParentAccessibilityId clears container ID bits
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerGetParentAccessibilityId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. encode, get parent ID, verify container bits are cleared
+     * @tc.expected: parent ID has no container bits
+     */
+    auto encoded = VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(7, 200);
+    auto parentId = VirtualNodeContainerIdManager::GetParentAccessibilityId(encoded);
+    EXPECT_EQ(VirtualNodeContainerIdManager::ExtractContainerId(parentId), 0);
+    EXPECT_EQ(VirtualNodeContainerIdManager::ExtractComponentId(parentId), 200);
+}
 } // namespace OHOS::Ace::NG
