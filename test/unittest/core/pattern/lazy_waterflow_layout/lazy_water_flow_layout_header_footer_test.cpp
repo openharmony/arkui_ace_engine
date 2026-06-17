@@ -1393,6 +1393,28 @@ void LazyVWaterFlowLayoutHeaderFooterTest::RunEdgeResizeLaneInvariance(
 } // namespace
 
 /**
+ * @tc.name: EndReferenceIgnoresHeaderResizeAdjust001
+ * @tc.desc: END-reference windows must not export header resize compensation; bottom anchoring absorbs section
+ *           growth in the END rebase path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, EndReferenceIgnoresHeaderResizeAdjust001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->headerMainSize_ = 120.0f;
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.referenceEdge_ = ReferenceEdge::END;
+    algorithm.headerMainSizeDelta_ = 80.0f;
+    algorithm.prevBodyMainSize_ = 100.0f;
+
+    algorithm.UpdateHeaderAdjustOffset();
+
+    EXPECT_FLOAT_EQ(algorithm.headerAdjustOffset_, 0.0f);
+}
+
+/**
  * @tc.name: BodyLocalItemStartGateClearsAfterPartialScroll001
  * @tc.desc: Body-local boundary gate: itemStart_ must compare the viewport against body 0, not headerMainSize_.
  *           After a small scroll past the top the gate must clear.
