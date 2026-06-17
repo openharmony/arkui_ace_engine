@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/toggle/bridge/arkts_native_toggle_bridge.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -60,8 +63,10 @@ void ParseToggleIsOnObject(const EcmaVM* vm, Local<JSValueRef>& jsVal)
     panda::Local<panda::FunctionRef> func = jsVal->ToObject(vm);
     std::function<void(bool)> callback = [node = targetNode, func = panda::CopyableGlobal(vm, func)](bool param) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("Toggle.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, param) };
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -555,15 +560,20 @@ ArkUINativeModuleValue ToggleBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(bool)> callback = [isJsView, node = targetNode, func = panda::CopyableGlobal(vm, func)](
                                              bool isOnchange) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        ACE_SCORING_EVENT("Toggle.onChange");
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, isOnchange) };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+                "event", "Toggle.onChange", ComponentEventType::COMPONENT_EVENT_SELECT);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
     };
