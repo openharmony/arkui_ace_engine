@@ -15,6 +15,7 @@
 
 #include "node_model.h"
 
+#include <cstring>
 #include <memory>
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
@@ -30,7 +31,41 @@
 
 namespace OHOS::Ace::NodeModel {
 namespace {
-#if defined(WINDOWS_PLATFORM)
+#if defined(ANDROID_PLATFORM)
+#include <dlfcn.h>
+void* FindModule()
+{
+    const char libname[] = "libarkui_android.so";
+    void* handle_ = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
+    if (!handle_) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libarkui_android: %{public}s", dlerror());
+        return nullptr;
+    }
+    return handle_;
+}
+
+void* FindFunction(void* library, const char* name)
+{
+    return dlsym(library, name);
+}
+#elif defined(IOS_PLATFORM)
+#include <dlfcn.h>
+void* FindModule()
+{
+    const char libname[] = "libarkui_ios.dylib";
+    void* handle_ = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
+    if (!handle_) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libarkui_ios: %{public}s", dlerror());
+        return nullptr;
+    }
+    return handle_;
+}
+
+void* FindFunction(void* library, const char* name)
+{
+    return dlsym(library, name);
+}
+#elif defined(WINDOWS_PLATFORM)
 #include <windows.h>
 // Here we need to find module where GetArkUINodeAPI()
 // function is implemented.
