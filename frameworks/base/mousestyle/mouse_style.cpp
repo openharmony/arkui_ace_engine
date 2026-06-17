@@ -37,9 +37,11 @@ bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId,
     if (userSetCursor_ && reason == MouseStyleChangeReason::INNER_SET_MOUSESTYLE) {
         return false;
     }
-    if (reason == MouseStyleChangeReason::INNER_SET_MOUSESTYLE &&
-        (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId)) {
-        return false;
+    if (reason == MouseStyleChangeReason::INNER_SET_MOUSESTYLE) {
+        if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId) {
+            return false;
+        }
+        windowIdWithNode_ = windowId;
     }
 
     MouseStyleChangeLog mouseStyleChangeLog;
