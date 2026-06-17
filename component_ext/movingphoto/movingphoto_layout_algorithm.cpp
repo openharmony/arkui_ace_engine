@@ -46,6 +46,7 @@ void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         int32_t childCount = host->GetTotalChildCount();
         CHECK_NULL_VOID(childCount >= 1);
         auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
+        CHECK_NULL_VOID(childLayoutWrapper);
         for (auto&& videoChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
             if (videoChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
                 videoChild->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
