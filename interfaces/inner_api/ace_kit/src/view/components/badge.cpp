@@ -20,6 +20,7 @@
 
 #include "core/components_ng/pattern/badge/badge_data.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
+#include "core/interfaces/native/node/badge_modifier.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/badge/badge_theme.h"
 
@@ -95,7 +96,9 @@ void Badge::SetBadgeParams(BadgeParametersKit& badgeParameters, bool isDefaultFo
     CHECK_NULL_VOID(badgeNode);
     BadgeParameters param;
     SetBadgeBaseParam(param, badgeParameters);
-    NG::BadgeModelNG::SetBadgeParam(badgeNode.GetRawPtr(), param, isDefaultFontSize, isDefaultBadgeSize);
+    auto badgeModifier = NG::NodeModifier::GetBadgeCustomModifier();
+    CHECK_NULL_VOID(badgeModifier);
+    badgeModifier->setBadgeParam(badgeNode.GetRawPtr(), param, isDefaultFontSize, isDefaultBadgeSize);
     if (SystemProperties::ConfigChangePerform()) {
         UpdateBadgeUserFlags(badgeParameters);
         if (badgeParameters.resourceBadgeColorObject) {
@@ -159,7 +162,10 @@ void Badge::HandleBadgeColor(const RefPtr<ResourceObject>& resourceObject)
             auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
             result = badgeTheme->GetBadgeColor();
         }
-        badgePattern->UpdateBadgeColor(result, isFirstLoad);
+        auto customModifier = NG::NodeModifier::GetBadgeCustomModifier();
+        if (customModifier) {
+            customModifier->updateBadgeColor(badgePattern, result, isFirstLoad);
+        }
     };
     badgePattern->AddResObj("badge.Color", resourceObject, std::move(updateFunc));
 }
@@ -188,7 +194,10 @@ void Badge::HandleBadgeTextColor(const RefPtr<ResourceObject>& resourceObject)
             auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
             result = badgeTheme->GetBadgeTextColor();
         }
-        badgePattern->UpdateColor(result, isFirstLoad);
+        auto customModifier = NG::NodeModifier::GetBadgeCustomModifier();
+        if (customModifier) {
+            customModifier->updateColor(badgePattern, result, isFirstLoad);
+        }
     };
     badgePattern->AddResObj("badge.textColor", resourceObject, std::move(updateFunc));
 }

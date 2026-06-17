@@ -86,9 +86,27 @@ ohos_abc("arkqrcode") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkloadingprogress") {
+  sources = [ "./src/arkloadingprogress.ts" ]
+  output_name = "arkloadingprogress"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkbadge") {
+  sources = [ "./src/arkbadge.ts" ]
+  output_name = "arkbadge"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

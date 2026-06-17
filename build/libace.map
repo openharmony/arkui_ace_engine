@@ -875,12 +875,14 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlphaForMaterial(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsColorStrategy(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::ForegroundColorStrategy&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFpNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFpNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionRect(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::DimensionRect&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionVp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool)";
@@ -1579,8 +1581,10 @@
       "OHOS::Ace::NG::NGGestureRecognizer::SetGestureGroup(OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer> const&)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::NodeAnimatableProperty(float const&, std::__h::function<void (float const&)>&&)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Set(float const&)";
+      "OHOS::Ace::NG::NodeModifier::GetBadgeCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetCheckboxCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetLazyGridLayoutCustomModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetLoadingProgressModifier()";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::SetPropertyUnit(OHOS::Ace::PropertyUnit)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Get() const";
       "OHOS::Ace::NG::OverlayManager::AvoidCustomKeyboard(int, float)";
@@ -3413,6 +3417,7 @@
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Ark_Length, double>(Ark_Length const&, OHOS::Ace::DimensionUnit)";
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, double>(Ark_Union_F64_String_Resource const&, OHOS::Ace::DimensionUnit)";
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Opt_Length, double>(Opt_Length const&, OHOS::Ace::DimensionUnit)";
+      "OHOS::Ace::NG::Converter::OptConvertFromF64ResourceStr(Opt_Union_F64_ResourceStr const&, OHOS::Ace::DimensionUnit)";
       "std::__h::vector<OHOS::Ace::Shadow, std::__h::allocator<OHOS::Ace::Shadow>> OHOS::Ace::NG::Converter::Convert<std::__h::vector<OHOS::Ace::Shadow, std::__h::allocator<OHOS::Ace::Shadow>>, Ark_ShadowOptions>(Ark_ShadowOptions const&)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<int, int>(panda::ecmascript::EcmaVM const*, int, int)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState)";
@@ -3633,7 +3638,6 @@
       OHOS::Ace::Animator::*;
       OHOS::Ace::BackEndEventIdManager::*;
       OHOS::Ace::BackgroundImageSize::*;
-      OHOS::Ace::BadgeModel::*;
       OHOS::Ace::Base64Util::Decode*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::BorderImage::*;
@@ -3811,7 +3815,6 @@
       OHOS::Ace::ListItemGroupModel::*;
       OHOS::Ace::ListItemModel::*;
       OHOS::Ace::ListModel::*;
-      OHOS::Ace::LoadingProgressModel::*;
       OHOS::Ace::Localization::*;
       OHOS::Ace::LogWrapper::*;
       "OHOS::Ace::MaskPath::MaskPath()";

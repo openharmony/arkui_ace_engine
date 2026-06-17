@@ -15,12 +15,14 @@
 
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -165,10 +167,9 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 
 void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetLoadingProgressModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createLoadingProgressFrameNode(nodeId);
 }
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
@@ -631,10 +632,9 @@ void* createQRcodeNode(ArkUI_Int32 nodeId)
 
 void* createBadgeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = BadgeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetBadgeModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createBadgeFrameNode(nodeId);
 }
 
 void* createTextClockNode(ArkUI_Int32 nodeId)

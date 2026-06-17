@@ -1196,12 +1196,13 @@ class ArkThemeWhiteList {
 }
 // Keep whiteList sorted A~Z (binary search depends on it).
 ArkThemeWhiteList.whiteList = [
-    'Badge',
     'Button',
     'JSAlphabetIndexer',
+    'JSBadge',
     'JSCounter',
     'JSDataPanel',
     'JSDatePicker',
+    'JSLoadingProgress',
     'JSMenu',
     'JSMenuItem',
     'JSPatternLock',
@@ -1210,7 +1211,6 @@ ArkThemeWhiteList.whiteList = [
     'JSTextClock',
     'JSTextPicker',
     'JSTimePicker',
-    'LoadingProgress',
     'Progress',
     'Scroll',
     'JSSearch',

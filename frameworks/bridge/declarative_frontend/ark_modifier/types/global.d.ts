@@ -67,6 +67,10 @@ interface AlphabetIndexerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface BadgeComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -110,6 +114,10 @@ interface ImageAnimatorComponentModule {
 }
 
 interface LazyVGridLayoutComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface LoadingProgressComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

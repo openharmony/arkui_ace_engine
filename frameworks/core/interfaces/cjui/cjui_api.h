@@ -2612,6 +2612,7 @@ struct CJUIBadgeModifier {
     void (*setBadgeCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeMaxCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*createBadge)(const struct ArkUIBadgeParam* style, const struct ArkUIBadgeJSParam* badgeJSParam);
 };
 
 struct CJUIRefreshModifier {
@@ -2698,13 +2699,15 @@ struct CJUILoadingProgressModifier {
     ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetColor)(ArkUINodeHandle node);
+    void (*resetColor)(ArkUINodeHandle node, bool isJsView);
     ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
     void (*setForegroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr);
-    void (*resetForegroundColor)(ArkUINodeHandle node);
+    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr, bool isJsView);
+    void (*resetForegroundColor)(ArkUINodeHandle node, bool isJsView, void* foregroundColorRawPtr);
+    ArkUINodeHandle (*createLoadingProgressFrameNode)(ArkUI_Uint32 nodeId);
+    void (*createLoadingProgress)();
 };
 
 struct CJUIImageAnimatorModifier {

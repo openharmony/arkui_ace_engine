@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,49 @@
  * limitations under the License.
  */
 
-class LoadingProgressModifier extends ArkLoadingProgressComponent implements AttributeModifier<LoadingProgressAttribute> {
+class LazyArkLoadingProgressComponent extends ArkComponent {
+  static module:  LoadingProgressComponentModule | undefined = undefined;
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
+    if (LazyArkLoadingProgressComponent.module === undefined) {
+      LazyArkLoadingProgressComponent.module =
+          globalThis.requireNapi('arkui.components.arkloadingprogress');
+    }
+    this.lazyComponent =
+        LazyArkLoadingProgressComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  color(value: ResourceColor) {
+    this.lazyComponent.color(value);
+    return this;
+  }
+  enableLoading(value: boolean) {
+    this.lazyComponent.enableLoading(value);
+    return this;
+  }
+  foregroundColor(value: ResourceColor) {
+    this.lazyComponent.foregroundColor(value);
+    return this;
+  }
+  contentModifier(value: ContentModifier<LoadingProgressConfiguration>) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+
+class LoadingProgressModifier extends LazyArkLoadingProgressComponent {
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: LoadingProgressAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<LoadingProgressAttribute, ArkLoadingProgressComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }

@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_badge_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
@@ -43,7 +42,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
@@ -540,6 +538,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "LazyVWaterFlowLayout" },
         { "ColumnSplit" },
         { "RowSplit" },
+        { "Badge" },
         { "Marquee" },
         { "Search" },
         { "Stepper" },
@@ -557,6 +556,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Hyperlink" },
         { "SymbolGlyph" },
         {"Richeditor"},
+        { "LoadingProgress" },
         { "Menu" },
         { "ImageSpan" },
         { "MenuItem" },
@@ -1641,7 +1641,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterListAttributes(object, vm);
     RegisterGridAttributes(object, vm);
     RegisterListItemGroupAttributes(object, vm);
-    RegisterLoadingProgressAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
     RegisterSelectionContainerAttributes(object, vm);
@@ -1658,7 +1657,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #endif
     RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
-    RegisterBadgeAttributes(object, vm);
     RegisterScrollBarAttributes(object, vm);
     RegisterIndicatorComponentAttributes(object, vm);
 #ifdef WEB_SUPPORTED
@@ -3893,26 +3891,6 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 
-void ArkUINativeModule::RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto loadingProgress = panda::ObjectRef::New(vm);
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::SetColor));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::ResetColor));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableLoading"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::SetEnableLoading));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableLoading"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::ResetEnableLoading));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::SetForegroundColor));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::ResetForegroundColor));
-    loadingProgress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadingProgressBridge::SetContentModifierBuilder));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadingProgress"), loadingProgress);
-}
-
 void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto textTimer = panda::ObjectRef::New(vm);
@@ -4052,16 +4030,6 @@ void ArkUINativeModule::RegisterFlexAttributes(Local<panda::ObjectRef> object, E
     flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::ResetFlexInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "flex"), flex);
-}
-
-void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto badge = panda::ObjectRef::New(vm);
-    badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithNumber"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithNumber));
-    badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithString"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithString));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "badge"), badge);
 }
 
 void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -4894,7 +4862,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     if (!isLiteSetRegistered) {
         RegisterArkUINativeModuleFormLite(object, vm);
     }
-    RegisterBadgeAttributes(object, vm);
     RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
@@ -4906,7 +4873,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterLineAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
-    RegisterLoadingProgressAttributes(object, vm);
     RegisterPathAttributes(object, vm);
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);

@@ -37,7 +37,6 @@ class AnimatablePropertyFloat;
 template<typename T, typename S>
 class NodeAnimatableProperty;
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
-const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
 const char REFRESH_ETS_TAG[] = "Refresh";
 
 class RefreshPattern : public NestableScrollContainer {

@@ -37,7 +37,6 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
-#include "bridge/declarative_frontend/jsview/js_badge.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
@@ -86,7 +85,6 @@
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
-#include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
@@ -448,7 +446,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
-    { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
@@ -471,7 +468,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Piece", JSPiece::JSBind },
-    { "Badge", JSBadge::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -530,7 +526,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ListItem", JSListItem::JSBind },
     { "ListItemGroup", JSListItemGroup::JSBind },
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
-    { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
@@ -625,7 +620,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
 #endif
-    { "Badge", JSBadge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
