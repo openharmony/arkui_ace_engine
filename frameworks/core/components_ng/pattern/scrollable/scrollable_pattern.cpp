@@ -4750,6 +4750,11 @@ void ScrollablePattern::OnAttachToMainTree()
     // call OnAttachToMainTreeMultiThread by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
+    if (refreshCoordination_) {
+        if (!refreshCoordination_->IsValid()) {
+            refreshCoordination_->UpdateRefreshNode();
+        }
+    }
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);
     auto enableNestScroll = scrollBarProxy->IsNestScroller();

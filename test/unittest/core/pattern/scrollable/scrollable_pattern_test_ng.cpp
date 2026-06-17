@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
@@ -2205,5 +2207,33 @@ HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree003, TestSize.Level1)
     EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(1);
     scrollablePattern->parent_ = parent;
     scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test ScrollablePattern OnAttachToMainTree can rebind refresh coordination after refresh is inserted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+
+    scrollablePattern->CreateRefreshCoordination();
+    ASSERT_NE(scrollablePattern->refreshCoordination_, nullptr);
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->InCoordination());
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->IsValid());
+
+    auto refreshPattern = AceType::MakeRefPtr<RefreshPattern>();
+    auto refreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 2, refreshPattern);
+    ASSERT_NE(refreshNode, nullptr);
+    scrollNode->MountToParent(refreshNode);
+
+    scrollablePattern->OnAttachToMainTree();
+
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->InCoordination());
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG
