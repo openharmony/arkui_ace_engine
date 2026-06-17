@@ -3408,13 +3408,13 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
 }
 
 template<>
-PickerValueType Convert(const Ark_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_String& src)
 {
     return Converter::Convert<std::string>(src);
 }
 
 template<>
-PickerValueType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_Resource& src)
 {
     auto value = Converter::OptConvert<std::string>(src);
     if (value) {
@@ -3424,20 +3424,20 @@ PickerValueType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerValueType Convert(const Array_ResourceStr& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_ResourceStr& src)
 {
     auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
     return Squash(value);
 }
 
 template<>
-PickerValueType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_String& src)
 {
     return Converter::Convert<std::vector<std::string>>(src);
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3447,7 +3447,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_I32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3596,7 +3596,7 @@ void AssignCast(
 }
 
 template<>
-PickerRangeType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_String& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     std::vector<std::string> tmp;
@@ -3612,7 +3612,7 @@ PickerRangeType Convert(const Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_Array_String& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     std::vector<std::vector<std::string>> tmp;
@@ -3629,7 +3629,7 @@ PickerRangeType Convert(const Array_Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Ark_Resource& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
@@ -3646,7 +3646,7 @@ PickerRangeType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
@@ -3655,7 +3655,7 @@ PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);

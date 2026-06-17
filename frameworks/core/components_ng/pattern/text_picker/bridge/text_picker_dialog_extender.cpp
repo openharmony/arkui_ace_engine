@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/interfaces/native/implementation/text_picker_dialog_extender.h"
+#include "core/components_ng/pattern/text_picker/bridge/text_picker_dialog_extender.h"
 
 #include <functional>
 #include <utility>
 
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/date_picker/picker_model.h"
@@ -26,14 +26,13 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
-#include "core/interfaces/native/implementation/text_picker_modifier.h"
+#include "core/components_ng/pattern/text_picker/bridge/textpicker_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 namespace TextPickerDialogExtender {
-
 std::optional<Converter::PickerValueType> ProcessBindableTextValue(
     const Opt_Union_BindableResourceStr_BindableResourceStrArray& value)
 {

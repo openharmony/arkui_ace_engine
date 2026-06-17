@@ -48,6 +48,7 @@ component_modules = [
   "image_animator",
   "date_picker",
   "lazy_grid_layout",
+  "text_picker",
 ]
 
 if (!ace_engine_feature_wearable) {

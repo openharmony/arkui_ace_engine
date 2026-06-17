@@ -25,6 +25,7 @@
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
@@ -421,10 +422,9 @@ void* createTimePickerNode(ArkUI_Int32 nodeId)
 
 void* createTextPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextPickerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetTextPickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)

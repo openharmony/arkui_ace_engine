@@ -175,6 +175,8 @@ interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
 interface LazyColumnLayoutAttribute extends CommonAttribute {}
 interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
+interface DividerOptions extends CommonAttribute {}
+interface PickerBackgroundStyle extends CommonAttribute {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;

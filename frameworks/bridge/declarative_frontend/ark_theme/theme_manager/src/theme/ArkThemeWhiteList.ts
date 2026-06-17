@@ -32,6 +32,7 @@ class ArkThemeWhiteList {
         'JSQRCode',
         'JSRadio',
         'JSTextClock',
+        'JSTextPicker',
         'JSTimePicker',
         'LoadingProgress',
         'Progress',
@@ -39,7 +40,6 @@ class ArkThemeWhiteList {
         'JSSearch',
         'Swiper',
         'Text',
-        'TextPicker',
     ];
 
     /**

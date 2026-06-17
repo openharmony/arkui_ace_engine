@@ -371,7 +371,7 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_Int32& dst, const Dimension& src);
-    void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
     void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src);
     void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
@@ -449,7 +449,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
     void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx);
-    void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);

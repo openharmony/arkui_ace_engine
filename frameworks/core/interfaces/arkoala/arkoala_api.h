@@ -7930,6 +7930,40 @@ struct ArkUITextPickerModifier {
         const struct ArkUIPickerBackgroundStyleStruct* backgroundStyleStruct);
     void (*getTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUINumberValue* result, ArkUI_Int32 size);
     void (*resetTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node);
+    void (*setTextPickerOnChangeHandler)(ArkUINodeHandle node, void* callback);
+    void (*setTextPickerOnScrollStopHandler)(ArkUINodeHandle node, void* callback);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*createJsSingle)(void* param);
+    void (*createJsMulti)(void* optionsAttr, void* param);
+    void (*setJsDefaultAttributes)();
+    void (*setJsOnValueChangeEvent)(void* onChange);
+    void (*setJsOnSelectedChangeEvent)(void* onChange);
+    ArkUI_Bool (*getCreateSingleRange)();
+    void (*setJsMaxCount)(ArkUI_Uint32 maxCount);
+    void (*setJsSingleRange)(ArkUI_Bool value);
+    void (*setJsSelectedTextStyle)(ArkUINodeHandle node, void* textStyle);
+    void (*setJsDisappearTextStyle)(ArkUINodeHandle node, void* textStyle);
+    void (*setJsNormalTextStyle)(ArkUINodeHandle node, void* textStyle);
+    void (*setJsDefaultTextStyle)(ArkUINodeHandle node, void* textStyle);
+    void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedOpacity)(ArkUINodeHandle node);
+    void (*setJsDivider)(ArkUINodeHandle node, void* divider);
+    void (*getJsSingleRange)(ArkUINodeHandle node, void* rangeValue);
+    void (*setJsSelected)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*setOnEnterSelectedArea)(ArkUINodeHandle node, void* callback);
+    ArkUI_Bool (*isSingle)(ArkUINodeHandle node);
+    ArkUI_Bool (*isJsCascade)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getJsMaxCount)();
+    void (*getJsMultiOptions)(ArkUINodeHandle node, void* options);
+    void (*setJsSelecteds)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 size);
+    void (*setJsHasSelectAttr)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setJsSelectedBackgroundStyle)(ArkUINodeHandle node, void* value);
+    void* (*createObject)();
+    void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+        void* scrollStopEvent, void* enterSelectedAreaEvent, void* textPickerDialog, void* textPickerDialogEvent,
+        void* buttonInfos);
 };
 
 struct ArkUITextTimerModifier {

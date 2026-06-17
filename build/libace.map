@@ -4,6 +4,7 @@
       "bool OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValue<OHOS::Ace::CalcDimension>(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "bool OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValue<OHOS::Ace::Color>(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "bool OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValueNG<OHOS::Ace::Dimension>(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Dimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
+      "bool OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValueNG<OHOS::Ace::CalcDimension>(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "bool OHOS::Ace::ResourceParseUtilsBase::ConvertFromResObjNG<OHOS::Ace::Dimension>(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::Dimension&)";
       "bool OHOS::Ace::SvgAnimate::CreatePropertyAnimate<double>(std::__h::function<void (double)>&&, double const&, OHOS::Ace::RefPtr<OHOS::Ace::Animator> const&)";
       "bool OHOS::Ace::SvgAnimate::CreatePropertyAnimate<OHOS::Ace::Color>(std::__h::function<void (OHOS::Ace::Color)>&&, OHOS::Ace::Color const&, OHOS::Ace::RefPtr<OHOS::Ace::Animator> const&)";
@@ -866,6 +867,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsAngle(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::optional<float>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColor(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColor(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsLengthMetricsToDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Dimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::Color const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&)";
@@ -920,8 +922,13 @@
       "OHOS::Ace::NG::ArkTSUtils::SetSymbolOptionApply(panda::ecmascript::EcmaVM*, std::__h::function<void (OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>&, panda::Local<panda::JSValueRef>)";
       "OHOS::Ace::NG::ArkTSUtils::SetRenderStrategy(panda::JsiRuntimeCallInfo*, unsigned int)";
       "OHOS::Ace::NG::ArkTSUtils::SetToggleBorderRadius(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseLengthMetricsToDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::DimensionUnit)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsIntegerArray(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef>, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsBool(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, bool&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsInteger(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, unsigned int&)";
       "OHOS::Ace::NG::ArkTSUtils::UnwrapNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseStringArray(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>*, int)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateJsResourceWrapper(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CalcHandleLevelMode(OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::RectT<float> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CalculateClippedRect(OHOS::Ace::NG::RectT<float>&)";
@@ -1063,6 +1070,9 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(double&, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(InteropString&, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(Ark_Int32&, uint32_t const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(int&, unsigned int const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(Ark_ResourceStr&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::DatePickerMode, Ark_DatePickerMode>(std::__h::optional<OHOS::Ace::DatePickerMode>&, Ark_DatePickerMode const&)";
@@ -1564,6 +1574,8 @@
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Set(float const&)";
       "OHOS::Ace::NG::NodeModifier::GetCheckboxCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetLazyGridLayoutCustomModifier()";
+      "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::SetPropertyUnit(OHOS::Ace::PropertyUnit)";
+      "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Get() const";
       "OHOS::Ace::NG::OverlayManager::AvoidCustomKeyboard(int, float)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboard(std::__h::function<void ()> const&, int)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboardWithNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int)";
@@ -1704,7 +1716,8 @@
       "OHOS::Ace::NG::PickerColumnPattern::UpdateTextPropertiesLinear(bool, double)";
       "OHOS::Ace::NG::PickerColumnPattern::UpdateToss(double)";
       "OHOS::Ace::NG::PickerColumnPattern::UpdateUserSetSelectColor()";
-      "OHOS::Ace::NG::PickerTextStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PickerTextStyle, Ark_PickerTextStyle>(Ark_PickerTextStyle const&)";
+      "OHOS::Ace::NG::PickerTextStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PickerTextStyle, Ark_PickerTextStyle>(Ark_PickerTextStyle const&)";        
+      "OHOS::Ace::NG::PickerTextStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PickerTextStyle, Ark_TextPickerTextStyle>(Ark_TextPickerTextStyle const&)";
       "OHOS::Ace::NG::PipelineContext::AddAfterLayoutTask(std::__h::function<void ()>&&, bool)";
       "OHOS::Ace::NG::PipelineContext::AddAfterModifierTask(std::__h::function<void ()>&&)";
       "OHOS::Ace::NG::PipelineContext::AddAfterRenderTask(std::__h::function<void ()>&&)";
@@ -1742,6 +1755,7 @@
       "OHOS::Ace::NG::PipelineContext::SendEventToAccessibilityWithNode(OHOS::Ace::AccessibilityEvent const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::PipelineContext::SetCallBackNode(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::PipelineContext::UsingCaretAvoidMode()";
+      "OHOS::Ace::NG::PickerBackgroundStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PickerBackgroundStyle, Ark_PickerBackgroundStyle>(Ark_PickerBackgroundStyle const&)";
       "OHOS::Ace::NG::PlaceholderSpanItem::DumpInfo() const";
       "OHOS::Ace::NG::RecognizerGroup::AddChildren(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>>> const&)";
       "OHOS::Ace::NG::RenderContext::GetHost() const";
@@ -2787,6 +2801,7 @@
       "OHOS::Ace::ResourceManager::GetInstance()";
       "OHOS::Ace::ResourceParseUtils::CompleteResourceObjectFromColor(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::Color&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::ResourceParseUtils::MakeNativeNodeInfo(OHOS::Ace::NG::UINode*)";
+      "OHOS::Ace::ResourceParseUtils::ParseResStrArray(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
       "OHOS::Ace::ResourceParseUtilsBase::CompleteResourceObjectFromColor(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::Color&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::ResourceParseUtilsBase::needReload_";
       "OHOS::Ace::ResourceParseUtilsBase::ParseResBool(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, bool&)";
@@ -3176,6 +3191,8 @@
       "OHOS::Ace::TimeEventProxy::GetInstance()";
       "OHOS::Ace::TimePickerDialogModel::GetInstance()";
       "OHOS::Ace::TimePickerModel::GetInstance()";
+      "OHOS::Ace::TextPickerModel::GetInstance()";
+      "OHOS::Ace::TextPickerDialogModel::GetInstance()";
       "OHOS::Ace::TokenTheme::IsDarkMode()";
       "OHOS::Ace::ToRSCapStyle(OHOS::Ace::LineCap const&)";
       "OHOS::Ace::ToRSColor(OHOS::Ace::Color const&)";
@@ -3362,6 +3379,10 @@
       "OHOS::Ace::V2::WaterFlowComponent::SetScrollBarProxy(OHOS::Ace::RefPtr<OHOS::Ace::ScrollBarProxy> const&)";
       "OHOS::Ace::V2::WINDOW_SCENE_ETS_TAG";
       "OHOS::Ace::VelocityTracker::POINT_NUMBER";
+      "OHOS::Ace::VelocityTracker::Reset()";
+      "OHOS::Ace::VelocityTracker::UpdateTrackerPoint(double, double, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>> const&, bool)";
+      "OHOS::Ace::VelocityTracker::UpdateVelocity()";
+      "OHOS::Ace::VelocityTracker::UpdateTrackerPoint(double, double, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&, bool)";
       "OHOS::Ace::ViewAbstractModel::GetInstance()";
       "OHOS::Ace::ViewStackModel::GetInstance()";
       "panda::Local<panda::JSValueRef> OHOS::Ace::NG::ArkTSUtils::ToJsValueWithVM<std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>>(panda::ecmascript::EcmaVM const*, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>)";
@@ -3369,6 +3390,17 @@
       "SendArkUISyncEvent";
       "std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> OHOS::Ace::NG::Converter::Convert<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, InteropString>(InteropString const&)";
       "std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> OHOS::Ace::NG::Converter::Convert<std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>, InteropString>(InteropString const&)";
+      "std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>, InteropString>(InteropString const&)";
+      "std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>, Ark_Resource>(Ark_Resource const&)";
+      "std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>, Array_ResourceStr>(Array_ResourceStr const&)";
+      "std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>, Array_String>(Array_String const&)";
+      "std::__h::variant<unsigned int, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<unsigned int, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>>, int>(int const&)";
+      "std::__h::variant<unsigned int, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<unsigned int, std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>>, Array_I32>(Array_I32 const&)";
+      "std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>>, Array_String>(Array_String const&)";
+      "std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>>, Array_Array_String>(Array_Array_String const&)";
+      "std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>>, Ark_Resource>(Ark_Resource const&)";
+      "std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>>, Array_TextPickerRangeContent>(Array_TextPickerRangeContent const&)";
+      "std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>> OHOS::Ace::NG::Converter::Convert<std::__h::variant<std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::RangeContent, std::__h::allocator<OHOS::Ace::NG::RangeContent>>>, std::__h::pair<bool, std::__h::vector<OHOS::Ace::NG::TextCascadePickerOptions, std::__h::allocator<OHOS::Ace::NG::TextCascadePickerOptions>>>>, Array_TextCascadePickerRangeContent>(Array_TextCascadePickerRangeContent const&)";
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Ark_Dimension, InteropNumber>(Ark_Dimension const&, OHOS::Ace::DimensionUnit)";
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Ark_Length, double>(Ark_Length const&, OHOS::Ace::DimensionUnit)";
       "std::__h::optional<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, double>(Ark_Union_F64_String_Resource const&, OHOS::Ace::DimensionUnit)";
@@ -3377,6 +3409,7 @@
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<int, int>(panda::ecmascript::EcmaVM const*, int, int)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::Dimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::Dimension, OHOS::Ace::ScrollState)";
+      "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double>(panda::ecmascript::EcmaVM const*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double)";
       "std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>> OHOS::Ace::NG::Converter::Convert<std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>>, Array_DateRange>(Array_DateRange const&)";
       *OHOS::Ace::NG::GeneratedApiImpl::GetContentNode*;
       *OHOS::Ace::NG::GeneratedApiImpl::SetContentNode*;
@@ -4311,6 +4344,7 @@
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
       vtable?for?OHOS::Ace::NG::ToggleButtonPattern;
+      vtable?for?OHOS::Ace::NG::TextPickerModelNG;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;

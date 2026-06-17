@@ -306,6 +306,33 @@ if (globalThis.TimePickerDialog === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.TextPicker === undefined) {
+  globalThis.TextPicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextPicker');
+      const module = globalThis.requireNapi('arkui.components.arktextpicker');
+      module.exportView();
+      getUINativeModule().textpicker.create(params);
+    },
+ 	name: 'JSTextPicker'
+  }
+}
+
+// @ts-ignore
+if (globalThis.TextPickerDialog === undefined) {
+  globalThis.TextPickerDialog = class {
+    static name = 'JSTextPickerDialog'
+    constructor() {}
+    static show(params) {
+      getUINativeModule().loadNativeModule('TextPickerDialog');
+      let module = globalThis.requireNapi('arkui.components.arktextpicker');
+      module.exportViewDialog();
+      getUINativeModule().textPickerDialog.show(params);
+    }
+  }
+}
+
+// @ts-ignore
 if (globalThis.DataPanel === undefined) {
   globalThis.DataPanel = {
     create: function(params) {

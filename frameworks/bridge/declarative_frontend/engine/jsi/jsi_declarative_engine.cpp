@@ -845,6 +845,8 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "ImageAnimator", "arkui.components.arkimageanimator" },
         { "DatePicker", "arkui.components.arkdatepicker" },
         { "DatePickerDialog", "arkui.components.arkdatepicker" },
+        { "TextPicker", "arkui.components.arktextpicker" },
+        { "TextPickerDialog", "arkui.components.arktextpicker" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");

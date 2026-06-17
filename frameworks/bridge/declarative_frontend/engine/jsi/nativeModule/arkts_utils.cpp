@@ -1017,6 +1017,26 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
     }
 }
 
+RefPtr<ResourceWrapper> ArkTSUtils::CreateJsResourceWrapper(
+    const EcmaVM* vm, const Local<JSValueRef>& jsObj, RefPtr<ResourceObject>& resourceObject)
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
+            return nullptr;
+        }
+    } else {
+        themeConstants = GetThemeConstants(vm, jsObj);
+        if (!themeConstants) {
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
 void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
 {
     // dynamic $r raw input format is
@@ -1864,6 +1884,112 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
 {
     RefPtr<ResourceObject> resourceObj;
     return ParseJsLengthMetrics(vm, jsValue, result, resourceObj);
+}
+
+bool ArkTSUtils::ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    CalcDimension& result, RefPtr<ResourceObject>& resourceObj, DimensionUnit unit)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber(vm)->Value(), unit);
+        return true;
+    }
+    if (jsValue->IsString(vm)) {
+        auto value = jsValue->ToString(vm)->ToString(vm);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, unit);
+    }
+    if (jsValue->IsObject(vm)) {
+        auto jsObj = jsValue->ToObject(vm);
+        auto valObj = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+        if (valObj->IsUndefined() || valObj->IsNull()) {
+            return false;
+        }
+        double value = valObj->ToNumber(vm)->Value();
+        auto unit = DimensionUnit::VP;
+        auto jsUnit = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "unit"));
+        if (jsUnit->IsNumber()) {
+            unit = static_cast<DimensionUnit>(jsUnit->ToNumber(vm)->Value());
+        }
+        CalcDimension dimension(value, unit);
+        result = dimension;
+        auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() && !jsRes->IsNull() &&
+            jsRes->IsObject(vm)) {
+            auto jsObjRes = jsRes->ToObject(vm);
+            CompleteResourceObject(vm, jsObjRes);
+            resourceObj = GetResourceObject(vm, jsObjRes);
+        }
+        return true;
+    }
+    return false;
+}
+
+void ArkTSUtils::ParseJsLengthMetricsToDimension(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, RefPtr<ResourceObject>& resourceObj)
+{
+    auto value =  GetProperty(vm, jsValue, "value");
+    if (!value->IsNumber()) {
+        return;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = GetProperty(vm, jsValue, "unit");
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber(vm)->Value());
+    }
+    CalcDimension dimension(value->ToNumber(vm)->Value(), unit);
+    result = dimension;
+    auto jsRes = GetProperty(vm, jsValue, "res");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() && !jsRes->IsNull() && jsRes->IsObject(vm)) {
+        auto jsObjRes = jsRes->ToObject(vm);
+        CompleteResourceObject(vm, jsObjRes);
+        resourceObj = GetResourceObject(vm, jsObjRes);
+    }
+    return;
+}
+
+bool ArkTSUtils::ParseJsBool(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool& result)
+{
+    if (!jsValue->IsBoolean() && !jsValue->IsObject(vm)) {
+        return false;
+    }
+
+    if (jsValue->IsBoolean()) {
+        result = jsValue->ToBoolean(vm)->Value();
+        return true;
+    }
+    int32_t resIdNum;
+    int32_t resType;
+    auto jsObj = jsValue->ToObject(vm);
+    ArkTSUtils::CompleteResourceObject(vm, jsObj);
+    if (jsObj->IsNull() || !GetResourceIdAndType(vm, jsObj, resIdNum, resType)) {
+        return false;
+    }
+    auto resObj = ArkTSUtils::GetResourceObject(vm, jsObj);
+    auto resourceWrapper = ArkTSUtils::CreateJsResourceWrapper(vm, jsValue, resObj);
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = ArkTSUtils::GetProperty(vm, jsObj, "params");
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        auto params = panda::Local<panda::ArrayRef>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
+            result = resourceWrapper->GetBooleanByName(param->ToString(vm)->ToString(vm));
+            return true;
+        }
+        return false;
+    }
+
+    if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
+        result = resourceWrapper->GetBoolean(static_cast<uint32_t>(resIdNum));
+        return true;
+    }
+    return false;
 }
 
 bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
@@ -4540,6 +4666,8 @@ template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<CalcDimension>(
     const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
     const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<CalcDimension>(
+    const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
 
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<CalcDimension>(
     const EcmaVM* vm, CalcDimension&& value);
@@ -4567,6 +4695,8 @@ template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJS
     const EcmaVM*, Dimension, ScrollState);
 template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<int32_t, int32_t>(
     const EcmaVM*, int32_t, int32_t);
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<std::string, double>(
+    const EcmaVM*, std::string, double);
 RefPtr<BasicShape> ArkTSUtils::GetBasicShape(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
     Framework::JSShapeAbstract* jsShapeAbstract =

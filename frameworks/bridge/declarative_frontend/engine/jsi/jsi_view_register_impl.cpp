@@ -138,7 +138,6 @@
 #include "bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
-#include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
@@ -572,12 +571,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Ellipse", JSEllipse::JSBind },
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
-    { "TextPicker", JSTextPicker::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
     { "DepthComponent", JSDepthComponent::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "TextPickerDialog", JSTextPickerDialog::JSBind },
-#endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },

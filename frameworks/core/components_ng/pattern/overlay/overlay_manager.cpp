@@ -36,6 +36,7 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/ng/offset_t.h"
@@ -92,6 +93,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/text_picker/bridge/textpicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
@@ -3339,7 +3341,9 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = TextPickerDialogView::Show(
+    auto* modifier = NG::NodeModifier::GetTextPickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    auto dialogNode = modifier->setTextPickerDialogViewShow(
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
