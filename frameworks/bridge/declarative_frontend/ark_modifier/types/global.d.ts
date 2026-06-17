@@ -157,6 +157,10 @@ interface RowSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface RefreshComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface SearchComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

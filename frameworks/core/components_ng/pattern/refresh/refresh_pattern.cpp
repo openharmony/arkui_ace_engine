@@ -232,7 +232,7 @@ void RefreshPattern::InitOnKeyEvent(const RefPtr<FrameNode>& host)
 void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
-    progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
+    progressChild_ = FrameNode::CreateFrameNode(LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);

@@ -170,9 +170,9 @@ struct NestedScrollOptions {
     NestedScrollMode forward;
     NestedScrollMode backward;
 
-    bool NeedParent() const;
+    ACE_FORCE_EXPORT bool NeedParent() const;
 
-    bool NeedParent(bool forward) const;
+    ACE_FORCE_EXPORT bool NeedParent(bool forward) const;
 
     bool operator==(const NestedScrollOptions& other) const;
 

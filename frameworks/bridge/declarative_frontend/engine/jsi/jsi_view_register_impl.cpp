@@ -111,7 +111,6 @@
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_with_env.h"
-#include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
@@ -673,7 +672,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Refresh", JSRefresh::JSBind },
     { "NativeWaterFlowSection", JSWaterFlowSectionsBinding::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },

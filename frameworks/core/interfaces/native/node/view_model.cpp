@@ -29,6 +29,7 @@
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -78,7 +79,6 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
-#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -308,10 +308,13 @@ void* createArcScrollBarNode(ArkUI_Int32 nodeId)
 
 void* createRefreshNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
+    auto arkUIRefreshModifier = NG::NodeModifier::GetRefreshModifier();
+    CHECK_NULL_RETURN(arkUIRefreshModifier, nullptr);
+    auto arkUINodeHandle = arkUIRefreshModifier->createRefreshFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createRootNode(ArkUI_Int32 nodeId)

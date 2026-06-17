@@ -80,7 +80,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
@@ -569,6 +568,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "DatePicker" },
         { "DatePickerDialog" },
         { "LazyVGridLayout" },
+        { "Refresh" },
         { "TextPicker" },
         { "TextPickerDialog" },
     };
@@ -1644,7 +1644,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterLoadingProgressAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
-    RegisterRefreshAttributes(object, vm);
     RegisterSelectionContainerAttributes(object, vm);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     RegisterPluginAttributes(object, vm);
@@ -2979,44 +2978,6 @@ void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> obj
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabContentOnWillHide"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillHide));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabContent"), tabContent);
-}
-
-void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto refresh = panda::ObjectRef::New(vm);
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRefreshOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetRefreshOffset));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRefreshOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetRefreshOffset));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullToRefresh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullToRefresh));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullToRefresh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullToRefresh));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullUpToCancelRefresh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullUpToCancelRefresh));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullUpToCancelRefresh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullUpToCancelRefresh));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullDownRatio"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullDownRatio));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullDownRatio"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullDownRatio));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnOffsetChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnOffsetChange));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnOffsetChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnOffsetChange));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnStateChange));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnStateChange));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRefreshing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnRefreshing));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRefreshing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnRefreshing));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxPullDownDistance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetMaxPullDownDistance));
-    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxPullDownDistance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetMaxPullDownDistance));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
 }
 
 void ArkUINativeModule::RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

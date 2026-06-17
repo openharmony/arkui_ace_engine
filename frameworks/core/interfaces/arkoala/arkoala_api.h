@@ -7272,6 +7272,21 @@ struct ArkUIRefreshModifier {
     void (*setOnStepOffsetChangeCallback)(ArkUINodeHandle node,
         void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData);
     void (*resetOnStepOffsetChangeCallback)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createRefreshFrameNode)(ArkUI_Uint32 nodeId);
+    void (*initCoordinationEvent)(ArkUINodeHandle node, void* callback);
+    void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
+    void (*resetFriction)(ArkUINodeHandle node);
+    void (*setOnChangeEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetOnChangeEvent)(ArkUINodeHandle node);
+    void (*setBuilder)(ArkUINodeHandle node, void* callback);
+    void (*resetBuilder)(ArkUINodeHandle node);
+    void (*createRefresh)();
+    void (*setIsCustomBuilderExist)(ArkUINodeHandle node, ArkUI_Bool isExist);
+    void (*resetIsCustomBuilderExist)(ArkUINodeHandle node);
+    void (*setLoadingText)(ArkUINodeHandle node, const char* text, ArkUI_VoidPtr resObjRawPtr);
+    void (*resetLoadingText)(ArkUINodeHandle node);
+    void (*setIndicatorOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr);
+    void (*resetIndicatorOffset)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {

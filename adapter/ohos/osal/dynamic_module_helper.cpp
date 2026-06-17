@@ -107,6 +107,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
         { "LazyVGridLayout", "lazygridlayout" },
+        { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
     };

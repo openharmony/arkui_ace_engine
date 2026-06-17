@@ -604,6 +604,7 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimageanimator
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arksymbolspan.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextpicker.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkrefresh.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -675,7 +676,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkProgress.ts @huawei_
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRadio.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRating.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRect.ts @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_component/src/ArkRefresh.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRelativeContainer.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRemoteWindow.ts
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRichEditor.ts @arkui_rich_editor
@@ -1310,8 +1310,6 @@ frameworks/bridge/declarative_frontend/jsview/js_rect_shape.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_recycle_view.cpp
 frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h
-frameworks/bridge/declarative_frontend/jsview/js_refresh.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_refresh.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_relative_container.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_relative_container.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_remote_window.cpp

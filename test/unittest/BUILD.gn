@@ -1780,6 +1780,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_water_flow_modifier.cpp",
     "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_lazy_grid_layout_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/refresh/bridge/mock_node_refresh_modifier.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [
