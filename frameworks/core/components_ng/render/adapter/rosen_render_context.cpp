@@ -9101,6 +9101,7 @@ void RosenRenderContext::SetMaterialWithQualityLevel(
     FREE_RS_CONTEXT_CHECK(SetMaterialWithQualityLevel, materialFilter, quality);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetMaterialWithQualityLevel(materialFilter, static_cast<Rosen::FilterQuality>(quality));
+    RequestNextFrame();
 }
 
 void RosenRenderContext::ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
