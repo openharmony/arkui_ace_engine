@@ -1026,6 +1026,7 @@
       "OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode(int)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, std::__h::optional<OHOS::Ace::NG::LayoutPolicyProperty> const&, OHOS::Ace::Axis)";
+      "OHOS::Ace::NG::ApplyMainAxisExtentByLayoutPolicy(OHOS::Ace::NG::OptionalSize<float>&, OHOS::Ace::NG::LayoutConstraintT<float> const&, std::__h::optional<OHOS::Ace::NG::LayoutPolicyProperty> const&, OHOS::Ace::Axis, float)";
       "OHOS::Ace::NG::ContainerModalPattern::GetContainerModalTitleHeight()";
       "OHOS::Ace::NG::Convert(OHOS::Ace::TextLineMetrics const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_Dimension&, OHOS::Ace::Dimension const&, OHOS::Ace::NG::Converter::ConvContext*)";
@@ -1562,6 +1563,7 @@
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::NodeAnimatableProperty(float const&, std::__h::function<void (float const&)>&&)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Set(float const&)";
       "OHOS::Ace::NG::NodeModifier::GetCheckboxCustomModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetLazyGridLayoutCustomModifier()";
       "OHOS::Ace::NG::OverlayManager::AvoidCustomKeyboard(int, float)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboard(std::__h::function<void ()> const&, int)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboardWithNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int)";
@@ -1976,6 +1978,7 @@
       "OHOS::Ace::NG::SymbolSourceInfo::operator==(OHOS::Ace::NG::SymbolSourceInfo const&) const";
       "OHOS::Ace::NG::SymbolSourceInfo::SymbolSourceInfo()";
       "OHOS::Ace::NG::SymbolSourceInfo::SymbolSourceInfo(unsigned int)";
+      "OHOS::Ace::NG::SetCrossAxisSize(float, OHOS::Ace::Axis, OHOS::Ace::NG::OptionalSize<float>&)";
       "OHOS::Ace::NG::TextAccessibilityProperty::GetChildren(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&) const";
       "OHOS::Ace::NG::TextAccessibilityProperty::GetSubComponentInfo(std::__h::vector<OHOS::Ace::SubComponentInfo, std::__h::allocator<OHOS::Ace::SubComponentInfo>>&) const";
       "OHOS::Ace::NG::TextAccessibilityProperty::GetText() const";
@@ -4165,6 +4168,7 @@
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??PickerTime??long??std????h??optional?OHOS??Ace??PickerTime????long?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??PickerTime??long?long??std????h??optional?OHOS??Ace??PickerTime????long?long?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??Shadow??Ark?ShadowStyle??std????h??optional?OHOS??Ace??Shadow????Ark?ShadowStyle?const??;
+      void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??V2??StickyStyle??Ark?StickyStyle??std????h??optional?OHOS??Ace??V2??StickyStyle????Ark?StickyStyle?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??SliderModel??BlockStyleType??Ark?SliderBlockType??std????h??optional?OHOS??Ace??SliderModel??BlockStyleType????Ark?SliderBlockType?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??SliderModel??SliderInteraction??Ark?SliderInteraction??std????h??optional?OHOS??Ace??SliderModel??SliderInteraction????Ark?SliderInteraction?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??SliderModel??SliderMode??Ark?SliderStyle??std????h??optional?OHOS??Ace??SliderModel??SliderMode????Ark?SliderStyle?const??;

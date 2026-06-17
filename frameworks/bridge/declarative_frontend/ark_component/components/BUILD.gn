@@ -111,6 +111,7 @@ special_components = [
   "arktoggle",
   "arkimageanimator",
   "arkdatepicker",
+  "arklazygridlayout",
 ]
 
 if (qrcodegen_support) {

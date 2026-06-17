@@ -27,8 +27,8 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"

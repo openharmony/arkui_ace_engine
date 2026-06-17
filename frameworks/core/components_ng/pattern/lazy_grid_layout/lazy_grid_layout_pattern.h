@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 
 #include <functional>
 #include <utility>
@@ -23,9 +23,10 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.h"
 
 namespace OHOS::Ace::NG {
+inline constexpr char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 
 class FrameNode;
 class LayoutWrapper;
@@ -145,4 +146,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H

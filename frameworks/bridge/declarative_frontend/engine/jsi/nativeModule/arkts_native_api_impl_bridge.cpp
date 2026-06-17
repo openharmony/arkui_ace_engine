@@ -85,7 +85,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_canvas_bridge.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
@@ -570,6 +569,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "ImageAnimator" },
         { "DatePicker" },
         { "DatePickerDialog" },
+        { "LazyVGridLayout" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1665,7 +1665,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #ifdef WEB_SUPPORTED
     RegisterWebAttributes(object, vm);
 #endif
-    RegisterLazyVGridLayoutAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
 #ifdef WINDOW_SCENE_SUPPORTED
     RegisterEmbeddedComponentAttributes(object, vm);
@@ -4737,43 +4736,6 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
-
-void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto lazyGridLayout = panda::ObjectRef::New(vm);
-    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsGap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetColumnsGap));
-    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsGap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetColumnsGap));
-    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRowsGap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetRowsGap));
-    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsGap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetRowsGap));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyGridLayout"), lazyGridLayout);
-
-    auto lazyVGridLayout = panda::ObjectRef::New(vm);
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsTemplate"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::SetColumnsTemplate));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::ResetColumnsTemplate));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetSticky));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetSticky));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeader"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetHeader));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeader"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetHeader));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFooter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetFooter));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFooter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetFooter));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleIndexesChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetOnVisibleIndexesChange));
-    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleIndexesChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetOnVisibleIndexesChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyVGridLayout"), lazyVGridLayout);
-}
 
 void ArkUINativeModule::RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

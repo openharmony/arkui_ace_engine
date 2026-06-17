@@ -109,6 +109,10 @@ interface ImageAnimatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface LazyVGridLayoutComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

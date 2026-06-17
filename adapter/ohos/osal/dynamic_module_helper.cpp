@@ -106,6 +106,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ImageAnimator", "imageanimator" },
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
+        { "LazyVGridLayout", "lazygridlayout" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

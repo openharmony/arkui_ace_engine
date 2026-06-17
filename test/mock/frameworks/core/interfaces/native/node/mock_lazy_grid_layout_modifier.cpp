@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LAZY_GRID_LAYOUT_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LAZY_GRID_LAYOUT_MODIFIER_H
-
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/lazy_grid_layout/bridge/lazy_grid_layout_custom_modifier.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 
-namespace OHOS::Ace::NG::NodeModifier {
-const ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier();
-ACE_FORCE_EXPORT const ArkUILazyGridLayoutCustomModifier* GetLazyGridLayoutCustomModifier();
+namespace OHOS::Ace::NG {
+void* GetLazyGridLayoutPattern()
+{
+    auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+    pattern->IncRefCount();
+    return AceType::RawPtr(pattern);
 }
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LAZY_GRID_LAYOUT_MODIFIER_H
+namespace NodeModifier {
+const ArkUILazyGridLayoutCustomModifier* GetLazyGridLayoutCustomModifier()
+{
+    static const ArkUILazyGridLayoutCustomModifier modifier = {
+        .getLazyGridLayoutPattern = GetLazyGridLayoutPattern,
+    };
+    return &modifier;
+}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

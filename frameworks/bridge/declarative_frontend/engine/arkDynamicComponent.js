@@ -576,3 +576,17 @@ if (globalThis.DatePickerDialog === undefined) {
     }
   }
 }
+
+// @ts-ignore
+if (globalThis.LazyVGridLayout === undefined) {
+  globalThis.LazyVGridLayout = {
+    create: function () {
+      getUINativeModule().loadNativeModule('LazyVGridLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazygridlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyVGridLayout.create();
+    },
+    name: 'JSLazyVGridLayout'
+  };
+}

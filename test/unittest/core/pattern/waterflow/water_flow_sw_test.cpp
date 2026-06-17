@@ -20,7 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"

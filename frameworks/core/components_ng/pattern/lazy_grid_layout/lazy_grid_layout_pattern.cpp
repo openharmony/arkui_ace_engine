@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 
@@ -28,6 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const char WATERFLOW_ETS_TAG[] = "WaterFlow";
 
 LazyGridLayoutPattern::~LazyGridLayoutPattern() = default;
 
@@ -351,7 +352,7 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() == V2::WATERFLOW_ETS_TAG || LazyLayoutUtils::IsVerticalScrollableParent(parent)) {
+        if (parent->GetTag() == WATERFLOW_ETS_TAG || LazyLayoutUtils::IsVerticalScrollableParent(parent)) {
             return;
         }
         LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -21,14 +21,14 @@
 
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/utils.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
-#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG {
 
@@ -330,7 +330,7 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
     headerAdjustOffset_ = 0.0f;
     if (!posRef.has_value()) {
         posRef = LazyLayoutUtils::GetViewPosReference(layoutWrapper->GetHostNode(),
-            { V2::LAZY_V_GRID_LAYOUT_ETS_TAG });
+            { LAZY_V_GRID_LAYOUT_ETS_TAG });
     }
     if (!posRef.has_value() || posRef.value().axis != axis_) {
         needAllLayout_ = true;
