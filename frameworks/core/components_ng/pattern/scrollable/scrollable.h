@@ -69,6 +69,7 @@ using BackToTopCallback = std::function<bool()>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
+using IsRefreshScrollCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
 using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
@@ -371,6 +372,11 @@ public:
     void SetIsReverseCallback(const IsReverseCallback& isReverseCallback)
     {
         isReverseCallback_ = isReverseCallback;
+    }
+
+    void SetIsRefreshScrollCallback(IsRefreshScrollCallback&& isRefreshScrollCallback)
+    {
+        isRefreshScrollCallback_ = std::move(isRefreshScrollCallback);
     }
 
     void OnAnimateStop();
@@ -836,6 +842,7 @@ private:
 
     DragFRCSceneCallback dragFRCSceneCallback_;
     FixScrollParamCallback fixScrollParamCallback_;
+    IsRefreshScrollCallback isRefreshScrollCallback_;
     uint64_t lastVsyncTime_ = 0;
     uint64_t lastAxisVsyncTime_ = 0; // only used in mouse wheel scenes
     AnimationState state_ = AnimationState::IDLE;

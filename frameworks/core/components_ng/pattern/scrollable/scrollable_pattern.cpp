@@ -820,6 +820,17 @@ void ScrollablePattern::SetIsReverseCallback(const RefPtr<Scrollable>& scrollabl
     });
 }
 
+void ScrollablePattern::SetIsRefreshScrollCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetIsRefreshScrollCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->refreshCoordination_ && pattern->refreshCoordination_->InCoordination() &&
+               pattern->isRefreshInReactive_;
+    });
+}
+
 void ScrollablePattern::SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
@@ -1058,6 +1069,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetHandleExtScrollCallback(scrollable);
     SetOverScrollCallback(scrollable);
     SetIsReverseCallback(scrollable);
+    SetIsRefreshScrollCallback(scrollable);
     SetOnScrollStartRec(scrollable);
     SetOnScrollEndRec(scrollable);
     SetScrollEndCallback(scrollable);
