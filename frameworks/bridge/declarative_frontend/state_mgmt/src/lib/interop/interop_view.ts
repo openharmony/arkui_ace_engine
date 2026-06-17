@@ -124,16 +124,17 @@ function findProviderForInterop(checkView: IView, aliasName: string): [ViewV2, s
 function findDynamicProvider(
     dynamicComponent: ViewV2,
     providerName: string,
-    createStaticProvider: <T>(value: T, viewV2: Object) => Object
+    createStaticProvider: <T>(value: T, viewV2: Object, varName: string) => Object
 ): Object | undefined {
     const providerInfo = findProviderForInterop(dynamicComponent, providerName);
     if (providerInfo === undefined) {
         return undefined;
     }
-    const viewV2 = providerInfo[0]; // assume varName is the same?
-    const interopAliasKey = makeInteropAliasKey(providerName);
+    const viewV2 = providerInfo[0];
+    const varName = providerInfo[1];
+    const interopAliasKey = makeInteropAliasKey(varName);
     if (viewV2[interopAliasKey] === undefined) {
-        Object.getPrototypeOf(viewV2)[interopAliasKey] = createStaticProvider(viewV2[providerName], viewV2); // need register
+        Object.getPrototypeOf(viewV2)[interopAliasKey] = createStaticProvider(viewV2[varName], viewV2, varName);
     }
     return viewV2[interopAliasKey];
 }
