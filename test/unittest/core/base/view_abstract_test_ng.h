@@ -46,7 +46,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_mode.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_string.h"

@@ -245,6 +245,11 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_imageanimator"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_checkbox"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -281,6 +286,11 @@ common_bin = [
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_containerreader"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_span"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -331,6 +341,11 @@ common_bin = [
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_toggle"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_datepicker"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

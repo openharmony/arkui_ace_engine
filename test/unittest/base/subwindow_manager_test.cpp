@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -371,5 +372,49 @@ HWTEST_F(SubwindowManagerTest, SubwindowTipsAllowedWithMainParent001, TestSize.L
     auto parentContainerId = manager->GetParentContainerId(SUB_CONTAINER_ID);
     bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
     EXPECT_FALSE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_ShowDialogNGCallbackOnError001
+ * @tc.desc: Test ShowDialogNG triggers callback with error code when subwindow creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ShowDialogNGCallbackOnError001, TestSize.Level1)
+{
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    DialogProperties dialogProps;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
+    };
+
+    auto dialogNode = manager->ShowDialogNG(dialogProps, nullptr, std::move(callback));
+    EXPECT_EQ(dialogNode, nullptr);
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_OpenCustomDialogNGCallbackOnError001
+ * @tc.desc: Test OpenCustomDialogNG triggers callback with error code when subwindow creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, OpenCustomDialogNGCallbackOnError001, TestSize.Level1)
+{
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    DialogProperties dialogProps;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
+    };
+    manager->OpenCustomDialogNG(dialogProps, std::move(callback));
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
 }
 }

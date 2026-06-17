@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_badge.h"
@@ -50,7 +51,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_distortion_component.h"
 #include "bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
@@ -71,8 +71,6 @@
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
-#include "bridge/declarative_frontend/jsview/js_image_animator.h"
-#include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
@@ -134,7 +132,6 @@
 #include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -486,7 +483,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
     { "CanvasGradient", JSCanvasGradient::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -500,7 +496,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     { "FormButton", JSFormButton::JSBind },
 #endif
-    { "SymbolSpan", JSSymbolSpan::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
@@ -541,7 +536,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -585,10 +579,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DepthComponent", JSDepthComponent::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
-#endif
-    { "DatePicker", JSDatePicker::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "DatePickerDialog", JSDatePickerDialog::JSBind },
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
@@ -697,7 +687,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
-    { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "Component3D", JSSceneView::JSBind },
@@ -742,7 +731,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
-    { "SymbolSpan", JSSymbolSpan::JSBind },
     { "ContainerSpan",  JSContainerSpan::JSBind},
     { "__RectShape__", JSRectShape::JSBind },
     { "__CircleShape__", JSCircleShape::JSBind },

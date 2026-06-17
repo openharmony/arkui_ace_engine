@@ -15,6 +15,7 @@
 
 #include "ui/base/utils/utils.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 

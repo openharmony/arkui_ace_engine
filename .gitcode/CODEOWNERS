@@ -599,11 +599,14 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts 
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkpatternlock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkqrcode.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextclock.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimageanimator.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arksymbolspan.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkslider.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimagespan.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkcolumnsplit.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arkrowsplit.js @arkuilayout1
@@ -642,8 +645,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkGridItem.ts @arkuisc
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridRow.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGrid.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkHyperlink.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @arkui001
-frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyWaterFlowLayout.ts @arkuiscroll
@@ -694,7 +695,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkStepperItem.ts @arku
 frameworks/bridge/declarative_frontend/ark_component/src/ArkStepper.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSwiper.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolGlyph.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolSpan.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTabContent.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTabs.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextArea.ts @huawei_g_five
@@ -949,8 +949,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_coun
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.cpp @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.cpp @arkuilayout1
@@ -1061,8 +1059,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swip
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.cpp @arkui_navigation
@@ -1164,7 +1160,6 @@ frameworks/bridge/declarative_frontend/jsview/js_data_change_listener.h @arkuiec
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_datepicker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_depth_component.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_depth_component.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_divider.cpp @arkuilayout1
@@ -1211,12 +1206,8 @@ frameworks/bridge/declarative_frontend/jsview/js_hyperlink.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_if_else.h @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/js_image_animator.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_image_animator.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image.h @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_image_span.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_image_span.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_indexer.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_indexer.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_indicator.cpp @arkui_navigation
@@ -1382,8 +1373,6 @@ frameworks/bridge/declarative_frontend/jsview/js_swiper.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_symbol.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol_modifier.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_symbol_span.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_tab_content.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_tab_content.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.cpp @arkui_navigation
@@ -2508,6 +2497,7 @@ frameworks/core/components_ng/pattern/custom/ @arkuilayout1
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
+frameworks/core/components_ng/pattern/date_picker/ @arkui001
 frameworks/core/components_ng/pattern/depth_component/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
@@ -2594,7 +2584,6 @@ frameworks/core/components_ng/pattern/panel/ @arkuicodepulse
 frameworks/core/components_ng/pattern/particle/ @arkuicodepulse
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @huawei_g_five
-frameworks/core/components_ng/pattern/picker/ @arkui001
 frameworks/core/components_ng/pattern/picker_utils/ @arkui001
 frameworks/core/components_ng/pattern/plugin/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/preview_mock/ @arkuilayout1
@@ -2649,6 +2638,7 @@ frameworks/core/components_ng/pattern/stepper/ @arkui_navigation
 frameworks/core/components_ng/pattern/swiper/ @arkui_navigation
 frameworks/core/components_ng/pattern/swiper_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/symbol/ @huawei_g_five
+frameworks/core/components_ng/pattern/symbol_span/ @huawei_g_five
 frameworks/core/components_ng/pattern/tabs/ @arkui_navigation
 frameworks/core/components_ng/pattern/text_area/ @huawei_g_five
 frameworks/core/components_ng/pattern/text/ @huawei_g_five
@@ -3115,6 +3105,8 @@ frameworks/core/interfaces/native/utility/error_message_macros.h @arkui_framewor
 frameworks/core/interfaces/native/utility/error_message_manager.h @arkui_framework_xnode
 frameworks/core/interfaces/native/utility/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/BUILD.gn @arkui_architecture
+interfaces/native/node_attributes/embedded_component.h @ArkUI_ability_group
+interfaces/native/node_attributes/xcomponent.h @ArkUI_ability_group
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
 interfaces/native/event/drag_and_drop_impl.cpp @ArkUI_Event
@@ -3241,6 +3233,7 @@ interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h @arkuicodepulse
 interfaces/inner_api/ace_kit/src/ @arkui_framework_xnode
+interfaces/inner_api/ace_kit/src/view/components/symbol.cpp @huawei_g_five
 
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkuicodepulse
@@ -3834,6 +3827,7 @@ test/unittest/core/base/simplified_inspector_test_ng.cpp @arkui_framework_xnode
 test/unittest/interfaces/ @arkui_framework_xnode
 test/unittest/interfaces/drawable_descriptor_test.cpp @arkui001
 test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
+test/unittest/interfaces/ace_kit/symbol_test.cpp @huawei_g_five
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework

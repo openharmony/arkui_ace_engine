@@ -42,6 +42,9 @@ public:
         return -1;
     }
 
+    // Called when popup node is being removed via RemoveChildWithService
+    virtual void OnRemoveChild(const RefPtr<FrameNode>& node) {}
+
 protected:
     bool AvoidKeyboard() const override
     {

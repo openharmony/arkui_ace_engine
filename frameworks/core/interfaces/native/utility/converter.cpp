@@ -28,6 +28,7 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
@@ -38,8 +39,8 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/picker/picker_date.h"
-#include "core/components_ng/pattern/picker/picker_time.h"
+#include "core/components_ng/pattern/date_picker/picker_date.h"
+#include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
@@ -2461,7 +2462,8 @@ template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Op
     const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)

@@ -34,6 +34,7 @@
 #undef private
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "ui/animation/animation_option.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -207,6 +208,83 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetSecondChildStart001, TestSize.L
     MarqueePattern marqueeModel;
     auto start = marqueeModel.GetSecondChildStart();
     EXPECT_EQ(start, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_NormalizeDoubleAnimationPhase001
+ * @tc.desc: Test double-text animation phase normalization.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_NormalizeDoubleAnimationPhase001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    EXPECT_FLOAT_EQ(marqueeModel.NormalizeDoubleAnimationPhase(-25.0f, 100.0f, true), 25.0f);
+    EXPECT_FLOAT_EQ(marqueeModel.NormalizeDoubleAnimationPhase(125.0f, 100.0f, true), 75.0f);
+    EXPECT_FLOAT_EQ(marqueeModel.NormalizeDoubleAnimationPhase(25.0f, 100.0f, false), 25.0f);
+    EXPECT_FLOAT_EQ(marqueeModel.NormalizeDoubleAnimationPhase(-125.0f, 100.0f, false), 75.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetDoubleAnimationOffsetByPhase001
+ * @tc.desc: Test phase-based double-text offsets.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetDoubleAnimationOffsetByPhase001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto leftOffset = marqueeModel.GetDoubleAnimationOffsetByPhase(25.0f, 100.0f, true);
+    EXPECT_FLOAT_EQ(leftOffset.first, -25.0f);
+    EXPECT_FLOAT_EQ(leftOffset.second, 75.0f);
+
+    auto rightOffset = marqueeModel.GetDoubleAnimationOffsetByPhase(25.0f, 100.0f, false);
+    EXPECT_FLOAT_EQ(rightOffset.first, 25.0f);
+    EXPECT_FLOAT_EQ(rightOffset.second, -75.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CreateAnimationOptions001
+ * @tc.desc: Test double-text animation starts moving immediately when phase is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CreateAnimationOptions001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto param = marqueeModel.CreateAnimationParam(true, 0.0f, 25, -120.0f, 3);
+    param.zero = -120.0f;
+    param.secondStart = 120.0f;
+    param.secondZero = 0.0f;
+    param.secondEnd = 0.0f;
+    AnimationOption option;
+    marqueeModel.CreateAnimationOptions(param, 10.0, option);
+
+    EXPECT_EQ(param.firstDuration, 1020);
+    EXPECT_EQ(param.secondDuration, 0);
+    EXPECT_EQ(param.totalDuration, 1045);
+    EXPECT_EQ(option.GetDuration(), 1045);
+    EXPECT_EQ(option.GetIteration(), 3);
+}
+
+/**
+ * @tc.name: MarqueePattern_CreateAnimationOptions002
+ * @tc.desc: Test delay is inserted when the marquee reaches offset zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CreateAnimationOptions002, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto param = marqueeModel.CreateAnimationParam(true, -25.0f, 25, -125.0f, 3);
+    param.zero = -100.0f;
+    param.secondStart = 75.0f;
+    param.secondZero = 0.0f;
+    param.secondEnd = -25.0f;
+    AnimationOption option;
+    marqueeModel.CreateAnimationOptions(param, 10.0, option);
+
+    EXPECT_EQ(param.firstDuration, 637);
+    EXPECT_EQ(param.secondDuration, 212);
+    EXPECT_EQ(param.totalDuration, 874);
+    EXPECT_EQ(option.GetDuration(), 874);
+    EXPECT_EQ(option.GetIteration(), 3);
 }
 
 /**

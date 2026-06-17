@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/picker/picker_checkbox_setting.h"
+#include "core/components_ng/pattern/date_picker/picker_checkbox_setting.h"
 namespace OHOS::Ace::NG {
 class CheckBoxGroupPaintProperty;
 class GroupManager;

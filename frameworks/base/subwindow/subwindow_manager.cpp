@@ -852,6 +852,26 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
+
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
+    std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
+    if (!subwindow) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "fail to create subwindow for dialog");
+        if (callback) {
+            callback(ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, -1);
+        }
+        return nullptr;
+    }
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
+    return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc), std::move(callback));
+}
+
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
     const RefPtr<NG::UINode>& customNode)
 {
@@ -891,6 +911,21 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_VOID(subwindow);
+    return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
+}
+
+void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng with error callback enter");
+    auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
+    if (!subwindow) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "fail to create subwindow for custom dialog");
+        if (callback) {
+            callback(ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, -1);
+        }
+        return;
+    }
     return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
 }
 

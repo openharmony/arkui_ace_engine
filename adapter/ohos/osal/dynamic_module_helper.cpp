@@ -93,6 +93,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "StepperItem", "stepper" },
         { "SymbolGlyph", "symbol" },
         { "TimePicker", "timepicker" },
+        { "ImageSpan", "span" },
+        { "SymbolSpan", "span" },
         { "TimePickerDialog", "timepicker" },
         { "WaterFlow", "waterflow" },
         { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
@@ -101,6 +103,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "ImageAnimator", "imageanimator" },
+        { "DatePicker", "datepicker" },
+        { "DatePickerDialog", "datepicker" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

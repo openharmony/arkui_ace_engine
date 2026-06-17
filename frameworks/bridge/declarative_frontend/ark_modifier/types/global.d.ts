@@ -105,6 +105,10 @@ interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ImageAnimatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -141,6 +145,10 @@ interface RichEditorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ImageSpanComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface RowSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -169,6 +177,10 @@ interface SymbolGlyphComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface SymbolSpanComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface TextClockComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -187,4 +199,8 @@ interface WaterFlowComponentModule {
 
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
+}
+
+interface DatePickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

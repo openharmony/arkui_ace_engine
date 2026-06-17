@@ -73,7 +73,6 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -100,7 +99,6 @@ private:
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
     static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterWebAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterImageAnimatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -120,7 +118,6 @@ private:
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSymbolSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard start

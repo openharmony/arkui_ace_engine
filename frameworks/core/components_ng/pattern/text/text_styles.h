@@ -321,6 +321,8 @@ struct SymbolStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsFontColorResource, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColorResource, std::vector<RefPtr<ResourceObject>>);
 
     void AddResource(
         const std::string& key,

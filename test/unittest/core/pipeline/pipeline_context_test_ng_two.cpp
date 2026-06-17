@@ -20,6 +20,7 @@
 #include "core/common/event_manager.h"
 
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -2799,6 +2800,57 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
         context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
         ASSERT_TRUE(std::chrono::high_resolution_clock::now() - currentTime < timeoutMs);
     }
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
+}
+
+/**
+ * @tc.name: PipelineContextTouchOptimizerNotifiedFalseTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent calls ResSchedReport when touchOptimizer reports not notified
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedFalseTest001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
+}
+
+/**
+ * @tc.name: PipelineContextTouchOptimizerNotifiedTrueTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent skips ResSchedReport when touchOptimizer reports already notified
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedTrueTest001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    const auto& touchOptimizer = context_->GetTouchOptimizer();
+    if (touchOptimizer) {
+        touchOptimizer->SetTouchDownNotifiedToClick(true);
+    }
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
     EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
 } // namespace NG

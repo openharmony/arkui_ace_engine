@@ -24,7 +24,7 @@
 
 #include "ui/base/referenced.h"
 
-#include "core/components_ng/pattern/picker/picker_time.h"
+#include "core/components_ng/pattern/date_picker/picker_time.h"
 
 struct Ark_TimePickerDialogOptions;
 namespace OHOS::Ace {
@@ -87,6 +87,7 @@ struct TimepickerCustomModifier {
         std::map<std::string, std::function<void(const GestureEvent& info)>> dialogCancelEvent);
 };
 
+const TimepickerCustomModifier* GetTimePickerCustomModifier();
 struct ArkUITimePickerDialogModifier {
     void (*showTimePickerDialog)(const Ark_TimePickerDialogOptions* options);
 };

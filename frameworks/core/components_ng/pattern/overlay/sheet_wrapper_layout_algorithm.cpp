@@ -149,8 +149,12 @@ void SheetWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     sheetLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
-    auto childConstraint = layoutProp->CreateChildConstraint();
-    child->Measure(childConstraint);
+    if (sheetWrapperPattern->GetSheetECNode()) {
+        MeasureSheetEC(layoutWrapper);
+    } else {
+        auto childConstraint = layoutProp->CreateChildConstraint();
+        child->Measure(childConstraint);
+    }
     GetSheetPageSize(layoutWrapper);
     MeasureSheetMask(layoutWrapper);
 }
@@ -174,6 +178,27 @@ void SheetWrapperLayoutAlgorithm::MeasureSheetMask(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProp);
     auto constraint = layoutProp->CreateChildConstraint();
     maskWrapper->Measure(constraint);
+}
+
+void SheetWrapperLayoutAlgorithm::MeasureSheetEC(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+ 
+    auto sheetECNode = sheetWrapperPattern->GetSheetECNode();
+    CHECK_NULL_VOID(sheetECNode);
+    auto index = host->GetChildIndexById(sheetECNode->GetId());
+    auto sheetECWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(sheetECWrapper);
+    auto layoutProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    auto constraint = layoutProp->CreateChildConstraint();
+    auto layoutPropEC = sheetECWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutPropEC);
+    layoutPropEC->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    sheetECWrapper->Measure(constraint);
 }
 
 void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
@@ -1065,10 +1090,14 @@ void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             sheetPopupInfo_.sheetOffsetX, sheetPopupInfo_.sheetOffsetY, sheetWidth_, sheetHeight_);
         RemeasureForPopup(layoutWrapper);
     }
-    auto index = host->GetChildIndexById(sheetPageNode->GetId());
-    auto sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(sheetPageWrapper);
-    sheetPageWrapper->Layout();
+    if (sheetWrapperPattern->GetSheetECNode()) {
+        LayoutECNode(layoutWrapper);
+    } else {
+        auto index = host->GetChildIndexById(sheetPageNode->GetId());
+        auto sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(sheetPageWrapper);
+        sheetPageWrapper->Layout();
+    }
     LayoutMaskNode(layoutWrapper);
 }
 
@@ -1110,6 +1139,20 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
     maskWrapper->Layout();
 }
 
+void SheetWrapperLayoutAlgorithm::LayoutECNode(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto sheetECNode = sheetWrapperPattern->GetSheetECNode();
+    CHECK_NULL_VOID(sheetECNode);
+    auto index = host->GetChildIndexById(sheetECNode->GetId());
+    auto sheetECWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(sheetECWrapper);
+    sheetECWrapper->Layout();
+}
+
 void SheetWrapperLayoutAlgorithm::RemeasureForPopup(LayoutWrapper* layoutWrapper)
 {
     UpdateSheetNodePopupInfo(layoutWrapper);
@@ -1133,8 +1176,19 @@ void SheetWrapperLayoutAlgorithm::UpdateSheetNodePopupInfo(LayoutWrapper* layout
     CHECK_NULL_VOID(sheetWrapperPattern);
     auto sheetNode = sheetWrapperPattern->GetSheetPageNode();
     CHECK_NULL_VOID(sheetNode);
-    auto index = host->GetChildIndexById(sheetNode->GetId());
-    auto sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    RefPtr<LayoutWrapper> sheetPageWrapper;
+    if (sheetWrapperPattern->GetSheetECNode()) {
+        auto sheetECNode = sheetWrapperPattern->GetSheetECNode();
+        CHECK_NULL_VOID(sheetECNode);
+        auto indexEC = host->GetChildIndexById(sheetECNode->GetId());
+        auto sheetECWrapper = layoutWrapper->GetOrCreateChildByIndex(indexEC);
+        CHECK_NULL_VOID(sheetECWrapper);
+        auto index = sheetECNode->GetChildIndexById(sheetNode->GetId());
+        sheetPageWrapper = sheetECWrapper->GetOrCreateChildByIndex(index);
+    } else {
+        auto index = host->GetChildIndexById(sheetNode->GetId());
+        sheetPageWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    }
     CHECK_NULL_VOID(sheetPageWrapper);
     auto sheetPageNode = sheetPageWrapper->GetHostNode();
     CHECK_NULL_VOID(sheetPageNode);

@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <string>
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"

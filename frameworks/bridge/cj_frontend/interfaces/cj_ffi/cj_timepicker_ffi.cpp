@@ -22,7 +22,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 

@@ -325,7 +325,7 @@ void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerTy
 }
 
 template<>
-void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
 {
     switch (src) {
         case ARK_IMAGE_FIT_CONTAIN: dst = ImageFit::CONTAIN; break;
@@ -392,7 +392,7 @@ void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
 }
 
 template<>
-void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
 {
     switch (src) {
         case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP:
@@ -2583,7 +2583,7 @@ void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_Dist
 }
 
 template<>
-void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
 {
     switch (src) {
         case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;

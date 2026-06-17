@@ -21,6 +21,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/syntax/with_env_node.h"
 #include "core/pipeline_ng/environment_manager.h"
@@ -31,6 +32,7 @@ namespace {
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_LTR = 0;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_RTL = 1;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_AUTO = 2;
+constexpr char DIRECTION_ENUM_NAME[] = "arkui.component.enums.Direction";
 
 RefPtr<UINode> GetUINode(ArkUINodeHandle node)
 {
@@ -60,6 +62,20 @@ RefPtr<EnvironmentManager> GetEnvironmentManager(const RefPtr<UINode>& node)
     return pipeline->GetEnvironmentManager();
 }
 
+std::optional<ArkUI_Int32> ConvertDirectionToFrontendValue(TextDirection value)
+{
+    switch (value) {
+        case TextDirection::LTR:
+            return FRONTEND_DIRECTION_LTR;
+        case TextDirection::RTL:
+            return FRONTEND_DIRECTION_RTL;
+        case TextDirection::AUTO:
+            return FRONTEND_DIRECTION_AUTO;
+        default:
+            return std::nullopt;
+    }
+}
+
 std::optional<TextDirection> ConvertDirection(ArkUI_Int32 value)
 {
     switch (value) {
@@ -74,18 +90,17 @@ std::optional<TextDirection> ConvertDirection(ArkUI_Int32 value)
     }
 }
 
-std::optional<double> ConvertDirectionToFrontendValue(TextDirection value)
+std::optional<SystemEnvValue> ConvertSystemEnvValue(const std::string& key, const ArkUIAniSystemEnvValue& value)
 {
-    switch (value) {
-        case TextDirection::LTR:
-            return FRONTEND_DIRECTION_LTR;
-        case TextDirection::RTL:
-            return FRONTEND_DIRECTION_RTL;
-        case TextDirection::AUTO:
-            return FRONTEND_DIRECTION_AUTO;
-        default:
-            return std::nullopt;
+    if (key == ENV_KEY_DIRECTION && value.type == ARKUI_ANI_ENV_VALUE_TYPE_ENUM) {
+        auto direction = ConvertDirection(value.intValue);
+        CHECK_NULL_RETURN(direction, std::nullopt);
+        return SystemEnvValue::FromDirection(*direction);
     }
+    if (key == ENV_KEY_FONT_SCALE && value.type == ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE) {
+        return SystemEnvValue::FromDouble(value.doubleValue);
+    }
+    return std::nullopt;
 }
 
 void FillCustomQueryResult(const std::any* value, ArkUIAniEnvironmentQueryResult& outResult)
@@ -103,13 +118,14 @@ bool FillSystemQueryResult(const SystemEnvValue* value, ArkUIAniEnvironmentQuery
     if (auto direction = value->GetDirection()) {
         auto frontendValue = ConvertDirectionToFrontendValue(*direction);
         CHECK_NULL_RETURN(frontendValue, false);
-        outResult.type = ARKUI_ANI_ENV_VALUE_TYPE_NUMBER;
-        outResult.numberValue = *frontendValue;
+        outResult.type = ARKUI_ANI_ENV_VALUE_TYPE_ENUM;
+        outResult.intValue = *frontendValue;
+        outResult.enumName = DIRECTION_ENUM_NAME;
         return true;
     }
     if (auto fontScale = value->GetDouble()) {
-        outResult.type = ARKUI_ANI_ENV_VALUE_TYPE_NUMBER;
-        outResult.numberValue = *fontScale;
+        outResult.type = ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE;
+        outResult.doubleValue = *fontScale;
         return true;
     }
     return false;
@@ -139,29 +155,17 @@ void RemoveSystemEnvProperty(ArkUINodeHandle node, const std::string& key)
     withEnvNode->RemoveSystemEnvProperty(key);
 }
 
-void SetSystemEnvProperty(ArkUINodeHandle node, const std::string& key, double value)
+void SetSystemEnvProperty(ArkUINodeHandle node, const std::string& key, ArkUIAniSystemEnvValue value)
 {
     auto withEnvNode = GetWithEnvNode(node);
     CHECK_NULL_VOID(withEnvNode);
-    SystemEnvValue envValue;
-    if (key == ENV_KEY_DIRECTION) {
-        auto directionValue = static_cast<ArkUI_Int32>(value);
-        if (static_cast<double>(directionValue) != value) {
-            return;
-        }
-        auto direction = ConvertDirection(directionValue);
-        CHECK_NULL_VOID(direction);
-        envValue = SystemEnvValue::FromDirection(*direction);
-    } else if (key == ENV_KEY_FONT_SCALE) {
-        envValue = SystemEnvValue::FromDouble(value);
-    } else {
-        return;
-    }
+    auto envValue = ConvertSystemEnvValue(key, value);
+    CHECK_NULL_VOID(envValue);
     auto envManager = GetEnvironmentManager(withEnvNode);
-    if (envManager && envManager->SetSystemEnvValue(withEnvNode, key, envValue)) {
+    if (envManager && envManager->SetSystemEnvValue(withEnvNode, key, *envValue)) {
         return;
     }
-    withEnvNode->SetSystemEnvProperty(key, envValue);
+    withEnvNode->SetSystemEnvProperty(key, *envValue);
 }
 
 void RemoveCustomEnvProperty(ArkUINodeHandle node, const std::string& key)

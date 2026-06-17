@@ -23,6 +23,15 @@ ohos_abc("arkgauge") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkimagespan") {
+  sources = [ "./src/arkimagespan.ts" ]
+  output_name = "arkimagespan"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"
@@ -50,6 +59,15 @@ ohos_abc("arkpatternlock") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arksymbolspan") {
+  sources = [ "./src/arksymbolspan.ts" ]
+  output_name = "arksymbolspan"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkcounter") {
   sources = [ "./src/arkcounter.ts" ]
   output_name = "arkcounter"
@@ -71,6 +89,24 @@ ohos_abc("arkqrcode") {
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkimageanimator") {
+  sources = [ "./src/arkimageanimator.ts" ]
+  output_name = "arkimageanimator"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkdatepicker") {
+  sources = [ "./src/arkdatepicker.ts" ]
+  output_name = "arkdatepicker"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

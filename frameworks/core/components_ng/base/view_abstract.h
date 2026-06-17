@@ -301,6 +301,9 @@ public:
     static void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(const UiMaterial* material);
 
+    static RefPtr<UiMaterial> ConvertToImmersiveEC(RefPtr<UiMaterial>& material);
+    static RefPtr<UiMaterial> ConvertToImmersiveECSub(RefPtr<UiMaterial>& material);
+
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
     static void SetOuterBorderRadius(const Dimension& value);

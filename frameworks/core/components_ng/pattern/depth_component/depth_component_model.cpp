@@ -65,6 +65,21 @@ void DepthComponentModel::SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSp
     depthPattern->SetDepthSpace(depthSpace);
 }
 
+void DepthComponentModel::SetRender3DScale(float render3DScale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRender3DScale(frameNode, render3DScale);
+}
+
+void DepthComponentModel::SetRender3DScale(FrameNode* frameNode, float render3DScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    depthPattern->SetRender3DScale(render3DScale);
+}
+
 void DepthComponentModel::SetDepthMap(const ImageSourceInfo& depthMap)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

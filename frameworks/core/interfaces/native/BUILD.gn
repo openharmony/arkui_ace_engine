@@ -353,6 +353,32 @@ template("ace_core_interfaces_native_node") {
 }
 
 foreach(item, ace_platforms) {
+  ohos_source_set("ace_core_interfaces_native_checkbox_modifier_" + item.name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+    configs = [ "$ace_root:ace_config" ]
+
+    config = {
+    }
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    defines = []
+    if (defined(config.defines)) {
+      defines += config.defines
+    }
+
+    cflags_cc = []
+    if (defined(config.cflags_cc)) {
+      cflags_cc += config.cflags_cc
+    }
+
+    sources = [
+      "node/node_checkbox_modifier.cpp",
+    ]
+  }
+
   platform = item.name
   ace_core_interfaces_native_node(
       "ace_core_interfaces_native_node_" + item.name) {

@@ -36,6 +36,32 @@ RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
     return nullptr;
 }
 
+bool RefreshCoordination::UpdateRefreshNode()
+{
+    auto refreshNode = FindRefreshNode();
+    refreshNode_ = WeakClaim(RawPtr(refreshNode));
+    coordinationEvent_ = nullptr;
+    if (!refreshNode) {
+        return false;
+    }
+    coordinationEvent_ = CreateCoordinationEvent();
+    return !!coordinationEvent_;
+}
+
+bool RefreshCoordination::IsValid() const
+{
+    auto scrollableNode = scrollableNode_.Upgrade();
+    auto refreshNode = refreshNode_.Upgrade();
+    CHECK_NULL_RETURN(scrollableNode && refreshNode, false);
+    CHECK_NULL_RETURN(refreshNode->GetPattern<RefreshPattern>(), false);
+    for (auto parent = scrollableNode->GetParent(); parent; parent = parent->GetParent()) {
+        if (parent == refreshNode) {
+            return true;
+        }
+    }
+    return false;
+}
+
 RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent()
 {
     if (coordinationEvent_) {

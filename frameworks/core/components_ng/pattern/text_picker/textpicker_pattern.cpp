@@ -25,7 +25,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"

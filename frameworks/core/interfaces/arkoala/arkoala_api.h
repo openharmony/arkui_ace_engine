@@ -2414,6 +2414,17 @@ struct ArkUIImageFrameInfo {
     void* drawable;
 };
 
+struct ArkUIImageJSProperties {
+    ArkUI_CharPtr src;
+    ArkUI_Float32 number[4];  // width, height, top, left values
+    ArkUI_Int32 unit[4];       // DimensionUnit for each
+    char* calc[4];             // CALC expressions
+    ArkUI_Int32 duration;
+    void* pixelMap;            // RefPtr<PixelMap>
+    ArkUI_CharPtr bundleName;
+    ArkUI_CharPtr moduleName;
+};
+
 struct ArkUIAccessibilityState {
     ArkUIOptionalInt isDisabled;
     ArkUIOptionalInt isSelected;
@@ -4892,7 +4903,7 @@ struct ArkUITimepickerModifier {
     void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
     void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
     void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
-    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* ojb);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* obj);
     void (*setBackgroundColor)(ArkUI_Uint32 color);
     void (*hasUserDefinedOpacity)();
     void (*setOnEnterSelectedArea)(ArkUINodeHandle node, void* callback);
@@ -6803,11 +6814,11 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
-    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
+    void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, void* option);
     void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
     void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
-    void (*setImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setImageSpanBaselineOffset)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isJsView, void* colorResObj);
     void (*resetImageSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setImageSpanOnComplete)(ArkUINodeHandle node, void* callback);
     void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
@@ -6827,6 +6838,8 @@ struct ArkUIImageSpanModifier {
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createImageSpanFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setImageSpanPlaceHolderStyle)(ArkUINodeHandle node, void* style);
 };
 
 struct ArkUIWaterFlowModifier {
@@ -7380,6 +7393,7 @@ struct ArkUILoadingProgressModifier {
 };
 
 struct ArkUIImageAnimatorModifier {
+    void (*createModel)();
     void (*setState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetState)(ArkUINodeHandle node);
     void (*setDuration)(ArkUINodeHandle node, ArkUI_Int32 duration);
@@ -7395,6 +7409,7 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorIteration)(ArkUINodeHandle node);
     void (*setAutoMonitorInvisibleArea)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setImageAnimatorSrc)(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size);
+    void (*setJSImages)(ArkUINodeHandle node, struct ArkUIImageJSProperties* images, ArkUI_Int32 length);
     void (*resetDuration)(ArkUINodeHandle node);
     ArkUI_Bool (*getIsReverse)(ArkUINodeHandle node);
     ArkUI_Int32 (*getDuration)(ArkUINodeHandle node);
@@ -7413,6 +7428,12 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorOnCancel)(ArkUINodeHandle node);
     void (*setImageAnimatorOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageAnimatorOnFinish)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnStartExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnPauseExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnRepeatExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnCancelExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnFinishExt)(ArkUINodeHandle node, void* extraParam);
+    ArkUINodeHandle (*createImageAnimatorFrameNode)(ArkUI_Int32 nodeId);
 };
 
 enum class ArkUIWidthType : uint32_t {
@@ -7989,6 +8010,7 @@ struct ArkUISymbolGlyphModifier {
     void (*resetShaderStyle)(ArkUINodeHandle node);
     void (*setFontColorJs)(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size,
         ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize);
+    bool (*getIsFontColorResource)(ArkUINodeHandle node);
 };
 
 struct ArkUISymbolSpanModifier {
@@ -8011,6 +8033,9 @@ struct ArkUISymbolSpanModifier {
     void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
     void (*setCustomSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
+    void (*createModel)(ArkUI_Uint32 index);
+    void (*setSymbolSpanFontFamilies)(ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
+    void (*setSymbolSpanType)(ArkUI_Uint32 value);
 };
 
 struct ArkUIComponent3DModifier {
@@ -8145,6 +8170,29 @@ struct ArkUIDatePickerModifier {
     ArkUI_Bool (*getCanLoop)(ArkUINodeHandle node);
     void (*setCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
     void (*resetCanLoop)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(int32_t nodeId);
+    void (*createTimePicker)(void* theme);
+    void (*createDatePicker)(void* theme);
+    void (*setJSSelectedTime)(void* value);
+    void (*setJSStartDate)(void* value);
+    void (*setJSEndDate)(void* value);
+    void (*setJSSelectedDate)(void* value);
+    void (*setJSDatePickerMode)(ArkUI_Int32 value);
+    void (*setJSChangeEvent)(void* value);
+    void (*setJSSelectedTextStyle)(void* theme, void* textStyle);
+    void (*updateUserSetSelectColor)();
+    void (*setJSTextStyle)(void* theme, void* textStyle);
+    void (*setJSDisappearTextStyle)(void* theme, void* textStyle);
+    void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* obj);
+    void (*hasUserDefinedOpacity)();
+    void (*setUseMilitaryTime)(ArkUI_Bool isUseMilitaryTime);
+    void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+        void* dateAcceptEvent, void* dateChangeEvent, ArkUI_Int32 pickerType, void* pickerDialogEvent,
+        void* buttonInfos);
+    void (*setDatePickerOnDateChangeHandler)(ArkUINodeHandle node, void* extraParam);
 };
 
 struct ArkUISpanModifier {
@@ -9708,6 +9756,8 @@ struct ArkUIDialogAPI {
         ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor);
     ArkUI_Int32 (*setBackgroundEffect)(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3],
         ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool (*boolArray)[2]);
+    ArkUI_Int32 (*openCustomDialogWithErrorCallback)(ArkUIDialogHandle handle, void* userData,
+        void (*callback)(int32_t errorCode, int32_t dialogId, void* userData));
 };
 
 struct ArkUIBasicNodeAPI {

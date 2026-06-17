@@ -820,6 +820,17 @@ void ScrollablePattern::SetIsReverseCallback(const RefPtr<Scrollable>& scrollabl
     });
 }
 
+void ScrollablePattern::SetIsRefreshScrollCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetIsRefreshScrollCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->refreshCoordination_ && pattern->refreshCoordination_->InCoordination() &&
+               pattern->isRefreshInReactive_;
+    });
+}
+
 void ScrollablePattern::SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
@@ -1058,6 +1069,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetHandleExtScrollCallback(scrollable);
     SetOverScrollCallback(scrollable);
     SetIsReverseCallback(scrollable);
+    SetIsRefreshScrollCallback(scrollable);
     SetOnScrollStartRec(scrollable);
     SetOnScrollEndRec(scrollable);
     SetScrollEndCallback(scrollable);
@@ -4738,6 +4750,11 @@ void ScrollablePattern::OnAttachToMainTree()
     // call OnAttachToMainTreeMultiThread by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
+    if (refreshCoordination_) {
+        if (!refreshCoordination_->IsValid()) {
+            refreshCoordination_->UpdateRefreshNode();
+        }
+    }
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);
     auto enableNestScroll = scrollBarProxy->IsNestScroller();

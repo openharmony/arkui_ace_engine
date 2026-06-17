@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 
 namespace OHOS::Ace::NG {

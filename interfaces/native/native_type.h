@@ -44,6 +44,9 @@
 
 #include "drawable_descriptor.h"
 #include "node_attributes/layout.h"
+#include "node_attributes/button.h"
+#include "node_attributes/checkbox.h"
+#include "node_attributes/slider.h"
 #include "node_attributes/text_common.h"
 #include "node_attributes/text.h"
 #include "node_attributes/text_input.h"
@@ -52,6 +55,8 @@
 #include "node_attributes/image_span.h"
 #include "node_attributes/custom_span.h"
 #include "node_attributes/progress.h"
+#include "node_attributes/embedded_component.h"
+#include "node_attributes/xcomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -350,20 +355,6 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Declares the Ability base want.
- *
- * @since 20
- */
-typedef struct AbilityBase_Want AbilityBase_Want;
-
-/**
- * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
- *
- * @since 20
- */
-typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
-
-/**
  * @brief Defines the matrix4 object.
  *
  * @since 24
@@ -399,20 +390,6 @@ typedef enum {
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
-
-/**
- * @brief Enumerates the types of the <b><XComponent></b> component.
- *
- * @since 12
- */
-typedef enum {
-    /** The custom content of EGL/OpenGL ES and media data is displayed individually on the screen. */
-    ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
-    /** The custom content of EGL/OpenGL ES and media data is grouped and displayed together with content
-      * of the component.
-      */
-    ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
-} ArkUI_XComponentType;
 
 /**
  * @brief Enumerates the text copy and paste modes.
@@ -945,58 +922,6 @@ typedef enum {
      * releasing the hand quickly.*/
     ARKUI_SCROLL_STATE_FLING,
 } ArkUI_ScrollState;
-
-/**
- * @brief Enumerates the types of the slider in the block direction.
- *
- * @since 12
- */
-typedef enum {
-    /** Round slider. */
-    ARKUI_SLIDER_BLOCK_STYLE_DEFAULT = 0,
-    /** Slider with an image background. */
-    ARKUI_SLIDER_BLOCK_STYLE_IMAGE,
-    /** Slider in a custom shape. */
-    ARKUI_SLIDER_BLOCK_STYLE_SHAPE,
-} ArkUI_SliderBlockStyle;
-
-/**
- * @brief Enumerates the scroll directions of the slider.
- *
- * @since 12
- */
-typedef enum {
-    /** Vertical direction. */
-    ARKUI_SLIDER_DIRECTION_VERTICAL = 0,
-    /** Horizontal direction. */
-    ARKUI_SLIDER_DIRECTION_HORIZONTAL,
-} ArkUI_SliderDirection;
-
-/**
- * @brief Enumerates the slider styles.
- *
- * @since 12
- */
-typedef enum {
-    /** The slider is on the slider track. */
-    ARKUI_SLIDER_STYLE_OUT_SET = 0,
-    /** The slider is in the slider track. */
-    ARKUI_SLIDER_STYLE_IN_SET,
-    /** No slider. */
-    ARKUI_SLIDER_STYLE_NONE,
-} ArkUI_SliderStyle;
-
-/**
- * @brief Enumerates the shapes of the check box
- *
- * @since 12
- */
-typedef enum {
-    /** Circle. */
-    ArkUI_CHECKBOX_SHAPE_CIRCLE = 0,
-    /** Rounded square. */
-    ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
-} ArkUI_CheckboxShape;
 
 /**
  * @brief Enumerates the animation playback modes.
@@ -1652,25 +1577,6 @@ typedef enum {
     /** The Router Page returns. */
     ARKUI_ROUTER_PAGE_STATE_ON_BACK_PRESS = 4,
 } ArkUI_RouterPageState;
-
-/**
- * @brief Enumerates the button types.
- *
- * @since 12
- */
-typedef enum {
-    /** Normal button (without rounded corners by default). */
-    ARKUI_BUTTON_TYPE_NORMAL = 0,
-    /** Capsule-type button (the round corner is half of the height by default). */
-    ARKUI_BUTTON_TYPE_CAPSULE,
-    /** Circle button. */
-    ARKUI_BUTTON_TYPE_CIRCLE,
-    /**
-     * Rounded rectangle button.
-     * @since 19
-     */
-    ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
-} ArkUI_ButtonType;
 
 /**
  * @brief Define the navigation indicator type of the swiper.
@@ -4423,45 +4329,6 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
  *@since 19
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
-
-/**
- * @brief Create an object for the EmbeddedComponent option.
- *
- * @return A pointer to the object of the EmbeddedComponent option.
- * @since 20
- */
-ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
-
-/**
- * @brief Destroy the object by EmbeddedComponent option.
- *
- * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
-
-/**
- * @brief Set the onError of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Common error information about the API invoking failure.
- * @param name Common error name information about the API invoking failure.
- * @param message Common error message information about the API invoking failure.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnError(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
-
-/**
- * @brief Set the onTerminated of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
- * @param want Data returned when the EmbeddedUIExtensionAbility exits.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
 
 /**
  * @brief Expand the swipe action.

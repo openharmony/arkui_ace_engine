@@ -106,9 +106,10 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 }
 
 void ResSchedClickOptimizer::GetComponentTextRecursive(
-    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain)
+    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, const int32_t maxNodes)
 {
     CHECK_EQUAL_VOID(remain <= 0, true);
+    CHECK_EQUAL_VOID(maxNodes <= 0, true);
 
     auto node = weakNode.Upgrade();
     CHECK_NULL_VOID(node);
@@ -125,7 +126,7 @@ void ResSchedClickOptimizer::GetComponentTextRecursive(
 
     auto& children = node->GetFrameChildren();
     for (auto& childWeak : children) {
-        GetComponentTextRecursive(childWeak, text, remain - 1);
+        GetComponentTextRecursive(childWeak, text, remain - 1, maxNodes - 1);
     }
 }
 } // namespace OHOS::Ace

@@ -365,9 +365,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_MouseHistoricalPoint& dst, const OHOS::Ace::MouseHistoricalPoint& src);
-    void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
-    void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_Int32& dst, const Dimension& src);
     void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
