@@ -162,6 +162,7 @@ if (is_arkui_x) {
       "$ace_root/interfaces/native",
       "$ace_root/interfaces/inner_api/ace_kit/include",
       "//base/global/resource_management/interfaces/inner_api/include",
+      "//foundation/graphic/graphic_2d/rosen/modules/platform/ipc_core",
     ]
 
     configs = [
@@ -186,9 +187,33 @@ if (is_arkui_x) {
       "node/node_model.cpp",
       "node/event_converter.cpp",
       "node/node_model_safely.cpp",
+      "node/container_picker_option.cpp",
+      "node/textpicker_option.cpp",
+      "node/frame_information.cpp",
+      "node/dialog_option.cpp",
+      "node/dialog_model.cpp",
+      "node/swiper_option.cpp",
+      "node/node_transition_imp.cpp",
+      "node/node_visual_effect.cpp",
+      "node/text_native_impl.cpp",
+      "node/native_impl.cpp",
+      "node/animate_impl.cpp",
+      "node/node_animate.cpp",
+      "node/style_modifier.cpp",
+      "node/node_transition.cpp",
+      "node/grid_layout_option.cpp",
+      "node/native_material_impl.cpp",
+      "node/waterflow_section_option.cpp",
+      "node/progress_option.cpp",
+      "node/rich_editor_native_impl.cpp",
+      "node/list_option.cpp",
+      "native_interface_accessibility.cpp",
     ]
 
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [
+      "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
 
     cflags_cc = [ "-Wno-missing-braces" ]
 
