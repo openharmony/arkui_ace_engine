@@ -91,11 +91,34 @@ void RichEditorDragPattern::SetDragNodeScale(
 void RichEditorDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
 {
     auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    if (richEditor) {
-        width = NearZero(info_->maxSelectedWidth) ? contentRect.Width() : info_->maxSelectedWidth;
-    } else {
+    if (!richEditor) {
         TextDragPattern::AdjustMaxWidth(width, contentRect, boxes);
+        return;
     }
+    width = NearZero(info_->maxSelectedWidth) ? contentRect.Width() : info_->maxSelectedWidth;
+    CHECK_NULL_VOID(richEditor->GetHorizontalScrolling());
+    width = std::min(width, contentRect.Width());
+}
+
+TextDragData RichEditorDragPattern::CreateTextDragData(const RectF& textRect, const OffsetF& localDragOffset,
+    const OffsetF& globalDragOffset, const RectF& leftHandler, const RectF& rightHandler)
+{
+    auto data = TextDragPattern::CreateTextDragData(textRect, localDragOffset, globalDragOffset, leftHandler,
+        rightHandler);
+    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(richEditor && richEditor->GetHorizontalScrolling(), data);
+    auto contentRect = richEditor->GetTextContentRect();
+    data.contentLeft_ = contentRect.Left() - localDragOffset.GetX();
+    return data;
+}
+
+void RichEditorDragPattern::AdjustHandlers(const RectF& contentRect, RectF& leftHandler, RectF& rightHandler)
+{
+    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
+    bool isHorizontalScrolling = richEditor && richEditor->GetHorizontalScrolling();
+    CHECK_NULL_VOID(leftHandler.GetY() == rightHandler.GetY() || isHorizontalScrolling);
+    leftHandler.SetLeft(std::clamp(leftHandler.GetX(), contentRect.Left(), contentRect.Right()));
+    rightHandler.SetLeft(std::clamp(rightHandler.GetX(), contentRect.Left(), contentRect.Right()));
 }
 
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
