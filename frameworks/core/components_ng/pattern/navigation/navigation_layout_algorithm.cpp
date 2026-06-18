@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 

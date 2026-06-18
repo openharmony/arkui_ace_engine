@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"

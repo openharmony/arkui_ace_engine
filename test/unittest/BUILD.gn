@@ -592,6 +592,8 @@ ohos_static_library("ace_base") {
     "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/ng/vector.cpp",
+    "$ace_root/frameworks/base/geometry/point.cpp",
     "$ace_root/frameworks/base/geometry/quaternion.cpp",
     "$ace_root/frameworks/base/geometry/response_region.cpp",
     "$ace_root/frameworks/base/geometry/transform_util.cpp",

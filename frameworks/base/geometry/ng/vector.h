@@ -16,62 +16,38 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_VECTORF_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_VECTORF_H
 
-#include "base/utils/utils.h"
+#include <cstdint>
+
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
     
-struct VectorF {
+struct ACE_FORCE_EXPORT VectorF {
     VectorF(float xF, float yF) : x(xF), y(yF) {}
 
-    bool operator==(const VectorF& other) const
-    {
-        return NearEqual(x, other.x, 1e-5) && NearEqual(y, other.y, 1e-5);
-    }
-
-    VectorF operator*(float value) const
-    {
-        return VectorF(x * value, y * value);
-    }
+    bool operator==(const VectorF& other) const;
+    VectorF operator*(float value) const;
 
     float x = 0.0f;
     float y = 0.0f;
 };
 
-struct Vector3F {
+struct ACE_FORCE_EXPORT Vector3F {
     Vector3F() = default;
     Vector3F(float xF, float yF, float zF) : x(xF), y(yF), z(zF) {}
 
-    bool operator==(const Vector3F& other) const
-    {
-        return NearEqual(x, other.x) && NearEqual(y, other.y) && NearEqual(z, other.z);
-    }
-
-    float operator[](int32_t index) const
-    {
-        switch (index) {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-            default:
-                return 0.0f;
-        }
-    }
+    bool operator==(const Vector3F& other) const;
+    float operator[](int32_t index) const;
 
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
 };
 
-struct Vector4F {
+struct ACE_FORCE_EXPORT Vector4F {
     Vector4F(float xF, float yF, float zF, float wF) : x(xF), y(yF), z(zF), w(wF) {}
 
-    bool operator==(const Vector4F& other) const
-    {
-        return NearEqual(x, other.x) && NearEqual(y, other.y) && NearEqual(z, other.z) && NearEqual(w, other.w);
-    }
+    bool operator==(const Vector4F& other) const;
 
     float x = 0.0f;
     float y = 0.0f;
@@ -79,14 +55,10 @@ struct Vector4F {
     float w = 0.0f;
 };
 
-struct Vector5F {
+struct ACE_FORCE_EXPORT Vector5F {
     Vector5F(float xF, float yF, float zF, float wF, float vF) : x(xF), y(yF), z(zF), w(wF), v(vF) {}
 
-    bool operator==(const Vector5F& other) const
-    {
-        return NearEqual(x, other.x) && NearEqual(y, other.y) && NearEqual(z, other.z) &&
-            NearEqual(w, other.w) && NearEqual(v, other.v);
-    }
+    bool operator==(const Vector5F& other) const;
 
     float x = 0.0f;
     float y = 0.0f;
