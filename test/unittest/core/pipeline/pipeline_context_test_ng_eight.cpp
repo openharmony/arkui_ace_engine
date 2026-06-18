@@ -27,6 +27,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/statistic_event_reporter.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"

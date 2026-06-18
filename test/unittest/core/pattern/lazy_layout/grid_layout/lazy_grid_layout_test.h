@@ -22,7 +22,9 @@
 #define protected public
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"

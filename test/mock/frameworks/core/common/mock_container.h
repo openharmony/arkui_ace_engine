@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"

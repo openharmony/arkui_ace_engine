@@ -115,6 +115,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/animation/animation_pub.cpp",
     "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
+    "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
+    "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
     "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
@@ -151,7 +153,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/hyperlink/bridge/hyperlink_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image_animator/bridge/image_animator_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image_animator/image_animator_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text/span/image_span_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/bridge/indexer_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model_static.cpp",
@@ -219,7 +220,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_static_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text/span/symbol_span_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span/bridge/image_span/image_span_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span/bridge/symbol_span/symbol_span_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_content_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_static_modifier.cpp",
@@ -264,6 +266,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   }
 
   external_deps = [
+    "ets_runtime:libark_jsruntime",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "libxml2:static_libxml2",

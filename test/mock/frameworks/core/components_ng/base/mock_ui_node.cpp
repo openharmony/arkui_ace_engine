@@ -447,4 +447,11 @@ void UINode::UpdateSelectionContainerId(int32_t selectionContainerId)
 }
 
 #pragma clang diagnostic pop
+
+void UINode::FlushUpdateAndMarkDirty() {}
+void UINode::SetGeometryTransitionInRecursive(bool) {}
+RefPtr<UINode> UINode::GetFirstChild() const { return nullptr; }
+void UINode::MarkForceMeasure() {}
+void UINode::SetHostPageId(int) {}
+
 } // namespace OHOS::Ace::NG

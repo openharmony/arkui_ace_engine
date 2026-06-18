@@ -329,7 +329,7 @@
                     "compile_mode": ["cross"]
                 },
                 "//foundation/arkui/ace_engine/test/unittest:unittest": {
-                    "compile_mode": ["host", "target"]
+                    "compile_mode": ["cross", "host", "target"]
                 },
                 "//foundation/arkui/ace_engine/test/benchmark:benchmark": {
                     "compile_mode": ["cross"]

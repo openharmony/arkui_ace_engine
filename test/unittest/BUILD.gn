@@ -899,6 +899,10 @@ ohos_static_library("ace_components_mock") {
     "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
+    "$ace_root/frameworks/core/components/navigation_bar/navigation_bar_theme.cpp",
+    "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
+    "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_theme.cpp",
   ]
   deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
   external_deps = [

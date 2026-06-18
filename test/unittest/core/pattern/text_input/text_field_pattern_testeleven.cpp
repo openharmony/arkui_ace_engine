@@ -19,6 +19,7 @@
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
