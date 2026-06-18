@@ -853,7 +853,8 @@ class RenderNode {
       getUINativeModule().renderNode.setBackgroundBlur(this.nodePtr, 0, 0, 0);
       return;
     }
-    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const radius = (blurValue.radius === undefined || blurValue.radius === null ||
+      blurValue.radius < 0 || !Number.isFinite(blurValue.radius)) ? 0 : blurValue.radius;
     const grayscale = blurValue.grayscale;
     let grayscale1 = 0;
     let grayscale2 = 0;
@@ -871,7 +872,8 @@ class RenderNode {
       getUINativeModule().renderNode.setContentBlur(this.nodePtr, 0, 0, 0);
       return;
     }
-    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const radius = (blurValue.radius === undefined || blurValue.radius === null ||
+      blurValue.radius < 0 || !Number.isFinite(blurValue.radius)) ? 0 : blurValue.radius;
     const grayscale = blurValue.grayscale;
     let grayscale1 = 0;
     let grayscale2 = 0;
@@ -889,7 +891,8 @@ class RenderNode {
       getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, 0);
       return;
     }
-    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const radius = (blurValue.radius === undefined || blurValue.radius === null ||
+      blurValue.radius < 0 || !Number.isFinite(blurValue.radius)) ? 0 : blurValue.radius;
     this.foregroundBlurValue = { radius: radius };
     getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, radius);
   }
