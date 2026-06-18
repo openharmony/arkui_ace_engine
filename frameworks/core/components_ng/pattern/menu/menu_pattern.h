@@ -828,7 +828,7 @@ public:
 
     OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
-    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex = 0);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
