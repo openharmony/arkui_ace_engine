@@ -126,6 +126,10 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return false;
+    }
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void StartOffsetEnteringAnimation();
     RefPtr<RenderContext> GetRenderContext();
