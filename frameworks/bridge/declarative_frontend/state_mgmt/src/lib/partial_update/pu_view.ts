@@ -1247,6 +1247,17 @@ abstract class ViewPU extends PUV2ViewBase
     }
   }
 
+  private  __tryQueuPreRenderCreation__Internal(name: string, componentClass?: ViewPUConstructor): boolean {
+    const preRenderPool = ViewPU.getCurrentPreRenderPool();
+    if (!preRenderPool || !componentClass) {
+      return false;
+    }
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
+    ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
+    return true;
+  }
+
   /**
    * @function observeRecycleComponentCreation
    * @description custom node recycle creation
@@ -1277,15 +1288,11 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     // PRE-RENDER mode: queue for later creation
-    const preRenderPool = ViewPU.getCurrentPreRenderPool();
-    if (preRenderPool) {
-      const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-      stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
-      ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
+    if (this.__tryQueuPreRenderCreation__Internal(name, componentClass)) {
       return;
     }
     // PRE-RENDERED CHILD: reuse child already created during pre-render
-    if (this.preRenderedChildren_?.has(name) && this.mountPreRenderedChild(name)) {
+    if (this.mountPreRenderedChild(name)) {
         return;
     }
 

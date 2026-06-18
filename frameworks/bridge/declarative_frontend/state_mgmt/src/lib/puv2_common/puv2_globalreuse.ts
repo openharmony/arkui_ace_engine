@@ -43,6 +43,16 @@ interface IReusePool {
 }
 
 /**
+ * Context object returned by UIUtils.getCustomComponentContext().
+ * A dedicated interface (rather than exposing PUV2ViewBase directly) keeps
+ * the framework API surface isolated from any same-named methods an app
+ * component may define.
+ */
+interface CustomComponentContext {
+  getReusePool(): IReusePool | undefined;
+}
+
+/**
  * Implements the `__ReusePool_Internal__` class responsible for managing recycled
  * ViewPU/ViewV2 instances
  * Supports
@@ -62,6 +72,10 @@ class __ReusePool_Internal__ implements IReusePool {
     private cached_: Map<string, Array<PUV2ViewBase>> = new Map();
     private accepts_: Set<abstract new (...args: PUV2ViewBase[]) => PUV2ViewBase> | undefined;
     private maxCounts_: Map<string, number> = new Map();
+    // The component that called getReusePool(); used by preRender() to bind the builder.
+    private callerContext_: PUV2ViewBase | undefined;
+    // Completion promises for pre-render builds deferred by queuePreRenderCreation.
+    preRenderTasks_: Array<Promise<void>> = [];
 
     // Maps original element IDs to new recycled element IDs.
     // Used when a recycled node is reattached and receives a new element ID.
@@ -379,14 +393,26 @@ class __ReusePool_Internal__ implements IReusePool {
      *   context is safely cleared.
      * - The pre-render context is always cleaned up via `endPreRender()`.
     */
+    // Sets the component that called getReusePool(). preRender() uses it to
+    // bind the builder so the app doesn't need .bind(this).
+    public setCallerContext(context: PUV2ViewBase): void {
+        this.callerContext_ = context;
+    }
+
     async preRender(builder: WrappedBuilder<[]>, n: number): Promise<void> {
         let preRenderError: unknown;
+        // The caller context (the component that called getReusePool) is set via
+        // setCallerContext() just before this call. Bind the builder to it so the
+        // builder's `this` resolves correctly without the app using .bind(this).
+        const context = this.callerContext_;
+        const rawFn = builder.builder;
+        const builderFn = (context && rawFn) ? rawFn.bind(context) : rawFn;
         try {
             // Activate pre-render context
             PUV2ViewBase.beginPreRender(this);
 
             for (let i = 0; i < n; i++)  {
-                builder.builder();
+                builderFn();
             }
         } catch (e) {
             stateMgmtConsole.error('ERROR: PreRender error:', e);
@@ -396,12 +422,14 @@ class __ReusePool_Internal__ implements IReusePool {
             // clear context
             PUV2ViewBase.endPreRender();
         }
-        // Queue the resolve as the final idle task
-        // It will fire after all the queued component creations complete
-        return new Promise<void>((resolve, reject) => {
-            ObserveV2.getObserve().queueIdleTask(() => {
-                preRenderError ? reject(preRenderError) : resolve()
-            });
+        // Wait for all deferred builds to push to the pool before resolving, so the
+        // consuming component reuses the pre-rendered node instead of creating a fresh one
+        const builds = this.preRenderTasks_;
+        this.preRenderTasks_ = [];
+        return Promise.all(builds).then(() => {
+            if (preRenderError) {
+                throw preRenderError;
+            }
         });
     }
 
