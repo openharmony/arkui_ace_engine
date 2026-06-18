@@ -246,26 +246,28 @@ class ObserveV2 {
 
   // Queue pre-render component creation of global reuse as an idle task
   public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
-      componentParams: Object, elmtId: number, pool: __ReusePool_Internal__, reuseId: string,
+      componentParams: Object, elmtId: number, pool: __ReusePool__Internal, reuseId: string,
       extraInfo: ExtraInfo = undefined): void {
     const createPreRenderTask = (): void => {
       const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);
-      instance.isPreRendered = true;
+      instance.__isPreRendered__Internal = true;
+      try {
+        // Set context before rendering children
+        PUV2ViewBase.__beginPreRender__Internal(pool);
 
-      // Set context before rendering children
-      PUV2ViewBase.beginPreRender(pool);
+        // Build the full component subtree in sandboxed mode
+        // (fake element IDs, no observation bindings)
+        if ('__initialRenderForPreRender__Internal' in instance && typeof instance.__initialRenderForPreRender__Internal === 'function') {
+          instance.__initialRenderForPreRender__Internal();
+        }
 
-      // Build the full component subtree in sandboxed mode
-      // (fake element IDs, no observation bindings)
-      if ('initialRenderForPreRender' in instance && typeof instance.initialRenderForPreRender === 'function') {
-        instance.initialRenderForPreRender();
+        // Push to pool before endPreRender
+        if (pool && typeof pool.push === 'function') {
+            pool.push(reuseId, instance, componentClass);
+        }
+      } finally {
+        PUV2ViewBase.__endPreRender__Internal();
       }
-
-      // Push to pool before endPreRender
-      if (pool && typeof pool.push === 'function') {
-          pool.push(reuseId, instance, componentClass);
-      }
-      PUV2ViewBase.endPreRender();
     };
     // Defer the build to a macrotask (runs after the current render flush). Record
     // a promise so preRender() waits for the pool push before resolving, otherwise

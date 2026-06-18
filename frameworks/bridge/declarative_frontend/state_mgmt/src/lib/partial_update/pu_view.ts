@@ -73,7 +73,7 @@ abstract class ViewPU extends PUV2ViewBase
   private delayedWatchedProps_: Set<string> = new Set<string>();
 
   private recycleManager_: RecycleManager = undefined;
-  private myReusePool__ : __ReusePool_Internal__  | undefined;
+  private __myReusePool__Internal : __ReusePool__Internal  | undefined;
 
   public hasBeenRecycled_: boolean = false;
 
@@ -273,11 +273,11 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   protected finalizeConstruction(): void {
-    this.__isGlobalPoolActive = !!this.___reusePool || this.getParent()?.__isGlobalPoolActive;
-    if (this.isReusable_ && this.__isGlobalPoolActive) {
-      // V1 first-render path has no child reference to set myReusePool__ on, unlike V2.
+    this.__isGlobalPoolActive__Internal = !!this.__reusePool__Internal || this.getParent()?.__isGlobalPoolActive__Internal;
+    if (this.isReusable_ && this.__isGlobalPoolActive__Internal) {
+      // V1 first-render path has no child reference to set __myReusePool__Internal on, unlike V2.
       // Cache it here while the ancestor chain is still intact.
-      this.myReusePool__ = this.getReusePoolInternal(this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
+      this.__myReusePool__Internal = this.__getReusePoolInternal__Internal(this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     }
     this.__customComponentExecuteInit__Internal();
   }
@@ -297,7 +297,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: aboutToBeDeletedInternal`);
     // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
     // to set and recursively set its children any more
-    if (!this.isDeleting_ && this.shouldDeleteRecursively()) {
+    if (!this.isDeleting_ && this.__shouldDeleteRecursively__Internal()) {
       this.isDeleting_ = true;
       this.setDeleteStatusRecursively();
     }
@@ -370,8 +370,8 @@ abstract class ViewPU extends PUV2ViewBase
         `${this.debugInfo__()} is in the process of destruction` );
     }
     // Detach this instance from the reusePool on component deletion
-    if (this.___reusePool) {
-      this.___reusePool.removeOwner(this);
+    if (this.__reusePool__Internal) {
+      this.__reusePool__Internal.removeOwner(this);
     }
   }
 
@@ -410,7 +410,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public __getRecycleDump_internal(): string {
-    const reusePool = this.getReusePoolInternal();
+    const reusePool = this.__getReusePoolInternal__Internal();
     if(reusePool) {
       return reusePool.getDumpInfo();
     }
@@ -647,8 +647,8 @@ abstract class ViewPU extends PUV2ViewBase
       for (const elmtId of dependentElmtIds) {
         if (this.hasRecycleManager()) {
           this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(this.recycleManager_.proxyNodeId(elmtId));
-        } else if (this.myReusePool__) {
-          this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(this.myReusePool__.proxyNodeId(elmtId));
+        } else if (this.__myReusePool__Internal) {
+          this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(this.__myReusePool__Internal.proxyNodeId(elmtId));
         } else {
           this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(elmtId);
         }
@@ -697,8 +697,8 @@ abstract class ViewPU extends PUV2ViewBase
         for (const elmtId of dependentElmtIds) {
           if (this.hasRecycleManager()) {
             this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-          } else if (this.myReusePool__) {
-            this.dirtDescendantElementIds_.add(this.myReusePool__.proxyNodeId(elmtId));
+          } else if (this.__myReusePool__Internal) {
+            this.dirtDescendantElementIds_.add(this.__myReusePool__Internal.proxyNodeId(elmtId));
           } else {
             this.dirtDescendantElementIds_.add(elmtId);
           }
@@ -758,8 +758,8 @@ abstract class ViewPU extends PUV2ViewBase
     }
     if (this.hasRecycleManager()) {
       this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-    } else if (this.myReusePool__) {
-          this.dirtDescendantElementIds_.add(this.myReusePool__.proxyNodeId(elmtId));
+    } else if (this.__myReusePool__Internal) {
+      this.dirtDescendantElementIds_.add(this.__myReusePool__Internal.proxyNodeId(elmtId));
     } else {
       this.dirtDescendantElementIds_.add(elmtId);
     }
@@ -911,7 +911,7 @@ abstract class ViewPU extends PUV2ViewBase
     * or applying a default value if no provider is found.
     * Used in global reuse
   */
-  public reInitializeConsume<T>(providedPropName: string, consumeVarName: string, defaultValue?: unknown): void {
+  public __reInitializeConsume__Internal<T>(providedPropName: string, consumeVarName: string, defaultValue?: unknown): void {
     let newProvidedVarStore: ObservedPropertyAbstractPU<unknown> = this.findProvidePU__(providedPropName);
 
     if (!newProvidedVarStore) {
@@ -919,7 +919,7 @@ abstract class ViewPU extends PUV2ViewBase
         newProvidedVarStore = new ObservedPropertyPU(defaultValue, this, consumeVarName);
         newProvidedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
-        stateMgmtConsole.warn(`${this.debugInfo__()}: reInitializeConsume: no @Provide for '${providedPropName}' and no default value provided.`);
+        stateMgmtConsole.warn(`${this.debugInfo__()}: __reInitializeConsume__Internal: no @Provide for '${providedPropName}' and no default value provided.`);
         return;
       }
     }
@@ -1006,8 +1006,8 @@ abstract class ViewPU extends PUV2ViewBase
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId), dirtElmtIdsFromRootNode);
-        } else if (this.myReusePool__) {
-          this.UpdateElement(this.myReusePool__.proxyNodeId(elmtId), dirtElmtIdsFromRootNode);
+        } else if (this.__myReusePool__Internal) {
+          this.UpdateElement(this.__myReusePool__Internal.proxyNodeId(elmtId), dirtElmtIdsFromRootNode);
         } else {
           this.UpdateElement(elmtId, dirtElmtIdsFromRootNode);
         }
@@ -1040,8 +1040,8 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     // Register this instance as an owner in the reuse pool (on Recycle creation)
-    if (this.___reusePool) {
-      this.___reusePool.addOwner(this);
+    if (this.__reusePool__Internal) {
+      this.__reusePool__Internal.addOwner(this);
     }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
@@ -1082,8 +1082,8 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     // Register this instance as an owner in the reuse pool
-    if (this.___reusePool) {
-      this.___reusePool.addOwner(this);
+    if (this.__reusePool__Internal) {
+      this.__reusePool__Internal.addOwner(this);
     }
     if (this.isDeleting_) {
       stateMgmtConsole.frequentError(`View ${this.constructor.name} is already in process of destruction, will not execute observeComponentCreation2 `);
@@ -1212,13 +1212,13 @@ abstract class ViewPU extends PUV2ViewBase
    * `preRenderedChildren_` so they can be reused when the component
    * is later popped from the pool and mounted via `createRecycle`.
   */
-  public initialRenderForPreRender(): void {
+  public __initialRenderForPreRender__Internal(): void {
     const originalObserve = this.observeComponentCreation2;
     const originalRecycleObserve = this.observeRecycleComponentCreation;
 
     this.observeComponentCreation2 = (updateFunc: UpdateFunc, classObject: UIClassObject): void => {
       // temporary negative ID; see reuseOrCreateNewComponent
-      const preRenderElmtId = -1000 - (ViewPU.preRenderCounter++);
+      const preRenderElmtId = -1000 - (ViewPU.__preRenderCounter__Internal++);
       updateFunc(preRenderElmtId, true);
       if (classObject && classObject.pop) {
           classObject.pop();
@@ -1228,12 +1228,12 @@ abstract class ViewPU extends PUV2ViewBase
     this.observeRecycleComponentCreation = (reuseId: string, recycleUpdateFunc: RecycleUpdateFunc, componentClass: ViewPUConstructor): void => {
       // Use negative IDs starting from -1000 to avoid collisions with real element IDs,
       // which are always positive. These temporary IDs are replaced during actual mounting.
-      const elmtId = -1000 - (ViewPU.preRenderCounter++);
+      const elmtId = -1000 - (ViewPU.__preRenderCounter__Internal++);
       const child = new componentClass(this, {}, undefined, elmtId, () => {}, undefined);
 
-      child.isPreRendered = true;
-      (this.preRenderedChildren_ ??= new Map()).set(reuseId, child);
-      child.initialRenderForPreRender();
+      child.__isPreRendered__Internal = true;
+      (this.__preRenderedChildren__Internal ??= new Map()).set(reuseId, child);
+      child.__initialRenderForPreRender__Internal();
       if (componentClass.pop) {
           componentClass.pop();
       }
@@ -1248,7 +1248,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private  __tryQueuPreRenderCreation__Internal(name: string, componentClass?: ViewPUConstructor): boolean {
-    const preRenderPool = ViewPU.getCurrentPreRenderPool();
+    const preRenderPool = ViewPU.__getCurrentPreRenderPool__Internal();
     if (!preRenderPool || !componentClass) {
       return false;
     }
@@ -1280,11 +1280,11 @@ abstract class ViewPU extends PUV2ViewBase
       recycleUpdateFunc(element, isFirstRender, undefined, false);
     };
 
-    const globalPool = this.__isGlobalPoolActive ? this.getReusePoolInternal(componentClass) : undefined;
+    const globalPool = this.__isGlobalPoolActive__Internal ? this.__getReusePoolInternal__Internal(componentClass) : undefined;
     // In aliasing cases, matching reuseId strings alone can cause duplicates,
     // so we use the constructor reference to uniquely store/retrieve pool keys.
     if (globalPool && componentClass && (!name || name === componentClass.name)) {
-      __ReusePool_Internal__.registerCtorName(componentClass, name);
+      __ReusePool__Internal.registerCtorName(componentClass, name);
     }
 
     // PRE-RENDER mode: queue for later creation
@@ -1292,7 +1292,7 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     // PRE-RENDERED CHILD: reuse child already created during pre-render
-    if (this.mountPreRenderedChild(name)) {
+    if (this.__mountPreRenderedChild__Internal(name)) {
         return;
     }
 
@@ -1344,30 +1344,30 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     node.hasBeenRecycled_ = false;
-    node.myReusePool__ = globalPool ?? node.myReusePool__;
+    node.__myReusePool__Internal = globalPool ?? node.__myReusePool__Internal;
 
     // Clear stale children created during pre-render before real initialRender creates new ones
-    if (node.isPreRendered && node.childrenWeakrefMap_) {
+    if (node.__isPreRendered__Internal && node.childrenWeakrefMap_) {
       node.childrenWeakrefMap_.clear();
     }
 
     this.rebuildUpdateFunc(recycleElmtId, compilerAssignedUpdateFunc);
     try {
-      recycleUpdateFunc(recycleElmtId, /* is first render */ true, node, node.isPreRendered);
+      recycleUpdateFunc(recycleElmtId, /* is first render */ true, node, node.__isPreRendered__Internal);
     } finally {
-      if (node.isPreRendered) {
+      if (node.__isPreRendered__Internal) {
         this.rerender();
-        node.isPreRendered = false;
+        node.__isPreRendered__Internal = false;
       }
     }
   }
 
   // Invoked by ace-loader during reuse flow to track the element ID rendered
-  public ___pushRecycleElmtIdToRenderStack(elmtId: number): void {
+  public __pushRecycleElmtIdToRenderStack__Internal(elmtId: number): void {
     this.currentlyRenderedElmtIdStack_.push(elmtId);
   }
 
-  public ___popRecycleElmtIdFromRenderStack(): void {
+  public __popRecycleElmtIdFromRenderStack__Internal(): void {
     this.currentlyRenderedElmtIdStack_.pop();
   }
 
@@ -1378,8 +1378,8 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
-        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse && this.getReusePoolInternal()) {
-          this.resetStateVarsOnReuse(params);
+        if (this.__resetStateVarsOnReuse__Internal !== ViewPU.prototype.__resetStateVarsOnReuse__Internal && this.__isGlobalPoolActive__Internal) {
+          this.__resetStateVarsOnReuse__Internal(params);
         }
         this.updateStateVars(params);
         this.aboutToReuse(params);
@@ -1447,7 +1447,7 @@ abstract class ViewPU extends PUV2ViewBase
   public recycleSelf(name: string): void {
     const parent = this.getParent() as ViewPU;
     const ctor = this.constructor as new (...args: ViewPU[]) => ViewPU;
-    const globalPool = this.myReusePool__;
+    const globalPool = this.__myReusePool__Internal;
     // Check if Legacy Reuse Pool exists
     if (!globalPool && parent && !(parent as ViewPU).isDeleting_) {
       parent.getOrCreateRecycleManager().pushRecycleNode(name, this);
@@ -1472,10 +1472,10 @@ abstract class ViewPU extends PUV2ViewBase
     return this.hasBeenRecycled_;
   }
 
-  // The resetStateVarsOnReuse function defined in the transpiler will be called.
+  // The __resetStateVarsOnReuse__Internal function defined in the transpiler will be called.
   // If it's not defined, it indicates that an older version of the toolchain is being used,
   // and an error is thrown to notify about the outdated toolchain.
-  public resetStateVarsOnReuse(params: Object): void {
+  public __resetStateVarsOnReuse__Internal(params: Object): void {
     throw new BusinessError(REUSABLE_V1_OLD_TOOLCHAIN, 'Old toolchain detected. Please upgrade to the latest.');
   }
 
