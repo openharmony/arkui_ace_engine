@@ -24,6 +24,8 @@
 #include "core/interfaces/native/node/column_modifier.h"
 #include "core/interfaces/native/node/column_split_modifier.h"
 #include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/interfaces/native/node/circle_modifier.h"
+#include "core/interfaces/native/node/ellipse_modifier.h"
 #include "core/interfaces/native/node/node_container_reader_modifier.h"
 #include "core/interfaces/native/node/counter_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
@@ -242,6 +244,8 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getGridItemModifier = NodeModifier::GetGridItemModifier,
         .getProgressModifier = NodeModifier::GetProgressModifier,
         .getCommonShapeModifier = NodeModifier::GetCommonShapeModifier,
+        .getCircleModifier = NodeModifier::GetCircleModifier,
+        .getEllipseModifier = NodeModifier::GetEllipseModifier,
         .getShapeModifier = NodeModifier::GetShapeModifier,
         .getRectModifier = NodeModifier::GetRectModifier,
         .getSwiperModifier = NodeModifier::GetSwiperModifier,

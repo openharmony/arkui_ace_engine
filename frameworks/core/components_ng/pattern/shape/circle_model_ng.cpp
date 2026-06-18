@@ -20,7 +20,6 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,16 +27,15 @@ void CircleModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CIRCLE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", CIRCLE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CIRCLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CirclePattern>(); });
+        CIRCLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CirclePattern>(); });
     stack->Push(frameNode);
 }
 
 RefPtr<FrameNode> CircleModelNG::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
+    return FrameNode::CreateFrameNode(CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
 }
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_MODEL_NG_CPP

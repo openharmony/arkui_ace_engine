@@ -52,9 +52,9 @@ public:
     void SetHeight(const RefPtr<ResourceObject>& resObj) override;
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
         const std::vector<RefPtr<ResourceObject>>& resObjArray);
-    static void SetWidth(FrameNode* frameNode, Dimension& width);
+    ACE_FORCE_EXPORT static void SetWidth(FrameNode* frameNode, Dimension& width);
     static void ResetWidth(FrameNode* frameNode);
-    static void SetHeight(FrameNode* frameNode, Dimension& height);
+    ACE_FORCE_EXPORT static void SetHeight(FrameNode* frameNode, Dimension& height);
     static void ResetHeight(FrameNode* frameNode);
     static void SetStroke(FrameNode* frameNode, const Color& color);
     static void SetFill(FrameNode* frameNode, const Color& color);

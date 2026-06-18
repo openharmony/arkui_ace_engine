@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/path_painter.h"
+#include "core/components_ng/pattern/shape/path_painter.h"
 
 namespace OHOS::Ace::NG {
 namespace {

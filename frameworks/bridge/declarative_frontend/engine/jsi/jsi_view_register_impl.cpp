@@ -70,7 +70,6 @@
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
-#include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
@@ -94,8 +93,6 @@
 #include "bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
-#include "bridge/declarative_frontend/jsview/js_polygon.h"
-#include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -110,7 +107,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
-#include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
@@ -441,14 +437,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "Calendar", JSCalendar::JSBind },
-    { "Rect", JSRect::JSBind },
-    { "Shape", JSShape::JSBind },
-    { "Path", JSPath::JSBind },
-    { "Circle", JSCircle::JSBind },
-    { "Line", JSLine::JSBind },
-    { "Polygon", JSPolygon::JSBind },
-    { "Polyline", JSPolyline::JSBind },
-    { "Ellipse", JSEllipse::JSBind },
+    { "__Rect__", JSRect::JSBind },
+    { "__Path__", JSPath::JSBind },
+    { "__Circle__", JSCircle::JSBind },
+    { "__Ellipse__", JSEllipse::JSBind },
     { "Piece", JSPiece::JSBind },
     { "SwiperController", JSSwiperControllerBinding::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
@@ -521,14 +513,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Calendar", JSCalendar::JSBind },
-    { "Rect", JSRect::JSBind },
-    { "Shape", JSShape::JSBind },
-    { "Path", JSPath::JSBind },
-    { "Circle", JSCircle::JSBind },
-    { "Line", JSLine::JSBind },
-    { "Polygon", JSPolygon::JSBind },
-    { "Polyline", JSPolyline::JSBind },
-    { "Ellipse", JSEllipse::JSBind },
+    { "__Rect__", JSRect::JSBind },
+    { "__Circle__", JSCircle::JSBind },
+    { "__Ellipse__", JSEllipse::JSBind },
+    { "__Path__", JSPath::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
     { "DepthComponent", JSDepthComponent::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },

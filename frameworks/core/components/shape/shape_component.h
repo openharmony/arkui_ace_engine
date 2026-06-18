@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 // keep same as the doc
 static const char* SHAPE_TYPE_STRINGS[] = { "Rect", "Circle", "Ellipse", "Line", "Polygon", "Polyline", "Path"};
 
-class ACE_EXPORT ShapeComponent : public RenderComponent, public Measurable {
+class ACE_FORCE_EXPORT ShapeComponent : public RenderComponent, public Measurable {
     DECLARE_ACE_TYPE(ShapeComponent, RenderComponent, Measurable);
 
 public:

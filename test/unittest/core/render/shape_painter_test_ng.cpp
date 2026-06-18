@@ -18,7 +18,7 @@
 #define protected public
 #define private public
 
-#include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/pattern/shape/shape_painter.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"

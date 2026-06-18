@@ -176,6 +176,41 @@ ohos_abc("arkrelativecontainer") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkline") {
+  sources = [ "./src/arkline.ts" ]
+  output_name = "arkline"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkshape") {
+  sources = [ "./src/arkshape.ts" ]
+  output_name = "arkshape"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkrect") {
+  sources = [ "./src/arkrect.ts" ]
+  output_name = "arkrect"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+ohos_abc("arkpolyline") {
+  sources = [ "./src/arkpolyline.ts" ]
+  output_name = "arkpolyline"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkqrcode") {
   sources = [ "./src/arkqrcode.ts" ]
   output_name = "arkqrcode"
@@ -295,6 +330,51 @@ ohos_abc("arkrefresh") {
 ohos_abc("arktextpicker") {
   sources = [ "./src/arktextpicker.ts" ]
   output_name = "arktextpicker"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkcommonshape") {
+  sources = [ "./src/arkcommonshape.ts" ]
+  output_name = "arkcommonshape"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkcircle") {
+  sources = [ "./src/arkcircle.ts" ]
+  output_name = "arkcircle"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkellipse") {
+  sources = [ "./src/arkellipse.ts" ]
+  output_name = "arkellipse"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkpath") {
+  sources = [ "./src/arkpath.ts" ]
+  output_name = "arkpath"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkpolygon") {
+  sources = [ "./src/arkpolygon.ts" ]
+  output_name = "arkpolygon"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

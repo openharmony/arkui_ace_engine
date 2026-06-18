@@ -14,61 +14,32 @@
  */
 #include "core/interfaces/native/node/path_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-
-void SetPathCommands(ArkUINodeHandle node, ArkUI_CharPtr commands, void* resObjPtr)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto commandsVal = std::string(commands);
-    PathModelNG::SetCommands(frameNode, commandsVal);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("PathCommands");
-    if (SystemProperties::ConfigChangePerform() && resObjPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        PathModelNG::SetCommands(frameNode, resObj);
-    }
-}
-
-void ResetPathCommands(ArkUINodeHandle node)
-{
-    std::string outCommands = "";
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    PathModelNG::SetCommands(frameNode, outCommands);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("PathCommands");
-}
 
 namespace NodeModifier {
 const ArkUIPathModifier* GetPathModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIPathModifier modifier = {
-        .setPathCommands = SetPathCommands,
-        .resetPathCommands = ResetPathCommands,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUIPathModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Path");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIPathModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIPathModifier* GetCJUIPathModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIPathModifier modifier = {
-        .setPathCommands = SetPathCommands,
-        .resetPathCommands = ResetPathCommands,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const CJUIPathModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Path");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIPathModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

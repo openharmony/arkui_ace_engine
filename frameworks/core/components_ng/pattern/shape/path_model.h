@@ -22,6 +22,7 @@
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
+constexpr char PATH_ETS_TAG[] = "Path";
 class ACE_FORCE_EXPORT PathModel {
 public:
     static PathModel* GetInstance();

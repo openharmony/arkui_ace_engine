@@ -22,6 +22,7 @@
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
+constexpr char LINE_ETS_TAG[] = "Line";
 class ACE_FORCE_EXPORT LineModel {
 public:
     static LineModel* GetInstance();

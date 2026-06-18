@@ -13,11 +13,42 @@
  * limitations under the License.
  */
 
-class RectModifier extends ArkRectComponent implements AttributeModifier<RectAttribute> {
+class LazyArkRectComponent extends LazyArkCommonShapeComponent {
+  static module: RectComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkRectComponent.module === undefined) {
+      LazyArkRectComponent.module = globalThis.requireNapi('arkui.components.arkrect');
+    }
+    this.lazyComponent = LazyArkRectComponent.module.createComponent(nativePtr, classType);
+  }
+
+  radius(value: Length | Array<any>): this {
+   this.lazyComponent.radius(value);
+   return this;
+  }
+
+  radiusWidth(value: Length): this {
+   this.lazyComponent.radiusWidth(value);
+   return this;
+  }
+
+  radiusHeight(value: Length): this {
+   this.lazyComponent.radiusHeight(value);
+   return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class RectModifier extends LazyArkRectComponent implements AttributeModifier<RectAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: RectAttribute): void {

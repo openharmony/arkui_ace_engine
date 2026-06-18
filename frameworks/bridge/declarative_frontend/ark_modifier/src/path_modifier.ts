@@ -13,11 +13,32 @@
  * limitations under the License.
  */
 
-class PathModifier extends ArkPathComponent implements AttributeModifier<PathAttribute> {
+class LazyArkPathComponent extends LazyArkCommonShapeComponent {
+  static module: PathComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkPathComponent.module === undefined) {
+      LazyArkPathComponent.module = globalThis.requireNapi('arkui.components.arkpath');
+    }
+    this.lazyComponent = LazyArkPathComponent.module.createComponent(nativePtr, classType);
+  }
+
+  commands(value: ResourceStr): this {
+    this.lazyComponent.commands(value);
+    return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class PathModifier extends LazyArkPathComponent implements AttributeModifier<PathAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: PathAttribute): void {

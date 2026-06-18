@@ -13,11 +13,27 @@
  * limitations under the License.
  */
 
-class CircleModifier extends ArkCircleComponent implements AttributeModifier<CircleAttribute> {
+class LazyArkCircleComponent extends LazyArkCommonShapeComponent {
+  static module: CircleComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkCircleComponent.module === undefined) {
+      LazyArkCircleComponent.module = globalThis.requireNapi('arkui.components.arkcircle');
+    }
+    this.lazyComponent = LazyArkCircleComponent.module.createComponent(nativePtr, classType);
+  }
 
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class CircleModifier extends LazyArkCircleComponent implements AttributeModifier<CircleAttribute> {
+    
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: CircleAttribute): void {

@@ -13,11 +13,32 @@
  * limitations under the License.
  */
 
-class PolylineModifier extends ArkPolylineComponent implements AttributeModifier<PolylineAttribute> {
+class LazyArkPolylineComponent extends LazyArkCommonShapeComponent {
+  static module: PolylineComponentModule | undefined = undefined; 
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkPolylineComponent.module === undefined) {
+      LazyArkPolylineComponent.module = globalThis.requireNapi('arkui.components.arkpolyline');
+    }
+    this.lazyComponent = LazyArkPolylineComponent.module.createComponent(nativePtr, classType);
+  }
+
+  points(value: Array<any>): this {
+    this.lazyComponent.points(value);
+    return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class PolylineModifier extends LazyArkPolylineComponent implements AttributeModifier<PolylineAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: PolylineAttribute): void {

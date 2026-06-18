@@ -23,7 +23,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/line_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,9 +32,9 @@ void LineModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LINE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", LINE_ETS_TAG, nodeId);
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::LINE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinePattern>(); });
+        FrameNode::GetOrCreateFrameNode(LINE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinePattern>(); });
     stack->Push(frameNode);
 }
 

@@ -13,11 +13,36 @@
  * limitations under the License.
  */
 
-class LineModifier extends ArkLineComponent implements AttributeModifier<LineAttribute> {
+class LazyArkLineComponent extends LazyArkCommonShapeComponent {
+  static module: LineComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkLineComponent.module === undefined) {
+      LazyArkLineComponent.module = globalThis.requireNapi('arkui.components.arkline');
+    }
+    this.lazyComponent = LazyArkLineComponent.module.createComponent(nativePtr, classType);
+  }
 
+  startPoint(value:	Array<any>): this {
+    this.lazyComponent.startPoint(value);
+    return this;
+  }
+
+  endPoint(value: Array<any>): this {
+    this.lazyComponent.endPoint(value);
+    return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class LineModifier extends LazyArkLineComponent implements AttributeModifier<LineAttribute> {
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: LineAttribute): void {

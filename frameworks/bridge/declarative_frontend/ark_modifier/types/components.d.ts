@@ -146,35 +146,39 @@ declare class ArkWaterFlowComponent extends ArkScrollable implements CommonMetho
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkCircleComponent extends ArkComponent implements CommonMethod<CircleAttribute> {
+declare class ArkCommonShapeComponent extends ArkComponent implements CommonMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkEllipseComponent extends ArkComponent implements CommonMethod<EllipseAttribute> {
+declare class ArkCircleComponent extends ArkCommonShapeComponent implements CommonMethod<CircleAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkLineComponent extends ArkComponent implements CommonMethod<LineAttribute> {
+declare class ArkEllipseComponent extends ArkCommonShapeComponent implements CommonMethod<EllipseAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPathComponent extends ArkComponent implements CommonMethod<PathAttribute> {
+declare class ArkLineComponent extends ArkCommonShapeComponent implements CommonMethod<LineAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPolygonComponent extends ArkComponent implements CommonMethod<PolygonAttribute> {
+declare class ArkPathComponent extends ArkCommonShapeComponent implements CommonMethod<PathAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPolylineComponent extends ArkComponent implements CommonMethod<PolylineAttribute> {
+declare class ArkPolygonComponent extends ArkCommonShapeComponent implements CommonMethod<PolygonAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkRectComponent extends ArkComponent implements CommonMethod<RectAttribute> {
+declare class ArkPolylineComponent extends ArkCommonShapeComponent implements CommonMethod<PolylineAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkShapeComponent extends ArkComponent implements CommonMethod<ShapeAttribute> {
+declare class ArkRectComponent extends ArkCommonShapeComponent implements CommonMethod<RectAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
+declare class ArkShapeComponent extends ArkCommonShapeComponent implements CommonMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 

@@ -18,11 +18,27 @@
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+
+namespace {
+OHOS::Ace::NG::EllipseModelNG* GetEllipseModel()
+{
+    static OHOS::Ace::NG::EllipseModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Ellipse");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find ellipse dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::EllipseModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkEllipseCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
-    OHOS::Ace::EllipseModel::GetInstance()->Create();
+    GetEllipseModel()->Create();
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }

@@ -314,6 +314,143 @@ if (globalThis.QRCode === undefined) {
   }
 }
 
+//@ts-ignore
+if (globalThis.CommonShape === undefined) {
+  globalThis.CommonShape = {
+    create: function() {
+      getUINativeModule().loadNativeModule('CommonShape');
+      let module = globalThis.requireNapi('arkui.components.arkcommonshape');
+      module.exportView();
+      module.loadComponent();
+    },
+    name: 'JSShapeAbstract'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Circle === undefined) {
+  globalThis.Circle = class {
+    static name = 'JSCircle'
+    constructor(value) {
+      return new __Circle__(value);
+    }
+    static create(value) {
+      getUINativeModule().loadNativeModule('Circle');
+      let module = globalThis.requireNapi('arkui.components.arkcircle');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().circle.create(value);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.Ellipse === undefined) {
+  globalThis.Ellipse = class {
+    static name = 'JSEllipse'
+    constructor(value) {
+      return new __Ellipse__(value);
+    }
+    static create(value) {
+      getUINativeModule().loadNativeModule('Ellipse');
+      let module = globalThis.requireNapi('arkui.components.arkellipse');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().ellipse.create(value);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.Shape === undefined) {
+  globalThis.Shape = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Shape');
+      let module = globalThis.requireNapi('arkui.components.arkshape');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().shape.create(value);
+    },
+    name: 'JSShape'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Rect === undefined) {
+  globalThis.Rect = class {
+    static name = 'JSRect'
+    constructor(value) {
+      return new __Rect__(value);
+    }
+    static create(value) {
+      getUINativeModule().loadNativeModule('Rect');
+      let module = globalThis.requireNapi('arkui.components.arkrect');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().rect.create(value);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.Line === undefined) {
+  globalThis.Line = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Line');
+      let module = globalThis.requireNapi('arkui.components.arkline');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().line.create(value);
+    },
+    name: 'JSLine'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Polyline === undefined) {
+  globalThis.Polyline = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Polyline');
+      let module = globalThis.requireNapi('arkui.components.arkpolyline');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().polyline.create(value);
+    },
+    name: 'JSPolyline'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Path === undefined) {
+  globalThis.Path = class {
+    static name = 'JSPath'
+    constructor(value) {
+      return new __Path__(value);
+    }
+    static create(value) {
+      getUINativeModule().loadNativeModule('Path');
+      let module = globalThis.requireNapi('arkui.components.arkpath');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().path.create(value);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.Polygon === undefined) {
+  globalThis.Polygon = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Polygon');
+      let module = globalThis.requireNapi('arkui.components.arkpolygon');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().polygon.create(params);
+    },
+    name: 'JSPolygon'
+  }
+}
+
 // @ts-ignore
 if (globalThis.GridRow === undefined) {
   globalThis.GridRow = {

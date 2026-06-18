@@ -18,11 +18,27 @@
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+
+namespace {
+OHOS::Ace::NG::CircleModelNG* GetCircleModel()
+{
+    static OHOS::Ace::NG::CircleModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Circle");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find circle dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::CircleModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkCircleCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
-    OHOS::Ace::CircleModel::GetInstance()->Create();
+    GetCircleModel()->Create();
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }

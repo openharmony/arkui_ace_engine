@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/shape/shape_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/ellipse_painter.h"
+#include "core/components_ng/pattern/shape/ellipse_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -38,38 +38,7 @@ public:
     {}
     ~EllipsePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
-                auto renderContext = paintWrapper->GetRenderContext();
-                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
-                renderContext->ResetForegroundColorStrategy();
-            }
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (paintWrapper->HasForegroundColor()) {
-            shapePaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
-        } else if (paintWrapper->HasForegroundColorStrategy()) {
-            shapePaintProperty->UpdateFill(Color::FOREGROUND);
-            shapePaintProperty->ResetFillOpacity();
-        }
-        float height = paintWrapper->GetContentSize().Height();
-        float width = paintWrapper->GetContentSize().Width();
-        float dx = paintWrapper->GetContentOffset().GetX();
-        float dy = paintWrapper->GetContentOffset().GetY();
-        RectF rect(dx, dy, width, height);
-        return [rect, shapePaintProperty, paintWrapper](RSCanvas& canvas) {
-                    EllipsePainter::DrawEllipse(canvas, rect, *shapePaintProperty);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(EllipsePaintMethod);
 };

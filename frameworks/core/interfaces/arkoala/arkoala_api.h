@@ -3896,15 +3896,26 @@ struct ArkUICommonShapeModifier {
     void (*resetStrokeLineCap)(ArkUINodeHandle node);
     void (*setStrokeLineJoin)(ArkUINodeHandle node, ArkUI_Int32 lineJoinStyle);
     void (*resetStrokeLineJoin)(ArkUINodeHandle node);
-    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
+    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeWidth)(ArkUINodeHandle node);
-    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
+    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeHeight)(ArkUINodeHandle node);
     void (*setShapeForegroundColor)(ArkUINodeHandle node, ArkUI_Int32 isColor, ArkUI_Uint32 color, void* resObjPtr);
     void (*resetShapeForegroundColor)(ArkUINodeHandle node);
 };
 
+struct ArkUICircleModifier {
+    void (*createCircle)();
+    ArkUINodeHandle (*createCircleFrameNode)(ArkUI_Uint32 nodeId);
+};
+
+struct ArkUIEllipseModifier {
+    void (*createEllipse)();
+    ArkUINodeHandle (*createEllipseFrameNode)(ArkUI_Uint32 nodeId);
+};
+
 struct ArkUILineModifier {
+    void (*createLine)();
     void (*setStartPoint)(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
         ArkUI_CharPtr pointStr[], void* resObjArray);
     void (*resetStartPoint)(ArkUINodeHandle node);
@@ -3914,23 +3925,28 @@ struct ArkUILineModifier {
 };
 
 struct ArkUIPathModifier {
+    void (*createPath)();
     void (*setPathCommands)(ArkUINodeHandle node, ArkUI_CharPtr commands, void* resObjPtr);
     void (*resetPathCommands)(ArkUINodeHandle node);
 };
 
 struct ArkUIPolygonModifier {
+    void (*createPolygon)();
     void (*setPolygonPoints)(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY,
         ArkUI_Int32 length, void* xResObjArray, void* yResObjArray);
     void (*resetPolygonPoints)(ArkUINodeHandle node);
 };
 
 struct ArkUIPolylineModifier {
+    void (*createPolyline)();
     void (*setPoints)(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY,
         ArkUI_Int32 length, void* xResObjArray, void* yResObjArray);
     void (*resetPoints)(ArkUINodeHandle node);
 };
 
 struct ArkUIRectModifier {
+    void (*createRect)();
+    ArkUINodeHandle (*createRectFrameNode)(ArkUI_Uint32 nodeId);
     void (*setRectRadiusWidth)(
         ArkUINodeHandle node, ArkUI_Float32 radiusWidthValue, ArkUI_Int32 radiusWidthUnit, void* resObjPtr);
     void (*resetRectRadiusWidth)(ArkUINodeHandle node);
@@ -3946,6 +3962,7 @@ struct ArkUIRectModifier {
 };
 
 struct ArkUIShapeModifier {
+    void (*createShape)();
     void (*setShapeViewPort)(
         ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits, void* resObjArray);
     void (*resetShapeViewPort)(ArkUINodeHandle node);
@@ -10046,6 +10063,8 @@ struct ArkUINodeModifiers {
     const ArkUIGridItemModifier* (*getGridItemModifier)();
     const ArkUIProgressModifier* (*getProgressModifier)();
     const ArkUICommonShapeModifier* (*getCommonShapeModifier)();
+    const ArkUICircleModifier* (*getCircleModifier)();
+    const ArkUIEllipseModifier* (*getEllipseModifier)();
     const ArkUIShapeModifier* (*getShapeModifier)();
     const ArkUIRectModifier* (*getRectModifier)();
     const ArkUISwiperModifier* (*getSwiperModifier)();

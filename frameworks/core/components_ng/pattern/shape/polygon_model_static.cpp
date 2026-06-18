@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/shape/polygon_model_static.h"
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/polygon_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,7 +30,7 @@ void PolygonModelStatic::SetPoints(FrameNode* frameNode, const std::optional<Sha
 RefPtr<FrameNode> PolygonModelStatic::CreateFrameNode(int32_t nodeId, bool isPolygon)
 {
     return FrameNode::CreateFrameNode(
-        isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG,
+        isPolygon ? POLYGON_ETS_TAG : POLYLINE_ETS_TAG,
         nodeId, AceType::MakeRefPtr<PolygonPattern>(isPolygon));
 }
 

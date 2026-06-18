@@ -57,7 +57,7 @@ public:
         animationOption_ = option;
     }
 
-    AnimatablePath& operator=(const AnimatablePath& newPath);
+    ACE_FORCE_EXPORT AnimatablePath& operator=(const AnimatablePath& newPath);
 private:
     void AnimateTo(std::string endValue);
     void ResetController();

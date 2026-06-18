@@ -22,6 +22,8 @@
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
+constexpr char POLYLINE_ETS_TAG[] = "Polyline";
+constexpr char POLYGON_ETS_TAG[] = "Polygon";
 class ACE_FORCE_EXPORT PolygonModel {
 public:
     static PolygonModel* GetInstance();

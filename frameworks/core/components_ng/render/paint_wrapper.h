@@ -91,11 +91,11 @@ public:
         return geometryNode_->GetContentOffset();
     }
 
-    bool HasForegroundColor() const;
+    ACE_FORCE_EXPORT bool HasForegroundColor() const;
 
-    bool HasForegroundColorStrategy() const;
+    ACE_FORCE_EXPORT bool HasForegroundColorStrategy() const;
 
-    Color GetForegroundColor() const;
+    ACE_FORCE_EXPORT Color GetForegroundColor() const;
 
     ACE_FORCE_EXPORT void FlushOverlayModifier();
 

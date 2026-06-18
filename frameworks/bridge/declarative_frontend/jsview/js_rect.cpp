@@ -16,157 +16,26 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 
 #include "base/log/ace_trace.h"
-#include "bridge/declarative_frontend/jsview/models/rect_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/shape/rect_model.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
-namespace OHOS::Ace {
-RectModel* RectModel::GetInstance()
-{
-#ifdef NG_BUILD
-    static NG::RectModelNG instance;
-    return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::RectModelNG instance;
-        return &instance;
-    } else {
-        static Framework::RectModelImpl instance;
-        return &instance;
-    }
-#endif
-}
-} // namespace OHOS::Ace
-
-namespace OHOS::Ace::Framework {
 namespace {
-constexpr uint32_t HAS_RADIUS_WIDTH = 1;
-constexpr uint32_t HAS_RADIUS_HEIGHT = 1 << 1;
-constexpr uint32_t HAS_RADIUS = 1 << 2;
+OHOS::Ace::NG::RectModelNG* GetRectModel()
+{
+    static OHOS::Ace::NG::RectModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Rect");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find rect dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::RectModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace
 
-void JSRect::Create(const JSCallbackInfo& info)
-{
-    RectModel::GetInstance()->Create();
-    JSShapeAbstract::SetSize(info);
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        auto propertyNames = obj->GetPropertyNames();
-        if (!propertyNames->IsArray()) {
-            return;
-        }
-        auto propertyFlag = 0U;
-        for (size_t i = 0; i < propertyNames->Length(); i++) {
-            JSRef<JSVal> value = propertyNames->GetValueAt(i);
-            if (!value->IsString()) {
-                continue;
-            }
-            auto propertyName = value->ToString();
-            if (propertyName == "radiusWidth") {
-                propertyFlag = propertyFlag | HAS_RADIUS_WIDTH;
-            } else if (propertyName == "radiusHeight") {
-                propertyFlag = propertyFlag | HAS_RADIUS_HEIGHT;
-            } else if (propertyName == "radius") {
-                propertyFlag = propertyFlag | HAS_RADIUS;
-            }
-        }
-        if ((propertyFlag & HAS_RADIUS_WIDTH) == HAS_RADIUS_WIDTH) {
-            JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
-            SetRadiusWidth(radiusWidth);
-        }
-        if ((propertyFlag & HAS_RADIUS_HEIGHT) == HAS_RADIUS_HEIGHT) {
-            JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
-            SetRadiusHeight(radiusHeight);
-        }
-        if ((propertyFlag & HAS_RADIUS) == HAS_RADIUS) {
-            JSRef<JSVal> radius = obj->GetProperty("radius");
-            if (radius->IsNumber() || radius->IsString()) {
-                SetRadiusWithJsVal(nullptr, radius);
-            } else if (radius->IsObject()) {
-                auto radiusObj = JSRef<JSObject>::Cast(radius);
-                auto resType = radiusObj->GetPropertyValue("type", -1); //-1 means unkown resource type
-                if (resType == -1) {
-                    SetRadiusWithArrayValue(nullptr, radius);
-                } else {
-                    SetRadiusWithJsVal(nullptr, radius);
-                }
-            }
-        }
-        info.SetReturnValue(info.This());
-    }
-}
-
-void JSRect::JsRadiusWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    SetRadiusWidth(info[0]);
-}
-
-void JSRect::JsRadiusHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    SetRadiusHeight(info[0]);
-}
-
-void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
-{
-    CalcDimension value(0.0f);
-    RefPtr<ResourceObject> radiusWidthResObj;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ParseJsDimensionVp(jsVal, value, radiusWidthResObj);
-    } else {
-        if (!ParseJsDimensionVpNG(jsVal, value, radiusWidthResObj)) {
-            value.SetValue(0.0f);
-        }
-    }
-    UnRegisterResource("RectRadiusWidth");
-    if (SystemProperties::ConfigChangePerform() && radiusWidthResObj) {
-        RectModel::GetInstance()->SetRadiusWidth(radiusWidthResObj);
-    }
-    RectModel::GetInstance()->SetRadiusWidth(value);
-}
-
-void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
-{
-    CalcDimension value(0.0f);
-    RefPtr<ResourceObject> radiusHeightResObj;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ParseJsDimensionVp(jsVal, value, radiusHeightResObj);
-    } else {
-        if (!ParseJsDimensionVpNG(jsVal, value, radiusHeightResObj)) {
-            value.SetValue(0.0f);
-        }
-    }
-    UnRegisterResource("RectRadiusHeight");
-    if (SystemProperties::ConfigChangePerform() && radiusHeightResObj) {
-        RectModel::GetInstance()->SetRadiusHeight(radiusHeightResObj);
-    }
-    RectModel::GetInstance()->SetRadiusHeight(value);
-}
-
-void JSRect::SetRadius(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    CalcDimension value(0.0f);
-    RectModel::GetInstance()->SetRadiusWidth(value);
-    RectModel::GetInstance()->SetRadiusHeight(value);
-    if (info[0]->IsArray()) {
-        SetRadiusWithArrayValue(nullptr, info[0]);
-        info.SetReturnValue(info.This());
-        return;
-    }
-    if (info[0]->IsNumber() || info[0]->IsString() || info[0]->IsObject()) {
-        SetRadiusWithJsVal(nullptr, info[0]);
-        info.SetReturnValue(info.This());
-    }
-}
+namespace OHOS::Ace::Framework {
 
 void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
@@ -185,12 +54,6 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
         shapeRect->SetRadiusHeight(value, option);
         return;
     }
-    UnRegisterResource("RectRadius");
-    if (SystemProperties::ConfigChangePerform() && radiusResObj) {
-        RectModel::GetInstance()->SetRadius(radiusResObj);
-    }
-    RectModel::GetInstance()->SetRadiusWidth(value);
-    RectModel::GetInstance()->SetRadiusHeight(value);
 }
 
 void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
@@ -232,11 +95,6 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const J
                 radiusYValue.SetValue(0.0f);
             }
         }
-        std::string key = std::string("RectRadius") + RADIUS_TYPES[i];
-        UnRegisterResource(key);
-        if (SystemProperties::ConfigChangePerform() && (radiusXResObj || radiusYResObj)) {
-            RectModel::GetInstance()->SetRadiusValue(radiusXValue, radiusYValue, radiusXResObj, radiusYResObj, i);
-        }
         SetRadiusValue(shapeRect, radiusXValue, radiusYValue, i);
     }
 }
@@ -245,9 +103,7 @@ void JSRect::SetRadiusValue(
     const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index)
 {
     if (shapeRect) {
-        RectModel::GetInstance()->SetShapeRectRadius(shapeRect, radiusX, radiusY, index);
-    } else {
-        RectModel::GetInstance()->SetRadiusValue(radiusX, radiusY, index);
+        GetRectModel()->SetShapeRectRadius(shapeRect, radiusX, radiusY, index);
     }
 }
 
@@ -380,11 +236,7 @@ void JSRect::DestructorCallback(JSRect* jsRect)
 
 void JSRect::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSRect>::Declare("Rect");
-    JSClass<JSRect>::StaticMethod("create", &JSRect::Create);
-    JSClass<JSRect>::StaticMethod("radiusWidth", &JSRect::JsRadiusWidth);
-    JSClass<JSRect>::StaticMethod("radiusHeight", &JSRect::JsRadiusHeight);
-    JSClass<JSRect>::StaticMethod("radius", &JSRect::SetRadius);
+    JSClass<JSRect>::Declare("__Rect__");
 
     JSClass<JSRect>::CustomMethod("width", &JSShapeAbstract::ObjectWidth);
     JSClass<JSRect>::CustomMethod("height", &JSShapeAbstract::ObjectHeight);
@@ -395,12 +247,6 @@ void JSRect::JSBind(BindingTarget globalObj)
     JSClass<JSRect>::CustomMethod("radius", &JSRect::ObjectRadius);
     JSClass<JSRect>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
     JSClass<JSRect>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
-
-    JSClass<JSRect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSRect>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSRect>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSRect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSRect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
 
     JSClass<JSRect>::InheritAndBind<JSShapeAbstract>(
         globalObj, JSRect::ConstructorCallback, JSRect::DestructorCallback);

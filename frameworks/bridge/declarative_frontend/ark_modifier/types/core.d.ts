@@ -162,6 +162,13 @@ interface TabsAttribute extends CommonAttribute {}
 interface TabContentAttribute extends CommonAttribute {}
 interface UIExtensionComponentAttribute extends CommonAttribute {}
 interface WaterFlowAttribute extends CommonAttribute {}
+interface ViewportRect {
+    x?: Length;
+    y?: Length;
+    width?: Length;
+    height?: Length;
+}
+
 interface ShapeAttribute extends CommonAttribute {}
 interface CommonShapeMethod<T> extends CommonAttribute {}
 interface CircleAttribute extends CommonAttribute {}

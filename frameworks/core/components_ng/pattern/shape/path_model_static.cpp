@@ -18,13 +18,12 @@
 #include "core/components_ng/pattern/shape/path_model_static.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> PathModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(V2::PATH_ETS_TAG, nodeId, AceType::MakeRefPtr<PathPattern>());
+    return FrameNode::CreateFrameNode(PATH_ETS_TAG, nodeId, AceType::MakeRefPtr<PathPattern>());
 }
 
 } // namespace OHOS::Ace::NG
