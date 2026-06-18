@@ -696,18 +696,19 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Lev
  */
 HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest001, TestSize.Level1)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    int32_t addId = 100;
-    bool called = false;
-    CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+    Create([](CounterModelNG model) {
+        bool called = false;
+        CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+        model.SetOnInc(std::move(onInc));
+    });
 
-    CounterModelNG model;
-    model.SetOnInc(std::move(onInc));
-
-    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
 
     EXPECT_EQ(gestureHub->parallelCombineClick, false);
+    EXPECT_NE(gestureHub->clickEventActuator_->userCallback_, nullptr);
 }
 
 /**
