@@ -87,6 +87,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "$ace_root/test/mock/frameworks/core/common/resource/mock_resource_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/resource/mock_resource_parse_utils.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/frameworks/core/components/common/layout/mock_screen_system_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components/common/properties/mock_color.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/animation/mock_geometry_transition.cpp",

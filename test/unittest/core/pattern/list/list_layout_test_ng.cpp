@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"

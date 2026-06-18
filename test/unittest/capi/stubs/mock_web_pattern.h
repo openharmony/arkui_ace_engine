@@ -33,6 +33,7 @@ public:
     using SetWebDetachCallback = std::function<void(int32_t)>;
     using OnControllerAttachedCallback = std::function<void()>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnFullScreenVideoOverlayEnterCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     ~WebPattern() override;
@@ -151,6 +152,14 @@ public:
 
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
     void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback) {}
+    void SetOnFullScreenVideoOverlayEnterCallback(OnFullScreenVideoOverlayEnterCallback&& callback)
+    {
+        onFullScreenVideoOverlayEnterCallback_ = std::move(callback);
+    }
+    OnFullScreenVideoOverlayEnterCallback GetOnFullScreenVideoOverlayEnterCallback() const
+    {
+        return onFullScreenVideoOverlayEnterCallback_;
+    }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback);
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
@@ -290,6 +299,7 @@ private:
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     OnCreateMenuCallback onCreateMenuCallback_ = nullptr;
     OnMenuItemClickCallback onMenuItemClick_ = nullptr;
+    OnFullScreenVideoOverlayEnterCallback onFullScreenVideoOverlayEnterCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H

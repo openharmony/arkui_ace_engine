@@ -818,4 +818,6 @@ void AccessibilityProperty::ResetAccessibilityActionOptions()
 }
 
 void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
+
+void AccessibilityProperty::SetHost(const WeakPtr<FrameNode>&) {}
 } // namespace OHOS::Ace::NG
