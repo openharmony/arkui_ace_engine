@@ -10899,8 +10899,8 @@ void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
@@ -13392,8 +13392,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
