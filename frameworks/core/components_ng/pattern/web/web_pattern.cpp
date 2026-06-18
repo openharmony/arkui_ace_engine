@@ -5341,7 +5341,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         touchPointY = touchPoint.y;
         if (info.GetSourceTool() == SourceTool::PEN &&
             delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
-            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(GetInspectorId(), touchPointX, touchPointY)) {
             TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
             isNeedInterceptedTouchEvent_ = true;
             WebRequestFocus();

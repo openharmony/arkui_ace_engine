@@ -60,7 +60,7 @@ public:
         const WeakPtr<NG::LayoutInfoInterface>& layoutInfo);
     ACE_FORCE_EXPORT void RemoveTextFieldFrameNode(const int32_t id);
 
-    bool IsNeedInterceptedTouchEventForWeb(float x, float y);
+    bool IsNeedInterceptedTouchEventForWeb(const std::string& resourceName, float x, float y);
 
     int32_t GetDefaultNodeId() const
     {
