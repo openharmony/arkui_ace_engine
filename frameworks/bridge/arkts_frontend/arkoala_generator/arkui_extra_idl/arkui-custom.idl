@@ -298,3 +298,9 @@ interface ThemeOps {
     static void applyThemeScopeIdToNode(pointer ptr, i32 themeScopeId);
 };
 
+[Entity=Class]
+interface LengthMetricsExt {
+    attribute LengthMetrics metrics;
+    attribute boolean refresh;
+}
+

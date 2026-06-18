@@ -17,7 +17,7 @@ import { int32 } from "@koalaui/common";
 import { KPointer, nullptr, MaterializedBaseTag } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
-import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
+import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten, LengthMetricsExt } from '#generated'
 import { TouchEvent, LayoutPolicy, LayoutPolicyInternal } from '../component/common'
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
@@ -980,5 +980,16 @@ export namespace extractors {
         return scrollableTargetInfoObj
     }
     return new EventTargetInfo(MaterializedBaseTag.NOP, ptr)
+  }
+
+  export function transform_Ark_LengthMetrics_to_Ark_LengthMetricsExt(lengthMetrics: LengthMetrics): LengthMetricsExt {
+    const lengthMetricsExt = new LengthMetricsExt()
+    lengthMetricsExt.metrics = lengthMetrics;
+    lengthMetricsExt.refresh = false;
+    return lengthMetricsExt
+  }
+
+  export function transform_Ark_LengthMetricsExt_to_Ark_LengthMetrics(lengthMetricsExt: LengthMetricsExt): LengthMetrics {
+    return lengthMetricsExt.metrics
   }
 }
