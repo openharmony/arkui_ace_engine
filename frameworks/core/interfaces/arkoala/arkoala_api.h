@@ -888,6 +888,11 @@ struct ArkUIDimensionType {
     ArkUI_Int32 units;
 };
 
+struct ArkUICalcDimensionType {
+    ArkUI_Float64 value;
+    ArkUI_Int32 units;
+};
+
 struct ArkUIOptionalDimensionType {
     ArkUI_Int32 isSet;
     ArkUIDimensionType dimension;
@@ -1228,6 +1233,64 @@ struct ArkUIBadgeParam {
     ArkUI_Bool enableAutoAvoidance;
     ArkUI_Uint32 outerBorderColor;
     struct ArkUIDimensionType outerBorderWidth;
+};
+
+struct ArkUIBadgeJSParam {
+    ArkUI_CharPtr badgeValue = nullptr;
+    ArkUI_Uint32 badgeCount;
+    ArkUI_Uint32 badgeMaxCount;
+    ArkUI_Bool isPositionXy;
+    ArkUI_Bool isDefaultFontSize = true;
+    ArkUI_Bool isDefaultBadgeSize = true;
+    ArkUI_Int32 position;
+    ArkUI_Int32 fontWeight;
+    ArkUI_Uint32 badgeColor;
+    ArkUI_Uint32 borderColor;
+    ArkUI_Uint32 textColor;
+    struct ArkUIDimensionType positionX;
+    struct ArkUIDimensionType positionY;
+    struct ArkUIDimensionType badgeSize;
+    struct ArkUIDimensionType borderWidth;
+    struct ArkUICalcDimensionType fontSize;
+    ArkUI_Bool enableAutoAvoidance;
+    ArkUI_Uint32 outerBorderColor;
+    struct ArkUIDimensionType outerBorderWidth;
+    ArkUI_Bool badgePositionXByUser = false;
+    ArkUI_Bool badgePositionYByUser = false;
+    ArkUI_Bool badgeTextColorByUser = false;
+    ArkUI_Bool badgeFontSizeByUser = false;
+    ArkUI_Bool badgeCircleSizeByUser = false;
+    ArkUI_Bool badgeColorByUser = false;
+    ArkUI_Bool badgeBorderWidthByUser = false;
+    ArkUI_Bool badgeBorderColorByUser = false;
+    ArkUI_Bool badgeOuterBorderWidthByUser = false;
+    ArkUI_Bool badgeOuterBorderColorByUser = false;
+    ArkUI_VoidPtr resourceBadgeValueObject = nullptr;
+    ArkUI_VoidPtr resourceColorObject = nullptr;
+    ArkUI_VoidPtr resourceBadgeColorObject = nullptr;
+    ArkUI_VoidPtr resourceBorderColorObject = nullptr;
+    ArkUI_VoidPtr resourceOuterBorderColorObject = nullptr;
+    ArkUI_VoidPtr resourceFontWeightObject = nullptr;
+    ArkUI_VoidPtr resourceBadgeSizeObject = nullptr;
+    ArkUI_VoidPtr resourceFontSizeObject = nullptr;
+    ArkUI_VoidPtr resourceBadgePositionXObject = nullptr;
+    ArkUI_VoidPtr resourceBadgePositionYObject = nullptr;
+    ArkUI_VoidPtr resourceBorderWidthObject = nullptr;
+    ArkUI_VoidPtr resourceOuterBorderWidthObject = nullptr;
+    ArkUI_Bool hasBadgeValue = false;
+    ArkUI_Bool hasBadgeCount = false;
+    ArkUI_Bool hasBadgeMaxCount = false;
+    ArkUI_Bool hasPosition = false;
+    ArkUI_Bool hasTextColor = false;
+    ArkUI_Bool hasFontWeight = false;
+    ArkUI_Bool hasBadgeColor = false;
+    ArkUI_Bool hasBadgeSize = false;
+    ArkUI_Bool hasFontSize = false;
+    ArkUI_Bool hasBorderColor = false;
+    ArkUI_Bool hasBorderWidth = false;
+    ArkUI_Bool hasOuterBorderColor = false;
+    ArkUI_Bool hasOuterBorderWidth = false;
+    ArkUI_Bool hasEnableAutoAvoidance = false;
 };
 
 struct ArkUI_StyledString_Descriptor {
@@ -7242,6 +7305,8 @@ struct ArkUIBadgeModifier {
     void (*setBadgeParamWithNumber)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_Int32 count,
         ArkUI_Bool countHasValue, ArkUI_Int32 maxCount);
     void (*setBadgeParamWithString)(ArkUINodeHandle node, const struct ArkUIBadgeParam* style, ArkUI_CharPtr value);
+    ArkUINodeHandle (*createBadgeFrameNode)(ArkUI_Uint32 nodeId);
+    void (*createBadge)(const struct ArkUIBadgeJSParam* badgeJSParam);
 };
 
 struct ArkUIRefreshModifier {
@@ -7399,13 +7464,15 @@ struct ArkUILoadingProgressModifier {
     ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetColor)(ArkUINodeHandle node);
+    void (*resetColor)(ArkUINodeHandle node, bool isJsView);
     ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
     void (*setForegroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr);
-    void (*resetForegroundColor)(ArkUINodeHandle node);
+    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr, bool isJsView);
+    void (*resetForegroundColor)(ArkUINodeHandle node, bool isJsView, void* foregroundColorRawPtr);
+    ArkUINodeHandle (*createLoadingProgressFrameNode)(ArkUI_Uint32 nodeId);
+    void (*createLoadingProgress)();
 };
 
 struct ArkUIImageAnimatorModifier {

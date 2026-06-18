@@ -492,6 +492,7 @@ type RadioConfiguration = object;
 type DataPanelConfiguration = object;
 type DataPanelShadowOptions = object;
 type GaugeConfiguration = object;
+type LoadingProgressConfiguration = object;
 type GaugeIndicatorOptions = object;
 type StarStyleOptions = object;
 type ShaderStyle = object;

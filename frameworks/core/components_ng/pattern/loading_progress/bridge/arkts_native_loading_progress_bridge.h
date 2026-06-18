@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_LOADING_PROGESS_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_LOADING_PROGESS_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_BRIDGE_ARKTS_NATIVE_LOADING_PROGRESS_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_BRIDGE_ARKTS_NATIVE_LOADING_PROGRESS_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class LoadingProgressBridge {
 public:
+    static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static ArkUINativeModuleValue CreateLoadingProgress(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableLoading(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -31,4 +33,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_LOADING_PROGESS__BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_BRIDGE_ARKTS_NATIVE_LOADING_PROGRESS_BRIDGE_H

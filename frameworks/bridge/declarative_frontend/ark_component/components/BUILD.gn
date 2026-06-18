@@ -103,8 +103,10 @@ foreach(item, arkui_modules) {
 special_components = [
   "arkimagespan",
   "arkgauge",
+  "arkbadge",
   "arkdatapanel",
   "arktextclock",
+  "arkloadingprogress",
   "arkpatternlock",
   "arksymbolspan",
   "arkcounter",

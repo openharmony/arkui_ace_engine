@@ -23,19 +23,34 @@ void LoadingProgressModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LOADING_PROGRESS_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", LOADING_PROGRESS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
+        LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);
     auto pros = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
     if (pros) {
         pros->ResetColorSetByUser();
     }
 }
+
+void LoadingProgressModelNG::CreateModel()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", LOADING_PROGRESS_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
+    stack->Push(frameNode);
+    auto pros = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    if (pros) {
+        pros->ResetColorSetByUser();
+    }
+}
+
 RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::CreateFrameNode(
-        V2::LOADING_PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<LoadingProgressPattern>());
+        LOADING_PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<LoadingProgressPattern>());
 }
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
@@ -123,6 +138,19 @@ void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingPro
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void LoadingProgressModelNG::ResetColor(FrameNode* frameNode, bool isJsView)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+    if (!isJsView) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true, frameNode);
+    } else {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, false, frameNode);
+    }
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
 }
 
 void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
+#include "loading_progress_model_impl.h"
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/progress/loading_progress_component.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 void LoadingProgressModelImpl::Create()

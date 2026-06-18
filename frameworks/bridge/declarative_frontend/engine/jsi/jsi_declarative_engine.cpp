@@ -807,6 +807,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Badge", "arkui.components.arkbadge" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
         { "Checkbox", "arkui.components.arkcheckbox" },
@@ -833,6 +834,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
         { "Slider", "arkui.components.arkslider" },
+        { "LoadingProgress", "arkui.components.arkloadingprogress" },
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },

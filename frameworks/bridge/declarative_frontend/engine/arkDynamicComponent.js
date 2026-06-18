@@ -519,6 +519,20 @@ if (globalThis.Search === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Badge === undefined) {
+  globalThis.Badge = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("Badge");
+      let module = globalThis.requireNapi('arkui.components.arkbadge');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().badge.create(params);
+    },
+    name: 'JSBadge'
+  };
+}
+
+// @ts-ignore
 if (globalThis.ImageSpan === undefined) {
   globalThis.ImageSpan = {
     create: function (params) {
@@ -575,6 +589,20 @@ if (globalThis.LazyColumnLayout === undefined) {
       getUINativeModule().lazyColumnLayout.create();
     }
   }
+}
+
+// @ts-ignore
+if (globalThis.LoadingProgress === undefined) {
+  globalThis.LoadingProgress = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('LoadingProgress');
+      let module = globalThis.requireNapi('arkui.components.arkloadingprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().loadingProgress.create(params);
+    },
+ 	name: 'JSLoadingProgress'
+  };
 }
 
 // @ts-ignore

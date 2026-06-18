@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,31 @@
  * limitations under the License.
  */
 
-#include "node_loading_progress_modifier.h"
+#include "loading_progress_dynamic_modifier_multi_thread.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/interfaces/native/node/node_loading_progress_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node)
+void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node, bool isJsView)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipelineContext = frameNode->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColorByUser(frameNode, false);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) && isJsView) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            LoadingProgressModelNG::ResetColor(frameNode);
+            LoadingProgressModelNG::SetColorByUser(frameNode, false);
+        } else {
+            auto progressTheme = frameNode->GetTheme<ProgressTheme>();
+            CHECK_NULL_VOID(progressTheme);
+            Color progressColor = progressTheme->GetLoadingColor();
+            LoadingProgressModelNG::SetColor(frameNode, progressColor);
+            LoadingProgressModelNG::SetColorByUser(frameNode, false);
+        }
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) && !isJsView) {
+        LoadingProgressModelNG::ResetColor(frameNode, isJsView);
     }
     if (SystemProperties::ConfigChangePerform()) {
         LoadingProgressModelNG::SetColorByUser(frameNode, false);

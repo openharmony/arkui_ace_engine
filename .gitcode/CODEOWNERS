@@ -1122,8 +1122,6 @@ frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp @ArkUI_abilit
 frameworks/bridge/declarative_frontend/jsview/js_animatable_arithmetic.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_animator.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_animator.h @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_badge.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_badge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_base_node.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_base_node.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_blank.cpp @arkuilayout1
@@ -1245,8 +1243,6 @@ frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_item.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_loading_progress.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp @harylee

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
-void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node);
+void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node, bool isJsView);
 } // namespace OHOS::Ace::NG
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_FRAME_NODE_MODIFIER_MULTI_THREAD_H

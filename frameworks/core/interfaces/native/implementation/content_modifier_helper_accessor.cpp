@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/loading_progress/bridge/content_modifier_helper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
@@ -146,6 +147,20 @@ const ArkUIToggleStaticContentModifier* GetToggleContentModifier()
         }
         cachedModifier =
             reinterpret_cast<const ArkUIToggleStaticContentModifier*>(module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
+const ArkUILoadingProgressContentModifier* GetLoadingProgressContentModifier()
+{
+    static const ArkUILoadingProgressContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find loadingprogress dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUILoadingProgressContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
     }
     return cachedModifier;
 }
@@ -277,31 +292,17 @@ void ContentModifierLoadingProgressImpl(Ark_NativePointer node,
                                         const Ark_Object* contentModifier,
                                         const LoadingProgressModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(contentModifier);
-    CHECK_NULL_VOID(builder);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_LoadingProgressConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.enableLoading = Converter::ArkValue<Ark_Boolean>(config.enableloading_);
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    LoadingProgressModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetLoadingProgressContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierLoadingProgressImpl(node, contentModifier, builder);
 }
 void ResetContentModifierLoadingProgressImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetLoadingProgressContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierLoadingProgressImpl(node);
 }
 void ContentModifierProgressImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,

@@ -312,7 +312,7 @@ namespace Converter {
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
     std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
-    std::optional<Dimension> OptConvertFromF64ResourceStr(
+    ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromF64ResourceStr(
         const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
     Font OptConvertFromFont(const Opt_arkui_component_units_Font& src, bool isSubTabStyle);
     ACE_FORCE_EXPORT std::optional<Color> OptConvertColorForMaterial(const Opt_ResourceColor* value);

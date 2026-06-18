@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,55 +13,30 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_static.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "base/log/log_wrapper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LoadingProgressModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = LoadingProgressModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // LoadingProgressModifier
-namespace LoadingProgressInterfaceModifier {
-void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
-{
-    // Keep empty, since no options
-}
-} // LoadingProgressInterfaceModifier
-namespace LoadingProgressAttributeModifier {
-void SetColorImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
-    LoadingProgressModelStatic::SetColor(frameNode, color);
-}
-void SetEnableLoadingImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value).value_or(true);
-    LoadingProgressModelNG::SetEnableLoading(frameNode, convValue);
-}
-} // LoadingProgressAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressStaticModifier();
+#endif
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
-    static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
-        LoadingProgressModifier::ConstructImpl,
-        LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
-        LoadingProgressAttributeModifier::SetColorImpl,
-        LoadingProgressAttributeModifier::SetEnableLoadingImpl,
-    };
-    return &ArkUILoadingProgressModifierImpl;
+    static const GENERATED_ArkUILoadingProgressModifier* cachedModifier = nullptr;
+
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetLoadingProgressStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUILoadingProgressModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
 }
 
 }

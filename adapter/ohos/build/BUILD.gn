@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
+  "badge",
   "container_reader",
   "dynamiclayout",
   "counter",
@@ -39,6 +40,7 @@ component_modules = [
   "time_picker",
   "calendar_picker",
   "indexer",
+  "loading_progress",
   "symbol",
   "span",
   "rich_editor",
