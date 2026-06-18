@@ -19,9 +19,11 @@
 #include "core/components_ng/pattern/progress/progress_model.h"
 
 namespace OHOS::Ace::NG {
+const char PROGRESS_ETS_TAG[] = "Progress";
+const char TEXT_ETS_TAG[] = "Text";
 using ProgressMakeCallback = std::function<RefPtr<FrameNode>(const ProgressConfiguration& config)>;
 
-class ACE_EXPORT ProgressModelNG : public OHOS::Ace::ProgressModel {
+class ACE_FORCE_EXPORT ProgressModelNG : public OHOS::Ace::ProgressModel {
 public:
     void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) override;
     void SetValue(double value) override;
@@ -145,6 +147,10 @@ public:
     static void CreateWithResourceObj(FrameNode* frameNode, JsProgressResourceType jsResourceType,
         const RefPtr<ResourceObject>& resObj);
     static void SetGradientColorByUser(FrameNode* frameNode, bool value);
+    static void SetBorderColorSetByUser(FrameNode* frameNode, bool value);
+    static void SetCapsuleStyleSetByUser(FrameNode* frameNode, bool value);
+    static void SetGradientColorResObj(FrameNode* frameNode, const NG::Gradient& value);
+    static void CreateProgressModelNG(double min, double value, double cachedValue, double max, NG::ProgressType type);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

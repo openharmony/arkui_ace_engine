@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,25 +21,31 @@
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components/common/properties/text_enums.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char TEXT_ETS_TAG[] = "Text";
+const char TEXTTIMER_ETS_TAG[] = "TextTimer";
+} // namespace
+
 RefPtr<TextTimerController> TextTimerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTTIMER_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", TEXTTIMER_ETS_TAG, nodeId);
     auto textTimerNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+        TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
     ACE_UINODE_TRACE(textTimerNode);
 
     auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
     if (textTimerNode->GetChildren().empty()) {
         auto textId = textTimerPattern->GetTextId();
         auto textNode = FrameNode::GetOrCreateFrameNode(
-            V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+            TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(textNode, nullptr);
         textNode->MarkModifyDone();
         textNode->MountToParent(textTimerNode);
@@ -83,7 +89,7 @@ void TextTimerModelNG::SetFontSize(const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode->GetTag() == TEXT_ETS_TAG);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
@@ -98,7 +104,7 @@ void TextTimerModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode->GetTag() == TEXT_ETS_TAG);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColorByRender(value);
@@ -197,7 +203,7 @@ void TextTimerModelNG::SetOnTimerMultiThread(FrameNode* frameNode, std::function
 RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto textTimerNode =
-        FrameNode::CreateFrameNode(V2::TEXTTIMER_ETS_TAG, nodeId, AceType::MakeRefPtr<TextTimerPattern>());
+        FrameNode::CreateFrameNode(TEXTTIMER_ETS_TAG, nodeId, AceType::MakeRefPtr<TextTimerPattern>());
     CHECK_NULL_RETURN(textTimerNode, nullptr);
     ACE_UINODE_TRACE(textTimerNode);
     auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
@@ -205,7 +211,7 @@ RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
     if (textTimerNode->GetChildren().empty()) {
         auto textId = textTimerPattern->GetTextId();
         auto textNode = FrameNode::GetOrCreateFrameNode(
-            V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+            TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(textNode, nullptr);
         textNode->MarkModifyDone();
         textNode->MountToParent(textTimerNode);
@@ -246,7 +252,7 @@ void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode->GetTag() == TEXT_ETS_TAG);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColorByRender(value);
@@ -261,7 +267,7 @@ void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode->GetTag() == TEXT_ETS_TAG);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
@@ -491,6 +497,34 @@ void TextTimerModelNG::SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUse
 {
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelNG::CreateTextTimerModel()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", TEXTTIMER_ETS_TAG, nodeId);
+    auto textTimerNode = FrameNode::GetOrCreateFrameNode(
+        TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+    ACE_UINODE_TRACE(textTimerNode);
+
+    auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
+    if (textTimerNode->GetChildren().empty()) {
+        auto textId = textTimerPattern->GetTextId();
+        auto textNode = FrameNode::GetOrCreateFrameNode(
+            TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(textNode);
+        textNode->MarkModifyDone();
+        textNode->MountToParent(textTimerNode);
+    }
+    stack->Push(textTimerNode);
+    auto textTimerLayoutProperty = textTimerNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    if (textTimerLayoutProperty) {
+        textTimerLayoutProperty->ResetTextColorSetByUser();
+        textTimerLayoutProperty->ResetTextFontSizeSetByUser();
+        textTimerLayoutProperty->ResetTextFontWeightSetByUser();
+        textTimerLayoutProperty->ResetTextFontFamilySetByUser();
     }
 }
 } // namespace OHOS::Ace::NG

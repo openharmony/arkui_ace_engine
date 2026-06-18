@@ -107,6 +107,8 @@ special_components = [
   "arkdatapanel",
   "arktextclock",
   "arkloadingprogress",
+  "arkprogress",
+  "arktexttimer",
   "arkpatternlock",
   "arksymbolspan",
   "arkcounter",

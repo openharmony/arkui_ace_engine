@@ -305,7 +305,7 @@ namespace Converter {
     template<typename T, typename NumberType = Ark_Float64>
     ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes(
         const T& src, DimensionUnit defaultUnit = DimensionUnit::FP);
-    std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
+    ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
     std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::FP);

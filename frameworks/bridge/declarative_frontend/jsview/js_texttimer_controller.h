@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,42 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_CONTROLLER_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_CONTROLLER_H
 
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/common/container_consts.h"
 #include "core/components/texttimer/texttimer_controller.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
 namespace OHOS::Ace::Framework {
-class JSTextTimer : public JSViewAbstract {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-
-protected:
-    static void SetFormat(const JSCallbackInfo& info);
-    static void SetTextColor(const JSCallbackInfo& info);
-    static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const JSCallbackInfo& info);
-    static void SetFontStyle(int32_t value);
-    static void SetFontFamily(const JSCallbackInfo& info);
-    static void SetFontDefault();
-    static void SetTextShadow(const JSCallbackInfo& info);
-    static void OnTimer(const JSCallbackInfo& info);
-};
-
 class JSTextTimerController final : public Referenced {
 public:
     JSTextTimerController() = default;
     ~JSTextTimerController() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& info);
+    static void JSBind(panda::Local<panda::ObjectRef> globalObj);
+    static void Constructor(const JsiCallbackInfo& info);
     static void Destructor(JSTextTimerController* timerController);
 
-    void Start(const JSCallbackInfo& info);
-    void Pause(const JSCallbackInfo& info);
-    void Reset(const JSCallbackInfo& info);
+    void Start(const JsiCallbackInfo& info);
+    void Pause(const JsiCallbackInfo& info);
+    void Reset(const JsiCallbackInfo& info);
 
     void SetController(const RefPtr<TextTimerController>& controller)
     {
@@ -72,4 +58,4 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextTimerController);
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTTIMER_CONTROLLER_H
