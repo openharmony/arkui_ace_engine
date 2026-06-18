@@ -33,7 +33,6 @@ enum class InstanceIdGenReason : uint32_t {
     SINGLETON,
     FOREGROUND,
     UNDEFINED,
-    LOCAL,
 };
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
@@ -62,7 +61,6 @@ public:
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
     using ContainerScopeLogCallback = void (*)(ContainerScopeLogLevel level, const char* message);
 #endif
-    using CheckRunOnUIThreadFunc = bool (*)(int32_t, bool);
     template<typename T>
     explicit ContainerScope(T) = delete;
 
@@ -80,8 +78,8 @@ public:
     static int32_t SingletonId();
     static int32_t RecentActiveId();
     static int32_t RecentForegroundId();
-    static int32_t SafelyId(bool checkThread = true);
-    static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason(bool checkThread = true);
+    static int32_t SafelyId();
+    static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason();
 
     // Convert InstanceIdGenReason enum to human-readable description
     static const std::string ReasonToDescription(InstanceIdGenReason reason);
@@ -98,7 +96,6 @@ public:
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);
-    static void RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc);
     static void CheckIdChange(int32_t id);
 
     // Isolated thread management for dc/card scenarios.

@@ -37,12 +37,7 @@
 
 namespace OHOS::Ace {
 
-Container::Container() : state_(FrontendState::UNDEFINE)
-{
-    static std::once_flag registerThreadCheckOnce;
-    std::call_once(registerThreadCheckOnce,
-        []() { ContainerScope::RegisterThreadCheckFunc(&Container::CheckRunOnThreadByThreadId); });
-}
+Container::Container() : state_(FrontendState::UNDEFINE) {}
 
 Container::~Container() = default;
 
