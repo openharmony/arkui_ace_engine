@@ -2952,8 +2952,13 @@ void SetTailIndents(ArkUINodeHandle node, const ArkUI_Float32* values,
     NG::TailIndents tailIndents;
     if (values != nullptr && units != nullptr && length > 0) {
         NG::TailIndentsArray indentArray;
+        indentArray.reserve(length);
         for (ArkUI_Int32 i = 0; i < length; i++) {
-            indentArray.emplace_back(Dimension(values[i], static_cast<DimensionUnit>(units[i])));
+            Dimension dim(values[i], static_cast<DimensionUnit>(units[i]));
+            if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                dim.Reset();
+            }
+            indentArray.emplace_back(dim);
         }
         tailIndents.indentsArray = indentArray;
     }

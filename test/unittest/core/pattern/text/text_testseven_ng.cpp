@@ -1514,4 +1514,159 @@ HWTEST_F(TextTestSevenNg, SetSelectedBackgroundColor001, TestSize.Level1)
     EXPECT_EQ(resultColor.GetGreen(), 0xFF);
     EXPECT_EQ(resultColor.GetBlue(), 0x00);
 }
+
+/**
+ * @tc.name: GetTailIndentInJson001
+ * @tc.desc: Test GetTailIndentInJson with single positive tail indent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set single positive tail indent and call GetTailIndentInJson.
+     * @tc.expected: returns non-empty JSON array string.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.find("20") != std::string::npos);
+}
+
+/**
+ * @tc.name: GetTailIndentInJson002
+ * @tc.desc: Test GetTailIndentInJson with multiple tail indent values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set multiple tail indents values and call GetTailIndentInJson.
+     * @tc.expected: returns JSON array string containing all dimension values.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(10.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(30.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.find("10") != std::string::npos);
+    EXPECT_TRUE(result.find("20") != std::string::npos);
+    EXPECT_TRUE(result.find("30") != std::string::npos);
+}
+
+/**
+ * @tc.name: GetTailIndentInJson003
+ * @tc.desc: Test GetTailIndentInJson without setting tail indent (no property).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property without setting tail indents.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetTailIndentInJson without setting tail indents.
+     * @tc.expected: returns empty string.
+     */
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetTailIndentInJson004
+ * @tc.desc: Test GetTailIndentInJson with empty TailIndentsArray (HasValue returns false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set tail indents with empty array.
+     * @tc.expected: returns empty string (HasValue is false).
+     */
+    NG::TailIndents tailIndents;
+    tailIndents.indentsArray = NG::TailIndentsArray();
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetTailIndentInJson005
+ * @tc.desc: Test GetTailIndentInJson with negative and zero dimension values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set tail indents with negative and zero values.
+     * @tc.expected: returns non-empty string containing all dimension values including negative.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(-10.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(15.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
+}
 } // namespace OHOS::Ace::NG

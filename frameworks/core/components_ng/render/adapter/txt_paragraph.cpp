@@ -110,7 +110,11 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     if (paraStyle.tailIndents.has_value() && paraStyle.tailIndents->HasValue()) {
         style.tailIndents.clear();
         for (const auto& indent : paraStyle.tailIndents->indentsArray.value()) {
-            style.tailIndents.push_back(indent.ConvertToPx());
+            if (indent.Unit() == DimensionUnit::PERCENT || indent.IsNegative()) {
+                style.tailIndents.push_back(0.0);
+            } else {
+                style.tailIndents.push_back(indent.ConvertToPx());
+            }
         }
     }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
