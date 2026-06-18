@@ -4393,15 +4393,24 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             jsParams = std::vector<std::string>(params.begin() + 1, params.end());
         }
 
-        auto stageNode = stageManager_->GetStageNode();
-        CHECK_NULL_RETURN(stageNode, false);
-        auto children = stageNode->GetChildren();
-        for (const auto& pageNode : children) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-            CHECK_NULL_RETURN(frameNode, false);
-            auto pagePattern = frameNode->GetPattern<PagePattern>();
+        bool isHelp = params.size() >= 2 && params[1] == "-h";
+        if (isHelp) {
+            auto pageNode = stageManager_->GetLastPage();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
             CHECK_NULL_RETURN(pagePattern, false);
             pagePattern->FireDumpListener(jsParams);
+        } else {
+            auto stageNode = stageManager_->GetStageNode();
+            CHECK_NULL_RETURN(stageNode, false);
+            auto children = stageNode->GetChildren();
+            for (const auto& pageNode : children) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+                CHECK_NULL_RETURN(frameNode, false);
+                auto pagePattern = frameNode->GetPattern<PagePattern>();
+                CHECK_NULL_RETURN(pagePattern, false);
+                pagePattern->FireDumpListener(jsParams);
+            }
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
