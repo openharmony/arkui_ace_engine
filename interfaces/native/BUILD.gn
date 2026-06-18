@@ -208,6 +208,7 @@ if (is_arkui_x) {
       "node/native_material_impl.cpp",
       "node/progress_option.cpp",
       "node/rich_editor_native_impl.cpp",
+      "node/node_node_relative_container.cpp",
     ]
 
     deps = [
