@@ -686,6 +686,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_SpaceType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_StyledStringValue& src)
 {
     switch (src.selector) {
@@ -971,21 +987,6 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ColumnOptions_ColumnOptionsV2& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -1748,21 +1749,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_RowOptions_RowOptionsV2& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ScrollAnimationOptions_Boolean& src)
 {
     switch (src.selector) {
@@ -2219,6 +2205,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ColumnOptions_ColumnOptionsV2& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions& src)
 {
     switch (src.selector) {
@@ -2462,6 +2463,21 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_RowOptions_RowOptionsV2& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3998,7 +4014,6 @@ ASSIGN_OPT(Opt_RotationGestureEvent)
 ASSIGN_OPT(Opt_RotationRecognizer)
 ASSIGN_OPT(Opt_router_RouterMode)
 ASSIGN_OPT(Opt_RouteType)
-ASSIGN_OPT(Opt_RowOptionsV2)
 ASSIGN_OPT(Opt_RRect)
 ASSIGN_OPT(Opt_SafeAreaEdge)
 ASSIGN_OPT(Opt_SafeAreaType)
@@ -4801,7 +4816,6 @@ ASSIGN_OPT(Opt_ClickEffect)
 ASSIGN_OPT(Opt_ColorFilterType)
 ASSIGN_OPT(Opt_ColorMetricsExt)
 ASSIGN_OPT(Opt_ColumnOptions)
-ASSIGN_OPT(Opt_ColumnOptionsV2)
 ASSIGN_OPT(Opt_CommandPath)
 ASSIGN_OPT(Opt_common2D_Color)
 ASSIGN_OPT(Opt_common2D_Point)
@@ -5012,6 +5026,7 @@ ASSIGN_OPT(Opt_SliderConfiguration)
 ASSIGN_OPT(Opt_SliderShowStepOptions)
 ASSIGN_OPT(Opt_SmartGestureShortcutOptions)
 ASSIGN_OPT(Opt_SnapshotOptions)
+ASSIGN_OPT(Opt_SpaceType)
 ASSIGN_OPT(Opt_SpatialPosition)
 ASSIGN_OPT(Opt_SslErrorEvent)
 ASSIGN_OPT(Opt_StackOptions)
@@ -5065,7 +5080,6 @@ ASSIGN_OPT(Opt_Union_Boolean_Resource)
 ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor)
-ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_Array_MenuElement)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ComponentContentBase)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo)
@@ -5115,7 +5129,6 @@ ASSIGN_OPT(Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_ResourceStr_Scene)
 ASSIGN_OPT(Opt_Union_ResourceStr_TabBarSymbol)
 ASSIGN_OPT(Opt_Union_RotateOptions_RotateAngleOptions)
-ASSIGN_OPT(Opt_Union_RowOptions_RowOptionsV2)
 ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
 ASSIGN_OPT(Opt_Union_String_Array_String)
 ASSIGN_OPT(Opt_Union_String_Bindable_String)
@@ -5171,6 +5184,7 @@ ASSIGN_OPT(Opt_CalendarOptions)
 ASSIGN_OPT(Opt_CanvasParams)
 ASSIGN_OPT(Opt_CircleStyleOptions)
 ASSIGN_OPT(Opt_CloseSwipeActionOptions)
+ASSIGN_OPT(Opt_ColumnOptionsV2)
 ASSIGN_OPT(Opt_ComponentInfo)
 ASSIGN_OPT(Opt_ContentCoverOptions)
 ASSIGN_OPT(Opt_ContextMenuAnimationOptions)
@@ -5243,6 +5257,7 @@ ASSIGN_OPT(Opt_RichEditorSymbolSpanStyle)
 ASSIGN_OPT(Opt_RichEditorUpdateSymbolSpanStyleOptions)
 ASSIGN_OPT(Opt_RichEditorUrlStyle)
 ASSIGN_OPT(Opt_RippleFieldOptionsInner)
+ASSIGN_OPT(Opt_RowOptionsV2)
 ASSIGN_OPT(Opt_SceneOptions)
 ASSIGN_OPT(Opt_ScrollBarMargin)
 ASSIGN_OPT(Opt_ScrollEffectOptions)
@@ -5295,6 +5310,7 @@ ASSIGN_OPT(Opt_Union_BindableResourceStr_BindableResourceStrArray)
 ASSIGN_OPT(Opt_Union_BlendMode_Blender)
 ASSIGN_OPT(Opt_Union_Boolean_MenuMaskType)
 ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
+ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
 ASSIGN_OPT(Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions)
 ASSIGN_OPT(Opt_Union_Dimension_Array_Dimension)
 ASSIGN_OPT(Opt_Union_Dimension_OptionWidthMode)
@@ -5311,6 +5327,7 @@ ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_UnderlineColor)
 ASSIGN_OPT(Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String)
 ASSIGN_OPT(Opt_Union_ResourceStr_Bindable_String_Bindable_Resource)
+ASSIGN_OPT(Opt_Union_RowOptions_RowOptionsV2)
 ASSIGN_OPT(Opt_Union_ShadowOptions_Array_ShadowOptions)
 ASSIGN_OPT(Opt_Union_ShadowOptions_ShadowStyle)
 ASSIGN_OPT(Opt_Union_SheetSize_Length)

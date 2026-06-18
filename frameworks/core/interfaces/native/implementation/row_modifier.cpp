@@ -22,10 +22,14 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 struct RowOptions {
+    std::optional<Dimension> space;
+};
+struct RowOptionsV2 {
     std::optional<Dimension> space;
 };
 }
@@ -36,6 +40,35 @@ RowOptions Convert(const Ark_RowOptions& src)
 {
     return {
         .space = OptConvert<Dimension>(src.space),
+    };
+}
+template<>
+RowOptionsV2 Convert(const Ark_RowOptionsV2& src)
+{
+    std::optional<Dimension> space;
+    Converter::VisitUnionPtr(&src.space,
+        [&space](const Ark_String& value) {
+            auto optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension dim;
+                auto result = StringUtils::StringToDimensionWithUnitNG(optStr.value(), dim, DimensionUnit::VP);
+                if (result) {
+                    space = dim;
+                }
+            }
+        },
+        [&space](const Ark_Float64& value) {
+            auto optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                space = Dimension(optValue.value(), DimensionUnit::VP);
+            }
+        },
+        [&space](const Ark_Resource& value) {
+            space = Converter::OptConvertFromArkResource(value, DimensionUnit::VP);
+        },
+        []() {});
+    return {
+        .space = space,
     };
 }
 } // namespace Converter
@@ -63,8 +96,9 @@ void SetRowOptionsImpl(Ark_NativePointer node,
             auto opts = Converter::Convert<RowOptions>(rowOptions);
             RowModelNG::SetSpace(frameNode, opts.space);
         },
-        [](const Ark_RowOptionsV2& rowOptionsV2) {
-            LOGE("RowInterfaceModifier::SetRowOptionsImpl Ark_RowOptionsV2 is not supported");
+        [frameNode](const Ark_RowOptionsV2& rowOptionsV2) {
+            auto opts = Converter::Convert<RowOptionsV2>(rowOptionsV2);
+            RowModelNG::SetSpace(frameNode, opts.space);
         },
         []() {});
 }

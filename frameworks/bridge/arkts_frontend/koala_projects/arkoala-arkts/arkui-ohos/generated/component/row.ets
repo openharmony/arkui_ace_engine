@@ -30,9 +30,12 @@ import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SpaceType } from './column'
+import { Resource as global_resource_Resource } from 'global.resource'
 import { RowModifier } from './../RowModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkRowPeer extends ArkCommonMethodPeer {
     rowAttributeSet?: RowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -119,7 +122,7 @@ export interface RowOptions {
     space?: string | double;
 }
 export interface RowOptionsV2 {
-    _stub: int32;
+    space?: SpaceType;
 }
 export interface RowAttribute extends CommonMethod {
     setRowOptions(options?: RowOptions | RowOptionsV2): this {
@@ -371,6 +374,53 @@ export class RowOptions_serializer {
         }
         const spaceTmpResult: string | double | undefined = spaceTmpBuf
         let value: RowOptions = ({space: spaceTmpResult} as RowOptions)
+        return value
+    }
+}
+export class RowOptionsV2_serializer {
+    public static write(buffer: SerializerBase, value: RowOptionsV2): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForSpace = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue = valueHolderForSpace!
+            if (valueHolderForSpaceTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForSpaceTmpValueForIdx0 = valueHolderForSpaceTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
+            } else if (valueHolderForSpaceTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForSpaceTmpValueForIdx1 = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx1)
+            } else if (valueHolderForSpaceTmpValue instanceof global_resource_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForSpaceTmpValueForIdx2 = valueHolderForSpaceTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSpaceTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RowOptionsV2 {
+        let valueDeserializer: DeserializerBase = buffer
+        const spaceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let spaceTmpBuf: SpaceType | undefined = undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let spaceTmpBufOpt: string | double | global_resource_Resource | undefined
+            if (spaceTmpBufOptUnionSelector == (0).toByte()) {
+                spaceTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (spaceTmpBufOptUnionSelector == (1).toByte()) {
+                spaceTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (spaceTmpBufOptUnionSelector == (2).toByte()) {
+                spaceTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for spaceTmpBufOpt has to be chosen through deserialisation.')
+            }
+            spaceTmpBuf = (spaceTmpBufOpt as string | double | global_resource_Resource)
+        }
+        const spaceTmpResult: SpaceType | undefined = spaceTmpBuf
+        let value: RowOptionsV2 = ({space: spaceTmpResult} as RowOptionsV2)
         return value
     }
 }
