@@ -99,9 +99,6 @@ std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* pr
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
     ScopedAniLocalScope localScope(env);
-    if (!localScope.IsActive()) {
-        return;
-    }
     ani_boolean errorExists;
     env->ExistUnhandledError(&errorExists);
     ani_status status;
@@ -140,9 +137,6 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
     ScopedAniLocalScope localScope(env);
-    if (!localScope.IsActive()) {
-        return;
-    }
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 

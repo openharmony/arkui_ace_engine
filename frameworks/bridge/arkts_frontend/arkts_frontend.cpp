@@ -147,9 +147,6 @@ bool ParseRouterStateInfo(ani_env* env, ani_ref result, RouterStateInfo& state)
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
     ScopedAniLocalScope localScope(env);
-    if (!localScope.IsActive()) {
-        return;
-    }
     ani_boolean errorExists;
     env->ExistUnhandledError(&errorExists);
     ani_status status;
@@ -189,9 +186,6 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
     ScopedAniLocalScope localScope(env);
-    if (!localScope.IsActive()) {
-        return;
-    }
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 

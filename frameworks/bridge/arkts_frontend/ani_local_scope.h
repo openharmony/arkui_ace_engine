@@ -18,6 +18,8 @@
 
 #include <ani.h>
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace {
 
 constexpr ani_size DEFAULT_ANI_LOCAL_SCOPE_SIZE = 16;
@@ -26,7 +28,16 @@ class ScopedAniLocalScope {
 public:
     explicit ScopedAniLocalScope(ani_env* env, ani_size size = DEFAULT_ANI_LOCAL_SCOPE_SIZE) : env_(env)
     {
-        active_ = env_ && env_->CreateLocalScope(size) == ANI_OK;
+        if (!env_) {
+            LOGE("Create ANI local scope failed, env is null");
+        } else {
+            auto status = env_->CreateLocalScope(size);
+            if (status != ANI_OK) {
+                LOGE("Create ANI local scope failed, status: %{public}d", status);
+            } else {
+                active_ = true;
+            }
+        }
     }
 
     ~ScopedAniLocalScope()
@@ -38,11 +49,6 @@ public:
 
     ScopedAniLocalScope(const ScopedAniLocalScope&) = delete;
     ScopedAniLocalScope& operator=(const ScopedAniLocalScope&) = delete;
-
-    bool IsActive() const
-    {
-        return active_;
-    }
 
 private:
     ani_env* env_ = nullptr;
