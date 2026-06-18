@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
+#include "core/components_ng/pattern/dialog/alert_dialog/alert_dialog_model_ng.h"
+
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -21,7 +23,6 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 void AlertDialogModelNG::SetParseButtonObj(
@@ -37,8 +38,8 @@ void AlertDialogModelNG::SetOnCancel(std::function<void()>&& eventFunc, DialogPr
     arg.onCancel = eventFunc;
 }
 
-void AlertDialogModelNG::SetOnWillDismiss(std::function<void(const int32_t& info,
-    const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
+void AlertDialogModelNG::SetOnWillDismiss(
+    std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
 {
     arg.onWillDismiss = std::move(onWillDismissFunc);
 }
@@ -91,8 +92,8 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                 dialog = overlayManager->ShowDialog(arg, nullptr, false);
                 CHECK_NULL_VOID(dialog);
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
-                ComponentEventType::COMPONENT_EVENT_DIALOG);
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+                "onVisibleChange", "show", ComponentEventType::COMPONENT_EVENT_DIALOG);
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             CHECK_NULL_VOID(hub);
             hub->SetOnCancel(arg.onCancel);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,12 +102,12 @@ public:
     }
 
     void OnAvoidInfoChange(const ContainerModalAvoidInfo& info);
-    void AddAvoidInfoListener(WeakPtr<IAvoidInfoListener> listener);
-    void RemoveAvoidInfoListener(WeakPtr<IAvoidInfoListener> listener);
+    ACE_FORCE_EXPORT void AddAvoidInfoListener(WeakPtr<IAvoidInfoListener> listener);
+    ACE_FORCE_EXPORT void RemoveAvoidInfoListener(WeakPtr<IAvoidInfoListener> listener);
 
     int32_t GetContainerModalTitleHeight();
-    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttonsRect);
-    bool NeedAvoidContainerModal();
+    ACE_FORCE_EXPORT bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttonsRect);
+    ACE_FORCE_EXPORT bool NeedAvoidContainerModal();
     void GetNewAvoidInfoForUEC(const RefPtr<FrameNode>& uecNode, ContainerModalAvoidInfo& info);
 
     static void GetContainerModalAvoidInfoForUEC(const RefPtr<FrameNode>& uecNode, ContainerModalAvoidInfo& info);

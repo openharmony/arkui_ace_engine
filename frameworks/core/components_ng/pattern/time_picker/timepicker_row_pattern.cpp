@@ -15,33 +15,34 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
-#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
-#include "core/components_ng/pattern/date_picker/picker_change_event.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
-#include "core/pipeline/container_window_manager.h"
 #include <cstdint>
 #include <ctime>
 
-#include "core/components_ng/render/drawing.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_utils.h"
-#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2417,8 +2418,10 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    bool isSupportBlurStyle =
+        dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(buttonTitleNode, isShowInSubWindow_) : false;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     host->MarkModifyDone();

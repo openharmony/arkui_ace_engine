@@ -23,23 +23,23 @@
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
+#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_row_layout_property.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
-#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
-#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/date_picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_utils.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -192,7 +193,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar,
             settingData.checkboxSettingData);
     }
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
+    auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);

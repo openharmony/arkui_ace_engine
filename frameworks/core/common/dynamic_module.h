@@ -50,6 +50,10 @@ public:
     {
         return nullptr;
     }
+    virtual void* GetModel(const std::string& name)
+    {
+        return nullptr;
+    }
     virtual const void* GetCustomModifier(const std::string& name = "")
     {
         return nullptr;

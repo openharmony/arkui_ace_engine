@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,32 +14,16 @@
  */
 
 #include "cj_menu_item_ffi.h"
+
 #include "cj_lambda.h"
 
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
-namespace OHOS::Ace {
-// Should use CJUIModifier API later
-NG::MenuItemModelNG* GetMenuItemModel()
-{
-    static NG::MenuItemModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find MenuItem dynamic module");
-        }
-        model = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
-    }
-    return model;
-}
-} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuItemCreateByBuilder(void(*builder)())
@@ -51,7 +35,7 @@ void FfiOHOSAceFrameworkMenuItemCreateByBuilder(void(*builder)())
         builderFunc();
         customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
     }
-    GetMenuItemModel()->Create(customNode);
+    NG::NodeModifier::GetMenuItemModel()->Create(customNode);
 }
 
 void FfiOHOSAceFrameworkMenuItemCreateByOption(const char* startIcon,
@@ -75,72 +59,72 @@ void FfiOHOSAceFrameworkMenuItemCreateByOption(const char* startIcon,
     if (builder) {
         menuItemProps.buildFunc = CJLambda::Create(builder);
     }
-    GetMenuItemModel()->Create(menuItemProps);
+    NG::NodeModifier::GetMenuItemModel()->Create(menuItemProps);
 }
 
 void FfiOHOSAceFrameworkMenuItemIsSelected(bool value)
 {
-    GetMenuItemModel()->SetSelected(value);
+    NG::NodeModifier::GetMenuItemModel()->SetSelected(value);
 }
 
 void FfiOHOSAceFrameworkMenuItemSelectIconByBool(bool value)
 {
-    GetMenuItemModel()->SetSelectIcon(value);
+    NG::NodeModifier::GetMenuItemModel()->SetSelectIcon(value);
 }
 
 void FfiOHOSAceFrameworkMenuItemSelectIconByResource(const char* value)
 {
     std::string icon = value;
-    GetMenuItemModel()->SetSelectIcon(true);
-    GetMenuItemModel()->SetSelectIconSrc(icon);
+    NG::NodeModifier::GetMenuItemModel()->SetSelectIcon(true);
+    NG::NodeModifier::GetMenuItemModel()->SetSelectIconSrc(icon);
 }
 
 void FfiOHOSAceFrameworkMenuItemContentFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    GetMenuItemModel()->SetFontStyle(static_cast<FontStyle>(style));
+    NG::NodeModifier::GetMenuItemModel()->SetFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    GetMenuItemModel()->SetFontFamily(fontFamilies);
+    NG::NodeModifier::GetMenuItemModel()->SetFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    GetMenuItemModel()->SetFontSize(fontSize);
+    NG::NodeModifier::GetMenuItemModel()->SetFontSize(fontSize);
 
     std::string weightVal = weight;
-    GetMenuItemModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
+    NG::NodeModifier::GetMenuItemModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuItemContentFontColor(uint32_t value)
 {
     std::optional<Color> color = Color(value);
-    GetMenuItemModel()->SetFontColor(color);
+    NG::NodeModifier::GetMenuItemModel()->SetFontColor(color);
 }
 
 void FfiOHOSAceFrameworkMenuItemLabelFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    GetMenuItemModel()->SetLabelFontStyle(static_cast<FontStyle>(style));
+    NG::NodeModifier::GetMenuItemModel()->SetLabelFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    GetMenuItemModel()->SetLabelFontFamily(fontFamilies);
+    NG::NodeModifier::GetMenuItemModel()->SetLabelFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    GetMenuItemModel()->SetLabelFontSize(fontSize);
+    NG::NodeModifier::GetMenuItemModel()->SetLabelFontSize(fontSize);
 
     std::string weightVal = weight;
-    GetMenuItemModel()->SetLabelFontWeight(ConvertStrToFontWeight(weightVal));
+    NG::NodeModifier::GetMenuItemModel()->SetLabelFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuItemLabelFontColor(uint32_t value)
 {
     std::optional<Color> color = Color(value);
-    GetMenuItemModel()->SetLabelFontColor(color);
+    NG::NodeModifier::GetMenuItemModel()->SetLabelFontColor(color);
 }
 
 void FfiOHOSAceFrameworkMenuItemOnChange(void (*callback)(bool isChecked))
 {
-    GetMenuItemModel()->SetOnChange(CJLambda::Create(callback));
+    NG::NodeModifier::GetMenuItemModel()->SetOnChange(CJLambda::Create(callback));
 }
 }

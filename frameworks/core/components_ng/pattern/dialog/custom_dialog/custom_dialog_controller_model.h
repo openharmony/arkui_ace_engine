@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H
 
-#include <mutex>
 #include <functional>
 #include <list>
+#include <memory>
+#include <mutex>
 #include <vector>
 
 #include "base/memory/ace_type.h"
-#include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace {
 struct DialogProperties;
@@ -47,9 +47,10 @@ public:
         std::list<DialogOperation>& dialogOperation) = 0;
 
     virtual PromptActionCommonState GetState(std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind) = 0;
+
 private:
     static std::unique_ptr<CustomDialogControllerModel> instance_;
     static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H

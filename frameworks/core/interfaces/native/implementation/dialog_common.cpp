@@ -117,7 +117,7 @@ MenuKeyboardAvoidMode Convert(const Ark_MenuKeyboardAvoidMode& options)
 }
 
 template<>
-DistortionMode Convert(const Ark_DistortionMode& options)
+ACE_FORCE_EXPORT DistortionMode Convert(const Ark_DistortionMode& options)
 {
     if (options == Ark_DistortionMode::ARK_DISTORTION_MODE_DISTORTION_ENABLED) {
         return DistortionMode::DISTORTION_ENABLED;
@@ -128,7 +128,7 @@ DistortionMode Convert(const Ark_DistortionMode& options)
 }
 
 template<>
-EdgeLightMode Convert(const Ark_EdgeLightMode& options)
+ACE_FORCE_EXPORT EdgeLightMode Convert(const Ark_EdgeLightMode& options)
 {
     if (options == Ark_EdgeLightMode::ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO) {
         return EdgeLightMode::EDGELIGHT_AUTO;

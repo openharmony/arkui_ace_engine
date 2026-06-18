@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,16 @@
 #include <functional>
 #include <securec.h>
 
-#include "base/i18n/localization.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -34,10 +36,9 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -1777,8 +1778,10 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (contentRowNode) {
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            !DialogView::IsSupportBlurStyle(contentRowNode, isShowInSubWindow_)) {
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        bool isSupportBlurStyle =
+            dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(contentRowNode, isShowInSubWindow_) : false;
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
             layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
         }
     }

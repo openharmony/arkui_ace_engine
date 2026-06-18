@@ -15,43 +15,45 @@
 
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 
-#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
-
 #include <algorithm>
-
-#include "base/log/log.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
-#include "core/components_ng/pattern/date_picker/picker_change_event.h"
-#include "core/components_ng/pattern/date_picker/picker_data.h"
 #include <functional>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "compatible/components/picker/picker_base_component.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/i18n/date_time_sequence.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "compatible/components/picker/picker_base_component.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/interfaces/native/node/view_model.h"
-#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
-#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -784,8 +786,10 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(buttonTitleNode);
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    bool isSupportBlurStyle =
+        dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(buttonTitleNode, isShowInSubWindow_) : false;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);

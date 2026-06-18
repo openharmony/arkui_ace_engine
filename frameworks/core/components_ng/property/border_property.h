@@ -277,7 +277,7 @@ struct BorderColorProperty {
                (bottomColor == value.bottomColor);
     }
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, bool isOutline = false) const;
@@ -385,7 +385,7 @@ struct ACE_FORCE_EXPORT BorderWidthPropertyT<Dimension> {
     void ToDashJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, const std::string& keyValue) const;
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     void AddResource(
         const std::string& key,

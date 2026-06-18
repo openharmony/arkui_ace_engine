@@ -14,26 +14,27 @@
  */
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_utils.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -246,7 +247,9 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
             layoutProperty->UpdateLayoutWeight(0);
         }
     }
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
+    auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);

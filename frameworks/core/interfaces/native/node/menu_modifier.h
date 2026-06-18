@@ -16,9 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H
 
-#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_manager_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 
@@ -28,6 +29,7 @@ const CJUIMenuModifier* GetCJUIMenuModifier();
 ACE_FORCE_EXPORT const ArkUIMenuInnerModifier* GetMenuInnerModifier();
 ACE_FORCE_EXPORT const ArkUIMenuViewInnerModifier* GetMenuViewInnerModifier();
 const ArkUIMenuManagerInnerModifier* GetMenuManagerInnerModifier();
+ACE_FORCE_EXPORT MenuModelNG* GetMenuModel();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H

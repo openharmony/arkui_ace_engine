@@ -51,6 +51,7 @@ component_modules = [
   "menu",
   "lazy_column_layout",
   "toggle",
+  "dialog",
   "image_animator",
   "date_picker",
   "lazy_grid_layout",

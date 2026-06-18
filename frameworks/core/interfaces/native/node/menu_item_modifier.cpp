@@ -63,5 +63,18 @@ const ArkUIMenuItemInnerModifier* GetMenuItemInnerModifier()
     return modifier;
 }
 #endif
+
+MenuItemModelNG* GetMenuItemModel()
+{
+    static MenuItemModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find MenuItem dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

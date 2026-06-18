@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,9 @@ public:
 
     static RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& frameNode);
 
-    static bool ShouldHandleSmoothImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial);
-    static bool ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& systemMaterial);
-    static bool HandleSmoothImmersiveMaterial(
+    ACE_FORCE_EXPORT static bool ShouldHandleSmoothImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial);
+    ACE_FORCE_EXPORT static bool ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& systemMaterial);
+    ACE_FORCE_EXPORT static bool HandleSmoothImmersiveMaterial(
         const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial);
     static void SetSmoothImmersiveBackground(const RefPtr<RenderContext>& renderContext);
     static void SetSmoothImmersiveShadow(
@@ -65,7 +65,7 @@ public:
         return dialogTag_;
     }
 
-    bool IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) const;
+    ACE_FORCE_EXPORT bool IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) const;
 
 private:
     int32_t dismissDialogId_ = 0;

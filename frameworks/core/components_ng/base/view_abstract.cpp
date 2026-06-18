@@ -14,14 +14,10 @@
  */
 
 #include "core/components_ng/base/view_abstract.h"
+
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
-#include "base/log/log_wrapper.h"
-#include "base/hiviewdfx/histogram_wrapper.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/property/flex_property.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "ui/base/ace_type.h"
@@ -30,6 +26,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
@@ -40,8 +37,8 @@
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/common/visual_effect/component_material_interaction.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -49,11 +46,15 @@
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/ui_material_theme.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
@@ -61,25 +62,25 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
-#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
-#include "core/components_ng/render/ui_material_filter_creator.h"
-#include "core/components_ng/property/union_effect_container_options.h"
-#include "core/components_ng/property/smart_gesture_property.h"
-#include "core/components_ng/property/edgelight_property.h"
-#include "core/interfaces/native/node/menu_modifier.h"
-#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
-#include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+#include "core/components_ng/property/edgelight_property.h"
+#include "core/components_ng/property/flex_property.h"
+#include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -5133,15 +5134,9 @@ void ViewAbstract::DismissDialog()
             dialogNode = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
         }
     }
-    CHECK_NULL_VOID(dialogNode);
-    auto pattern = dialogNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
-    if (dialogPattern) {
-        dialogPattern->OverlayDismissDialog(dialogNode);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy",
-            ComponentEventType::COMPONENT_EVENT_DIALOG);
-    }
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_VOID(dialogInnerModifier);
+    dialogInnerModifier->dismissDialog(dialogNode);
 }
 
 void ViewAbstract::ShowMenuPreview(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_static.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -50,8 +50,7 @@ TaskExecutor::Task CustomDialogControllerModelStatic::ParseOpenDialogTask(int32_
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             CHECK_NULL_VOID(dialog);
-            if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
-                !container->IsUIExtensionWindow()) {
+            if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog && !container->IsUIExtensionWindow()) {
                 auto mask = overlayManager->SetDialogMask(dialogProperties);
                 if (!mask) {
                     TAG_LOGW(AceLogTag::ACE_DIALOG, "fail to set mask dialog.");
@@ -120,8 +119,8 @@ TaskExecutor::Task CustomDialogControllerModelStatic::ParseCloseDialogTask(const
     return task;
 }
 
-void CustomDialogControllerModelStatic::SetOpenDialog(
-    DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, const WeakPtr<AceType>& controller,
+void CustomDialogControllerModelStatic::SetOpenDialog(DialogProperties& dialogProperties,
+    std::vector<WeakPtr<AceType>>& dialogs, const WeakPtr<AceType>& controller,
     std::function<RefPtr<UINode>()>&& builder, bool& hasBind)
 {
     auto container = Container::Current();
@@ -162,8 +161,8 @@ void CustomDialogControllerModelStatic::SetOpenDialog(
         return;
     }
     if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
-        auto embeddedOverlay = NG::DialogManagerStatic::GetEmbeddedOverlay(
-            dialogProperties.dialogLevelUniqueId, context);
+        auto embeddedOverlay =
+            NG::DialogManagerStatic::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
         if (embeddedOverlay) {
             overlayManager = embeddedOverlay;
         }

@@ -1104,8 +1104,6 @@ frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp @arkui_
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/canvas/ @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/dialog/ @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.cpp @arkuieco3
@@ -2449,7 +2447,6 @@ frameworks/core/components_ng/manager/shared_overlay/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/smart_gesture/ @ArkUI_Event
 frameworks/core/components_ng/manager/toolbar/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ability_component/ @arkuieco3
-frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/animator/ @arkuicodepulse
 frameworks/core/components_ng/pattern/app_bar/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/badge/ @huawei_g_five
@@ -2851,10 +2848,10 @@ frameworks/core/interfaces/native/node/common_shape_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/common_shape_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/counter_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/counter_modifier.h @huawei_g_five
-frameworks/core/interfaces/native/node/custom_dialog_model.cpp @arkuipopupwindow_all
-frameworks/core/interfaces/native/node/custom_dialog_model.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/data_panel_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/data_panel_modifier.h @huawei_g_five
+frameworks/core/interfaces/native/node/dialog_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/node/dialog_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/divider_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/divider_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/drag_adapter_impl.cpp @ArkUI_Event
@@ -3584,8 +3581,9 @@ test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/components_ng/base/ @arkui_framework_xnode
 test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp @arkuicodepulse
-test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
 test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp @arkui_framework_xnode
+test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp @arkuipopupwindow_all
+test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
 
@@ -4395,8 +4393,6 @@ frameworks/core/interfaces/native/implementation/content_transition_effect_peer_
 frameworks/core/interfaces/native/implementation/content_transition_peer_impl.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/custom_builder_root_modifier.cpp @arkui_statemgmt
 frameworks/core/interfaces/native/implementation/custom_dialog_controller_extender_accessor.cpp @arkuipopupwindow_all
-frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.cpp @arkuipopupwindow_all
-frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/custom_span_impl.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/custom_span_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/data_load_params_peer.h @ArkUI_Event

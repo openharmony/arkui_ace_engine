@@ -182,8 +182,8 @@ public:
         temporarySplitRatio_ = std::nullopt;
     }
     float FindNearestSnapRatio(float currentRatio) const;
-    void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
-    void RemoveForceSplitRatioListener(int32_t nodeId);
+    ACE_FORCE_EXPORT void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
+    ACE_FORCE_EXPORT void RemoveForceSplitRatioListener(int32_t nodeId);
     void AddIsDraggableChangeListener(int32_t nodeId, std::function<void(bool isDraggable)>&& listener);
     void RemoveIsDraggableChangeListener(int32_t nodeId);
 

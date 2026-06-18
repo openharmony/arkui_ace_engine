@@ -513,7 +513,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
     void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
-    void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_StrokeJoinStyle& dst, const OHOS::Ace::StrokeJoinStyle& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_GradientDirection& dst, const NG::GradientDirection& src);
 

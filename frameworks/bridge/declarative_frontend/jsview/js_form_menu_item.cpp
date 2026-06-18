@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
-
 #include "want.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -35,82 +34,36 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<MenuItemModel> MenuItemModel::instance_ = nullptr;
-std::mutex MenuItemModel::mutex_;
-
-NG::MenuItemModelNG* GetMenuItemModel()
-{
-    static NG::MenuItemModelNG* menuItemModel = nullptr;
-    if (menuItemModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
-        if (module == nullptr) {
-            LOGF("Can't find MenuItem dynamic module");
-            abort();
-        }
-        menuItemModel = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
-    }
-    return menuItemModel;
-}
-
-NG::MenuModelNG* GetMenuModel()
-{
-    static NG::MenuModelNG* menuModel = nullptr;
-    if (menuModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
-        if (module == nullptr) {
-            LOGF("Can't find Menu dynamic module");
-            abort();
-        }
-        menuModel = reinterpret_cast<NG::MenuModelNG*>(module->GetModel());
-    }
-    return menuModel;
-}
-
 MenuItemModel* MenuItemModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(GetMenuItemModel());
+    return NG::NodeModifier::GetMenuItemModel();
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(GetMenuItemModel());
-            } else {
-                instance_.reset(new Framework::MenuItemModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::NodeModifier::GetMenuItemModel();
+    } else {
+        static Framework::MenuItemModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
-std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
-std::mutex MenuModel::mutex_;
 
 MenuModel* MenuModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(GetMenuModel());
+    return NG::NodeModifier::GetMenuModel();
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(GetMenuModel());
-            } else {
-                instance_.reset(new Framework::MenuModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::NodeModifier::GetMenuModel();
+    } else {
+        static Framework::MenuModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 

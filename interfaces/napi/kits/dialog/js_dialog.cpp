@@ -132,7 +132,7 @@ napi_value JSPresentDialog(napi_env env, napi_callback_info info)
                 CHECK_NULL_VOID(container);
             }
             if (!dialogProps.isShowInSubWindow) {
-                overlayManager->ShowDialog(
+                overlayManager->ShowDialogWithErrorCallback(
                     dialogProps, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft(), std::move(callback));
                 return;
             }
@@ -247,7 +247,7 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
                     TAG_LOGW(AceLogTag::ACE_OVERLAY, "Temporary not support isShowInSubWindow and isModal.");
                 }
             } else {
-                overlayManager->OpenCustomDialog(dialogProps, std::move(callback));
+                overlayManager->OpenCustomDialogWithErrorCallback(dialogProps, std::move(callback));
             }
         };
         if (dialogProps.dialogLevelMode == LevelMode::EMBEDDED) {

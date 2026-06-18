@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier();
 const CJUITextPickerModifier* GetCJUITextPickerModifier();
-const NG::TextPickerUtil::TextPickerCustomModifier* GetTextPickerCustomModifier();
+ACE_FORCE_EXPORT const NG::TextPickerUtil::TextPickerCustomModifier* GetTextPickerCustomModifier();
 void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam);
 void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
