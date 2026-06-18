@@ -3655,11 +3655,19 @@ export class GlobalScopeUicontextTextMenu {
         GlobalScopeUicontextTextMenu.setMenuOptions_serialize(options_casted)
         return
     }
+    public static disableSystemServiceMenuItems(disable: boolean): void {
+        const disable_casted = disable as (boolean)
+        GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems_serialize(disable_casted)
+        return
+    }
     private static setMenuOptions_serialize(options: TextMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         TextMenuOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_setMenuOptions(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static disableSystemServiceMenuItems_serialize(disable: boolean): void {
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_disableSystemServiceMenuItems(disable ? true : false)
     }
 }
 export class ImmersiveHelper {

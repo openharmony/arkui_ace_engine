@@ -17,6 +17,8 @@
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -65,11 +67,29 @@ void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
         selectOverlayManager->SetTextMenuOptions(*optTextMenuOptions);
     }
 }
+void DisableSystemServiceMenuItemsImpl(Ark_Boolean disable)
+{
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "TextMenu DisableSystemServiceMenuItemsImpl enter");
+    auto disableAll = Converter::Convert<bool>(disable);
+    auto textMenuInfo = AceApplicationInfo::GetInstance().GetTextMenuInfo();
+    auto isPrevDisableAll = (textMenuInfo.disableFlags & NG::DISABLE_ALL_FLAG) == NG::DISABLE_ALL_FLAG;
+    if (disableAll) {
+        AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_ALL_FLAG);
+    } else {
+        AceApplicationInfo::GetInstance().SetTextMenuDisableFlags(~NG::DISABLE_ALL_FLAG);
+    }
+    if (isPrevDisableAll != disableAll && textMenuInfo.menuOnChangeCallback) {
+        if (!textMenuInfo.menuOnChangeCallback()) {
+            AceApplicationInfo::GetInstance().SetTextMenuOnChangeCallback(nullptr);
+        }
+    }
+}
 } // GlobalScopeUicontextTextMenuAccessor
 const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
         GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        GlobalScopeUicontextTextMenuAccessor::DisableSystemServiceMenuItemsImpl,
     };
     return &GlobalScopeUicontextTextMenuAccessorImpl;
 }

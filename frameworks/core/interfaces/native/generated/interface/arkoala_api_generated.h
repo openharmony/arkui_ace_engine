@@ -29997,6 +29997,7 @@ typedef struct GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor {
 
 typedef struct GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor {
     void (*setMenuOptions)(const Ark_TextMenuOptions* options);
+    void (*disableSystemServiceMenuItems)(Ark_Boolean disable);
 } GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor;
 
 typedef struct GENERATED_ArkUIHierarchicalSymbolEffectAccessor {
