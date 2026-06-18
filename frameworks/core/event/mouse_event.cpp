@@ -495,12 +495,14 @@ TouchEvent MouseEvent::CreateTouchPoint() const
         .SetPointerEvent(pointerEvent)
         .SetTouchEventId(touchEventId)
         .SetOriginalId(pointOriginalId)
+        .SetEventHandleId(pointId)
         .SetIsInjected(isInjected);
     event.isPrivacyMode = isPrivacyMode;
     event.isStylusMouseMode = isStylusMouseMode;
     event.pointers.emplace_back(std::move(point));
     event.pressedKeyCodes_ = pressedKeyCodes_;
     event.passThrough = passThrough;
+    event.isNewReferee = isNewReferee;
     if (passThrough) {
         event.postEventNodeId = postEventNodeId;
     }
