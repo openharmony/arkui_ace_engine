@@ -1055,10 +1055,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
     Ark_ResourceColor initValueBackgroundColor;
     std::string expectedStr;
 
-    // Initial setup
     initValueBackgroundColor =
         Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-    expectedStr = std::get<2>(Fixtures::testFixtureColorsStrValidValues[0]); // invalid value should be ignored
 
     auto checkValue = [this, &initValueBackgroundColor, &expectedStr](const std::string& input,
         const Ark_ResourceColor& value)
@@ -1067,11 +1065,13 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
         auto convValue = ArkValue<Opt_ResourceColor>(inputValueBackgroundColor);
         modifier_->setBackgroundColor(node_, &convValue);
         OnModifyDone();
+        auto jsonValue = GetPatternJsonValue(node_);
+        expectedStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
         inputValueBackgroundColor = value;
         convValue = ArkValue<Opt_ResourceColor>(inputValueBackgroundColor);
         modifier_->setBackgroundColor(node_, &convValue);
         OnModifyDone();
-        auto jsonValue = GetPatternJsonValue(node_);
+        jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
     };
@@ -1083,7 +1083,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
 
-    // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 

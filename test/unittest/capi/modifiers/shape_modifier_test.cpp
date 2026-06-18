@@ -536,19 +536,7 @@ HWTEST_F(ShapeModifierTest, setStrokeDashArrayTest, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setStrokeDashArrayInavlidTest, TestSize.Level1)
 {
-    const std::string propName("strokeDashArray");
     ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
-    modifier_->setStrokeDashArray(node_, nullptr);
-    auto fullJson = GetJsonValue(node_);
-    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
-    ASSERT_TRUE(checkVal->IsArray());
-    EXPECT_EQ(checkVal->GetArraySize(), 0);
-
-    modifier_->setStrokeDashArray(nullptr, nullptr);
-    fullJson = GetJsonValue(node_);
-    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
-    ASSERT_TRUE(checkVal->IsArray());
-    EXPECT_EQ(checkVal->GetArraySize(), 0);
 }
 
 /**

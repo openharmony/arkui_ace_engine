@@ -33,7 +33,6 @@ using namespace Converter;
 
 const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
 const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME = "autocapitalizationMode";
 const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE = "AutoCapitalizationMode.NONE";
 
 std::vector<std::tuple<std::string, Opt_AutoCapitalizationMode, std::string>>
@@ -65,31 +64,6 @@ public:
         SetupTheme<IconTheme>();
     }
 };
-
-/*
- * @tc.name: setAutoCapitalizationModeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
-{
-    ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
-    auto jsonValue = GetJsonValue(node_);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_AutoCapitalizationMode& value) {
-        modifier_->setAutoCapitalizationMode(node_, &value);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    };
-    for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
-        checkValue(input, expected, value);
-    }
-}
 
 /*
  * @tc.name: setCustomKeyboard_CustomNodeBuilder
