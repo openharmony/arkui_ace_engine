@@ -1214,8 +1214,8 @@ void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(const LayoutConst
 {
     for (const auto& child : layoutPolicyChildren_) {
         auto childNode = child->GetHostNode();
-        auto childlayoutProperty = childNode->GetLayoutProperty();
-        if (childNode && childlayoutProperty && childlayoutProperty->IsExpandConstraintNeeded()) {
+        if (childNode && childNode->GetLayoutProperty() &&
+            childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
             child->SetDelaySelfLayoutForIgnore();
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
