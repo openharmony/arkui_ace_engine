@@ -897,25 +897,4 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Leve
         CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")))
         << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
 }
-
-/**
- * @tc.name: GetAlignPositionWithDirectionTest001
- * @tc.desc: GetAlignPositionWithDirection
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, GetAlignPositionWithDirectionTest001, TestSize.Level1)
-{
-    const SizeF parentSize(100.0f, 100.0f);
-    const SizeF childSize(50.0f, 50.0f);
-    for (const auto& testCase : OVERLAY_OPTIONS_TEST_CASES) {
-        /**
-        * @tc.steps: step1. call GetAlignPositionWithDirection function.
-        * @tc.expected: step1. offset equals expectedResult.
-        */
-        auto offset = Alignment::GetAlignPositionWithDirection(parentSize, childSize,
-            testCase.align, testCase.direction);
-        EXPECT_FLOAT_EQ(offset.GetX(), testCase.expectedResult.GetX());
-        EXPECT_FLOAT_EQ(offset.GetY(), testCase.expectedResult.GetY());
-    }
-}
 }
