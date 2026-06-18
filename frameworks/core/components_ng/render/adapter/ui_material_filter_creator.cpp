@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
+const Rosen::Vector2f EMPTY_ROSEN_VECTOR2F { 0.0f, 0.0f };
 
 constexpr FrostedGlassParam Gentle_Regular_Transparency3_Light {
     .blurParams = { 12.0f, 6.0f },
@@ -743,6 +744,10 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
     auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
     CHECK_NULL_RETURN(glassFilter, nullptr);
     auto& materialColor = params.materialColor;
+    if (materialColor.GetAlpha() > 0) {
+        glassFilter->Setter<Rosen::FrostedGlassWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        glassFilter->Setter<Rosen::FrostedGlassDarkModeWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+    }
     Rosen::Vector4f rsColor { materialColor.GetRed() / 255.0f, materialColor.GetGreen() / 255.0f,
         materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
     glassFilter->Setter<Rosen::FrostedGlassMaterialColorTag>(rsColor);
@@ -788,6 +793,10 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
     auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(shader);
     CHECK_NULL_RETURN(glassEffect, nullptr);
     auto& materialColor = newConfig.materialColor;
+    if (materialColor.GetAlpha() > 0) {
+        glassEffect->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        // no darkmode param till now
+    }
     Rosen::Vector4f rsColor { materialColor.GetRed() / 255.0f, materialColor.GetGreen() / 255.0f,
         materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
     glassEffect->Setter<Rosen::FrostedGlassEffectMaterialColorTag>(rsColor);

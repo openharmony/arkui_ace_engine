@@ -177,6 +177,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "overlay_modifier_test_ng.cpp",
     "rosen_render_context_test.cpp",
     "rosen_render_context_test_new.cpp",
+    "ui_material_filter_creator_test_ng.cpp",
   ]
 
   configs = [ ":rosen_render_context_config" ]

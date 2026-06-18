@@ -20,13 +20,15 @@
 
 bool OH_ArkUI_NativeModule_GetSystemMaterialSupported()
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* impl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
+    CHECK_NULL_RETURN(impl, false);
     return impl->getNodeModifiers()->getMaterialModifier()->getDeviceSystemMaterialSupported();
 }
 
 ArkUI_MaterialLevel OH_ArkUI_NativeModule_GetGlobalMaterialLevel()
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* impl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
+    CHECK_NULL_RETURN(impl, ArkUI_MaterialLevel::ARKUI_MATERIAL_LEVEL_SMOOTH);
     auto level = impl->getNodeModifiers()->getMaterialModifier()->getGlobalMaterialLevel();
     return static_cast<ArkUI_MaterialLevel>(level);
 }
