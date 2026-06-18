@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H
+#include "core/interfaces/native/node/styled_string_impl.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
-#include "core/interfaces/arkoala/arkoala_api.h"
-
-typedef struct ArkUIStyledStringAPI ArkUIStyledStringAPI;
 namespace OHOS::Ace::StyledStringAdapter {
-const ArkUIStyledStringAPI* GetStyledStringAPI();
-void DestroySpanString(ArkUI_StyledString_Descriptor* descriptor);
+void DestroySpanString(ArkUI_StyledString_Descriptor* descriptor)
+{
+    if (descriptor && descriptor->spanString) {
+        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
+        delete spanString;
+        descriptor->spanString = nullptr;
+    }
+}
 } // namespace OHOS::Ace::StyledStringAdapter
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H
