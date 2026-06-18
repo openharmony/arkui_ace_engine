@@ -2790,7 +2790,7 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
 
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
-        if (tag_ == V2::WEB_ETS_TAG) {
+        if (tag_ == V2::WEB_ETS_TAG || tag_ == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
                 isVisible, std::to_string(currentVisibleRatio).c_str(), nodeId_,
                 std::to_string(accessibilityId_).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
