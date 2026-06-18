@@ -2062,7 +2062,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     UnRegisterResource("cancelButtonIconColorDefault");
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
-        ParseJsColor(iconColorProp, iconColor, colorObject)) {
+        ParseJsColorForMaterial(iconColorProp, iconColor, colorObject)) {
         if (SystemProperties::ConfigChangePerform() && colorObject) {
             RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
         }
