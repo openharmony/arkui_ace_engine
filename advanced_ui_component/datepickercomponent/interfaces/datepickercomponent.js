@@ -118,6 +118,7 @@ export class DatePickerComponent extends ViewPU {
         this.subscriber = null;
         this.formatter = new intl.NumberFormat();
         this.yearFormatter = new intl.NumberFormat('', { useGrouping: false });
+        this.userLunar = false;
         this.setInitiallyProvidedValue(params);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("currentLocale", this.onLocaleChange);
@@ -261,6 +262,9 @@ export class DatePickerComponent extends ViewPU {
         }
         if (params.yearFormatter !== undefined) {
             this.yearFormatter = params.yearFormatter;
+        }
+        if (params.userLunar !== undefined) {
+            this.userLunar = params.userLunar;
         }
     }
     updateStateVars(params) {
@@ -573,6 +577,20 @@ export class DatePickerComponent extends ViewPU {
         this.locale = new intl.Locale(this.currentLocale);
         this.formatter = new intl.NumberFormat();
         this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
+        // Issue 2: Save user-set lunar value, decide whether to apply based on current language
+        this.userLunar = this.lunar;
+        const isChinese = this.isChineseLocale();
+        if (!isChinese) {
+            // Static scenario: non-Chinese language, force lunar to false
+            this.lunar = false;
+            this.lunarCalendar = null;
+        }
+        else {
+            // Chinese language: apply lunar based on user setting
+            if (this.lunar) {
+                this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+            }
+        }
         if (this.selectedYear === 0 || this.selectedMonth === 0 || this.selectedDay === 0) {
             const now = new Date();
             this.selectedYear = now.getFullYear();
@@ -581,11 +599,6 @@ export class DatePickerComponent extends ViewPU {
             this.selectedHour = now.getHours();
             this.selectedMinute = now.getMinutes();
             this.selectedSecond = now.getSeconds();
-            // Note: selectedPeriod will be set in initTimeArrays or updateTimeOptions
-            // based on the correct useMilitaryTime value
-        }
-        if (this.lunar) {
-            this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
         }
         if (this.options !== undefined && this.options !== null) {
             this.onOptionsChange();
@@ -593,7 +606,6 @@ export class DatePickerComponent extends ViewPU {
         else {
             this.initArrays();
         }
-        // Create subscriber to listen for system language changes
         this.createLocaleChangeSubscriber();
     }
     aboutToDisappear() {
@@ -632,8 +644,43 @@ export class DatePickerComponent extends ViewPU {
         this.locale = new intl.Locale(this.currentLocale);
         this.formatter = new intl.NumberFormat();
         this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
-        if (this.lunar) {
-            this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+        const isChinese = this.isChineseLocale();
+        const prevLunar = this.lunar;
+        const prevLunarCalendar = this.lunarCalendar;
+        // Handle lunar calendar based on language
+        if (isChinese) {
+            // Chinese locale: use user-set lunar value
+            this.lunar = this.userLunar;
+            if (this.lunar) {
+                this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+            }
+            else {
+                this.lunarCalendar = null;
+            }
+        }
+        else {
+            // Non-Chinese locale: disable lunar calendar but keep user setting
+            this.lunar = false;
+            this.lunarCalendar = null;
+        }
+        // Convert date when switching between lunar and gregorian modes
+        if (prevLunar !== this.lunar) {
+            if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
+                // Switching from gregorian to lunar: convert gregorian date to lunar date
+                this.lunarCalendar.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
+                this.selectedMonth = this.lunarCalendar.get('month');
+                this.selectedDay = this.lunarCalendar.get('date');
+            }
+            else if (prevLunar && !this.lunar && prevLunarCalendar !== null) {
+                // Switching from lunar to gregorian: convert lunar date to gregorian date
+                // Use prevLunarCalendar for conversion since current lunarCalendar is null
+                const gregorianDate = this.convertLunarToGregorianWithCalendar(prevLunarCalendar, this.selectedYear, this.selectedMonth, this.selectedDay);
+                if (gregorianDate !== null) {
+                    this.selectedYear = gregorianDate.getFullYear();
+                    this.selectedMonth = gregorianDate.getMonth();
+                    this.selectedDay = gregorianDate.getDate();
+                }
+            }
         }
         this.initArrays();
     }
@@ -705,6 +752,33 @@ export class DatePickerComponent extends ViewPU {
         }
         catch (e) {
             return 30;
+        }
+    }
+    convertLunarToGregorian(gregorianYear, lunarMonth, lunarDay) {
+        return this.convertLunarToGregorianWithCalendar(this.lunarCalendar, gregorianYear, lunarMonth, lunarDay);
+    }
+    convertLunarToGregorianWithCalendar(calendar, gregorianYear, lunarMonth, lunarDay) {
+        if (calendar === null) {
+            return null;
+        }
+        try {
+            // Find the gregorian date for the given lunar date
+            // Iterate through gregorian dates to find matching lunar month and day
+            for (let month = 0; month < 12; month++) {
+                for (let day = 1; day <= 31; day++) {
+                    const testDate = new Date(gregorianYear, month, day);
+                    calendar.setTime(testDate);
+                    const currentLunarMonth = calendar.get('month');
+                    const currentLunarDay = calendar.get('date');
+                    if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
+                        return testDate;
+                    }
+                }
+            }
+            return null;
+        }
+        catch (e) {
+            return null;
         }
     }
     formatLunarYear(gregorianYear) {
@@ -900,9 +974,9 @@ export class DatePickerComponent extends ViewPU {
                 if (this.selectedHour < 12) {
                     const minPMHour = Math.max(12, this.startHour);
                     const maxPMHour = Math.min(23, this.endHour);
-                    // 计算目标小时（24小时制）：12 AM->12, 1-11 AM->13-23
+                    // Calculate target hour (24-hour format): 12 AM->12, 1-11 AM->13-23
                     let targetHour24 = this.selectedHour === 0 ? 12 : this.selectedHour + 12;
-                    // 确保目标小时在有效范围内
+                    // Ensure target hour is within valid range
                     this.selectedHour = Math.max(minPMHour, Math.min(maxPMHour, targetHour24));
                 }
             }
@@ -1049,12 +1123,12 @@ export class DatePickerComponent extends ViewPU {
                 return undefined;
             }
             // Detect JavaScript auto-correction by checking year jump
-            // If year jumped significantly (> 1 year), it indicates异常input
+            // If year jumped significantly (> 1 year), it indicates abnormal input
             // Create expected Date without correction
             const originalTime = date.getTime();
             const correctedDate = new Date(year, month, day);
             const correctedTime = correctedDate.getTime();
-            // If time difference > 365 days, indicates year jump due to异常month/day
+            // If time difference > 365 days, indicates year jump due to abnormal month/day
             const timeDiff = Math.abs(originalTime - correctedTime);
             const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
             if (timeDiff > oneYearInMs) {
@@ -1091,7 +1165,7 @@ export class DatePickerComponent extends ViewPU {
             const day = date.getDate();
             const originalTime = date.getTime();
             const correctedTime = new Date(year, month, day, hour, minute, second).getTime();
-            // If time difference > 1 hour, indicates异常minute/second overflow
+            // If time difference > 1 hour, indicates abnormal minute/second overflow
             const timeDiff = Math.abs(originalTime - correctedTime);
             const oneHourInMs = 60 * 60 * 1000;
             if (timeDiff > oneHourInMs) {
@@ -1109,35 +1183,93 @@ export class DatePickerComponent extends ViewPU {
         return new Date(year, month, day);
     }
     onOptionsChange() {
-        if (this.options.displayMode !== undefined) {
+        // Issue 4: Restore defaults for undefined/null values
+        if (this.options.displayMode !== undefined && this.options.displayMode !== null) {
             this.displayMode = this.options.displayMode;
         }
-        if (this.options.dateOptions !== undefined) {
+        else {
+            this.displayMode = DisplayMode.DATE;
+        }
+        if (this.options.dateOptions !== undefined && this.options.dateOptions !== null) {
             this.updateDateOptions(this.options.dateOptions);
         }
-        if (this.options.timeOptions !== undefined) {
+        else {
+            // Restore defaults when dateOptions is undefined
+            this.dateMode = DateMode.DATE;
+            this.lunar = false;
+            this.userLunar = false;
+            this.lunarCalendar = null;
+            this.dateCanLoop = true;
+            this.dateHapticFeedback = true;
+            this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+            this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+            this.startMonth = DatePickerConstant.MIN_MONTH;
+            this.endMonth = DatePickerConstant.MAX_MONTH;
+            this.startDay = DatePickerConstant.MIN_DAY;
+            this.endDay = 31;
+        }
+        if (this.options.timeOptions !== undefined && this.options.timeOptions !== null) {
             this.updateTimeOptions(this.options.timeOptions);
+        }
+        else {
+            // Restore defaults when timeOptions is undefined
+            this.timeFormat = TimeFormat.HOUR_MINUTE;
+            this.useMilitaryTime = false;
+            this.timeCanLoop = true;
+            this.timeHapticFeedback = true;
+            this.startHour = DatePickerConstant.MIN_HOUR;
+            this.endHour = DatePickerConstant.MAX_HOUR;
+            this.startMinute = DatePickerConstant.MIN_MINUTE;
+            this.endMinute = DatePickerConstant.MAX_MINUTE;
+            this.startSecond = DatePickerConstant.MIN_SECOND;
+            this.endSecond = DatePickerConstant.MAX_SECOND;
+            this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
         }
         this.initArrays();
     }
     updateDateOptions(dateOptions) {
-        if (dateOptions.mode !== undefined) {
+        // Issue 4: Restore defaults for undefined/null values
+        if (dateOptions.mode !== undefined && dateOptions.mode !== null) {
             this.dateMode = dateOptions.mode;
         }
-        if (dateOptions.lunar !== undefined) {
-            this.lunar = dateOptions.lunar;
-            if (this.lunar) {
-                this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+        else {
+            this.dateMode = DateMode.DATE;
+        }
+        if (dateOptions.lunar !== undefined && dateOptions.lunar !== null) {
+            // Issue 2: Save user-set value first, then decide based on current language
+            this.userLunar = dateOptions.lunar;
+            const isChinese = this.isChineseLocale();
+            if (isChinese) {
+                this.lunar = dateOptions.lunar;
+                if (this.lunar) {
+                    this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+                }
+                else {
+                    this.lunarCalendar = null;
+                }
             }
             else {
+                // Non-Chinese language: force lunar to false, do not apply
+                this.lunar = false;
                 this.lunarCalendar = null;
             }
         }
-        if (dateOptions.loop !== undefined) {
+        else {
+            this.lunar = false;
+            this.userLunar = false;
+            this.lunarCalendar = null;
+        }
+        if (dateOptions.loop !== undefined && dateOptions.loop !== null) {
             this.dateCanLoop = dateOptions.loop;
         }
-        if (dateOptions.enableHapticFeedback !== undefined) {
+        else {
+            this.dateCanLoop = true;
+        }
+        if (dateOptions.enableHapticFeedback !== undefined && dateOptions.enableHapticFeedback !== null) {
             this.dateHapticFeedback = dateOptions.enableHapticFeedback;
+        }
+        else {
+            this.dateHapticFeedback = true;
         }
         let startValid = false;
         let endValid = false;
@@ -1308,17 +1440,30 @@ export class DatePickerComponent extends ViewPU {
         }
     }
     updateTimeOptions(timeOptions) {
-        if (timeOptions.format !== undefined) {
+        // Issue 4: Restore defaults for undefined/null values
+        if (timeOptions.format !== undefined && timeOptions.format !== null) {
             this.timeFormat = timeOptions.format;
         }
-        if (timeOptions.useMilitaryTime !== undefined) {
+        else {
+            this.timeFormat = TimeFormat.HOUR_MINUTE;
+        }
+        if (timeOptions.useMilitaryTime !== undefined && timeOptions.useMilitaryTime !== null) {
             this.useMilitaryTime = timeOptions.useMilitaryTime;
         }
-        if (timeOptions.loop !== undefined) {
+        else {
+            this.useMilitaryTime = false;
+        }
+        if (timeOptions.loop !== undefined && timeOptions.loop !== null) {
             this.timeCanLoop = timeOptions.loop;
         }
-        if (timeOptions.enableHapticFeedback !== undefined) {
+        else {
+            this.timeCanLoop = true;
+        }
+        if (timeOptions.enableHapticFeedback !== undefined && timeOptions.enableHapticFeedback !== null) {
             this.timeHapticFeedback = timeOptions.enableHapticFeedback;
+        }
+        else {
+            this.timeHapticFeedback = true;
         }
         let startValid = false;
         let endValid = false;
@@ -1518,20 +1663,20 @@ export class DatePickerComponent extends ViewPU {
         this.timeOnChange?.(this.getResult());
     }
     onPeriodChange(selectedIndex) {
-        // 根据periodArray内容确定selectedPeriod，而不是直接使用selectedIndex
-        // 这样即使periodArray只有一个选项也能正确映射
+        // Determine selectedPeriod based on periodArray content, not directly using selectedIndex
+        // This ensures correct mapping even if periodArray has only one option
         const selectedPeriodStr = this.periodArray[selectedIndex];
         this.selectedPeriod = selectedPeriodStr === this.formatPeriod(true) ? 0 : 1;
         if (!this.useMilitaryTime) {
-            // 更新hourArray
+            // Update hourArray
             this.updateHourArrayFor12Hour();
-            // 根据新的period调整selectedHour
+            // Adjust selectedHour based on new period
             const isAM = this.selectedPeriod === 0;
             if (isAM) {
-                // 切换到AM时段
+                // Switch to AM period
                 const minHour = Math.max(0, this.startHour);
                 const maxHour = Math.min(11, this.endHour < 12 ? this.endHour : 11);
-                // 如果当前hour不在AM范围内，调整到范围内
+                // If current hour is not in AM range, adjust to within range
                 if (this.selectedHour >= 12 || this.selectedHour < minHour) {
                     this.selectedHour = minHour;
                 }
@@ -1540,10 +1685,10 @@ export class DatePickerComponent extends ViewPU {
                 }
             }
             else {
-                // 切换到PM时段
+                // Switch to PM period
                 const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12);
                 const maxHour = Math.min(23, this.endHour);
-                // 如果当前hour不在PM范围内，调整到范围内
+                // If current hour is not in PM range, adjust to within range
                 if (this.selectedHour < 12 || this.selectedHour < minHour) {
                     this.selectedHour = minHour;
                 }
@@ -1551,7 +1696,7 @@ export class DatePickerComponent extends ViewPU {
                     this.selectedHour = maxHour;
                 }
             }
-            // 更新minute和second数组
+            // Update minute and second arrays
             this.updateTimeArrays();
         }
         this.timeOnChange?.(this.getResult());
