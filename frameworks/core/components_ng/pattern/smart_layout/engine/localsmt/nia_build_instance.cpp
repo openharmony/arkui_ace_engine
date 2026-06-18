@@ -14,7 +14,6 @@
  */
 
 #include <unordered_set>
-#include <fstream>
 #include "matrix.h"
 #include "nia_ls.h"
 #define NLS_DEBUG
@@ -296,55 +295,6 @@ bool IsSameCls(const std::vector<int>& cl1, const std::vector<int>& cl2)
         }
     }
     return true;
-}
-
-void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::string>& softCNames)
-{
-    std::string inString;
-    uint64_t inputNumLits;
-    std::ifstream ifs(fileName.c_str());
-    if (!ifs.is_open()) {
-        perror("ReadFromFile:open failed");
-        return;
-    }
-    ifs >> inputNumLits;
-    MakeLitsSpace(inputNumLits);
-    getline(ifs, inString);
-    getline(ifs, inString);
-    while (inString != "0") {
-        BuildLits(inString);
-        getline(ifs, inString);
-    }
-    int size;
-    ifs >> size;
-    if (size < 0) {
-        return;
-    }
-    originalVec.resize(size);
-    int sizeNow = 0;
-    while (sizeNow < size) {
-        ifs >> inString;
-        if (inString == "(") {
-            continue;
-        } else if (inString == ")") {
-            sizeNow++;
-        } else {
-            originalVec[sizeNow].push_back(atoi(inString.c_str()));
-        }
-    }
-    DeleteRedundantClauses(originalVec);
-    bool hasBC = name2var.find("BC_width") != name2var.end();
-    basicComponentName = hasBC ? "BC" : "";
-    bcWidthIdx = hasBC ?
-        static_cast<int>(TransferNameToVar("BC_width", true)) : static_cast<int>(TransferNameToVar(".w", true));
-    bcHeightIdx = hasBC ?
-        static_cast<int>(TransferNameToVar("BC_height", true)) : static_cast<int>(TransferNameToVar(".h", true));
-    PrepareComponentsIdx();
-    PrepareSoftComponentsIdx(softCNames);
-    numVars = vars.size();
-    litAppear.resize(numLits);
-    litsInCls = new Array(static_cast<int>(numLits));
-    RecordInfoAfterReadFile();
 }
 
 void LsSolver::RecordInfoAfterReadFile()
