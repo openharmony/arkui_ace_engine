@@ -947,7 +947,7 @@ HWTEST_F(SheetPresentationTestEightNg, UpdateSheetBackgroundColor002, TestSize.L
 
     auto renderContext = sheetNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    EXPECT_FALSE(renderContext->HasBackgroundColor());
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }
