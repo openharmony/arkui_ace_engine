@@ -681,13 +681,13 @@ void MenuPattern::RemoveParentHoverStyle()
     menuItemPattern->OnHover(false);
 }
 
-void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode)
+void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex)
 {
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     const auto& children = host->GetChildren();
-    int32_t index = 0;
+    int32_t index = currentIndex;
     for (auto child : children) {
         auto tag = child->GetTag();
         if (tag == MENU_ITEM_ETS_TAG) {
@@ -727,7 +727,7 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (tag == JS_FOR_EACH_ETS_TAG || tag == JS_SYNTAX_ITEM_ETS_TAG
             ||  tag == JS_IF_ELSE_ETS_TAG || tag == JS_REPEAT_ETS_TAG) {
-            UpdateMenuItemChildren(child, previousNode);
+            UpdateMenuItemChildren(child, previousNode, index);
         }
         index++;
     }
