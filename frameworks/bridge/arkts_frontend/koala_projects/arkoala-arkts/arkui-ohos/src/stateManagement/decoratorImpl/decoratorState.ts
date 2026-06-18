@@ -80,6 +80,12 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         return value;
     }
 
+    public rawGet(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${this.getTraceInfo()}`);
+        const value = this.backing_.get(false);
+        return value;
+    }
+
     public set(newValue: T): void {
         const oldValue = this.backing_.get(false);
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${oldValue === newValue} ${this.setTraceInfo()}`);
