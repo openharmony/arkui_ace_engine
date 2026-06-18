@@ -132,7 +132,14 @@ HWTEST_F(ToggleOneTestNg, TogglePatternTest0019, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     geometryNode->SetContentSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
     /**
-     * @tc.steps: step2. call function HandleDragEnd.
+     * @tc.steps: step2. mock switchTheme to themeManager for OnClick inside HandleDragEnd.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
+    /**
+     * @tc.steps: step3. call function HandleDragEnd.
      */
     pattern->dragOffsetX_ = 0;
     pattern->HandleDragEnd();
