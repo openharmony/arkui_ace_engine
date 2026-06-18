@@ -24,11 +24,11 @@ ResSchedClient& ResSchedClient::GetInstance()
 }
 
 void ResSchedClient::RegisterEventListener(const sptr<ResSchedEventListener>& eventListener,
-    uint32_t eventType, uint32_t listernGroup)
+    uint32_t eventType, uint32_t listenerGroup)
 {
 }
 void ResSchedClient::UnRegisterEventListener(const sptr<ResSchedEventListener>& eventListener,
-    uint32_t eventType, uint32_t listernGroup)
+    uint32_t eventType, uint32_t listenerGroup)
 {
 }
 } // end ResourceSchedule
