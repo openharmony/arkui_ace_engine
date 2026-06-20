@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/dimension.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 double Dimension::ConvertToVp() const
@@ -90,7 +91,7 @@ void Dimension::SetValue(double value)
 
 bool Dimension::operator==(const Dimension& dimension) const
 {
-    return (unit_ == dimension.unit_) && (value_ == dimension.value_);
+    return (unit_ == dimension.unit_) && NearEqual(value_, dimension.value_);
 }
 
 bool Dimension::NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
