@@ -158,6 +158,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/bridge/lazy_grid_layout_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/loading_progress/bridge/loading_progress_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/column_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/row_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/bridge/column_split_static_modifier.cpp",

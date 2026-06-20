@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/matrix4.h"
+#include "base/geometry/point.h"
 
 using namespace testing;
 using namespace testing::ext;

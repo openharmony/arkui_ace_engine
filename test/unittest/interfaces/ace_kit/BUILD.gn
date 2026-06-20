@@ -146,6 +146,7 @@ ohos_unittest("ace_kit_test") {
     "$ace_root/interfaces/inner_api/ace_kit/src/resource/resource_parser.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/utils/measure_utils.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/badge.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/badge_modifier.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/column.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/menu_view.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/stack.cpp",
