@@ -722,8 +722,15 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
     }
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scrollable TouchTestDone: isHitTestBlock %{public}d, clickJudge %{public}d",
         isHitTestBlock, clickJudge);
+    OnTouchTestDoneHandlePreventRecognizer(activeRecognizers, isHitTestBlock);
+}
+
+void ScrollablePattern::OnTouchTestDoneHandlePreventRecognizer(
+    const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers, bool isHitTestBlock)
+{
     auto scrollableNode = GetHost();
     CHECK_NULL_VOID(scrollableNode);
+    auto scrollableNodeDepth = scrollableNode->GetDepth();
     bool isChild = true;
     for (auto iter = activeRecognizers.begin(); iter != activeRecognizers.end(); ++iter) {
         auto recognizer = *iter;
@@ -737,6 +744,24 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
             isChild = false;
             if (!isHitTestBlock) {
                 return;
+            }
+        }
+        if (isChild) {
+            auto parent = frameNode->GetParent();
+            bool isScrollableAncestor = false;
+            while (parent) {
+                auto parentNodeDepth = parent->GetDepth();
+                if (parentNodeDepth < scrollableNodeDepth) {
+                    break;
+                }
+                if (AceType::DynamicCast<FrameNode>(parent) == scrollableNode) {
+                    isScrollableAncestor = true;
+                    break;
+                }
+                parent = parent->GetParent();
+            }
+            if (!isScrollableAncestor) {
+                continue;
             }
         }
         if (IsNeedPreventRecognizer(upgradeRecognizer, isChild, isHitTestBlock)) {
