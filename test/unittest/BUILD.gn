@@ -687,6 +687,7 @@ ohos_static_library("ace_core_extra") {
     "$ace_root/frameworks/core/common/event_dump.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/event_manager_pen.cpp",
+    "$ace_root/frameworks/core/common/platform_res_register.cpp",
     "$ace_root/frameworks/core/common/force_split/force_split_utils.cpp",
     "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_action.cpp",

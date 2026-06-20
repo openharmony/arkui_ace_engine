@@ -83,6 +83,16 @@ Dimension Dimension::FromString(const std::string& str)
     return Dimension();
 }
 
+void Dimension::SetValue(double value)
+{
+    value_ = value;
+}
+
+bool Dimension::operator==(const Dimension& dimension) const
+{
+    return (unit_ == dimension.unit_) && (value_ == dimension.value_);
+}
+
 bool Dimension::NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
 {
     (void)vpScale;
