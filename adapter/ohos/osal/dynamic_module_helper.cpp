@@ -114,6 +114,11 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
+#if defined(CROSS_PLATFORM)
+        { "ArcScrollBar", "arcscrollbar" },
+        { "ArcList", "arclist" },
+        { "ArcListItem", "arclist" },
+#endif
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {
