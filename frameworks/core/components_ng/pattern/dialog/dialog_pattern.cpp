@@ -114,6 +114,9 @@ constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
 constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
+constexpr uint32_t MIN_FRAME_RATE = 60;
+constexpr uint32_t MAX_FRAME_RATE = 120;
+constexpr uint32_t EXPECTED_FRAME_RATE = 120;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
 const DistortionParam TERMINAL_DISTORTION_PARAM {
     .luCorner = { 0, 0 },
@@ -3544,6 +3547,9 @@ void DialogPattern::PlayDistortion()
         .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
     };
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+        AceType::MakeRefPtr<FrameRateRange>(MIN_FRAME_RATE, MAX_FRAME_RATE, EXPECTED_FRAME_RATE);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(1000);
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
     AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
