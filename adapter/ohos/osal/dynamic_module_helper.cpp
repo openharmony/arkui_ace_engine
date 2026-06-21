@@ -101,6 +101,11 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+#if defined(CROSS_PLATFORM)
+        { "ArcScrollBar", "arcscrollbar" },
+        { "ArcList", "arclist" },
+        { "ArcListItem", "arclist" },
+#endif
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {
