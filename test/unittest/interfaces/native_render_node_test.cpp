@@ -32,7 +32,6 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/core/components_ng/base/mixed_mount_registry.h"
-#include "frameworks/core/components_ng/base/ui_node.h"
 
 using namespace testing;
 using namespace testing::ext;

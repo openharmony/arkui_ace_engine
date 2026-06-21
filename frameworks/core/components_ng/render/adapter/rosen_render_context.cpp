@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/particle_property.h"
@@ -82,6 +83,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/render/adapter/transition_modifier.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -347,6 +349,10 @@ std::timed_mutex RosenRenderContext::taskMtx_;
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
 
+RosenRenderContext::RosenRenderContext()
+    : mixedRenderChildList_(std::make_unique<RosenMixedRenderChildList>())
+{}
+
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -363,7 +369,7 @@ RosenRenderContext::~RosenRenderContext()
     auto host = GetHost();
     if (host) {
         host->RemoveExtraCustomProperty("RS_NODE");
-        mixedRenderChildList_.Reset(host);
+        mixedRenderChildList_->Reset(host);
     }
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
 }
@@ -4985,7 +4991,7 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNod
 
 bool RosenRenderContext::IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode)
 {
-    return mixedRenderChildList_.IsFrameRenderChild(rsNode);
+    return mixedRenderChildList_->IsFrameRenderChild(rsNode);
 }
 
 void RosenRenderContext::NotifyMixedListChanged()
@@ -4998,81 +5004,112 @@ void RosenRenderContext::NotifyMixedListChanged()
 
 int32_t RosenRenderContext::GetMixedRenderChildCount()
 {
-    return mixedRenderChildList_.GetChildCount();
+    return mixedRenderChildList_->GetChildCount();
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderChildAt(int32_t index)
 {
-    return mixedRenderChildList_.GetChildAt(index);
+    return mixedRenderChildList_->GetChildAt(index);
 }
 
 int32_t RosenRenderContext::GetMixedRenderChildIndexByRSNode(
     const std::shared_ptr<Rosen::RSNode>& rsNode)
 {
-    return mixedRenderChildList_.GetChildIndexByRSNode(rsNode);
+    return mixedRenderChildList_->GetChildIndexByRSNode(rsNode);
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderSibling(
     const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset)
 {
-    return mixedRenderChildList_.GetSibling(rsNode, offset);
+    return mixedRenderChildList_->GetSibling(rsNode, offset);
 }
 
 bool RosenRenderContext::GetMixedRenderChildInsertIndexAfterRSNode(
     const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex)
 {
-    return mixedRenderChildList_.GetInsertIndexAfterRSNode(rsNode, mixedIndex);
+    return mixedRenderChildList_->GetInsertIndexAfterRSNode(rsNode, mixedIndex);
 }
 
 void RosenRenderContext::InsertPureRenderChildAt(
     const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
 {
-    if (mixedRenderChildList_.InsertPureRenderChildAt(GetHost(), childRSNode, index)) {
+    if (mixedRenderChildList_->InsertPureRenderChildAt(WeakPtr<FrameNode>(GetHost()), childRSNode, index)) {
         NotifyMixedListChanged();
     }
 }
 
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const
+{
+    CHECK_NULL_RETURN(child, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        return GetRsNodeByFrame(frameNode);
+    }
+    std::list<RefPtr<FrameNode>> frameNodes;
+    child->GenerateSelfVisibleFrameWithTransition(frameNodes);
+    if (frameNodes.empty()) {
+        return nullptr;
+    }
+    return GetRsNodeByFrame(frameNodes.front());
+}
+
 void RosenRenderContext::InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
 {
-    if (mixedRenderChildList_.InsertFrameChildBefore(GetHost(), child, nextSibling)) {
+    CHECK_NULL_VOID(child);
+    mixedRenderChildList_->RemoveFrameChild(child);
+    auto childRSNode = ResolveMixedFrameChildRSNode(child);
+    if (mixedRenderChildList_->InsertFrameChildBefore(
+        WeakPtr<FrameNode>(GetHost()), child, childRSNode, nextSibling)) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode)
 {
-    if (mixedRenderChildList_.RemovePureRenderChild(childRSNode)) {
+    if (mixedRenderChildList_->RemovePureRenderChild(childRSNode)) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::RemoveMixedFrameChild(const RefPtr<UINode>& child)
 {
-    if (mixedRenderChildList_.RemoveFrameChild(child)) {
+    if (mixedRenderChildList_->RemoveFrameChild(child)) {
         NotifyMixedListChanged();
     }
 }
 
 bool RosenRenderContext::CanSwitchToSingleIfRenderNode()
 {
-    return mixedRenderChildList_.CanSwitchToSingleIfRenderNode();
+    return mixedRenderChildList_->CanSwitchToSingleIfRenderNode();
 }
 
 void RosenRenderContext::ResetMixedRenderChildren()
 {
-    mixedRenderChildList_.Reset(GetHost());
+    mixedRenderChildList_->Reset(GetHost());
 }
 
 void RosenRenderContext::ClearMixedPureRenderChildren()
 {
-    if (mixedRenderChildList_.ClearPureRenderChildren()) {
+    if (mixedRenderChildList_->ClearPureRenderChildren()) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children)
 {
-    if (mixedRenderChildList_.SyncFrameChildren(GetHost(), children)) {
+    bool changed = false;
+    RefPtr<UINode> nextSibling;
+    auto host = WeakPtr<FrameNode>(GetHost());
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto child = *iter;
+        if (child) {
+            mixedRenderChildList_->RemoveFrameChild(child);
+        }
+        auto childRSNode = ResolveMixedFrameChildRSNode(child);
+        changed |= mixedRenderChildList_->InsertFrameChildBefore(host, child, childRSNode, nextSibling);
+        nextSibling = child;
+    }
+    if (changed) {
         NotifyMixedListChanged();
     }
 }
@@ -5091,7 +5128,7 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::BuildMixedTarget
         }
     };
 
-    auto targetRSNodes = mixedRenderChildList_.BuildTargetRSNodes(GetHost());
+    auto targetRSNodes = mixedRenderChildList_->BuildTargetRSNodes(WeakPtr<FrameNode>(GetHost()));
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> targetNodeMap;
     for (const auto& childRSNode : targetRSNodes) {
         if (childRSNode) {
