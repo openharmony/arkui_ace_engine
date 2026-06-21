@@ -22223,7 +22223,7 @@ int32_t SetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node, const ArkUI_Att
     if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getListModifier()->setDigitalCrownSensitivity(
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->setDigitalCrownSensitivity(
         node->uiNodeHandle, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -22231,14 +22231,14 @@ int32_t SetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node, const ArkUI_Att
 const ArkUI_AttributeItem* GetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node)
 {
     g_numberValues[NUM_0].i32 =
-        GetFullImpl()->getNodeModifiers()->getListModifier()->getDigitalCrownSensitivity(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getArcListModifier()->getDigitalCrownSensitivity(node->uiNodeHandle);
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
 void ResetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListModifier()->resetDigitalCrownSensitivity(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->resetDigitalCrownSensitivity(node->uiNodeHandle);
 }
 
 int32_t SetArcListChainAnimation(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -22271,20 +22271,20 @@ int32_t SetArcListHeader(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
     auto headerNode = reinterpret_cast<ArkUI_NodeHandle>(item->object);
     CHECK_NULL_RETURN(headerNode, ERROR_CODE_PARAM_INVALID);
-    GetFullImpl()->getNodeModifiers()->getListModifier()->setArcListHeader(node->uiNodeHandle, headerNode->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->setArcListHeader(node->uiNodeHandle, headerNode->uiNodeHandle);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetArcListHeader(ArkUI_NodeHandle node)
 {
-    auto header = GetFullImpl()->getNodeModifiers()->getListModifier()->getArcListHeader(node->uiNodeHandle);
+    auto header = GetFullImpl()->getNodeModifiers()->getArcListModifier()->getArcListHeader(node->uiNodeHandle);
     g_attributeItem.object = GetArkUINode(header);
     return &g_attributeItem;
 }
 
 void ResetArcListHeader(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListModifier()->resetArcListHeader(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->resetArcListHeader(node->uiNodeHandle);
 }
 
 int32_t SetArcListScrollBar(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -22523,7 +22523,7 @@ int32_t SetArcListItemAutoScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     if (actualSize < 0 || !CheckAttributeIsBool(item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getListItemModifier()->setAutoScale(
+    GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->setAutoScale(
         node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
     return ERROR_CODE_NO_ERROR;
 }
@@ -22531,14 +22531,14 @@ int32_t SetArcListItemAutoScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem
 const ArkUI_AttributeItem* GetArcListItemAutoScale(ArkUI_NodeHandle node)
 {
     g_numberValues[NUM_0].i32 =
-        GetFullImpl()->getNodeModifiers()->getListItemModifier()->getAutoScale(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->getAutoScale(node->uiNodeHandle);
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
 void ResetArcListItemAutoScale(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListItemModifier()->resetAutoScale(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->resetAutoScale(node->uiNodeHandle);
 }
 
 int32_t SetArcListItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)

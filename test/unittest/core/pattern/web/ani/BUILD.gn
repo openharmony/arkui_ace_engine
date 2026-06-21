@@ -705,6 +705,10 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.cpp",
     "$ace_root/test/mock/adapter/ohos/entrance/picker/mock_picker_haptic_controller.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/mock_indexer_vibrator.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_arc_scroll_bar_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
   ]
 
   sources += [

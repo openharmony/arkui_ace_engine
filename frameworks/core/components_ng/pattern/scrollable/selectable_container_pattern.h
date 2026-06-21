@@ -40,7 +40,7 @@ struct EditModeOptions {
     bool enableFingerMultiSelect = true;
 };
 
-class SelectableContainerPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT SelectableContainerPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(SelectableContainerPattern, ScrollablePattern);
 
 public:

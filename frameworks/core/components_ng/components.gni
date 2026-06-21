@@ -47,6 +47,12 @@ template("build_component_ng") {
       }
     }
 
+    if (defined(component_ng_deps)) {
+      foreach(item, component_ng_deps) {
+        extra_deps += [ "$ace_root/frameworks/core/components_ng/pattern/${item}:ace_core_components_${item}_pattern_ng_${platform}" ]
+      }
+    }
+
     if (defined(platform_deps)) {
       foreach(item, platform_deps) {
         extra_deps += [ "${item}_${platform}" ]

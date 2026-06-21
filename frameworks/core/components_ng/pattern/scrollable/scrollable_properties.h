@@ -103,7 +103,7 @@ enum class ContentClipMode {
     DEFAULT,      // Different scrollable components have different default clip values.
 };
 
-struct ContentClip {
+struct ACE_FORCE_EXPORT ContentClip {
     ContentClipMode first;
     RefPtr<ShapeRect> second;
 

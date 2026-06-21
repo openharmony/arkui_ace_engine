@@ -82,7 +82,7 @@ using OnDidStopFlingCallback = std::function<void()>;
 class FrameNode;
 class PipelineContext;
 
-class Scrollable : public TouchEventTarget {
+class ACE_FORCE_EXPORT Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
