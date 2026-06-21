@@ -650,8 +650,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetSelectIcon002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetSelectIcon(true);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectIcon(true);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -689,8 +689,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetSelectIconSrc002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetSelectIconSrc("selectIcon.png");
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetSelectIconSrc("selectIcon.png");
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -777,8 +777,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetFontSize004, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetFontSize(Dimension(40.0));
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontSize(Dimension(40.0));
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -839,8 +839,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetFontWeight002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetFontWeight(FontWeight::BOLD);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontWeight(FontWeight::BOLD);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -879,8 +879,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetFontColor002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetFontColor(Color::RED);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontColor(Color::RED);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -967,8 +967,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetLabelFontSize003, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetLabelFontSize(Dimension(40.0));
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetLabelFontSize(Dimension(40.0));
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -1007,8 +1007,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetLabelFontWeight002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetLabelFontWeight(FontWeight::BOLD);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetLabelFontWeight(FontWeight::BOLD);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -1047,8 +1047,8 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetLabelFontColor002, TestSize.Level1)
 {
     MenuItemModelNG MneuItemModelInstance;
     MenuItemProperties itemOption;
-    MneuItemModelInstance.SetLabelFontColor(Color::RED);
     MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetLabelFontColor(Color::RED);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
