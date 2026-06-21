@@ -402,6 +402,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     } else {
+        auto instance = AceType::MakeRefPtr<JSCustomDialogController>(nullptr);
+        instance->IncRefCount();
+        info.SetReturnValue(AceType::RawPtr(instance));
         TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController::ConstructorCallback failed!");
         ACE_ENGINE_HISTOGRAM_BOOLEAN("Component.CustomDialogController", 1);
     }
@@ -418,9 +421,11 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     if (!jsBuilderFunction_) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "JsOpenDialog failed, jsBuilderFunction is nullptr!");
         return;
     }
     if (this->ownerView_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "JsOpenDialog failed, ownerView is nullptr!");
         return;
     }
     auto containerId = this->ownerView_->GetInstanceId();
