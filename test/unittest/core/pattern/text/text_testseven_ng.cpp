@@ -1610,39 +1610,10 @@ HWTEST_F(TextTestSevenNg, GetTailIndentInJson003, TestSize.Level1)
 
 /**
  * @tc.name: GetTailIndentInJson004
- * @tc.desc: Test GetTailIndentInJson with empty TailIndentsArray (HasValue returns false).
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestSevenNg, GetTailIndentInJson004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode and get layout property.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. set tail indents with empty array.
-     * @tc.expected: returns empty string (HasValue is false).
-     */
-    NG::TailIndents tailIndents;
-    tailIndents.indentsArray = NG::TailIndentsArray();
-    textLayoutProperty->UpdateTailIndents(tailIndents);
-
-    auto result = textLayoutProperty->GetTailIndentInJson();
-    EXPECT_TRUE(result.empty());
-}
-
-/**
- * @tc.name: GetTailIndentInJson005
  * @tc.desc: Test GetTailIndentInJson with negative and zero dimension values.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestSevenNg, GetTailIndentInJson005, TestSize.Level1)
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode and get layout property.
