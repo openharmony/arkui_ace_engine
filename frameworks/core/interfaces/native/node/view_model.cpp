@@ -32,6 +32,8 @@
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/progress_modifier.h"
+#include "core/interfaces/native/node/text_timer_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -246,10 +248,14 @@ void* createButtonNode(ArkUI_Int32 nodeId)
 
 void* createProgressNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ProgressModelNG::CreateFrameNode(nodeId, 0, 100, NG::ProgressType::LINEAR);
+    auto arkUIProgressModifier = NG::NodeModifier::GetProgressModifier();
+    CHECK_NULL_RETURN(arkUIProgressModifier && arkUIProgressModifier->createProgressFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIProgressModifier->createProgressFrameNode(
+        nodeId, 0, 100, static_cast<ArkUI_Int32>(NG::ProgressType::LINEAR));
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
@@ -646,10 +652,13 @@ void* createTextClockNode(ArkUI_Int32 nodeId)
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
+    auto arkUITextTimerModifier = NG::NodeModifier::GetTextTimerModifier();
+    CHECK_NULL_RETURN(arkUITextTimerModifier, nullptr);
+    auto arkUINodeHandle = arkUITextTimerModifier->createTextTimerFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)

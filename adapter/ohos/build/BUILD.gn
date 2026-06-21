@@ -33,6 +33,8 @@ component_modules = [
   "linear_split",
   "side_bar",
   "marquee",
+  "progress",
+  "texttimer",
   "search",
   "stepper",
   "radio",

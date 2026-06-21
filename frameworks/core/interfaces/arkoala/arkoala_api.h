@@ -5821,6 +5821,17 @@ struct ArkUIProgressModifier {
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle);
     void (*resetProgressInitialize)(ArkUINodeHandle node);
     void (*getProgressLinearStyle)(ArkUINodeHandle node, ArkUIProgressLinearStyleOption& option);
+    void (*setBorderColorSetByUser)(ArkUINodeHandle node, bool isSetByUser);
+    void (*setGradientColorByUser)(ArkUINodeHandle node, bool isSetByUser);
+    void (*setCapsuleStyleSetByUser)(ArkUINodeHandle node, bool isSetByUser);
+    void (*setProgressColorJS)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setProgressGradientColorWithResourceObj)(ArkUINodeHandle node, void* gradientRawPtr);
+    ArkUINodeHandle (*createProgressFrameNode)(
+        ArkUI_Uint32 nodeId, ArkUI_Float32 value, ArkUI_Float32 max, ArkUI_Int32 type);
+    void (*createModel)(
+        ArkUI_Float32 min, ArkUI_Float32 value, ArkUI_Float32 cachedValue, ArkUI_Float32 max, ArkUI_Int32 type);
+    void (*createWithResourceObj)(ArkUINodeHandle node, ArkUI_Int32 jsType, void* resObj);
+    void (*resetProgressBackgroundColorWithColorSpace)(ArkUINodeHandle node);
 };
 
 struct ArkUIPluginModifier {
@@ -8073,6 +8084,16 @@ struct ArkUITextTimerModifier {
         ArkUI_Int32 startTime);
     void (*setTextTimerOnTimer)(ArkUINodeHandle node, void* callback);
     void (*resetTextTimerOnTimer)(ArkUINodeHandle node);
+    void (*createTextTimerModel)();
+    ArkUINodeHandle (*createTextTimerFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setTextColorByUser)(ArkUINodeHandle node, bool isByUser);
+    void (*setFontSizeByUser)(ArkUINodeHandle node, bool isByUser);
+    void (*setFontWeightByUser)(ArkUINodeHandle node, bool isByUser);
+    void (*setFontFamilyByUser)(ArkUINodeHandle node, bool isByUser);
+    void (*setIsCountDown)(ArkUINodeHandle node, ArkUI_Bool isCountDown);
+    void (*setInputCount)(ArkUINodeHandle node, ArkUI_Float64 count);
+    void (*setStartTime)(ArkUINodeHandle node, ArkUI_Int32 startTime);
+    void (*setFontDefault)(ArkUINodeHandle node);
 };
 struct ArkUIContainerReaderModifier {
     void (*create)();

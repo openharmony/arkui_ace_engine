@@ -50,6 +50,24 @@ ohos_abc("arktextclock") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkprogress") {
+  sources = [ "./src/arkprogress.ts" ]
+  output_name = "arkprogress"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arktexttimer") {
+  sources = [ "./src/arktexttimer.ts" ]
+  output_name = "arktexttimer"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkpatternlock") {
   sources = [ "./src/arkpatternlock.ts" ]
   output_name = "arkpatternlock"

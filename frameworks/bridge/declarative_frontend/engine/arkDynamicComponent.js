@@ -551,6 +551,34 @@ if (globalThis.ImageSpan === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.TextTimer === undefined) {
+  globalThis.TextTimer = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextTimer');
+      let module = globalThis.requireNapi('arkui.components.arktexttimer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().texttimer.create(params?.isCountDown, params?.count, params?.controller, params?.startTime);
+    },
+    name: 'JSTextTimer'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Progress === undefined) {
+  globalThis.Progress = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Progress');
+      let module = globalThis.requireNapi('arkui.components.arkprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().progress.create(value?.value, value?.total, value?.style, value?.type);
+    },
+    name: 'JSProgress'
+  }
+}
+
+// @ts-ignore
 if (globalThis.TextClock === undefined) {
   globalThis.TextClock = {
     create: function (params) {

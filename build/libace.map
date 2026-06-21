@@ -832,6 +832,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ColorAlphaAdapt(unsigned int)";
       "OHOS::Ace::NG::ArkTSUtils::CompleteResourceObject(panda::ecmascript::EcmaVM const*, panda::Local<panda::ObjectRef>&)";
       "OHOS::Ace::NG::ArkTSUtils::CompleteResourceObjectFromColor(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::Color&, bool)";
+      "OHOS::Ace::NG::ArkTSUtils::CompleteResourceObjectFromColor(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::Color&, bool, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ConvertBorderStyle(int)";
       "OHOS::Ace::NG::ArkTSUtils::ConvertPixmap(panda::Local<panda::ObjectRef> const&, panda::ecmascript::EcmaVM const*, OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> const&)";
       "OHOS::Ace::NG::ArkTSUtils::CreatePixelMapFromNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef>)";
@@ -874,6 +875,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::Color const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::Color&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlphaForMaterial(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorStrategy(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::ForegroundColorStrategy&)";
@@ -1437,6 +1439,7 @@
       "OHOS::Ace::NG::ImageSpanItem::SetImageSpanOptions(OHOS::Ace::ImageSpanOptions const&)";
       "OHOS::Ace::NG::ImageSpanItem::UpdateLpxUnitFlag()";
       "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
+      "OHOS::Ace::NG::InputEventHub::SetHoverEffect(OHOS::Ace::HoverEffectType)";
       "OHOS::Ace::NG::InspectorFilter::IsFastFilter() const";
       "OHOS::Ace::NG::LayoutConstraintT<float>::Constrain(OHOS::Ace::NG::SizeT<float> const&) const";
       "OHOS::Ace::NG::LayoutConstraintT<float>::Reset()";
@@ -3211,6 +3214,7 @@
       "OHOS::Ace::ToRSColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::ToRSColor(OHOS::Ace::LinearColor const&)";
       "OHOS::Ace::ToRSPoint(OHOS::Ace::NG::PointT<float> const&)";
+      "OHOS::Ace::ToRSUIColor(OHOS::Ace::LinearColor const&, OHOS::Ace::Color const&)";
       "OHOS::Ace::ToRSRect(OHOS::Ace::NG::RectT<float> const&)";
       "OHOS::Ace::TouchEvent::GetOffset() const";
       "OHOS::Ace::TouchEventTarget::AttachFrameNode(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
@@ -3425,6 +3429,8 @@
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::Dimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::Dimension, OHOS::Ace::ScrollState)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double>(panda::ecmascript::EcmaVM const*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double)";
       "std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>> OHOS::Ace::NG::Converter::Convert<std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>>, Array_DateRange>(Array_DateRange const&)";
+      "OHOS::Ace::GetProgressColorSpace(OHOS::Ace::Color const&)";
+      "OHOS::Ace::NG::Converter::OptConvertFromArkLength(Ark_Length const&, OHOS::Ace::DimensionUnit)";
       *OHOS::Ace::NG::GeneratedApiImpl::GetContentNode*;
       *OHOS::Ace::NG::GeneratedApiImpl::SetContentNode*;
       "OHOS::Ace::Point::operator-(OHOS::Ace::Offset const&) const";
@@ -4083,7 +4089,9 @@
       OHOS::Ace::TextFieldModel::*;
       OHOS::Ace::TextModel::*;
       OHOS::Ace::TextPickerModel::*;
-      OHOS::Ace::TextTimerModel::*;
+      "OHOS::Ace::Framework::JsiObject::JsiObject(panda::Local<panda::ObjectRef>)";
+      "OHOS::Ace::Framework::JsiCallbackInfo::JsiCallbackInfo(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::TextTimerModel::GetInstance()";
       OHOS::Ace::Theme::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::TimePickerModel::*;

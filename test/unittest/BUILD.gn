@@ -1781,6 +1781,8 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_indexer_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_loading_progress_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_marquee_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_progress_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_text_timer_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_menu_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_qrcode_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_radio_modifier.cpp",

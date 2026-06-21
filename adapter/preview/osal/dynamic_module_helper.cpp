@@ -98,6 +98,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
+        { "Progress", "progress" },
+        { "TextTimer", "texttimer" },
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
         {"Radio", "radio"},

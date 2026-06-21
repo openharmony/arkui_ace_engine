@@ -36,6 +36,8 @@ interface ArkComponentCreator {
   createMarqueeComponent?: (node: NodePtr, type: ModifierType) => ArkMarqueeComponent;
   createSymbolGlyphComponent?: (node: NodePtr, type: ModifierType) => ArkSymbolGlyphComponent;
   createBadgeComponent?: (node: NodePtr, type: ModifierType) => ArkBadgeComponent;
+  createProgressComponent?: (node: NodePtr, type: ModifierType) => ArkProgressComponent;
+  createTextTimerComponent?: (node: NodePtr, type: ModifierType) => ArkTextTimerComponent;
 }
 
 const __componentCreator__ : ArkComponentCreator = {};
@@ -1345,7 +1347,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Progress', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Progress', (node: NodePtr, type: ModifierType): ArkProgressComponent => {
-        return new ArkProgressComponent(node, type);
+        if (__componentCreator__.createProgressComponent === undefined) {
+          getUINativeModule().loadNativeModule('Progress');
+          let module = globalThis.requireNapi('arkui.components.arkprogress');
+          __componentCreator__.createProgressComponent = module.createComponent;
+        }
+        return __componentCreator__.createProgressComponent!(node, type);
       })
     }],
     ['Scroll', (context: UIContext): FrameNode => {
@@ -1468,7 +1475,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['TextTimer', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
-        return new ArkTextTimerComponent(node, type);
+        if (__componentCreator__.createTextTimerComponent === undefined) {
+          getUINativeModule().loadNativeModule('TextTimer');
+          let module = globalThis.requireNapi('arkui.components.arktexttimer');
+          __componentCreator__.createTextTimerComponent = module.createComponent;
+        }
+        return __componentCreator__.createTextTimerComponent!(node, type);
       })
     }],
     ['Marquee', (context: UIContext): FrameNode => {
@@ -1787,7 +1799,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Progress');
+      let module = globalThis.requireNapi('arkui.components.arkprogress');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['LoadingProgress', (node: FrameNode): ArkLoadingProgressComponent => {

@@ -81,6 +81,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Indexer", "indexer" },
         { "Badge", "badge" },
         { "Marquee", "marquee" },
+        { "Progress", "progress" },
+        { "TextTimer", "texttimer" },
         { "PatternLock", "patternlock" },
         { "QRCode", "qrcode" },
         { "Radio", "radio" },

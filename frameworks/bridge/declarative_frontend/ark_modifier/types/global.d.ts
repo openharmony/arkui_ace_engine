@@ -141,6 +141,10 @@ interface PatternLockComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ProgressComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface QRCodeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -198,6 +202,10 @@ interface SymbolSpanComponentModule {
 }
 
 interface TextClockComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TextTimerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

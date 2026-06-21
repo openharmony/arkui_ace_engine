@@ -104,7 +104,6 @@
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
-#include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -135,7 +134,7 @@
 #include "bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
-#include "bridge/declarative_frontend/jsview/js_texttimer.h"
+#include "bridge/declarative_frontend/jsview/js_texttimer_controller.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
@@ -447,7 +446,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ListItem", JSListItem::JSBind },
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "Image", JSImage::JSBind },
-    { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Stack", JSStack::JSBind },
@@ -479,7 +477,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
-    { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
@@ -527,7 +524,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ListItemGroup", JSListItemGroup::JSBind },
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "Image", JSImage::JSBind },
-    { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Grid", JSGrid::JSBind },
@@ -662,7 +658,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
     { "PatternLockController", JSPatternLockControllerBinding::JSBind },
-    { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
@@ -865,6 +860,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSTextClockControllerBinding::JSBind(globalObj);
         return;
     }
+    if (module == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -874,8 +873,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSSwiperController::JSBind(globalObj);
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
-    } else if ((*func).first == "TextTimer") {
-        JSTextTimerController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
         JSCanvasPattern::JSBind(globalObj);
         JSCanvasGradient::JSBind(globalObj);
@@ -898,6 +895,10 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSTextClockControllerBinding::JSBind(globalObj);
         return;
     }
+    if (moduleName == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
+        return;
+    }
     if ((*func).first == "Swiper") {
         JSSwiperController::JSBind(globalObj);
     } else if ((*func).first == "Tabs") {
@@ -917,8 +918,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
-    } else if ((*func).first == "TextTimer") {
-        JSTextTimerController::JSBind(globalObj);
     } else if ((*func).first == "TextInput") {
         JSTextInputController::JSBind(globalObj);
     } else if ((*func).first == "TextArea") {
