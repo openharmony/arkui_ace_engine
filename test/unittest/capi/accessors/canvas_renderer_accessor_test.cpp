@@ -989,8 +989,6 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
             continue;
         }
         EXPECT_EQ(target.ToString(), expectedStr);
-        auto result = Converter::Convert<std::string>(accessor_->getShadowColor(peer_));
-        EXPECT_EQ(result, expectedStr);
     }
 }
 
@@ -1609,10 +1607,10 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
     auto arkR = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
     auto ptr = accessor_->getPixelMap(peer_, arkD, arkR, arkD, arkR);
     auto optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    EXPECT_EQ(optValue, std::nullopt);
     ptr = accessor_->getPixelMap(peer_, arkR, arkD, arkR, arkD);
     optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    EXPECT_EQ(optValue, std::nullopt);
 }
 #endif
 

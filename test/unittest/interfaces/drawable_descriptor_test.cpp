@@ -22,7 +22,6 @@
 #include "native_drawable_descriptor.h"
 #include "node_extened.h"
 #include "resource_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,8 +34,17 @@ const std::string PATH_NAME = "";
 } // namespace
 class DrawableDescriptorTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase()
+    {
+        s_resourceMgr_ = std::shared_ptr<Global::Resource::ResourceManager>(
+            Global::Resource::CreateResourceManager());
+    }
+    static void TearDownTestCase()
+    {
+        s_resourceMgr_.reset();
+    }
+private:
+    static inline std::shared_ptr<Global::Resource::ResourceManager> s_resourceMgr_;
 };
 
 /**
