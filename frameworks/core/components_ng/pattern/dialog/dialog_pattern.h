@@ -431,6 +431,7 @@ private:
         return false;
     }
     void OnModifyDone() override;
+    void UpdateDrawFocusLevel();
 
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();

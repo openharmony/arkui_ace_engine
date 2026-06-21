@@ -742,6 +742,23 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
+    UpdateDrawFocusLevel();
+}
+
+void DialogPattern::UpdateDrawFocusLevel()
+{
+    std::list<DialogContentNode> textNodeList = {
+        DialogContentNode::TITLE,
+        DialogContentNode::SUBTITLE,
+        DialogContentNode::MESSAGE,
+    };
+    for (const auto& textNode : textNodeList) {
+        auto node = contentNodeMap_[textNode];
+        CHECK_NULL_CONTINUE(node);
+        auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_CONTINUE(accessibilityProperty);
+        accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    }
 }
 
 void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
