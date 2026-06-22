@@ -45,6 +45,11 @@
     "pages/example/ImageReloadKeyScenarioExample",
     "pages/testcase/ImageReloadKeyTestCase",
     "pages/example/ImageBase64SvgExample",
-    "pages/example/ImageContentDetectionExample"
+    "pages/example/ImageContentDetectionExample",
+    "pages/example/ImageSandboxPathExample",
+    "pages/example/ImageRelativePathExample",
+    "pages/example/ImageContentTransitionExample",
+    "pages/example/ImageAntialiasedExample",
+    "pages/example/ImageAvatarGalleryExample"
   ]
 }

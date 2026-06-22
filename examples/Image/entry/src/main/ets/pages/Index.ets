@@ -289,6 +289,31 @@ struct Index {
             router.pushUrl({ url: 'pages/example/ImageContentDetectionExample' })
           })
 
+          Button('router ImageSandboxPathExample').onClick(() => {
+            console.log('router ImageSandboxPathExample');
+            router.pushUrl({ url: 'pages/example/ImageSandboxPathExample' })
+          })
+
+          Button('router ImageRelativePathExample').onClick(() => {
+            console.log('router ImageRelativePathExample');
+            router.pushUrl({ url: 'pages/example/ImageRelativePathExample' })
+          })
+
+          Button('router ImageContentTransitionExample').onClick(() => {
+            console.log('router ImageContentTransitionExample');
+            router.pushUrl({ url: 'pages/example/ImageContentTransitionExample' })
+          })
+
+          Button('router ImageAntialiasedExample').onClick(() => {
+            console.log('router ImageAntialiasedExample');
+            router.pushUrl({ url: 'pages/example/ImageAntialiasedExample' })
+          })
+
+          Button('router ImageAvatarGalleryExample').onClick(() => {
+            console.log('router ImageAvatarGalleryExample');
+            router.pushUrl({ url: 'pages/example/ImageAvatarGalleryExample' })
+          })
+
         }
       }
     }
