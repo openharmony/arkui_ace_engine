@@ -4617,13 +4617,16 @@ struct ArkUIListModifier {
     void (*setBackPressCloseSwipeAction)(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction);
     void (*resetBackPressCloseSwipeAction)(ArkUINodeHandle node);
     ArkUI_Bool (*getBackPressCloseSwipeAction)(ArkUINodeHandle node);
+    ArkUI_Bool (*getChainAnimation)(ArkUINodeHandle node);
+};
+
+struct ArkUIArcListModifier {
     void (*setDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 sensitivity);
     ArkUI_Int32 (*getDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*resetDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setArcListHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
     ArkUINodeHandle (*getArcListHeader)(ArkUINodeHandle node);
     void (*resetArcListHeader)(ArkUINodeHandle node);
-    ArkUI_Bool (*getChainAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -5341,6 +5344,9 @@ struct ArkUIListItemModifier {
     void (*resetListItemStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*expand)(ArkUINodeHandle node, ArkUI_Int32 direction);
     ArkUI_Int32 (*collapse)(ArkUINodeHandle node);
+};
+
+struct ArkUIArcListItemModifier {
     void (*setAutoScale)(ArkUINodeHandle node, ArkUI_Bool autoScale);
     ArkUI_Bool (*getAutoScale)(ArkUINodeHandle node);
     void (*resetAutoScale)(ArkUINodeHandle node);
@@ -5360,6 +5366,10 @@ struct ArkUIScrollBarModifier {
     void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollBarScrollBarColor)(ArkUINodeHandle node);
     void (*createScrollBarScrollBarColorWithResourceObj)(ArkUINodeHandle node, void* colorRawPtr);
+};
+
+struct ArkUIArcScrollBarModifier {
+    void* reserved;
 };
 
 struct ArkUIScrollerModifier {
@@ -9743,6 +9753,9 @@ struct ArkUINodeModifiers {
     const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
     const ArkUIMaterialModifier* (*getMaterialModifier)();
     const ArkUISelectionContainerModifier* (*getSelectionContainerModifier)();
+    const ArkUIArcListModifier* (*getArcListModifier)();
+    const ArkUIArcListItemModifier* (*getArcListItemModifier)();
+    const ArkUIArcScrollBarModifier* (*getArcScrollBarModifier)();
 };
 
 // same as inner defines in property.h
