@@ -238,8 +238,8 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAt
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
-  this.wordBreak(WordBreak.HYPHENATION);
   this.orphanCharOptimization(true);
+  this.punctuationOverflow(true);
   return this;
 }
 
@@ -251,8 +251,8 @@ function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttr
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
-  this.wordBreak(WordBreak.HYPHENATION);
   this.orphanCharOptimization(true);
+  this.punctuationOverflow(true);
   return this;
 }
 
