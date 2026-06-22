@@ -425,8 +425,8 @@ private:
     void UpdateDragFrameNode();
     void UpdateDragPointNode();
     void UpdateBlurCoverNode();
-    void UpdateSelectedTrackFrameNode();
-    void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius);
+    void UpdateSelectedTrackFrameNode(float centerX, float centerY);
+    void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius, bool isRealPosition);
     void UpdateMaterialFrameNode(
         const RefPtr<FrameNode>& frameNode, float newSize, float posX, float posY, float borderRadiusValue);
     void RegisterMaterialNodePositionCallback();
