@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -64,7 +65,7 @@ RefPtr<LayoutAlgorithm> Pattern::CreateLayoutAlgorithm()
 
 RefPtr<EventHub> Pattern::CreateEventHub()
 {
-    return nullptr;
+    return MakeRefPtr<EventHub>();
 }
 
 void Pattern::ReadFontScaleFromEnv()

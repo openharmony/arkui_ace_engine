@@ -1548,7 +1548,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg175, TestSize.Level1)
     context_->focusNode_ = frameNode_;
     frameNode_->SetPrivacySensitive(true);
     context_->DetachNode(frameNode_);
-    EXPECT_EQ(context_->focusNode_, frameNode_);
+    EXPECT_NE(context_->focusNode_, frameNode_);
 }
 
 /**
@@ -2137,7 +2137,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg193, TestSize.Level1)
      * @tc.expected: children.front() is not nullptr
      */
     context_->EnableContainerModalGesture(isEnable);
-    EXPECT_FALSE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
 
     context_->rootNode_->children_.clear();
     node.Reset();

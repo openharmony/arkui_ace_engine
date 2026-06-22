@@ -682,10 +682,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest029, TestSize.Level1
     AssertValidContext();
     auto originalWindowModal = context_->windowModal_;
     auto originalRoot = context_->rootNode_;
-    context_->windowModal_ = WindowModal::NORMAL;
 
     // Build a tree to verify early return doesn't modify pattern state
     auto tree = SetupContainerModalTree(context_);
+    context_->windowModal_ = WindowModal::NORMAL;
     bool originalHideSplit = tree.containerPattern->hideSplitButton_;
     context_->SetContainerButtonHide(true, true, true, true);
     EXPECT_EQ(tree.containerPattern->hideSplitButton_, originalHideSplit);

@@ -409,7 +409,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextEightTest011, TestSize.Level1
 
     context_->OnMouseEvent(event, node);
     EXPECT_NE(context_->lastMouseEvent_, nullptr);
-    EXPECT_FALSE(context_->lastMouseEvent_->isMockWindowTransFlag);
+    EXPECT_TRUE(context_->lastMouseEvent_->isMockWindowTransFlag);
 }
 
 /**

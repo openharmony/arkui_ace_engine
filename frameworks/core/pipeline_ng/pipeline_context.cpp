@@ -658,7 +658,6 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
         LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
-        LogBacktrace();
     }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
@@ -677,7 +676,6 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
         LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
-        LogBacktrace();
     }
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
@@ -708,7 +706,6 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
-        LogBacktrace();
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -774,7 +771,6 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
-        LogBacktrace();
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -808,7 +804,6 @@ void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
         LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
-        LogBacktrace();
     }
     dirtyFreezeNode_.emplace_back(WeakClaim(node));
     hasIdleTasks_ = true;
