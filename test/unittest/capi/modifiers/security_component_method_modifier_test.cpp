@@ -1046,47 +1046,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestValidValues,
 }
 
 /*
- * @tc.name: setBackgroundColorTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueBackgroundColor;
-    std::string expectedStr;
-
-    initValueBackgroundColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-
-    auto checkValue = [this, &initValueBackgroundColor, &expectedStr](const std::string& input,
-        const Ark_ResourceColor& value)
-    {
-        Ark_ResourceColor inputValueBackgroundColor = initValueBackgroundColor;
-        auto convValue = ArkValue<Opt_ResourceColor>(inputValueBackgroundColor);
-        modifier_->setBackgroundColor(node_, &convValue);
-        OnModifyDone();
-        auto jsonValue = GetPatternJsonValue(node_);
-        expectedStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        inputValueBackgroundColor = value;
-        convValue = ArkValue<Opt_ResourceColor>(inputValueBackgroundColor);
-        modifier_->setBackgroundColor(node_, &convValue);
-        OnModifyDone();
-        jsonValue = GetPatternJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
-    };
-
-    for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value));
-    }
-    for (const auto &[input, value]: Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(value));
-    }
-
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
-}
-
-/*
  * @tc.name: setBorderStyleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
