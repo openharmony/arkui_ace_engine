@@ -90,7 +90,7 @@ enum class LayoutDirection {
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
 
 public:

@@ -39,7 +39,7 @@ struct CacheRange {
     }
 };
 
-class ACE_EXPORT ListLayoutProperty : public ScrollableLayoutProperty {
+class ACE_FORCE_EXPORT ListLayoutProperty : public ScrollableLayoutProperty {
     DECLARE_ACE_TYPE(ListLayoutProperty, ScrollableLayoutProperty);
 
 public:
