@@ -3729,6 +3729,7 @@ test/unittest/core/pattern/overlay/overlay_manager_testone_ng.cpp @arkuipopupwin
 test/unittest/core/pattern/overlay/overlay_manager_testthree_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_manager_testtwo_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_manager_toast_test_ng.cpp @arkuipopupwindow_all
+test/unittest/core/pattern/overlay/overlay_material_ec_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/overlay_new_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_test_update.cpp @arkuipopupwindow_all
