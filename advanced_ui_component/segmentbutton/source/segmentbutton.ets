@@ -828,7 +828,6 @@ struct SegmentButtonItemArrayComponent {
   @ObjectLink @Watch('onOptionsArrayChange') optionsArray: SegmentButtonItemOptionsArray
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link selectedIndexes: number[]
-  @Link componentSize: SizeOptions
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
   @Consume positionTrigger: number
@@ -1281,9 +1280,6 @@ struct SegmentButtonItemArrayComponent {
       .direction(this.options.direction)
       .focusScopeId(this.groupId, true)
       .padding(this.options.componentPadding)
-      .onSizeChange((_, newValue) => {
-        this.componentSize = { width: newValue.width, height: newValue.height }
-      })
     }
   }
 
@@ -1318,7 +1314,6 @@ export struct SegmentButton {
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
   @Prop maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
-  @State componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
   }, (_: Object, index): LocalizedBorderRadiuses => {
@@ -1559,11 +1554,14 @@ export struct SegmentButton {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
-    return getBackgroundBorderRadius(this.options, this.componentSize.height as number / 2);
+    return getBackgroundBorderRadius(this.options, this.layoutAlgorithm.refSize.height / 2);
   }
 
   private getButtonSystemMaterial(): uiMaterial.Material | undefined {
     if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    if (this.layoutAlgorithm.refSize.height === 0) {
       return undefined;
     }
     return this.options.backgroundSystemMaterial;
@@ -1605,7 +1603,7 @@ export struct SegmentButton {
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(getBackgroundBorderRadius(
               this.options,
-              this.componentSize.height as number / 2
+              this.layoutAlgorithm.refSize.height / 2
             ))
             .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
             .borderWidth(this.options.backgroundSystemMaterial ? undefined
@@ -1613,6 +1611,7 @@ export struct SegmentButton {
             .borderColor(this.options.backgroundSystemMaterial ? undefined
               : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
             .systemMaterial(this.options.backgroundSystemMaterial)
+            .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
           }
           Stack() {
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1634,12 +1633,12 @@ export struct SegmentButton {
           .animation({ duration: 0 })
           .borderRadius(getBackgroundBorderRadius(
             this.options,
-            this.componentSize.height as number / 2
+            this.layoutAlgorithm.refSize.height / 2
           ))
           .translate({ x: this.selectedItemOffsetX })
+          .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
 
           SegmentButtonItemArrayComponent({
-            componentSize: $componentSize,
             pressArray: this.pressArray,
             hoverArray: this.hoverArray,
             hoverColorArray: this.hoverColorArray,
@@ -2190,6 +2189,7 @@ function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius:
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
 
+@ObservedV2
 class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   selectedIndex: number = -1
   componentPadding: number = 0
@@ -2200,6 +2200,7 @@ class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   rowSpace: number = 0
   shouldMirror: boolean = false
   buttonCount: number = 0
+  @Trace refSize: Size = { width: 0, height: 0 }
 
   getButtonX(index: number): number {
     const effectiveIndex = this.shouldMirror ? this.buttonCount - 1 - index : index
@@ -2218,7 +2219,9 @@ class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
       buttonLayer.measure(constraint)
     }
     const refSize: Size = buttonLayer ? buttonLayer.getMeasuredSize() : { width: 0, height: 0 }
-
+    if (this.refSize.width !== refSize.width || this.refSize.height !== refSize.height) {
+      this.refSize = refSize
+    }
     // All buttons use layoutWeight(1) in Row({ space: 1 }) — calculate equal width
     let buttonWidth: number = 0
     if (buttonLayer) {
