@@ -305,6 +305,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
     std::string GetTextMarqueeOptionsString() const;
+    std::string GetTailIndentInJson() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
     void SetIsNewMaterial(bool isNewMaterial)
     {

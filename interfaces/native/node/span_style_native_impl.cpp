@@ -888,7 +888,11 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
         style.radialGradient = paragraphStyle->radialGradient.value();
     }
     if (paragraphStyle->tailIndents.has_value()) {
-        style.tailIndents = paragraphStyle->tailIndents.value();
+        std::vector<float> indents;
+        for (const auto& indent : paragraphStyle->tailIndents.value()) {
+            indents.push_back(indent < 0.0f ? 0.0f : indent);
+        }
+        style.tailIndents = indents;
     }
     spanStyle->paragraphStyle = style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -1668,7 +1672,11 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
 {
     CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     if (size > 0 && tailIndents != nullptr) {
-        std::vector<float> indents(tailIndents, tailIndents + size);
+        std::vector<float> indents;
+        indents.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            indents.push_back(tailIndents[i] < 0.0f ? 0.0f : tailIndents[i]);
+        }
         paragraphStyle->tailIndents = indents;
     } else {
         paragraphStyle->tailIndents.reset();

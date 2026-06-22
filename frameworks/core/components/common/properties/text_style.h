@@ -717,7 +717,7 @@ public:
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
         SymbolType, SymbolType, SymbolType::SYSTEM, SymbolStyleAttribute::RE_CREATE);
     ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE(Gradient, Gradient);
-    ACE_DEFINE_TEXT_STYLE(TailIndent, NG::TailIndents, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE(TailIndent, NG::TailIndents, ParagraphStyleAttribute::RE_CREATE);
 
 public:
     ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(

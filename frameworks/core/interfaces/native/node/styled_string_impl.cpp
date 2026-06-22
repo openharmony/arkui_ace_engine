@@ -218,7 +218,7 @@ RefPtr<SpanBase> ParseParagraphStyle(const ArkUISpanStyle& style, int32_t start,
     if (paragraphStyle.tailIndents.has_value()) {
         NG::TailIndentsArray indentsArray;
         for (const auto& indent : paragraphStyle.tailIndents.value()) {
-            indentsArray.push_back(Dimension(indent, DimensionUnit::VP));
+            indentsArray.push_back(Dimension(std::max(indent, 0.0f), DimensionUnit::FP));
         }
         spanParagraphStyle.tailIndents = NG::TailIndents { indentsArray };
     }
@@ -1036,7 +1036,7 @@ void ApplyParagraphStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     if (spanParagraphStyle.tailIndents.has_value() && spanParagraphStyle.tailIndents->HasValue()) {
         std::vector<ArkUI_Float32> indents;
         for (const auto& dim : spanParagraphStyle.tailIndents->indentsArray.value()) {
-            indents.push_back(dim.ConvertToVp());
+            indents.push_back(dim.Value());
         }
         paragraphStyle.tailIndents = indents;
     }
