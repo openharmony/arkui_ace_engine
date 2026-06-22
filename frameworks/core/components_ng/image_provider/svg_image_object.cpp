@@ -61,9 +61,6 @@ bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSource
     svgDomBase_ = rosenImageData->MakeSvgDom(src);
     CHECK_NULL_RETURN(svgDomBase_, false);
     imageSize_ = svgDomBase_->GetContainerSize();
-    if (imageSize_.IsNonPositive()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "No intrinsic size for %{private}s, size required.", src.ToString().c_str());
-    }
     return true;
 }
 
