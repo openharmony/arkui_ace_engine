@@ -87,6 +87,18 @@ public:
         return std::nullopt;
     }
 
+    HandleVisibleContentResult GetHandleVisibleContentRect(
+        const RectF&, RectF& visibleContentRect, HandleLevelMode) override
+    {
+        visibleContentRect = RectF(0.0f, 0.0f, TEST_OFFSET_X, TEST_OFFSET_Y);
+        return HandleVisibleContentResult::NEED_CHECK;
+    }
+
+    std::optional<RectF> GetAncestorNodeViewPortForChild() override
+    {
+        return RectF(0.0f, 0.0f, TEST_OFFSET_X, TEST_OFFSET_Y);
+    }
+
     SelectionIndexRange GetSelectionIndexesByPoints(const OffsetF& firstPoint, const OffsetF& secondPoint) override
     {
         return { TEST_START_INDEX, TEST_END_INDEX };
