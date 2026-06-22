@@ -52,7 +52,7 @@ FormModel* FormModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-bool ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id)
+bool ParseFormId(RequestFormInfo& formInfo, JSRef<JSVal> id)
 {
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
