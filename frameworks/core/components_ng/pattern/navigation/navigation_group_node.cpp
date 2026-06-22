@@ -642,7 +642,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
     auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination),
-                                 navigationWeak = WeakClaim(this)](GestureEvent& /*info*/) -> bool {
+                                 navigationWeak = WeakClaim(this)](GestureEvent& info) -> bool {
         auto navDestination = navDestinationWeak.Upgrade();
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "click navigation back button");
         CHECK_NULL_RETURN(navDestination, false);
@@ -663,8 +663,14 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         }
         auto navigation = navigationWeak.Upgrade();
         CHECK_NULL_RETURN(navigation, false);
-        if (navDestination->IsHomeDestination() ||
-            navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
+        bool isUserClick = info.GetPointerEvent() != nullptr;
+        bool isHomeOrRelatedNav = navDestination->IsHomeDestination() ||
+                                  navDestination->GetNavDestinationType() == NavDestinationType::RELATED;
+        if (isHomeOrRelatedNav) {
+            if (!isUserClick) {
+                // if trigger by onbackPressed and result is false, Home or related navdestination don't consume.
+                return false;
+            }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination or related NavDestination");
             return navigation->HandleBackForHomeOrRelatedDestination();
         }
@@ -2026,7 +2032,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         return false;
     }
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
+    if (pattern && pattern->GetCustomNode() != remainChild) {
         // if curNode is visible, need remove in hideNodes_.
         hideNodes_.erase(
             std::remove_if(hideNodes_.begin(), hideNodes_.end(),

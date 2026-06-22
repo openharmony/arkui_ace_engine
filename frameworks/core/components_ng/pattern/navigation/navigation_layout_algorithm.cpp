@@ -263,7 +263,8 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     dividerOffset.AddX(padding.left.value_or(0));
     dividerOffset.AddY(padding.top.value_or(0));
-    auto marginStart = navigationLayoutProperty->GetDividerStartMargin()->ConvertToPx();
+    auto dividerStartMargin = navigationLayoutProperty->GetDividerStartMargin();
+    auto marginStart = dividerStartMargin.has_value() ? dividerStartMargin->ConvertToPx() : 0.0f;
     dividerOffset.AddY(marginStart);
     geometryNode->SetMarginFrameOffset(dividerOffset);
     dividerWrapper->Layout();

@@ -697,25 +697,27 @@ RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Loc
         moduleName = module->ToString(vm)->ToString(vm);
     }
 
-    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     std::vector<ResourceObjectParams> resObjParamsList;
-    auto size = static_cast<int32_t>(GetArrayLength(vm, params));
-    for (int32_t i = 0; i < size; i++) {
-        auto item = panda::ArrayRef::GetValueAt(vm, params, i);
+    if (args->IsArray(vm)) {
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto size = static_cast<int32_t>(GetArrayLength(vm, params));
+        for (int32_t i = 0; i < size; i++) {
+            auto item = panda::ArrayRef::GetValueAt(vm, params, i);
 
-        std::string valueString = ToString(vm, item).c_str();
+            std::string valueString = ToString(vm, item).c_str();
 
-        ResourceObjectParams resObjParams { .value = valueString };
-        if (item->IsString(vm)) {
-            resObjParams.type = ResourceObjectParamType::STRING;
-        } else if (item->IsNumber()) {
-            if (std::regex_match(item->ToString(vm)->ToString(vm), FLOAT_PATTERN)) {
-                resObjParams.type = OHOS::Ace::ResourceObjectParamType::FLOAT;
-            } else {
-                resObjParams.type = OHOS::Ace::ResourceObjectParamType::INT;
+            ResourceObjectParams resObjParams { .value = valueString };
+            if (item->IsString(vm)) {
+                resObjParams.type = ResourceObjectParamType::STRING;
+            } else if (item->IsNumber()) {
+                if (std::regex_match(item->ToString(vm)->ToString(vm), FLOAT_PATTERN)) {
+                    resObjParams.type = OHOS::Ace::ResourceObjectParamType::FLOAT;
+                } else {
+                    resObjParams.type = OHOS::Ace::ResourceObjectParamType::INT;
+                }
             }
+            resObjParamsList.emplace_back(resObjParams);
         }
-        resObjParamsList.emplace_back(resObjParams);
     }
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
         id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());

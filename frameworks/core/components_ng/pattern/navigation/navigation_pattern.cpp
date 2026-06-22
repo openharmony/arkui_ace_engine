@@ -63,9 +63,6 @@
 #endif
 namespace OHOS::Ace::NG {
 
-constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
-constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
-constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
 constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
@@ -410,47 +407,6 @@ RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
         auto renderContext = contentNode->GetRenderContext();
         return renderContext;
     }
-}
-
-void NavigationPattern::DoAnimation(NavigationMode usrNavigationMode)
-{
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    layoutProperty->UpdateNavigationMode(navigationMode_);
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    AnimationOption option = AnimationOption();
-    option.SetDuration(NAVIMODE_CHANGE_ANIMATION_DURATION);
-    option.SetCurve(Curves::FRICTION);
-    option.SetFillMode(FillMode::FORWARDS);
-    AnimationOption optionAlpha = AnimationOption();
-    optionAlpha.SetCurve(Curves::SHARP);
-    optionAlpha.SetFillMode(FillMode::FORWARDS);
-    auto renderContext = GetTitleBarRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    std::function<void()> finishCallback = [optionAlpha, renderContext, hostNode]() {
-        renderContext->OpacityAnimation(optionAlpha, 0, 1);
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    context->OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
-    layoutProperty->UpdateNavigationMode(usrNavigationMode);
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    context->FlushUITasks();
-    if (usrNavigationMode == NavigationMode::STACK || navigationMode_ == NavigationMode::SPLIT) {
-        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
-        renderContext->OpacityAnimation(optionAlpha, 1, 0);
-    } else if (usrNavigationMode == NavigationMode::SPLIT || navigationMode_ == NavigationMode::STACK) {
-        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
-        renderContext->OpacityAnimation(optionAlpha, 0, 1);
-    }
-    context->CloseImplicitAnimation();
-    navigationMode_ = usrNavigationMode;
 }
 
 void NavigationPattern::OnAttachToFrameNode()
@@ -897,7 +853,7 @@ void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
      * When developers provide a valid style to systemBarStyle, we should set the style to window;
      * when 'undefined' was provided, we should restore the style.
      */
-    if (currStyle_.value() != nullptr) {
+    if (currStyle_.has_value() && currStyle_.value() != nullptr) {
         windowManager->SetSystemBarStyle(currStyle_.value());
     } else {
         TryRestoreSystemBarStyle(windowManager);
