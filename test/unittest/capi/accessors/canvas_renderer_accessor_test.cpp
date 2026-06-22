@@ -843,11 +843,11 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: globalCompositeOperationSetterGetterTest
+ * @tc.name: setGlobalCompositeOperationTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, globalCompositeOperationSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setGlobalCompositeOperationTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalCompositeOperation, nullptr);
     for (const auto& [actual, expected, expectedStr] : ARK_COMPOSITE_TEST_PLAN) {

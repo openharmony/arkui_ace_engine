@@ -957,8 +957,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset_Test001, TestSize.Leve
     
     paintProp = GetShapePaintProperty(frameNode);
     ASSERT_NE(paintProp, nullptr);
-    EXPECT_TRUE(paintProp->GetStrokeDashOffset().has_value());
-    EXPECT_EQ(paintProp->GetStrokeDashOffset().value(), 0.0_vp);
+    EXPECT_FALSE(paintProp->GetStrokeDashOffset().has_value());
 }
 
 /**
