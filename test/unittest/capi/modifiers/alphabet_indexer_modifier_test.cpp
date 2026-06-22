@@ -17,11 +17,15 @@
 #include "modifiers_test_utils.h"
 
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "interfaces/native/node/node_model.h"
+#include "interfaces/native/node/style_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -280,6 +284,37 @@ const std::vector<BlurStyleTestStep> BLUR_STYLE_TEST_PLAN = {
 };
 
 const auto CONTEXT_ID = 123;
+
+ArkUI_AttributeItem CreateNumberItem(ArkUI_NumberValue* values, int32_t size)
+{
+    return { values, size, nullptr, nullptr };
+}
+
+ArkUI_AttributeItem CreateStringNumberItem(const char* value, ArkUI_NumberValue* values, int32_t size)
+{
+    return { values, size, value, nullptr };
+}
+
+ArkUI_AttributeItem CreateObjectItem(void* object, int32_t size)
+{
+    return { nullptr, size, nullptr, object };
+}
+
+struct ArcAlphabetIndexerNodeHolder {
+    RefPtr<FrameNode> frameNode;
+    ArkUI_Node node;
+};
+
+ArcAlphabetIndexerNodeHolder CreateArcAlphabetIndexerNodeHolder(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ARC_INDEXER_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcIndexerPattern>());
+    ArkUI_Node node = {};
+    node.type = ARKUI_NODE_ARC_ALPHABET_INDEXER;
+    node.uiNodeHandle = AceType::RawPtr(frameNode);
+    node.cNode = true;
+    return { frameNode, node };
+}
 } // namespace
 
 class IndexerModifierTest
@@ -1557,6 +1592,168 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
 
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
     EXPECT_THAT(checkVal3, Eq(EXPECTED_TRUE));
+}
+
+/**
+ * @tc.name: arcAlphabetIndexerAttributeTest
+ * @tc.desc: Check the functionality of ArcAlphabetIndexer C API attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerModifierTest, arcAlphabetIndexerAttributeTest, TestSize.Level1)
+{
+    auto nodeHolder = CreateArcAlphabetIndexerNodeHolder(10001);
+    auto node = &nodeHolder.node;
+    ASSERT_NE(node->uiNodeHandle, nullptr);
+
+    ArkUI_CharPtr arrayValues[] = { "A", "B", "C" };
+    auto arrayItem = CreateObjectItem(arrayValues, 3);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY, &arrayItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    auto arrayResult = OHOS::Ace::NodeModel::GetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY);
+    ASSERT_NE(arrayResult, nullptr);
+    ASSERT_NE(arrayResult->object, nullptr);
+    ASSERT_EQ(arrayResult->size, 3);
+    auto resultValues = reinterpret_cast<ArkUI_CharPtr*>(arrayResult->object);
+    EXPECT_STREQ(resultValues[0], "A");
+    EXPECT_STREQ(resultValues[1], "B");
+    EXPECT_STREQ(resultValues[2], "C");
+    EXPECT_EQ(OHOS::Ace::NodeModel::ResetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    arrayResult = OHOS::Ace::NodeModel::GetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY);
+    ASSERT_NE(arrayResult, nullptr);
+    EXPECT_EQ(arrayResult->size, 0);
+
+    auto emptyArrayItem = CreateObjectItem(nullptr, 0);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY, &emptyArrayItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(
+        node, NODE_ARC_ALPHABET_INDEXER_ARRAY, static_cast<const ArkUI_AttributeItem*>(nullptr)),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto invalidArrayItem = CreateObjectItem(nullptr, 1);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY, &invalidArrayItem),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto negativeArrayItem = CreateObjectItem(nullptr, -1);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ARRAY, &negativeArrayItem),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    struct ColorCase {
+        ArkUI_NodeAttributeType type;
+        uint32_t value;
+        uint32_t defaultValue;
+    };
+    const std::vector<ColorCase> colorCases = {
+        { NODE_ARC_ALPHABET_INDEXER_COLOR, 0xFF112233, 0xFFFFFFFF },
+        { NODE_ARC_ALPHABET_INDEXER_SELECTED_COLOR, 0xFF223344, 0xFFFFFFFF },
+        { NODE_ARC_ALPHABET_INDEXER_POPUP_COLOR, 0xFF334455, 0xFFFFFFFF },
+        { NODE_ARC_ALPHABET_INDEXER_SELECTED_BACKGROUND_COLOR, 0xFF445566, 0xFF1F71FF },
+        { NODE_ARC_ALPHABET_INDEXER_POPUP_BACKGROUND_COLOR, 0xD8556677, 0xD8404040 },
+    };
+    for (const auto& colorCase : colorCases) {
+        ArkUI_NumberValue value[] = { { .u32 = colorCase.value } };
+        auto item = CreateNumberItem(value, 1);
+        EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, colorCase.type, &item), ARKUI_ERROR_CODE_NO_ERROR);
+        auto result = OHOS::Ace::NodeModel::GetNodeAttribute(node, colorCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_EQ(result->value[0].u32, colorCase.value);
+        EXPECT_EQ(OHOS::Ace::NodeModel::ResetNodeAttribute(node, colorCase.type), ARKUI_ERROR_CODE_NO_ERROR);
+        result = OHOS::Ace::NodeModel::GetNodeAttribute(node, colorCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_EQ(result->value[0].u32, colorCase.defaultValue);
+    }
+
+    struct IntCase {
+        ArkUI_NodeAttributeType type;
+        int32_t value;
+        int32_t defaultValue;
+    };
+    const std::vector<IntCase> intCases = {
+        { NODE_ARC_ALPHABET_INDEXER_USE_POPUP, 1, 0 },
+        { NODE_ARC_ALPHABET_INDEXER_SELECTED, 6, 0 },
+        { NODE_ARC_ALPHABET_AUTO_COLLAPSE, 0, 1 },
+        { NODE_ARC_ALPHABET_POPUP_BACKGROUND_BLUR_STYLE, ARKUI_BLUR_STYLE_COMPONENT_REGULAR,
+            ARKUI_BLUR_STYLE_NONE },
+    };
+    for (const auto& intCase : intCases) {
+        ArkUI_NumberValue value[] = { { .i32 = intCase.value } };
+        auto item = CreateNumberItem(value, 1);
+        EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, intCase.type, &item), ARKUI_ERROR_CODE_NO_ERROR);
+        auto result = OHOS::Ace::NodeModel::GetNodeAttribute(node, intCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_EQ(result->value[0].i32, intCase.value);
+        EXPECT_EQ(OHOS::Ace::NodeModel::ResetNodeAttribute(node, intCase.type), ARKUI_ERROR_CODE_NO_ERROR);
+        result = OHOS::Ace::NodeModel::GetNodeAttribute(node, intCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_EQ(result->value[0].i32, intCase.defaultValue);
+    }
+
+    ArkUI_NumberValue itemSizeValue[] = { { .f32 = 32.0f } };
+    auto itemSize = CreateNumberItem(itemSizeValue, 1);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE, &itemSize),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = OHOS::Ace::NodeModel::GetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_FLOAT_EQ(result->value[0].f32, 32.0f);
+    EXPECT_EQ(
+        OHOS::Ace::NodeModel::ResetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
+    result = OHOS::Ace::NodeModel::GetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_FLOAT_EQ(result->value[0].f32, 24.0f);
+    ArkUI_NumberValue invalidItemSizeValue[] = { { .f32 = -1.0f } };
+    auto invalidItemSize = CreateNumberItem(invalidItemSizeValue, 1);
+    EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE, &invalidItemSize),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = OHOS::Ace::NodeModel::GetNodeAttribute(node, NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE);
+    ASSERT_NE(result, nullptr);
+    EXPECT_FLOAT_EQ(result->value[0].f32, 24.0f);
+}
+
+/**
+ * @tc.name: arcAlphabetIndexerFontAttributeTest
+ * @tc.desc: Check the functionality of ArcAlphabetIndexer C API font attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerModifierTest, arcAlphabetIndexerFontAttributeTest, TestSize.Level1)
+{
+    auto nodeHolder = CreateArcAlphabetIndexerNodeHolder(10002);
+    auto node = &nodeHolder.node;
+    ASSERT_NE(node->uiNodeHandle, nullptr);
+
+    struct FontCase {
+        ArkUI_NodeAttributeType type;
+        float size;
+        float defaultSize;
+    };
+    const std::vector<FontCase> fontCases = {
+        { NODE_ARC_ALPHABET_SELECTED_FONT, 15.0f, 13.0f },
+        { NODE_ARC_ALPHABET_INDEXER_POPUP_FONT, 21.0f, 19.0f },
+        { NODE_ARC_ALPHABET_FONT, 17.0f, 13.0f },
+    };
+    for (const auto& fontCase : fontCases) {
+        ArkUI_NumberValue value[] = {
+            { .f32 = fontCase.size },
+            { .i32 = ARKUI_FONT_WEIGHT_W700 },
+            { .i32 = ARKUI_FONT_STYLE_ITALIC },
+        };
+        auto item = CreateStringNumberItem("HarmonyOS Sans,Roboto", value, 3);
+        EXPECT_EQ(OHOS::Ace::NodeModel::SetNodeAttribute(node, fontCase.type, &item), ARKUI_ERROR_CODE_NO_ERROR);
+        auto result = OHOS::Ace::NodeModel::GetNodeAttribute(node, fontCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_FLOAT_EQ(result->value[0].f32, fontCase.size);
+        EXPECT_EQ(result->value[1].i32, ARKUI_FONT_WEIGHT_W700);
+        EXPECT_EQ(result->value[2].i32, ARKUI_FONT_STYLE_ITALIC);
+        ASSERT_NE(result->string, nullptr);
+        EXPECT_STREQ(result->string, "HarmonyOS Sans,Roboto");
+
+        EXPECT_EQ(OHOS::Ace::NodeModel::ResetNodeAttribute(node, fontCase.type), ARKUI_ERROR_CODE_NO_ERROR);
+        result = OHOS::Ace::NodeModel::GetNodeAttribute(node, fontCase.type);
+        ASSERT_NE(result, nullptr);
+        EXPECT_FLOAT_EQ(result->value[0].f32, fontCase.defaultSize);
+        EXPECT_EQ(result->value[1].i32, ARKUI_FONT_WEIGHT_W500);
+        EXPECT_EQ(result->value[2].i32, ARKUI_FONT_STYLE_NORMAL);
+        ASSERT_NE(result->string, nullptr);
+        EXPECT_STREQ(result->string, "HarmonyOS Sans");
+    }
+
 }
 
 #ifdef WRONG_OLD_GEN

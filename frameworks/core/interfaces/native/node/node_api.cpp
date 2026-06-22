@@ -1248,7 +1248,8 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             auto* alphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
             if (alphabetIndexerModifier) {
                 eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
@@ -1568,7 +1569,8 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             // alphabet indexer event type.
             if (subKind >= sizeof(ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
                 ResetComponentAsyncEventHandler)) {

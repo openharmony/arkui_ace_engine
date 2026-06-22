@@ -104,6 +104,11 @@ typedef enum {
      * @since 24
      */
     ARKUI_NODE_TEXT_EDITOR = 22,
+    /**
+     * ArcAlphabetIndexer.
+     * @since 26.0.0
+     */
+    ARKUI_NODE_ARC_ALPHABET_INDEXER = 23,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -6893,6 +6898,220 @@ typedef enum {
     NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
 
     /**
+     * @brief Defines the index string array.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .object: array of the alphabet index, the type is string array. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .object: array of the alphabet index, the type is string array. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_ARRAY = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
+
+    /**
+     * @brief Defines the index item text color in normal state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_COLOR,
+
+    /**
+     * @brief Defines the index item text color in selected state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED_COLOR,
+
+    /**
+     * @brief Defines the pop-up window text color.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_COLOR,
+
+    /**
+     * @brief Defines the index item background color in selected state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the background,  in 0xARGB format, and the default value is 0xFF1F71FF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the background,  in 0xARGB format. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED_BACKGROUND_COLOR,
+
+    /**
+     * @brief Defines the pop-up window background color.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the background,  in 0xARGB format, and the default value is 0xD8404040. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the background,  in 0xARGB format. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_BACKGROUND_COLOR,
+
+    /**
+     * @brief Defines whether to use a pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to use a pop-up. The value <b>0</b> means not to use a pop-up, \n
+     * and <b>1</b> means to use a pop-up. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to use a pop-up. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_USE_POPUP,
+
+    /**
+     * @brief Defines the font style of the selected index.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>13</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_SELECTED_FONT,
+
+    /**
+     * @brief Defines the font style of the pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>19</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_FONT,
+
+    /**
+     * @brief Defines the default font style.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>13</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_FONT,
+
+    /**
+     * @brief Defines the letter index bar letter area size.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].f32: the letter area is a circle, set the diameter of the circle, in vp. \n
+     * The default value is <b>24</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].f32: the letter area is a circle, set the diameter of the circle, in vp. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE,
+
+    /**
+     * @brief Defines the selected index.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the selected index. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the selected index. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED,
+
+    /**
+     * @brief Defines whether to collapse the characters when the indexer bar is not enough to display all characters.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to collapse the characters when the indexer bar is not enough to display all characters. \n
+     * The value <b>1</b> means to automatically collapses the characters, and <b>0</b> means the opposite. \n
+     * The default value is <b>1</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to collapse the characters when the indexer bar is not enough to display all characters. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_AUTO_COLLAPSE,
+
+    /**
+     * @brief Defines the background blur style of the pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: blur style of the pop-up window. The value is an enum of {@link ArkUI_BlurStyle}. \n
+     * The default value is <b>ARKUI_BLUR_STYLE_NONE</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: blur style of the pop-up window. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_POPUP_BACKGROUND_BLUR_STYLE,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -11038,6 +11257,19 @@ typedef enum {
      * @since 24
      */
     NODE_TEXT_EDITOR_ON_DID_CHANGE,
+
+    /**
+     * @brief Defines the event triggered when the index of the currently displayed element of this
+     * <b>ARKUI_NODE_ARC_ALPHABET_INDEXER</b> instance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_EVENT_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this

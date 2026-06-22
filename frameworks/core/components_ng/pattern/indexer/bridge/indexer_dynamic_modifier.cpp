@@ -19,9 +19,11 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 #include "core/components_ng/pattern/indexer/indexer_model_impl.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -53,6 +55,15 @@ constexpr double DEFAULT_POPUP_POSITION_Y = 48.0;
 constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
 constexpr double ITEM_DEFAULT_RADIUS = 8.0;
 constexpr double RADIUS_OFFSET = 4.0;
+constexpr uint32_t ARC_ALPHABET_DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
+constexpr uint32_t ARC_ALPHABET_DEFAULT_SELECTED_BACKGROUND_COLOR = 0xFF1F71FF;
+constexpr uint32_t ARC_ALPHABET_DEFAULT_POPUP_BACKGROUND_COLOR = 0xD8404040;
+constexpr float ARC_ALPHABET_DEFAULT_ITEM_SIZE = 24.0f;
+constexpr float ARC_ALPHABET_DEFAULT_FONT_SIZE = 13.0f;
+constexpr float ARC_ALPHABET_DEFAULT_POPUP_FONT_SIZE = 19.0f;
+constexpr int32_t ARC_ALPHABET_DEFAULT_FONT_WEIGHT = 4; // ARKUI_FONT_WEIGHT_W500
+constexpr int32_t ARC_ALPHABET_DEFAULT_FONT_STYLE = 0; // ARKUI_FONT_STYLE_NORMAL
+constexpr const char* ARC_ALPHABET_DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 } // namespace
 
 FrameNode* GetFrameNode(ArkUINodeHandle node)
@@ -505,6 +516,171 @@ void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
     IndexerModelNG::SetPopupBackgroundBlurStyleByUser(frameNode, false);
 }
+
+RefPtr<IndexerLayoutProperty> GetIndexerLayoutProperty(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetLayoutProperty<IndexerLayoutProperty>();
+}
+
+RefPtr<IndexerPaintProperty> GetIndexerPaintProperty(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetPaintProperty<IndexerPaintProperty>();
+}
+
+std::string JoinFontFamilies(const std::vector<std::string>& families)
+{
+    std::string result;
+    for (const auto& family : families) {
+        if (!result.empty()) {
+            result.append(",");
+        }
+        result.append(family);
+    }
+    return result;
+}
+
+int32_t ConvertFontWeightToArkUI(FontWeight weight)
+{
+    return static_cast<int32_t>(weight);
+}
+
+int32_t ConvertFontStyleToArkUI(Ace::FontStyle style)
+{
+    return style == Ace::FontStyle::ITALIC ? 1 : 0;
+}
+
+const char* GetIndexerFontValue(
+    ArkUINodeHandle node, const std::optional<TextStyle>& (IndexerLayoutProperty::*getFont)() const,
+    float defaultFontSize, ArkUI_Float32* size, ArkUI_Int32* weight, ArkUI_Int32* style)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    thread_local std::string families;
+    if (layoutProperty) {
+        const auto& textStyle = (layoutProperty.GetRawPtr()->*getFont)();
+        if (textStyle.has_value()) {
+            if (size) {
+                *size = static_cast<float>(textStyle->GetFontSize().Value());
+            }
+            if (weight) {
+                *weight = ConvertFontWeightToArkUI(textStyle->GetFontWeight());
+            }
+            if (style) {
+                *style = ConvertFontStyleToArkUI(textStyle->GetFontStyle());
+            }
+            families = JoinFontFamilies(textStyle->GetFontFamilies());
+            return families.c_str();
+        }
+    }
+    if (size) {
+        *size = defaultFontSize;
+    }
+    if (weight) {
+        *weight = ARC_ALPHABET_DEFAULT_FONT_WEIGHT;
+    }
+    if (style) {
+        *style = ARC_ALPHABET_DEFAULT_FONT_STYLE;
+    }
+    families = ARC_ALPHABET_DEFAULT_FONT_FAMILY;
+    return families.c_str();
+}
+
+ArkUI_Uint32 GetAlphabetIndexerColor(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, ARC_ALPHABET_DEFAULT_TEXT_COLOR);
+    return layoutProperty->GetColor().value_or(Color(ARC_ALPHABET_DEFAULT_TEXT_COLOR)).GetValue();
+}
+
+ArkUI_Uint32 GetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, ARC_ALPHABET_DEFAULT_TEXT_COLOR);
+    return layoutProperty->GetSelectedColor().value_or(Color(ARC_ALPHABET_DEFAULT_TEXT_COLOR)).GetValue();
+}
+
+ArkUI_Uint32 GetPopupColor(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, ARC_ALPHABET_DEFAULT_TEXT_COLOR);
+    return layoutProperty->GetPopupColor().value_or(Color(ARC_ALPHABET_DEFAULT_TEXT_COLOR)).GetValue();
+}
+
+ArkUI_Uint32 GetSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto paintProperty = GetIndexerPaintProperty(node);
+    CHECK_NULL_RETURN(paintProperty, ARC_ALPHABET_DEFAULT_SELECTED_BACKGROUND_COLOR);
+    return paintProperty->GetSelectedBackgroundColor()
+        .value_or(Color(ARC_ALPHABET_DEFAULT_SELECTED_BACKGROUND_COLOR))
+        .GetValue();
+}
+
+ArkUI_Uint32 GetPopupBackground(ArkUINodeHandle node)
+{
+    auto paintProperty = GetIndexerPaintProperty(node);
+    CHECK_NULL_RETURN(paintProperty, ARC_ALPHABET_DEFAULT_POPUP_BACKGROUND_COLOR);
+    return paintProperty->GetPopupBackground().value_or(Color(ARC_ALPHABET_DEFAULT_POPUP_BACKGROUND_COLOR)).GetValue();
+}
+
+ArkUI_Bool GetUsingPopup(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetUsingPopup().value_or(false);
+}
+
+ArkUI_CharPtr GetSelectedFont(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight, ArkUI_Int32* style)
+{
+    return GetIndexerFontValue(node, &IndexerLayoutProperty::GetSelectedFont, ARC_ALPHABET_DEFAULT_FONT_SIZE, size,
+        weight, style);
+}
+
+ArkUI_CharPtr GetPopupFont(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight, ArkUI_Int32* style)
+{
+    return GetIndexerFontValue(node, &IndexerLayoutProperty::GetPopupFont, ARC_ALPHABET_DEFAULT_POPUP_FONT_SIZE, size,
+        weight, style);
+}
+
+ArkUI_CharPtr GetAlphabetIndexerFont(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight,
+    ArkUI_Int32* style)
+{
+    return GetIndexerFontValue(node, &IndexerLayoutProperty::GetFont, ARC_ALPHABET_DEFAULT_FONT_SIZE, size, weight,
+        style);
+}
+
+ArkUI_Float32 GetItemSize(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, ARC_ALPHABET_DEFAULT_ITEM_SIZE);
+    return static_cast<float>(
+        layoutProperty->GetItemSize().value_or(Dimension(ARC_ALPHABET_DEFAULT_ITEM_SIZE, DimensionUnit::VP)).Value());
+}
+
+ArkUI_Int32 GetAlphabetIndexerSelected(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_SELECTED);
+    return layoutProperty->GetSelected().value_or(DEFAULT_SELECTED);
+}
+
+ArkUI_Bool GetAutoCollapse(ArkUINodeHandle node)
+{
+    auto layoutProperty = GetIndexerLayoutProperty(node);
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetAutoCollapse().value_or(true);
+}
+
+ArkUI_Int32 GetPopupBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    auto paintProperty = GetIndexerPaintProperty(node);
+    CHECK_NULL_RETURN(paintProperty, static_cast<int32_t>(BlurStyle::NO_MATERIAL));
+    auto option = paintProperty->GetPopupBackgroundBlurStyle();
+    return option.has_value() ? static_cast<int32_t>(option->blurStyle) : static_cast<int32_t>(BlurStyle::NO_MATERIAL);
+}
+
 void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = GetFrameNode(node);
@@ -558,6 +734,27 @@ void ResetArrayValue(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::vector<std::string> valueVector;
     IndexerModelNG::SetArrayValue(frameNode, valueVector);
+}
+
+ArkUI_CharPtr* GetArrayValue(ArkUINodeHandle node, ArkUI_Uint32* length)
+{
+    CHECK_NULL_RETURN(length, nullptr);
+    *length = 0;
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    thread_local std::vector<std::string> arrayValues;
+    thread_local std::vector<ArkUI_CharPtr> arrayValuePtrs;
+    arrayValues = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
+    arrayValuePtrs.clear();
+    arrayValuePtrs.reserve(arrayValues.size());
+    for (const auto& value : arrayValues) {
+        arrayValuePtrs.emplace_back(value.c_str());
+    }
+    *length = static_cast<ArkUI_Uint32>(arrayValuePtrs.size());
+    return arrayValuePtrs.empty() ? nullptr : arrayValuePtrs.data();
 }
 
 void SetAutoCollapse(ArkUINodeHandle node, ArkUI_Bool value)
@@ -658,9 +855,8 @@ ArkUINodeHandle CreateFrameNode(int32_t nodeId, ArkUI_Bool isArc)
 {
     auto frameNode = IndexerModelNG::CreateFrameNode(nodeId, isArc);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto node = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-    CHECK_NULL_RETURN(node, nullptr);
-    return node;
+    frameNode->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
 
 void SetIndexerChangeEvent(void* callback)
@@ -1382,6 +1578,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerDynamicModifier()
             .resetAdaptiveWidth = nullptr,
             .setArrayValue = nullptr,
             .resetArrayValue = nullptr,
+            .getArrayValue = nullptr,
             .setAutoCollapse = SetAutoCollapseImpl,
             .resetAutoCollapse = nullptr,
             .setEnableHapticFeedback = SetEnableHapticFeedbackImpl,
@@ -1420,6 +1617,19 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerDynamicModifier()
             .setPopupTitleBackgroundJs = SetPopupTitleBackgroundJsImpl,
             .setPopupTitleBackgroundByUser = SetPopupTitleBackgroundByUserImpl,
             .setPopupPositionJs = SetPopupPositionJsImpl,
+            .getAlphabetIndexerColor = nullptr,
+            .getAlphabetIndexerSelectedColor = nullptr,
+            .getPopupColor = nullptr,
+            .getSelectedBackgroundColor = nullptr,
+            .getPopupBackground = nullptr,
+            .getUsingPopup = nullptr,
+            .getSelectedFont = nullptr,
+            .getPopupFont = nullptr,
+            .getAlphabetIndexerFont = nullptr,
+            .getItemSize = nullptr,
+            .getAlphabetIndexerSelected = nullptr,
+            .getAutoCollapse = nullptr,
+            .getPopupBackgroundBlurStyle = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -1475,6 +1685,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerDynamicModifier()
         .resetAdaptiveWidth = ResetAdaptiveWidth,
         .setArrayValue = SetArrayValue,
         .resetArrayValue = ResetArrayValue,
+        .getArrayValue = GetArrayValue,
         .setAutoCollapse = SetAutoCollapse,
         .resetAutoCollapse = ResetAutoCollapse,
         .setEnableHapticFeedback = SetEnableHapticFeedback,
@@ -1513,6 +1724,19 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerDynamicModifier()
         .setPopupTitleBackgroundJs = SetPopupTitleBackgroundJs,
         .setPopupTitleBackgroundByUser = SetPopupTitleBackgroundByUser,
         .setPopupPositionJs = SetPopupPositionJs,
+        .getAlphabetIndexerColor = GetAlphabetIndexerColor,
+        .getAlphabetIndexerSelectedColor = GetAlphabetIndexerSelectedColor,
+        .getPopupColor = GetPopupColor,
+        .getSelectedBackgroundColor = GetSelectedBackgroundColor,
+        .getPopupBackground = GetPopupBackground,
+        .getUsingPopup = GetUsingPopup,
+        .getSelectedFont = GetSelectedFont,
+        .getPopupFont = GetPopupFont,
+        .getAlphabetIndexerFont = GetAlphabetIndexerFont,
+        .getItemSize = GetItemSize,
+        .getAlphabetIndexerSelected = GetAlphabetIndexerSelected,
+        .getAutoCollapse = GetAutoCollapse,
+        .getPopupBackgroundBlurStyle = GetPopupBackgroundBlurStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -94,7 +94,6 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
-#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -549,23 +548,15 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 {
     auto* arkUIAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
     CHECK_NULL_RETURN(arkUIAlphabetIndexerModifier, nullptr);
-    auto arkUINodeHandle = arkUIAlphabetIndexerModifier->createFrameNode(nodeId, false);
-    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return frameNode;
+    return arkUIAlphabetIndexerModifier->createFrameNode(nodeId, false);
 }
 
 void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
 {
     auto* arkUIAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
     CHECK_NULL_RETURN(arkUIAlphabetIndexerModifier, nullptr);
-    auto arkUINodeHandle = arkUIAlphabetIndexerModifier->createFrameNode(nodeId, true);
-    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
+    auto* frameNode = arkUIAlphabetIndexerModifier->createFrameNode(nodeId, true);
+    arkUIAlphabetIndexerModifier->setAlphabetIndexerSelected(frameNode, 0);
     return frameNode;
 }
 

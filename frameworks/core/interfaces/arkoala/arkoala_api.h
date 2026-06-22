@@ -7485,6 +7485,7 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetAdaptiveWidth)(ArkUINodeHandle node);
     void (*setArrayValue)(ArkUINodeHandle node, ArkUI_CharPtr* value, ArkUI_Uint32 length);
     void (*resetArrayValue)(ArkUINodeHandle node);
+    ArkUI_CharPtr* (*getArrayValue)(ArkUINodeHandle node, ArkUI_Uint32* length);
     void (*setAutoCollapse)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAutoCollapse)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -7523,6 +7524,22 @@ struct ArkUIAlphabetIndexerModifier {
     void (*setPopupTitleBackgroundJs)(void* color);
     void (*setPopupTitleBackgroundByUser)(ArkUI_Bool setByUser);
     void (*setPopupPositionJs)(void* x, void* y);
+    ArkUI_Uint32 (*getAlphabetIndexerColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getAlphabetIndexerSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getPopupColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getSelectedBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getPopupBackground)(ArkUINodeHandle node);
+    ArkUI_Bool (*getUsingPopup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSelectedFont)(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight,
+        ArkUI_Int32* style);
+    ArkUI_CharPtr (*getPopupFont)(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight,
+        ArkUI_Int32* style);
+    ArkUI_CharPtr (*getAlphabetIndexerFont)(ArkUINodeHandle node, ArkUI_Float32* size, ArkUI_Int32* weight,
+        ArkUI_Int32* style);
+    ArkUI_Float32 (*getItemSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getAlphabetIndexerSelected)(ArkUINodeHandle node);
+    ArkUI_Bool (*getAutoCollapse)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getPopupBackgroundBlurStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
