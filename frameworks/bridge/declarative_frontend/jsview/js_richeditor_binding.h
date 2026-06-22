@@ -163,6 +163,8 @@ private:
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     bool CheckImageSource(std::string assetSrc);
+    void BindBuilderToHostNode(RefPtr<JsFunction>& builderFunc, const RefPtr<NG::FrameNode>& hostNode,
+ 	    const JSRef<JSVal>& funcValue);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;
