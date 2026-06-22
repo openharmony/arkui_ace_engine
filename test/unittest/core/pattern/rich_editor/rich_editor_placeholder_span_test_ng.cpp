@@ -257,12 +257,18 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan004, TestSize.Level0
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Get richEditor node
+     */
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. Get content node
+     */
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     ASSERT_NE(contentNode, nullptr);
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
