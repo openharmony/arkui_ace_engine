@@ -775,6 +775,14 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 {
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitDragging()) {
+        return true;
+    }
+
     if (!isOverride && !isLastChild) {
         navigationPattern->RemoveNavDestination();
         return true;

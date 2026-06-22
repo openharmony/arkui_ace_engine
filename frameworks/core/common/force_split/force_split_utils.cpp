@@ -382,6 +382,9 @@ bool ForceSplitUtils::ParseSplitParam(const std::unique_ptr<JsonValue>& split, c
     if (isDraggable) {
         return true;
     }
+    if (!split->Contains(RATIO_KEY)) {
+        return true;
+    }
     auto ratioJson = split->GetValue(RATIO_KEY);
     if (!ratioJson || !ratioJson->IsString()) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s must be type of string!", RATIO_KEY);

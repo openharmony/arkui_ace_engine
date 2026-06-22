@@ -507,6 +507,14 @@ bool ParallelPageRouterManager::CheckStackSize(const RouterPageInfo& target, boo
 
 bool ParallelPageRouterManager::StartPop()
 {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitDragging()) {
+        return true;
+    }
+
     if (pageRouterStack_.size() > 1) {
         auto penultimatePage = pageRouterStack_.rbegin();
         std::advance(penultimatePage, 1);
