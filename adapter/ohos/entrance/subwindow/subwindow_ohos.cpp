@@ -2508,6 +2508,7 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
+    ContainerScope scope(context->GetInstanceId());
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     auto lastChild = rootNode->GetLastChild();
