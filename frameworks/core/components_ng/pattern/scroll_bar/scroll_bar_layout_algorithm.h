@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ScrollBarLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT ScrollBarLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ScrollBarLayoutAlgorithm, LayoutAlgorithm);
 
 public:
