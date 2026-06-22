@@ -1290,4 +1290,45 @@ HWTEST_F(SwiperControllerTestNg, Fakedrag006, TestSize.Level1)
     ret = pattern_->FakeDragCheckAtEnd(offset);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: DoSwiperPreMakeItems001
+ * @tc.desc: Test SwiperPattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, DoSwiperPreMakeItems001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateItemsInLazyForEach();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. Call DoSwiperPreMakeItems when premakeIndex is greater than the number of nodes.
+     * @tc.expected: premake node is nullptr
+     */
+    pattern_->DoSwiperPreMakeItems({4});
+    EXPECT_TRUE(pattern_->premakeItems_.size() > 0);
+
+    /**
+     * @tc.steps: step2. Call DoSwiperPreMakeItems when premakeIndex is valid.
+     * @tc.expected: premake success
+     */
+    pattern_->DoSwiperPreMakeItems({2});
+    EXPECT_TRUE(pattern_->premakeItems_.size() > 0);
+
+    /**
+     * @tc.steps: step3. Call DoSwiperPreMakeItems when geometryNode_ is nullptr
+     * @tc.expected: premake node not execute ProcessOffscreenNode
+     */
+    auto host = pattern_->GetHost();
+    auto targetNode = pattern_->FindLazyForEachNode(host);
+    ASSERT_TRUE(targetNode.has_value());
+
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+    auto premakeNode = lazyForEachNode->GetFrameChildByIndex(2, true);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(premakeNode);
+    frameNode->geometryNode_ = nullptr;
+    pattern_->DoSwiperPreMakeItems({2});
+    EXPECT_TRUE(pattern_->premakeItems_.size() > 0);
+}
 } // namespace OHOS::Ace::NG
