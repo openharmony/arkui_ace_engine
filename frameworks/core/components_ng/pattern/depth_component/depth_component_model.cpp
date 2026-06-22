@@ -45,9 +45,7 @@ void DepthComponentModel::SetBackgroundSource(FrameNode* frameNode, const OHOS::
     CHECK_NULL_VOID(frameNode);
     auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
     CHECK_NULL_VOID(depthPattern);
-    if (background.IsValid()) {
-        depthPattern->SetBackgroundSource(background);
-    }
+    depthPattern->SetBackgroundSource(background);
 }
 
 void DepthComponentModel::SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace)
@@ -109,7 +107,9 @@ void DepthComponentModel::SetDepthMap(
     auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
     CHECK_NULL_VOID(depthPattern);
     depthPattern->SetDepthMap(depthMap);
-    depthPattern->SetOnDepthMapError(std::move(callback));
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDepthMapError(std::move(callback));
 }
 
 void DepthComponentModel::SetCamera(const OHOS::Ace::DepthCameraParams& camera)
@@ -150,9 +150,9 @@ void DepthComponentModel::SetOnComplete(FrameNode* frameNode,
     std::function<void(const DepthComponentCompleteEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
-    CHECK_NULL_VOID(depthPattern);
-    depthPattern->SetOnComplete(std::move(callback));
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(callback));
 }
 
 void DepthComponentModel::SetOnError(
@@ -167,9 +167,9 @@ void DepthComponentModel::SetOnError(FrameNode* frameNode,
     std::function<void(const DepthComponentErrorEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
-    CHECK_NULL_VOID(depthPattern);
-    depthPattern->SetOnError(std::move(callback));
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG
