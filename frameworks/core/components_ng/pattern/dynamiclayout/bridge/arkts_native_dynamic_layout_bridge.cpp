@@ -342,12 +342,14 @@ std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Loc
         CHECK_NULL_VOID(layoutProperty);
         auto layoutConstraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
         auto constraint = GenConstraintObj(vm, layoutConstraint);
+        const auto& contentConstraint = layoutProperty->GetContentLayoutConstraint();
+        const std::optional<ViewPosReference>& viewPosRef =
+            contentConstraint.has_value() ? contentConstraint.value().viewPosRef : std::nullopt;
 
         auto lazyMeasureFuncObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__onMeasure__"));
-        if (lazyMeasureFuncObj->IsFunction(vm) && layoutConstraint.viewPosRef.has_value()) {
+        if (lazyMeasureFuncObj->IsFunction(vm) && viewPosRef.has_value()) {
             panda::Local<panda::FunctionRef> lazyMeasureFunc = lazyMeasureFuncObj;
-            const auto& viewPosRef = layoutConstraint.viewPosRef.value();
-            auto lazyLayoutInfoObj = GenLazyLayoutInfoObj(vm, layoutWrapper, viewPosRef);
+            auto lazyLayoutInfoObj = GenLazyLayoutInfoObj(vm, layoutWrapper, viewPosRef.value());
             panda::Local<panda::JSValueRef> lazyMeasureParams[] = { returnPtr, constraint, lazyLayoutInfoObj };
             auto result = lazyMeasureFunc->Call(vm, obj.ToLocal(), lazyMeasureParams, ArraySize(lazyMeasureParams));
             

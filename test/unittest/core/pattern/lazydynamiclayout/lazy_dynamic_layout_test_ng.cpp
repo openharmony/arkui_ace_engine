@@ -430,4 +430,113 @@ HWTEST_F(LazyDynamicLayoutTest, WaterFlowSlidingWindowTest001, TestSize.Level1)
     EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 20);
     EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 29);
 }
+
+/**
+ * @tc.name: ScrollBottomHeightUpdateTest001
+ * @tc.desc: Test LazyDynamicLayout in Scroll mode, scroll to bottom and decrease child height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutTest, ScrollBottomHeightUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll and one LazyDynamicLayout
+     * @tc.expected: layout visible items and verify initial state
+     */
+    CreateScroll();
+
+    constexpr int32_t itemCount = 30;
+    constexpr float newHeight = 50.f;
+
+    CreateLazyDynamicLayout(Axis::VERTICAL);
+    CreateContent(itemCount);
+    CreateDone();
+
+    auto pattern = GetChildPattern<LazyDynamicLayoutPattern>(scrollableFrameNode_, 0);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), itemCount * ITEM_HEIGHT);
+    EXPECT_EQ(pattern->prevVisibleIndexes_.size(), 5u);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 0);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 4);
+
+    /**
+     * @tc.steps: step2. Scroll to bottom
+     * @tc.expected: visible indexes updated
+     */
+    for (int32_t i = 0; i < 5; i++) {
+        scrollablePattern_->UpdateCurrentOffset(-500, SCROLL_FROM_UPDATE);
+        FlushUITasks(scrollableFrameNode_);
+    }
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 24);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 29);
+
+    /**
+     * @tc.steps: step3. Decrease all children height
+     * @tc.expected: children height updated
+     */
+    for (auto& child : frameNode_->GetChildren()) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(child);
+        if (frameChild) {
+            auto property = frameChild->GetLayoutProperty();
+            property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(SCROLL_WIDTH), CalcLength(newHeight)));
+        }
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 20);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 29);
+}
+
+/**
+ * @tc.name: ScrollWithPaddingTest001
+ * @tc.desc: Test LazyDynamicLayout in Scroll with top padding, verify visible items range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutTest, ScrollWithPaddingTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll and LazyDynamicLayout with top padding
+     * @tc.expected: visible items range is 0-3 (4 items) considering top padding
+     */
+    CreateScroll();
+    
+    constexpr int32_t itemCount = 20;
+    constexpr float topPadding = 100.f;
+    
+    CreateLazyDynamicLayout(Axis::VERTICAL);
+    PaddingProperty padding;
+    padding.top = CalcLength(topPadding);
+    ViewAbstract::SetPadding(padding);
+    
+    CreateContent(itemCount);
+    CreateDone();
+    
+    auto pattern = GetChildPattern<LazyDynamicLayoutPattern>(scrollableFrameNode_, 0);
+    ASSERT_NE(pattern, nullptr);
+    
+    auto lazyDynamicLayoutNode = GetChildFrameNode(scrollableFrameNode_, 0);
+    ASSERT_NE(lazyDynamicLayoutNode, nullptr);
+    
+    auto layoutProperty = lazyDynamicLayoutNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto& paddingProp = layoutProperty->GetPaddingProperty();
+    ASSERT_TRUE(paddingProp);
+    
+    if (paddingProp) {
+        auto paddingTop = paddingProp->top.has_value() ? paddingProp->top->GetDimension().Value() : 0;
+        EXPECT_EQ(paddingTop, topPadding);
+    }
+    
+    auto geometryNode = lazyDynamicLayoutNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    
+    RectF lazyDynamicLayoutRect = geometryNode->GetFrameRect();
+    EXPECT_EQ(lazyDynamicLayoutRect.GetX(), 0);
+    EXPECT_EQ(lazyDynamicLayoutRect.GetY(), 0);
+    EXPECT_EQ(lazyDynamicLayoutRect.Width(), SCROLL_WIDTH);
+    EXPECT_EQ(lazyDynamicLayoutRect.Height(), itemCount * ITEM_HEIGHT + topPadding);
+    
+    EXPECT_EQ(pattern->prevVisibleIndexes_.size(), 4u);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 0);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 3);
+}
 } // namespace OHOS::Ace::NG
