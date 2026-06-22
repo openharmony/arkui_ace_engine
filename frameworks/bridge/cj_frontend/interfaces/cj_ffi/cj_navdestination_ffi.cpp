@@ -99,7 +99,7 @@ void FfiOHOSAceFrameworkNavdestinationSetOnReady(void (*callback)(CJNavDestinati
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithString(const char* value)
 {
-    NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, "", std::string(value));
+    NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, "", std::string(value != nullptr ? value : ""));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilder(void (*builder)())
@@ -120,7 +120,8 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitle(const char* main, 
 {
     bool hasSub = (sub != nullptr);
     bool hasMain = (main != nullptr);
-    NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(hasSub, hasMain, std::string(sub), std::string(main));
+    NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(hasSub, hasMain,
+        std::string(sub != nullptr ? sub : ""), std::string(main != nullptr ? main : ""));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeight(void (*builder)(), int32_t titleHeightMode)
@@ -259,7 +260,7 @@ void FfiOHOSAceFrameworkNavdestinationSetBackButtonIconWithUrl(const char* url)
     nameList.emplace_back("");
     nameList.emplace_back("");
     NavDestinationModel::GetInstance()->SetBackButtonIcon(
-        nullptr, std::string(url), imageOption, pixelMapRef, nameList);
+        nullptr, std::string(url != nullptr ? url : ""), imageOption, pixelMapRef, nameList);
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetBackButtonIconWithPixelMap(int64_t pixelMapId)

@@ -821,13 +821,20 @@ int64_t NativeCanvasRenderer::CreateImageData(const double height, const double 
     double density = GetDensity();
     int32_t finalWidth = static_cast<int32_t>(std::abs(width * density + DIFF));
     int32_t finalHeight = static_cast<int32_t>(std::abs(height * density + DIFF));
-    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    if (finalWidth <= 0 || finalHeight <= 0) {
+        return FFI_ERROR_CODE;
+    }
+    int64_t result64 = static_cast<int64_t>(finalWidth) * finalHeight * PIXEL_SIZE;
+    if (result64 > INT32_MAX) {
+        return FFI_ERROR_CODE;
+    }
+    int32_t result = static_cast<int32_t>(result64);
     std::vector<uint8_t> bufferArray;
     for (int32_t i = 0; i < result; i++) {
         bufferArray.emplace_back(0xff);
     }
     imageData->height_ = finalHeight;
-    imageData->width_ = finalHeight;
+    imageData->width_ = finalWidth;
     imageData->data = bufferArray;
     return imageData->GetID();
 }
@@ -838,13 +845,20 @@ int64_t NativeCanvasRenderer::CreateImageData(const sptr<NativeImageData> imageD
     double density = GetDensity();
     int32_t finalWidth = static_cast<int32_t>(std::abs(imageData->width_ * density + DIFF));
     int32_t finalHeight = static_cast<int32_t>(std::abs(imageData->height_ * density + DIFF));
-    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    if (finalWidth <= 0 || finalHeight <= 0) {
+        return FFI_ERROR_CODE;
+    }
+    int64_t result64 = static_cast<int64_t>(finalWidth) * finalHeight * PIXEL_SIZE;
+    if (result64 > INT32_MAX) {
+        return FFI_ERROR_CODE;
+    }
+    int32_t result = static_cast<int32_t>(result64);
     std::vector<uint8_t> bufferArray;
     for (int32_t i = 0; i < result; i++) {
         bufferArray.emplace_back(0xff);
     }
     ret->height_ = finalHeight;
-    ret->width_ = finalHeight;
+    ret->width_ = finalWidth;
     ret->data = bufferArray;
     return ret->GetID();
 }

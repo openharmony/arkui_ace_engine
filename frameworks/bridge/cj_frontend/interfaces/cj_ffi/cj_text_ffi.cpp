@@ -92,7 +92,7 @@ void NGNativeTextController::GetLayoutManager(int64_t layoutId)
 extern "C" {
 void FfiOHOSAceFrameworkTextCreate(const char* content)
 {
-    TextModel::GetInstance()->Create(content);
+    TextModel::GetInstance()->Create(content != nullptr ? content : "");
 }
 
 void FfiOHOSAceFrameworkTextCreateWithController(const char* content, int64_t controllerId)
@@ -102,7 +102,7 @@ void FfiOHOSAceFrameworkTextCreateWithController(const char* content, int64_t co
         LOGE("FfiText invalid controllerId");
         return;
     }
-    TextModel::GetInstance()->Create(content);
+    TextModel::GetInstance()->Create(content != nullptr ? content : "");
     auto nativeController = TextModel::GetInstance()->GetTextController();
     if (controller) {
         controller->SetController(nativeController);
@@ -141,7 +141,7 @@ void FfiOHOSAceFrameworkTextResetFontSize()
 
 void FfiOHOSAceFrameworkTextSetFontWeight(const char* fontWeight)
 {
-    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight != nullptr ? fontWeight : ""));
 }
 
 void FfiOHOSAceFrameworkTextSetFontColor(uint32_t textColor)
