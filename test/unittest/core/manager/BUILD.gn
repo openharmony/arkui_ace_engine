@@ -169,7 +169,7 @@ ace_unittest("frame_rate_manager_test_ng") {
 }
 
 ace_unittest("gesture_debug_boundary_manager_test_ng") {
-  module_name = "Gesture-DebugBoundaryManager"
+  module_name = "CommonProperties-InteractionProperties"
   type = "new"
   sources = [ "gesture_debug_boundary_manager_test_ng.cpp" ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
