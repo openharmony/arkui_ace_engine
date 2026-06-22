@@ -652,7 +652,7 @@ Ark_String GetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, defaultValue);
-    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation());
+    return Converter::ArkValue<Ark_String>(peerImpl->GetGlobalCompositeOperation(), Converter::FC);
 }
 void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)

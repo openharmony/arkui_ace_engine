@@ -195,6 +195,8 @@ HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
     EXPECT_EQ(result, DEFAULT_WIDTH_VALUE);
 }
 
+#ifdef WRONG_GEN_v140
+// DISABLED_TEST: gen140 GENERATED_ArkUIImageBitmapAccessor has no setHeight, setWidth
 /**
  * @tc.name: setHeightTest
  * @tc.desc:
@@ -226,4 +228,6 @@ HWTEST_F(ImageBitmapAccessorTest, setWidthTest, TestSize.Level1)
         EXPECT_FLOAT_EQ (peer_->GetWidth(), expected);
     }
 }
+#endif
+
 } // namespace OHOS::Ace::NG
