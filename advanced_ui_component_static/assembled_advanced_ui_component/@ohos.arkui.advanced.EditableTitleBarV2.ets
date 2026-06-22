@@ -19,7 +19,7 @@ import {
   SizeResult, ForEach, Color, BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType,
   Button, ButtonType, SymbolGlyph, SymbolEffectStrategy, SymbolEffect, ImageFit, BlurStyle, SafeAreaType,
   SafeAreaEdge, Direction, ShadowStyle, $r, Margin, Padding, ButtonOptions, HoverEvent, ClickEvent,
-  UIContext, Resource, Stack, Alignment, ResourceStr,
+  UIContext, Resource, Stack, Alignment, ResourceStr, CommonMethod,
   ResourceColor, LocalizedMargin, GestureModifier, UIGestureEvent, LongPressGestureHandler
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
@@ -703,7 +703,6 @@ export struct ImageMenuItemV2 {
   @Local private isOnFocusV2: boolean = false;
   @Local private isOnHoverV2: boolean = false;
   @Local private isOnClickV2: boolean = false;
-  @Local private isInFocusedStyleV2: boolean = false;
   @Local fontSizeInternalV2: number = 1;
 
   private buttonGestureModifierLocal: ButtonGestureModifierV2 = new ButtonGestureModifierV2(
@@ -743,6 +742,22 @@ export struct ImageMenuItemV2 {
     } else {
       return this.itemV2.label ? this.itemV2.label as ResourceStr : '' as ResourceStr;
     }
+  }
+
+  focusedStyle(instance: CommonMethod): void {
+    instance.border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
+      color: this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor,
+      style: BorderStyle.Solid
+    })
+  }
+
+  notInFocusedStyle(instance: CommonMethod): void {
+    instance.border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: EditableTitleBarV2.commonZeroV2
+    })
   }
 
   getBgColorV2(): ResourceColor {
@@ -893,24 +908,19 @@ export struct ImageMenuItemV2 {
     .focusOnTouch(true)
     .foregroundColor(this.getFgColorV2())
     .backgroundColor(this.getBgColorV2())
-    .border({
-      radius: $r('sys.float.titlebar_icon_background_shape'),
-      width: this.isInFocusedStyleV2 ?
-        $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-      color: this.isInFocusedStyleV2 ?
-        this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
-      style: BorderStyle.Solid,
+    .stateStyles({
+      focused: (instance: CommonMethod) => this.focusedStyle(instance),
+      normal: (instance: CommonMethod) => this.notInFocusedStyle(instance),
+      pressed: (instance: CommonMethod) => this.notInFocusedStyle(instance)
     })
     .onFocus(() => {
       if (!this.itemV2.isEnabled) {
         return;
       }
       this.isOnFocusV2 = true;
-      this.isInFocusedStyleV2 = true;
     })
     .onBlur(() => {
       this.isOnFocusV2 = false;
-      this.isInFocusedStyleV2 = false;
     })
     .onHover((isOn: boolean, event?: HoverEvent) => {
       if (!this.itemV2.isEnabled) {
@@ -972,24 +982,19 @@ export struct ImageMenuItemV2 {
         .enabled(this.itemV2.isEnabled)
         .foregroundColor(this.getFgColorV2())
         .backgroundColor(EditableTitleBarV2.noneColorV2)
-        .border({
-          radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: this.isInFocusedStyleV2 ?
-            $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-          color: this.isInFocusedStyleV2 ?
-            this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
-          style: BorderStyle.Solid,
+        .stateStyles({
+          focused: (instance: CommonMethod) => this.focusedStyle(instance),
+          normal: (instance: CommonMethod) => this.notInFocusedStyle(instance),
+          pressed: (instance: CommonMethod) => this.notInFocusedStyle(instance)
         })
         .onFocus(() => {
           if (!this.itemV2.isEnabled) {
             return;
           }
           this.isOnFocusV2 = true;
-          this.isInFocusedStyleV2 = true;
         })
         .onBlur(() => {
           this.isOnFocusV2 = false;
-          this.isInFocusedStyleV2 = false;
         })
         .onHover((isOn: boolean, event?: HoverEvent) => {
           if (!this.itemV2.isEnabled) {
