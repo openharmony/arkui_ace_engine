@@ -772,10 +772,11 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
 
 void TabContentModelStatic::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdatePunctuationOverflow(true);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
-    CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);
     textStyle->UpdateOrphanCharOptimization(true);
