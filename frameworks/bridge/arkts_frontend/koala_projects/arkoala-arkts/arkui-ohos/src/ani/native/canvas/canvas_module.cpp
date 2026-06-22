@@ -138,7 +138,7 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
     static ani_ref gUint8ClampedArray = {};
     static ani_method gUint8ClampedArrayCtor = {};
     if (!gUint8ClampedArray) {
-        static const char* className = "std.core.Uint8ClampedArray";
+        static const char* className = "escompat.Uint8ClampedArray";
         ani_class cls;
         if (ANI_OK != env->FindClass(className, &cls) ||
             ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), &gUint8ClampedArray)) {

@@ -1480,17 +1480,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CanvasRenderer_GetImageData",
-            "ldddd:C{std.core.Uint8ClampedArray}",
+            "ldddd:C{escompat.Uint8ClampedArray}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetImageData)
         },
         ani_native_function {
             "_CanvasRenderer_PutImageData0",
-            "lC{std.core.Uint8ClampedArray}ddii:",
+            "lC{escompat.Uint8ClampedArray}ddii:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData0)
         },
         ani_native_function {
             "_CanvasRenderer_PutImageData1",
-            "lC{std.core.Uint8ClampedArray}ddiidddd:",
+            "lC{escompat.Uint8ClampedArray}ddiidddd:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
         },
         ani_native_function {
