@@ -262,9 +262,9 @@ export struct DatePickerComponent {
     if (prevLunar !== this.lunar) {
       if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
         // Switching from gregorian to lunar: convert gregorian date to lunar date
-        this.lunarCalendar.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
-        this.selectedMonth = this.lunarCalendar.get('month').toInt();
-        this.selectedDay = this.lunarCalendar.get('date').toInt();
+        this.lunarCalendar!.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
+        this.selectedMonth = this.lunarCalendar!.get('month')!.toInt();
+        this.selectedDay = this.lunarCalendar!.get('date')!.toInt();
       } else if (prevLunar && !this.lunar && prevLunarCalendar !== null) {
         // Switching from lunar to gregorian: convert lunar date to gregorian date
         // Use prevLunarCalendar for conversion since current lunarCalendar is null
