@@ -1553,12 +1553,24 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
-    // recognize gesture as click if touch up position is close to last touch down position
+    // Treat the gesture as a click iff the finger stays inside the item bounds during the whole touch
+    // sequence (down/move/up). This mirrors ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu closes" share the same hit criterion, instead of the old down->up straight-line distance check
+    // which is stricter than onClick and caused the menu not to close on an in-bounds swipe before lift-up.
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
+        movedOutOfRegion_ = false;
+    } else if (touchType == TouchType::MOVE) {
+        // mirror ClickRecognizer: once the finger leaves the item bounds, it is no longer a click
+        if (!movedOutOfRegion_ &&
+            !MenuPattern::IsOffsetInNodeBounds(GetHost(), touches.front().GetLocalLocation())) {
+            movedOutOfRegion_ = true;
+        }
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = touches.front().GetLocalLocation();
-        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+        bool isClick = lastTouchOffset_ && !movedOutOfRegion_ &&
+            MenuPattern::IsOffsetInNodeBounds(GetHost(), touchUpOffset);
+        if (isClick) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
             }
@@ -1568,6 +1580,7 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
             }
         }
         lastTouchOffset_.reset();
+        movedOutOfRegion_ = false;
     }
 }
 

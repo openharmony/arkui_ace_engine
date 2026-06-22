@@ -965,4 +965,120 @@ HWTEST_F(MenuPatternTwoTestNg, MenuPatternPlayExtensionMenuDistortAnimation001, 
     EXPECT_EQ(callbackHost, menuNode);
     EXPECT_EQ(callbackOffset, menuPosition);
 }
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_IsOffsetInNodeBounds001
+ * @tc.desc: Test MenuPattern::IsOffsetInNodeBounds region hit criterion used by touch-up-to-dismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_IsOffsetInNodeBounds001, TestSize.Level1)
+{
+    auto host = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(host, nullptr);
+    host->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    // inside the frame bounds -> click candidate (mirrors ClickRecognizer::IsPointInRegion)
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(0.0, 0.0)));
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, 50.0)));
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(100.0, 100.0)));
+    // outside the frame bounds -> not a click
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(-1.0, 50.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, -1.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(100.1, 50.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, 100.1)));
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_IsOffsetInNodeBoundsNullHost001
+ * @tc.desc: Test MenuPattern::IsOffsetInNodeBounds returns false when host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_IsOffsetInNodeBoundsNullHost001, TestSize.Level1)
+{
+    RefPtr<FrameNode> nullHost;
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(nullHost, Offset(10.0, 10.0)));
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_OnTouchEventRegionInBounds001
+ * @tc.desc: Test MenuPattern::OnTouchEvent keeps a click when the finger stays inside the menu bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_OnTouchEventRegionInBounds001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_TRUE(menuPattern->needHideAfterTouch_);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    // DOWN inside bounds records the start and resets the out-of-region flag
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(menuPattern->lastTouchOffset_.has_value());
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
+
+    // MOVE inside bounds keeps it a click candidate
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(40.0, 40.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
+
+    // UP inside bounds -> isClick path runs (HideMenu), state is reset
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(60.0, 60.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->lastTouchOffset_.has_value());
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_OnTouchEventRegionMoveOut001
+ * @tc.desc: Test MenuPattern::OnTouchEvent drops the click once the finger leaves the bounds on MOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_OnTouchEventRegionMoveOut001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+
+    // MOVE out of bounds marks the gesture as no longer a click
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(200.0, 200.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(menuPattern->movedOutOfRegion_);
+
+    // UP -> isClick is false (HideMenu skipped), state still resets
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
+}
 } // namespace OHOS::Ace::NG
