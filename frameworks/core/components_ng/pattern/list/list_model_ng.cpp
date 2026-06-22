@@ -620,6 +620,7 @@ int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
 bool ListModelNG::GetShowCached(FrameNode* frameNode)
 {
     bool show = false;
+    CHECK_NULL_RETURN(frameNode, show);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, ShowCachedItems, show, frameNode, false);
     return show;
 }
