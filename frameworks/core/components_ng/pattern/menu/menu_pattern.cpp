@@ -3184,6 +3184,10 @@ bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
         }
         if (IsSelectOverlayRightClickMenu() || IsExtensionInnerMenu() || IsSelectOverlayExtensionMenu()) {
             styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            if (IsSelectOverlayRightClickMenu()) {
+                renderContext->UpdateBackgroundColor(
+                    menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
+            }
         }
         renderContext->UpdateBackBlurStyle(menuParams.blurStyleOption.value_or(styleOption));
     }
