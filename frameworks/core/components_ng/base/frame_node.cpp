@@ -8564,7 +8564,12 @@ void FrameNode::CleanupPipelineResources()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(nodeId_);
         pipeline->RemoveVisibleAreaChangeNode(nodeId_);
-        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT);
+        auto eventManager = pipeline->GetEventManager();
+        int32_t windowId = 0;
+        if (eventManager && eventManager->GetMouseStyleManager()) {
+            windowId = eventManager->GetMouseStyleManager()->GetWindowIdWithNodeId(nodeId_);
+        }
+        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(nodeId_);
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
@@ -8579,7 +8584,6 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
-        auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
         }
