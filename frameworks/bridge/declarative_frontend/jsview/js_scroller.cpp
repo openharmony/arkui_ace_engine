@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
 #include "core/common/container.h"
@@ -124,20 +125,19 @@ panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
         return panda::Local<panda::ObjectRef>();
     }
     auto* vm = runtime->GetEcmaVm();
-    panda::Local<panda::ObjectRef> rectObj = panda::ObjectRef::New(vm);
-    auto xRef = panda::StringRef::NewFromUtf8(vm, "x");
-    rectObj->Set(vm, xRef, panda::NumberRef::New(vm, info.Left()));
-
-    auto yRef = panda::StringRef::NewFromUtf8(vm, "y");
-    rectObj->Set(vm, yRef, panda::NumberRef::New(vm, info.Top()));
-
-    auto widthRef = panda::StringRef::NewFromUtf8(vm, "width");
-    rectObj->Set(vm, widthRef, panda::NumberRef::New(vm, info.Width()));
-
-    auto heightRef = panda::StringRef::NewFromUtf8(vm, "height");
-    rectObj->Set(vm, heightRef, panda::NumberRef::New(vm, info.Height()));
-
-    return rectObj;
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
+    };
+    PropertyAttribute attrs[] = {
+        PropertyAttribute(panda::NumberRef::New(vm, info.Left()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, info.Top()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, info.Width()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, info.Height()), true, true, true),
+    };
+    return panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
 }
 
 void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)

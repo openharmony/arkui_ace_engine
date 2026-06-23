@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
@@ -233,31 +234,48 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateEventTargetObject(EcmaVM* vm, con
 Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(EcmaVM* vm, const TouchLocationInfo& touchInfo)
 {
     double density = PipelineBase::GetCurrentDensity();
-    const Offset& globalOffset = touchInfo.GetGlobalLocation();
-    const Offset& localOffset = touchInfo.GetLocalLocation();
+    const Offset& globalOffset = touchInfo.GetGlobalLocation(), &localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
     const Offset& globalDisplayOffset = touchInfo.GetGlobalDisplayLocation();
-    const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
-        "pressedTime", "pressure", "width", "height", "hand", "globalDisplayX", "globalDisplayY" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
-        panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX() / density),
-        panda::NumberRef::New(vm, screenOffset.GetY() / density),
-        panda::NumberRef::New(vm, globalOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalOffset.GetY() / density),
-        panda::NumberRef::New(vm, globalOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalOffset.GetY() / density),
-        panda::NumberRef::New(vm, localOffset.GetX() / density),
-        panda::NumberRef::New(vm, localOffset.GetY() / density),
-        panda::NumberRef::New(vm, static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count())),
-        panda::NumberRef::New(vm, touchInfo.GetForce()),
-        panda::NumberRef::New(vm, touchInfo.GetWidth() / density),
-        panda::NumberRef::New(vm, touchInfo.GetHeight() / density),
-        panda::NumberRef::New(vm, touchInfo.GetOperatingHand()),
-        panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
-    auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
-        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TYPE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::ID)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::DISPLAY_X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::DISPLAY_Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WINDOW_X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WINDOW_Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::SCREEN_X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::SCREEN_Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::PRESSED_TIME)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::PRESSURE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HAND)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_DISPLAY_X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_DISPLAY_Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GET_CURRENT_LOCAL_POSITION)),
+    PropertyAttribute attrs[] = {
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, screenOffset.GetX() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, screenOffset.GetY() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalOffset.GetX() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalOffset.GetY() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalOffset.GetX() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalOffset.GetY() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, localOffset.GetX() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, localOffset.GetY() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm,
+            static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count())), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, touchInfo.GetWidth() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, touchInfo.GetHeight() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, touchInfo.GetOperatingHand()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition), true, true, true),
+    };
+    auto touchInfoObj = panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&touchInfo)));
     return touchInfoObj;
@@ -1276,34 +1294,87 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
 
 Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info)
 {
-    const char* keys[] = { "source", "timestamp", "target", "pressure", "deviceId" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-        CreateEventTargetObject(vm, info), panda::NumberRef::New(vm, info.GetForce()),
-        panda::NumberRef::New(vm, info.GetDeviceId()) };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::SOURCE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TIMESTAMP)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TARGET)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::PRESSURE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::DEVICE_ID)),
+    };
+    PropertyAttribute attrs[] = {
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
+            true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm,
+            static_cast<double>(info.GetTimeStamp().time_since_epoch().count())), true, true, true),
+        PropertyAttribute(CreateEventTargetObject(vm, info), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, info.GetForce()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, info.GetDeviceId()), true, true, true),
+    };
+    return panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
 }
 
 Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     panda::JsiFastNativeScope fastNativeScope(vm);
-    auto eventObj = CreateTouchEventInfoObj(vm, *infoPtr);
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
+    auto targetObj = CreateEventTargetObject(vm, *infoPtr);
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::SOURCE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TIMESTAMP)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TARGET)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::PRESSURE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::DEVICE_ID)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TILT_X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TILT_Y)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::ROLL_ANGLE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::SOURCE_TOOL)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::STOP_PROPAGATION)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GET_HISTORICAL_POINTS)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::AXIS_VERTICAL)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::AXIS_HORIZONTAL)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::AXIS_PINCH)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::PREVENT_DEFAULT)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GET_MODIFIER_KEY_STATE)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::TARGET_DISPLAY_ID)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::EVENT_HANDLE_ID)),
+        panda::ExternalStringCache::GetCachedString(vm,
+            static_cast<int32_t>(ArkUIIndex::GET_CURRENT_LOCAL_POSITION)),
+    };
+    PropertyAttribute attrs[] = {
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+            true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm,
+            static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())), true, true, true),
+        PropertyAttribute(targetObj, true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetForce()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetDeviceId()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm,
+            static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, Framework::JsStopPropagation), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, Framework::JsGetHistoricalPoints), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()), true, true, true),
+        PropertyAttribute(panda::NumberRef::New(vm, infoPtr->GetEventHandleId()), true, true, true),
+        PropertyAttribute(panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition), true, true, true),
+    };
+    auto eventObj = panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
+
     auto touchArr = panda::ArrayRef::New(vm);
     const std::list<TouchLocationInfo>& touchList = infoPtr->GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
         panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location));
     }
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
+    eventObj->Set(vm, panda::ExternalStringCache::GetCachedString(vm,
+        static_cast<int32_t>(ArkUIIndex::TOUCHES)), touchArr);
+
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = infoPtr->GetChangedTouches();
@@ -1311,30 +1382,13 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change));
     }
     if (changeTouch.size() > 0) {
-        eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
+        eventObj->Set(vm, panda::ExternalStringCache::GetCachedString(vm,
+            static_cast<int32_t>(ArkUIIndex::TYPE)),
             panda::NumberRef::New(vm, static_cast<int32_t>(changeTouch.front().GetTouchType())));
     }
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "changedTouches"), changeTouchArr);
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "stopPropagation"),
-        panda::FunctionRef::New(vm, Framework::JsStopPropagation));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
-        panda::FunctionRef::New(vm, Framework::JsGetHistoricalPoints));
-    eventObj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
-    eventObj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
-    eventObj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
-        panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
-        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
-        panda::NumberRef::New(vm, infoPtr->GetEventHandleId()));
-    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
-        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
+    eventObj->Set(vm, panda::ExternalStringCache::GetCachedString(vm,
+        static_cast<int32_t>(ArkUIIndex::CHANGED_TOUCHES)), changeTouchArr);
+
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
