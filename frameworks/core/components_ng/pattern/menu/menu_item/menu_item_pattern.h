@@ -719,6 +719,8 @@ private:
         return true;
     }
     std::unique_ptr<Offset> lastTouchOffset_;
+    // true once the finger has moved out of the item bounds during the current touch sequence
+    bool movedOutOfRegion_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
