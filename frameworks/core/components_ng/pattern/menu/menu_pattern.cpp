@@ -20,6 +20,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/shadow_theme.h"
@@ -1412,13 +1413,13 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
     auto pipelineContext = host->GetContextWithCheck();
-    if (resetForDesktopMenu) {
+    if (ShouldUpdateShadow() && resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
         Shadow shadow;
         if (GetShadowFromTheme(ShadowStyle::None, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
-    } else {
+    } else if (ShouldUpdateShadow()) {
         Shadow shadow;
         auto shadowStyle = GetMenuDefaultShadowStyle(pipelineContext);
         if (GetShadowFromTheme(shadowStyle, shadow, pipelineContext)) {
@@ -1450,7 +1451,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTh
     }
     Shadow shadow;
     auto defaultShadowStyle = GetMenuDefaultShadowStyle(pipeline);
-    if (GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
+    if (ShouldUpdateShadow() && GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
         renderContext->UpdateBackShadow(shadow);
     }
     // make menu round rect
@@ -1685,6 +1686,35 @@ MenuParam MenuPattern::GetMenuParam() const
     CHECK_NULL_RETURN(menuWrapperPattern, MenuParam());
     auto menuParam = menuWrapperPattern->GetMenuParam();
     return menuParam;
+}
+
+bool MenuPattern::ShouldUpdateShadow() const
+{
+    auto systemMaterial = GetMenuParam().systemMaterial;
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial));
+    if (!nativeMaterial) {
+        return true; // No valid material: apply default menu shadow.
+    }
+
+    auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+    if (!materialType.has_value()) {
+        return true; // Unknown material type: apply default menu shadow.
+    }
+
+    // For NONE, SEMI_TRANSPARENT or other (e.g. HDS) types, the material carries its own
+    // visual effect, so don't apply the default menu shadow.
+    if (materialType.value() != MaterialType::IMMERSIVE) {
+        return false;
+    }
+
+    // For IMMERSIVE type, check applyShadow property.
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    if (immersiveOptions && immersiveOptions->applyShadow) {
+        return false; // IMMERSIVE with applyShadow=true: material shadow handles it.
+    }
+
+    // IMMERSIVE with applyShadow=false or no options: apply default menu shadow.
+    return true;
 }
 
 bool MenuPattern::IsUseDistortionAnimation() const
@@ -3112,7 +3142,7 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
+    if (ShouldUpdateShadow() && GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }

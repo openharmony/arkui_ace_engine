@@ -29,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -256,6 +257,43 @@ void MenuPatternTestNg::CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWrappe
     auto customNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     menuWrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+}
+
+// Build a Menu node mounted under a MenuWrapper that carries the given system
+// material in its MenuParam, so GetMenuParam().systemMaterial resolves to it.
+RefPtr<MenuPattern> BuildMenuPatternWithMaterial(const RefPtr<UiMaterial>& material)
+{
+    auto wrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    if (menu) {
+        menu->MountToParent(wrapper);
+    }
+    MenuParam menuParam;
+    menuParam.systemMaterial = material;
+    auto wrapperPattern = wrapper ? wrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    if (wrapperPattern) {
+        wrapperPattern->SetMenuParam(menuParam);
+    }
+    return menu ? menu->GetPattern<MenuPattern>() : nullptr;
+}
+
+RefPtr<UiMaterial> BuildImmersiveMaterialForShadow(bool applyShadow)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = applyShadow;
+    material->SetImmersiveOptions(options);
+    return material;
+}
+
+RefPtr<UiMaterial> BuildMaterialByTypeForShadow(MaterialType type)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(type));
+    return material;
 }
 
 /**
@@ -1664,6 +1702,101 @@ HWTEST_F(MenuPatternTestNg, MenuPattern_GetFinalPlacement_AlignTypeLogic, TestSi
         auto result = node->GetPattern<MenuPattern>()->GetFinalPlacement();
         EXPECT_EQ(result, param.expected);
     }
+}
+
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow001
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with no system material (default shadow applies).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow001, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(nullptr);
+    ASSERT_NE(pattern, nullptr);
+    // No material: PreProcessMaterial returns null, apply default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow002
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with empty material (default shadow applies).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow002, TestSize.Level1)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetEmpty(true);
+    auto pattern = BuildMenuPatternWithMaterial(material);
+    ASSERT_NE(pattern, nullptr);
+    // Empty material is invalid: apply default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow003
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with IMMERSIVE material and applyShadow=true (shadow suppressed).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow003, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(BuildImmersiveMaterialForShadow(true));
+    ASSERT_NE(pattern, nullptr);
+    // IMMERSIVE + applyShadow=true: material shadow handles it, suppress default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow004
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with IMMERSIVE material and applyShadow=false (default shadow
+ * applies).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow004, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(BuildImmersiveMaterialForShadow(false));
+    ASSERT_NE(pattern, nullptr);
+    // IMMERSIVE + applyShadow=false: apply default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow005
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with IMMERSIVE material and no immersive options (default shadow
+ * applies).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow005, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(BuildMaterialByTypeForShadow(MaterialType::IMMERSIVE));
+    ASSERT_NE(pattern, nullptr);
+    // IMMERSIVE without immersive options (null): apply default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow006
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with SEMI_TRANSPARENT material (shadow suppressed).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow006, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(BuildMaterialByTypeForShadow(MaterialType::SEMI_TRANSPARENT));
+    ASSERT_NE(pattern, nullptr);
+    // Non-IMMERSIVE material (e.g. HDS-like): suppress default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
+}
+ 
+/**
+ * @tc.name: MenuPattern_ShouldUpdateShadow007
+ * @tc.desc: Test MenuPattern::ShouldUpdateShadow with NONE material (shadow suppressed).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_ShouldUpdateShadow007, TestSize.Level1)
+{
+    auto pattern = BuildMenuPatternWithMaterial(BuildMaterialByTypeForShadow(MaterialType::NONE));
+    ASSERT_NE(pattern, nullptr);
+    // NONE material: suppress default shadow.
+    EXPECT_TRUE(pattern->ShouldUpdateShadow());
 }
 
 } // namespace OHOS::Ace::NG
