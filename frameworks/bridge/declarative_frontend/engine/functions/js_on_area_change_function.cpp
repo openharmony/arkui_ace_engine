@@ -41,10 +41,10 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
     };
-    PropertyAttribute offsetAttrs[] = {
-        PropertyAttribute(panda::NumberRef::New(vm,
+    panda::PropertyAttribute offsetAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm,
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())), true, true, true),
     };
     auto offsetObj = panda::ObjectRef::NewWithProperties(vm, 2, offsetKeys, offsetAttrs);
@@ -54,10 +54,10 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
     };
-    PropertyAttribute globalAttrs[] = {
-        PropertyAttribute(panda::NumberRef::New(vm,
+    panda::PropertyAttribute globalAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX())), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm,
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY())), true, true, true),
     };
     auto globalOffsetObj = panda::ObjectRef::NewWithProperties(vm, 2, globalKeys, globalAttrs);
@@ -71,14 +71,14 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
     };
-    PropertyAttribute areaAttrs[] = {
-        PropertyAttribute(offsetObj, true, true, true),
-        PropertyAttribute(offsetObj, true, true, true),
-        PropertyAttribute(globalOffsetObj, true, true, true),
-        PropertyAttribute(globalOffsetObj, true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm,
+    panda::PropertyAttribute areaAttrs[] = {
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(rect.Width())), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm,
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
             PipelineBase::Px2VpWithCurrentDensity(rect.Height())), true, true, true),
     };
     auto areaObj = panda::ObjectRef::NewWithProperties(vm, 6, areaKeys, areaAttrs);

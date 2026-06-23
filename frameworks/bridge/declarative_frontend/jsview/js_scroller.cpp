@@ -131,11 +131,11 @@ panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
     };
-    PropertyAttribute attrs[] = {
-        PropertyAttribute(panda::NumberRef::New(vm, info.Left()), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm, info.Top()), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm, info.Width()), true, true, true),
-        PropertyAttribute(panda::NumberRef::New(vm, info.Height()), true, true, true),
+    panda::PropertyAttribute attrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm, info.Left()), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm, info.Top()), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm, info.Width()), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm, info.Height()), true, true, true),
     };
     return panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
 }
