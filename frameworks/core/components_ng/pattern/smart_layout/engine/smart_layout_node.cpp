@@ -239,6 +239,9 @@ SmartLayoutRect SmartLayoutNode::GetChildrenBoundingBox() const
     double maxBottom = std::numeric_limits<double>::lowest();
 
     for (const auto& child : children_) {
+        if (child == nullptr) {
+            continue;
+        }
         double childX = child->GetPosition().offsetX.value;
         double childY = child->GetPosition().offsetY.value;
         double childW = child->GetSize().width.value;
@@ -263,6 +266,12 @@ void SmartLayoutNode::ApplyRowConstraints()
 {
     SmartLayoutConstraints constraintsBuilder;
     constraintsBuilder.AddRowConstraints(*this);
+}
+
+void SmartLayoutNode::ApplyGeneralConstraints()
+{
+    SmartLayoutConstraints constraintsBuilder;
+    constraintsBuilder.AddGeneralConstraints(*this);
 }
 
 } // namespace OHOS::Ace::NG
