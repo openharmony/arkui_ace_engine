@@ -14,8 +14,10 @@
  */
 
 #include "frameworks/bridge/common/dom/dom_text.h"
+
 #include "core/common/ace_application_info.h"
 #include "core/components/declaration/text/text_specialized_style.h"
+#include "frameworks/bridge/common/dom/dom_span.h"
 
 namespace OHOS::Ace::Framework {
 

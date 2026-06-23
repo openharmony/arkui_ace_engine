@@ -16,6 +16,7 @@
 #include "common_method_modifier_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"

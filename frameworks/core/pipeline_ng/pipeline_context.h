@@ -33,7 +33,6 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"

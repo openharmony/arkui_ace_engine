@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/layout/layout_wrapper_test_ng.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {

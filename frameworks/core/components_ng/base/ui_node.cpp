@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

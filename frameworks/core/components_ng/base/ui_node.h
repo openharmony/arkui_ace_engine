@@ -33,7 +33,6 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/theme/theme.h"
-#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -61,6 +60,7 @@ using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
+class ExportTextureInfo;
 class FocusHub;
 class LayoutWrapperNode;
 class FrameNode;

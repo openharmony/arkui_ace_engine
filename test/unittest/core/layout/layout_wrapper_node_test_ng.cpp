@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

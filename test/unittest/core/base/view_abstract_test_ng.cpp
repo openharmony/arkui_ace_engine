@@ -19,6 +19,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 

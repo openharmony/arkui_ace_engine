@@ -18,10 +18,11 @@
 
 #include "core/components/text/text_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
-#include "frameworks/bridge/common/dom/dom_span.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace::Framework {
+
+class DOMSpan;
 
 class ACE_FORCE_EXPORT DOMText : public DOMNode {
     DECLARE_ACE_TYPE(DOMText, DOMNode);

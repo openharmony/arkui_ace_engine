@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/render/render_context.h"

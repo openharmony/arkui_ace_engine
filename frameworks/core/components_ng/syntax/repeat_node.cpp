@@ -23,6 +23,7 @@
 #endif
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 

@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"

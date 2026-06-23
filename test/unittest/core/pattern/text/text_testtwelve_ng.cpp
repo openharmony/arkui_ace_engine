@@ -19,6 +19,7 @@
 #include "text_base.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

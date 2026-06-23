@@ -52,6 +52,7 @@
 #include "compatible/components/list_v2/list_item_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "frameworks/bridge/common/dom/dom_span.h"
 
 namespace OHOS::Ace::Framework {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;

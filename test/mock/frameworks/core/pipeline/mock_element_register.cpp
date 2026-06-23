@@ -15,6 +15,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/element.h"

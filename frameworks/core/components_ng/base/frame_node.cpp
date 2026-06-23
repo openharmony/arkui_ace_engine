@@ -161,6 +161,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/base/mount_policy.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;

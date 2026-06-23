@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

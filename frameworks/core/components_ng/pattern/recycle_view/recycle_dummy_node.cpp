@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 #include "core/components_ng/pattern/custom/custom_node_base.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId)

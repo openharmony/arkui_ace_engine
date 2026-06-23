@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/memory/ref_counter.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 #define private public
 #define protectd public

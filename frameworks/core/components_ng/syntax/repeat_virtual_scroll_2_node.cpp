@@ -27,6 +27,7 @@
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace {
 constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
