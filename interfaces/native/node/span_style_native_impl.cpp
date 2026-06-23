@@ -1607,7 +1607,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTextDirection(
 ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLinearGradient(
     OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_LinearGradientOptions* linearGradient)
 {
-    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(paragraphStyle && linearGradient, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     OH_ArkUI_LinearGradientOptions gradient;
     gradient.angle = linearGradient->angle;
     gradient.direction = linearGradient->direction;
@@ -1636,7 +1636,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetLinearGradient(
 ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetRadialGradient(
     OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_RadialGradientOptions* radialGradient)
 {
-    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(paragraphStyle && radialGradient, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     OH_ArkUI_RadialGradientOptions gradient;
     gradient.centerX = radialGradient->centerX;
     gradient.centerY = radialGradient->centerY;
@@ -1770,7 +1770,7 @@ ArkUI_ErrorCode OH_ArkUI_TextShadowStyle_SetTextShadow(OH_ArkUI_TextShadowStyle*
 ArkUI_ErrorCode OH_ArkUI_TextShadowStyle_GetTextShadow(const OH_ArkUI_TextShadowStyle* textShadowStyle,
     OH_ArkUI_ShadowOptions** shadowOptions, uint32_t shadowOptionsSize, uint32_t* writeLength)
 {
-    CHECK_NULL_RETURN(textShadowStyle && shadowOptions && shadowOptionsSize >= 0,
+    CHECK_NULL_RETURN(textShadowStyle && shadowOptions && shadowOptionsSize >= 0 && writeLength,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto size = textShadowStyle->textShadow.size();
     *writeLength = size;

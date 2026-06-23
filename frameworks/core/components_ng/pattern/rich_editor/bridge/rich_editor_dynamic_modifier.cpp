@@ -1063,7 +1063,7 @@ void SetRichEditorMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (maxLine <= 0) {
+    if (maxLine == 0 || maxLine > static_cast<uint32_t>(INT32_MAX)) {
         RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
         return;
     }

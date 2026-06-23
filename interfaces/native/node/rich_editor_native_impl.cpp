@@ -729,7 +729,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetTextShadows(
     OH_ArkUI_ShadowOptions** shadowOptions,
     uint32_t shadowOptionsSize, uint32_t* writeLength)
 {
-    CHECK_NULL_RETURN(style && shadowOptions && shadowOptionsSize >= 0,
+    CHECK_NULL_RETURN(style && shadowOptions && shadowOptionsSize >= 0 && writeLength,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto size = style->textShadow.size();
     *writeLength = size;
