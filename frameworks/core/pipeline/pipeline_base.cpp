@@ -1111,6 +1111,13 @@ void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
     jsFormVsyncCallbacks_.erase(subWindowId);
 }
 
+void PipelineBase::NotifyWindowAttachStateChange(bool status)
+{
+    if (window_) {
+        window_->NotifyWindowAttachStateChange(status);
+    }
+}
+
 bool PipelineBase::MaybeRelease()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
