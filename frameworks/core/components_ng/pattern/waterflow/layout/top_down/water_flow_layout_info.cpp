@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
+#include <algorithm>
+
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
@@ -42,30 +44,79 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
         return;
     }
     auto mainHeight = GetMaxMainHeight();
+    const float viewStartBound = GetViewStartBound();
     // need more items for currentOffset_
-    if (LessOrEqual(currentOffset_ + mainHeight, 0.0f)) {
+    if (LessOrEqual(currentOffset_ + mainHeight, viewStartBound)) {
         if (measureInNextFrame_) {
             startIndex_ = endIndex_;
         }
         return;
     }
 
+    startIndex_ = FindStartIndex(viewStartBound);
+}
+
+bool WaterFlowLayoutInfo::IsStartIndexCandidate(float itemStart, float itemSize, float viewStartBound) const
+{
+    if (GreatNotEqual(itemStart + itemSize + currentOffset_, viewStartBound)) {
+        return true;
+    }
+    // FlowItem that have not been loaded at the beginning of each cross need to be selected as startIndex_
+    // for the ClearCache later.
+    return NearZero(itemStart + itemSize) && NearZero(currentOffset_) && NearZero(viewStartBound);
+}
+
+int32_t WaterFlowLayoutInfo::FindStartIndex(float viewStartBound) const
+{
     int32_t tempStartIndex = -1;
-    for (const auto& crossItems : items_[GetSegment(tempStartIndex)]) {
-        for (const auto& iter : crossItems.second) {
-            if (GreatNotEqual(iter.second.first + iter.second.second + currentOffset_, 0.0f)) {
-                tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
-                break;
-            }
-            // FlowItem that have not been loaded at the beginning of each cross need to be selected as startIndex_ for
-            // the ClearCache later.
-            if (NearZero(iter.second.first + iter.second.second) && NearZero(currentOffset_)) {
-                tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter.first) : iter.first;
-                break;
+    for (const auto& section : items_) {
+        for (const auto& crossItems : section) {
+            auto iter = std::find_if(crossItems.second.begin(), crossItems.second.end(),
+                [this, viewStartBound](const auto& item) {
+                    return IsStartIndexCandidate(item.second.first, item.second.second, viewStartBound);
+                });
+            if (iter != crossItems.second.end()) {
+                tempStartIndex = tempStartIndex != -1 ? std::min(tempStartIndex, iter->first) : iter->first;
             }
         }
     }
-    startIndex_ = tempStartIndex == -1 ? 0 : tempStartIndex;
+    return tempStartIndex == -1 ? 0 : tempStartIndex;
+}
+
+void WaterFlowLayoutInfo::SyncReportRange(float mainSize)
+{
+    if (!itemInfos_.empty()) {
+        reportStartIndex_ = FastSolveStartIndex(GetViewStartBound(true));
+        reportEndIndex_ = FastSolveEndIndex(GetViewEndBound(mainSize, true));
+        return;
+    }
+
+    const float reportStartBound = GetViewStartBound(true);
+    const float reportEndBound = GetViewEndBound(mainSize, true);
+    ReportRangeContext reportRange(reportStartBound, reportEndBound);
+    for (const auto& section : items_) {
+        for (const auto& crossItems : section) {
+            UpdateReportRangeWithItems(crossItems.second, reportRange);
+        }
+    }
+    reportStartIndex_ = reportRange.startIndex == -1 ? 0 : reportRange.startIndex;
+    reportEndIndex_ = reportRange.endIndex;
+}
+
+void WaterFlowLayoutInfo::UpdateReportRangeWithItems(
+    const ItemMap::mapped_type& crossItems, ReportRangeContext& reportRange) const
+{
+    for (const auto& iter : crossItems) {
+        const float itemStart = iter.second.first + currentOffset_;
+        const float itemEnd = itemStart + iter.second.second;
+        if (GreatNotEqual(itemEnd, reportRange.startBound)) {
+            reportRange.startIndex = reportRange.startIndex != -1 ?
+                std::min(reportRange.startIndex, iter.first) : iter.first;
+        }
+        if (LessNotEqual(itemStart, reportRange.endBound)) {
+            reportRange.endIndex = std::max(reportRange.endIndex, iter.first);
+        }
+    }
 }
 
 int32_t WaterFlowLayoutInfo::GetEndIndexByOffset(float offset) const
@@ -249,6 +300,8 @@ void WaterFlowLayoutInfo::Reset()
 
     startIndex_ = 0;
     endIndex_ = -1;
+    reportStartIndex_ = 0;
+    reportEndIndex_ = -1;
     targetIndex_.reset();
     items_ = { ItemMap() };
     itemInfos_.clear();
@@ -277,6 +330,8 @@ void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
     maxHeight_ = 0.0f;
     ClearCacheAfterIndex(resetFrom - 1);
     startIndex_ = std::max(resetFrom - 1, 0);
+    reportStartIndex_ = startIndex_;
+    reportEndIndex_ = endIndex_;
 }
 
 int32_t WaterFlowLayoutInfo::GetCrossCount() const
@@ -361,13 +416,13 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset, bool firstLayout) const
     return scrollDownToReachEnd || scrollUpToReachEnd;
 }
 
-int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
+int32_t WaterFlowLayoutInfo::FastSolveStartIndex(float startBound) const
 {
     if (NearZero(currentOffset_ + TopMargin()) && !endPosArray_.empty() &&
         NearZero(endPosArray_[0].first - TopMargin())) {
         return endPosArray_[0].second;
     }
-    auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
+    auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), startBound - currentOffset_,
         [](float value, const std::pair<float, int32_t>& info) { return LessNotEqual(value, info.first); });
     if (it == endPosArray_.end()) {
         return std::max(static_cast<int32_t>(itemInfos_.size()) - 1, 0);
@@ -375,13 +430,13 @@ int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
     return it->second;
 }
 
-int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
+int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float endBound) const
 {
     if (itemInfos_.empty()) {
         return -1;
     }
 
-    const float endBound = mainSize - currentOffset_;
+    endBound -= currentOffset_;
     auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), endBound,
         [](const ItemInfo& info, float value) { return LessNotEqual(info.mainOffset, value); });
 
@@ -439,19 +494,21 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool can
         currentOffset_ = contentStartOffset_;
     }
 
-    endIndex_ = FastSolveEndIndex(mainSize + expandHeight_);
+    endIndex_ = FastSolveEndIndex(GetViewEndBound(mainSize));
+    reportEndIndex_ = FastSolveEndIndex(GetViewEndBound(mainSize, true));
 
     maxHeight_ = GetMaxMainHeight();
 
     itemStart_ = GreatOrEqual(currentOffset_, contentStartOffset_);
-    itemEnd_ = endIndex_ >= 0 && endIndex_ == GetChildrenCount() - 1;
+    itemEnd_ = reportEndIndex_ >= 0 && reportEndIndex_ == GetChildrenCount() - 1;
     offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_ + contentEndOffset_);
     // adjust offset when it can't overScroll at bottom
     if (offsetEnd_ && LessNotEqual(currentOffset_, contentStartOffset_) && !canOverScrollEnd) {
         currentOffset_ = std::min(-maxHeight_ - contentEndOffset_ + mainSize, contentStartOffset_);
     }
 
-    startIndex_ = FastSolveStartIndex();
+    startIndex_ = FastSolveStartIndex(GetViewStartBound());
+    reportStartIndex_ = FastSolveStartIndex(GetViewStartBound(true));
 }
 
 bool WaterFlowLayoutInfo::IsAtTopWithDelta()

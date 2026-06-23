@@ -19,6 +19,14 @@ COMMON_SRC = [
   "water_flow_cache_test.cpp",
 ]
 
+CONTENT_CLIP_SRC = [
+  "water_flow_content_clip_test.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_algorithm.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.cpp",
+]
+
 # Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
   module_name = "ScrollingSet-Scroll"
@@ -31,6 +39,7 @@ ace_unittest("water_flow_test_original") {
     "water_flow_regular_test.cpp",
     "water_flow_top_down_test.cpp",
   ]
+  sources += CONTENT_CLIP_SRC
   sources += COMMON_SRC
 
   if (!ace_enable_full_test_suite) {
@@ -54,6 +63,7 @@ ace_unittest("water_flow_test_segmented") {
     "water_flow_segment_layout_test.cpp",
     "water_flow_top_down_test.cpp",
   ]
+  sources += CONTENT_CLIP_SRC
   sources += COMMON_SRC
 
   if (!ace_enable_full_test_suite) {
@@ -77,6 +87,7 @@ ace_unittest("water_flow_test_sw") {
     "water_flow_sw_test.cpp",
     "water_flow_layout_utils_test.cpp",
   ]
+  sources += CONTENT_CLIP_SRC
   sources += COMMON_SRC
 
   if (!ace_enable_full_test_suite) {

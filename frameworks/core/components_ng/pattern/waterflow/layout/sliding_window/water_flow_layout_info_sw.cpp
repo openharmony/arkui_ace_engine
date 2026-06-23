@@ -38,6 +38,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     mainGap_ = mainGap;
     startPos_ = StartPos();
     endPos_ = EndPos();
+    SyncReportRange(mainSize);
 
     prevItemStart_ = itemStart_;
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin() - contentStartOffset_);
@@ -57,6 +58,42 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     isPrevOffsetValid_ = true;
 
     synced_ = true;
+}
+
+void WaterFlowLayoutInfoSW::SyncReportRange(float mainSize)
+{
+    reportStartIndex_ = 0;
+    reportEndIndex_ = -1;
+    const float reportStartBound = GetViewStartBound(true);
+    const float reportEndBound = GetViewEndBound(mainSize, true);
+    ReportRangeContext reportRange(reportStartBound, reportEndBound);
+    for (size_t secIdx = 0; secIdx < lanes_.size(); ++secIdx) {
+        const float mainGap = secIdx < mainGap_.size() ? mainGap_[secIdx] : 0.0f;
+        for (const auto& lane : lanes_[secIdx]) {
+            UpdateReportRangeWithLane(lane, mainGap, reportRange);
+        }
+    }
+    if (reportRange.startIndex != Infinity<int32_t>()) {
+        reportStartIndex_ = reportRange.startIndex;
+    }
+    reportEndIndex_ = reportRange.endIndex;
+}
+
+void WaterFlowLayoutInfoSW::UpdateReportRangeWithLane(
+    const Lane& lane, float mainGap, ReportRangeContext& reportRange) const
+{
+    float itemStart = lane.startPos;
+    for (const auto& item : lane.items_) {
+        const float itemEnd = itemStart + item.mainSize;
+        if (GreatNotEqual(itemEnd, reportRange.startBound) ||
+            (NearZero(item.mainSize) && NearEqual(itemEnd, reportRange.startBound))) {
+            reportRange.startIndex = std::min(reportRange.startIndex, item.idx);
+        }
+        if (LessNotEqual(itemStart, reportRange.endBound)) {
+            reportRange.endIndex = std::max(reportRange.endIndex, item.idx);
+        }
+        itemStart = itemEnd + mainGap;
+    }
 }
 
 bool WaterFlowLayoutInfoSW::IsAtTopWithDelta()
@@ -379,6 +416,8 @@ void WaterFlowLayoutInfoSW::Reset()
     heightSum_ = 0.0f;
     maxHeight_ = 0.0f;
     knowTotalHeight_ = false;
+    reportStartIndex_ = 0;
+    reportEndIndex_ = -1;
     synced_ = false;
 }
 
@@ -462,6 +501,8 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
     idxToLane_.clear();
     idxToHeight_.clear();
     heightSum_ = 0.0f;
+    reportStartIndex_ = 0;
+    reportEndIndex_ = -1;
     synced_ = false;
 }
 
@@ -847,6 +888,8 @@ void WaterFlowLayoutInfoSW::ClearData()
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
+    reportStartIndex_ = 0;
+    reportEndIndex_ = -1;
 }
 
 float WaterFlowLayoutInfoSW::GetAverageItemHeight() const
@@ -981,6 +1024,8 @@ void WaterFlowLayoutInfoSW::SyncOnEmptyLanes(float mainSize)
 {
     startPos_ = StartPos();
     endPos_ = EndPos();
+    reportStartIndex_ = startIndex_;
+    reportEndIndex_ = endIndex_;
     itemStart_ = NonNegative(startPos_ - TopMargin() - contentStartOffset_);
     itemEnd_ = true;
     offsetEnd_ = LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin() + contentEndOffset_, mainSize, 0.1f);
@@ -1100,7 +1145,10 @@ void WaterFlowLayoutInfoSW::HandleItemEnd(int32_t itemCnt, float mainSize)
     if (endIndex_ >= itemCnt - 1) {
         itemEnd_ = true;
         if (footerIndex_ == 0) {
-            itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
+            itemEnd_ &= LessOrEqualCustomPrecision(endPos_, GetViewEndBound(mainSize, true), 0.1f);
+        }
+        if (NearZero(endFixOffset_)) {
+            reportEndIndex_ = std::max(reportEndIndex_, endIndex_);
         }
         return;
     }
@@ -1121,12 +1169,15 @@ void WaterFlowLayoutInfoSW::HandleItemEnd(int32_t itemCnt, float mainSize)
     // Set itemEnd_ based on whether all remaining items are zero-height
     itemEnd_ = (zeroHeightCount > 0 && endIndex_ + zeroHeightCount >= itemCnt - 1);
     if (itemEnd_ && footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, GetViewEndBound(mainSize, true), 0.1f);
     }
 
-    // Adjust endIndex_ to include zero-height trailing items
+    // Adjust endIndex_ to include zero-height trailing items.
     if (itemEnd_ && zeroHeightCount > 0) {
         endIndex_ = itemCnt - 1;
+        if (NearZero(endFixOffset_)) {
+            reportEndIndex_ = std::max(reportEndIndex_, endIndex_);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

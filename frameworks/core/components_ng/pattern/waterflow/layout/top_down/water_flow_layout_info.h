@@ -57,6 +57,7 @@ public:
     int32_t GetCrossIndex(int32_t itemIndex) const override;
 
     void UpdateStartIndex() override;
+    void SyncReportRange(float mainSize);
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const override;
@@ -154,7 +155,7 @@ public:
      *
      * @return index of the starting item.
      */
-    int32_t FastSolveStartIndex() const;
+    int32_t FastSolveStartIndex(float startBound) const;
 
     /**
      * @brief Find the last item inside viewport in log_n time using itemInfos_.
@@ -162,7 +163,7 @@ public:
      * @param mainSize main-axis length of viewport.
      * @return index of the item.
      */
-    int32_t FastSolveEndIndex(float mainSize) const;
+    int32_t FastSolveEndIndex(float endBound) const;
 
     /**
      * @brief Calculate and set the start position of next segment after filling the tail item of the current segment.
@@ -244,6 +245,21 @@ public:
     }
 
 private:
+    struct ReportRangeContext {
+        ReportRangeContext(float viewStartBound, float viewEndBound)
+            : startBound(viewStartBound), endBound(viewEndBound)
+        {}
+
+        float startBound = 0.0f;
+        float endBound = 0.0f;
+        int32_t startIndex = -1;
+        int32_t endIndex = -1;
+    };
+
+    int32_t FindStartIndex(float viewStartBound) const;
+    bool IsStartIndexCandidate(float itemStart, float itemSize, float viewStartBound) const;
+    void UpdateReportRangeWithItems(const ItemMap::mapped_type& crossItems, ReportRangeContext& reportRange) const;
+
     inline float TopMargin() const
     {
         if (margins_.empty()) {

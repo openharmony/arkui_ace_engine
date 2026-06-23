@@ -226,6 +226,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     }
     algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
     algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && (layoutInfo_->repeatDifference_ == 0));
+    SetLayoutAlgorithmContentClip(algorithm);
     return algorithm;
 }
 
@@ -245,7 +246,57 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
         paint->SetEdgeEffect(scrollEffect);
     }
     UpdateFadingEdge(paint);
+    paint->SetSafeAreaExpand(safeAreaPad_);
     return paint;
+}
+
+void WaterFlowPattern::SetLayoutAlgorithmContentClip(const RefPtr<WaterFlowLayoutBase>& algorithm)
+{
+    CHECK_NULL_VOID(algorithm);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (!paintProperty || !paintProperty->HasContentClip()) {
+        safeAreaPad_.reset();
+        return;
+    }
+
+    auto clip = paintProperty->GetContentClipValue();
+    auto mode = clip.first;
+    if (mode == ContentClipMode::DEFAULT) {
+        mode = paintProperty->GetDefaultContentClip();
+    }
+    algorithm->SetContentClipMode(mode);
+    if (mode != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (mode == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        algorithm->SetContentClipSafeAreaPad(safeAreaPad_);
+    } else if (mode == ContentClipMode::CUSTOM) {
+        algorithm->SetContentClipShape(clip.second);
+    }
+}
+
+void WaterFlowPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (type != LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA) {
+        host->PostponedTaskForIgnoreDefault();
+        return;
+    }
+    const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
+        { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+        IgnoreStrategy::AXIS_INSENSITIVE);
+    if (safeAreaPad_.has_value() && safeAreaPad_ == safeAreaPad) {
+        return;
+    }
+    safeAreaPad_ = safeAreaPad;
+    if (!layoutInfo_->measureInNextFrame_) {
+        const auto& layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        host->SetLayoutDirtyMarked(true);
+        host->CreateLayoutTask(true, LayoutType::NONE);
+    }
 }
 
 void WaterFlowPattern::OnModifyDone()
@@ -321,14 +372,15 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     if (onJSFrameNodeDidScroll) {
         FireOnScroll(delta, onJSFrameNodeDidScroll);
     }
-    bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
+    bool indexChanged =
+        itemRange_.first != layoutInfo_->reportStartIndex_ || itemRange_.second != layoutInfo_->reportEndIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     auto onJsFrameNodeScrollIndex = eventHub->GetJSFrameNodeOnWaterFlowScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
         host->OnAccessibilityEvent(
-            AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+            AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->reportStartIndex_, layoutInfo_->reportEndIndex_);
     }
     auto onReachStart = eventHub->GetOnReachStart();
     auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
@@ -380,14 +432,15 @@ void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnRe
 void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged);
-    itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
-    ReportOnItemWaterFlowScrollEvent("onScrollIndex", layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    itemRange_ = { layoutInfo_->reportStartIndex_, layoutInfo_->reportEndIndex_ };
+    ReportOnItemWaterFlowScrollEvent(
+        "onScrollIndex", layoutInfo_->reportStartIndex_, layoutInfo_->reportEndIndex_);
     CHECK_NULL_VOID(onScrollIndex);
-    int32_t endIndex = layoutInfo_->endIndex_;
+    int32_t endIndex = layoutInfo_->reportEndIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->reportEndIndex_);
     }
-    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
+    onScrollIndex(layoutInfo_->reportStartIndex_, endIndex);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -586,7 +639,7 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
 
 int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
 {
-    for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
+    for (int32_t index = layoutInfo_->startIndex_; index <= layoutInfo_->endIndex_; ++index) {
         Rect rect = GetItemRect(index);
         if (rect.IsInRegion({ x, y })) {
             return index;
@@ -636,7 +689,7 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
 
 int32_t WaterFlowPattern::GetFirstIndex() const
 {
-    return layoutInfo_ ? layoutInfo_->startIndex_ : -1;
+    return layoutInfo_ ? layoutInfo_->reportStartIndex_ : -1;
 }
 
 void WaterFlowPattern::ResetSections()
@@ -962,6 +1015,22 @@ void WaterFlowPattern::DumpInfo()
     }
 }
 
+void WaterFlowPattern::DumpAdvanceLayoutInfo() const
+{
+    DumpLog::GetInstance().AddDesc("offset:" + std::to_string(layoutInfo_->Offset()));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(prevOffset_));
+    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(layoutInfo_->lastMainSize_));
+    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(layoutInfo_->GetContentHeight()));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(layoutInfo_->startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(layoutInfo_->endIndex_));
+    DumpLog::GetInstance().AddDesc("reportStartIndex:" + std::to_string(layoutInfo_->reportStartIndex_));
+    DumpLog::GetInstance().AddDesc("reportEndIndex:" + std::to_string(layoutInfo_->reportEndIndex_));
+    DumpLog::GetInstance().AddDesc("startFixOffset:" + std::to_string(layoutInfo_->startFixOffset_));
+    DumpLog::GetInstance().AddDesc("endFixOffset:" + std::to_string(layoutInfo_->endFixOffset_));
+    DumpLog::GetInstance().AddDesc("expandHeight:" + std::to_string(layoutInfo_->expandHeight_));
+    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(layoutInfo_->jumpIndex_));
+}
+
 void WaterFlowPattern::DumpAdvanceInfo()
 {
     auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
@@ -978,13 +1047,7 @@ void WaterFlowPattern::DumpAdvanceInfo()
     }
     std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
 
-    DumpLog::GetInstance().AddDesc("offset:" + std::to_string(layoutInfo_->Offset()));
-    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(prevOffset_));
-    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(layoutInfo_->lastMainSize_));
-    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(layoutInfo_->GetContentHeight()));
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(layoutInfo_->startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(layoutInfo_->endIndex_));
-    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(layoutInfo_->jumpIndex_));
+    DumpAdvanceLayoutInfo();
 
     DumpLog::GetInstance().AddDesc("RowsTemplate:" + property->GetRowsTemplate().value_or("null"));
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:" + property->GetColumnsTemplate().value_or("null"));
