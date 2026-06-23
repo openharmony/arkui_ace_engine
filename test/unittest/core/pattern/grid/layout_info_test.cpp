@@ -486,6 +486,92 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindInMatrix004
+ * @tc.desc: Test FindInMatrix when index=0 and crossCount_=0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 0;
+    info.gridMatrix_ = MATRIX_DEMO_3;
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix005
+ * @tc.desc: Test FindInMatrix when index=0 with empty matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_.clear();
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix006
+ * @tc.desc: Test FindInMatrix when index=0 at the first row (normal case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix006, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = MATRIX_DEMO_3;
+
+    auto it = info.FindInMatrix(0);
+    EXPECT_EQ(it, info.gridMatrix_.begin());
+    bool found = false;
+    for (auto [_, item] : it->second) {
+        if (item == 0) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+/**
+ * @tc.name: FindInMatrix007
+ * @tc.desc: Test FindInMatrix when index=0 not at the first row (invariant broken)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix007, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    // row 0 has items 1 and 2, but NOT item 0
+    info.gridMatrix_ = {
+        { 0, { { 0, 1 }, { 1, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 } } },
+    };
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix008
+ * @tc.desc: Test FindInMatrix when index=0 and first row is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix008, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, {} },
+        { 1, { { 0, 3 }, { 1, 4 } } },
+    };
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
  * @tc.name: ClearMatrixToEnd001
  * @tc.desc: Test GridLayoutInfo::ClearMatrixToEnd
  * @tc.type: FUNC

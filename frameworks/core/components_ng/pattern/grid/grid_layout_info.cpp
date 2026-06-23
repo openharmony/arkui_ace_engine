@@ -826,7 +826,22 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
         return gridMatrix_.end();
     }
     if (index == 0) {
-        return gridMatrix_.begin();
+        // Optimization: item 0 is typically at the first row.
+        // When matrix is empty, begin() == end() returns end() correctly.
+        // Verify the first row actually contains item 0 to avoid returning
+        // a wrong result in edge cases where the invariant is broken.
+        auto first = gridMatrix_.begin();
+        if (first == gridMatrix_.end()) {
+            return gridMatrix_.end();
+        }
+        int32_t maxV = -1;
+        if (CheckRow(maxV, first->second, index)) {
+            return first;
+        }
+        // Grid layout invariant: items are placed sequentially starting from index 0,
+        // so item 0 is always at the first row if it exists. Not found here means it
+        // doesn't exist in the matrix — no need to fall through to binary search.
+        return gridMatrix_.end();
     }
     size_t count = gridMatrix_.size();
     size_t step = 0;
