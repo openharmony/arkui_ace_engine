@@ -263,11 +263,11 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(TraverseInfo& info, TraverseR
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
         bool isDirectionConsistent = (absRect.GetWidth() < absRect.GetHeight() && width < height) ||
- 	        (absRect.GetWidth() > absRect.GetHeight() && width > height);
- 	    uiParam.ignoreRotateScaleX_ =
- 	        isDirectionConsistent ? absRect.GetWidth() / width : absRect.GetWidth() / height;
- 	    uiParam.ignoreRotateScaleY_ =
- 	        isDirectionConsistent ? absRect.GetHeight() / height : absRect.GetHeight() / width;
+            (absRect.GetWidth() > absRect.GetHeight() && width > height);
+        uiParam.ignoreRotateScaleX_ =
+            isDirectionConsistent ? absRect.GetWidth() / width : absRect.GetWidth() / height;
+        uiParam.ignoreRotateScaleY_ =
+            isDirectionConsistent ? absRect.GetHeight() / height : absRect.GetHeight() / width;
     }
     uiParam.needSync_ = info.notSyncPosition ? false : true;
     // based on transform scene coordinate system to compute trans pos
