@@ -948,8 +948,6 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     int32_t spanIndex = 0;
     if (richEditorController) {
         spanIndex = richEditorController->AddTextSpan(options);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "rich editor controller error");
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
