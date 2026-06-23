@@ -696,6 +696,10 @@ template("ace_core_source_set") {
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
+    if (ace_engine_feature_enable_material_customized) {
+      defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
@@ -1230,6 +1234,10 @@ template("ace_core_ng_source_set") {
     if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+    }
+
+    if (ace_engine_feature_enable_material_customized) {
+      defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
     }
 
     cflags_cc = []

@@ -102,6 +102,9 @@ declare_args() {
   #Enable container_scope tracking
   ace_engine_feature_enable_container_scope_tracking = false
 
+  #Enable material param customized
+  ace_engine_feature_enable_material_customized = false
+
   # Enable reduce eh_frame only for ArkUI-X release.
   ace_engine_enable_reduce_eh_frame = is_arkui_x && runtime_mode == "release"
 }

@@ -381,9 +381,12 @@ bool MaterialUtils::ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& op
 bool MaterialUtils::GetUiMaterialFilter(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -415,9 +418,12 @@ bool MaterialUtils::GetUiMaterialFilter(
 bool MaterialUtils::GetUiMaterialFilterEC(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -450,9 +456,12 @@ bool MaterialUtils::GetUiMaterialFilterEC(
 bool MaterialUtils::GetUiMaterialShaderECSub(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
