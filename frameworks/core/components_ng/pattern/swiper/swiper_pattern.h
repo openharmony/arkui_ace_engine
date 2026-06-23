@@ -1624,6 +1624,8 @@ private:
     VelocityTracker velocityTracker_;
     Offset offsetXY_;
     std::optional<float> lastDragByOffset_;
+
+    bool lastSetRenderGroup_ = false;
 };
 } // namespace OHOS::Ace::NG
 

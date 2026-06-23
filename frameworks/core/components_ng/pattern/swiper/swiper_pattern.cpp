@@ -5952,13 +5952,26 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper() const
 
 void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    // The common attribute rendergroup is set to false, and the default itemrendergroup does not take effect.
+    // Clear the cache that has not been closed.
+    if (renderContext->HasRenderGroup() && !renderContext->GetRenderGroupValue()) {
+        itemRenderGroup = false;
+    }
+    if (!lastSetRenderGroup_ && !itemRenderGroup) {
+        return;
+    }
+    lastSetRenderGroup_ = itemRenderGroup;
+
     for (auto& item : itemPosition_) {
         if (auto frameNode = item.second.node) {
             groupedItems_.insert(frameNode);
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     for (auto child : host->GetChildren()) {
         auto frameNode = DynamicCast<FrameNode>(child);
         if (!frameNode || child->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
