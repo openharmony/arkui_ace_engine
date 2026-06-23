@@ -1260,7 +1260,7 @@ void OverlayManager::PopToast(int32_t toastId)
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();
             } else {
-                SubwindowManager::GetInstance()->HideToastSubWindowNG(context->GetInstanceId());
+                SubwindowManager::GetInstance()->HideSubWindowNG(context->GetInstanceId());
             }
         }
     });
@@ -6935,6 +6935,9 @@ void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filte
         CHECK_NULL_VOID(filterNode);
         overlayManager->RemoveFilterWithNode(filterNode);
         overlayManager->RemoveFilterOnDisappear(filterNode->GetId());
+        auto context = filterNode->GetContext();
+        CHECK_NULL_VOID(context);
+        SubwindowManager::GetInstance()->HideSubWindowNG(context->GetInstanceId());
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);

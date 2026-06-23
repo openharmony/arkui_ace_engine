@@ -174,7 +174,7 @@ public:
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
-    void HideToastSubWindowNG(int32_t instanceId);
+    void HideSubWindowNG(int32_t instanceId);
     ToastWindowType GetToastWindowType(int32_t instanceId);
     ACE_FORCE_EXPORT void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
