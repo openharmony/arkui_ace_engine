@@ -465,6 +465,9 @@ void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallback
 
 GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

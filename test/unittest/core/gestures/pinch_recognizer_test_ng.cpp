@@ -2520,4 +2520,57 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerIsCtrlBeingPressedTest001, TestSi
     eventWithoutCtrl.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
     EXPECT_FALSE(pinchRecognizer->IsCtrlBeingPressed(eventWithoutCtrl));
 }
+
+/**
+ * @tc.name: PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    pinchRecognizer->AttachFrameNode(frameNode);
+
+    pinchRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    pinchRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = pinchRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    pinchRecognizer->AttachFrameNode(frameNode);
+
+    pinchRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    pinchRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = pinchRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    pinchRecognizer->AttachFrameNode(frameNode);
+
+    pinchRecognizer->gestureInfo_ = nullptr;
+    auto result = pinchRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG

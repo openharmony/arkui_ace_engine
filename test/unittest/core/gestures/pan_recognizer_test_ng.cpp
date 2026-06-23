@@ -3693,4 +3693,57 @@ HWTEST_F(PanRecognizerTestNg, PanGestureTest013, TestSize.Level1)
     panGesture->SetDistanceMap(newMap);
     EXPECT_EQ(panGesture->GetDistanceMap().size(), 2);
 }
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = nullptr;
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG
