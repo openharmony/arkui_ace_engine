@@ -2971,4 +2971,25 @@ HWTEST_F(SearchTestNg, SearchCompressLeadingPunctuation, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), false);
     EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), false);
 }
+
+/**
+ * @tc.name: SearchButtonPunctuationOverflow001
+ * @tc.desc: Verify search button text PunctuationOverflow default value is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchButtonPunctuationOverflow001, TestSize.Level1)
+{
+    SearchModelNG searchModelNG;
+    searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    EXPECT_FALSE(buttonFrameNode->GetChildren().empty());
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+}
 } // namespace OHOS::Ace::NG
