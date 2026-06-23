@@ -177,6 +177,7 @@ if (is_arkui_x) {
       "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
       "native_error_message_wrapper.cpp",
       "native_interface_xcomponent_cross_platform.cpp",
+      "native_styled_string_descriptor.cpp",
       "node/native_node_ani.cpp",
       "node/native_node_napi.cpp",
       "node/node_utils.cpp",
