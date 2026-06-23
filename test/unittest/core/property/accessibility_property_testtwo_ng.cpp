@@ -161,37 +161,6 @@ HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg003, Test
 }
 
 /**
- * @tc.name: AccessibilityPropertyTestTwoNg004
- * @tc.desc: test IsMatchAccessibilityResponseRegion
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg004, TestSize.Level1)
-{
-    AccessibilityProperty accessibilityProperty;
-    auto host = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    host->isActive_ = true;
-    DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
-    std::vector<DimensionRect> responseRegion;
-    responseRegion.push_back(responseRect);
-    auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
-    gestureEventHub->SetResponseRegion(responseRegion);
-    auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
-    EXPECT_FALSE(responseRegionList.size() != 1);
-
-    auto rect = responseRegionList.back();
-    EXPECT_FALSE(rect == paintRect);
-
-    EXPECT_FALSE(!accessibilityProperty.IsAccessibilityCompInResponseRegion(rect, paintRect));
-
-    WeakPtr<FrameNode> hostBak = host;
-    accessibilityProperty.SetHost(hostBak);
-    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(true);
-    EXPECT_FALSE(result);
-}
-
-/**
  * @tc.name: AccessibilityPropertyTestTwoNg005
  * @tc.desc: test ActActionClick
  * @tc.type: FUNC

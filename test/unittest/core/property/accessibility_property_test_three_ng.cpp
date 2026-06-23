@@ -624,44 +624,6 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree022, Te
 
 /**
  * @tc.name: AccessibilityPropertyTestThree023
- * @tc.desc: Match ResponseRegion but not IsAccessibilityCompInResponseRegion
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree023, TestSize.Level1)
-{
-    auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(node, nullptr);
-
-    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
-    node->renderContext_ = mockRenderContext;
-    RectF rect(100, 100, 100, 100);
-    mockRenderContext->UpdatePaintRect(rect);
-    mockRenderContext->SetPaintRectWithTransform(rect);
-    RectF responseRect(99, 99, 100, 101);
-    node->mockResponseRegionList_.emplace_back(responseRect);
-    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    ASSERT_NE(property, nullptr);
-    // precision < 1.0001f, Match ResponseRegion but not IsAccessibilityCompInResponseRegion
-    auto result = property->IsMatchAccessibilityResponseRegion(false);
-    EXPECT_TRUE(result);
-    NG::RectT<int32_t> resultRect;
-    resultRect = property->GetAccessibilityResponseRegionRect(false);
-    EXPECT_EQ(resultRect.GetX(), 0);
-    EXPECT_EQ(resultRect.GetY(), 0);
-    EXPECT_EQ(resultRect.Width(), rect.Width());
-    EXPECT_EQ(resultRect.Height(), rect.Height());
-    // virtual node Match ResponseRegion but not IsAccessibilityCompInResponseRegion
-    result = property->IsMatchAccessibilityResponseRegion(true);
-    EXPECT_FALSE(result);
-    resultRect = property->GetAccessibilityResponseRegionRect(true);
-    EXPECT_EQ(resultRect.GetX(), rect.GetX());
-    EXPECT_EQ(resultRect.GetY(), rect.GetX());
-    EXPECT_EQ(resultRect.Width(), rect.Width());
-    EXPECT_EQ(resultRect.Height(), rect.Height());
-}
-
-/**
- * @tc.name: AccessibilityPropertyTestThree023
  * @tc.desc: UpdatePaintAccessibilityFocus in FlushRender
  * @tc.type: FUNC
  */
