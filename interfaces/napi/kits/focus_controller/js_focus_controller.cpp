@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::Napi {
 namespace {
-constexpr size_t STR_BUFFER_SIZE = 1024;
 constexpr size_t ARGC_ACTIVATE_PARAMTER = 2;
 }
 
@@ -34,6 +33,24 @@ static napi_value JSClearFocus(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+bool ParseString(napi_env env, napi_value argv, std::string& key)
+{
+    size_t buffSize = 0;
+    napi_status status = napi_get_value_string_utf8(env, argv, nullptr, 0, &buffSize);
+    if (status != napi_ok) {
+        return false;
+    }
+
+    std::unique_ptr<char[]> keyBuffer = std::make_unique<char[]>(buffSize + 1);
+    status = napi_get_value_string_utf8(env, argv, keyBuffer.get(), buffSize + 1, &buffSize);
+    if (status != napi_ok) {
+        return false;
+    }
+
+    key = keyBuffer.get();
+    return true;
+}
+
 static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -45,10 +62,9 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
     napi_valuetype type = napi_undefined;
     napi_typeof(env, argv, &type);
     NAPI_ASSERT(env, type == napi_string, "the type of arg is not string");
-    char outBuffer[STR_BUFFER_SIZE] = { 0 };
-    size_t outSize = 0;
-    napi_get_value_string_utf8(env, argv, outBuffer, STR_BUFFER_SIZE, &outSize);
-    std::string key = std::string(outBuffer);
+
+    std::string key;
+    ParseString(env, argv, key);
 
     napi_value obj = nullptr;
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
