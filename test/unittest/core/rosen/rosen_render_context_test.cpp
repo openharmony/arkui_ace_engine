@@ -179,6 +179,100 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncGeometryFrameWithFrameOffset001
+ * @tc.desc: SyncGeometryFrame() with render frame offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SyncGeometryFrameWithFrameOffset001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    RectF paintRect = { 10.0f, 20.0f, 30.0f, 40.0f };
+    OffsetF frameOffset = { 3.0f, 4.0f };
+
+    rosenRenderContext->SetRenderFrameOffset(frameOffset);
+    rosenRenderContext->SyncGeometryFrame(paintRect);
+
+    const auto& stagingProperties = rosenRenderContext->GetRSNode()->GetStagingProperties();
+    auto bounds = stagingProperties.GetBounds();
+    auto frame = stagingProperties.GetFrame();
+    EXPECT_EQ(bounds[0], paintRect.GetX());
+    EXPECT_EQ(bounds[1], paintRect.GetY());
+    EXPECT_EQ(bounds[2], paintRect.Width());
+    EXPECT_EQ(bounds[3], paintRect.Height());
+    EXPECT_EQ(frame[0], paintRect.GetX() + frameOffset.GetX());
+    EXPECT_EQ(frame[1], paintRect.GetY() + frameOffset.GetY());
+    EXPECT_EQ(frame[2], paintRect.Width());
+    EXPECT_EQ(frame[3], paintRect.Height());
+}
+
+/**
+ * @tc.name: SyncGeometryFrameWithFrameOffsetPriority001
+ * @tc.desc: SyncGeometryFrame() uses render frame offset before content rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SyncGeometryFrameWithFrameOffsetPriority001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RectF paintRect = { 10.0f, 20.0f, 30.0f, 40.0f };
+    OffsetF frameOffset = { 3.0f, 4.0f };
+
+    geometryNode->SetContentOffset(OffsetF(50.0f, 60.0f));
+    geometryNode->SetContentSize(SizeF(70.0f, 80.0f));
+    rosenRenderContext->SetUsingContentRectForRenderFrame(true, true);
+    rosenRenderContext->SetRenderFrameOffset(frameOffset);
+    rosenRenderContext->SyncGeometryFrame(paintRect);
+
+    const auto& stagingProperties = rosenRenderContext->GetRSNode()->GetStagingProperties();
+    auto bounds = stagingProperties.GetBounds();
+    auto frame = stagingProperties.GetFrame();
+    EXPECT_EQ(bounds[0], paintRect.GetX());
+    EXPECT_EQ(bounds[1], paintRect.GetY());
+    EXPECT_EQ(bounds[2], paintRect.Width());
+    EXPECT_EQ(bounds[3], paintRect.Height());
+    EXPECT_EQ(frame[0], paintRect.GetX() + frameOffset.GetX());
+    EXPECT_EQ(frame[1], paintRect.GetY() + frameOffset.GetY());
+    EXPECT_EQ(frame[2], paintRect.Width());
+    EXPECT_EQ(frame[3], paintRect.Height());
+}
+
+/**
+ * @tc.name: SyncGeometryFrameWithContentRect001
+ * @tc.desc: SyncGeometryFrame() uses content rect as render frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SyncGeometryFrameWithContentRect001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RectF paintRect = { 10.0f, 20.0f, 100.0f, 120.0f };
+    OffsetF contentOffset = { 5.0f, 6.0f };
+    SizeF contentSize = { 70.0f, 80.0f };
+
+    geometryNode->SetContentOffset(contentOffset);
+    geometryNode->SetContentSize(contentSize);
+    rosenRenderContext->SetUsingContentRectForRenderFrame(true, true);
+    rosenRenderContext->SyncGeometryFrame(paintRect);
+
+    const auto& stagingProperties = rosenRenderContext->GetRSNode()->GetStagingProperties();
+    auto bounds = stagingProperties.GetBounds();
+    auto frame = stagingProperties.GetFrame();
+    EXPECT_EQ(bounds[0], paintRect.GetX());
+    EXPECT_EQ(bounds[1], paintRect.GetY());
+    EXPECT_EQ(bounds[2], paintRect.Width());
+    EXPECT_EQ(bounds[3], paintRect.Height());
+    EXPECT_EQ(frame[0], paintRect.GetX() + contentOffset.GetX());
+    EXPECT_EQ(frame[1], paintRect.GetY() + contentOffset.GetY());
+    EXPECT_EQ(frame[2], contentSize.Width());
+    EXPECT_EQ(frame[3], contentSize.Height());
+}
+
+/**
  * @tc.name: RosenRenderContextTest006
  * @tc.desc: SetChildBounds().
  * @tc.type: FUNC

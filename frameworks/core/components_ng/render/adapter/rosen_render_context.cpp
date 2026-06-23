@@ -341,6 +341,48 @@ void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier, Rosen::Mod
     CHECK_NULL_VOID(property);
     property->RequestCancelAnimation();
 }
+
+std::optional<RectF> GetContentFrameRect(const RefPtr<FrameNode>& host, RectF rect, bool adjustRSFrameByContentRect)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    if (adjustRSFrameByContentRect) {
+        auto contentRect = geometryNode->GetContentRect();
+        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
+        rect.SetSize(contentRect.GetSize());
+        return rect;
+    }
+    auto&& padding = geometryNode->GetPadding();
+    if (padding) {
+        rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
+        auto size = rect.GetSize();
+        MinusPaddingToSize(*padding, size);
+        rect.SetSize(size);
+    }
+    return rect;
+}
+
+std::optional<RectF> GetRSFrameRect(const RefPtr<FrameNode>& host, const RectF& boundsRect,
+    const std::optional<OffsetF>& frameOffset, bool useContentRectForRSFrame, bool adjustRSFrameByContentRect)
+{
+    if (frameOffset.has_value()) {
+        return RectF(boundsRect.GetX() + frameOffset->GetX(), boundsRect.GetY() + frameOffset->GetY(),
+            boundsRect.Width(), boundsRect.Height());
+    }
+    if (useContentRectForRSFrame) {
+        return GetContentFrameRect(host, boundsRect, adjustRSFrameByContentRect);
+    }
+    return boundsRect;
+}
+
+void SetBoundsAndFrameToRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, const RectF& boundsRect, const RectF& frameRect)
+{
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetBoundsAndFrame({boundsRect.GetX(), boundsRect.GetY(), boundsRect.Width(), boundsRect.Height()},
+        {frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height()});
+}
 } // namespace
 
 std::timed_mutex RosenRenderContext::taskMtx_;
@@ -844,21 +886,20 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode, bool
 void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (rsTextureExport_) {
         rsTextureExport_->UpdateBufferInfo(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     }
     if (handleChildBounds_) {
         SetChildBounds(paintRect);
     }
-    if (useContentRectForRSFrame_) {
-        SetContentRectToFrame(paintRect);
+    auto frameHost = frameOffset_.has_value() || !useContentRectForRSFrame_ ? nullptr : GetHost();
+    auto frameRect = GetRSFrameRect(frameHost, paintRect, frameOffset_, useContentRectForRSFrame_,
+        adjustRSFrameByContentRect_);
+    if (frameRect.has_value()) {
+        SetBoundsAndFrameToRSNode(rsNode_, paintRect, frameRect.value());
     } else {
-        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    }
-    if (frameOffset_.has_value()) {
-        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
-            paintRect.Width(), paintRect.Height());
+        rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        SetContentRectToFrame(paintRect);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2820,12 +2861,13 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         gRect = rect;
         return rect;
     }
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
-    auto skew = rsNode_->GetStagingProperties().GetSkew();
-    auto perspective = rsNode_->GetStagingProperties().GetPersp();
-    auto scale = rsNode_->GetStagingProperties().GetScale();
-    auto center = rsNode_->GetStagingProperties().GetPivot();
-    auto degree = rsNode_->GetStagingProperties().GetRotation();
+    auto transform = rsNode_->GetStagingProperties().GetAllTransformPropertyValues();
+    const auto& translate = transform.translate;
+    const auto& skew = transform.skew;
+    const auto& perspective = transform.persp;
+    const auto& scale = transform.scale;
+    const auto& center = transform.pivot;
+    auto degree = transform.rotation;
     // calculate new pos.
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -3109,11 +3151,12 @@ RectF RosenRenderContext::GetPaintRectWithTransformWithoutDegree()
     if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         return rect;
     }
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
-    auto skew = rsNode_->GetStagingProperties().GetSkew();
-    auto perspective = rsNode_->GetStagingProperties().GetPersp();
-    auto scale = rsNode_->GetStagingProperties().GetScale();
-    auto center = rsNode_->GetStagingProperties().GetPivot();
+    auto transform = rsNode_->GetStagingProperties().GetAllTransformPropertyValues();
+    const auto& translate = transform.translate;
+    const auto& skew = transform.skew;
+    const auto& perspective = transform.persp;
+    const auto& scale = transform.scale;
+    const auto& center = transform.pivot;
     auto degree = 0;
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -4521,15 +4564,13 @@ void RosenRenderContext::SetPositionToRSNode()
                 rect.Height(), frameNode->GetId(), frameNode->GetTag().c_str());
         }
     }
-    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    if (useContentRectForRSFrame_) {
-        SetContentRectToFrame(rect);
+    auto frameRect = GetRSFrameRect(frameNode, rect, frameOffset_, useContentRectForRSFrame_,
+        adjustRSFrameByContentRect_);
+    if (frameRect.has_value()) {
+        SetBoundsAndFrameToRSNode(rsNode_, rect, frameRect.value());
     } else {
-        rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    }
-    if (frameOffset_.has_value()) {
-        rsNode_->SetFrame(
-            rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(), rect.Width(), rect.Height());
+        rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        SetContentRectToFrame(rect);
     }
     frameNode->OnSyncGeometryFrameFinish(rect);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
@@ -7689,22 +7730,9 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (adjustRSFrameByContentRect_) {
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto contentRect = geometryNode->GetContentRect();
-        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
-        rect.SetSize(contentRect.GetSize());
-    } else {
-        auto&& padding = host->GetGeometryNode()->GetPadding();
-        // minus padding to get contentRect
-        if (padding) {
-            rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
-            auto size = rect.GetSize();
-            MinusPaddingToSize(*padding, size);
-            rect.SetSize(size);
-        }
-    }
+    auto frameRect = GetContentFrameRect(host, rect, adjustRSFrameByContentRect_);
+    CHECK_NULL_VOID(frameRect.has_value());
+    rect = frameRect.value();
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
 }
 
