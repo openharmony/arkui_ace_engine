@@ -185,6 +185,7 @@ if (is_arkui_x) {
       "event/drag_and_drop_impl.cpp",
       "event/key_event_impl.cpp",
       "event/ui_input_event.cpp",
+      "native_styled_string_descriptor.cpp",
       "node/node_component_snapshot.cpp",
       "node/native_interface_focus.cpp",
       "node/drawable_descriptor.cpp",
