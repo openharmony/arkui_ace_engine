@@ -531,7 +531,7 @@ public:
 
     TabBarStyle GetTabBarStyle(uint32_t position) const
     {
-        if (position < 0 || position >= tabBarStyles_.size()) {
+        if (position >= tabBarStyles_.size()) {
             return TabBarStyle::NOSTYLE;
         }
         return tabBarStyles_[position];
@@ -539,7 +539,7 @@ public:
 
     const BottomTabBarStyle& GetBottomTabBarStyle(uint32_t position) const
     {
-        if (position < 0 || position >= bottomTabBarStyles_.size()) {
+        if (position >= bottomTabBarStyles_.size()) {
             return bottomTabBarStyle_;
         }
         return bottomTabBarStyles_[position];

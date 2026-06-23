@@ -103,6 +103,7 @@ public:
         layoutAlgorithm->SetControlImageWidth(controlImageWidth_);
         layoutAlgorithm->SetControlImageHeight(controlImageHeight_);
         auto host = GetHost();
+        CHECK_NULL_RETURN(host, layoutAlgorithm);
         auto sideBarContainerPattern = host->GetPattern<SideBarContainerPattern>();
         layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
         return layoutAlgorithm;

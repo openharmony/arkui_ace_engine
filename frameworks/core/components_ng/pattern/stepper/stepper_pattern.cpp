@@ -40,7 +40,9 @@ void StepperPattern::OnModifyDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
-    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    index_ = swiperLayoutProperty->GetIndex().value_or(0);
 
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -75,7 +77,9 @@ void StepperPattern::OnHostChildUpdateDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
-    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    index_ = swiperLayoutProperty->GetIndex().value_or(0);
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     maxIndex_ = TotalCount();
@@ -273,12 +277,14 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_VOID(swiperNode);
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
     CHECK_NULL_VOID(stepperItemNode);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    auto labelStatus =
-        stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_VOID(stepperItemLayoutProperty);
+    auto labelStatus = stepperItemLayoutProperty->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, false, theme->GetStepperStart());
@@ -418,9 +424,12 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     CHECK_NULL_VOID(hostNode);
     // get rightLabel
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_VOID(swiperNode);
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
-    auto rightLabel =
-        stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(defaultContent);
+    CHECK_NULL_VOID(stepperItemNode);
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_VOID(stepperItemLayoutProperty);
+    auto rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(defaultContent);
     // Create or get buttonNode
     if (isLoadingButton_) {
         hostNode->RemoveRightButtonNode();
@@ -492,10 +501,13 @@ void StepperPattern::CreateWaitingRightButtonNode()
     auto loadingProgressNode = AceType::Claim(reinterpret_cast<FrameNode*>(
         loadingProgressModifier->createLoadingProgressFrameNode(hostNode->GetRightButtonId())));
     CHECK_NULL_VOID(loadingProgressNode);
-    loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    auto progressLayoutProperty = loadingProgressNode->GetLayoutProperty();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(stepperTheme->GetProgressDiameter()), CalcLength(stepperTheme->GetProgressDiameter())));
-    loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>()->UpdateColor(
-        stepperTheme->GetProgressColor());
+    auto progressPaintProperty = loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateColor(stepperTheme->GetProgressColor());
     loadingProgressNode->GetRenderContext()->UpdateForegroundColor(stepperTheme->GetProgressColor());
     loadingProgressNode->MountToParent(hostNode);
     loadingProgressNode->MarkModifyDone();
@@ -548,11 +560,15 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperAnimationController = swiperPattern->GetController();
     if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
         return;
     }
-    auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+    auto swiperController = swiperPattern->GetSwiperController();
+    CHECK_NULL_VOID(swiperController);
     stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     swiperController->SwipeTo(std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
@@ -566,7 +582,10 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperAnimationController = swiperPattern->GetController();
     if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
         return;
     }

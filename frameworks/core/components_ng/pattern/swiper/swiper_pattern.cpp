@@ -4071,7 +4071,7 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 
         auto nextIndex = ComputeNextIndexByVelocity(static_cast<float>(dragVelocity), true);
         if (currentIndex_ != nextIndex) {
-            FireWillShowEvent(nextIndex_);
+            FireWillShowEvent(nextIndex);
             FireWillHideEvent(currentIndex_);
 
             UpdateCurrentIndex(nextIndex);
@@ -4819,8 +4819,10 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     auto itemInfoInVisibleArea = std::make_pair(0, SwiperItemInfo {});
     if (!itemPosition_.empty()) {
         auto item = itemPosition_.find(nextIndex_);
-        itemInfoInVisibleArea =
-            std::make_pair(item->first, SwiperItemInfo { item->second.startPos, item->second.endPos });
+        if (item != itemPosition_.end()) {
+            itemInfoInVisibleArea =
+                std::make_pair(item->first, SwiperItemInfo { item->second.startPos, item->second.endPos });
+        }
     }
     if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex_)) {
         UpdateCurrentIndex(nextIndex_);

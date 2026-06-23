@@ -355,7 +355,9 @@ std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
     CHECK_NULL_RETURN(tabBarItem, "");
     auto node = AceType::DynamicCast<FrameNode>(tabBarItem);
     CHECK_NULL_RETURN(node, "");
-    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, "");
+    return accessibilityProperty->GetGroupText(true);
 }
 
 void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -894,6 +896,7 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
     for (const auto& tabBarItemNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(tabBarItemNode);
         auto tabBarItemFrameNode = AceType::DynamicCast<FrameNode>(tabBarItemNode);
+        CHECK_NULL_VOID(tabBarItemFrameNode);
         tabBarItems[tabBarItemFrameNode->GetId()] = tabBarItemFrameNode;
     }
     std::stack<RefPtr<UINode>> stack;

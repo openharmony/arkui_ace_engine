@@ -27,7 +27,7 @@ CanvasDrawFunction SwiperPaintMethod::GetOverlayDrawFunction(PaintWrapper* paint
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto swiper = weak.Upgrade();
-        if (swiper) {
+        if (swiper && paintWrapper) {
             swiper->PaintFade(canvas, paintWrapper);
         }
     };
