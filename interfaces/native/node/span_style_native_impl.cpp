@@ -1077,6 +1077,7 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineHeightStyle(
     CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     lineHeightStyle->lineHeight = spanStyle->lineHeightStyle.lineHeight;
+    lineHeightStyle->lineHeightMultiple = spanStyle->lineHeightStyle.lineHeightMultiple;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1491,7 +1492,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetWordBreak(
 ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(OH_ArkUI_ParagraphStyle* paragraphStyle,
     struct OH_PixelmapNative* pixelmap)
 {
-    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(paragraphStyle && pixelmap, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     delete paragraphStyle->leadingMarginPixelMap;
@@ -2159,7 +2160,7 @@ ArkUI_ErrorCode OH_ArkUI_UserDataSpan_GetUserData(const OH_ArkUI_UserDataSpan* u
 OH_ArkUI_CustomSpan* OH_ArkUI_CustomSpan_Create()
 {
     OH_ArkUI_CustomSpan* customSpan = new OH_ArkUI_CustomSpan();
-    customSpan->onDraw = nullptr;
+    customSpan->onMeasure = nullptr;
     customSpan->onDraw = nullptr;
     return customSpan;
 }
