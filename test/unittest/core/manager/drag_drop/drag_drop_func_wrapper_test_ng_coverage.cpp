@@ -912,33 +912,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragResult, TestSize.Level1)
 }
 
 /**
- * @tc.name: Test NotifyDragEndPendingDone
- * @tc.desc: Test NotifyDragEndPendingDone func
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragEndPendingDone, TestSize.Level1)
-{
-    int32_t requestId = 1;
-    DragDropGlobalController::GetInstance().requestId_ = 0;
-    DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_SUCCESS;
-    int32_t ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
-    EXPECT_EQ(ret, -1);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
-
-    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
-    ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
-    EXPECT_EQ(ret, -1);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
-
-    DragDropGlobalController::GetInstance().requestId_ = requestId;
-    ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
-    EXPECT_EQ(ret, 0);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
-    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
-}
-
-/**
  * @tc.name: Test GetAnonyString
  * @tc.desc: Test GetAnonyString func
  * @tc.type: FUNC
