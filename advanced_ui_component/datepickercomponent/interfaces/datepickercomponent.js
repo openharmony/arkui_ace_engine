@@ -119,6 +119,8 @@ export class DatePickerComponent extends ViewPU {
         this.formatter = new intl.NumberFormat();
         this.yearFormatter = new intl.NumberFormat('', { useGrouping: false });
         this.userLunar = false;
+        this.__firstColumnWidth = new ObservedPropertySimplePU(0, this, "firstColumnWidth");
+        this.__lastColumnWidth = new ObservedPropertySimplePU(0, this, "lastColumnWidth");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("currentLocale", this.onLocaleChange);
@@ -266,6 +268,12 @@ export class DatePickerComponent extends ViewPU {
         if (params.userLunar !== undefined) {
             this.userLunar = params.userLunar;
         }
+        if (params.firstColumnWidth !== undefined) {
+            this.firstColumnWidth = params.firstColumnWidth;
+        }
+        if (params.lastColumnWidth !== undefined) {
+            this.lastColumnWidth = params.lastColumnWidth;
+        }
     }
     updateStateVars(params) {
         this.__options.reset(params.options);
@@ -308,6 +316,8 @@ export class DatePickerComponent extends ViewPU {
         this.__periodArray.purgeDependencyOnElmtId(rmElmtId);
         this.__selectedPeriod.purgeDependencyOnElmtId(rmElmtId);
         this.__currentLocale.purgeDependencyOnElmtId(rmElmtId);
+        this.__firstColumnWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__lastColumnWidth.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__options.aboutToBeDeleted();
@@ -347,6 +357,8 @@ export class DatePickerComponent extends ViewPU {
         this.__periodArray.aboutToBeDeleted();
         this.__selectedPeriod.aboutToBeDeleted();
         this.__currentLocale.aboutToBeDeleted();
+        this.__firstColumnWidth.aboutToBeDeleted();
+        this.__lastColumnWidth.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -571,6 +583,18 @@ export class DatePickerComponent extends ViewPU {
     }
     set currentLocale(newValue) {
         this.__currentLocale.set(newValue);
+    }
+    get firstColumnWidth() {
+        return this.__firstColumnWidth.get();
+    }
+    set firstColumnWidth(newValue) {
+        this.__firstColumnWidth.set(newValue);
+    }
+    get lastColumnWidth() {
+        return this.__lastColumnWidth.get();
+    }
+    set lastColumnWidth(newValue) {
+        this.__lastColumnWidth.set(newValue);
     }
     aboutToAppear() {
         this.currentLocale = i18n.System.getSystemLanguage();
@@ -1360,6 +1384,10 @@ export class DatePickerComponent extends ViewPU {
             this.endMonth = tempMonth;
             this.endDay = tempDay;
         }
+        // If user explicitly sets valid start or end, force loop to false
+        if (startValid || endValid) {
+            this.dateCanLoop = false;
+        }
         if (this.startYear < DatePickerConstant.MIN_YEAR) {
             this.startYear = DatePickerConstant.MIN_YEAR;
             this.startMonth = DatePickerConstant.MIN_MONTH;
@@ -1531,6 +1559,10 @@ export class DatePickerComponent extends ViewPU {
         this.endMinute = Math.max(DatePickerConstant.MIN_MINUTE, Math.min(DatePickerConstant.MAX_MINUTE, this.endMinute));
         this.startSecond = Math.max(DatePickerConstant.MIN_SECOND, Math.min(DatePickerConstant.MAX_SECOND, this.startSecond));
         this.endSecond = Math.max(DatePickerConstant.MIN_SECOND, Math.min(DatePickerConstant.MAX_SECOND, this.endSecond));
+        // If user explicitly sets valid start or end, force loop to false
+        if (startValid || endValid) {
+            this.timeCanLoop = false;
+        }
         const now = new Date();
         let selectedTime = undefined;
         let selectedValid = false;
@@ -1837,6 +1869,126 @@ export class DatePickerComponent extends ViewPU {
     isRTL() {
         return i18n.isRTL(this.locale.toString()) ?? false;
     }
+    getDateColumnCount() {
+        if (this.dateMode === DateMode.DATE) {
+            return 3;
+        }
+        else {
+            return 2;
+        }
+    }
+    getTimeColumnCount() {
+        if (this.timeFormat === TimeFormat.HOUR_MINUTE) {
+            return this.useMilitaryTime ? 2 : 3;
+        }
+        else {
+            return this.useMilitaryTime ? 3 : 4;
+        }
+    }
+    getColumnCount() {
+        let columnCount = 0;
+        if (this.displayMode === DisplayMode.DATE) {
+            columnCount = this.getDateColumnCount();
+        }
+        else if (this.displayMode === DisplayMode.TIME) {
+            columnCount = this.getTimeColumnCount();
+        }
+        else {
+            columnCount = this.getDateColumnCount() + this.getTimeColumnCount();
+        }
+        return columnCount;
+    }
+    getFontSize() {
+        const columnCount = this.getColumnCount();
+        return columnCount >= 6 ? '14vp' : '16vp';
+    }
+    getDatePartRatio() {
+        const timeColumns = this.getTimeColumnCount();
+        const dateColumns = this.getDateColumnCount();
+        if (timeColumns === 4) {
+            if (dateColumns === 3) {
+                return 1;
+            }
+            else {
+                return 2;
+            }
+        }
+        else if (timeColumns === 2) {
+            if (dateColumns === 3) {
+                return 3;
+            }
+            else {
+                return 1;
+            }
+        }
+        else {
+            return 1;
+        }
+    }
+    getTimePartRatio() {
+        const timeColumns = this.getTimeColumnCount();
+        const dateColumns = this.getDateColumnCount();
+        if (timeColumns === 4) {
+            if (dateColumns === 3) {
+                return 1;
+            }
+            else {
+                return 3;
+            }
+        }
+        else if (timeColumns === 2) {
+            if (dateColumns === 3) {
+                return 2;
+            }
+            else {
+                return 1;
+            }
+        }
+        else {
+            return 1;
+        }
+    }
+    getDateColumnWidth(columnIndex) {
+        const inDateTimeMode = this.displayMode === DisplayMode.DATE_TIME;
+        let parts = [];
+        if (this.dateMode === DateMode.DATE) {
+            parts = [3, 2, 2];
+        }
+        else if (this.dateMode === DateMode.YEAR_AND_MONTH) {
+            parts = [3, 2];
+        }
+        else {
+            parts = [1, 1];
+        }
+        const totalParts = parts.reduce((a, b) => a + b, 0);
+        const columnPart = parts[columnIndex];
+        if (inDateTimeMode) {
+            const dateRatio = this.getDatePartRatio();
+            const timeRatio = this.getTimePartRatio();
+            const totalRatio = dateRatio + timeRatio;
+            const percent = (dateRatio / totalRatio) * (columnPart / totalParts) * 100;
+            return `${percent.toFixed(2)}%`;
+        }
+        else {
+            const percent = (columnPart / totalParts) * 100;
+            return `${percent.toFixed(2)}%`;
+        }
+    }
+    getTimeColumnWidth(columnIndex) {
+        const inDateTimeMode = this.displayMode === DisplayMode.DATE_TIME;
+        const totalColumns = this.getTimeColumnCount();
+        if (inDateTimeMode) {
+            const dateRatio = this.getDatePartRatio();
+            const timeRatio = this.getTimePartRatio();
+            const totalRatio = dateRatio + timeRatio;
+            const percent = (timeRatio / totalRatio) * (1 / totalColumns) * 100;
+            return `${percent.toFixed(2)}%`;
+        }
+        else {
+            const percent = (1 / totalColumns) * 100;
+            return `${percent.toFixed(2)}%`;
+        }
+    }
     getFirstPickerIndicator(radius = 20) {
         if (this.isRTL()) {
             return {
@@ -1892,6 +2044,14 @@ export class DatePickerComponent extends ViewPU {
             }
         };
     }
+    getAdjustedRadius() {
+        const minColumnWidth = Math.min(this.firstColumnWidth, this.lastColumnWidth);
+        if (minColumnWidth <= 0) {
+            return 20;
+        }
+        const calculatedRadius = Math.min(minColumnWidth / 2, 20);
+        return Math.max(calculatedRadius, 0);
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
@@ -1907,11 +2067,11 @@ export class DatePickerComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getYearSelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(0));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onYearChange(selectedIndex);
                                     });
@@ -1919,6 +2079,12 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedYear = this.startYear + selectedIndex;
                                         this.updateDaysArray();
                                         this.dateOnScrollStop?.(this.getResult());
+                                    });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        const newWidth = newValue.width;
+                                        if (this.firstColumnWidth !== newWidth) {
+                                            this.firstColumnWidth = newWidth;
+                                        }
                                     });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1928,8 +2094,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -1940,7 +2105,7 @@ export class DatePickerComponent extends ViewPU {
                                 UIPickerComponent.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getMonthSelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(1));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
@@ -1964,8 +2129,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -1976,11 +2140,11 @@ export class DatePickerComponent extends ViewPU {
                                 UIPickerComponent.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getDaySelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(2));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onDayChange(selectedIndex);
                                     });
@@ -1992,6 +2156,14 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedDay = startDayIndex + selectedIndex;
                                         this.dateOnScrollStop?.(this.getResult());
                                     });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        if (this.displayMode !== DisplayMode.DATE_TIME) {
+                                            const newWidth = newValue.width;
+                                            if (this.lastColumnWidth !== newWidth) {
+                                                this.lastColumnWidth = newWidth;
+                                            }
+                                        }
+                                    });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     ForEach.create();
@@ -2000,8 +2172,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -2016,11 +2187,11 @@ export class DatePickerComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getYearSelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(0));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onYearChange(selectedIndex);
                                     });
@@ -2028,6 +2199,12 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedYear = this.startYear + selectedIndex;
                                         this.updateDaysArray();
                                         this.dateOnScrollStop?.(this.getResult());
+                                    });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        const newWidth = newValue.width;
+                                        if (this.firstColumnWidth !== newWidth) {
+                                            this.firstColumnWidth = newWidth;
+                                        }
                                     });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2037,8 +2214,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -2049,11 +2225,11 @@ export class DatePickerComponent extends ViewPU {
                                 UIPickerComponent.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getMonthSelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(1));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onMonthChange(selectedIndex);
                                     });
@@ -2065,6 +2241,14 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedMonth = startMonthIndex + selectedIndex;
                                         this.dateOnScrollStop?.(this.getResult());
                                     });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        if (this.displayMode !== DisplayMode.DATE_TIME) {
+                                            const newWidth = newValue.width;
+                                            if (this.lastColumnWidth !== newWidth) {
+                                                this.lastColumnWidth = newWidth;
+                                            }
+                                        }
+                                    });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     ForEach.create();
@@ -2073,8 +2257,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -2089,11 +2272,11 @@ export class DatePickerComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(2, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getMonthSelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(0));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onMonthChange(selectedIndex);
                                     });
@@ -2105,6 +2288,12 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedMonth = startMonthIndex + selectedIndex;
                                         this.dateOnScrollStop?.(this.getResult());
                                     });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        const newWidth = newValue.width;
+                                        if (this.firstColumnWidth !== newWidth) {
+                                            this.firstColumnWidth = newWidth;
+                                        }
+                                    });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     ForEach.create();
@@ -2113,8 +2302,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -2125,11 +2313,11 @@ export class DatePickerComponent extends ViewPU {
                                 UIPickerComponent.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     UIPickerComponent.create({ selectedIndex: this.getDaySelectedIndex() });
-                                    UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                    UIPickerComponent.width(this.getDateColumnWidth(1));
                                     UIPickerComponent.height(200);
                                     UIPickerComponent.canLoop(this.dateCanLoop);
                                     UIPickerComponent.enableHapticFeedback(this.dateHapticFeedback);
-                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator());
+                                    UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()));
                                     UIPickerComponent.onChange((selectedIndex) => {
                                         this.onDayChange(selectedIndex);
                                     });
@@ -2141,6 +2329,14 @@ export class DatePickerComponent extends ViewPU {
                                         this.selectedDay = startDayIndex + selectedIndex;
                                         this.dateOnScrollStop?.(this.getResult());
                                     });
+                                    UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                        if (this.displayMode !== DisplayMode.DATE_TIME) {
+                                            const newWidth = newValue.width;
+                                            if (this.lastColumnWidth !== newWidth) {
+                                                this.lastColumnWidth = newWidth;
+                                            }
+                                        }
+                                    });
                                 }, UIPickerComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     ForEach.create();
@@ -2149,8 +2345,7 @@ export class DatePickerComponent extends ViewPU {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
                                             Text.maxLines(1);
-                                            Text.maxFontSize('16vp');
-                                            Text.minFontSize('14vp');
+                                            Text.fontSize(this.getFontSize());
                                             Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
@@ -2189,11 +2384,11 @@ export class DatePickerComponent extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getHourSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(0));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onHourChange(selectedIndex);
                                                 });
@@ -2201,6 +2396,14 @@ export class DatePickerComponent extends ViewPU {
                                                     this.selectedHour = this.startHour + selectedIndex;
                                                     this.updateTimeArrays();
                                                     this.timeOnScrollStop?.(this.getResult());
+                                                });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    if (this.displayMode === DisplayMode.TIME) {
+                                                        const newWidth = newValue.width;
+                                                        if (this.firstColumnWidth !== newWidth) {
+                                                            this.firstColumnWidth = newWidth;
+                                                        }
+                                                    }
                                                 });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2210,8 +2413,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2222,11 +2424,11 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getMinuteSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(1));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onMinuteChange(selectedIndex);
                                                 });
@@ -2239,6 +2441,12 @@ export class DatePickerComponent extends ViewPU {
                                                     this.updateSecondArray();
                                                     this.timeOnScrollStop?.(this.getResult());
                                                 });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    const newWidth = newValue.width;
+                                                    if (this.lastColumnWidth !== newWidth) {
+                                                        this.lastColumnWidth = newWidth;
+                                                    }
+                                                });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 ForEach.create();
@@ -2247,8 +2455,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2263,17 +2470,25 @@ export class DatePickerComponent extends ViewPU {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.selectedPeriod });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(0));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(false);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onPeriodChange(selectedIndex);
                                                 });
                                                 UIPickerComponent.onScrollStop((selectedIndex) => {
                                                     this.selectedPeriod = selectedIndex;
                                                     this.timeOnScrollStop?.(this.getResult());
+                                                });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    if (this.displayMode === DisplayMode.TIME) {
+                                                        const newWidth = newValue.width;
+                                                        if (this.firstColumnWidth !== newWidth) {
+                                                            this.firstColumnWidth = newWidth;
+                                                        }
+                                                    }
                                                 });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2283,8 +2498,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2295,7 +2509,7 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getHourSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '34%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(1));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
@@ -2315,8 +2529,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2327,11 +2540,11 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getMinuteSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(2));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onMinuteChange(selectedIndex);
                                                 });
@@ -2344,6 +2557,12 @@ export class DatePickerComponent extends ViewPU {
                                                     this.updateSecondArray();
                                                     this.timeOnScrollStop?.(this.getResult());
                                                 });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    const newWidth = newValue.width;
+                                                    if (this.lastColumnWidth !== newWidth) {
+                                                        this.lastColumnWidth = newWidth;
+                                                    }
+                                                });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 ForEach.create();
@@ -2352,8 +2571,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2376,11 +2594,11 @@ export class DatePickerComponent extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getHourSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(0));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onHourChange(selectedIndex);
                                                 });
@@ -2388,6 +2606,14 @@ export class DatePickerComponent extends ViewPU {
                                                     this.selectedHour = this.startHour + selectedIndex;
                                                     this.updateTimeArrays();
                                                     this.timeOnScrollStop?.(this.getResult());
+                                                });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    if (this.displayMode === DisplayMode.TIME) {
+                                                        const newWidth = newValue.width;
+                                                        if (this.firstColumnWidth !== newWidth) {
+                                                            this.firstColumnWidth = newWidth;
+                                                        }
+                                                    }
                                                 });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2397,8 +2623,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2409,7 +2634,7 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getMinuteSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(1));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
@@ -2434,8 +2659,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2446,11 +2670,11 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getSecondSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(2));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onSecondChange(selectedIndex);
                                                 });
@@ -2462,6 +2686,12 @@ export class DatePickerComponent extends ViewPU {
                                                     this.selectedSecond = startSecondIndex + selectedIndex;
                                                     this.timeOnScrollStop?.(this.getResult());
                                                 });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    const newWidth = newValue.width;
+                                                    if (this.lastColumnWidth !== newWidth) {
+                                                        this.lastColumnWidth = newWidth;
+                                                    }
+                                                });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 ForEach.create();
@@ -2470,8 +2700,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2486,17 +2715,25 @@ export class DatePickerComponent extends ViewPU {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.selectedPeriod });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(0));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(false);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onPeriodChange(selectedIndex);
                                                 });
                                                 UIPickerComponent.onScrollStop((selectedIndex) => {
                                                     this.selectedPeriod = selectedIndex;
                                                     this.timeOnScrollStop?.(this.getResult());
+                                                });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    if (this.displayMode === DisplayMode.TIME) {
+                                                        const newWidth = newValue.width;
+                                                        if (this.firstColumnWidth !== newWidth) {
+                                                            this.firstColumnWidth = newWidth;
+                                                        }
+                                                    }
                                                 });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2506,8 +2743,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2518,7 +2754,7 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getHourSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(1));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
@@ -2538,8 +2774,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2550,7 +2785,7 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getMinuteSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(2));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
@@ -2575,8 +2810,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
@@ -2587,11 +2821,11 @@ export class DatePickerComponent extends ViewPU {
                                             UIPickerComponent.pop();
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 UIPickerComponent.create({ selectedIndex: this.getSecondSelectedIndex() });
-                                                UIPickerComponent.width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%');
+                                                UIPickerComponent.width(this.getTimeColumnWidth(3));
                                                 UIPickerComponent.height(200);
                                                 UIPickerComponent.canLoop(this.timeCanLoop);
                                                 UIPickerComponent.enableHapticFeedback(this.timeHapticFeedback);
-                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator());
+                                                UIPickerComponent.selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()));
                                                 UIPickerComponent.onChange((selectedIndex) => {
                                                     this.onSecondChange(selectedIndex);
                                                 });
@@ -2603,6 +2837,12 @@ export class DatePickerComponent extends ViewPU {
                                                     this.selectedSecond = startSecondIndex + selectedIndex;
                                                     this.timeOnScrollStop?.(this.getResult());
                                                 });
+                                                UIPickerComponent.onAreaChange((oldValue, newValue) => {
+                                                    const newWidth = newValue.width;
+                                                    if (this.lastColumnWidth !== newWidth) {
+                                                        this.lastColumnWidth = newWidth;
+                                                    }
+                                                });
                                             }, UIPickerComponent);
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 ForEach.create();
@@ -2611,8 +2851,7 @@ export class DatePickerComponent extends ViewPU {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
                                                         Text.maxLines(1);
-                                                        Text.maxFontSize('16vp');
-                                                        Text.minFontSize('14vp');
+                                                        Text.fontSize(this.getFontSize());
                                                         Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
