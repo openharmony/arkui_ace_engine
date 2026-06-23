@@ -54,6 +54,14 @@ public:
             urlDisabledColor_= urlDefaultColor_.BlendOpacity(urlDisabledOpacity_);
             urlHoverColor_ = colors->InteractiveHover();
             urlPressColor_ = colors->InteractivePressed();
+            caretColor_ = colors->CompBackgroundEmphasize();
+            selectedBackgroundColor_ = colors->CompEmphasizeSecondary();
+            dragBackgroundColor_ = colors->CompBackgroundPrimary();
+            popIconColor_ = colors->IconSecondary();
+            menuTitleColor_ = colors->FontSecondary();
+            menuTextColor_ = colors->FontPrimary();
+            menuIconColor_ = colors->IconPrimary();
+            placeholderColor_ = colors->FontSecondary();
         }
     }
 

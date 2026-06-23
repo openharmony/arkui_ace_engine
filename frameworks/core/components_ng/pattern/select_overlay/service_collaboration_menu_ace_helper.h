@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,9 @@ struct OrientationAction {
 class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceType {
     DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
+    explicit ServiceCollaborationMenuAceHelper(std::shared_ptr<SelectOverlayInfo> info)
+        : info_(std::move(info))
+    {}
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color,
         bool needMargin, bool hasEndIcon);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& row,
@@ -71,6 +74,7 @@ public:
     bool subMenuIsShow_ = false;
     bool mainMenuIsHover_ = false;
     uint32_t photoCount_ = 0;
+    std::shared_ptr<SelectOverlayInfo> info_;
 private:
     static constexpr int32_t TEXT_RIGHT_MARGIN = 8;
     static constexpr int32_t TEXT_RIGHT_MARGIN_NO_ENDICON = 12;
