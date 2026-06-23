@@ -2999,6 +2999,180 @@ HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleFrameNodeLpx003, TestSize.Le
 }
 
 /**
+ * @tc.name: SetIndicatorStyleLpxCallback001
+ * @tc.desc: Test SetIndicatorStyle registers LPX update callbacks for divider indicator with LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double lpxValue = 5.0;
+    style.strokeWidth = Dimension(lpxValue, DimensionUnit::LPX);
+    style.startMargin = Dimension(lpxValue, DimensionUnit::LPX);
+    style.endMargin = Dimension(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpxCallback002
+ * @tc.desc: Test SetIndicatorStyle does not register LPX update callbacks for divider indicator with VP units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback002, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double vpValue = 5.0;
+    style.strokeWidth = Dimension(vpValue, DimensionUnit::VP);
+    style.startMargin = Dimension(vpValue, DimensionUnit::VP);
+    style.endMargin = Dimension(vpValue, DimensionUnit::VP);
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) ==
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) ==
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) ==
+        frameNode_->lpxUpdateCallbacks_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpxCallback003
+ * @tc.desc: Test SetIndicatorStyle registers LPX update callbacks for borderRadius with LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback003, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_BACKGROUND;
+    constexpr double lpxValue = 5.0;
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusTopRight = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomRight = Dimension(lpxValue, DimensionUnit::LPX);
+    style.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpxCallback004
+ * @tc.desc: Test SetIndicatorStyle with FrameNode registers LPX update callbacks for divider with LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback004, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double lpxValue = 5.0;
+    style.strokeWidth = Dimension(lpxValue, DimensionUnit::LPX);
+    style.startMargin = Dimension(lpxValue, DimensionUnit::LPX);
+    style.endMargin = Dimension(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), style);
+
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpxCallback005
+ * @tc.desc: Test SetIndicatorStyle with FrameNode registers LPX update callbacks for borderRadius with LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback005, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_BACKGROUND;
+    constexpr double lpxValue = 5.0;
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusTopRight = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomRight = Dimension(lpxValue, DimensionUnit::LPX);
+    style.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), style);
+
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+    EXPECT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpxCallback006
+ * @tc.desc: Test LPX update callback triggers MarkDirtyNode with PROPERTY_UPDATE_RENDER
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpxCallback006, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double lpxValue = 5.0;
+    style.strokeWidth = Dimension(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    ASSERT_TRUE(frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) !=
+        frameNode_->lpxUpdateCallbacks_.end());
+
+    auto callback = frameNode_->lpxUpdateCallbacks_[LpxAttribute::LPX_DIVIDER_STROKE_WIDTH];
+    ASSERT_TRUE(callback != nullptr);
+    callback();
+
+    auto layoutFlag = frameNode_->layoutProperty_->GetPropertyChangeFlag();
+    auto paintFlag = frameNode_->paintProperty_->GetPropertyChangeFlag();
+    EXPECT_TRUE((layoutFlag | paintFlag) & PROPERTY_UPDATE_RENDER);
+}
+
+/**
  * @tc.name: ValidatePickerItemHeight006
  * @tc.desc: Test ValidatePickerItemHeight returns PICKER_ITEM_HEIGHT constant when input is below min
  * @tc.type: FUNC
