@@ -36,15 +36,15 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
 struct TextDetectConfig;
+struct TabBarSymbol;
+struct ImageInfoConfig;
 namespace NG {
 struct DrawingContext;
 } // namespace NG

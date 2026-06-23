@@ -19,7 +19,6 @@
 #include <vector>
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/event/key_code.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_constants.h"
 
@@ -28,6 +27,8 @@ class PointerEvent;
 } // namespace OHOS::MMI
 
 namespace OHOS::Ace {
+
+enum class KeyCode : int32_t;
 
 class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;

@@ -18,12 +18,12 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/resource/internal_resource.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 const int32_t DEFAULT_RATING_STAR_NUMBER = 5;
 struct RatingPropertyGroup {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Indicator, bool);

@@ -20,7 +20,6 @@
 
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -28,6 +27,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT CalendarPickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(CalendarPickerLayoutProperty, LinearLayoutProperty);
 

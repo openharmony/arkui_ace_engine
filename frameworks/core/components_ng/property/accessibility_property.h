@@ -29,7 +29,6 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Accessibility {
 class ExtraElementInfo;
@@ -40,6 +39,7 @@ class JsonValue;
 }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 struct WindowSceneInfo {
     int32_t left = 0;
     int32_t top = 0;

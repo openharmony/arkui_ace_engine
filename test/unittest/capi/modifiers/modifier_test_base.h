@@ -23,6 +23,7 @@
 #include "arkoala_api_generated.h"
 #include "../capi_gen140_compat.h"
 
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"

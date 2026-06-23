@@ -30,16 +30,17 @@
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
+#include "base/log/ace_trace.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/system_properties.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
 #include "ui/resource/resource_configuration.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
@@ -106,6 +107,7 @@ class DrawDelegate;
 class ResourceAdapter;
 class EventManager;
 class AccessibilityManager;
+class UIDisplaySyncManager;
 enum class FrontendType;
 enum class PlatformVersion;
 enum class AccessibilityCallbackEventId : uint32_t;

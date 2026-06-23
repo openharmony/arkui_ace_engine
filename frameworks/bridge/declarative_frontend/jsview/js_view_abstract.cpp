@@ -106,6 +106,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/common/color_inverter.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;

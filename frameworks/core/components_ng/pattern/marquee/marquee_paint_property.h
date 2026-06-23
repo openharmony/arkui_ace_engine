@@ -19,10 +19,10 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
 class ACE_EXPORT MarqueePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(MarqueePaintProperty, PaintProperty);

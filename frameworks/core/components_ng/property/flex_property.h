@@ -23,10 +23,10 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
 using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>

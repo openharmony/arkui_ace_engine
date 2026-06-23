@@ -17,10 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_PROPERTY_H
 
 #include "linear_split_model.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT LinearSplitLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(LinearSplitLayoutProperty, LayoutProperty);
 

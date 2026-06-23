@@ -19,11 +19,12 @@
 #include <cstdint>
 #include <string>
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // PaintProperty are used to set render properties.
 class RatingRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RatingRenderProperty, PaintProperty);

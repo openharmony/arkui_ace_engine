@@ -21,12 +21,12 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 // Syntax nodes are used for ForEach, LazyForEach, and IfElse nodes to wrap up the generated sub components and are
 // uniquely identified by keys.

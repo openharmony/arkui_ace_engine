@@ -21,10 +21,12 @@
 #include <cmath>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"

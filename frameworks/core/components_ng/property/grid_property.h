@@ -26,10 +26,10 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_layout_info.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
 constexpr int32_t DEFAULT_GRID_OFFSET = 0;

@@ -24,6 +24,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/plugin_component_manager.h"
 #include "core/components/plugin/plugin_sub_container.h"

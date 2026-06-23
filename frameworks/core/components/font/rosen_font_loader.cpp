@@ -24,6 +24,7 @@
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 

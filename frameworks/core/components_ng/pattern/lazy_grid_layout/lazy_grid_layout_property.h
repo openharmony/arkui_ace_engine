@@ -18,12 +18,13 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT LazyGridLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(LazyGridLayoutProperty, LayoutProperty);
 

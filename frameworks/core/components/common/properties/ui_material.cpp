@@ -21,6 +21,7 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
 
 namespace OHOS::Ace {
