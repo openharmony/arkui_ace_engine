@@ -1327,6 +1327,7 @@ HWTEST_F(SwiperControllerTestNg, DoSwiperPreMakeItems001, TestSize.Level1)
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
     auto premakeNode = lazyForEachNode->GetFrameChildByIndex(2, true);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(premakeNode);
+    ASSERT_NE(frameNode, nullptr);
     frameNode->geometryNode_ = nullptr;
     pattern_->DoSwiperPreMakeItems({2});
     EXPECT_TRUE(pattern_->premakeItems_.size() > 0);
