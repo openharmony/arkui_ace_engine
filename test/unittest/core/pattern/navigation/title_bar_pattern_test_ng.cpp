@@ -2002,13 +2002,14 @@ HWTEST_F(TitleBarPatternTestNg, PrasePaddingEnd001, TestSize.Level1)
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     titleBarNode->SetParent(navDestination);
+    navDestination->UpdatePrevTitleIsCustom(true);
 
     auto layoutAlgorithm = AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
     float avoidWidth = 100.0f;
     layoutAlgorithm->paddingRightForMenu_ = 50.0f;
 
-    navDestination->UpdatePrevTitleIsCustom(true);
+    navDestination->UpdatePrevMenuIsCustom(true);
     NavigationTitlebarOptions options;
     options.enableCustomTitlePaddingCheck = false;
     titleBarPattern->SetTitlebarOptions(options);
@@ -2020,16 +2021,18 @@ HWTEST_F(TitleBarPatternTestNg, PrasePaddingEnd001, TestSize.Level1)
     titleBarPattern->SetTitlebarOptions(options);
     result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
     EXPECT_TRUE(result);
+    EXPECT_EQ(avoidWidth, 100.0f);
 
     options.brOptions.paddingEnd = CalcDimension(10.0f);
     titleBarPattern->SetTitlebarOptions(options);
     layoutAlgorithm->paddingRightForMenu_ = 150.0f;
-    navDestination->UpdatePrevTitleIsCustom(false);
+    navDestination->UpdatePrevMenuIsCustom(false);
     result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
     EXPECT_FALSE(result);
+    EXPECT_EQ(avoidWidth, 100.0f);
 
     layoutAlgorithm->paddingRightForMenu_ = 50.0f;
-    navDestination->UpdatePrevTitleIsCustom(true);
+    navDestination->UpdatePrevMenuIsCustom(true);
     result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
     EXPECT_TRUE(result);
     EXPECT_EQ(avoidWidth, 50.0f);

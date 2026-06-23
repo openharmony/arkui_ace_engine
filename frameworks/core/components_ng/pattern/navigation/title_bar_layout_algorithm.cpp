@@ -287,13 +287,13 @@ bool TitleBarLayoutAlgorithm::PrasePaddingEnd(const RefPtr<TitleBarNode>& titleB
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
     CHECK_NULL_RETURN(navDestination, true);
-    auto isCustomTitle = navDestination->GetPrevTitleIsCustomValue(false);
+    auto isCustomMenu = navDestination->GetPrevMenuIsCustomValue(false);
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, true);
     auto options = titlePattern->GetTitleBarOptions();
     auto paddingEnd = options.brOptions.paddingEnd;
     auto isSetPadding = paddingEnd.has_value();
-    if (!isSetPadding || (isCustomTitle && !options.enableCustomTitlePaddingCheck)) {
+    if (!isSetPadding || (isCustomMenu && !options.enableCustomTitlePaddingCheck)) {
         return true;
     }
     if (GreatOrEqual(paddingRightForMenu_, avoidWidth)) {
