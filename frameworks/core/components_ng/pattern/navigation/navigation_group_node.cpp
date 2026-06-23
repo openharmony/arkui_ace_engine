@@ -785,7 +785,6 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 {
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-
     if (!isOverride && !isLastChild) {
         navigationPattern->RemoveNavDestination();
         return true;
