@@ -2737,13 +2737,14 @@ void SwiperPattern::DoSwiperPreMakeItems(const std::set<int32_t>& indexSet)
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
         for (auto index : indexSet) {
-            if (lazyForEachNode) {
-                auto premakeNode = lazyForEachNode->GetFrameChildByIndex(index, true);
-                RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(premakeNode);
-                if (frameNode && frameNode->GetGeometryNode()) {
-                    frameNode->GetGeometryNode()->SetParentLayoutConstraint(GetLayoutConstraint());
-                    FrameNode::ProcessOffscreenNode(frameNode);
-                }
+            if (!lazyForEachNode) {
+                break;
+            }
+            auto premakeNode = lazyForEachNode->GetFrameChildByIndex(index, true);
+            RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(premakeNode);
+            if (frameNode && frameNode->GetGeometryNode()) {
+                frameNode->GetGeometryNode()->SetParentLayoutConstraint(GetLayoutConstraint());
+                FrameNode::ProcessOffscreenNode(frameNode);
             }
         }
     }
