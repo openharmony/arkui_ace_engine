@@ -2240,6 +2240,7 @@ void UINode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
             ContainerScope scope(instanceId_);
             ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d", nodeId_, tag_.c_str(), customNode ? true : false);
             customNode->FireClearAllRecycleFunc();
+            customNode->FireClearParentReusePoolIfNeeded();
             SetShouldClearCache(false);
             ACE_LAYOUT_TRACE_END()
         }

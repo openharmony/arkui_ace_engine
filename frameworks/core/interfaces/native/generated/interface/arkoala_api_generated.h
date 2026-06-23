@@ -1434,6 +1434,8 @@ typedef struct Callback_Boolean_HoverEvent_Void Callback_Boolean_HoverEvent_Void
 typedef struct Opt_Callback_Boolean_HoverEvent_Void Opt_Callback_Boolean_HoverEvent_Void;
 typedef struct Callback_Buffer_Void Callback_Buffer_Void;
 typedef struct Opt_Callback_Buffer_Void Opt_Callback_Buffer_Void;
+typedef struct Callback_ClearCache Callback_ClearCache;
+typedef struct Opt_Callback_ClearCache Opt_Callback_ClearCache;
 typedef struct Callback_ClickEvent_Void Callback_ClickEvent_Void;
 typedef struct Opt_Callback_ClickEvent_Void Opt_Callback_ClickEvent_Void;
 typedef struct Callback_ComputedBarAttribute_Void Callback_ComputedBarAttribute_Void;
@@ -1694,6 +1696,8 @@ typedef struct Callback_RangeUpdate Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate Opt_Callback_RangeUpdate;
 typedef struct Callback_RefreshStatus_Void Callback_RefreshStatus_Void;
 typedef struct Opt_Callback_RefreshStatus_Void Opt_Callback_RefreshStatus_Void;
+typedef struct Callback_ReleaseItemByIndex Callback_ReleaseItemByIndex;
+typedef struct Opt_Callback_ReleaseItemByIndex Opt_Callback_ReleaseItemByIndex;
 typedef struct Callback_Resource_Void Callback_Resource_Void;
 typedef struct Opt_Callback_Resource_Void Opt_Callback_Resource_Void;
 typedef struct Callback_ResourceStr_Void Callback_ResourceStr_Void;
@@ -5750,6 +5754,14 @@ typedef struct Opt_LazyForEachCustomComponentFreezeMode {
     Ark_Tag tag;
     Ark_LazyForEachCustomComponentFreezeMode value;
 } Opt_LazyForEachCustomComponentFreezeMode;
+typedef enum Ark_LazyForEachMemOptStrategy {
+    ARK_LAZY_FOR_EACH_MEM_OPT_STRATEGY_DEFAULT = 0,
+    ARK_LAZY_FOR_EACH_MEM_OPT_STRATEGY_ENABLE_AUTO_CACHE_OPTIMIZATION = 1,
+} Ark_LazyForEachMemOptStrategy;
+typedef struct Opt_LazyForEachMemOptStrategy {
+    Ark_Tag tag;
+    Ark_LazyForEachMemOptStrategy value;
+} Opt_LazyForEachMemOptStrategy;
 typedef enum Ark_LazyForEachReleaseStrategy {
     ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_BATCH = 0,
     ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_PROGRESSIVE = 1,
@@ -11401,6 +11413,16 @@ typedef struct Opt_Callback_Buffer_Void {
     Ark_Tag tag;
     Callback_Buffer_Void value;
 } Opt_Callback_Buffer_Void;
+typedef struct Callback_ClearCache {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId);
+} Callback_ClearCache;
+typedef struct Opt_Callback_ClearCache {
+    Ark_Tag tag;
+    Callback_ClearCache value;
+} Opt_Callback_ClearCache;
 typedef struct Callback_ClickEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12701,6 +12723,16 @@ typedef struct Opt_Callback_RefreshStatus_Void {
     Ark_Tag tag;
     Callback_RefreshStatus_Void value;
 } Opt_Callback_RefreshStatus_Void;
+typedef struct Callback_ReleaseItemByIndex {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index);
+} Callback_ReleaseItemByIndex;
+typedef struct Opt_Callback_ReleaseItemByIndex {
+    Ark_Tag tag;
+    Callback_ReleaseItemByIndex value;
+} Opt_Callback_ReleaseItemByIndex;
 typedef struct Callback_Resource_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -16499,6 +16531,7 @@ typedef struct Ark_LazyForEachOptions {
     /* kind: Interface */
     Opt_LazyForEachCustomComponentFreezeMode customComponentFreezeMode;
     Opt_LazyForEachReleaseStrategy releaseStrategy;
+    Opt_LazyForEachMemOptStrategy memoryOptimizationStrategy;
 } Ark_LazyForEachOptions;
 typedef struct Opt_LazyForEachOptions {
     Ark_Tag tag;
@@ -30350,7 +30383,10 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*Sync)(Ark_NativePointer node,
                  Ark_Int32 totalCount,
                  const Callback_CreateItem* creator,
-                 const Callback_RangeUpdate* updater);
+                 const Callback_RangeUpdate* updater,
+                 const Callback_ClearCache* clear,
+                 Ark_Int32 repeatMemOptStrategy,
+                 const Callback_ReleaseItemByIndex* release);
     void (*SyncOnMoveOps)(Ark_NativePointer node,
                           const Callback_OnMoveFromTo* onMoveFromToOps,
                           const Opt_OnMoveHandler* onMoveOps,

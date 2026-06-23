@@ -159,7 +159,9 @@ RefPtr<ArkoalaLazyNode> CreateArkoalaContent(int32_t totalCount, int32_t* update
             if (updateRangeCount != nullptr) {
                 ++(*updateRangeCount);
             }
-        });
+        },
+        []() {},
+        [](int32_t) {});
     ViewStackProcessor::GetInstance()->Push(arkoalaNode);
     ViewStackProcessor::GetInstance()->Pop();
     return arkoalaNode;
