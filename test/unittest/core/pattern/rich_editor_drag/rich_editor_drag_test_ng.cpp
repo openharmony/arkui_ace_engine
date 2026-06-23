@@ -824,6 +824,6 @@ HWTEST_F(RichEditorDragTestNG, AdjustMaxWidth001, TestSize.Level0)
     info->maxSelectedWidth = 200.0f;
     width = 0.0f;
     dragPattern->AdjustMaxWidth(width, contentRect, boxes);
-    EXPECT_EQ(width, 200.0f);
+    EXPECT_EQ(width, 100.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -1060,6 +1060,94 @@ HWTEST_F(NativeStyledStringTest, TestRadialGradientOptions001, TestSize.Level1) 
 }
 
 /**
+ * @tc.name: SpanStyleLineHeightStyle001
+ * @tc.desc: Test OH_ArkUI_SpanStyle_GetLineHeightStyle correctly copies lineHeightMultiple.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, SpanStyleLineHeightStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test LineHeightStyle set/get lineHeightMultiple with value
+     * branch: lineHeightMultiple has value
+     */
+    OH_ArkUI_LineHeightStyle* lineHeightStyle = OH_ArkUI_LineHeightStyle_Create();
+    auto errorCode = OH_ArkUI_LineHeightStyle_SetLineHeight(lineHeightStyle, 30.0f);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = OH_ArkUI_LineHeightStyle_SetLineHeightMultiple(lineHeightStyle, 1.5f);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    float getLineHeight = 0.0f;
+    float getLineHeightMultiple = 0.0f;
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeight(lineHeightStyle, &getLineHeight);
+    EXPECT_EQ(getLineHeight, 30.0f);
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(lineHeightStyle, &getLineHeightMultiple);
+    EXPECT_EQ(getLineHeightMultiple, 1.5f);
+
+    /**
+     * @tc.steps: step2. test SpanStyle set/get LineHeightStyle preserves lineHeightMultiple
+     * branch: lineHeightMultiple preserved through SpanStyle round-trip
+     */
+    OH_ArkUI_SpanStyle* spanStyle = OH_ArkUI_SpanStyle_Create();
+    errorCode = OH_ArkUI_SpanStyle_SetLineHeightStyle(spanStyle, lineHeightStyle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_LineHeightStyle* getResult = OH_ArkUI_LineHeightStyle_Create();
+    errorCode = OH_ArkUI_SpanStyle_GetLineHeightStyle(spanStyle, getResult);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(getResult->lineHeight, 30.0f);
+    EXPECT_TRUE(getResult->lineHeightMultiple.has_value());
+    EXPECT_EQ(getResult->lineHeightMultiple.value(), 1.5f);
+
+    /**
+     * @tc.steps: step3. test LineHeightStyle without lineHeightMultiple
+     * branch: lineHeightMultiple is nullopt
+     */
+    OH_ArkUI_LineHeightStyle* noMultiple = OH_ArkUI_LineHeightStyle_Create();
+    errorCode = OH_ArkUI_LineHeightStyle_SetLineHeight(noMultiple, 40.0f);
+    float getMultiple = -1.0f;
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(noMultiple, &getMultiple);
+    EXPECT_EQ(getMultiple, 0.0f);
+
+    OH_ArkUI_LineHeightStyle_Destroy(lineHeightStyle);
+    OH_ArkUI_LineHeightStyle_Destroy(getResult);
+    OH_ArkUI_LineHeightStyle_Destroy(noMultiple);
+    OH_ArkUI_SpanStyle_Destroy(spanStyle);
+}
+
+/**
+ * @tc.name: ParagraphStyleSetLeadingMarginPixelMap001
+ * @tc.desc: Test OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap null check for pixelmap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, ParagraphStyleSetLeadingMarginPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test pixelmap null → PARAM_INVALID
+     * branch: pixelmap is nullptr
+     */
+    OH_ArkUI_ParagraphStyle* paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(paragraphStyle, nullptr);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_ParagraphStyle_Destroy(paragraphStyle);
+}
+
+/**
+ * @tc.name: CustomSpanCreate001
+ * @tc.desc: Test OH_ArkUI_CustomSpan_Create initializes onMeasure and onDraw to nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, CustomSpanCreate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create custom span and verify onMeasure and onDraw are nullptr
+     * branch: onMeasure initialized to nullptr, onDraw initialized to nullptr
+     */
+    OH_ArkUI_CustomSpan* customSpan = OH_ArkUI_CustomSpan_Create();
+    EXPECT_NE(customSpan, nullptr);
+    EXPECT_EQ(customSpan->onMeasure, nullptr);
+    EXPECT_EQ(customSpan->onDraw, nullptr);
+    delete customSpan;
+}
+
+/**
  * @tc.name: DestroySpanString001
  * @tc.desc: Test DestroySpanString with null descriptor.
  * @tc.type: FUNC
