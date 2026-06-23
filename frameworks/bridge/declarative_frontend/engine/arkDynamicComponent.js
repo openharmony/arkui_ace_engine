@@ -670,6 +670,62 @@ if (globalThis.Toggle === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Swiper === undefined) {
+  globalThis.Swiper = {
+    create: function(controller) {
+      getUINativeModule().loadNativeModule('Swiper');
+      let module = globalThis.requireNapi('arkui.components.arkswiper');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().swiper.create(controller);
+    },
+    name: 'JSSwiper'
+  };
+}
+
+// @ts-ignore
+if (globalThis.IndicatorComponent === undefined) {
+  globalThis.IndicatorComponent = {
+    create: function(controller) {
+      getUINativeModule().loadNativeModule('SwiperIndicator');
+      let module = globalThis.requireNapi('arkui.components.arkswiperindicator');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().indicatorComponent.create(controller);
+    },
+    name: 'JSIndicator'
+  };
+}
+
+// @ts-ignore
+if (globalThis.Tabs === undefined) {
+  globalThis.Tabs = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Tabs');
+      let module = globalThis.requireNapi('arkui.components.arktabs');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().tabs.create(params);
+    },
+    name: 'JSTabs'
+  };
+}
+
+// @ts-ignore
+if (globalThis.TabContent === undefined) {
+  globalThis.TabContent = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TabContent');
+      let module = globalThis.requireNapi('arkui.components.arktabcontent');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().tabContent.create(params);
+    },
+    name: 'JSTabContent'
+  };
+}
+
+// @ts-ignore
 if (globalThis.LazyColumnLayout === undefined) {
   globalThis.LazyColumnLayout = {
     create: function () {

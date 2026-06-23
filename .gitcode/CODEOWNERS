@@ -1196,8 +1196,8 @@ frameworks/bridge/declarative_frontend/jsview/js_image.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_indexer.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_indexer.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_indicator.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_indicator.h @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_indicator_controller.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_indicator_controller.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_interactable_view.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp @ArkUI_ability_group
@@ -1347,7 +1347,7 @@ frameworks/bridge/declarative_frontend/jsview/js_stack.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.cpp
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h
 frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_swiper.h @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_swiper_controller.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_symbol.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol_modifier.h @huawei_g_five

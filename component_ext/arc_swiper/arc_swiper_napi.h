@@ -19,8 +19,6 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#include "core/components_ng/pattern/swiper/swiper_model.h"
-
 namespace OHOS::Ace {
 
 // Type tags for napi_wrap_s/napi_unwrap_s type safety

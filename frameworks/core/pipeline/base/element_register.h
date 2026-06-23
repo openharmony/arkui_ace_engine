@@ -43,7 +43,7 @@ class Element;
 
 using RemovedElementsType = std::unordered_set<ElementIdType>;
 
-class ACE_EXPORT ElementRegister {
+class ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
@@ -117,8 +117,8 @@ public:
         const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     void DumpGeometryTransition();
 
-    void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr,
-                                  const AnimationOption& option = AnimationOption());
+    ACE_FORCE_EXPORT void ReSyncGeometryTransition(
+        const WeakPtr<NG::FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());
 
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();

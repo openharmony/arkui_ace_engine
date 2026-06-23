@@ -15,6 +15,18 @@
 
 const __ArcSwiper__ = requireInternal("arkui.ArcSwiper");
 
+function initSwiperBase() {
+    getUINativeModule().loadNativeModule('Swiper');
+    const swiperModule = globalThis.requireNapi('arkui.components.arkswiper');
+    swiperModule.exportView();
+    swiperModule.loadComponent();
+    if (swiperModule.exportComponent) {
+        swiperModule.exportComponent();
+    }
+}
+
+initSwiperBase();
+
 class ArcSwiper extends JSViewAbstract {
     static create(value) {
         __ArcSwiper__.create(value);

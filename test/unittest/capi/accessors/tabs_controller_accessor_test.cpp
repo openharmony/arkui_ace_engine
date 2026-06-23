@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
+#include "core/components_ng/pattern/tabs/bridge/tabs_controller_modifier_peer_impl.h"
 
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"

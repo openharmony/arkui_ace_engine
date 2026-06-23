@@ -14,57 +14,46 @@
  */
 #include "core/interfaces/native/node/swiper_controller_modifier.h"
 
-#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/components_ng/pattern/swiper/bridge/swiper_controller_modifier_api.h"
 
 namespace OHOS::Ace::NG {
-
-ArkUINodeHandle GetSwiperController(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto controller = SwiperModelNG::GetOrCreateSwiperController(frameNode);
-    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
-}
-
-void ShowNext(ArkUINodeHandle controller)
-{
-    CHECK_NULL_VOID(controller);
-    auto* swiperController = reinterpret_cast<SwiperController*>(controller);
-    swiperController->ShowNext();
-}
-
-void ShowPrevious(ArkUINodeHandle controller)
-{
-    CHECK_NULL_VOID(controller);
-    auto* swiperController = reinterpret_cast<SwiperController*>(controller);
-    swiperController->ShowPrevious();
-}
-
 namespace NodeModifier {
 const ArkUISwiperControllerModifier* GetSwiperControllerModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUISwiperControllerModifier modifier = {
-        .getSwiperController = GetSwiperController,
-        .showNext = ShowNext,
-        .showPrevious = ShowPrevious,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUISwiperControllerModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const ArkUISwiperControllerModifier*>(module->GetCustomModifier("swiperArkController"));
+    }
+    return cachedModifier;
 }
 
 const CJUISwiperControllerModifier* GetCJUISwiperControllerModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUISwiperControllerModifier modifier = {
-        .getSwiperController = GetSwiperController,
-        .showNext = ShowNext,
-        .showPrevious = ShowPrevious,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    static const CJUISwiperControllerModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const CJUISwiperControllerModifier*>(module->GetCustomModifier("swiperCjController"));
+    }
+    return cachedModifier;
+}
 
-    return &modifier;
+const ArkUICustomSwiperControllerModifier* GetCustomSwiperControllerModifier()
+{
+    static const ArkUICustomSwiperControllerModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUICustomSwiperControllerModifier*>(
+            module->GetCustomModifier("swiperController"));
+    }
+    return cachedModifier;
 }
 }
 }

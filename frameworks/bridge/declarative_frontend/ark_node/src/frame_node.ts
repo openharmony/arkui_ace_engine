@@ -1349,7 +1349,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Swiper', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Swiper', (node: NodePtr, type: ModifierType): ArkSwiperComponent => {
-        return new ArkSwiperComponent(node, type);
+        getUINativeModule().loadNativeModule('Swiper');
+        let module = globalThis.requireNapi('arkui.components.arkswiper');
+        return module.createComponent(node, type);
       })
     }],
     ['Progress', (context: UIContext): FrameNode => {
@@ -1577,7 +1579,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkSwiperComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Swiper');
+      let module = globalThis.requireNapi('arkui.components.arkswiper');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Scroll', (node: FrameNode): ArkScrollComponent => {
