@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
@@ -29,7 +30,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -56,6 +57,7 @@ constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 constexpr int32_t MIN_MONTH = 1;
 constexpr int32_t MIN_DAY = 1;
+const char BUTTON_ETS_TAG[] = "Button";
 } // namespace
 
 FocusPattern CalendarDialogPattern::GetFocusPattern() const
@@ -164,13 +166,14 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
 
     for (const auto& child : title->GetChildren()) {
         CHECK_NULL_VOID(child);
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonLayoutProperty);
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+            auto* calDlgBtnModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(calDlgBtnModifier);
+            calDlgBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();
@@ -253,15 +256,16 @@ void CalendarDialogPattern::UpdateOptionsButton()
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
         CHECK_NULL_VOID(child);
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
-            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonLayoutProperty);
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                buttonLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
+                buttonModifier->updateLabelToLayoutProp(nodeHandle, dialogTheme->GetConfirmText());
             } else {
-                buttonLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
+                buttonModifier->updateLabelToLayoutProp(nodeHandle, dialogTheme->GetCancelText());
             }
             button->MarkDirtyNode();
             buttonIndex++;
@@ -283,11 +287,13 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
         CHECK_NULL_VOID(child);
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
-            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonLayoutProperty);
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
+
             bool cancelNotUpdateBGColor =
                 buttonIndex == OPTION_CANCEL_BUTTON_INDEX && !updateColorFlags[CANCEL_BUTTON_BACKGROUND_COLOR_INDEX];
             bool acceptNotUpdateBGColor =
@@ -297,7 +303,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                                           ? Color::TRANSPARENT
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);
-                buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+                buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
             }
 
             auto text = button->GetChildren().front();
@@ -311,8 +317,9 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                 buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_FONT_COLOR_INDEX];
             if (!(cancelNotUpdateFontColor || acceptNotUpdateFontColor)) {
                 textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-                buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-                buttonLayoutProperty->UpdateFontColorFlagByUser(true);
+                buttonModifier->updateFontColorToLayoutProp(
+                    nodeHandle, pickerTheme->GetOptionStyle(true, false).GetTextColor());
+                buttonModifier->updateFontColorFlagByUserToLayoutProp(nodeHandle, true);
             }
             textNode->MarkModifyDone();
 
@@ -1383,7 +1390,7 @@ void CalendarDialogPattern::OnEnterKeyEvent(const KeyEvent& event)
 
     for (const auto& child : options->GetChildren()) {
         CHECK_NULL_VOID(child);
-        if (child->GetTag() != V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() != BUTTON_ETS_TAG) {
             continue;
         }
         auto button = AceType::DynamicCast<FrameNode>(child);

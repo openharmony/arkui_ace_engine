@@ -132,6 +132,27 @@ if (globalThis.CheckboxGroup === undefined) {
   };
 }
 
+// @ts-ignore
+if (globalThis.Button === undefined) {
+  globalThis.Button = {
+    createWithLabel: function(...args) {
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().button.createWithLabel(...args);
+    },
+    createWithChild: function(...args) {
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().button.createWithChild(...args);
+    },
+    name: 'JSButton'
+  };
+}
+
 
 // @ts-ignore
 if (globalThis.Rating === undefined) {

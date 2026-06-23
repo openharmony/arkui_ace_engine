@@ -20,8 +20,12 @@
 #include "jsnapi_expo.h"
 
 #include "base/i18n/localization.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 #include "core/drawable/drawable_descriptor.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -186,6 +190,51 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
             break;
     }
+}
+
+std::function<void()> GetRemoteMessageEventCallback(const EcmaVM* vm, const Local<JSValueRef>& arg)
+{
+    CHECK_NULL_RETURN(vm, []() {});
+    if (!arg->IsObject(vm)) {
+        return []() {};
+    }
+    auto obj = arg->ToObject(vm);
+    auto actionValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
+    std::string action;
+    if (actionValue->IsString(vm)) {
+        action = actionValue->ToString(vm)->ToString(vm);
+    }
+    auto abilityValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "ability"));
+    std::string ability;
+    if (abilityValue->IsString(vm)) {
+        ability = abilityValue->ToString(vm)->ToString(vm);
+    }
+    auto paramsObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    std::string params;
+    if (paramsObj->IsObject(vm)) {
+        params = paramsObj->ToString(vm)->ToString(vm);
+    }
+    auto eventCallback = [action, ability, params]() {
+        if (action.compare("message") == 0) {
+            return;
+        }
+        if (action.compare("route") == 0) {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+            std::vector<std::string> strList;
+            StringUtils::StringSplitter(ability, '/', strList);
+            if (strList.size() <= 1) {
+                return;
+            }
+            int32_t result = PluginManager::GetInstance().StartAbility(strList[0], strList[1], params);
+            if (result != 0) {
+                LOGW("Failed to start the APP %{public}s.", ability.c_str());
+            }
+#else
+            LOGW("Unsupported Windows and Mac platforms to start APP.");
+#endif
+        }
+    };
+    return eventCallback;
 }
 
 void GetBorderRadiusByLengthMetrics(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,
@@ -6253,6 +6302,23 @@ void ArkTSUtils::ParseToggleParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_
     }
 }
 
+void ArkTSUtils::JsRemoteMessage(
+    const EcmaVM* vm, const Local<JSValueRef>& arg, OHOS::Ace::RemoteCallback& remoteCallback)
+{
+    CHECK_NULL_VOID(vm);
+    if (!arg->IsObject(vm)) {
+        return;
+    }
+
+    auto eventCallback = GetRemoteMessageEventCallback(vm, arg);
+    remoteCallback = [func = std::move(eventCallback)](const BaseEventInfo* info) {
+        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        if (clickInfo && clickInfo->GetType().compare("onClick") == 0) {
+            func();
+        }
+    };
+}
+
 void ArkTSUtils::SetButtonBorderRadiusByJs(
     const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value)
 {
@@ -6262,7 +6328,8 @@ void ArkTSUtils::SetButtonBorderRadiusByJs(
     CHECK_NULL_VOID(buttonModifier);
     CalcDimension radius;
     if (ParseJsDimensionVp(vm, value, radius, false)) {
-        buttonModifier->setButtonBorderRadiusWithOne(nativeNode, radius.Value(), static_cast<int32_t>(radius.Unit()));
+        CHECK_NULL_VOID(buttonModifier->setJsButtonBorderRadius);
+        buttonModifier->setJsButtonBorderRadius(nativeNode, radius.Value(), static_cast<int32_t>(radius.Unit()));
         return;
     } else if (value->IsObject(vm)) {
         auto obj = value->ToObject(vm);
@@ -6292,14 +6359,17 @@ void ArkTSUtils::SetButtonBorderRadiusByJs(
             PushBorderRadiusVector(radiusBottomLeft, options);
             PushBorderRadiusVector(radiusBottomRight, options);
             if (hasLocalizedRadius) {
-                buttonModifier->setButtonLocalizedBorderRadius(nativeNode, options.data(), options.size());
+                CHECK_NULL_VOID(buttonModifier->setJsButtonLocalizedBorderRadius);
+                buttonModifier->setJsButtonLocalizedBorderRadius(nativeNode, options.data(), options.size());
             } else {
+                CHECK_NULL_VOID(buttonModifier->setButtonBorderRadius);
                 buttonModifier->setButtonBorderRadius(nativeNode, options.data(), options.size());
             }
             return;
         }
     }
-    buttonModifier->resetButtonBorderRadiusJS(nativeNode);
+    CHECK_NULL_VOID(buttonModifier->resetJsButtonBorderRadius);
+    buttonModifier->resetJsButtonBorderRadius(nativeNode);
 }
 
 void ArkTSUtils::SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length)

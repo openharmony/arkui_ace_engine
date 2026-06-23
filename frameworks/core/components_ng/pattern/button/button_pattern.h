@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
@@ -34,7 +35,6 @@ namespace OHOS::Ace::NG {
 struct InspectorConfig;
 class InspectorFilter;
 class TextLayoutProperty;
-enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
 class ACE_FORCE_EXPORT ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 

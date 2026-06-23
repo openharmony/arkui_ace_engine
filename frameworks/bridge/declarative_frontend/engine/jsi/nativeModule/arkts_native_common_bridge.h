@@ -543,6 +543,9 @@ public:
     static ArkUINativeModuleValue ResetOnNeedSoftkeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text = u"");
+#endif
 };
 } // namespace OHOS::Ace::NG
 

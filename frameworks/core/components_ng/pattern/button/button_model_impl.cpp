@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
+#include "core/components_ng/pattern/button/button_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components/box/box_component_helper.h"
@@ -155,8 +154,8 @@ void ButtonModelImpl::CreateWithChild(const CreateWithPara& para)
     SetDefaultAttributes(buttonComponent);
     SetTypeAndStateEffect(para.type, para.stateEffect, buttonComponent);
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
+    ViewAbstractModel::GetInstance()->SetFocusable(true);
+    ViewAbstractModel::GetInstance()->SetFocusNode(true);
     buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
     if (buttonComponent->NeedResetHeight()) {
         ResetButtonHeight();

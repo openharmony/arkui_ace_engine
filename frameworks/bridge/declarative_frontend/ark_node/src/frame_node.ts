@@ -1402,7 +1402,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Button', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Button', (node: NodePtr, type: ModifierType): ArkButtonComponent => {
-        return new ArkButtonComponent(node, type);
+        getUINativeModule().loadNativeModule('Button');
+        let module = globalThis.requireNapi('arkui.components.arkbutton');
+        return module.createComponent(node, type);
       })
     }],
     ['XComponent', (context: UIContext, options?: object): FrameNode => {
@@ -1691,7 +1693,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Checkbox', (node: FrameNode): ArkCheckboxComponent => {

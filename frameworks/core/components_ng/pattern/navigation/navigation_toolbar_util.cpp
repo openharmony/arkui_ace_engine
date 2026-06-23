@@ -22,9 +22,8 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -37,6 +36,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -248,7 +248,7 @@ void UpdateToolbarItemNodeWithConfiguration(
         CHECK_NULL_VOID(itemFocusHub);
         itemFocusHub->SetEnabled(false);
 
-        auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+        auto buttonEventHub = buttonNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(buttonEventHub);
         buttonEventHub->SetEnabled(false);
         auto buttonFocusHub = buttonNode->GetFocusHub();
@@ -328,37 +328,41 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
-    auto buttonPattern = AceType::MakeRefPtr<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
-        buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
-    }
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(rawPattern, nullptr);
     auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
     CHECK_NULL_RETURN(toolBarItemNode, nullptr);
-    auto toolBarItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(toolBarItemLayoutProperty, nullptr);
-    toolBarItemLayoutProperty->UpdateUserDefinedIdealSize(
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItemNode));
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
+    buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
+        buttonModifier->setBlendColorWithOptional(nodeHandle, Color::TRANSPARENT, std::nullopt);
+    }
+    auto layoutProperty = toolBarItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
-    toolBarItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    toolBarItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
+    buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
+    buttonModifier->updateBorderRadiusToLayoutProp(
+        nodeHandle, BorderRadiusProperty(theme->GetToolBarItemBorderRadius()));
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    toolBarItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     MarginProperty margin;
     AddSafeIntervalBetweenToolbarItem(margin, count, toolbarItemSize, param.needMoreButton);
-    toolBarItemLayoutProperty->UpdateMargin(margin);
+    layoutProperty->UpdateMargin(margin);
 
     PaddingProperty padding;
     padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
     padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
     padding.top = CalcLength(theme->GetToolbarItemTopPadding());
     padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
-    toolBarItemLayoutProperty->UpdatePadding(padding);
+    layoutProperty->UpdatePadding(padding);
 
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
@@ -400,39 +404,44 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
-    auto buttonPattern = AceType::MakeRefPtr<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
-        buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
-    }
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(rawPattern, nullptr);
     auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
     CHECK_NULL_RETURN(toolBarItemNode, nullptr);
-    auto menuItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-    menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItemNode));
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
+    buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
+        buttonModifier->setBlendColorWithOptional(
+            nodeHandle, Color::TRANSPARENT, std::nullopt);
+    }
+    auto layoutProperty = toolBarItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
-    menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    menuItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
+    buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
+    buttonModifier->updateBorderRadiusToLayoutProp(
+        nodeHandle, BorderRadiusProperty(theme->GetToolBarItemBorderRadius()));
 
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
 
     MarginProperty menuButtonMargin;
     menuButtonMargin.left = CalcLength(theme->GetToolbarItemMargin());
-    menuItemLayoutProperty->UpdateMargin(menuButtonMargin);
+    layoutProperty->UpdateMargin(menuButtonMargin);
 
     PaddingProperty padding;
     padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
     padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
     padding.top = CalcLength(theme->GetToolbarItemTopPadding());
     padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
-    menuItemLayoutProperty->UpdatePadding(padding);
+    layoutProperty->UpdatePadding(padding);
 
     barItemNode->MountToParent(toolBarItemNode);
     barItemNode->MarkModifyDone();

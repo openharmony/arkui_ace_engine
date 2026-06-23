@@ -24,7 +24,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -300,15 +300,23 @@ bool GetTextByAccessibilityProperty(const RefPtr<NG::FrameNode>& frameNode, std:
 }
 bool GetTextByLayoutProperty(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
 {
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* buttonModifier = NG::NodeModifier::GetButtonCustomModifier();
+    if (buttonModifier && buttonModifier->isButtonLayoutProperty) {
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        if (buttonModifier->isButtonLayoutProperty(nodeHandle)) {
+            if (buttonModifier->getLabelFromLayoutProp) {
+                text = buttonModifier->getLabelFromLayoutProp(nodeHandle);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // Handle Text component
     const RefPtr<NG::LayoutProperty>& layoutProperty = frameNode->GetLayoutProperty<NG::LayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    if (AceType::InstanceOf<NG::ButtonLayoutProperty>(layoutProperty)) {
-        auto buttonLayoutProperty = AceType::DynamicCast<NG::ButtonLayoutProperty>(layoutProperty);
-        if (buttonLayoutProperty) {
-            text = buttonLayoutProperty->GetLabelValue();
-            return true;
-        }
-    } else if (AceType::InstanceOf<NG::TextLayoutProperty>(layoutProperty)) {
+    if (AceType::InstanceOf<NG::TextLayoutProperty>(layoutProperty)) {
         auto textLayoutProperty = AceType::DynamicCast<NG::TextLayoutProperty>(layoutProperty);
         if (textLayoutProperty) {
             text = UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value());

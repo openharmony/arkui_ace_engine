@@ -790,8 +790,8 @@ void TimePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -807,7 +807,7 @@ void TimePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
         borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
         borderColor.SetColor(buttonDefaultBorderColor_);
     }
-    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    layoutProperty->UpdateBorderWidth(borderWidth);
     renderContext->UpdateBorderColor(borderColor);
     renderContext->UpdateBackgroundColor(buttonBgColor_);
 

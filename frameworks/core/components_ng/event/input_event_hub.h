@@ -35,7 +35,7 @@ struct TouchpadInteractionListener {
 };
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT InputEventHub : public virtual AceType {
+class ACE_FORCE_EXPORT InputEventHub : public virtual AceType {
     DECLARE_ACE_TYPE(InputEventHub, AceType);
 public:
     explicit InputEventHub(const WeakPtr<EventHub>& eventHub);

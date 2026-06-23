@@ -36,7 +36,6 @@
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
@@ -44,7 +43,6 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/event/state_style_manager.h"
-#include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
@@ -98,6 +96,7 @@
 #include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
@@ -2765,7 +2764,9 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
     if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
-        ButtonModelStatic::BackgroundColor(frameNode, colorValue);
+        auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setBackgroundColorToModelStatic(frameNode, colorValue);
         return;
     }
     if (!colorValue) {
@@ -2789,7 +2790,9 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
         if (colorValue.has_value()) {
-            ToggleButtonModelNG::SetBackgroundColor(frameNode, colorValue.value());
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->setToggleBackgroundColor(reinterpret_cast<ArkUINodeHandle>(node), colorValue.value());
         }
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
@@ -3099,8 +3102,14 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
     if (radiuses) {
         // Implement Reset value
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
-            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
-                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            const auto& borderRadius = radiuses.value();
+            buttonModifier->setButtonBorderRadius(reinterpret_cast<ArkUINodeHandle>(node),
+                borderRadius.radiusTopLeft,
+                borderRadius.radiusTopRight,
+                borderRadius.radiusBottomLeft,
+                borderRadius.radiusBottomRight);
         }
         if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
             ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,

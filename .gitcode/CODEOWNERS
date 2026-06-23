@@ -595,6 +595,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js 
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arklazydynamiclayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkbutton.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkcounter.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkgrid.ts @arkuiscroll
@@ -621,7 +622,6 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkstepperitem.j
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBlank.ts @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_component/src/ArkButton.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCalendarPicker.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCanvas.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCheckboxGroup.ts @arkuipopupwindow_all
@@ -933,8 +933,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_impl_bridge.cpp @arkui_architecture
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp @arkui_framework_xnode
@@ -1432,8 +1430,6 @@ frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.cpp @huawe
 frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.cpp @arkui001
@@ -2841,8 +2837,6 @@ frameworks/core/interfaces/native/node/atomic_service_modifier.cpp @ArkUI_abilit
 frameworks/core/interfaces/native/node/atomic_service_modifier.h @ArkUI_ability_group
 frameworks/core/interfaces/native/node/blank_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/blank_modifier.h @arkuilayout1
-frameworks/core/interfaces/native/node/button_modifier.cpp @arkuipopupwindow_all
-frameworks/core/interfaces/native/node/button_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/calendar_picker_modifier.cpp @arkui001
 frameworks/core/interfaces/native/node/calendar_picker_modifier.h @arkui001
 frameworks/core/interfaces/native/node/canvas_rendering_context_2d_modifier.cpp @arkuilayout1
@@ -2929,6 +2923,8 @@ frameworks/core/interfaces/native/node/node_api.cpp @arkui_architecture
 frameworks/core/interfaces/native/node/node_api.h @arkui_architecture
 frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/node/node_api_multi_thread.h @arkui_framework_xnode
+frameworks/core/interfaces/native/node/node_button_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/node/node_button_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/node_canvas_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/node_canvas_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwindow_all

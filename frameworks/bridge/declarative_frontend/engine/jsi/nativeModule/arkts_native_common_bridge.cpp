@@ -20,10 +20,12 @@
 
 #include "ui/focus/focus_constants.h"
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/layout_break_point.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/event_manager.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -60,6 +62,9 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "interfaces/native/native_type.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 using namespace OHOS::Ace::Framework;
 
@@ -8975,6 +8980,28 @@ ArkUINativeModuleValue CommonBridge::ResetOnClick(ArkUIRuntimeCallInfo* runtimeC
     ViewAbstract::DisableOnClick(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+void CommonBridge::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
+{
+    if (UiSessionManager::GetInstance()->GetClickEventRegistered()) {
+        auto data = JsonUtil::Create();
+        data->Put("event", "onClick");
+        std::u16string content = text;
+        auto node = weakNode.Upgrade();
+        if (node) {
+            data->Put("id", node->GetId());
+            auto children = node->GetChildren();
+            if (!children.empty()) {
+                node->GetContainerComponentText(content);
+            }
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
+            data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
+        }
+        UiSessionManager::GetInstance()->ReportClickEvent(data->ToString());
+    }
+}
+#endif
 
 ArkUINativeModuleValue CommonBridge::SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

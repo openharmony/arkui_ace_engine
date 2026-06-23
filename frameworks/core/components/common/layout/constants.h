@@ -74,6 +74,8 @@ enum class ControlSize { SMALL, NORMAL };
 
 enum class ButtonRole { NORMAL, ERROR };
 
+enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
+
 // Flex Styles
 enum class FlexDirection {
     ROW = 0,

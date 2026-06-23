@@ -131,6 +131,14 @@ ohos_abc("arkloadingprogress") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkbutton") {
+  sources = [ "./src/arkbutton.ts" ]
+  output_name = "arkbutton"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"

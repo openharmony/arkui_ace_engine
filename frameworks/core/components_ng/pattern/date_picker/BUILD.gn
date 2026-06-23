@@ -17,6 +17,7 @@ import(
 build_component_ng("date_picker_pattern_ng") {
   is_component_model = true
   sources = [
+    "../picker_utils/picker_layout_utils.cpp",
     "../picker_utils/toss_animation_controller.cpp",
     "date_time_animation_controller.cpp",
     "datepicker_accessibility_property.cpp",

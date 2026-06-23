@@ -15,11 +15,13 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_button_ffi.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components_ng/pattern/button/button_model.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -38,13 +40,32 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 } // namespace
 
+namespace OHOS::Ace {
+NG::ButtonModelNG* GetButtonModel()
+{
+    static std::once_flag flag;
+    static NG::ButtonModelNG* model = nullptr;
+    std::call_once(flag, []() {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Button");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find button dynamic module");
+        }
+        model = reinterpret_cast<NG::ButtonModelNG*>(module->GetModel());
+        if (model == nullptr) {
+            LOGF_ABORT("Button model is null after loading");
+        }
+    });
+    return model;
+}
+}
+
 extern "C" {
 void FfiOHOSAceFrameworkButtonCreateWithChild()
 {
     CreateWithPara params;
     params.parseSuccess = false;
     params.optionSetFirst = false;
-    ButtonModel::GetInstance()->CreateWithChild(params);
+    GetButtonModel()->CreateWithChild(params);
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
 }
 
@@ -62,8 +83,8 @@ void FfiOHOSAceFrameworkButtonCreateWithChildAndOptions(ButtonOptions buttonOpti
     params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
     params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
-    ButtonModel::GetInstance()->CreateWithChild(params);
-    ButtonModel::GetInstance()->SetCreateWithLabel(false);
+    GetButtonModel()->CreateWithChild(params);
+    GetButtonModel()->SetCreateWithLabel(false);
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
 }
 
@@ -83,9 +104,9 @@ void FfiOHOSAceFrameworkButtonCreateWithButtonOptions(ButtonOptions buttonOption
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
     params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
     std::list<RefPtr<Component>> children;
-    ButtonModel::GetInstance()->CreateWithLabel(params, children);
-    ButtonModel::GetInstance()->Create(params, children);
-    ButtonModel::GetInstance()->SetCreateWithLabel(true);
+    GetButtonModel()->CreateWithLabel(params, children);
+    GetButtonModel()->Create(params, children);
+    GetButtonModel()->SetCreateWithLabel(true);
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
 }
 
@@ -97,9 +118,9 @@ void FfiOHOSAceFrameworkButtonCreateWithLabel(const char* label)
     params.parseSuccess = true;
     params.optionSetFirst = false;
     LOGI("done set label");
-    auto model = ButtonModel::GetInstance();
+    auto model = GetButtonModel();
     if (!model) {
-        LOGE("ButtonModel::GetInstance returns null");
+        LOGE("GetButtonModel returns null");
         return;
     }
     LOGI("before create");
@@ -108,7 +129,6 @@ void FfiOHOSAceFrameworkButtonCreateWithLabel(const char* label)
     model->Create(params, children);
     LOGI("done create with child");
     ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::SCALE);
-    LOGI("done set hover effect");
 }
 
 void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, ButtonOptions buttonOptions)
@@ -126,9 +146,9 @@ void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, Butto
     params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
     params.buttonRole = static_cast<ButtonRole>(buttonOptions.role);
-    auto model = ButtonModel::GetInstance();
+    auto model = GetButtonModel();
     if (!model) {
-        LOGE("ButtonModel::GetInstance returns null");
+        LOGE("GetButtonModel returns null");
         return;
     }
     std::list<RefPtr<Component>> children;
@@ -141,7 +161,7 @@ void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, Butto
 void FfiOHOSAceFrameworkButtonSetFontSize(double fontSize, int32_t unit)
 {
     Dimension value(fontSize, static_cast<DimensionUnit>(unit));
-    ButtonModel::GetInstance()->SetFontSize(value);
+    GetButtonModel()->SetFontSize(value);
 }
 
 // reset button font size from buttontheme
@@ -150,23 +170,23 @@ void FfiOHOSAceFrameworkButtonResetFontSize()
     auto buttonTheme = GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     CalcDimension fontSize = buttonTheme->GetTextStyle().GetFontSize();
-    ButtonModel::GetInstance()->SetFontSize(fontSize);
+    GetButtonModel()->SetFontSize(fontSize);
 }
 
 void FfiOHOSAceFrameworkButtonSetFontWeight(const char* fontWeight)
 {
-    ButtonModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    GetButtonModel()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void FfiOHOSAceFrameworkButtonSetFontColor(uint32_t color)
 {
-    ButtonModel::GetInstance()->SetFontColor(Color(color));
+    GetButtonModel()->SetFontColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkButtonSetRadius(double radius, int32_t unit)
 {
     Dimension value(radius, static_cast<DimensionUnit>(unit));
-    ButtonModel::GetInstance()->SetBorderRadius(value);
+    GetButtonModel()->SetBorderRadius(value);
 }
 
 void FfiOHOSAceFrameworkButtonSetAllBorderRadius(CJBorderRadius value)
@@ -175,7 +195,7 @@ void FfiOHOSAceFrameworkButtonSetAllBorderRadius(CJBorderRadius value)
     CalcDimension topRight(value.topRight, static_cast<DimensionUnit>(value.topRightUnit));
     CalcDimension bottomLeft(value.bottomLeft, static_cast<DimensionUnit>(value.bottomLeftUnit));
     CalcDimension bottomRight(value.bottomRight, static_cast<DimensionUnit>(value.bottomRightUnit));
-    ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    GetButtonModel()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 }
 
 void FfiOHOSAceFrameworkButtonSetBorder(CJBorder params)
@@ -189,7 +209,7 @@ void FfiOHOSAceFrameworkButtonSetBorder(CJBorder params)
 
     ViewAbstractModel::GetInstance()->SetBorderWidth(widthDime);
     ViewAbstractModel::GetInstance()->SetBorderColor(Color(params.color));
-    ButtonModel::GetInstance()->SetBorderRadius(radiusDime);
+    GetButtonModel()->SetBorderRadius(radiusDime);
     ViewAbstractModel::GetInstance()->SetBorderStyle(BORDER_STYLES[params.style]);
 }
 
@@ -216,14 +236,14 @@ void FfiOHOSAceFrameworkButtonSetFontStyle(int32_t fontStyle)
         LOGE("invalid value for font style");
         return;
     }
-    ButtonModel::GetInstance()->SetFontStyle(FONT_STYLES[fontStyle]);
+    GetButtonModel()->SetFontStyle(FONT_STYLES[fontStyle]);
 }
 
 void FfiOHOSAceFrameworkButtonSetFontFamily(const char* fontFamily)
 {
     std::vector<std::string> fontFamilies;
     fontFamilies = ConvertStrToFontFamilies(fontFamily);
-    ButtonModel::GetInstance()->SetFontFamily(fontFamilies);
+    GetButtonModel()->SetFontFamily(fontFamilies);
 }
 
 void FfiOHOSAceFrameworkButtonSetType(int32_t shape)
@@ -232,7 +252,7 @@ void FfiOHOSAceFrameworkButtonSetType(int32_t shape)
         LOGE("invalid value for button type");
         return;
     }
-    ButtonModel::GetInstance()->SetType(static_cast<int>(BUTTON_TYPES[shape]));
+    GetButtonModel()->SetType(static_cast<int>(BUTTON_TYPES[shape]));
 }
 
 void FfiOHOSAceFrameworkButtonSetPadding(double top, int32_t topUnit, double right, int32_t rightUnit, double bottom,
@@ -247,7 +267,7 @@ void FfiOHOSAceFrameworkButtonSetPadding(double top, int32_t topUnit, double rig
     paddings.right = NG::CalcLength(rightValue);
     paddings.bottom = NG::CalcLength(bottomValue);
     paddings.left = NG::CalcLength(leftValue);
-    ButtonModel::GetInstance()->Padding(paddings, Edge());
+    GetButtonModel()->Padding(paddings, Edge());
 }
 
 void FfiOHOSAceFrameworkButtonSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -257,22 +277,22 @@ void FfiOHOSAceFrameworkButtonSetSize(double width, int32_t widthUnit, double he
 
 void FfiOHOSAceFrameworkButtonSetStateEffect(bool stateEffect)
 {
-    ButtonModel::GetInstance()->SetStateEffect(stateEffect);
+    GetButtonModel()->SetStateEffect(stateEffect);
 }
 
 void FfiOHOSAceFrameworkButtonSetRole(int32_t value)
 {
-    ButtonModel::GetInstance()->SetRole(static_cast<ButtonRole>(value));
+    GetButtonModel()->SetRole(static_cast<ButtonRole>(value));
 }
 
 void FfiOHOSAceFrameworkButtonSetControlSize(int32_t value)
 {
-    ButtonModel::GetInstance()->SetControlSize(static_cast<ControlSize>(value));
+    GetButtonModel()->SetControlSize(static_cast<ControlSize>(value));
 }
 
 void FfiOHOSAceFrameworkButtonSetButtonStyle(int32_t value)
 {
-    ButtonModel::GetInstance()->SetButtonStyle(static_cast<ButtonStyleMode>(value));
+    GetButtonModel()->SetButtonStyle(static_cast<ButtonStyleMode>(value));
 }
 
 void FfiOHOSAceFrameworkButtonSetLabelStyle(CJLabelStyle labelStyle)
@@ -296,6 +316,6 @@ void FfiOHOSAceFrameworkButtonSetLabelStyle(CJLabelStyle labelStyle)
     fontFamilies = ConvertStrToFontFamilies(labelStyle.fontFamiliy);
     buttonParameters.fontFamily = fontFamilies;
     buttonParameters.fontStyle = FONT_STYLES[labelStyle.fontStyle];
-    ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
+    GetButtonModel()->SetLabelStyle(buttonParameters);
 }
 }

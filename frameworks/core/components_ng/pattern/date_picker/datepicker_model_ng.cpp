@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
 #include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
@@ -38,11 +37,13 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+const char BUTTON_ETS_TAG[] = "Button";
 using DataPickerGetTextStyleFunc = const std::unique_ptr<FontStyle>& (DataPickerRowLayoutProperty::*)() const;
 using DataPickerUpdateColorFunc = void (DataPickerRowLayoutProperty::*)(const Color& value);
 void ResetDataPickerTextStyleColor(FrameNode* frameNode, DataPickerGetTextStyleFunc getTextStyleFunc,
@@ -200,8 +201,13 @@ RefPtr<FrameNode> DatePickerModelNG::CreateColumnNode()
 RefPtr<FrameNode> DatePickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
 }
 
 RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
@@ -287,7 +293,10 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         auto blendMonthNode = CreateColumnNode();
         auto buttonMonthNode = CreateButtonNode();
         buttonMonthNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
-        buttonMonthNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBackgroundColorFlagByUser(true);
+        auto* buttonMonthModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonMonthModifier, dateNode);
+        buttonMonthModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonMonthNode)), true);
         buttonMonthNode->MountToParent(stackMonthNode);
         monthColumnNode->MountToParent(blendMonthNode);
         blendMonthNode->MountToParent(stackMonthNode);
@@ -301,7 +310,10 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         auto blendDayNode = CreateColumnNode();
         auto buttonDayNode = CreateButtonNode();
         buttonDayNode->GetRenderContext()->UpdateBackgroundColor(Color::GRAY);
-        buttonDayNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBackgroundColorFlagByUser(true);
+        auto* buttonDayModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonDayModifier, dateNode);
+        buttonDayModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonDayNode)), true);
         buttonDayNode->MountToParent(stackDayNode);
         dayColumnNode->MountToParent(blendDayNode);
         blendDayNode->MountToParent(stackDayNode);

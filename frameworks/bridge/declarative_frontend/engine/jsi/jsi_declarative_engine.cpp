@@ -807,6 +807,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
         { "Badge", "arkui.components.arkbadge" },
+        { "Button", "arkui.components.arkbutton" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
         { "Checkbox", "arkui.components.arkcheckbox" },

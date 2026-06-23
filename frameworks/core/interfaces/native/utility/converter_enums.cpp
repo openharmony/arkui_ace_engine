@@ -184,7 +184,7 @@ void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
 
 // Convert Ark_ButtonRole
 template<>
-void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
     switch (src) {
         case ARK_BUTTON_ROLE_NORMAL: dst = ButtonRole::NORMAL; break;
@@ -195,7 +195,7 @@ void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 
 // Convert Ark_ButtonType
 template<>
-void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
 {
     switch (src) {
         case ARK_BUTTON_TYPE_CAPSULE: dst = ButtonType::CAPSULE; break;
@@ -219,7 +219,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<ControlSize>& dst, const Ark_Cont
 
 // Convert Ark_ButtonStyleMode
 template<>
-void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src)
 {
     switch (src) {
         case ARK_BUTTON_STYLE_MODE_NORMAL: dst = ButtonStyleMode::NORMAL; break;
@@ -789,7 +789,7 @@ void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAli
 }
 
 template<>
-void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
 {
     switch (src) {
         case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST:
@@ -851,7 +851,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
 }
 
 template<>
-void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
 {
     switch (src) {
         case ARK_TEXT_OVERFLOW_NONE: dst = TextOverflow::NONE; break;

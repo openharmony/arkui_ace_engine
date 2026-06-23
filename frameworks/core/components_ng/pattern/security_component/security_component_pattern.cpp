@@ -15,10 +15,11 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/multi_thread.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
@@ -588,14 +589,17 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json,
         } else {
             json->PutExtAttr("borderStyle", static_cast<int>(BorderStyle::NONE), filter);
         }
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(bgProp);
-        const auto& borderWidth = bgProp->GetBorderWidthProperty();
+        auto buttonLayoutProp = buttonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(buttonLayoutProp);
+        const auto& borderWidth = buttonLayoutProp->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
             json->PutExtAttr("borderWidth",
                 borderWidth->leftDimen.value_or(theme->GetBorderWidth()).ToString().c_str(), filter);
         }
-        auto borderRadius = bgProp->GetBorderRadius();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
         if (borderRadius.has_value()) {
             json->PutExtAttr("borderRadius", borderRadius->radiusTopLeft.value_or(theme->GetBorderRadius()).
                 ToString().c_str(), filter);
@@ -610,9 +614,9 @@ FocusPattern SecurityComponentPattern::GetFocusPattern() const
     auto frameNode = GetHost();
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
     if (buttonNode != nullptr) {
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        if (buttonPattern != nullptr) {
-            return buttonPattern->GetFocusPattern();
+        auto pattern = buttonNode->GetPattern<Pattern>();
+        if (pattern != nullptr) {
+            return pattern->GetFocusPattern();
         }
     }
 
@@ -770,16 +774,17 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
 {
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
-    auto buttonLayoutProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto layoutProperty = buttonNode->GetLayoutProperty();
     const auto& buttonRender = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEventHub);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
 
     if (scLayoutProp->GetBackgroundBorderWidth().has_value()) {
         BorderWidthProperty widthProp;
         widthProp.SetBorderWidth(scLayoutProp->GetBackgroundBorderWidth().value());
-        buttonLayoutProp->UpdateBorderWidth(widthProp);
+        layoutProperty->UpdateBorderWidth(widthProp);
     }
 
     if (scPaintProp->GetBackgroundBorderStyle().has_value()) {
@@ -788,7 +793,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         buttonRender->UpdateBorderStyle(style);
     }
     if (scLayoutProp->GetBackgroundBorderRadius().has_value()) {
-        buttonLayoutProp->UpdateBorderRadius(
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle,
             BorderRadiusProperty(scLayoutProp->GetBackgroundBorderRadius().value()));
     }
     auto pipeline = scNode->GetContextRefPtr();
@@ -802,17 +807,17 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
     } else {
         buttonRender->UpdateBackgroundColor(theme->GetBackgroundColor());
     }
-    buttonLayoutProp->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     if (scPaintProp->GetBackgroundBorderColor().has_value()) {
         BorderColorProperty borderColor;
         borderColor.SetColor(scPaintProp->GetBackgroundBorderColor().value());
         buttonRender->UpdateBorderColor(borderColor);
     }
     if (scLayoutProp->GetStateEffect().has_value()) {
-        buttonEventHub->SetStateEffect(scLayoutProp->GetStateEffect().value());
+        buttonModifier->setStateEffectToEventHub(buttonHandle, scLayoutProp->GetStateEffect().value());
     }
     if (scLayoutProp->GetHoverEffect().has_value()) {
-        auto inputHub = buttonEventHub->GetOrCreateInputEventHub();
+        auto inputHub = buttonNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         inputHub->SetHoverEffect(scLayoutProp->GetHoverEffect().value());
     }

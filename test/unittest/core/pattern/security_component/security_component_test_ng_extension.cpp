@@ -2322,7 +2322,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
     buttonNode->SetInternal();
     buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
-    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
 
     buttonAlgorithm->componentWidth_ = 15.0;
     buttonAlgorithm->componentHeight_ = 10.0;
@@ -2371,7 +2371,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTex
     buttonNode->SetInternal();
     buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
-    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
     buttonAlgorithm->icon_.width_ = 6.0;
     buttonAlgorithm->icon_.height_ = 6.0;
     buttonAlgorithm->text_.width_ = 4.0;

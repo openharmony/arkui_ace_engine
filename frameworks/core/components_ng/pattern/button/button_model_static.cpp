@@ -17,6 +17,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,6 +27,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char BUTTON_ETS_TAG[] = "Button";
+} // namespace
 
 void ButtonModelStatic::SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& optButtonRole)
 {
@@ -135,7 +139,7 @@ void ButtonModelStatic::SetLabel(FrameNode* frameNode, const char* label)
 
 RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);

@@ -18,7 +18,7 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/button/button_model.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::Framework {
 class JSButtonTheme {
@@ -58,10 +58,13 @@ private:
 
         // normal
         ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
-        if (isLabelButton) {
-            ButtonModel::GetInstance()->SetFontColorDefault(JSButtonTheme::FontColor(themeColors));
+        auto* modifier = NG::NodeModifier::GetButtonCustomModifier();
+        if (modifier) {
+            if (isLabelButton) {
+                modifier->setFontColorDefault(JSButtonTheme::FontColor(themeColors));
+            }
+            modifier->setBackgroundColorDefault(JSButtonTheme::BackgroundColor(themeColors, false));
         }
-        ButtonModel::GetInstance()->BackgroundColorDefault(JSButtonTheme::BackgroundColor(themeColors, false));
 
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();

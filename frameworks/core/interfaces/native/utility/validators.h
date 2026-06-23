@@ -38,7 +38,7 @@ void ValidateOpacity(std::optional<float>& opt);
 ACE_FORCE_EXPORT void ValidatePositive(std::optional<float>& value);
 ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<float>& value);
 ACE_FORCE_EXPORT void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
-void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
+ACE_FORCE_EXPORT void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 ACE_FORCE_EXPORT void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
 void ValidateNonNegative(std::optional<CalcDimension>& opt);
 void ValidatePositive(std::optional<CalcDimension>& opt);

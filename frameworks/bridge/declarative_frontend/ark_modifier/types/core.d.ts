@@ -536,6 +536,7 @@ type ImageFrameInfo = object;
 type TextOverflowOptions = object;
 type SideBarPosition = 'start' | 'end';
 type ButtonStyle = object;
+type ButtonConfiguration = object;
 type DividerStyle = object;
 type BadgePosition = object;
 type BadgeStyle = object;

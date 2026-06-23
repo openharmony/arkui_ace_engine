@@ -40,7 +40,8 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/container_window_manager.h"
@@ -50,6 +51,7 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -174,24 +176,28 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
     auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_RETURN(buttonNode, false);
-    auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
-    buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(selectorItemRadius_));
     auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
     auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
     auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
     if (!useButtonFocusArea_) {
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
-        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
-        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - pickerPadding.ConvertToPx() * RATE), CalcLength(buttonHeight)));
         auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
         UpdateColumnButtonStyles(columnNode, isFocusButton, false);
@@ -547,9 +553,9 @@ void DatePickerPattern::UpdateButtonMargin(
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DatePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true);
     } else {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
+        DatePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false);
     }
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }

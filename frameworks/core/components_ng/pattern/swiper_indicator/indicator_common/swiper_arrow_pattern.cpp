@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -226,8 +227,14 @@ void SwiperArrowPattern::InitAccessibilityText()
 
 void SwiperArrowPattern::InitNavigationArrow()
 {
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
     buttonAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
@@ -252,12 +259,11 @@ void SwiperArrowPattern::InitNavigationArrow()
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
     UpdateArrowContent();
-    auto pattern = buttonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->HandleBackgroundColor();
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->handleButtonBackgroundColor(buttonHandle);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CIRCLE);
 }
 
 int32_t SwiperArrowPattern::TotalCount() const
@@ -488,10 +494,10 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        if (buttonLayoutProperty) {
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-        }
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()) });
     }
@@ -533,10 +539,10 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
         CHECK_NULL_VOID(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        if (buttonLayoutProperty) {
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-        }
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()));
     }
@@ -558,10 +564,13 @@ void SwiperArrowPattern::UpdateArrowContent()
         swiperArrowLayoutProperty->GetIsShowBackgroundValue(false)
             ? swiperArrowLayoutProperty->GetBackgroundColorValue(backgroundColor_)
             : Color::TRANSPARENT);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue()),
             CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue())));
     backgroundColor_ = buttonRenderContext->GetBackgroundColorValue(Color::TRANSPARENT);

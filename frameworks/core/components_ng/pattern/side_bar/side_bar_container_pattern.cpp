@@ -39,7 +39,6 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -55,6 +54,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 #include "core/components_ng/property/measure_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+
 namespace OHOS::Ace::NG {
 
 SideBarContainerPattern::SideBarContainerPattern() = default;
@@ -201,7 +202,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateVisibility(showControlButton ? VisibleType::VISIBLE : VisibleType::GONE);
@@ -677,19 +678,25 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
 {
     CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     auto buttonRadius = sideBarTheme->GetControlButtonRadius();
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
-    buttonLayoutProperty->UpdateCreateWithLabel(false);
+    auto* sideBarBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(sideBarBtnModifier, nullptr);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    sideBarBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    sideBarBtnModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(buttonRadius));
+    sideBarBtnModifier->updateCreateWithLabelToLayoutProp(buttonHandle, false);
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    sideBarBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);

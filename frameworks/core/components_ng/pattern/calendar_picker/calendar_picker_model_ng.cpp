@@ -23,7 +23,6 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -31,6 +30,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t YEAR_NODE_INDEX = 0;
@@ -45,6 +45,7 @@ static int32_t yearNodeIndex_ = 0;
 static int32_t monthNodeIndex_ = 2;
 static int32_t dayNodeIndex_ = 4;
 const bool DEFAULT_MARK_TODAY = false;
+const char BUTTON_ETS_TAG[] = "Button";
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -117,20 +118,19 @@ void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pi
 RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(
     int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme, TextDirection textDirection)
 {
-    auto buttonNode =
-        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, id, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetStateEffect(true);
-
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-
-    auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-
+    auto* btnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(btnModifier, nullptr);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    btnModifier->setStateEffectToEventHub(buttonHandle, true);
+    btnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetEntryButtonWidth()), std::nullopt));
     buttonNode->GetLayoutProperty()->UpdateLayoutWeight(1);

@@ -18,9 +18,10 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
@@ -240,19 +241,23 @@ void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGrou
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_VOID(rawPattern);
     auto backButtonNode =
-        FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
+        FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::Claim(rawPattern));
     auto focusHub = backButtonNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusDependence(FocusDependence::SELF);
-    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetSkipColorConfigurationUpdate();
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    buttonModifier->setSkipColorConfigurationUpdate(nodeHandle);
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+        buttonModifier->setBlendColor(
+            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
     }
 
     // read navdestination back button
@@ -261,31 +266,31 @@ void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGrou
 
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
+    auto layoutProperty = backButtonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(theme->GetIconBackgroundWidth()), CalcLength(theme->GetIconBackgroundHeight())));
-        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        buttonModifier->updateBorderRadiusToLayoutProp(nodeHandle, BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
         padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
-        backButtonLayoutProperty->UpdatePadding(padding);
+        layoutProperty->UpdatePadding(padding);
     } else {
-        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        buttonModifier->updateBorderRadiusToLayoutProp(nodeHandle, BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(BUTTON_PADDING));
-        backButtonLayoutProperty->UpdatePadding(padding);
+        layoutProperty->UpdatePadding(padding);
     }
-    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {

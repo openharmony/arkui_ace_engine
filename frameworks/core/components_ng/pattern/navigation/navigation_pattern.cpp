@@ -38,7 +38,6 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -47,6 +46,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -4385,12 +4385,13 @@ void NavigationPattern::UpdateToobarFocusColor()
     auto toolBarItemNodes = containerNode->GetChildren();
     auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
     for (auto& toolBarItemNode : toolBarItemNodes) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(toolBarItemNode);
         CHECK_NULL_VOID(buttonNode);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonModifier->setFocusBorderColor(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), theme->GetToolBarItemFocusColor());
         auto focusHub = buttonNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetPaintColor(theme->GetToolBarItemFocusColor());

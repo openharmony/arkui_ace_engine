@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"
 
@@ -36,7 +37,6 @@ class FrameNode;
 class UINode;
 class FocusHub;
 class PipelineContext;
-class ButtonLayoutProperty;
 class RenderContext;
 
 class ACE_EXPORT TextPickerDialogView {
@@ -129,9 +129,9 @@ private:
     static void UpdateBackwardButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
         const RefPtr<FrameNode>& buttonNode, bool isConfirm);
