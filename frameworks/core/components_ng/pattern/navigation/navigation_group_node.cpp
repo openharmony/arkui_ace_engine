@@ -736,6 +736,16 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     } while (false);
+
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during dragging");
+        return true;
+    }
+    
     if (!navigationPattern->IsFinishInteractiveAnimation()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during interactive animation");
         return true;
@@ -775,13 +785,6 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 {
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, false);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_RETURN(forceSplitMgr, false);
-    if (forceSplitMgr->IsForceSplitDragging()) {
-        return true;
-    }
 
     if (!isOverride && !isLastChild) {
         navigationPattern->RemoveNavDestination();

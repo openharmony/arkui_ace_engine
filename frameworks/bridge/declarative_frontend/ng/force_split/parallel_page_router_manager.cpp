@@ -512,6 +512,7 @@ bool ParallelPageRouterManager::StartPop()
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_RETURN(forceSplitMgr, false);
     if (forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't pop during dragging");
         return true;
     }
 
