@@ -119,7 +119,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
-#include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
@@ -652,7 +651,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoControllerAsync", JSVideoControllerAsync::JSBind },
 #endif
 #endif
-    { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockControllerBinding::JSBind },
     { "Sheet", JSSheet::JSBind },

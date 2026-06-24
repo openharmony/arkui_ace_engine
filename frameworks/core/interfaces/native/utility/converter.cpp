@@ -2963,7 +2963,7 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 }
 
 template<>
-BorderColorProperty Convert(const Ark_EdgeColors& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_EdgeColors& src)
 {
     BorderColorProperty dst;
     dst.leftColor = OptConvert<Color>(src.left);
@@ -2992,7 +2992,7 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 
 
 template<>
-BorderColorProperty Convert(const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_ResourceColor& src)
 {
     BorderColorProperty dst;
     if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
@@ -3111,7 +3111,7 @@ BorderRadiusPropertyOpt Convert(const Ark_Resource& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 {
     BorderWidthProperty dst;
     dst.leftDimen = OptConvert<Dimension>(src.left);
@@ -3127,7 +3127,7 @@ BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3149,37 +3149,37 @@ static BorderWidthProperty BorderWidthPropertyFromDimension(std::optional<Dimens
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LengthMetrics& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Number& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Float64& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_String& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_String& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Resource& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3345,7 +3345,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
 }
 
 template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
 {
     if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
         if (!dst) {
@@ -4399,7 +4399,7 @@ void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_Br
 }
 
 template<>
-void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
 {
     if (!src) {
         dst = std::nullopt;

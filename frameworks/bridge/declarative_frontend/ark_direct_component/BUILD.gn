@@ -175,3 +175,12 @@ ohos_abc("arktextpicker") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+ohos_abc("arkselect") {
+  sources = [ "./src/arkselect.ts" ]
+  output_name = "arkselect"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

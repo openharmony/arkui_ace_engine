@@ -208,7 +208,7 @@ void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
 
 // Convert Ark_ControlSize
 template<>
-void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
 {
     switch (src) {
         case ARK_CONTROL_SIZE_SMALL: dst = ControlSize::SMALL; break;

@@ -1774,6 +1774,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/mock_web_pattern.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/search/bridge/mock_search_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/select/bridge/mock_select_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/slider/bridge/mock_node_slider_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/symbol/bridge/mock_symbol_glyph_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/text_clock/bridge/mock_textclock_modifier.cpp",

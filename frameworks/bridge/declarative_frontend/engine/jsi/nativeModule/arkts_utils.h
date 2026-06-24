@@ -28,9 +28,12 @@ class BrightnessBlender;
 
 namespace OHOS::Ace {
 class ResourceWrapper;
+struct SelectParam;
 }
 
 namespace OHOS::Ace::NG {
+class MenuItemConfiguration;
+struct MenuParam;
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 using panda::JSValueRef;
 using panda::ObjectRef;
@@ -583,6 +586,19 @@ public:
     static void SetButtonBorderRadiusByJs(
         const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
     static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
+    static void ParseMenuOutlineWidth(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineWidthValue, MenuParam& menuParam);
+    static void ParseMenuOutlineColor(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineColorValue, MenuParam& menuParam);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
+    static void SetTextStyleApply(
+        EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const Local<JSValueRef> modifierObj);
+    static Local<JSValueRef> GetSelectLocalHandle(EcmaVM* vm, MenuItemConfiguration& config);
+    static SelectParam GetSelectParam(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetSymbolModifier(
+        std::vector<SelectParam>& params, const size_t i, const Local<JSValueRef>& selectSymbolIcon);
 
     static bool ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj, DimensionUnit defaultUnit = DimensionUnit::FP);

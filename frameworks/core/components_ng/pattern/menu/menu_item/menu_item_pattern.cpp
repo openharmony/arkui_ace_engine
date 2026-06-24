@@ -51,6 +51,7 @@
 #endif
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3826,10 +3827,9 @@ void MenuItemPattern::UpdateOptionStyle()
     CHECK_NULL_VOID(menuPattern);
     auto selectNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(selectNode);
-    auto selectPattern = selectNode->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(selectPattern);
     auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(selectPaintProperty);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
     if (isSelected_) {
         if (SystemProperties::ConfigChangePerform()) {
             ApplySelectedThemeStyles(selectPaintProperty, menuNode);
@@ -3839,7 +3839,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
-        selectPattern->UpdateSelectedOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateSelectedOptionFontFromPattern(menuNode, host);
+        }
     } else {
         if (SystemProperties::ConfigChangePerform()) {
             ApplyOptionThemeStyles(selectPaintProperty);
@@ -3849,7 +3851,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
-        selectPattern->UpdateOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateOptionFontFromPattern(menuNode, host);
+        }
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

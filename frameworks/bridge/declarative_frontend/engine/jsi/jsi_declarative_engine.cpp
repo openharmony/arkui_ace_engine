@@ -852,6 +852,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TextPickerDialog", "arkui.components.arktextpicker" },
         { "Progress", "arkui.components.arkprogress" },
         { "TextTimer", "arkui.components.arktexttimer" },
+        { "Select", "arkui.components.arkselect" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");

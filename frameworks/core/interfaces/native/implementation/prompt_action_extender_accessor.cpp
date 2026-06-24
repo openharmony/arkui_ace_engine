@@ -33,6 +33,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "core/interfaces/native/utility/promise_helper.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 using namespace OHOS::Ace::NG::Converter;
 namespace OHOS::Ace::NG {
@@ -465,9 +466,9 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     } else if (offsetOpt.has_value()) {
         popupParam->SetArrowOffset(offsetOpt.value());
     }
-    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
-    if (avoidTargetOpt.has_value()) {
-        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    if (customModifier) {
+        customModifier->setAvoidTarget(popupParam, src.avoidTarget);
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);

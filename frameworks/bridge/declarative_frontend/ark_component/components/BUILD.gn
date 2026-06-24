@@ -118,6 +118,7 @@ special_components = [
   "arklazygridlayout",
   "arkrefresh",
   "arktextpicker",
+  "arkselect",
 ]
 
 if (qrcodegen_support) {

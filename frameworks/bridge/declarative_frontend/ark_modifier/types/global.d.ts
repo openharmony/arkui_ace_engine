@@ -177,6 +177,10 @@ interface SearchComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface SelectComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface SideBarContainerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

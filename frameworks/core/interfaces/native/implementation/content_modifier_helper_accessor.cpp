@@ -52,6 +52,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
@@ -385,7 +389,7 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        MenuItemConfiguration config) -> RefPtr<FrameNode> {
+                           MenuItemConfiguration config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_MenuItemConfiguration arkConfig = PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
         arkConfig->contentModifier_ = contentModifier;
@@ -426,13 +430,17 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return boxNode;
     };
-    SelectModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setBuilderFunc(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::ResetBuilderFunc(frameNode);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->resetBuilderFunc(frameNode);
 }
 const GENERATED_ArkUISliderContentModifier* GetSliderContentModifier()
 {

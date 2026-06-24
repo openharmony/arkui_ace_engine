@@ -28,6 +28,8 @@
 namespace OHOS::Ace {
 struct SymbolShadow;
 struct SymbolGradient;
+struct SelectParam;
+struct SelectResObjParam;
 }
 
 namespace OHOS::Ace::NG {
@@ -1847,6 +1849,12 @@ enum ArkUIPropertyType {
     ANIMATABLE_PROPERTY_FLOAT = 100,
     ANIMATABLE_PROPERTY_VECTOR2 = 101,
     ANIMATABLE_PROPERTY_COLOR = 102,
+};
+
+enum ArkUISelectFontType {
+    SELECTED = 0,
+    OPTION = 1,
+    SELECTED_OPTION = 2,
 };
 
 // Current implementation assumes that each argument is 4 bytes,
@@ -8443,7 +8451,6 @@ struct ArkUISelectModifier {
     void (*resetFont)(ArkUINodeHandle node);
     void (*resetOptionFont)(ArkUINodeHandle node);
     void (*resetSelectedOptionFont)(ArkUINodeHandle node);
-
     void (*setSelectWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetSelectWidth)(ArkUINodeHandle node);
     void (*setSelectHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
@@ -8514,6 +8521,53 @@ struct ArkUISelectModifier {
     void (*resetMenuDistortionMode)(ArkUINodeHandle node);
     void (*setMenuEdgeLightMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
     void (*resetMenuEdgeLightMode)(ArkUINodeHandle node);
+    void (*createSelect)(
+        const std::vector<OHOS::Ace::SelectParam>& params, const std::vector<OHOS::Ace::SelectResObjParam>& resObjVec);
+    void (*setSelectChangeEvent)(void* callback);
+    void (*setValueChangeEvent)(void* callback);
+    void (*setShowInSubWindow)(ArkUINodeHandle node, ArkUI_Bool isShowInSubWindow);
+    void (*resetShowInSubWindow)(ArkUINodeHandle node);
+    void (*resetShowDefaultSelectedIcon)(ArkUINodeHandle node);
+    void (*setPaddingTop)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setPaddingBottom)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setPaddingLeft)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setPaddingRight)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setArrowModifierApply)(ArkUINodeHandle node, void* symbolFunction);
+    void (*setTextModifierApply)(ArkUINodeHandle node, void* applyFunction);
+    void (*setOptionTextModifier)(ArkUINodeHandle node, void* applyFunction);
+    void (*setSelectedOptionTextModifier)(ArkUINodeHandle node, void* applyFunction);
+    ArkUINodeHandle (*createSelectFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setCommonPadding)(ArkUINodeHandle node, void* commonCalcDimension);
+    void (*setPadding)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    void (*setJsMenuBackgroundEffect)(ArkUINodeHandle node, void* option);
+    void (*setJsMenuBackgroundBlurStyleOptions)(ArkUINodeHandle node, void* option);
+    void (*setJsMenuBgColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBgColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsOptionFontColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr optionFontColorRawPtr, ArkUI_Bool isNormal);
+    void (*setJsOptionBgColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsSelectedOptionFontColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr selectOptionFontColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsSelectedOptionBgColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsSelectBackgroundColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBackgroundColorRawPtr);
+    void (*setJsSelectFontColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr fontColorRawPtr);
+    void (*setJsFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Int32 type);
+    void (*resetJsFontSize)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*setJsFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr weight, ArkUI_Int32 type);
+    void (*resetJsFontWeight)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*setJsFontFamily)(ArkUINodeHandle node, std::vector<std::string>& family, ArkUI_Int32 type);
+    void (*resetJsFontFamily)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*setJsFontStyle)(ArkUINodeHandle node, ArkUI_Int32 styleVal, ArkUI_Int32 type);
+    void (*resetJsFontStyle)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*setJsMenuOutline)(ArkUINodeHandle node, void* option);
+    void (*setHasOptionWidth)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setJsSelectDivider)(ArkUINodeHandle node, void* divider, const ArkUISelectDividerArgs* dividerArgs);
+    void (*setJsSelectDividerStyle)(
+        ArkUINodeHandle node, void* divider, const ArkUISelectDividerArgs* dividerArgs, ArkUI_Int32 mode);
+    void (*resetJsSelectFontColor)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
