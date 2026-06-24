@@ -6963,5 +6963,9 @@
  	{
  	    "first_introduced": "26.0.0",
  	    "name": "OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterial"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CreateIdentityTransitionEffect"
     }
 ]

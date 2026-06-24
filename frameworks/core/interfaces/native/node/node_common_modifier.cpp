@@ -159,6 +159,7 @@ enum TransitionEffectType {
     TRANSITION_EFFECT_ROTATE,
     TRANSITION_EFFECT_MOVE,
     TRANSITION_EFFECT_ASYMMETRIC,
+    TRANSITION_EFFECT_IDENTITY,
 };
 
 struct GestureCollectTouchRecognizerHandle {
@@ -8978,6 +8979,11 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
                 disappearEffect = ParseTransition(option->disappear);
             }
             transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_IDENTITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedIdentityEffect>();
             break;
         }
     }
