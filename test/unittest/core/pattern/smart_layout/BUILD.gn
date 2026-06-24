@@ -15,7 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("smart_layout_test_ng") {
   type = "new"
-  module_name = "Layout-SmartLayout"
+  module_name = "Layout-Flex"
   sources = [
     # Smart layout engine
     "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/localsmt.cpp",
