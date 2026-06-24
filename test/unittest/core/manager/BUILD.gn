@@ -137,14 +137,14 @@ ace_unittest("shared_overlay_manager_test_ng") {
 }
 
 ace_unittest("smart_gesture_decider_test_ng") {
-  module_name = "SmartGesture-Decider"
+  module_name = "Gesture-BasicAndCombinationGesture"
   type = "new"
   sources = [ "smart_gesture_decider_test_ng.cpp" ]
   defines = [ "SMART_GESTURE_SUPPORTED" ]
 }
 
 ace_unittest("smart_gesture_manager_test_ng") {
-  module_name = "SmartGesture-Manager"
+  module_name = "Gesture-BasicAndCombinationGesture"
   type = "new"
   sources = [ "smart_gesture_manager_test_ng.cpp" ]
   defines = [ "SMART_GESTURE_SUPPORTED" ]
