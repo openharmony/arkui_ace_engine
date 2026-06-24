@@ -275,7 +275,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return ArkUIAniModule._CustomNode_findCustomValueByKey(this.getPeer()!.peer.ptr, key);
     }
 
-    findSystemEnvValueByKey(key: string): Any | undefined {
+    findWritableSystemEnvValueByKey(key: string): Any | undefined {
         return ArkUIAniModule._CustomNode_findSystemEnvValueByKey(this.getPeer()!.peer.ptr, key);
     }
 
@@ -333,13 +333,13 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             }
             envSet.clear();
         }
-        const unregisterFuncs = this.instance.__getSimpleEnvUnregisterFuncs__Internal();
+        const unregisterFuncs = this.instance.__getReadonlyEnvUnregisterFuncs__Internal();
         if (unregisterFuncs.size > 0) {
             unregisterFuncs.forEach((unregisterFunc: () => void, _: string) => {
                 unregisterFunc();
             });
         }
-        this.instance.__clearAllSimpleEnvRegistrations__Internal();
+        this.instance.__clearAllEnvRegistrations__Internal();
     }
     onDidBuild(): void {
         this.instance.onDidBuild();

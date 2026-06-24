@@ -236,6 +236,36 @@ ani_ref ConvertQueryResultToAniRef(ani_env* env, const ArkUIAniEnvironmentQueryR
     }
 }
 
+ani_object CreateCustomEnvValueResultObject(ani_env* env, bool isFind, ani_ref outResult)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+
+    ani_class resultClass = nullptr;
+    auto classString = "arkui.stateManagement.decorator.CustomEnvValueResult";
+    if (env->FindClass(classString, &resultClass) != ANI_OK || !resultClass) {
+        return nullptr;
+    }
+
+    ani_method ctor = nullptr;
+    if (env->Class_FindMethod(resultClass, "<ctor>", ":", &ctor) != ANI_OK || !ctor) {
+        return nullptr;
+    }
+
+    ani_object res = nullptr;
+    if (env->Object_New(resultClass, ctor, &res) != ANI_OK || !res) {
+        return nullptr;
+    }
+    if (env->Object_SetPropertyByName_Boolean(res, "isFind", isFind ? ANI_TRUE : ANI_FALSE) != ANI_OK) {
+        return nullptr;
+    }
+    if (isFind && outResult != nullptr &&
+        env->Object_SetPropertyByName_Ref(res, "outResult", outResult) != ANI_OK) {
+        env->Object_SetPropertyByName_Boolean(res, "isFind", ANI_FALSE);
+    }
+
+    return res;
+}
+
 void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm, const std::string& key,
     const std::optional<ArkUIAniEnvironmentQueryResult>& value, bool isCustom, const char* warning)
 {
@@ -335,17 +365,20 @@ void WithEnvRemoveCustomEnvProperty(
     withEnvModifier->removeCustomEnvProperty(ToNodeHandle(ptr), std::to_string(key));
 }
 
-ani_ref CustomNodeFindCustomEnvValueByKey(
+ani_object CustomNodeFindCustomEnvValueByKey(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int key)
 {
+    CHECK_NULL_RETURN(env, nullptr);
+
     const auto* withEnvModifier = GetWithEnvModifier();
-    CHECK_NULL_RETURN(withEnvModifier, GetUndefinedRef(env));
-    CHECK_NULL_RETURN(withEnvModifier->findCustomEnvValueByKey, GetUndefinedRef(env));
+    CHECK_NULL_RETURN(withEnvModifier, nullptr);
+    CHECK_NULL_RETURN(withEnvModifier->findCustomEnvValueByKey, nullptr);
+
     ArkUIAniEnvironmentQueryResult result;
-    if (!withEnvModifier->findCustomEnvValueByKey(ToNodeHandle(ptr), std::to_string(key), result)) {
-        return GetUndefinedRef(env);
-    }
-    return ConvertQueryResultToAniRef(env, result);
+    bool isFind = withEnvModifier->findCustomEnvValueByKey(ToNodeHandle(ptr), std::to_string(key), result);
+    ani_ref outResult = isFind ? ConvertQueryResultToAniRef(env, result) : GetUndefinedRef(env);
+
+    return CreateCustomEnvValueResultObject(env, isFind && outResult != nullptr, outResult);
 }
 
 ani_ref CustomNodeFindSystemEnvValueByKey(

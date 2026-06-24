@@ -61,18 +61,27 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
-    __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
-    __removeSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
-    __setSimpleEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void;
-    __getAndClearSimpleEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined;
-    __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void>;
-    __setSimpleEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void;
-    __getSimpleEnvUnregisterFuncs__Internal(): Map<string, () => void>;
-    __clearAllSimpleEnvRegistrations__Internal(): void;
-    __getSimpleEnvCallbackSet__Internal(envKey: string): (Set<(value: Any) => void>) | undefined;
+    __setReadonlyEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void;
+    __getAndClearReadonlyEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined;
+    __getReadonlyEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void>;
+    __setReadonlyEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void;
+    __getReadonlyEnvUnregisterFuncs__Internal(): Map<string, () => void>;
+    __clearAllEnvRegistrations__Internal(): void;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
     __getCanUpdateStateVars__Internal(): boolean;
+    __findCustomEnvValueByKey__Internal(internalId: int32): Any;
+    __registerCustomEnvUpdateCallback__Internal(callback: (key: int32, value: Any) => void): void;
+    __updateCustomEnvVarValue__Internal(internalId: int32, callback: (key: int32, value: Any) => void): void;
+    __getCustomEnvCallbackMap__Internal(): Map<int32, Set<(key: int32, value: Any) => void>>;
+    __removeCustomEnvCallback__Internal(internalId: int32, callback: (key: int32, value: Any) => void): boolean;
+    __findWritableSystemEnvValueByKey__Internal(key: string): Any;
+    __addSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): void;
+    __registerWritableEnvUpdateCallback__Internal(callback: (key: string, value: Any) => void): void;
+    __removeSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): boolean;
+    __getSystemEnvValueCallbacks__Internal(key: string): Set<(value: Any) => void> | undefined;
+    __getSystemEnvCallbacksMap__Internal(): Map<string, Set<(value: Any) => void>>;
+    __getHasRegisteredWritableEnvCallback__Internal(): boolean;
 }
 
 export interface IDecoratedVariable {
@@ -215,6 +224,16 @@ export interface MakeMonitorOptions {
 }
 
 export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
+
+export class CustomEnvValueResult<T> {
+    isFind: boolean;
+    outResult?: T;
+
+    constructor(isFind: boolean = false, outResult?: T) {
+        this.isFind = isFind;
+        this.outResult = outResult;
+    }
+}
 
 export interface ICustomEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
 
