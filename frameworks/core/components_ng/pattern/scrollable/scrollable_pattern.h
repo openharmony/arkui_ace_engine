@@ -1155,6 +1155,8 @@ private:
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
+    void OnTouchTestDoneHandlePreventRecognizer(
+        const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers, bool isHitTestBlock);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
     bool IsInComponent(PointF point);
