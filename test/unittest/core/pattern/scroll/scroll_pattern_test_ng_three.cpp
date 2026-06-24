@@ -680,7 +680,7 @@ HWTEST_F(ScrollPatternThreeTestNg, EdgeEffectCallbackwithContentOffset, TestSize
 
     EXPECT_EQ(edgeEffect->leadingCallback_(), -1.0);
     EXPECT_EQ(edgeEffect->trailingCallback_(), 0.0);
-    EXPECT_EQ(edgeEffect->initLeadingCallback_(), 0.0);
+    EXPECT_EQ(edgeEffect->initLeadingCallback_(), -1.0);
     EXPECT_EQ(edgeEffect->initTrailingCallback_(), 0.0);
 
     pattern_->scrollableDistance_ -= 2;
