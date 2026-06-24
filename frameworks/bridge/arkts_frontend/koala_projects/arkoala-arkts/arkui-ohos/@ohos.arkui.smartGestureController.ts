@@ -19,7 +19,7 @@ export declare namespace smartGestureController {
     export interface SmartGestureProposalRaw {
         action: SmartGestureAction;
         operateIntention?: OperateIntention;
-        nodePtr?: long;
+        nodeId?: int;
         pageCount?: int;
         distance?: double;
     }

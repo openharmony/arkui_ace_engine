@@ -5127,7 +5127,10 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
     config.action = SmartGestureShortcutAction::PRIMARY;
     if (actionVal->IsNumber()) {
-        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        auto rawAction = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        if (rawAction == SmartGestureShortcutAction::PRIMARY) {
+            config.action = rawAction;
+        }
     }
     config.enabled = false;
     if (enabledVal->IsBoolean()) {

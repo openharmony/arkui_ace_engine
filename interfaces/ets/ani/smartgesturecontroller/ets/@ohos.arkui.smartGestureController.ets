@@ -21,7 +21,7 @@ export default namespace smartGestureController {
     export interface SmartGestureProposalRaw {
         action: SmartGestureAction;
         operateIntention?: OperateIntention;
-        nodePtr?: long;
+        nodeId?: int;
         pageCount?: int;
         distance?: double;
     }
@@ -29,7 +29,7 @@ export default namespace smartGestureController {
     class SmartGestureProposalRawInner implements SmartGestureProposalRaw {
         action: SmartGestureAction = SmartGestureAction.NONE;
         operateIntention?: OperateIntention;
-        nodePtr?: long;
+        nodeId?: int;
         pageCount?: int;
         distance?: double;
     }

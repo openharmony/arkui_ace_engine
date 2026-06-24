@@ -98,6 +98,7 @@ ace_unittest("view_abstract_test_ng") {
     "view_abstract_test_three_ng.cpp",
     "view_abstract_test_two_ng_for_property_config.cpp",
   ]
+  defines = [ "SMART_GESTURE_SUPPORTED" ]
 }
 
 ace_unittest("view_abstract_test_resetposition_ng") {

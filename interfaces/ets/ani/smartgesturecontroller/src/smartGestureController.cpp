@@ -28,12 +28,11 @@
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
-#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::Ani {
-using OHOS::Ace::FrameNodePeer;
 using OHOS::Ace::NG::SmartGestureManager;
 using OHOS::Ace::NG::SmartGestureProposal;
 
@@ -44,12 +43,11 @@ constexpr char RAW_PROPOSAL_INNER_CLASS[] =
 constexpr char SMART_GESTURE_ACTION_ENUM[] = "arkui.component.enums.SmartGestureAction";
 constexpr char OPERATE_INTENTION_ENUM[] = "arkui.component.enums.OperateIntention";
 constexpr char STS_INT_CLASS[] = "std.core.Int";
-constexpr char STS_LONG_CLASS[] = "std.core.Long";
 constexpr char STS_DOUBLE_CLASS[] = "std.core.Double";
 
 constexpr char ACTION_KEY[] = "action";
 constexpr char OPERATE_INTENTION_KEY[] = "operateIntention";
-constexpr char NODE_PTR_KEY[] = "nodePtr";
+constexpr char NODE_ID_KEY[] = "nodeId";
 constexpr char PAGE_COUNT_KEY[] = "pageCount";
 constexpr char DISTANCE_KEY[] = "distance";
 constexpr char IS_CONSUMED_KEY[] = "isConsumed";
@@ -249,24 +247,6 @@ ani_object CreateIntObject(ani_env* env, int32_t value)
     return result;
 }
 
-ani_object CreateLongObject(ani_env* env, int64_t value)
-{
-    CHECK_NULL_RETURN(env, nullptr);
-    ani_class cls = nullptr;
-    ani_method ctor = nullptr;
-    ani_object result = nullptr;
-    if (ANI_OK != env->FindClass(STS_LONG_CLASS, &cls)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_New(cls, ctor, &result, static_cast<ani_long>(value))) {
-        return nullptr;
-    }
-    return result;
-}
-
 ani_object CreateDoubleObject(ani_env* env, double value)
 {
     CHECK_NULL_RETURN(env, nullptr);
@@ -289,14 +269,6 @@ bool SetIntPropertyByRef(ani_env* env, ani_object object, const char* key, int32
 {
     CHECK_NULL_RETURN(env && object && key, false);
     auto boxedValue = CreateIntObject(env, value);
-    CHECK_NULL_RETURN(boxedValue, false);
-    return env->Object_SetPropertyByName_Ref(object, key, static_cast<ani_ref>(boxedValue)) == ANI_OK;
-}
-
-bool SetLongPropertyByRef(ani_env* env, ani_object object, const char* key, int64_t value)
-{
-    CHECK_NULL_RETURN(env && object && key, false);
-    auto boxedValue = CreateLongObject(env, value);
     CHECK_NULL_RETURN(boxedValue, false);
     return env->Object_SetPropertyByName_Ref(object, key, static_cast<ani_ref>(boxedValue)) == ANI_OK;
 }
@@ -364,25 +336,6 @@ std::optional<int32_t> GetInt32FromRef(ani_env* env, ani_ref ref)
     return std::nullopt;
 }
 
-std::optional<int64_t> GetInt64FromRef(ani_env* env, ani_ref ref)
-{
-    CHECK_NULL_RETURN(env && ref, std::nullopt);
-    if (IsUndefinedOrNull(env, ref)) {
-        return std::nullopt;
-    }
-
-    auto object = static_cast<ani_object>(ref);
-    if (!IsClassObject(env, object, STS_LONG_CLASS)) {
-        return std::nullopt;
-    }
-
-    ani_long value = 0;
-    if (ANI_OK != env->Object_CallMethodByName_Long(object, "toLong", ":l", &value)) {
-        return std::nullopt;
-    }
-    return static_cast<int64_t>(value);
-}
-
 std::optional<double> GetDoubleFromRef(ani_env* env, ani_ref ref)
 {
     CHECK_NULL_RETURN(env && ref, std::nullopt);
@@ -416,22 +369,6 @@ std::optional<int32_t> GetOptionalInt32PropertyByName(ani_env* env, ani_object o
     }
 
     return GetInt32FromRef(env, ref);
-}
-
-std::optional<int64_t> GetOptionalInt64PropertyByName(ani_env* env, ani_object object, const char* key)
-{
-    CHECK_NULL_RETURN(env && object && key, std::nullopt);
-    ani_long value = 0;
-    if (ANI_OK == env->Object_GetPropertyByName_Long(object, key, &value)) {
-        return static_cast<int64_t>(value);
-    }
-
-    ani_ref ref = nullptr;
-    if (!GetPropertyRef(env, object, key, ref) || IsUndefinedOrNull(env, ref)) {
-        return std::nullopt;
-    }
-
-    return GetInt64FromRef(env, ref);
 }
 
 std::optional<double> GetOptionalDoublePropertyByName(ani_env* env, ani_object object, const char* key)
@@ -501,12 +438,7 @@ public:
 
         auto targetNode = proposal.GetTargetNode();
         if (targetNode) {
-            ContainerScope scope(instanceId);
-            auto peer = FrameNodePeer::Create(targetNode);
-            if (peer) {
-                auto nodePtr = static_cast<int64_t>(reinterpret_cast<intptr_t>(peer));
-                SetLongPropertyByRef(env, object, NODE_PTR_KEY, nodePtr);
-            }
+            SetIntPropertyByRef(env, object, NODE_ID_KEY, targetNode->GetId());
         }
 
         if (proposal.scrollingConfig.has_value()) {
@@ -634,10 +566,11 @@ private:
 
     static OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> ParseFrameNode(ani_env* env, ani_object object)
     {
-        auto nodePtr = GetOptionalInt64PropertyByName(env, object, NODE_PTR_KEY);
-        CHECK_NULL_RETURN(nodePtr.has_value(), nullptr);
-        auto peer = reinterpret_cast<FrameNodePeer*>(static_cast<intptr_t>(nodePtr.value()));
-        return FrameNodePeer::GetFrameNodeByPeer(peer);
+        auto nodeId = GetOptionalInt32PropertyByName(env, object, NODE_ID_KEY);
+        CHECK_NULL_RETURN(nodeId.has_value(), nullptr);
+        auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(static_cast<int32_t>(nodeId.value()));
+        CHECK_NULL_RETURN(node, nullptr);
+        return AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(node);
     }
 
     static JsSmartGestureAction ToJsAction(const SmartGestureProposal& proposal)

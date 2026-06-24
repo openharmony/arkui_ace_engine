@@ -1461,26 +1461,26 @@ export class SmartGestureControllerImpl extends SmartGestureController {
                 return proposal;
             }
             case SmartGestureAction.CLICK: {
-                const node = this.fromRawNodePtr(raw.nodePtr);
+                const node = this.fromRawNodeId(raw.nodeId);
                 const proposal = new ClickActionProposal(node);
                 proposal.operateIntention = operateIntention;
                 return proposal;
             }
             case SmartGestureAction.SELECT: {
-                const node = this.fromRawNodePtr(raw.nodePtr);
+                const node = this.fromRawNodeId(raw.nodeId);
                 const proposal = new SelectActionProposal(node);
                 proposal.operateIntention = operateIntention;
                 return proposal;
             }
             case SmartGestureAction.PAGE_FORWARD: {
-                const node = this.fromRawNodePtr(raw.nodePtr);
+                const node = this.fromRawNodeId(raw.nodeId);
                 const pageCount = (raw.pageCount ?? (0 as int)) as int;
                 const proposal = new PageSwitchActionProposal(node, pageCount);
                 proposal.operateIntention = operateIntention;
                 return proposal;
             }
             case SmartGestureAction.SCROLL_FORWARD: {
-                const node = this.fromRawNodePtr(raw.nodePtr);
+                const node = this.fromRawNodeId(raw.nodeId);
                 const proposal = new ScrollActionProposal(node, raw.distance ?? 0);
                 proposal.operateIntention = operateIntention;
                 return proposal;
@@ -1529,18 +1529,18 @@ export class SmartGestureControllerImpl extends SmartGestureController {
             case SmartGestureAction.CLICK:
             case SmartGestureAction.SELECT: {
                 const targeted = selectedProposal as ClickActionProposal | SelectActionProposal;
-                rawProposal.nodePtr = this.toRawNodePtr(targeted.node);
+                rawProposal.nodeId = this.toRawNodeId(targeted.node);
                 return rawProposal;
             }
             case SmartGestureAction.PAGE_FORWARD: {
                 const pageSwitch = selectedProposal as PageSwitchActionProposal;
-                rawProposal.nodePtr = this.toRawNodePtr(pageSwitch.node);
+                rawProposal.nodeId = this.toRawNodeId(pageSwitch.node);
                 rawProposal.pageCount = pageSwitch.pageCount;
                 return rawProposal;
             }
             case SmartGestureAction.SCROLL_FORWARD: {
                 const scroll = selectedProposal as ScrollActionProposal;
-                rawProposal.nodePtr = this.toRawNodePtr(scroll.node);
+                rawProposal.nodeId = this.toRawNodeId(scroll.node);
                 rawProposal.distance = scroll.distance;
                 return rawProposal;
             }
@@ -1568,11 +1568,15 @@ export class SmartGestureControllerImpl extends SmartGestureController {
         }
     }
 
-    private fromRawNodePtr(nodePtr?: long): FrameNode {
-        if (nodePtr === undefined || nodePtr === null) {
+    private fromRawNodeId(nodeId?: int32): FrameNode {
+        if (nodeId === undefined || nodeId === null) {
             throw new TypeError('Invalid smart gesture proposal.');
         }
-        const peerPtr = nodePtr as KPointer;
+        let resolvedNodeId: int32;
+        if (nodeId !== undefined && nodeId !== null) {
+            resolvedNodeId = nodeId;
+        }
+        const peerPtr = FrameNodeExtender.getFrameNodeByUniqueId(resolvedNodeId);
         if (peerPtr === nullptr || peerPtr === 0) {
             throw new TypeError('Invalid smart gesture proposal.');
         }
@@ -1586,8 +1590,8 @@ export class SmartGestureControllerImpl extends SmartGestureController {
         return node;
     }
 
-    private toRawNodePtr(node: FrameNode): long {
-        return extractors.toFrameNodePtr(node) as long;
+    private toRawNodeId(node: FrameNode): int32 {
+        return Double.toInt(FrameNodeExtender.getIdByFrameNode(extractors.toFrameNodePtr(node)));
     }
 }
 
