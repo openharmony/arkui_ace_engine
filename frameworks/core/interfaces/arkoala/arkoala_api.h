@@ -2332,6 +2332,9 @@ struct ArkUIArcSwiperIndicatorOptions {
     ArkUI_Uint32 unselectedColor;
     ArkUI_Uint32 selectedColor;
     ArkUI_Uint32 backgroundColor;
+    ArkUI_Int32 maskColorSize;
+    ArkUI_Uint32 maskColors[10];
+    ArkUI_Float32 maskStops[10];
 };
 
 struct ArkUISwiperArrowStyle {
@@ -4819,7 +4822,7 @@ struct ArkUISwiperControllerModifier {
 struct ArkUIArcSwiperModifier {
     void (*setArcSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
     void (*resetArcSwiperIndex)(ArkUINodeHandle node);
-    void (*setArcSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
+    void (*setArcSwiperDuration)(ArkUINodeHandle node, ArkUI_Int32 duration);
     void (*resetArcSwiperDuration)(ArkUINodeHandle node);
     void (*setArcSwiperVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*resetArcSwiperVertical)(ArkUINodeHandle node);
@@ -4829,14 +4832,15 @@ struct ArkUIArcSwiperModifier {
     void (*resetArcSwiperEffectMode)(ArkUINodeHandle node);
     void (*setArcSwiperIndicator)(ArkUINodeHandle node, ArkUI_Int32 show,
         ArkUI_Int32 arcDirection, ArkUI_Uint32 unselectedColor,
-        ArkUI_Uint32 selectedColor, ArkUI_Uint32 backgroundColor);
+        ArkUI_Uint32 selectedColor, ArkUI_Uint32 backgroundColor,
+        const ArkUI_Uint32* maskColors, const ArkUI_Float32* maskStops, ArkUI_Int32 maskColorSize);
     void (*resetArcSwiperIndicator)(ArkUINodeHandle node);
     void (*setArcSwiperDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 sensitivity);
     void (*resetArcSwiperDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setArcSwiperDisableTransitionAnimation)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*resetArcSwiperDisableTransitionAnimation)(ArkUINodeHandle node);
     ArkUI_Int32 (*getArcSwiperIndex)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getArcSwiperDuration)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperDuration)(ArkUINodeHandle node);
     ArkUI_Int32 (*getArcSwiperVertical)(ArkUINodeHandle node);
     ArkUI_Int32 (*getArcSwiperDisableSwipe)(ArkUINodeHandle node);
     ArkUI_Int32 (*getArcSwiperEffectMode)(ArkUINodeHandle node);

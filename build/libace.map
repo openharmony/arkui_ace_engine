@@ -3379,6 +3379,7 @@
       "OHOS::Ace::V2::SPAN_ETS_TAG";
       "OHOS::Ace::V2::STACK_ETS_TAG";
       "OHOS::Ace::V2::SWIPER_ETS_TAG";
+      "OHOS::Ace::V2::ARC_SWIPER_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_SPAN_ETS_TAG";
       "OHOS::Ace::V2::TEXT_ETS_TAG";

@@ -27,6 +27,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/native/native_error_message_macros.h"
 
@@ -1678,6 +1679,7 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::ARC_INDEXER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_ALPHABET_INDEXER },
         { OHOS::Ace::V2::STACK_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_STACK },
         { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SWIPER },
+        { OHOS::Ace::V2::ARC_SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER },
         { OHOS::Ace::V2::SCROLL_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SCROLL },
         { OHOS::Ace::V2::LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST },
         { OHOS::Ace::V2::LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM },
@@ -1697,7 +1699,6 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::ARC_LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_LIST },
         { OHOS::Ace::V2::ARC_LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_LIST_ITEM },
         { OHOS::Ace::V2::ARC_SCROLL_BAR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_SCROLL_BAR },
-        { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER },
         { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR  },
         { OHOS::Ace::V2::CUSTOM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM },
     };
@@ -1757,7 +1758,7 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_LIST), OHOS::Ace::V2::ARC_LIST_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_LIST_ITEM), OHOS::Ace::V2::ARC_LIST_ITEM_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_SCROLL_BAR), OHOS::Ace::V2::ARC_SCROLL_BAR_ETS_TAG },
-        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER), OHOS::Ace::V2::SWIPER_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER), OHOS::Ace::V2::ARC_SWIPER_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CUSTOM), OHOS::Ace::V2::CUSTOM_ETS_TAG },

@@ -556,6 +556,7 @@ void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
     auto* arkUIAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
     CHECK_NULL_RETURN(arkUIAlphabetIndexerModifier, nullptr);
     auto* frameNode = arkUIAlphabetIndexerModifier->createFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     arkUIAlphabetIndexerModifier->setAlphabetIndexerSelected(frameNode, 0);
     return frameNode;
 }

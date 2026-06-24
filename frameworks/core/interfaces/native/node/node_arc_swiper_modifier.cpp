@@ -15,6 +15,9 @@
 
 #include "core/interfaces/native/node/node_arc_swiper_modifier.h"
 
+#include <algorithm>
+#include <optional>
+
 #include "node_model.h"
 
 #include "base/error/error_code.h"
@@ -36,6 +39,7 @@ constexpr int32_t NUM_4 = 4;
 constexpr float ANIMATION_INFO_DEFAULT = 0.0f;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr int32_t DEFAULT_EDGE_EFFECT_INDEX = 0;
+constexpr int32_t MAX_MASK_COLOR_SIZE = 10;
 
 bool GetArcSwiperTheme(FrameNode* frameNode, RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme)
 {
@@ -77,10 +81,11 @@ void ResetArcSwiperIndex(ArkUINodeHandle node)
     SwiperModelNG::SetIndex(frameNode, 0);
 }
 
-void SetArcSwiperDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
+void SetArcSwiperDuration(ArkUINodeHandle node, ArkUI_Int32 duration)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    duration = duration < 0 ? DEFAULT_DURATION : duration;
     SwiperModelNG::SetDuration(frameNode, static_cast<uint32_t>(duration));
 }
 
@@ -136,9 +141,27 @@ void ResetArcSwiperEffectMode(ArkUINodeHandle node)
     SwiperModelNG::SetEdgeEffect(frameNode, EdgeEffect::SPRING);
 }
 
-void SetArcSwiperIndicator(ArkUINodeHandle node, ArkUI_Int32 show,
-    ArkUI_Int32 arcDirection, ArkUI_Uint32 unselectedColor,
-    ArkUI_Uint32 selectedColor, ArkUI_Uint32 backgroundColor)
+std::optional<Gradient> ParseArcSwiperMaskColor(
+    const ArkUI_Uint32* maskColors, const ArkUI_Float32* maskStops, ArkUI_Int32 maskColorSize)
+{
+    if (maskColors == nullptr || maskStops == nullptr || maskColorSize <= 0) {
+        return std::nullopt;
+    }
+    Gradient gradient;
+    gradient.CreateGradientWithType(GradientType::LINEAR);
+    auto size = std::min(maskColorSize, MAX_MASK_COLOR_SIZE);
+    for (int32_t index = 0; index < size; ++index) {
+        GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(Color(maskColors[index])));
+        gradientColor.SetDimension(CalcDimension(std::max(maskStops[index], 0.0f), DimensionUnit::PERCENT));
+        gradient.AddColor(gradientColor);
+    }
+    return gradient;
+}
+
+void SetArcSwiperIndicator(ArkUINodeHandle node, ArkUI_Int32 show, ArkUI_Int32 arcDirection,
+    ArkUI_Uint32 unselectedColor, ArkUI_Uint32 selectedColor, ArkUI_Uint32 backgroundColor,
+    const ArkUI_Uint32* maskColors, const ArkUI_Float32* maskStops, ArkUI_Int32 maskColorSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -158,6 +181,10 @@ void SetArcSwiperIndicator(ArkUINodeHandle node, ArkUI_Int32 show,
     params.itemColor = Color(unselectedColor);
     params.selectedItemColor = Color(selectedColor);
     params.containerColor = Color(backgroundColor);
+    auto maskColor = ParseArcSwiperMaskColor(maskColors, maskStops, maskColorSize);
+    if (maskColor.has_value()) {
+        params.maskColor = maskColor.value();
+    }
     SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::ARC_DOT);
     SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelNG::SetArcDotIndicatorStyle(frameNode, params);
@@ -179,8 +206,12 @@ void SetArcSwiperDigitalCrownSensitivity(ArkUINodeHandle node, ArkUI_Int32 sensi
 #ifdef SUPPORT_DIGITAL_CROWN
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto pattern = frameNode->GetPattern<ArcSwiperPattern>();
     CHECK_NULL_VOID(pattern);
+    if (sensitivity < static_cast<ArkUI_Int32>(CrownSensitivity::LOW) ||
+        sensitivity > static_cast<ArkUI_Int32>(CrownSensitivity::HIGH)) {
+        sensitivity = static_cast<ArkUI_Int32>(CrownSensitivity::MEDIUM);
+    }
     pattern->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
 #endif
 }
@@ -190,7 +221,7 @@ void ResetArcSwiperDigitalCrownSensitivity(ArkUINodeHandle node)
 #ifdef SUPPORT_DIGITAL_CROWN
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto pattern = frameNode->GetPattern<ArcSwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetDigitalCrownSensitivity(CrownSensitivity::MEDIUM);
 #endif
@@ -221,11 +252,11 @@ ArkUI_Int32 GetArcSwiperIndex(ArkUINodeHandle node)
     return SwiperModelNG::GetIndex(frameNode);
 }
 
-ArkUI_Float32 GetArcSwiperDuration(ArkUINodeHandle node)
+ArkUI_Int32 GetArcSwiperDuration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_Float32>(SwiperModelNG::GetDuration(frameNode));
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetDuration(frameNode));
 }
 
 ArkUI_Int32 GetArcSwiperVertical(ArkUINodeHandle node)
@@ -263,6 +294,7 @@ void GetArcSwiperIndicator(ArkUINodeHandle node, ArkUIArcSwiperIndicatorOptions*
     options->unselectedColor = Color::TRANSPARENT.GetValue();
     options->selectedColor = Color::TRANSPARENT.GetValue();
     options->backgroundColor = Color::TRANSPARENT.GetValue();
+    options->maskColorSize = 0;
 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -292,6 +324,14 @@ void GetArcSwiperIndicator(ArkUINodeHandle node, ArkUIArcSwiperIndicatorOptions*
         params->containerColor
             .value_or(swiperIndicatorTheme ? swiperIndicatorTheme->GetArcContainerColor() : Color::TRANSPARENT)
             .GetValue();
+    auto maskColor =
+        params->maskColor.value_or(swiperIndicatorTheme ? swiperIndicatorTheme->GetArcMaskColor() : Gradient());
+    auto colors = maskColor.GetColors();
+    options->maskColorSize = std::min(static_cast<ArkUI_Int32>(colors.size()), MAX_MASK_COLOR_SIZE);
+    for (int32_t index = 0; index < options->maskColorSize; ++index) {
+        options->maskColors[index] = colors[index].GetLinearColor().ToColor().GetValue();
+        options->maskStops[index] = static_cast<ArkUI_Float32>(colors[index].GetDimension().Value());
+    }
 }
 
 ArkUI_Int32 GetArcSwiperDigitalCrownSensitivity(ArkUINodeHandle node)
