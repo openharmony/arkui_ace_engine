@@ -101,10 +101,14 @@ struct WaterFlowDestroyDeclare {
     WaterFlowControllerStore.setNavigationMode(mode);
     WaterFlowControllerStore.setResult(`WaterFlow host page left by ${mode}. Call methods on the bound controller below.`);
     setTimeout(() => {
-      if (mode === 'replace') {
-        router.replaceUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
-      } else {
-        router.pushUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
+      try {
+        if (mode === 'replace') {
+          router.replaceUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
+        } else {
+          router.pushUrl({ url: 'pages/waterflow/bindController/WaterFlowDestroySubPage' });
+        }
+      } catch (error) {
+        console.error(`Failed to navigate by ${mode}:`, error);
       }
     }, 100);
   }
