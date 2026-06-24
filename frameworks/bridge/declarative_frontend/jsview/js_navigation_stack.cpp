@@ -1515,6 +1515,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         auto infoName = navdestinationsInfo[index].name;
         auto infoParam = navdestinationsInfo[index].param;
         auto infoMode = navdestinationsInfo[index].mode;
+        auto componentInfo = navdestinationsInfo[index].componentInfo;
 
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
@@ -1526,6 +1527,9 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         navPathInfo->SetProperty<std::string>("ohmUrl", navdestinationsInfo[index].fileName.c_str());
         navPathInfo->SetProperty<std::string>("moduleName", navdestinationsInfo[index].moduleName.c_str());
         navPathInfo->SetProperty<std::string>("autoCleanedState", navdestinationsInfo[index].state);
+        if (!componentInfo.empty()) {
+            navPathInfo->SetProperty<std::string>("componentInfo", componentInfo);
+        }
         newPathArray->SetValueAt(index, navPathInfo);
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
@@ -1994,5 +1998,17 @@ bool JSNavigationStack::CreateNodeFromRecovery(int32_t index, const WeakPtr<NG::
         return false;
     }
     return CreateNodeByIndex(index, customNode, node);
+}
+
+std::string JSNavigationStack::GetComponentInfo(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return "";
+    }
+    auto pathInfo = GetJsPathInfo(index);
+    auto info = pathInfo->GetPropertyValue<std::string>("componentInfo", "");
+    JSRef<JSVal> undefinedVal = JSVal::Undefined();
+    pathInfo->SetPropertyObject("componentInfo", undefinedVal);
+    return info;
 }
 } // namespace OHOS::Ace::Framework

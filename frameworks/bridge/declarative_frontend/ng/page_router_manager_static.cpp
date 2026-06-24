@@ -794,6 +794,9 @@ RefPtr<FrameNode> PageRouterManager::CreatePageExtender(int32_t pageId, const Ro
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
     ResSchedReportScope reportScope("push_page", reportData);
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    if (!target.componentInfo.empty()) {
+        pagePattern->SetRestoreInfo(target.componentInfo);
+    }
     pageNode->SetHostPageId(pageId);
     // !!! must push_back first for UpdateRootComponent
     pageRouterStack_.emplace_back(pageNode);

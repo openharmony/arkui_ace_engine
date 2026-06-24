@@ -36,6 +36,7 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -3065,7 +3066,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
         AbortAnimation(hostNode);
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
     if (context) {
         context->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
@@ -3299,6 +3301,10 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
             eventHub->FireOnRestoreState(navigationStack_->GetAutoCleanedState(index));
         }
         navigationStack_->ClearAutoCleanedState(index);
+        auto componentInfo = navigationStack_->GetComponentInfo(index);
+        if (!componentInfo.empty()) {
+            navdestination->SetRestoreInfo(componentInfo);
+        }
     }
     return removeSize;
 }
@@ -5190,9 +5196,15 @@ void NavigationPattern::FireOnInactiveLifecycle(const RefPtr<NavDestinationGroup
 std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
 {
     auto allNavdestinationInfo = JsonUtil::CreateArray(true);
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, allNavdestinationInfo);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, allNavdestinationInfo);
+    auto recoverableMgr = context->GetRecoverableManager();
+    CHECK_NULL_RETURN(recoverableMgr, allNavdestinationInfo);
     const auto& navdestinationNodes = GetAllNavDestinationNodes();
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    int32_t lastStandardIndex = hostNode ? hostNode->GetLastStandardIndex() : -1;
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    int32_t lastStandardIndex = navigationGroupNode ? navigationGroupNode->GetLastStandardIndex() : -1;
     for (int32_t index = 0; index < static_cast<int32_t>(navdestinationNodes.size()); ++index) {
         auto iter = navdestinationNodes[index];
         auto navdestinationInfo = JsonUtil::Create(true);
@@ -5237,6 +5249,10 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
             navdestinationInfo->Put("moduleName", moduleName.c_str());
         }
         navdestinationInfo->Put("state", navigationStack_ ? navigationStack_->GetAutoCleanedState(index).c_str() : "");
+        std::string componentInfo;
+        if (recoverableMgr->GetRestoreByPage(true, navdestinationNode->GetId(), componentInfo)) {
+            navdestinationInfo->Put("componentInfo", componentInfo.c_str());
+        }
         allNavdestinationInfo->Put(navdestinationInfo);
     }
     return allNavdestinationInfo;
@@ -5276,15 +5292,23 @@ void NavigationPattern::RestoreJsStackIfNeeded()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto navigationManager = pipeline->GetNavigationManager();
-    CHECK_NULL_VOID(navigationManager);
+    auto recoverableMgr = pipeline->GetRecoverableManager();
+    CHECK_NULL_VOID(recoverableMgr);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
-    if (navdestinationsInfo.empty()) {
-        return;
+    auto homeInfo = recoverableMgr->GetNavigationHomeInfo(hostNode->GetCurId());
+    if (!homeInfo.empty()) {
+        auto homeDestination = AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
+        if (homeDestination) {
+            homeDestination->SetRestoreInfo(homeInfo);
+        }
     }
-    navigationStack_->SetPathArray(navdestinationsInfo);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
+    if (!navdestinationsInfo.empty()) {
+        navigationStack_->SetPathArray(navdestinationsInfo);
+    }
 }
 
 void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)

@@ -348,6 +348,11 @@ public:
         return false;
     }
 
+    virtual std::string GetComponentInfo(int32_t index)
+    {
+        return "";
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

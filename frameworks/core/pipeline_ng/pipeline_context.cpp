@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
@@ -407,6 +408,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
+    }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
         avoidInfoMgr_->SetInstanceId(instanceId);
@@ -444,6 +448,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
+    }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
         avoidInfoMgr_->SetInstanceId(instanceId);
@@ -476,6 +483,9 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
     }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
@@ -8348,6 +8358,7 @@ void PipelineContext::InitManagers()
     frameRateManager_ = MakeRefPtr<FrameRateManager>();
     privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    recoverableMgr_ = MakeRefPtr<RecoverableManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
@@ -8360,6 +8371,11 @@ void PipelineContext::InitManagers()
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
 {
     return forceSplitMgr_;
+}
+
+const RefPtr<RecoverableManager>& PipelineContext::GetRecoverableManager() const
+{
+    return recoverableMgr_;
 }
 
 const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const

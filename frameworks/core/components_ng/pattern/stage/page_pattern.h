@@ -343,6 +343,9 @@ public:
         return currentPageSize_;
     }
 
+    void SetRestoreInfo(const std::string& info);
+    bool GetComponentInfo(const std::string& componentId, std::string& result);
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -433,6 +436,9 @@ protected:
     std::shared_ptr<AnimationUtils::Animation> currCustomAnimation_;
     std::optional<SizeF> currentPageSize_;
     bool needNotifySizeChangeWhenVisible_ = false;
+
+    // componentId->restoreInfo
+    std::unordered_map<std::string, std::string> restoreInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

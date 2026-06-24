@@ -53,6 +53,7 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
@@ -1419,6 +1420,11 @@ const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
     return forceSplitMgr_;
 }
 
+const RefPtr<RecoverableManager>& PipelineContext::GetRecoverableManager() const
+{
+    return recoverableMgr_;
+}
+
 const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const
 {
     return formVisibleMgr_;
@@ -1446,6 +1452,7 @@ void PipelineContext::InitManagers()
     toolbarManager_ = MakeRefPtr<ToolbarManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    recoverableMgr_ = MakeRefPtr<RecoverableManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();

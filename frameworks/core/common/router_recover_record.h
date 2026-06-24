@@ -23,10 +23,14 @@ struct RouterRecoverRecord {
     std::string url;
     std::string params;
     bool isNamedRouter;
+    std::string componentInfo;
 
     RouterRecoverRecord() : url{}, params{}, isNamedRouter(false) {}
     RouterRecoverRecord(const std::string& url, const std::string& params, bool isNamedRouter)
         : url(url), params(params), isNamedRouter(isNamedRouter) {}
+    RouterRecoverRecord(const std::string& url, const std::string& params, bool isNamedRouter,
+        const std::string& componentInfo)
+        : url(url), params(params), isNamedRouter(isNamedRouter), componentInfo(componentInfo) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ROUTER_RECOVER_RECORD_H

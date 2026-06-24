@@ -67,6 +67,7 @@ void TabsPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetRecoverableViewHostNode(host);
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     host->GetRenderContext()->SetClipToFrame(!tabTheme->GetIsChangeFocusTextStyle());
@@ -789,6 +790,16 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(swiperNode);
     auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
+    if (isInit_) {
+        std::string result;
+        if (GetRestoreInfo(result)) {
+            auto info = JsonUtil::ParseJsonString(result);
+            auto index = info->GetInt64("index");
+            auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateIndexSetByUser(index);
+        }
+    }
     UpdateIndex(tabsNode, tabBarNode, swiperNode, tabsLayoutProperty);
 
     if (isInit_) {
@@ -1308,12 +1319,28 @@ void TabsPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     auto id = host->GetId();
     context->AddWindowSizeChangeCallback(id);
+    auto customId = host->GetInspectorId().value_or("");
+    RegisterRecoverable(customId);
+}
+
+bool TabsPattern::OnSaveData(std::string& data)
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto layoutProperty = hostNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto info = JsonUtil::Create();
+    CHECK_NULL_RETURN(info, false);
+    info->Put("index", layoutProperty->GetIndexValue(0));
+    data = info->ToString();
+    return true;
 }
 
 void TabsPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UnregisterRecoverable();
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture && touchListener_) {
         gesture->RemoveTouchEvent(touchListener_);

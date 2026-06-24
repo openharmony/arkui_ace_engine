@@ -90,6 +90,7 @@ struct RouterPageInfo {
     std::shared_ptr<std::vector<uint8_t>> content;
     RouterIntentInfo intentInfo;
     bool isUseIntent = false;
+    std::string componentInfo;
 };
 
 class ACE_FORCE_EXPORT PageRouterManager : public AceType {
@@ -435,6 +436,7 @@ protected:
     IsComponentPreviewCallback isComponentPreview_;
 #endif
     std::optional<RouterIntentInfo> intentInfo_ = std::nullopt;
+    std::string firstRestorePageComponentInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

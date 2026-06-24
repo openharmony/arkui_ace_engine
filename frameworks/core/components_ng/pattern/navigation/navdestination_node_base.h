@@ -357,6 +357,9 @@ public:
     virtual void SplitTransitionPopFinish(int32_t animationId = -1) {}
     //-------for force split------- end  ------
 
+    void SetRestoreInfo(const std::string& info);
+    bool GetComponentInfo(const std::string& componentId, std::string& result);
+
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
     RectF CalcHalfClipRectForTransition(const SizeF& frameSize);
@@ -387,6 +390,8 @@ protected:
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
+    // componentId->restoreInfo
+    std::unordered_map<std::string, std::string> restoreInfo_;
     bool isNewToolbar_ = false;
     int32_t animationId_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;

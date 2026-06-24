@@ -57,6 +57,8 @@ build_component_ng("manager_ng") {
     "memory/memory_manager.cpp",
     "navigation/navigation_manager.cpp",
     "post_event/post_event_manager.cpp",
+    "recoverable/recoverable_manager.cpp",
+    "recoverable/recoverable_view.cpp",
     "safe_area/safe_area_manager.cpp",
     "scroll_adjust/scroll_adjust_manager.cpp",
     "select_content_overlay/select_content_overlay_manager.cpp",
