@@ -18,8 +18,11 @@
 
 #include <utility>
 
+#include "base/geometry/shape.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +50,21 @@ public:
     static RefPtr<LayoutWrapper> GetGridItem(LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true,
         bool isCache = false);
 
+    void SetContentClipMode(ContentClipMode mode)
+    {
+        contentClipMode_ = mode;
+    }
+
+    void SetContentClipShape(const RefPtr<ShapeRect>& shape)
+    {
+        clipShapeRect_ = shape;
+    }
+
+    void SetContentClipSafeAreaPad(const std::optional<ExpandEdges>& safeAreaPad)
+    {
+        safeAreaPad_ = safeAreaPad;
+    }
+
 protected:
     void AdjustChildrenHeight(LayoutWrapper* layoutWrapper);
 
@@ -62,9 +80,18 @@ protected:
 
     void CalcContentOffset(LayoutWrapper* layoutWrapper, float mainSize);
 
+    void CalculateContentClipFixOffset(LayoutWrapper* layoutWrapper, float mainSize, float mainGap);
+
     GridLayoutInfo info_;
     bool measureInNextFrame_ = false;
     bool syncLoad_ = false;
+    ContentClipMode contentClipMode_ = ContentClipMode::CONTENT_ONLY;
+    RefPtr<ShapeRect> clipShapeRect_;
+    std::optional<ExpandEdges> safeAreaPad_;
+
+private:
+    void PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper) const;
+
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };
 

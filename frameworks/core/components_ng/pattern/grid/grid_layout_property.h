@@ -56,6 +56,7 @@ public:
         ResetLayoutOptions();
         ResetSyncLoad();
         ResetItemFillPolicy();
+        contentClip_.reset();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -162,6 +163,15 @@ public:
     void OnContentEndOffsetUpdate(float /* contentEndOffset */) const override;
 
     std::optional<std::string> GetFinalColumnsTemplate(double width);
+
+    void UpdateContentClip(std::optional<ContentClip> contentClip) override
+    {
+        if (contentClip_ != contentClip) {
+            contentClip_ = contentClip;
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -182,6 +192,7 @@ protected:
         value->propLayoutOptions_ = CloneLayoutOptions();
         value->propSyncLoad_ = CloneSyncLoad();
         value->propItemFillPolicy_ = CloneItemFillPolicy();
+        value->contentClip_ = contentClip_;
     }
 
 private:
@@ -197,6 +208,7 @@ private:
 
     void UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const;
     std::string GetItemFillPolicyString() const;
+    std::optional<ContentClip> contentClip_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
