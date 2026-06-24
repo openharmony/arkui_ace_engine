@@ -148,6 +148,7 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _BuilderProxyNode_Mock_Construct(id: KInt): KPointer
+    native static _SetOnNodeDestroyEvent(ptr: KPointer, event: (nodeId: int) => void): void
     native static _DetachedFreeRoot_Construct(id: KInt): KPointer;
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
