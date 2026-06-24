@@ -199,6 +199,11 @@ bool IsMeasureDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
 }
 
+bool IsSkipSecondaryMeasuredEnabled()
+{
+    return (system::GetParameter("persist.ace.measure.skip.secondary.enabled", "false") == "true");
+}
+
 bool IsSafeAreaDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
@@ -735,6 +740,7 @@ bool SystemProperties::dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEna
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
 bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -983,6 +989,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
         syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
         measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+        skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
         vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
         safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
         pixelRoundEnable_ = IsPixelRoundEnabled();

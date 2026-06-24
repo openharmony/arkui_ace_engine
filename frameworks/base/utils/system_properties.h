@@ -456,6 +456,11 @@ public:
         return measureDebugTraceEnable_;
     }
 
+    static bool GetSkipSecondaryMeasuredEnabled()
+    {
+        return skipSecondaryMeasuredEnable_;
+    }
+
     static bool GetSafeAreaDebugTraceEnabled()
     {
         return safeAreaDebugTraceEnable_;
@@ -803,6 +808,7 @@ private:
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool measureDebugTraceEnable_;
+    static bool skipSecondaryMeasuredEnable_;
     static bool safeAreaDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
