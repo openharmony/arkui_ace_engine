@@ -566,7 +566,6 @@ private:
     std::optional<int32_t> hoverModeChangedCallbackId_;
     std::optional<bool> needDistortion_;
     std::optional<bool> needFlowLight_;
-    std::optional<bool> isDistortAnimationExecuting_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
@@ -610,6 +609,7 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
+    bool isDialogShow_ = true;
     bool hasExtraNodeForDistortion_ = false;
     std::function<void()> onFinishEvent_ = nullptr;
 };
