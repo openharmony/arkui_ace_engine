@@ -815,6 +815,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -883,6 +884,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -950,6 +952,7 @@ void DialogPattern::UpdateContentTextProperty(
     const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
 {
     contentProp->UpdateEnableSmallLanguageTruncation(true);
+    contentProp->UpdatePunctuationOverflow(true);
     if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         contentProp->UpdateOrphanCharOptimization(true);
     }
@@ -1352,6 +1355,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateEnableSmallLanguageTruncation(true);
+    textProps->UpdatePunctuationOverflow(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1448,6 +1452,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateEnableSmallLanguageTruncation(true);
+    props->UpdatePunctuationOverflow(true);
     if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         props->UpdateOrphanCharOptimization(true);
     }
