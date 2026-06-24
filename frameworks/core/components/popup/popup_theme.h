@@ -148,6 +148,10 @@ public:
             theme->buttonTopMargin_ = pattern->GetAttr<Dimension>("popup_button_top_margin", 0.0_vp);
             theme->buttonBottomMargin_ = pattern->GetAttr<Dimension>("popup_button_bottom_margin", 4.0_vp);
             theme->popupDoubleButtonIsSameStyle_ = pattern->GetAttr<int>("popup_double_button_is_same_style", 1);
+            theme->ageTextLeftPadding_ = pattern->GetAttr<Dimension>("popup_age_text_left_padding", 12.0_vp);
+            theme->ageTextRightPadding_ = pattern->GetAttr<Dimension>("popup_age_text_right_padding", 12.0_vp);
+            auto enablePopupFlexGrow = pattern->GetAttr<std::string>("popup_button_enable_flex_grow", "0");
+            theme->enablePopupFlexGrow_ = StringUtils::StringToInt(enablePopupFlexGrow);
         }
     };
 
@@ -499,6 +503,10 @@ public:
     {
         return popupDoubleButtonIsSameStyle_;
     }
+    int32_t GetEnablePopupFlexGrow() const
+    {
+        return enablePopupFlexGrow_;
+    }
 
 protected:
     PopupTheme() = default;
@@ -577,6 +585,7 @@ private:
     int buttonTextFontWeight_ = static_cast<int>(FontWeight::REGULAR);
     Dimension buttonSpacingNewVersion_ = 0.0_vp;
     int popupDoubleButtonIsSameStyle_ = 1;
+    int32_t enablePopupFlexGrow_ = 0;
 };
 
 } // namespace OHOS::Ace
