@@ -189,6 +189,7 @@ if (is_arkui_x) {
       "node/node_component_snapshot.cpp",
       "node/native_interface_focus.cpp",
       "node/drawable_descriptor.cpp",
+      "native_styled_string_descriptor.cpp",
       "node/native_node_ani.cpp",
       "node/native_node_napi.cpp",
       "node/node_utils.cpp",
