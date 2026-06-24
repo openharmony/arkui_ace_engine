@@ -70,6 +70,8 @@ struct NavigationIntentInfo {
 struct NavdestinationRecoveryInfo {
     std::string name;
     std::string param;
+    std::string fileName;
+    std::string moduleName;
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
     int32_t launchMode = 0;

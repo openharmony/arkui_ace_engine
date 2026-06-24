@@ -49,6 +49,7 @@ struct NamedRouterProperty {
     std::string moduleName;
     std::string pagePath;
     std::string ohmUrl;
+    std::string newUrl;
 };
 
 // ArkTsCard load config
@@ -537,6 +538,7 @@ public:
     bool IsNamedRouterNeedPreload(const std::string& name) override;
     void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
+    bool UpdatePageUrl(void* customNode, const std::string& pageName) override;
     bool UpdateRootComponent() override;
     bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)

@@ -2554,6 +2554,7 @@ std::unique_ptr<JsonValue> JsiDeclarativeEngine::GetNamedRouterInfo()
         jsonItem->Put("moduleName", property.moduleName.c_str());
         jsonItem->Put("pagePath", property.pagePath.c_str());
         jsonItem->Put("ohmUrl", property.ohmUrl.c_str());
+        jsonItem->Put("newUrl", property.newUrl.c_str());
         jsonNamedRouterInfo->Put(jsonItem);
         ++recordIter;
     }
@@ -2581,6 +2582,7 @@ void JsiDeclarativeEngine::RestoreNamedRouterInfo(std::unique_ptr<JsonValue> nam
         auto moduleNameJsonValue = item->GetValue("moduleName");
         auto pagePathJsonValue = item->GetValue("pagePath");
         auto ohmUrlJsonValue = item->GetValue("ohmUrl");
+        auto newUrl = item->GetValue("newUrl");
         if (!nameJsonValue || !nameJsonValue->IsString() ||
             !bundleNameJsonValue || !bundleNameJsonValue->IsString() ||
             !moduleNameJsonValue || !moduleNameJsonValue->IsString() ||
@@ -2591,14 +2593,19 @@ void JsiDeclarativeEngine::RestoreNamedRouterInfo(std::unique_ptr<JsonValue> nam
         }
 
         std::string name = nameJsonValue->GetString();
+        if (namedRouterRegisterMap_.find(name) != namedRouterRegisterMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "restore page(%{public}s) is existed", name.c_str());
+            continue;
+        }
         property.bundleName = bundleNameJsonValue->GetString();
         property.moduleName = moduleNameJsonValue->GetString();
         property.pagePath = pagePathJsonValue->GetString();
         property.ohmUrl = ohmUrlJsonValue->GetString();
-        namedRouterMap.emplace(name, property);
+        if (newUrl && newUrl->IsString()) {
+            property.newUrl = newUrl->GetString();
+        }
+        namedRouterRegisterMap_.emplace(name, property);
     }
-
-    std::swap(namedRouterRegisterMap_, namedRouterMap);
 }
 
 bool JsiDeclarativeEngine::IsNamedRouterNeedPreload(const std::string& name)
@@ -2630,19 +2637,30 @@ void JsiDeclarativeEngine::PreloadNamedRouter(const std::string& name, std::func
     const auto& moduleName = it->second.moduleName;
     const auto& pagePath = it->second.pagePath;
     std::string ohmUrl = it->second.ohmUrl + ".js";
+    const auto& newUrl = it->second.newUrl;
     TAG_LOGI(AceLogTag::ACE_ROUTER, "preload named rotuer, bundleName:"
-        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s",
-        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str());
+        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s, newUrl: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str(), newUrl.c_str());
 
-    auto callback = [weak = AceType::WeakClaim(this), ohmUrl, finishCallback = loadFinishCallback]() {
+    auto callback = [weak = AceType::WeakClaim(this), ohmUrl, newUrl, moduleName,
+        finishCallback = loadFinishCallback]() {
         auto jsEngine = weak.Upgrade();
         CHECK_NULL_VOID(jsEngine);
         bool loadSuccess = true;
-        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, &loadSuccess](const std::string& errorMsg, int32_t errorCode) {
+        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, newUrl, moduleName, weak, &loadSuccess](
+            const std::string& errorMsg, int32_t errorCode) {
             TAG_LOGW(AceLogTag::ACE_ROUTER,
                 "Failed to load page source: %{public}s, errorCode: %{public}d, errorMsg: %{public}s", ohmUrl.c_str(),
                 errorCode, errorMsg.c_str());
             loadSuccess = false;
+            // load new normalize ohmurl
+            auto jsEngine = weak.Upgrade();
+            CHECK_NULL_VOID(jsEngine);
+            if (jsEngine->LoadNavDestinationSource("", moduleName, newUrl, false) != 0) {
+                TAG_LOGI(AceLogTag::ACE_ROUTER, "restore load new normalize file(%{public}s) failed", newUrl.c_str());
+                return;
+            }
+            loadSuccess = true;
         });
         if (finishCallback) {
             finishCallback(loadSuccess);
@@ -3773,5 +3791,40 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
     return true;
 }
 
+bool JsiDeclarativeEngine::UpdatePageUrl(void* customNode, const std::string& pageName)
+{
+    CHECK_RUN_ON(JS);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    LocalScope scope(runtime->GetEcmaVm());
+    CHECK_NULL_RETURN(customNode, false);
+    auto thisVal = (JSRef<JSObject>*)(customNode);
+    CHECK_NULL_RETURN(thisVal, false);
+    JSRef<JSObject> thisObj = *(thisVal);
+    if (thisObj->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get custom object in page failed");
+        return false;
+    }
+    auto constructor = thisObj->GetProperty("constructor");
+    if (constructor->IsUndefined()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "custom object constructor is undefined");
+        return false;
+    }
+    std::string moduleName;
+    std::string fileName;
+    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    if (!res) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get ohmurl form jsObject failed");
+        return false;
+    }
+    // update pageUrl info
+    auto iter = namedRouterRegisterMap_.find(pageName);
+    if (iter == namedRouterRegisterMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get pageName(%{public}s) failed", pageName.c_str());
+        return false;
+    }
+    iter->second.newUrl = fileName;
+    return true;
+}
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework
