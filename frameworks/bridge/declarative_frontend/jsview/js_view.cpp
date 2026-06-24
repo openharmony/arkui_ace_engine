@@ -1676,9 +1676,8 @@ void JSViewPartialUpdate::RegisterUpdateForEnvCallback(const JSRef<JSFunc>& upda
 
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
-        auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
-            jsFunc->Call(self->jsViewObject_, 1, param);
+            func->Call(self->jsViewObject_, 1, param);
         }
     };
 
