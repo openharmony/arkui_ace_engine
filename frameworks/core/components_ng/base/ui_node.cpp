@@ -200,7 +200,6 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
         LOGW("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "context instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
@@ -749,7 +748,6 @@ void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addD
         LOGE("AdoptChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
             "child=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, child->GetId(), child->IsIsolatedThread());
-        LogBacktrace();
     }
     auto prevParent = child->GetAdoptParent();
     if (child->IsAdopted() && prevParent && prevParent->GetId() != this->GetId()) {
@@ -802,7 +800,6 @@ void UINode::DoAddChild(
         LOGE("DoAddChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
             "child=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, child->nodeId_, child->isIsolatedThread_);
-        LogBacktrace();
     }
     children_.insert(it, child);
 
@@ -1923,7 +1920,6 @@ PipelineContext* UINode::GetContext() const
         LOGW("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     return context;
 }
@@ -1936,7 +1932,6 @@ PipelineContext* UINode::GetAttachedContext() const
         LOGW("GetAttachedContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-        LogBacktrace();
     }
     return context_;
 }
@@ -1950,7 +1945,6 @@ PipelineContext* UINode::GetContextWithCheck()
             LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
                 "pipeline instanceId=%{public}d isolated=%{public}d",
                 nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-            LogBacktrace();
         }
         return context_;
     }
@@ -1961,7 +1955,6 @@ PipelineContext* UINode::GetContextWithCheck()
         LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     return context;
 }
