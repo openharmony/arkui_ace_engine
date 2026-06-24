@@ -33,8 +33,6 @@ void DrawableCreateAnimatedDrawableByResource(ani_env* env, [[maybe_unused]] ani
     ani_long resourceObjectKPointer, ani_object optionsAni);
 void DrawableCreateAnimatedDrawableByString(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
     ani_string resource, ani_object optionsAni);
-void DrawableCreatePictureDrawable(
-    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object pictureAni);
 ani_object DrawableCreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni);
 ani_object DrawableCreateForeground(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni);
 ani_object DrawableCreateBackground(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni);
@@ -46,9 +44,6 @@ ani_object DrawableGetAnimationController(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object AnimatedDrawable, [[maybe_unused]] ani_string id);
 void DrawableSetBlendMode(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_enum_item blendMode);
-void DrawableSetHdrComposition(
-    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object configAni);
-void DrawableInvalidate(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni);
 ani_object DrawableNativeTransferStatic(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object input, ani_string typeName);
 void DrawableDestructDrawable([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass, ani_long pointer);

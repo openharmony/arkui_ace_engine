@@ -19,15 +19,12 @@
 #include "interop_js/arkts_esvalue.h"
 #include "load.h"
 #include "log/log.h"
-#include "picture_taihe.h"
-#include "picture_taihe_ani.h"
 #include "pixel_map_taihe_ani.h"
 #include "resource_manager.h"
 #include "securec.h"
 #include "utils/ani_utils.h"
 
 #include "base/log/log_wrapper.h"
-#include "base/utils/string_utils.h"
 #include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::Ani {
@@ -36,9 +33,7 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
-constexpr char PICTURE_DRAWABLE_DESCRIPTOR_NAME[] = "PictureDrawableDescriptor";
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
-constexpr char PICTURE_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PictureDrawableDescriptor";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:Y";
 constexpr char ANIMATED_CONSTRUCTOR[] = "C{std.core.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
@@ -60,7 +55,6 @@ enum class DrawableType {
     LAYERED,
     ANIMATED,
     PIXELMAP,
-    PICTURE,
 };
 
 enum class ControlStatus {
@@ -219,51 +213,6 @@ ani_object CreateLayeredDrawableByPixelMap(ani_env* env, const std::shared_ptr<M
     status = env->Object_New(cls, ctor, &obj, objForeground, objBackground, objMask);
     if (ANI_OK != status) {
         HILOGW("AceDrawableDescriptor CreateLayeredDrawableByPixelMap [%{public}d]", status);
-        return nullptr;
-    }
-    return obj;
-}
-
-std::shared_ptr<Media::Picture> GetNativePicture(ani_env* env, ani_object pictureAni)
-{
-    ani_boolean isUndefined = true;
-    if (env->Reference_IsUndefined(pictureAni, &isUndefined) != ANI_OK || static_cast<bool>(isUndefined)) {
-        return nullptr;
-    }
-
-    ani_long implPtr = 0;
-    if (env->Object_CallMethodByName_Long(pictureAni, "getImplPtr", ":l", &implPtr) == ANI_OK && implPtr != 0) {
-        auto* pictureImpl = reinterpret_cast<ANI::Image::PictureImpl*>(implPtr);
-        if (pictureImpl != nullptr) {
-            return pictureImpl->GetNativePtr();
-        }
-    }
-
-    return nullptr;
-}
-
-ani_object CreatePictureDrawableByNative(ani_env* env, void* native)
-{
-    CHECK_NULL_RETURN(native, nullptr);
-    auto* modifier = GetDrawableDescriptorModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-
-    ani_class cls;
-    if (env->FindClass(PICTURE_DRAWABLE, &cls) != ANI_OK) {
-        return nullptr;
-    }
-    ani_object obj {};
-    ani_method ctor {};
-    if (env->Class_FindMethod(cls, "<ctor>", ":", &ctor) != ANI_OK) {
-        return nullptr;
-    }
-    if (env->Object_New(cls, ctor, &obj) != ANI_OK) {
-        return nullptr;
-    }
-
-    modifier->increaseRef(native);
-    if (env->Object_CallMethodByName_Void(obj, "bindNativeObj", "l:", reinterpret_cast<ani_long>(native)) != ANI_OK) {
-        modifier->decreaseRef(native);
         return nullptr;
     }
     return obj;
@@ -484,24 +433,6 @@ void DrawableCreateAnimatedDrawableByString(ani_env* env, [[maybe_unused]] ani_c
     ParseAnimatedOptions(env, optionsAni, drawable);
 }
 
-void DrawableCreatePictureDrawable(
-    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object pictureAni)
-{
-    auto* modifier = GetDrawableDescriptorModifier();
-    CHECK_NULL_VOID(modifier);
-    auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::PICTURE));
-    CHECK_NULL_VOID(drawable);
-    auto ptr = reinterpret_cast<ani_long>(drawable);
-    if (env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr) != ANI_OK) {
-        return;
-    }
-    modifier->increaseRef(drawable);
-    auto picture = GetNativePicture(env, pictureAni);
-    if (picture != nullptr) {
-        modifier->setPicture(drawable, &picture);
-    }
-}
-
 ani_object DrawableCreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
@@ -622,8 +553,7 @@ ani_object DrawableLoadSync(ani_env* env, [[maybe_unused]] ani_class aniClass, a
         case DrawableType::LAYERED:
             break;
         case DrawableType::PIXELMAP:
-        case DrawableType::ANIMATED:
-        case DrawableType::PICTURE: {
+        case DrawableType::ANIMATED: {
             int32_t width = 0;
             int32_t height = 0;
             int32_t errorCode = -1;
@@ -664,8 +594,7 @@ ani_object DrawableLoad(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_o
         case DrawableType::LAYERED:
             break;
         case DrawableType::PIXELMAP:
-        case DrawableType::ANIMATED:
-        case DrawableType::PICTURE: {
+        case DrawableType::ANIMATED: {
             ArkUIDrawableAsync asyncCtx;
             CreateDrawableLoadCallback(env, asyncCtx, &retValue);
             modifier->loadAsync(native, asyncCtx);
@@ -741,8 +670,6 @@ DrawableType GetDrawableType(ani_env* env, ani_string typeName)
         drawableType = DrawableType::ANIMATED;
     } else if (typeNameStr == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
         drawableType = DrawableType::PIXELMAP;
-    } else if (typeNameStr == PICTURE_DRAWABLE_DESCRIPTOR_NAME) {
-        drawableType = DrawableType::PICTURE;
     }
     return drawableType;
 }
@@ -776,12 +703,6 @@ ani_object CreateDrawableByNapiType(ani_env* env, DrawableType drawableType, voi
             retValue = CreatePixelMapDrawableByPixelMap(env, pixelMap->GetPixelMap());
             break;
         }
-        case DrawableType::PICTURE: {
-            auto* native = reinterpret_cast<void*>(unwrapResult);
-            CHECK_NULL_RETURN(native, nullptr);
-            retValue = CreatePictureDrawableByNative(env, native);
-            break;
-        }
         default:
             break;
     }
@@ -811,79 +732,6 @@ void DrawableSetBlendMode(
     }
 
     modifier->setBlendMode(native, static_cast<int32_t>(mode));
-}
-
-int32_t ConvertLengthToPx(ani_env* env, ani_ref value)
-{
-    ani_boolean isUndefined = true;
-    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK || static_cast<bool>(isUndefined)) {
-        return 0;
-    }
-
-    auto aniObject = static_cast<ani_object>(value);
-    if (AniUtils::IsNumber(env, aniObject)) {
-        ani_double doubleValue = 0.0;
-        if (env->Object_CallMethodByName_Double(aniObject, "toDouble", ":d", &doubleValue) !=
-            ANI_OK) {
-            return 0;
-        }
-        return static_cast<int32_t>(doubleValue);
-    }
-
-    return 0;
-}
-
-int32_t GetDimensionProperty(ani_env* env, ani_object object, const char* name)
-{
-    ani_ref value = nullptr;
-    if (env->Object_GetPropertyByName_Ref(object, name, &value) != ANI_OK) {
-        return 0;
-    }
-    return ConvertLengthToPx(env, value);
-}
-
-void DrawableSetHdrComposition(
-    ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object configAni)
-{
-    ani_boolean isUndefined = true;
-    if (env->Reference_IsUndefined(configAni, &isUndefined) != ANI_OK || static_cast<bool>(isUndefined)) {
-        return;
-    }
-
-    ani_ref rectRef = nullptr;
-    if (env->Object_GetPropertyByName_Ref(configAni, "rect", &rectRef) != ANI_OK) {
-        return;
-    }
-    if (env->Reference_IsUndefined(rectRef, &isUndefined) != ANI_OK || static_cast<bool>(isUndefined)) {
-        return;
-    }
-    auto rect = static_cast<ani_object>(rectRef);
-
-    ani_long nativeObj = 0;
-    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
-
-    auto* modifier = GetDrawableDescriptorModifier();
-    CHECK_NULL_VOID(modifier);
-
-    auto* native = reinterpret_cast<void*>(nativeObj);
-    CHECK_NULL_VOID(native);
-
-    modifier->setHdrComposition(native, GetDimensionProperty(env, rect, "x"), GetDimensionProperty(env, rect, "y"),
-        GetDimensionProperty(env, rect, "width"), GetDimensionProperty(env, rect, "height"));
-}
-
-void DrawableInvalidate(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
-{
-    ani_long nativeObj = 0;
-    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
-
-    auto* modifier = GetDrawableDescriptorModifier();
-    CHECK_NULL_VOID(modifier);
-
-    auto* native = reinterpret_cast<void*>(nativeObj);
-    CHECK_NULL_VOID(native);
-
-    modifier->invalidate(native);
 }
 
 ani_object DrawableNativeTransferStatic(

@@ -244,19 +244,16 @@ void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, DrawableDescr
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(drawableAddr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<DrawableDescriptor> drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-    auto drawableType = drawable->GetDrawableType();
-    if (drawableType == DrawableType::ANIMATED || drawableType == DrawableType::PICTURE) {
-        pattern->SetImageType(drawableType == DrawableType::ANIMATED
-            ? ImageType::ANIMATED_DRAWABLE : ImageType::PICTURE_DRAWABLE);
-        pattern->UpdateDrawableDescriptor(drawable);
+    auto drawableType = drawableAddr->GetDrawableType();
+    if (drawableType != DrawableType::ANIMATED) {
+        auto pixelMap = drawableAddr->GetPixelMap();
+        SetPixelMap(frameNode, pixelMap);
     } else {
-        auto pixelMap = drawable->GetPixelMap();
-        auto srcInfo = ImageSourceInfo(pixelMap);
-        pattern->UpdateDrawableDescriptor(nullptr);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        pattern->UpdateDrawableDescriptor(drawable);
     }
 }
 
