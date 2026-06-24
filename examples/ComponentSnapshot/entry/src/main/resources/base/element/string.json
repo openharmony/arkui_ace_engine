@@ -1,0 +1,60 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "LongSnapshotPractice"
+    },
+    {
+      "name": "reason_internet",
+      "value": "Use internet permissions to load html"
+    },
+    {
+      "name": "title_scroll_snapshot",
+      "value": "Scroll Screenshot"
+    },
+    {
+      "name": "title_web_snapshot",
+      "value": "Web Long Screenshot"
+    },
+    {
+      "name": "one_click_snapshot",
+      "value": "One-Tap Screenshot"
+    },
+    {
+      "name": "scroll_snapshot",
+      "value": "Scrolling Snapshot"
+    },
+    {
+      "name": "snapshot",
+      "value": "snapshot"
+    },
+    {
+      "name": "news_item_publish_date",
+      "value": "January 1, 2025"
+    },
+    {
+      "name": "news_item_content",
+      "value": "%1$d The application development documentation provides reference for you to build applications using the APIs provided by the HarmonyOS SDK."
+    },
+    {
+      "name": "screen_is_taking",
+      "value": "Screenshot is taking, please wait..."
+    },
+    {
+      "name": "button_cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "save_album_success",
+      "value": "Saved to album"
+    }
+  ]
+}
