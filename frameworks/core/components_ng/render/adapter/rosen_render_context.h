@@ -58,7 +58,6 @@
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/sidebar_content_mask_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
-#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
@@ -80,12 +79,13 @@ class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
 class PipelineContext;
+class RosenMixedRenderChildList;
 class UINode;
 
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext() = default;
+    RosenRenderContext();
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -1010,7 +1010,7 @@ protected:
     Rosen::Vector4f borderWidth_ = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     bool isTouchUpFinished_ = true;
 
-    bool useContentRectForRSFrame_;
+    bool useContentRectForRSFrame_ = false;
     bool adjustRSFrameByContentRect_ = false;
     bool isFocusBoxGlow_ = false;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
@@ -1027,7 +1027,6 @@ protected:
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
     bool hasKeyFrameCache_ = false;
-    PipelineContext* pipeline_;
 
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
     friend class PropertyTransitionEffectTemplate;
@@ -1042,12 +1041,13 @@ private:
     void InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling);
     void RemoveMixedFrameChild(const RefPtr<UINode>& child);
     void NotifyMixedListChanged();
+    std::shared_ptr<Rosen::RSNode> ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const;
     std::vector<std::shared_ptr<Rosen::RSNode>> BuildMixedTargetRSNodes(FrameNode* frameNode);
     void ReCreateRsNodeTreeByTargetList(const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
         std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap);
 
     uint32_t backgroundTaskId_ = 0;
-    RosenMixedRenderChildList mixedRenderChildList_;
+    std::unique_ptr<RosenMixedRenderChildList> mixedRenderChildList_;
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;

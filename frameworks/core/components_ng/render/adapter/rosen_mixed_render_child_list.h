@@ -57,20 +57,17 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSibling(const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset);
     bool GetInsertIndexAfterRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex);
     bool InsertPureRenderChildAt(
-        const RefPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index);
-    bool InsertFrameChildBefore(
-        const RefPtr<FrameNode>& host, const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling);
+        const WeakPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index);
+    bool InsertFrameChildBefore(const WeakPtr<FrameNode>& host, const RefPtr<UINode>& child,
+        const std::shared_ptr<Rosen::RSNode>& childRSNode, const RefPtr<UINode>& nextSibling);
     bool RemoveFrameChild(const RefPtr<UINode>& child);
-    bool SyncFrameChildren(const RefPtr<FrameNode>& host, const std::list<RefPtr<UINode>>& children);
-    std::vector<std::shared_ptr<Rosen::RSNode>> BuildTargetRSNodes(const RefPtr<FrameNode>& host);
+    std::vector<std::shared_ptr<Rosen::RSNode>> BuildTargetRSNodes(const WeakPtr<FrameNode>& host);
 
 private:
     using MixedRenderChildIterator = std::list<MixedRenderChild>::iterator;
 
     std::shared_ptr<Rosen::RSNode> GetChildRSNode(const MixedRenderChild& child) const;
-    std::shared_ptr<Rosen::RSNode> GetRSNodeFromFrameNode(const RefPtr<FrameNode>& frameNode) const;
-    std::shared_ptr<Rosen::RSNode> ResolveFrameChildRSNode(const RefPtr<UINode>& uiNode) const;
-    void RegisterChild(const RefPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode) const;
+    void RegisterChild(const WeakPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode) const;
     void UnregisterChild(const std::optional<uint64_t>& childRSNodeId) const;
     void RemoveExpiredChild(MixedRenderChildIterator& iter);
 
