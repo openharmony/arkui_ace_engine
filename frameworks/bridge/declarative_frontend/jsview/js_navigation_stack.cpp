@@ -1523,6 +1523,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
+        navPathInfo->SetProperty<std::string>("autoCleanedState", navdestinationsInfo[index].state);
         newPathArray->SetValueAt(index, navPathInfo);
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
@@ -1608,6 +1609,17 @@ bool JSNavigationStack::IsAutoCleaned(int32_t index) const
     return autoCleaned->IsBoolean() && autoCleaned->ToBoolean();
 }
 
+bool JSNavigationStack::GetAutoCleanedCanRecovery(int32_t index) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto canRecovery = pathInfo->GetProperty("canRecovery");
+    return canRecovery->IsBoolean() ? canRecovery->ToBoolean() : true;
+}
+
 void JSNavigationStack::ClearAutoCleanedState(int32_t index)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
@@ -1617,6 +1629,7 @@ void JSNavigationStack::ClearAutoCleanedState(int32_t index)
     }
     pathInfo->SetPropertyObject("autoCleaned", JsiValue::Undefined());
     pathInfo->SetPropertyObject("autoCleanedState", JsiValue::Undefined());
+    pathInfo->SetPropertyObject("canRecovery", JsiValue::Undefined());
 }
 
 std::string JSNavigationStack::GetAutoCleanedState(int32_t index) const
@@ -1630,7 +1643,7 @@ std::string JSNavigationStack::GetAutoCleanedState(int32_t index) const
     return state->IsString() ? state->ToString() : "";
 }
 
-void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId)
+void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
 
@@ -1648,6 +1661,7 @@ void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId)
         auto navDestinationIdValue = info->GetProperty("navDestinationId");
         if (navDestinationIdValue->IsString() && navDestinationIdValue->ToString() == id) {
             info->SetProperty<bool>("autoCleaned", true);
+            info->SetProperty<bool>("canRecovery", canRecovery);
             return;
         }
     }
