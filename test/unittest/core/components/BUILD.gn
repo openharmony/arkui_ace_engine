@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("os_content_test") {
-  module_name = "Common-Properties-OsContent"
+  module_name = "ScrollingSet-Scrollable"
   type = "new"
   sources = [ "./common/properties/os_content_test.cpp" ]
 }
