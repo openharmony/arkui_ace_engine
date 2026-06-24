@@ -629,17 +629,14 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto windowManager = pipelineContext->GetWindowManager();
     isContainerModal_ = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (!canExpandCurrentWindow_ && isContainerModal_) {
-            LimitContainerModalMenuRect(width_, height_, menuPattern);
-        } else {
-            AdjustWrapperRectForPCMode(host);
-        }
-    }
+    auto parentOffset = host->GetPaintRectOffset(true, true);
+    width_ -= parentOffset.GetX();
+    height_ -= parentOffset.GetY();
     CalculateSafeAreaIntersection(safeAreaInsets);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
-    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s offset: %{public}s",
+        wrapperRect_.ToString().c_str(), parentOffset.ToString().c_str());
 }
 
 void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
@@ -2618,17 +2615,6 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
     rectWidth -= containerOffsetX;
     rectHeight -= containerOffsetY;
-}
-
-void MenuLayoutAlgorithm::AdjustWrapperRectForPCMode(const RefPtr<FrameNode>& host)
-{
-    CHECK_NULL_VOID(host);
-    if (!SystemProperties::IsPCMode()) {
-        return;
-    }
-    auto parentOffset = host->GetPaintRectOffset(true, true);
-    width_ -= parentOffset.GetX();
-    height_ -= parentOffset.GetY();
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)

@@ -1458,47 +1458,5 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg036, TestSize.Level1)
     auto resultOffset = menuLayoutAlgorithm->FitToScreen(position, size, true);
     EXPECT_EQ(resultOffset, OffsetF(0.0f, 0.0f));
 }
-
-/**
- * @tc.name: MenuLayoutAlgorithmTestNg037
- * @tc.desc: Test AdjustWrapperRectForPCMode with PCMode enabled
- * @tc.type: FUNC
- */
-HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg037, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menuLayoutAlgorithm and set initial values
-     * @tc.expected: menuLayoutAlgorithm is not null
-     */
-    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
-    ASSERT_NE(menuLayoutAlgorithm, nullptr);
-    
-    menuLayoutAlgorithm->width_ = 100.0;
-    menuLayoutAlgorithm->height_ = 200.0;
-
-    /**
-     * @tc.steps: step2. create host FrameNode
-     * @tc.expected: host is not null
-     */
-    auto host = FrameNode::CreateFrameNode(
-        V2::MENU_ETS_TAG, NODEID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, MENU_TAG, TYPE));
-    ASSERT_NE(host, nullptr);
-
-    /**
-     * @tc.steps: step3. set PCMode and call AdjustWrapperRectForPCMode
-     * @tc.expected: width_ and height_ are adjusted by parent offset
-     */
-    SystemProperties::isPCMode_ = true;
-    menuLayoutAlgorithm->AdjustWrapperRectForPCMode(host);
-    
-    auto parentOffset = host->GetPaintRectOffset(true, true);
-    double expectedWidth = 100.0 - parentOffset.GetX();
-    double expectedHeight = 200.0 - parentOffset.GetY();
-    
-    EXPECT_DOUBLE_EQ(menuLayoutAlgorithm->width_, expectedWidth);
-    EXPECT_DOUBLE_EQ(menuLayoutAlgorithm->height_, expectedHeight);
-    
-    SystemProperties::isPCMode_ = false;
-}
 } // namespace OHOS::Ace::NG
 

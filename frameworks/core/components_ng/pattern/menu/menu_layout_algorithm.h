@@ -219,7 +219,6 @@ private:
     void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize, const LayoutWrapper* layoutWrapper);
     void UpdatePropArrowOffset();
     void LimitContainerModalMenuRect(double& rectWidth, double& rectHeight, const RefPtr<MenuPattern>& menuPattern);
-    void AdjustWrapperRectForPCMode(const RefPtr<FrameNode>& host);
 
     // get option LayoutWrapper for measure get max width
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
