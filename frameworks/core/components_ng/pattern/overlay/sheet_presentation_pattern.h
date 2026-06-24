@@ -363,6 +363,9 @@ public:
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
+    void ClearSheetCloseIconMaterial();
+    void SetSheetCloseIconMaterial();
+
     void ClearSheetRenderMaterial();
     void SetSheetRenderMaterial();
 
