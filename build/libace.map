@@ -1784,6 +1784,7 @@
       "OHOS::Ace::NG::ScrollablePattern::InitScrollBarClickEvent()";
       "OHOS::Ace::NG::ScrollablePattern::IsScrollableSpringEffect() const";
       "OHOS::Ace::NG::ScrollablePattern::MarkScrollBarProxyDirty()";
+      "OHOS::Ace::NG::ScrollablePattern::MarkUserScrollSource(int)";
       "OHOS::Ace::NG::ScrollablePattern::OnAttachToFrameNode()";
       "OHOS::Ace::NG::ScrollablePattern::OnAttachToMainTree()";
       "OHOS::Ace::NG::ScrollablePattern::OnColorConfigurationUpdate()";

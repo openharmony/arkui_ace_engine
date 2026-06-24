@@ -735,6 +735,10 @@ public:
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;

@@ -197,6 +197,10 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isInitialized_ = true;
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    if (scrollStop_) {
+        // Reset accessibilityScrollSource_ when scrolling stops or a single-frame jump layout completes
+        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
@@ -774,6 +778,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     lastOffset_ = currentOffset_;
     auto willScrollPosition = currentOffset_ + delta;
@@ -1013,6 +1018,7 @@ void ScrollPattern::SetAccessibilityAction()
             pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
             static_cast<int32_t>(host->GetAccessibilityId()));
         if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
+            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             pattern->ScrollPage(false, true, scrollType);
         }
     });
@@ -1027,6 +1033,7 @@ void ScrollPattern::SetAccessibilityAction()
             pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
             static_cast<int32_t>(host->GetAccessibilityId()));
         if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
+            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             pattern->ScrollPage(true, true, scrollType);
         }
     });
@@ -1087,6 +1094,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         moveOffset = scrollFrameLength - focusNodeDiffToScroll - focusNodeLength;
     }
     if (!NearZero(moveOffset)) {
+        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;
@@ -1094,10 +1102,14 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    (void)isAccessibility;
-    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+    return { [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
+                if (isAccessibility) {
+                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
+                } else {
+                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
+                }
                 return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
             },
         GetAxis() };

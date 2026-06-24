@@ -5324,6 +5324,20 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, const std
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = accessibilityId_;
+        event.extraEventInfo = extraEventInfo;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {
