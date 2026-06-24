@@ -37,7 +37,7 @@ public:
         onSelect_ = std::move(onSelect);
     }
 
-    const SelectEvent& GetSelectEvent()
+    SelectEvent GetSelectEvent()
     {
         return onSelect_;
     }
@@ -47,7 +47,7 @@ public:
         selectChangeEvent_ = std::move(selectChangeEvent);
     }
 
-    const SelectChangeEvent& GetSelectChangeEvent()
+    SelectChangeEvent GetSelectChangeEvent()
     {
         return selectChangeEvent_;
     }
@@ -57,7 +57,7 @@ public:
         valueChangeEvent_ = std::move(valueChangeEvent);
     }
 
-    const ValueChangeEvent& GetValueChangeEvent()
+    ValueChangeEvent GetValueChangeEvent()
     {
         return valueChangeEvent_;
     }
