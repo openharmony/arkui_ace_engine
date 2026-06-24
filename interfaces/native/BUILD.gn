@@ -219,6 +219,7 @@ if (is_arkui_x) {
       "node/waterflow_section_option.cpp",
       "node/progress_option.cpp",
       "node/rich_editor_native_impl.cpp",
+      "node/node_node_relative_container.cpp",
       "node/list_option.cpp",
       "native_interface_accessibility.cpp",
     ]
