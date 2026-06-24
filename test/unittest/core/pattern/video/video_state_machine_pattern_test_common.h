@@ -65,6 +65,7 @@
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
+#include "video_test_property_common.h"
 
 namespace OHOS::Ace::NG {
 
@@ -82,23 +83,6 @@ public:
 
     MOCK_METHOD0(GetVideoWidth, int32_t());
     MOCK_METHOD0(GetVideoHeight, int32_t());
-};
-
-// Layout must stay byte-identical to the `struct TestProperty` in video_test_ng.cpp,
-// video_test_ng_add.cpp, video_test_ng_extra_add.cpp and video_property_test_ng.cpp:
-// they share namespace OHOS::Ace::NG and link into one binary, so any member drift is an
-// ODR violation that crashes at exit teardown once a different TU's ~TestProperty() wins.
-struct TestProperty {
-    std::optional<std::string> src;
-    std::optional<double> progressRate;
-    std::optional<std::string> posterUrl;
-    std::optional<bool> showFirstFrame;
-    std::optional<bool> muted;
-    std::optional<bool> autoPlay;
-    std::optional<bool> controls;
-    std::optional<bool> loop;
-    std::optional<ImageFit> objectFit;
-    std::optional<RefPtr<VideoControllerV2>> videoController;
 };
 
 namespace {

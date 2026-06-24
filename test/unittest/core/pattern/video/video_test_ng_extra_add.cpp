@@ -63,23 +63,12 @@
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
+#include "video_test_property_common.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-struct TestProperty {
-    std::optional<std::string> src;
-    std::optional<double> progressRate;
-    std::optional<std::string> posterUrl;
-    std::optional<bool> showFirstFrame;
-    std::optional<bool> muted;
-    std::optional<bool> autoPlay;
-    std::optional<bool> controls;
-    std::optional<bool> loop;
-    std::optional<ImageFit> objectFit;
-    std::optional<RefPtr<VideoControllerV2>> videoController;
-};
 namespace {
 constexpr double VIDEO_PROGRESS_RATE = 1.0;
 constexpr bool MUTED_VALUE = false;
