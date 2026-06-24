@@ -84,6 +84,10 @@ public:
     MOCK_METHOD0(GetVideoHeight, int32_t());
 };
 
+// Layout must stay byte-identical to the `struct TestProperty` in video_test_ng.cpp,
+// video_test_ng_add.cpp, video_test_ng_extra_add.cpp and video_property_test_ng.cpp:
+// they share namespace OHOS::Ace::NG and link into one binary, so any member drift is an
+// ODR violation that crashes at exit teardown once a different TU's ~TestProperty() wins.
 struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
@@ -94,6 +98,7 @@ struct TestProperty {
     std::optional<bool> controls;
     std::optional<bool> loop;
     std::optional<ImageFit> objectFit;
+    std::optional<RefPtr<VideoControllerV2>> videoController;
 };
 
 namespace {
