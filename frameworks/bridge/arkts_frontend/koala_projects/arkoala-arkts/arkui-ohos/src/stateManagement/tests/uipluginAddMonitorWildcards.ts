@@ -405,7 +405,6 @@ function doAddMonitorMixedWildAndNonWildDifferentObjects(sync: boolean): void {
 
     // Non-wildcard value info rooted at `comp` (ParentComponent).
     let valueCallbackPropB1 = () => {
-        console.log('[' + tag + '] valueCallback for ' + nonWildcardPath);
         return comp.a_anyprop_no_meta.classB.propB1;
     }
 
