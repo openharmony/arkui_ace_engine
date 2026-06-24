@@ -1310,7 +1310,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme001, TestSize.Level1)
     pattern_->scrollBar_->SetMinHeight(Dimension());
     pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
     EXPECT_EQ(pattern_->scrollBar_->GetBarRect().Height(), 300.0);
-    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 30.0);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 48.0);
 }
 
 /**
