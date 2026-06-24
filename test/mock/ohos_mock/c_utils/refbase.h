@@ -18,6 +18,11 @@
 
 #include <memory>
 namespace OHOS {
+class RefBase {
+public:
+    virtual ~RefBase() = default;
+};
+
 template <typename T>
 class sptr {
 private:

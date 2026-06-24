@@ -224,6 +224,8 @@ public:
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
+    virtual RefPtr<BaseDisplayInfo> GetCachedDisplayInfo();
+
     virtual void InitIsFoldable();
 
     virtual bool IsFoldable();

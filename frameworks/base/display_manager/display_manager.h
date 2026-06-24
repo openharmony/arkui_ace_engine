@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_DISPLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_DISPLAY_MANAGER_H
 
+#include <functional>
+
 #include "base/utils/macros.h"
 #include "base/memory/ace_type.h"
 #include "core/common/display_info.h"
@@ -28,6 +30,15 @@ public:
     static DisplayManager& GetInstance();
     virtual bool ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t& rsScreenId) = 0;
     virtual FoldDisplayMode GetFoldDisplayMode() = 0;
+
+    virtual RefPtr<BaseDisplayInfo> GetCachedDisplayInfo(uint64_t displayId = 0) = 0;
+    // Triggered when display width/height/rotation changes.
+    // May execute on a Binder thread, NOT guaranteed to be on the UI thread.
+    using DisplaySizeChangeCallback = std::function<void(int32_t /* width */, int32_t /* height */,
+        Rotation /* rotation */, uint64_t /* displayId */)>;
+    // Returns callbackId > 0 on success, 0 if listener registration failed or callback is null.
+    virtual uint64_t RegisterDisplaySizeChangeCallback(DisplaySizeChangeCallback callback) = 0;
+    virtual void UnregisterDisplaySizeChangeCallback(uint64_t callbackId) = 0;
 };
 
 } //namespace OHOS::Ace

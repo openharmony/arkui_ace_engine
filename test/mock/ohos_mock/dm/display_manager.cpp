@@ -47,4 +47,34 @@ sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActu
 {
     return defaultDisplay_;
 }
+
+DMError DisplayManager::RegisterDisplayAttributeListener(std::vector<std::string>& attributes,
+    sptr<IDisplayAttributeListener> listener)
+{
+    attributeListener_ = listener;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::UnRegisterDisplayAttributeListener(sptr<IDisplayAttributeListener> listener)
+{
+    attributeListener_ = nullptr;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::RegisterDisplayListener(const sptr<IDisplayListener>& listener)
+{
+    displayListener_ = listener;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
+{
+    displayListener_ = nullptr;
+    return DMError::DM_OK;
+}
+
+bool DisplayManager::IsFoldable()
+{
+    return false;
+}
 }

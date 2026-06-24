@@ -90,8 +90,62 @@ enum class DisplaySourceMode : uint32_t {
     ALONE = 4,
 };
 
-class ACE_EXPORT DisplayInfo : public AceType {
-    DECLARE_ACE_TYPE(DisplayInfo, AceType);
+class ACE_EXPORT BaseDisplayInfo : public AceType {
+    DECLARE_ACE_TYPE(BaseDisplayInfo, AceType);
+
+public:
+    BaseDisplayInfo() = default;
+    ~BaseDisplayInfo() override = default;
+
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+
+    void SetWidth(int32_t width)
+    {
+        width_ = width;
+    }
+
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
+
+    void SetHeight(int32_t height)
+    {
+        height_ = height;
+    }
+
+    Rotation GetRotation() const
+    {
+        return rotation_;
+    }
+
+    void SetRotation(Rotation rotation)
+    {
+        rotation_ = rotation;
+    }
+
+    uint64_t GetDisplayId() const
+    {
+        return displayId_;
+    }
+
+    void SetDisplayId(uint64_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+private:
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+    Rotation rotation_ = Rotation::ROTATION_0;
+    uint64_t displayId_ = 0;
+};
+
+class ACE_EXPORT DisplayInfo : public BaseDisplayInfo {
+    DECLARE_ACE_TYPE(DisplayInfo, BaseDisplayInfo);
 
 public:
     DisplayInfo() = default;
@@ -117,16 +171,6 @@ public:
         foldStatus_ = foldStatus;
     }
 
-    Rotation GetRotation()
-    {
-        return rotation_;
-    }
-
-    void SetRotation(Rotation rotation)
-    {
-        rotation_ = rotation;
-    }
-
     std::vector<Rect> GetCurrentFoldCreaseRegion()
     {
         return currentFoldCreaseRegion_;
@@ -135,36 +179,6 @@ public:
     void SetCurrentFoldCreaseRegion(std::vector<Rect> currentFoldCreaseRegion)
     {
         currentFoldCreaseRegion_ = currentFoldCreaseRegion;
-    }
-
-    uint64_t GetDisplayId() const
-    {
-        return displayId_;
-    }
-
-    void SetDisplayId(uint64_t displayId)
-    {
-        displayId_ = displayId;
-    }
-
-    int32_t GetWidth() const
-    {
-        return width_;
-    }
-
-    void SetWidth(int32_t width)
-    {
-        width_ = width;
-    }
-
-    int32_t GetHeight() const
-    {
-        return height_;
-    }
-
-    void SetHeight(int32_t height)
-    {
-        height_ = height;
     }
 
     DisplaySourceMode GetDisplaySourceMode()
@@ -180,11 +194,7 @@ public:
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
-    Rotation rotation_ = Rotation::ROTATION_0;
     std::vector<Rect> currentFoldCreaseRegion_;
-    uint64_t displayId_ = 0;
-    int32_t width_ = 0;
-    int32_t height_ = 0;
     DisplaySourceMode displaySourceMode_ = DisplaySourceMode::NONE;
 };
 } // namespace OHOS::Ace

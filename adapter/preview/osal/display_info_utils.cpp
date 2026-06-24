@@ -64,4 +64,4 @@ Rect DisplayInfoUtils::GetFoldExpandAvailableRect() const
 {
     return Rect();
 }
-} // namespace OHOS::Ace::DisplayInfoUtils
+} // namespace OHOS::Ace

@@ -17,8 +17,22 @@
 
 #include <cstdint>
 
+#include "refbase.h"
+
 namespace OHOS::Rosen {
 using DisplayId = uint64_t;
+
+enum class Rotation : uint32_t {
+    ROTATION_0 = 0,
+    ROTATION_90 = 1,
+    ROTATION_180 = 2,
+    ROTATION_270 = 3,
+};
+
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    CLONE = 1,
+};
 
 class DisplayInfo {
 public:
@@ -33,10 +47,15 @@ public:
     float GetDensityInCurResolution() const;
     float GetVirtualPixelRatio() const;
 
+    Rotation GetRotation() const;
+    DisplaySourceMode GetDisplaySourceMode() const;
+
     float densityInCurRes_ = 1.0f;
     int32_t dpi_ = 320;
     int32_t width_ = 720;
     int32_t height_ = 1280;
+    Rotation rotation_ = Rotation::ROTATION_0;
+    DisplaySourceMode displaySourceMode_ = DisplaySourceMode::NONE;
 };
 } // namespace OHOS::Rosen
 #endif //FOUNDATION_DM_DISPLAY_INFO_H
