@@ -269,11 +269,11 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemOnSelected(ArkUIRuntimeCallInf
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-
-    std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](bool isSelected) {
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(bool)> callback = [vm, targetNode, func = panda::CopyableGlobal(vm, func)](bool isSelected) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(targetNode);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, isSelected) };
         func->Call(vm, func.ToLocal(), params, NUM_1);
     };

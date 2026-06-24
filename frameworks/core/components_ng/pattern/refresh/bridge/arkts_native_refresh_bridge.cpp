@@ -380,12 +380,13 @@ ArkUINativeModuleValue RefreshBridge::SetOnStateChange(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(RefreshStatus)> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(RefreshStatus)> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)](
                                                       RefreshStatus stateChange) {
         auto vm = func.GetEcmaVM();
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(targetNode);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::NumberRef::New(vm, static_cast<int>(stateChange)) };
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
@@ -428,11 +429,12 @@ ArkUINativeModuleValue RefreshBridge::SetOnRefreshing(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void()> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)]() {
         auto vm = func.GetEcmaVM();
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(targetNode);
         auto result = func->Call(vm, func.ToLocal(), nullptr, NUM_0);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
@@ -470,12 +472,13 @@ ArkUINativeModuleValue RefreshBridge::SetOnOffsetChange(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const float)> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(const float)> callback = [vm, isJsView, targetNode, func = panda::CopyableGlobal(vm, func)](
                                                     const float offsetChange) {
         auto vm = func.GetEcmaVM();
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(targetNode);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::NumberRef::New(vm, offsetChange) };
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
