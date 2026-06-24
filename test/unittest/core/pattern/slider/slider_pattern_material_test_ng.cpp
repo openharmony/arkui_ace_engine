@@ -2025,7 +2025,7 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_UpdateMaterialNodePosition_A
     pattern->blurCoverNode_ = nullptr;
     pattern->dragPointNode_ = nullptr;
     
-    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f);
+    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f, true);
     
     EXPECT_EQ(pattern->dragFrameNode_, nullptr);
     EXPECT_EQ(pattern->blurCoverNode_, nullptr);
@@ -2053,8 +2053,12 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_UpdateMaterialNodePosition_A
     ASSERT_NE(pattern->dragFrameNode_, nullptr);
     ASSERT_NE(pattern->blurCoverNode_, nullptr);
     ASSERT_NE(pattern->dragPointNode_, nullptr);
-    
-    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f);
+
+    frameNode->AddChild(pattern->dragFrameNode_);
+    frameNode->AddChild(pattern->blurCoverNode_);
+    frameNode->AddChild(pattern->dragPointNode_);
+
+    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f, true);
     
     auto frameRC = pattern->dragFrameNode_->GetRenderContext();
     ASSERT_NE(frameRC, nullptr);

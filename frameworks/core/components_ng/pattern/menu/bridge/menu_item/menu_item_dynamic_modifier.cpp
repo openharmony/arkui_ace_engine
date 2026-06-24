@@ -557,10 +557,10 @@ const ArkUIMenuItemModifier* GetMenuItemDynamicModifier()
             .resetSelectIconSymbol = ResetSelectIconSymbol,
             .setOnChange = SetMenuItemOnChange,
             .resetOnChange = ResetMenuItemOnChange,
-            .setSubMenuBuilder = SetSubMenuBuilder,
-            .resetSubMenuBuilder = ResetSubMenuBuilder,
             .createMenuItemFrameNode = CreateMenuItemFrameNode,
             .setLabelFontColorInt = SetLabelFontColor,
+            .setSubMenuBuilder = SetSubMenuBuilder,
+            .resetSubMenuBuilder = ResetSubMenuBuilder,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
