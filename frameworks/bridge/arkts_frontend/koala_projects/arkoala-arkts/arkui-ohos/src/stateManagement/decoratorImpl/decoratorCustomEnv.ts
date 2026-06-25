@@ -52,7 +52,8 @@ export class CustomEnvDecoratedVariable<T> extends DecoratedVariableBase impleme
             }
 
             this.customEnvCallback = ((internalId: int32, value: Any): void => {
-                if (internalId === this.envKey.internalId) {
+                const currentValue = this.finalResultBackingValue.get(false);
+                if (internalId === this.envKey.internalId && value !== currentValue) {
                     try {
                         Promise.resolve().then(() => this.set(value as T));
                     } catch (error) {
