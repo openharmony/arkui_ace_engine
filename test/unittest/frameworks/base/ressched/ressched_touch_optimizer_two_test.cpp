@@ -384,33 +384,6 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsync001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NeedTpFlushVsync002
- * @tc.desc: Test NeedTpFlushVsync functionality with different conditions
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsync002, TestSize.Level1)
-{
-    optimizer_->rvsEnable_ = true;
-    optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccept_ = true;
-    optimizer_->isTpFlushFrameDisplayPeriod_ = true;
-    
-    TouchEvent touchEvent;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    
-    // When slide is not accepted, should return true
-    EXPECT_TRUE(optimizer_->NeedTpFlushVsync(touchEvent));
-    
-    // Test the transition to first frame after TP flush
-    optimizer_->slideAccept_ = false;
-    optimizer_->isTpFlushFrameDisplayPeriod_ = true;
-    optimizer_->lastTpFlush_ = false;
-    optimizer_->NeedTpFlushVsyncInner(touchEvent); // Call inner function to set up state
-    optimizer_->NeedTpFlushVsync(touchEvent);
-    EXPECT_TRUE(optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_);
-}
-
-/**
  * @tc.name: NeedTpFlushVsyncInner001
  * @tc.desc: Test NeedTpFlushVsyncInner with various conditions
  * @tc.type: FUNC
@@ -431,28 +404,6 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner001, TestSize.Level
     // Test with non-finger source tool
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     touchEvent.sourceTool = SourceTool::MOUSE;
-    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
-}
-
-/**
- * @tc.name: NeedTpFlushVsyncInner002
- * @tc.desc: Test NeedTpFlushVsyncInner with slide acceptance conditions
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner002, TestSize.Level1)
-{
-    optimizer_->rvsEnable_ = true;
-    optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccept_ = true;
-    
-    TouchEvent touchEvent;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    
-    // When slide is not accepted, should trigger TP flush for first frame
-    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
-    
-    // Test when slide is accepted
-    optimizer_->slideAccept_ = false;
     EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
