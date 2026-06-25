@@ -230,40 +230,6 @@ struct ImageAltExample {
 
         Divider().strokeWidth(2).color('#E0E0E0')
 
-        // 示例 4: 网络图片 + ImageAlt
-        Column({ space: 15 }) {
-          Text('示例 4: 网络图片 + ImageAlt')
-            .fontSize(18)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(Color.Black)
-
-          Column({ space: 10 }) {
-            Image('https://example.com/invalid-image.png')
-              .width(200)
-              .height(150)
-              .alt({
-                placeholder: $r('app.media.startIcon'),
-                error: $r('app.media.startIcon')
-              })
-              .borderRadius(10)
-              .objectFit(ImageFit.Cover)
-              .onError((error) => {
-                console.info('网络图片加载失败:', JSON.stringify(error));
-              })
-            Text('网络图片失败时显示自定义占位图')
-              .fontSize(14)
-              .fontColor(Color.Gray)
-          }
-          .padding(15)
-          .backgroundColor('#F0F0FF')
-          .borderRadius(15)
-          .width('100%')
-        }
-        .width('100%')
-        .padding(15)
-        .backgroundColor('#E6E6FA')
-        .borderRadius(15)
-
         Text('ImageAlt 提供更灵活的占位图控制，推荐 API 22+ 项目使用')
           .fontSize(12)
           .fontColor(Color.Blue)
