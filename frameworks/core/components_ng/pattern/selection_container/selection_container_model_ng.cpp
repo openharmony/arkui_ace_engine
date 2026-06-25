@@ -60,6 +60,22 @@ void SelectionContainerModelNG::SetCopyOption(CopyOptions copyOption)
     SetCopyOption(frameNode, copyOption);
 }
 
+void SelectionContainerModelNG::CloseSelectionMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectionContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseSelectionMenu();
+}
+
+void SelectionContainerModelNG::ClearTextSelection(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectionContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearTextSelection();
+}
+
 void SelectionContainerModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SelectionContainerLayoutProperty, CopyOption, copyOption, frameNode);

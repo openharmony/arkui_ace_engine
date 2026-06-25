@@ -2981,6 +2981,10 @@ void ArkUINativeModule::RegisterSelectionContainerAttributes(Local<panda::Object
     auto selectionContainer = panda::ObjectRef::New(vm);
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::Create));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "closeSelectionMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::CloseSelectionMenu));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearTextSelection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ClearTextSelection));
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetCopyOption));
     selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),

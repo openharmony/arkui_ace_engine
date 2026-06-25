@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG {
 class SelectionContainerBridge {
 public:
     static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CloseSelectionMenu(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ClearTextSelection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCopyOption(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCopyOption(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);

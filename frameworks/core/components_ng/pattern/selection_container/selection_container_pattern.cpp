@@ -131,6 +131,25 @@ void SelectionContainerPattern::CloseSelectOverlay(bool animation, CloseReason r
     overlay->CloseOverlay(animation, reason);
 }
 
+int32_t SelectionContainerPattern::ClaimSelectionContainerEpoch()
+{
+    static int32_t counter = 0;
+    return counter++;
+}
+
+void SelectionContainerPattern::CloseSelectionMenu()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    CloseSelectOverlay(true);
+}
+
+void SelectionContainerPattern::ClearTextSelection()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    ResetAllSelection();
+    CloseSelectOverlay(true);
+}
+
 void SelectionContainerPattern::ProcessOverlay(const OverlayRequest& request)
 {
     auto overlay = GetOrCreateSelectionSelectOverlay();

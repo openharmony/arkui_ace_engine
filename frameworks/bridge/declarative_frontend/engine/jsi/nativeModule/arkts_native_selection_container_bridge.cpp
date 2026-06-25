@@ -21,6 +21,9 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/select_content_overlay/selection_container_manager.h"
+#include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
+#include "core/components_ng/pattern/selection_container/selection_container_controller_holder.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -170,6 +173,56 @@ ArkUINodeHandle GetNativeNodeHandle(Local<panda::JSValueRef> firstArg, EcmaVM* v
     }
     return nullptr;
 }
+
+// Concrete holder living in the bridge layer: pins a JS controller object via a
+// panda CopyableGlobal so it is not GC'd while the container is alive.
+class PandaControllerHolder : public SelectionContainerControllerHolder {
+public:
+    PandaControllerHolder(EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj) : ref_(vm, obj) {}
+    ~PandaControllerHolder() override = default;
+private:
+    panda::CopyableGlobal<panda::ObjectRef> ref_;
+};
+
+// Bind container nodeId into the JS controller object (property 'nodeId_') so that
+// controller.closeSelectionMenu() can reach the container via SelectionContainerManager.
+void BindControllerInternal(EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& controllerArg)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!controllerArg->IsObject(vm)) {
+        return;
+    }
+    auto controllerObj = controllerArg->ToObject(vm);
+    auto pattern = frameNode->GetPattern<SelectionContainerPattern>();
+    if (pattern) {
+        // Stamp nodeId + epoch together (atomic binding). If pattern is null, neither is
+        // stamped, so the controller stays inert (the nodeId_ < 0 guard rejects it).
+        controllerObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeId_"),
+            panda::IntegerRef::New(vm, frameNode->GetId()));
+        controllerObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "epoch_"),
+            panda::IntegerRef::New(vm, pattern->GetSelectionEpoch()));
+        // Pin the JS controller so it is not GC'd while the container is alive.
+        pattern->SetControllerHolder(std::make_shared<PandaControllerHolder>(vm, controllerObj));
+    }
+}
+
+// Resolve the live container pattern for a controller's (nodeId, epoch). Returns nullptr if
+// the container is gone or the epoch mismatches (node id reused by a different instance).
+RefPtr<SelectionContainerPattern> GetContainerPatternByController(int32_t nodeId, int32_t epoch)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto selectOverlayManager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_RETURN(selectOverlayManager, nullptr);
+    auto manager = selectOverlayManager->GetSelectionContainerManager();
+    CHECK_NULL_RETURN(manager, nullptr);
+    auto container = manager->GetSelectionContainer(nodeId);
+    auto pattern = AceType::DynamicCast<SelectionContainerPattern>(container);
+    if (!pattern || pattern->GetSelectionEpoch() != epoch) {
+        return nullptr;
+    }
+    return pattern;
+}
 } // namespace
 
 ArkUINativeModuleValue SelectionContainerBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -177,6 +230,49 @@ ArkUINativeModuleValue SelectionContainerBridge::Create(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getSelectionContainerModifier()->create();
+    // Route A (dynamic TS): bind controller from constructor options { controller }.
+    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    if (optionsArg->IsObject(vm)) {
+        auto optionsObj = optionsArg->ToObject(vm);
+        auto controllerVal =
+            optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "controller"));
+        if (controllerVal->IsObject(vm)) {
+            auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            BindControllerInternal(vm, frameNode, controllerVal);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectionContainerBridge::CloseSelectionMenu(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> epochArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!idArg->IsNumber() || !epochArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pattern = GetContainerPatternByController(idArg->Int32Value(vm), epochArg->Int32Value(vm));
+    if (pattern) {
+        pattern->CloseSelectionMenu();
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectionContainerBridge::ClearTextSelection(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> epochArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!idArg->IsNumber() || !epochArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pattern = GetContainerPatternByController(idArg->Int32Value(vm), epochArg->Int32Value(vm));
+    if (pattern) {
+        pattern->ClearTextSelection();
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
