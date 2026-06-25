@@ -944,12 +944,12 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined;
         const uiContext = data?.uiContext;
 
-        const reuseKeyValue = remember(() => {
+        const reuseKeyValue = remember<string | undefined>(() => {
             // No reuseKey lambda from transpiler → this isn't a reusable component.
             if (!reuseKey) {
                 return undefined;
             }
-            const incoming = reuseKey();
+            const incoming = reuseKey!();
             if (!options?.sClass) {
                 return incoming || undefined;
             }

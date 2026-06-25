@@ -1,12 +1,11 @@
 import { int32, int64, float32 } from '@koalaui/common';
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from '@koalaui/interop';
-import { memo, memo_stable } from '@koalaui/runtime/annotations';
-import { ComponentBuilder } from '@koalaui/builderLambda';
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda';
 import { isDynamicObject } from './interop';
 import { StateMgmtTool } from '#stateMgmtTool';
 
 export class WrappedBuilder<T> {
-    /** @memo */
+    @Builder
     public builder: T;
     constructor(t: T) {
         this.builder = t;
