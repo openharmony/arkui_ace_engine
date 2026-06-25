@@ -1189,8 +1189,7 @@ export struct TreeView {
     this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
     this.nodeList[this.viewLastIndex.toInt()].setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
     this.nodeList[this.viewLastIndex.toInt()].fontColor = this.treeViewTheme.primaryTitleFontColor;
-    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()]
-      .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+    this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
     this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].setIsSelected(false);
     this.listNodeDataSource.listNode[this.viewLastIndex.toInt()].imageSource =
@@ -1480,8 +1479,7 @@ export struct TreeView {
         /* Set the visibility of the flag line. */
         this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder, this.allParentNode);
         /* Automatically HighLight one second delay and expand after two second delay. */
-        if (currentNodeId !== undefined && currentNodeId !==
-          this.listNodeDataSource.getDraggingCurrentNodeId().toInt()) {
+        if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId().toInt()) {
           this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
             currentNodeId, index);
         }
@@ -2451,8 +2449,7 @@ export class ListNodeDataSource extends BasicDataSource {
     this.changeNodeColor(this.lastIndex, this.listNode[this.lastIndex.toInt()].getNodeStatus()
       .normal);
     this.handleFocusEffect(this.lastIndex, false);
-    this.notifyDataChange(
-      this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex.toInt()].getNodeCurrentNodeId()));
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex.toInt()].getNodeCurrentNodeId()));
   }
 
   private loadedListNodeFunction(): void {
@@ -3027,8 +3024,7 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public clearTimeOutAboutDelayHighLightAndExpand(currentIndex: number): void {
-    if (this.lastPassId !== this.INITIAL_INVALID_VALUE
-      && this.loadedNodeIdAndIndexMap.has((this.lastPassId as int).toDouble())) {
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has((this.lastPassId as int).toDouble())) {
       let index: number = this.loadedNodeIdAndIndexMap.get((this.lastPassId as int).toDouble()) as number;
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
@@ -3632,8 +3628,7 @@ export class ListNodeDataSource extends BasicDataSource {
     /* Add remaining node. */
     for (let j: int = 1; j < dragNodeParam.length; j++) {
       let addNodeResult: boolean =
-        this.addNode(dragNodeParam[j].parentId.toInt(),
-          dragNodeParam[j].currentId.toInt(), dragNodeParam[j].data, false);
+        this.addNode(dragNodeParam[j].parentId.toInt(), dragNodeParam[j].currentId.toInt(), dragNodeParam[j].data, false);
       if (!addNodeResult) {
         return;
       }

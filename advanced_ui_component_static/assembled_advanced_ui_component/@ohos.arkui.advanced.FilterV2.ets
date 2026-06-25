@@ -1130,13 +1130,9 @@ export struct FilterV2 {
         .filter(item => item?.value !== undefined)
         .map((item: FilterV2Result): ResourceStr => {
           if (typeof item.value !== 'string') {
-            try {
-              let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
-              return (uiContent as common.UIAbilityContext).resourceManager
-                .getStringSync((item.value as Resource).id as Long);
-            } catch (error) {
-              return '';
-            }
+            let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
+            return (uiContent as common.UIAbilityContext).resourceManager
+              .getStringSync((item.value as Resource).id as Long);
           } else {
             return item.value;
           }
