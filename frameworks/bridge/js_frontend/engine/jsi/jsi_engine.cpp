@@ -2972,7 +2972,6 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterPerfUtilModule();
     RegisterHiViewModule();
     RegisterI18nPluralRulesModule();
-
     // load jsfwk
 #ifdef OHOS_PLATFORM
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
@@ -3165,6 +3164,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     auto nativeEngine = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     nativeEngine_ = nativeEngine;
     engineInstance_->SetNativeEngine(nativeEngine_);
+    RegisterContainerScopeFunc();
     SetPostTask(nativeEngine_);
 #if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
@@ -3180,7 +3180,6 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     engineInstance_->RegisterFaPlugin();
     RegisterWorker();
-
     return true;
 }
 
@@ -3256,6 +3255,13 @@ void JsiEngine::RegisterInitWorkerFunc()
         }
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiEngine::RegisterContainerScopeFunc()
+{
+    nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
+    nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
+    nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);
 }
 
 #ifdef OHOS_PLATFORM
