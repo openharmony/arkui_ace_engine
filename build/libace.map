@@ -3775,7 +3775,7 @@
       OHOS::Ace::ImageInfoConfig::*;
       OHOS::Ace::ImageModel::*;
       "OHOS::Ace::NG::ImageModelNG::SetAlt(OHOS::Ace::NG::FrameNode*, OHOS::Ace::ImageSourceInfo const&)";
-      "OHOS::Ace::NG::ImageModelNG::CreateFrameNode(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      "OHOS::Ace::NG::ImageModelNG::CreateFrameNode(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool, bool)";
       "OHOS::Ace::NG::ImageModelNG::SetBackBorder(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::ImageModelNG::ResetBackBorder(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::ArkTSUtils::SetTextBackgroundStyle(std::__h::shared_ptr<OHOS::Ace::TextBackgroundStyle>, OHOS::Ace::Color, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, float const*, int const*)";

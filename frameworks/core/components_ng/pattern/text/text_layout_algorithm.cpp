@@ -606,8 +606,9 @@ ParagraphStyle TextLayoutAlgorithm::CreateSpanParagraphStyle(LayoutWrapper* layo
 
     ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle, group);
     if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-        spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale(),
+            textStyle.GetEnvFontScale());
     }
     spanParagraphStyle.isEndAddParagraphSpacing =
         paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&

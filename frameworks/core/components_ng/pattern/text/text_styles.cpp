@@ -54,8 +54,9 @@ namespace {
         if (value.Unit() == DimensionUnit::PERCENT) {                                                  \
             textStyle.Set##styleName(value);                                                           \
         } else {                                                                                       \
-            auto px = value.ConvertToPxDistribute(                                                     \
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());   \
+            auto px = value.ConvertToPxDistributeWithEnv(                                              \
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale(),    \
+                textStyle.GetEnvFontScale());                                                          \
             textStyle.Set##styleName(Dimension(px, DimensionUnit::PX));                                \
         }                                                                                              \
     } while (false)

@@ -1390,4 +1390,165 @@ HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsSameNonZeroWidth001, TestSize.Lev
     alg.LayoutParagraphs(TEST_WIDTH_SAME);
 }
 
+// ==================== ConvertToPxDistributeWithEnv (UPDATE_DIMENSION_STYLE_TO_PX) Tests ====================
+
+/**
+ * @tc.name: UpdateTextStyleFromPropertyEnvFontScale001
+ * @tc.desc: Test UpdateTextStyleFromProperty uses pattern envFontScale when converting FP font size to PX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScale001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetEnvFontScale(2.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    constexpr double fpFontSize = 10.0;
+    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
+    // envFontScale=2.0, dipScale=1.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
+    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize * 2.0);
+}
+
+/**
+ * @tc.name: UpdateTextStyleFromPropertyEnvFontScaleClamped001
+ * @tc.desc: Test envFontScale is clamped by MinFontScale/MaxFontScale during PX conversion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScaleClamped001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetEnvFontScale(5.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    constexpr double fpFontSize = 10.0;
+    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    constexpr float minFontScale = 0.0f;
+    constexpr float maxFontScale = 2.0f;
+    layoutProperty->UpdateMinFontScale(minFontScale);
+    layoutProperty->UpdateMaxFontScale(maxFontScale);
+
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
+    // envFontScale=5.0 clamped to [0.0, 2.0] => 2.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
+    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize * maxFontScale);
+}
+
+/**
+ * @tc.name: UpdateTextStyleFromPropertyEnvFontScaleNoScale001
+ * @tc.desc: Test envFontScale is ignored when AllowScale is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScaleNoScale001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetEnvFontScale(2.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    constexpr double fpFontSize = 10.0;
+    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    layoutProperty->UpdateAllowScale(false);
+
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
+    // allowScale=false => px = value * dipScale = 10.0 * 1.0 = 10.0 (envFontScale ignored)
+    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
+    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize);
+}
+
+// ==================== ConvertToPxDistributeWithEnv (CreateSpanParagraphStyle) Tests ====================
+
+/**
+ * @tc.name: CreateSpanParagraphStyleFontSizeWithEnv001
+ * @tc.desc: Test CreateSpanParagraphStyle uses textStyle envFontScale when converting span fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, CreateSpanParagraphStyleFontSizeWithEnv001, TestSize.Level1)
+{
+    auto cache = AceType::MakeRefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle, cache);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+
+    std::list<RefPtr<SpanItem>> group;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+    constexpr double fpFontSize = 10.0;
+    spanItem->fontStyle->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    spanItem->content = u"Test";
+    group.push_back(spanItem);
+
+    TextStyle envTextStyle;
+    envTextStyle.SetEnvFontScale(2.0f);
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = 100;
+    int32_t maxLines = 100;
+
+    auto result = alg.CreateSpanParagraphStyle(
+        AceType::RawPtr(layoutWrapper), group, paraStyle, envTextStyle, maxLines, true, false);
+    // envFontScale=2.0, dipScale=1.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_DOUBLE_EQ(result.fontSize, fpFontSize * 2.0);
+}
+
+/**
+ * @tc.name: CreateSpanParagraphStyleFontSizeEnvClamped001
+ * @tc.desc: Test CreateSpanParagraphStyle clamps envFontScale by MinFontScale/MaxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, CreateSpanParagraphStyleFontSizeEnvClamped001, TestSize.Level1)
+{
+    auto cache = AceType::MakeRefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle, cache);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+
+    std::list<RefPtr<SpanItem>> group;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+    constexpr double fpFontSize = 10.0;
+    spanItem->fontStyle->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    spanItem->content = u"Test";
+    group.push_back(spanItem);
+
+    TextStyle envTextStyle;
+    envTextStyle.SetEnvFontScale(5.0f);
+    constexpr float minFontScale = 0.0f;
+    constexpr float maxFontScale = 2.0f;
+    envTextStyle.SetMinFontScale(minFontScale);
+    envTextStyle.SetMaxFontScale(maxFontScale);
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = 100;
+    int32_t maxLines = 100;
+
+    auto result = alg.CreateSpanParagraphStyle(
+        AceType::RawPtr(layoutWrapper), group, paraStyle, envTextStyle, maxLines, true, false);
+    // envFontScale=5.0 clamped to [0.0, 2.0] => 2.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_DOUBLE_EQ(result.fontSize, fpFontSize * maxFontScale);
+}
+
 } // namespace OHOS::Ace::NG
