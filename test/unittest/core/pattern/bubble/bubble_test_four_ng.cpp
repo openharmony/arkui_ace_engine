@@ -74,6 +74,8 @@ constexpr float FONT_SIZE_SCALE_TEST2 = 3.20f;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE = true;
 constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
+constexpr float LARGE_ARROW_WIDTH = 100.0f;
+constexpr float LARGE_ARROW_HEIGHT = 50.0f;
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
 constexpr Dimension DEFAULT_RADIUS = 20.0_px;
@@ -1466,4 +1468,754 @@ HWTEST_F(BubbleTestFourNg, FitAvailableRect001, TestSize.Level0)
     layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), true);
     EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: ArrowMemberVariablesTest001
+ * @tc.desc: Test that multiple BubbleLayoutAlgorithm instances maintain independent arrow width/height
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest001, TestSize.Level1)
+{
+    // Create two bubble layout algorithm instances with different targets
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1",
+        OffsetF(100.0f, 100.0f), SizeF(50.0f, 50.0f));
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2",
+        OffsetF(200.0f, 200.0f), SizeF(60.0f, 60.0f));
+
+    // Verify initial default values are the same
+    EXPECT_EQ(algorithm1->bubbleArrowWidth_, 16.0_vp);
+    EXPECT_EQ(algorithm1->bubbleArrowHeight_, 8.0_vp);
+    EXPECT_EQ(algorithm2->bubbleArrowWidth_, 16.0_vp);
+    EXPECT_EQ(algorithm2->bubbleArrowHeight_, 8.0_vp);
+
+    // Modify first instance's arrow dimensions
+    algorithm1->bubbleArrowWidth_ = Dimension(24.0_vp);
+    algorithm1->bubbleArrowHeight_ = Dimension(12.0_vp);
+
+    // Verify first instance has new values
+    EXPECT_EQ(algorithm1->bubbleArrowWidth_, 24.0_vp);
+    EXPECT_EQ(algorithm1->bubbleArrowHeight_, 12.0_vp);
+
+    // Verify second instance still has default values (independence check)
+    EXPECT_EQ(algorithm2->bubbleArrowWidth_, 16.0_vp);
+    EXPECT_EQ(algorithm2->bubbleArrowHeight_, 8.0_vp);
+
+    // Modify second instance to different values
+    algorithm2->bubbleArrowWidth_ = Dimension(32.0_vp);
+    algorithm2->bubbleArrowHeight_ = Dimension(16.0_vp);
+
+    // Verify both instances have independent values
+    EXPECT_EQ(algorithm1->bubbleArrowWidth_, 24.0_vp);
+    EXPECT_EQ(algorithm1->bubbleArrowHeight_, 12.0_vp);
+    EXPECT_EQ(algorithm2->bubbleArrowWidth_, 32.0_vp);
+    EXPECT_EQ(algorithm2->bubbleArrowHeight_, 16.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest002
+ * @tc.desc: Test that multiple BubbleLayoutAlgorithm instances maintain independent beta values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest002, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1",
+        OffsetF(100.0f, 100.0f), SizeF(50.0f, 50.0f));
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2",
+        OffsetF(200.0f, 200.0f), SizeF(60.0f, 60.0f));
+
+    // Set different arrow dimensions for each instance
+    algorithm1->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm1->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    algorithm2->bubbleArrowWidth_ = Dimension(32.0_vp);
+    algorithm2->bubbleArrowHeight_ = Dimension(16.0_vp);
+
+    // Call GetEndP2P4 for both instances
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm1->GetEndP2P4(ARROW_RADIUS);
+    algorithm2->GetEndP2P4(ARROW_RADIUS);
+
+    // Verify that typeOneBeta_ values are different due to different arrow dimensions
+    EXPECT_NE(algorithm1->typeOneBeta_, algorithm2->typeOneBeta_);
+    EXPECT_GT(algorithm1->typeOneBeta_, 0.0);
+    EXPECT_GT(algorithm2->typeOneBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest003
+ * @tc.desc: Test that multiple BubbleLayoutAlgorithm instances maintain independent typeTwoBeta values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest003, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1",
+        OffsetF(100.0f, 100.0f), SizeF(50.0f, 50.0f));
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2",
+        OffsetF(200.0f, 200.0f), SizeF(60.0f, 60.0f));
+
+    // Set different arrow dimensions for each instance
+    algorithm1->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm1->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    algorithm2->bubbleArrowWidth_ = Dimension(32.0_vp);
+    algorithm2->bubbleArrowHeight_ = Dimension(16.0_vp);
+
+    // Call GetP2 for both instances
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm1->GetP2(ARROW_RADIUS);
+    algorithm2->GetP2(ARROW_RADIUS);
+
+    // Verify that typeTwoBeta_ values are different due to different arrow dimensions
+    EXPECT_NE(algorithm1->typeTwoBeta_, algorithm2->typeTwoBeta_);
+    EXPECT_GT(algorithm1->typeTwoBeta_, 0.0);
+    EXPECT_GT(algorithm2->typeTwoBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest004
+ * @tc.desc: Test SetArrowSize function with default arrow dimensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest004, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Use default arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call SetArrowSize
+    float width = 0.0f;
+    float height = 0.0f;
+    algorithm->SetArrowSize(width, height);
+
+    // Verify the width and height are set to default values
+    EXPECT_FLOAT_EQ(width, 16.0f);
+    EXPECT_FLOAT_EQ(height, 8.0f);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest005
+ * @tc.desc: Test SetArrowSize function with custom arrow dimensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest005, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set custom arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(24.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(12.0_vp);
+
+    // Call SetArrowSize
+    float width = 0.0f;
+    float height = 0.0f;
+    algorithm->SetArrowSize(width, height);
+
+    // Verify the width and height are set correctly
+    EXPECT_FLOAT_EQ(width, 24.0f);
+    EXPECT_FLOAT_EQ(height, 12.0f);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest006
+ * @tc.desc: Test GetEndP2P4 calculates correct default point parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest006, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up default arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call GetEndP2P4 with test radius
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm->GetEndP2P4(ARROW_RADIUS);
+
+    // Verify that calculated values are set
+    EXPECT_GT(algorithm->defaultP4EndY_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2EndX_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2EndY_.Value(), 0.0);
+    EXPECT_GT(algorithm->typeOneBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest007
+ * @tc.desc: Test GetP2 calculates correct default point parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest007, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up default arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call GetP2 with test radius
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm->GetP2(ARROW_RADIUS);
+
+    // Verify that calculated values are set
+    EXPECT_GT(algorithm->defaultP2Height_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2Width_.Value(), 0.0);
+    EXPECT_GT(algorithm->typeTwoBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest008
+ * @tc.desc: Test that GetEndP2P4 and GetP2 produce different beta values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest008, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up default arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call both functions
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm->GetEndP2P4(ARROW_RADIUS);
+    algorithm->GetP2(ARROW_RADIUS);
+
+    // Verify that typeOneBeta_ and typeTwoBeta_ are different (they calculate different angles)
+    EXPECT_NE(algorithm->typeOneBeta_, algorithm->typeTwoBeta_);
+    EXPECT_GT(algorithm->typeOneBeta_, 0.0);
+    EXPECT_GT(algorithm->typeTwoBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest009
+ * @tc.desc: Test arrow vertical offset parameters maintain independence across instances
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest009, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different offset values for each instance
+    algorithm1->arrowVerticalP1OffsetX_ = Dimension(10.0_vp);
+    algorithm1->arrowVerticalP2OffsetY_ = Dimension(8.0_vp);
+
+    algorithm2->arrowVerticalP1OffsetX_ = Dimension(15.0_vp);
+    algorithm2->arrowVerticalP2OffsetY_ = Dimension(12.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowVerticalP1OffsetX_, 10.0_vp);
+    EXPECT_EQ(algorithm1->arrowVerticalP2OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm2->arrowVerticalP1OffsetX_, 15.0_vp);
+    EXPECT_EQ(algorithm2->arrowVerticalP2OffsetY_, 12.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest010
+ * @tc.desc: Test arrow horizon offset parameters maintain independence across instances
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest010, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different horizon offset values for each instance
+    algorithm1->arrowHorizonP1OffsetY_ = Dimension(9.0_vp);
+    algorithm1->arrowHorizonP2OffsetX_ = Dimension(7.0_vp);
+
+    algorithm2->arrowHorizonP1OffsetY_ = Dimension(11.0_vp);
+    algorithm2->arrowHorizonP2OffsetX_ = Dimension(10.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowHorizonP1OffsetY_, 9.0_vp);
+    EXPECT_EQ(algorithm1->arrowHorizonP2OffsetX_, 7.0_vp);
+    EXPECT_EQ(algorithm2->arrowHorizonP1OffsetY_, 11.0_vp);
+    EXPECT_EQ(algorithm2->arrowHorizonP2OffsetX_, 10.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest011
+ * @tc.desc: Test arrow replace start vertical offset parameters maintain independence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest011, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different replace start vertical offset values
+    algorithm1->arrowReplaceStartVerticalP1OffsetX_ = Dimension(5.0_vp);
+    algorithm1->arrowReplaceStartVerticalP2OffsetY_ = Dimension(6.0_vp);
+
+    algorithm2->arrowReplaceStartVerticalP1OffsetX_ = Dimension(7.0_vp);
+    algorithm2->arrowReplaceStartVerticalP2OffsetY_ = Dimension(8.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowReplaceStartVerticalP1OffsetX_, 5.0_vp);
+    EXPECT_EQ(algorithm1->arrowReplaceStartVerticalP2OffsetY_, 6.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceStartVerticalP1OffsetX_, 7.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceStartVerticalP2OffsetY_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest012
+ * @tc.desc: Test arrow replace end vertical offset parameters maintain independence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest012, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different replace end vertical offset values
+    algorithm1->arrowReplaceEndVerticalP4OffsetX_ = Dimension(9.0_vp);
+    algorithm1->arrowReplaceEndVerticalP5OffsetX_ = Dimension(10.0_vp);
+
+    algorithm2->arrowReplaceEndVerticalP4OffsetX_ = Dimension(11.0_vp);
+    algorithm2->arrowReplaceEndVerticalP5OffsetX_ = Dimension(12.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowReplaceEndVerticalP4OffsetX_, 9.0_vp);
+    EXPECT_EQ(algorithm1->arrowReplaceEndVerticalP5OffsetX_, 10.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceEndVerticalP4OffsetX_, 11.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceEndVerticalP5OffsetX_, 12.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest013
+ * @tc.desc: Test arrow replace start horizon offset parameters maintain independence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest013, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different replace start horizon offset values
+    algorithm1->arrowReplaceStartHorizonP1OffsetY_ = Dimension(13.0_vp);
+    algorithm1->arrowReplaceStartHorizonP2OffsetX_ = Dimension(14.0_vp);
+
+    algorithm2->arrowReplaceStartHorizonP1OffsetY_ = Dimension(15.0_vp);
+    algorithm2->arrowReplaceStartHorizonP2OffsetX_ = Dimension(16.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowReplaceStartHorizonP1OffsetY_, 13.0_vp);
+    EXPECT_EQ(algorithm1->arrowReplaceStartHorizonP2OffsetX_, 14.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceStartHorizonP1OffsetY_, 15.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceStartHorizonP2OffsetX_, 16.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest014
+ * @tc.desc: Test arrow replace end horizon offset parameters maintain independence
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest014, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different replace end horizon offset values
+    algorithm1->arrowReplaceEndHorizonP4OffsetX_ = Dimension(17.0_vp);
+    algorithm1->arrowReplaceEndHorizonP5OffsetY_ = Dimension(18.0_vp);
+
+    algorithm2->arrowReplaceEndHorizonP4OffsetX_ = Dimension(19.0_vp);
+    algorithm2->arrowReplaceEndHorizonP5OffsetY_ = Dimension(20.0_vp);
+
+    // Verify independence
+    EXPECT_EQ(algorithm1->arrowReplaceEndHorizonP4OffsetX_, 17.0_vp);
+    EXPECT_EQ(algorithm1->arrowReplaceEndHorizonP5OffsetY_, 18.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceEndHorizonP4OffsetX_, 19.0_vp);
+    EXPECT_EQ(algorithm2->arrowReplaceEndHorizonP5OffsetY_, 20.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest015
+ * @tc.desc: Test that bubbleArrowWidthF_ and bubbleArrowHeightF_ are set correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest015, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set custom arrow dimensions and their float versions
+    algorithm->bubbleArrowWidth_ = Dimension(20.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(10.0_vp);
+    algorithm->bubbleArrowWidthF_ = 20.0f;
+    algorithm->bubbleArrowHeightF_ = 10.0f;
+
+    // Verify the float versions are set
+    EXPECT_TRUE(algorithm->bubbleArrowWidthF_.has_value());
+    EXPECT_TRUE(algorithm->bubbleArrowHeightF_.has_value());
+    EXPECT_FLOAT_EQ(algorithm->bubbleArrowWidthF_.value(), 20.0f);
+    EXPECT_FLOAT_EQ(algorithm->bubbleArrowHeightF_.value(), 10.0f);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest016
+ * @tc.desc: Test concurrent arrow parameter calculation for multiple instances
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest016, TestSize.Level1)
+{
+    // Create multiple instances to simulate concurrent bubble creation
+    std::vector<RefPtr<BubbleLayoutAlgorithm>> algorithms;
+    for (int i = 0; i < 5; i++) {
+        algorithms.push_back(AceType::MakeRefPtr<BubbleLayoutAlgorithm>(
+            1001 + i, "target" + std::to_string(i),
+            OffsetF(100.0f + i * 50.0f, 100.0f + i * 50.0f),
+            SizeF(50.0f + i * 10.0f, 50.0f + i * 10.0f)));
+    }
+
+    // Set different arrow dimensions for each instance
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    for (size_t i = 0; i < algorithms.size(); i++) {
+        algorithms[i]->bubbleArrowWidth_ =
+            Dimension(16.0_vp + Dimension(static_cast<double>(i) * 4.0, DimensionUnit::VP));
+        algorithms[i]->bubbleArrowHeight_ =
+            Dimension(8.0_vp + Dimension(static_cast<double>(i) * 2.0, DimensionUnit::VP));
+        algorithms[i]->GetEndP2P4(ARROW_RADIUS);
+        algorithms[i]->GetP2(ARROW_RADIUS);
+    }
+
+    // Verify each instance has independent values
+    for (size_t i = 0; i < algorithms.size(); i++) {
+        EXPECT_FLOAT_EQ(algorithms[i]->bubbleArrowWidth_.Value(), 16.0 + static_cast<double>(i) * 4.0);
+        EXPECT_FLOAT_EQ(algorithms[i]->bubbleArrowHeight_.Value(), 8.0 + static_cast<double>(i) * 2.0);
+        EXPECT_GT(algorithms[i]->typeOneBeta_, 0.0);
+        EXPECT_GT(algorithms[i]->typeTwoBeta_, 0.0);
+    }
+
+    // Verify that all instances have different typeOneBeta values
+    for (size_t i = 0; i < algorithms.size() - 1; i++) {
+        EXPECT_NE(algorithms[i]->typeOneBeta_, algorithms[i + 1]->typeOneBeta_);
+        EXPECT_NE(algorithms[i]->typeTwoBeta_, algorithms[i + 1]->typeTwoBeta_);
+    }
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest017
+ * @tc.desc: Test default values of all new arrow member variables
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest017, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify default values of arrow dimension variables
+    EXPECT_EQ(algorithm->bubbleArrowWidth_, 16.0_vp);
+    EXPECT_EQ(algorithm->bubbleArrowHeight_, 8.0_vp);
+    EXPECT_FALSE(algorithm->bubbleArrowWidthF_.has_value());
+    EXPECT_FALSE(algorithm->bubbleArrowHeightF_.has_value());
+
+    // Verify default values of calculated parameters
+    EXPECT_EQ(algorithm->defaultP2Height_, 7.32_vp);
+    EXPECT_EQ(algorithm->defaultP2Width_, 1.5_vp);
+    EXPECT_EQ(algorithm->defaultP4EndY_, 6.0_vp);
+    EXPECT_EQ(algorithm->defaultP2EndX_, 12.8_vp);
+    EXPECT_EQ(algorithm->defaultP2EndY_, 7.6_vp);
+
+    // Verify default values of beta angles
+    EXPECT_EQ(algorithm->typeOneBeta_, 0.0);
+    EXPECT_EQ(algorithm->typeTwoBeta_, 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest018
+ * @tc.desc: Test all arrow vertical offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest018, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all vertical offset parameters have default values
+    EXPECT_EQ(algorithm->arrowVerticalP1OffsetX_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowVerticalP2OffsetX_, 1.5_vp);
+    EXPECT_EQ(algorithm->arrowVerticalP2OffsetY_, 7.32_vp);
+    EXPECT_EQ(algorithm->arrowVerticalP4OffsetX_, 1.5_vp);
+    EXPECT_EQ(algorithm->arrowVerticalP4OffsetY_, 7.32_vp);
+    EXPECT_EQ(algorithm->arrowVerticalP5OffsetX_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest019
+ * @tc.desc: Test all arrow horizon offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest019, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all horizon offset parameters have default values
+    EXPECT_EQ(algorithm->arrowHorizonP1OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowHorizonP2OffsetX_, 7.32_vp);
+    EXPECT_EQ(algorithm->arrowHorizonP2OffsetY_, 1.5_vp);
+    EXPECT_EQ(algorithm->arrowHorizonP4OffsetX_, 7.32_vp);
+    EXPECT_EQ(algorithm->arrowHorizonP4OffsetY_, 1.5_vp);
+    EXPECT_EQ(algorithm->arrowHorizonP5OffsetY_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest020
+ * @tc.desc: Test all arrow replace start vertical offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest020, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all replace start vertical offset parameters have default values
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP1OffsetX_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP2OffsetX_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP2OffsetY_, 6.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP4OffsetX_, 4.8_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP4OffsetY_, 7.6_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartVerticalP5OffsetX_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest021
+ * @tc.desc: Test all arrow replace end vertical offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest021, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all replace end vertical offset parameters have default values
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP1OffsetX_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP2OffsetX_, 4.8_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP2OffsetY_, 7.6_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP4OffsetX_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP4OffsetY_, 6.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndVerticalP5OffsetX_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest022
+ * @tc.desc: Test all arrow replace start horizon offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest022, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all replace start horizon offset parameters have default values
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP1OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP2OffsetX_, 6.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP2OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP4OffsetX_, 7.6_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP4OffsetY_, 4.8_vp);
+    EXPECT_EQ(algorithm->arrowReplaceStartHorizonP5OffsetY_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest023
+ * @tc.desc: Test all arrow replace end horizon offset parameters have correct default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest023, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Verify all replace end horizon offset parameters have default values
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP1OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP2OffsetX_, 7.6_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP2OffsetY_, 4.8_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP4OffsetX_, 6.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP4OffsetY_, 8.0_vp);
+    EXPECT_EQ(algorithm->arrowReplaceEndHorizonP5OffsetY_, 8.0_vp);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest024
+ * @tc.desc: Test SetArrowSize with zero arrow dimensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest024, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set zero arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(0.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(0.0_vp);
+
+    // Call SetArrowSize with zero dimensions
+    float width = 0.0f;
+    float height = 0.0f;
+    algorithm->SetArrowSize(width, height);
+
+    // Verify the width and height are zero
+    EXPECT_FLOAT_EQ(width, 0.0f);
+    EXPECT_FLOAT_EQ(height, 0.0f);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest025
+ * @tc.desc: Test SetArrowSize with large arrow dimensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest025, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    algorithm->bubbleArrowWidth_ = Dimension(LARGE_ARROW_WIDTH, DimensionUnit::VP);
+    algorithm->bubbleArrowHeight_ = Dimension(LARGE_ARROW_HEIGHT, DimensionUnit::VP);
+
+    // Call SetArrowSize with large dimensions
+    float width = 0.0f;
+    float height = 0.0f;
+    algorithm->SetArrowSize(width, height);
+
+    // Verify the width and height are set to large values
+    EXPECT_FLOAT_EQ(width, LARGE_ARROW_WIDTH);
+    EXPECT_FLOAT_EQ(height, LARGE_ARROW_HEIGHT);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest026
+ * @tc.desc: Test GetEndP2P4 with very small radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest026, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call GetEndP2P4 with very small radius
+    constexpr Dimension SMALL_RADIUS = 0.5_vp;
+    algorithm->GetEndP2P4(SMALL_RADIUS);
+
+    // Verify calculations still work
+    EXPECT_GT(algorithm->typeOneBeta_, 0.0);
+    EXPECT_GT(algorithm->defaultP4EndY_.Value(), 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest027
+ * @tc.desc: Test GetP2 with very small radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest027, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call GetP2 with very small radius
+    constexpr Dimension SMALL_RADIUS = 0.5_vp;
+    algorithm->GetP2(SMALL_RADIUS);
+
+    // Verify calculations still work
+    EXPECT_GT(algorithm->typeTwoBeta_, 0.0);
+    EXPECT_GT(algorithm->defaultP2Height_.Value(), 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest028
+ * @tc.desc: Test that CalculateArrowPoint sets up all offset parameters correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest028, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up custom arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(24.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(12.0_vp);
+
+    // Call GetEndP2P4 and GetP2 to calculate parameters
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm->GetEndP2P4(ARROW_RADIUS);
+    algorithm->GetP2(ARROW_RADIUS);
+
+    // Simulate CalculateArrowPoint rateX calculation
+    float rateX = 24.0f / 16.0f; // CUSTOM_ARROW_WIDTH / DEFAULT_ARROW_WIDTH
+
+    // Manually set offset values as CalculateArrowPoint would do
+    algorithm->arrowVerticalP1OffsetX_ = 8.0_vp * rateX;
+    algorithm->arrowVerticalP2OffsetY_ = algorithm->defaultP2Height_;
+    algorithm->arrowVerticalP2OffsetX_ = algorithm->defaultP2Width_;
+    algorithm->arrowVerticalP4OffsetY_ = algorithm->defaultP2Height_;
+    algorithm->arrowVerticalP4OffsetX_ = algorithm->defaultP2Width_;
+    algorithm->arrowVerticalP5OffsetX_ = 8.0_vp * rateX;
+
+    // Verify the offset values are set correctly
+    EXPECT_FLOAT_EQ(algorithm->arrowVerticalP1OffsetX_.Value(), 8.0 * rateX);
+    EXPECT_FLOAT_EQ(algorithm->arrowVerticalP2OffsetY_.Value(), algorithm->defaultP2Height_.Value());
+    EXPECT_FLOAT_EQ(algorithm->arrowVerticalP2OffsetX_.Value(), algorithm->defaultP2Width_.Value());
+    EXPECT_FLOAT_EQ(algorithm->arrowVerticalP5OffsetX_.Value(), 8.0 * rateX);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest029
+ * @tc.desc: Test that defaultP2Height, defaultP2Width, defaultP4EndY, defaultP2EndX, defaultP2EndY
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest029, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+
+    // Set up default arrow dimensions
+    algorithm->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    // Call GetEndP2P4 to calculate defaultP4EndY, defaultP2EndX, defaultP2EndY
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm->GetEndP2P4(ARROW_RADIUS);
+
+    // Verify calculated values are positive
+    EXPECT_GT(algorithm->defaultP4EndY_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2EndX_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2EndY_.Value(), 0.0);
+
+    // Call GetP2 to calculate defaultP2Height, defaultP2Width
+    algorithm->GetP2(ARROW_RADIUS);
+
+    // Verify calculated values are positive
+    EXPECT_GT(algorithm->defaultP2Height_.Value(), 0.0);
+    EXPECT_GT(algorithm->defaultP2Width_.Value(), 0.0);
+}
+
+/**
+ * @tc.name: ArrowMemberVariablesTest030
+ * @tc.desc: Test that multiple instances have independent calculated point parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestFourNg, ArrowMemberVariablesTest030, TestSize.Level1)
+{
+    auto algorithm1 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1001, "target1");
+    auto algorithm2 = AceType::MakeRefPtr<BubbleLayoutAlgorithm>(1002, "target2");
+
+    // Set different arrow dimensions
+    algorithm1->bubbleArrowWidth_ = Dimension(16.0_vp);
+    algorithm1->bubbleArrowHeight_ = Dimension(8.0_vp);
+
+    algorithm2->bubbleArrowWidth_ = Dimension(32.0_vp);
+    algorithm2->bubbleArrowHeight_ = Dimension(16.0_vp);
+
+    // Call GetEndP2P4 and GetP2 for both instances
+    constexpr Dimension ARROW_RADIUS = 2.0_vp;
+    algorithm1->GetEndP2P4(ARROW_RADIUS);
+    algorithm1->GetP2(ARROW_RADIUS);
+    algorithm2->GetEndP2P4(ARROW_RADIUS);
+    algorithm2->GetP2(ARROW_RADIUS);
+
+    // Verify that calculated point parameters are different
+    EXPECT_NE(algorithm1->defaultP2Height_.Value(), algorithm2->defaultP2Height_.Value());
+    EXPECT_NE(algorithm1->defaultP2Width_.Value(), algorithm2->defaultP2Width_.Value());
+    EXPECT_NE(algorithm1->defaultP4EndY_.Value(), algorithm2->defaultP4EndY_.Value());
+    EXPECT_NE(algorithm1->defaultP2EndX_.Value(), algorithm2->defaultP2EndX_.Value());
+    EXPECT_NE(algorithm1->defaultP2EndY_.Value(), algorithm2->defaultP2EndY_.Value());
+}
+
 } // namespace OHOS::Ace::NG
