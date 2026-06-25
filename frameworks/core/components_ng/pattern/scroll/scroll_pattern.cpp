@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
@@ -168,25 +169,19 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         return false;
     }
     UpdateScrollBarOffset();
-    if (config.frameSizeChange && isInitialized_) {
-        if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisappearDelayTask();
-        }
+    if (config.frameSizeChange && isInitialized_ && GetScrollBar() != nullptr) {
+        GetScrollBar()->ScheduleDisappearDelayTask();
     }
     auto eventHub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
-    auto onReachStart = eventHub->GetOnReachStart();
-    auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
-    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
-    auto onReachEnd = eventHub->GetOnReachEnd();
-    auto onJSFrameNodeReachEnd = eventHub->GetJSFrameNodeOnReachEnd();
-    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
-    auto onScrollStop = eventHub->GetOnScrollStop();
-    auto onJSFrameNodeScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
-    OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
-    ScrollSnapTrigger();
+    FireOnReachStart(eventHub->GetOnReachStart(), eventHub->GetJSFrameNodeOnReachStart());
+    FireOnReachEnd(eventHub->GetOnReachEnd(), eventHub->GetJSFrameNodeOnReachEnd());
+    OnScrollStop(eventHub->GetOnScrollStop(), eventHub->GetJSFrameNodeOnScrollStop());
+    if (!(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled() && IsAccessibilityFocusScroll())) {
+        ScrollSnapTrigger();
+    }
     CheckScrollable();
     prevOffset_ = currentOffset_;
     auto geometryNode = host->GetGeometryNode();
@@ -197,6 +192,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isInitialized_ = true;
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    SetAccessibilityFocusScroll(false);
     if (scrollStop_) {
         // Reset accessibilityScrollSource_ when scrolling stops or a single-frame jump layout completes
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
@@ -771,6 +767,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (source != SCROLL_FROM_FOCUS_JUMP) {
+        SetAccessibilityFocusScroll(false);
+    }
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1106,11 +1105,16 @@ ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility(bool isAccessibility)
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
                 if (isAccessibility) {
+                    pattern->SetAccessibilityFocusScroll(true);
                     pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
                 } else {
                     pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
                 }
-                return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+                auto ret = pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+                if (isAccessibility && !ret) {
+                    pattern->SetAccessibilityFocusScroll(false);
+                }
+                return ret;
             },
         GetAxis() };
 }

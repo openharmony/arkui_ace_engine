@@ -1843,7 +1843,8 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // click or long-press external scrollbar
+        // click or long-press external scrollbar
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         return pattern->ScrollPage(reverse, smooth);
     };
     auto scrollBarOnDidStopDraggingCallback = [weak = WeakClaim(this)](bool isWillFling) {
@@ -3510,16 +3511,16 @@ std::string ScrollablePattern::GetAccessibilityScrollSource()
         case AccessibilityScrollSource::NONE:
         default:
             return "";
-
     }
 }
 
 void ScrollablePattern::MarkUserScrollSource(int32_t source)
 {
-    // When scrollSource_ is one of the user-typed values below (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_FLING/BAR_OVER_DRAG),
-    // it clearly indicates a user gesture, so accessibilityScrollSource_ is forced to USER.
-    // Otherwise, for the source-neutral values (JUMP/FOCUS_JUMP/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER),
-    // accessibilityScrollSource_ is left unchanged (falls through to default).
+    // When scrollSource_ is one of the user-typed values below
+    // (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_FLING/BAR_OVER_DRAG), it clearly indicates a user gesture, so
+    // accessibilityScrollSource_ is forced to USER. Otherwise, for the source-neutral values
+    // (JUMP/FOCUS_JUMP/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER), accessibilityScrollSource_ is left unchanged
+    // (falls through to default).
 
     switch (source) {
         case SCROLL_FROM_UPDATE: // drag
@@ -3543,7 +3544,8 @@ void ScrollablePattern::FireAccessibilityScrollEndEvent()
     std::string accessibilityScrollSource = GetAccessibilityScrollSource();
     std::map<std::string, std::string> extraEventInfo;
     extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "%{public}s/%{public}d SCROLL_END, scrollSource_:%{public}d, accessibilityScrollSource:%{public}s",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE,
+        "%{public}s/%{public}d SCROLL_END, scrollSource_:%{public}d, accessibilityScrollSource:%{public}s",
         host->GetTag().c_str(), host->GetId(), GetScrollSource(), accessibilityScrollSource.c_str());
     accessibilityScrollSource.empty() ? host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END)
                                       : host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END, extraEventInfo);

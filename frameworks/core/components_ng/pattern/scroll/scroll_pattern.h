@@ -183,6 +183,14 @@ public:
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
+    void SetAccessibilityFocusScroll(bool isAccessibilityFocusScroll)
+    {
+        isAccessibilityFocusScroll_ = isAccessibilityFocusScroll;
+    }
+    bool IsAccessibilityFocusScroll() const
+    {
+        return isAccessibilityFocusScroll_;
+    }
     float GetMainContentSize() const override
     {
         return viewPortLength_;
@@ -467,6 +475,7 @@ private:
     float viewPortLength_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    bool isAccessibilityFocusScroll_ = false;
     SizeF viewPort_;
     SizeF viewSize_;
     SizeF viewPortExtent_;
