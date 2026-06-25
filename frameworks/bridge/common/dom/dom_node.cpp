@@ -34,13 +34,7 @@
 
 namespace OHOS::Ace::Framework {
 
-RefPtr<SingleChild> DOMNode::GetLastCommonParent()
-{
-    if (sharedTransitionComponent_) {
-        return sharedTransitionComponent_;
-    }
-    return boxComponent_;
-}
+
 namespace {
 
 constexpr uint32_t TRANSFORM_SINGLE = 1;
@@ -577,6 +571,14 @@ void DOMNode::CreatePropertyAnimation(const std::string& property)
             propertyAnimation.second(*this);
         }
     }
+}
+
+RefPtr<SingleChild> DOMNode::GetLastCommonParent()
+{
+    if (sharedTransitionComponent_) {
+        return sharedTransitionComponent_;
+    }
+    return boxComponent_;
 }
 
 RefPtr<KeyframeAnimation<float>> DOMNode::SetPropertyFloatAnimationKeyframe(float begin, float end)
