@@ -1963,8 +1963,8 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.rbCorner = { 1.0, 1.0 };
 
             param2.luCorner = { 0.0, 0.0 };
-            param2.ruCorner = { 0.2, 0.0 };
-            param2.lbCorner = { 0.0, 1.0 };
+            param2.ruCorner = { 1.0, 0.0 };
+            param2.lbCorner = { 0.0, 0.2 };
             param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
@@ -1985,8 +1985,8 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.rbCorner = { 1.0, 1.0 };
 
             param2.luCorner = { 0.0, 0.0 };
-            param2.ruCorner = { 1.0, 0.0 };
-            param2.lbCorner = { 0.8, 1.0 };
+            param2.ruCorner = { 1.0, 0.8 };
+            param2.lbCorner = { 0.0, 1.0 };
             param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
@@ -2006,10 +2006,10 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.lbCorner = { 0.0, 1.0 };
             param1.rbCorner = { 0.2, 1.0 };
 
-            param2.luCorner = { 0.0, 0.0 };
+            param2.luCorner = { 0.0, 0.8 };
             param2.ruCorner = { 1.0, 0.0 };
             param2.lbCorner = { 0.0, 1.0 };
-            param2.rbCorner = { 0.2, 1.0 };
+            param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
             param3.ruCorner = { 1.0, 0.0 };
