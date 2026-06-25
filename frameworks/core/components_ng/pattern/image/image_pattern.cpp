@@ -43,6 +43,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -507,12 +508,11 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
-    auto frameCount = loadingCtx_->GetFrameCount();
     imageDfxConfig_.SetFrameSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
 
     image_->SetImageDfxConfig(imageDfxConfig_);
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
+    SetImagePaintConfig(image_, loadingCtx_);
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
     }
@@ -934,17 +934,40 @@ void ImagePattern::UpdateSvgSmoothEdgeValue()
     renderProp->UpdateSmoothEdge(std::max(smoothEdge_, renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
-void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-    const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
+void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage,
+    const RefPtr<ImageLoadingContext>& ctx)
 {
+    CHECK_NULL_VOID(canvasImage);
+    CHECK_NULL_VOID(ctx);
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    ImageFit imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    std::optional<SizeF> sourceSize = layoutProps->GetSourceSize();
+    int32_t frameCount = ctx->GetFrameCount();
+    auto sourceInfo = ctx->GetSourceInfo();
+
+    // Compute srcRect/dstRect from the live component content size instead of trusting
+    // loadingCtx->GetDstRect(), which can lag behind the latest resize when MakeCanvasImageIfNeed
+    // skips re-decode (sizeLevel unchanged). Resizable drawing (DrawImageNine / DrawImageLattice)
+    // uses dstRect_ directly, so it must match the current component size to render correctly.
+    RectF srcRect;
+    RectF dstRect;
+    auto rawSize = ctx->GetImageSize();
+    if (rawSize.IsPositive() && geometryNode->GetContent()) {
+        ImagePainter::ApplyImageFit(imageFit, sourceSize.value_or(rawSize),
+            geometryNode->GetContentSize(), srcRect, dstRect);
+    }
 
     ImagePaintConfig config {
         .srcRect_ = srcRect,
         .dstRect_ = dstRect,
     };
-    config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    config.imageFit_ = imageFit;
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
     if (GreatNotEqual(frameCount, 1)) {
@@ -1062,8 +1085,7 @@ void ImagePattern::LoadingContext()
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
-                loadingCtx_->GetFrameCount());
+            SetImagePaintConfig(image_, loadingCtx_);
         }
     }
     if (altErrorCtx_ && altErrorCtx_->GetImageObject() != nullptr) {
@@ -1071,8 +1093,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altErrorImage_) {
             altErrorCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altErrorImage_, altErrorCtx_->GetSrcRect(), altErrorCtx_->GetDstRect(),
-                altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
+            SetImagePaintConfig(altErrorImage_, altErrorCtx_);
         }
     }
     if (altLoadingCtx_ && altLoadingCtx_->GetImageObject() != nullptr) {
@@ -1080,8 +1101,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
-                altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
+            SetImagePaintConfig(altImage_, altLoadingCtx_);
         }
     }
 }
@@ -1100,7 +1120,9 @@ void ImagePattern::CreateObscuredImage()
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
             obscuredImage_ = MakeRefPtr<ObscuredImage>();
-            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo);
+            if (loadingCtx_) {
+                SetImagePaintConfig(obscuredImage_, loadingCtx_);
+            }
         }
     }
 }
@@ -1577,8 +1599,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altImage_->SetImageDfxConfig(pattern->altImageDfxConfig_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo(), pattern->altLoadingCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altImage_, pattern->altLoadingCtx_);
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -3058,8 +3079,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
         pattern->altErrorImage_->SetImageDfxConfig(pattern->altErrorImageDfxConfig_);
         pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
         pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altErrorImage_, *pattern->altErrorSrcRect_, *pattern->altErrorDstRect_,
-            pattern->altErrorCtx_->GetSourceInfo(), pattern->altErrorCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altErrorImage_, pattern->altErrorCtx_);
 
         pattern->PrepareAnimation(pattern->altErrorImage_);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

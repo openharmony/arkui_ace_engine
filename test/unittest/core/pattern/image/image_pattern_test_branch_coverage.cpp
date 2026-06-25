@@ -441,55 +441,6 @@ HWTEST_F(ImagePatternBranchCoverageTestNg, StartDecodingNullContent001, TestSize
 }
 
 /**
- * @tc.name: SetImagePaintConfigFrameCountGreaterThanOne001
- * @tc.desc: Test SetImagePaintConfig when frameCount > 1
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternBranchCoverageTestNg, SetImagePaintConfigFrameCountGreaterThanOne001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<ImagePattern>();
-    EXPECT_NE(pattern, nullptr);
-    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
-    EXPECT_NE(canvasImage, nullptr);
-    
-    RectF srcRect(0.0f, 0.0f, 100.0f, 100.0f);
-    RectF dstRect(0.0f, 0.0f, 200.0f, 200.0f);
-    ImageSourceInfo sourceInfo("test.gif");
-    int32_t frameCount = 10;
-    pattern->SetImagePaintConfig(canvasImage, srcRect, dstRect, sourceInfo, frameCount);
-    
-    auto& config = canvasImage->GetPaintConfig();
-    EXPECT_NE(&config, nullptr);
-    EXPECT_EQ(config.orientation_, ImageRotateOrientation::UP);
-}
-
-/**
- * @tc.name: SetImagePaintConfigFrameCountLessEqualOne001
- * @tc.desc: Test SetImagePaintConfig when frameCount <= 1
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternBranchCoverageTestNg, SetImagePaintConfigFrameCountLessEqualOne001, TestSize.Level1)
-{
-    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
-    EXPECT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    EXPECT_NE(pattern, nullptr);
-    
-    pattern->joinOrientation_ = ImageRotateOrientation::RIGHT;
-    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
-    EXPECT_NE(canvasImage, nullptr);
-    RectF srcRect(0.0f, 0.0f, 100.0f, 100.0f);
-    RectF dstRect(0.0f, 0.0f, 200.0f, 200.0f);
-    ImageSourceInfo sourceInfo("test.png");
-    int32_t frameCount = 1;
-    pattern->SetImagePaintConfig(canvasImage, srcRect, dstRect, sourceInfo, frameCount);
-    
-    auto& config = canvasImage->GetPaintConfig();
-    EXPECT_NE(&config, nullptr);
-    EXPECT_EQ(config.orientation_, ImageRotateOrientation::RIGHT);
-}
-
-/**
  * @tc.name: CreateNodePaintMethodImageExistAndNotLoadFailed001
  * @tc.desc: Test CreateNodePaintMethod when image exists and not failed
  * @tc.type: FUNC

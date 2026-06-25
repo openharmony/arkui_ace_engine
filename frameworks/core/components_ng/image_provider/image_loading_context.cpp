@@ -344,11 +344,6 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoR
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
     }
-    if (!res && hasValidSlice) {
-        dstSize_ = dstSize;
-        // to keep srcRect/dstRect in sync with the current component size.
-        ResizableCalcDstSize();
-    }
     CHECK_NULL_RETURN(res, res);
     if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {
         pendingMakeCanvasImageTask_ = [weak = AceType::WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {

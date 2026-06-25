@@ -308,10 +308,14 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level0)
     ASSERT_NE(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateNeedBorderRadius(true);
     /**
-     * @tc.steps: step3. start set ImagePaintConfig and Verify it will be set correctly.
+     * @tc.steps: step3. construct a loadingCtx without imageObj (GetImageSize returns non-positive),
+     * so srcRect/dstRect stay at default RectF(). Verify imageFit_ defaults to COVER.
      */
-    imagePattern->SetImagePaintConfig(
-        canvasImage, RectF(), RectF(), ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    imagePattern->SetImagePaintConfig(canvasImage, loadingCtx);
     ASSERT_NE(canvasImage->paintConfig_, nullptr);
     auto paintConfig = canvasImage->GetPaintConfig();
     EXPECT_EQ(paintConfig.srcRect_, RectF());
