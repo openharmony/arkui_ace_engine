@@ -6846,16 +6846,16 @@ void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
 
 void ViewAbstract::HistogramImmersiveOptions(const ImmersiveMaterialConfig& config)
 {
-    int32_t state = 0;
+    uint32_t state = 0U;
     [[maybe_unused]] static constexpr int32_t HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL = 8;
     if (config.HasLightEffect()) {
-        state |= 0b01;
+        state |= 0b01U;
     }
     if (config.interactive) {
-        state |= 0b10;
+        state |= 0b10U;
     }
     if (config.colorInvert) {
-        state |= 0b100;
+        state |= 0b100U;
     }
     ACE_ENGINE_HISTOGRAM_ENUMERATION(
         "uiMaterial.ImmersiveMaterial.enum", state, HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL);
