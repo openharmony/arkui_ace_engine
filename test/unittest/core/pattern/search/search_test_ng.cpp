@@ -2396,6 +2396,40 @@ HWTEST_F(SearchTestNg, testSelectedBackgroundColor002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SearchOnThemeScopeUpdate001
+ * @tc.desc: Test SearchPattern::OnThemeScopeUpdate API26 isolation branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchOnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = frameNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(1);
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    Color customBgColor = textFieldTheme->GetBgColor() == Color::RED ? Color::BLUE : Color::RED;
+    renderContext->UpdateBackgroundColor(customBgColor);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: testInputFilter001
  * @tc.desc: Test Search input filter
  * @tc.type: FUNC
@@ -2936,5 +2970,26 @@ HWTEST_F(SearchTestNg, SearchCompressLeadingPunctuation, TestSize.Level1)
      */
     EXPECT_EQ(textFieldLayoutProperty->GetCompressLeadingPunctuation(), false);
     EXPECT_EQ(SearchModelNG::GetCompressLeadingPunctuation(frameNode), false);
+}
+
+/**
+ * @tc.name: SearchButtonPunctuationOverflow001
+ * @tc.desc: Verify search button text PunctuationOverflow default value is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchButtonPunctuationOverflow001, TestSize.Level1)
+{
+    SearchModelNG searchModelNG;
+    searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    EXPECT_FALSE(buttonFrameNode->GetChildren().empty());
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
 }
 } // namespace OHOS::Ace::NG

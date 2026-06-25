@@ -30,7 +30,6 @@
 #include "core/animation/property_animatable.h"
 #include "core/animation/property_animation.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 
 namespace OHOS::Ace {

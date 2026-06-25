@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_UI_MATERIAL_H
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "ui/base/ace_type.h"
@@ -26,12 +27,44 @@
 
 namespace OHOS::Ace {
 
+struct LightEffectOptions {
+    Color color = Color::WHITE;
+    RefPtr<ResourceObject> colorResObj = nullptr;
+    bool operator==(const LightEffectOptions& other) const
+    {
+        return color == other.color && colorResObj == other.colorResObj;
+    }
+};
+
 struct ImmersiveOptions {
     UiMaterialStyle style = UiMaterialStyle::REGULAR;
     Color materialColor = Color::TRANSPARENT;
     bool colorInvert = false;
     bool applyShadow = true;
+    // when disableLightEffect is true, do not add lightEffect. lightEffectOptions has no effect.
+    bool disableLightEffect = false;
+    // std::nullopt means follow the behavior of component, otherwise is set by user.
+    std::optional<bool> interactive = std::nullopt;
+    // "std::nullopt and disableLightEffect==false" means follow the behavior of component, otherwise is set by user.
+    std::optional<LightEffectOptions> lightEffectOptions = std::nullopt;
     RefPtr<ResourceObject> colorResObj = nullptr;
+    ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED; // options' colorMode will override GetNodeColorMode
+    
+    bool HasLightEffect() const
+    {
+        return !disableLightEffect && lightEffectOptions.has_value();
+    }
+    bool IsInteractive() const
+    {
+        return interactive.value_or(false);
+    }
+    void DisableLightEffect()
+    {
+        disableLightEffect = true;
+        if (lightEffectOptions) {
+            lightEffectOptions = std::nullopt;
+        }
+    }
 };
 
 class ACE_FORCE_EXPORT UiMaterial : public AceType {
@@ -68,6 +101,8 @@ public:
     virtual RefPtr<UiMaterial> Copy() const;
     // return whether contains applyShadow effect.
     virtual bool IsForceShadow() const;
+    // return whether enabled interactive.
+    virtual std::optional<bool> IsInteractived() const;
     // Get material state from application configuration.
     static MaterialState GetConfiguredMaterialState();
     // Check if material is disabled (state == DISABLE).

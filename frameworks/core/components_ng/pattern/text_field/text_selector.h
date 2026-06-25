@@ -22,7 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/haptic_feedback_mode.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK
@@ -295,6 +295,9 @@ struct SelectMenuParam {
     std::function<void()> onDisappear;
     std::function<void(int32_t, int32_t)> onMenuShow;
     std::function<void(int32_t, int32_t)> onMenuHide;
+    std::function<void(const std::u16string&)> onAppearWithText;
+    std::function<void(const std::u16string&)> onMenuShowWithText;
+    std::function<void(const std::u16string&)> onMenuHideWithText;
     bool isValid = true;
     PreviewMenuOptions previewMenuOptions;
 };
@@ -307,6 +310,9 @@ struct SelectionMenuParams {
     TextResponseType responseType;
     std::function<void(int32_t, int32_t)> onMenuShow;
     std::function<void(int32_t, int32_t)> onMenuHide;
+    std::function<void(const std::u16string&)> onAppearWithText;
+    std::function<void(const std::u16string&)> onMenuShowWithText;
+    std::function<void(const std::u16string&)> onMenuHideWithText;
     bool isValid = true;
 
     SelectionMenuParams(TextSpanType _type, std::function<void()> _buildFunc,

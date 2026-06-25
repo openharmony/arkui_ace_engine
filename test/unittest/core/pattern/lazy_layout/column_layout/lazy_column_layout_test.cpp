@@ -67,22 +67,25 @@ private:
 };
 
 void LazyColumnLayoutTest::CreateRepeatVirtualScrollNode(
-    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index)
+    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& onGetRid4Index)
 {
     RepeatVirtualScroll2ModelNG repeatModel;
     auto onActiveRange = [](int32_t start, int32_t end, int32_t cacheStart,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     auto onRecycleItems = [](int32_t start, int32_t end) {};
     repeatModel.Create(
         itemNumber,
         itemNumber,
+        0,
         onGetRid4Index,
         onRecycleItems,
         onActiveRange,
         nullptr,
         onPurge,
+        onPurgeAll,
         onUpdateDirty);
 }
 
@@ -307,6 +310,76 @@ HWTEST_F(LazyColumnLayoutTest, SpaceTest001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 10 * ITEM_HEIGHT);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 4);
+}
+
+/**
+ * @tc.name: SpaceTest002
+ * @tc.desc: Shrink space repeatedly while scrolled to the bottom; the last item stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, SpaceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyColumnLayout with 10 items and space = 30
+     * @tc.expected: content height = 10 * ITEM_HEIGHT + 9 * 30 = 1270
+     */
+    CreateScroll();
+    CreateLazyColumnLayout();
+    auto space = 30.0f;
+    LazyColumnLayoutModel::SetSpace(AceType::RawPtr(frameNode_), Dimension(space));
+    CreateContent(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: last item (index 9) bottom-aligned, on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350
+     */
+    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * space);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
+
+    /**
+     * @tc.steps: step3. Shrink space 30 -> 20
+     * @tc.expected: last item stays bottom-pinned, on-screen top y stays 350 (no jump)
+     */
+    space = 20.0f;
+    LazyColumnLayoutModel::SetSpace(AceType::RawPtr(frameNode_), Dimension(space));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * space);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
+
+    /**
+     * @tc.steps: step4. Shrink space 20 -> 10
+     * @tc.expected: last item on-screen top y stays 350
+     */
+    space = 10.0f;
+    LazyColumnLayoutModel::SetSpace(AceType::RawPtr(frameNode_), Dimension(space));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * space);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
+
+    /**
+     * @tc.steps: step5. Shrink space 10 -> 0
+     * @tc.expected: last item on-screen top y stays 350
+     */
+    space = 0.0f;
+    LazyColumnLayoutModel::SetSpace(AceType::RawPtr(frameNode_), Dimension(space));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * space);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
 }
 
 /**
@@ -918,6 +991,55 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest004, TestSize.Level1)
     EXPECT_EQ(indexStart, 1);
     EXPECT_EQ(indexEnd, 6);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
+}
+
+/**
+ * @tc.name: AddDelChildrenTest005
+ * @tc.desc: Delete 5 bottom children while scrolled to the bottom; the last item stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyColumnLayout with 10 items
+     * @tc.expected: content height = 10 * ITEM_HEIGHT = 1000, scrollable range = 1000 - SCROLL_HEIGHT = 550
+     */
+    CreateScroll();
+    CreateLazyColumnLayout();
+    CreateContent(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: visible range 5-9, scroll offset = -550, last item bottom-aligned
+     *               (on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350)
+     */
+    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -550);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
+
+    /**
+     * @tc.steps: step3. Delete the last 5 (bottom) children, then flush once
+     * @tc.expected: the 5 remaining top items become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 5, visible 0-4, offset = -(550 - 5 * ITEM_HEIGHT) = -50,
+     *               last item on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 5; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 4);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -50);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 4), 350);
 }
 
 /**
@@ -1703,7 +1825,7 @@ HWTEST_F(LazyColumnLayoutTest, RepeatVirtualScrollTest001, TestSize.Level1)
     CreateScroll();
     CreateLazyColumnLayout();
     CreateRepeatVirtualScrollNode(10,
-        [](uint32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+        [](uint32_t index, bool inAnimation, bool restoreCache) -> std::pair<uint32_t, uint32_t> {
             StackModelNG stackModel;
             stackModel.Create();
             ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
@@ -1910,5 +2032,35 @@ HWTEST_F(LazyColumnLayoutTest, VisibleIndexWithSafeAreaPadding001, TestSize.Leve
     EXPECT_EQ(visibleEnd, 4);
     EXPECT_GT(visibleStart, pattern_->layoutInfo_->startIndex_);
     EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: FirstFrameWindowSeedsWithUnknownBody001
+ * @tc.desc: First layout with an already-scrolled viewport (body extent unknown): the forward window must fall back
+ *           to measuring from item 0 (no past-the-end clamp), and the backward window seeds the last item at body 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.Level1)
+{
+    auto info = AceType::MakeRefPtr<LazyColumnLayoutInfo>();
+    info->totalItemCount_ = 10;
+    LazyColumnLayoutAlgorithm algorithm(info);
+    algorithm.totalItemCount_ = 10;
+    algorithm.hadMeasuredItems_ = false; // true first layout
+    algorithm.prevBodyMainSize_ = 0.0f;
+    algorithm.startPos_ = 200.0f; // viewport already scrolled when this child first measures
+    algorithm.endPos_ = 650.0f;
+
+    int32_t index = -2;
+    float pos = -1.0f;
+    algorithm.GetStartIndexInfo(index, pos);
+    EXPECT_EQ(index, 0);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
+
+    index = -2;
+    pos = -1.0f;
+    algorithm.GetEndIndexInfo(index, pos);
+    EXPECT_EQ(index, 9);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
 }
 } // namespace OHOS::Ace::NG

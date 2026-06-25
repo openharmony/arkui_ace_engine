@@ -14,6 +14,11 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
 

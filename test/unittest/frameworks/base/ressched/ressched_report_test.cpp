@@ -204,4 +204,177 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest011, TestSize.Level1)
     bool result = ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ResSchedReportTest012
+ * @tc.desc: test HandlePageTransition when frompage is and toPage is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest012, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "";
+    pageTransitionInfo.toPage = "";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_TRUE(pageTransitionInfo.fromPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest013
+ * @tc.desc: test HandlePageTransition when frompage is empty and topage is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest013, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "";
+    pageTransitionInfo.toPage = "topage";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.toPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest014
+ * @tc.desc: test HandlePageTransition when frompage is not empty and toPage is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest014, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "frompage";
+    pageTransitionInfo.toPage = "";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest015
+ * @tc.desc: test HandlePageTransition when frompage is not empty and toPage is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest015, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "frompage";
+    pageTransitionInfo.toPage = "topage";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
+}
+
+/**
+ * @tc.name: CollectComponentInfoTest_001
+ * @tc.desc: CollectComponentInfo should collect text when FrameNode is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, CollectComponentInfoTest_001, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    std::unordered_map<std::string, std::string> payload;
+
+    ResSchedReport::GetInstance().CollectComponentInfo(weakNode, payload);
+    EXPECT_NE(payload.find("text"), payload.end());
+    EXPECT_NE(payload.find("path"), payload.end());
+    EXPECT_NE(payload.find("pid"), payload.end());
+}
+
+/**
+ * @tc.name: CollectComponentInfoTest_002
+ * @tc.desc: CollectComponentInfo should set text to empty when node text is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, CollectComponentInfoTest_002, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 2, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    std::unordered_map<std::string, std::string> payload;
+
+    ResSchedReport::GetInstance().CollectComponentInfo(weakNode, payload);
+    EXPECT_NE(payload.find("text"), payload.end());
+}
+
+/**
+ * @tc.name: CollectComponentInfoTest_003
+ * @tc.desc: CollectComponentInfo should set correct path when node has path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, CollectComponentInfoTest_003, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 3, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    std::unordered_map<std::string, std::string> payload;
+
+    ResSchedReport::GetInstance().CollectComponentInfo(weakNode, payload);
+    EXPECT_NE(payload.find("path"), payload.end());
+}
+
+/**
+ * @tc.name: HandleTouchDownTest_001
+ * @tc.desc: HandleTouchDown should collect component info when weakNode is valid and clickExtEnabled is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, HandleTouchDownTest_001, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 4, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    ReportConfig config;
+    bool isClickExtEnabled = true;
+    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
+    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
+    ResSchedReport::GetInstance().isInTouch_ = false;
+}
+
+/**
+ * @tc.name: HandleTouchDownTest_002
+ * @tc.desc: HandleTouchDown should not crash when weakNode is invalid and clickExtEnabled is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, HandleTouchDownTest_002, TestSize.Level1)
+{
+    WeakPtr<NG::FrameNode> weakNode;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    ReportConfig config;
+    bool isClickExtEnabled = true;
+    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
+    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
+    ResSchedReport::GetInstance().isInTouch_ = false;
+}
+
+/**
+ * @tc.name: HandleTouchDownTest_003
+ * @tc.desc: HandleTouchDown should not collect component info when clickExtEnabled is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, HandleTouchDownTest_003, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 5, AceType::MakeRefPtr<NG::Pattern>());
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    ReportConfig config;
+    bool isClickExtEnabled = false;
+    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
+    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
+    ResSchedReport::GetInstance().isInTouch_ = false;
+}
+
+/**
+ * @tc.name: HandleTouchDownTest_004
+ * @tc.desc: HandleTouchDown should not collect component info when weakNode is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, HandleTouchDownTest_004, TestSize.Level1)
+{
+    WeakPtr<NG::FrameNode> weakNode;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    ReportConfig config;
+    bool isClickExtEnabled = true;
+    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
+    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
+    ResSchedReport::GetInstance().isInTouch_ = false;
+}
 } // namespace OHOS::Ace

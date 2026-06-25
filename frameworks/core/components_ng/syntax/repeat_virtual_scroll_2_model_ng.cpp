@@ -24,19 +24,19 @@
 
 namespace OHOS::Ace::NG {
 
-void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
-    const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index,
+void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount, int32_t memOptStrategy,
+    const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
-    const std::function<void()>& onUpdateDirty)
+    const std::function<void()>& onPurgeAll, const std::function<void()>& onUpdateDirty)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll2ModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
-        onMoveFromTo, onPurge, onUpdateDirty);
+        nodeId, arrLen, totalCount, memOptStrategy, onGetRid4Index, onRecycleItems, onActiveRange,
+        onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
 
     stack->Push(repeatNode);
     stack->PopContainer();
@@ -48,6 +48,15 @@ void RepeatVirtualScroll2ModelNG::RemoveNode(uint32_t rid)
     auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
     CHECK_NULL_VOID(repeatNode);
     repeatNode->RemoveNode(rid);
+}
+
+void RepeatVirtualScroll2ModelNG::RemoveNodes(const std::vector<uint32_t>& rids, const std::vector<int32_t>& indexes)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(repeatNode);
+
+    repeatNode->AddPendingRemoveNodes(rids, indexes);
 }
 
 void RepeatVirtualScroll2ModelNG::SetInvalid(int32_t repeatElmtId, uint32_t rid)

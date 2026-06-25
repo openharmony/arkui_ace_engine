@@ -71,7 +71,8 @@ void LsSolver::ConstructSolution(const std::map<std::string, double>& varInitial
             initValues[it->second] = name2Value.second;
         }
     }
-    for (int i = 0; i < numVars; i++) {
+    int numVariable = static_cast<int>(numVars);
+    for (int i = 0; i < numVariable; i++) {
         RationNum varValue = (vars[i].isNia) ? RationNum::FromDouble(initValues[i]) :
             (initValues[i] < 0.5 ? RationNum(-1) : RationNum(1));
         if (!vars[i].isNia) {
@@ -114,7 +115,7 @@ void LsSolver::ReadModel()
     }
 }
 
-void LsSolver::InitializeVariableDatas() {}
+void LsSolver::InitializeVariableDatas() const {}
 
 // initialize the delta of each literal by DeltaLit operation
 void LsSolver::InitializeLitDatas()
@@ -154,15 +155,15 @@ void LsSolver::InitializeClauseDatas()
         }
         if (cl->satCount == 0) {
             UnsatAClause(c);
-            litInUnsatClauseNum += clauses[c].literals.size();
-            boolLitInUnsatClauseNum += clauses[c].boolLiterals.size();
+            litInUnsatClauseNum += static_cast<int>(clauses[c].literals.size());
+            boolLitInUnsatClauseNum += static_cast<int>(clauses[c].boolLiterals.size());
             for (int lSignIdx : cl->boolLiterals) {
                 vars[lits[std::abs(lSignIdx)].delta.ToInt()].score++;
             }
         } else {
             SatAClause(c);
         }
-        if (cl->satCount > 0 && cl->satCount < cl->literals.size()) {
+        if (cl->satCount > 0 && cl->satCount < static_cast<int>(cl->literals.size())) {
             satClauseWithFalseLiteral->InsertElement(static_cast<int>(c));
         }
         if (cl->satCount == 1) {

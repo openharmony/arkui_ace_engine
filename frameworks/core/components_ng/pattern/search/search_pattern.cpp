@@ -906,6 +906,7 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->ReportShiftAndDirectionEvent(event);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -917,6 +918,31 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void SearchPattern::ReportShiftAndDirectionEvent(const KeyEvent& keyEvent)
+{
+    bool isDirectionalKey = keyEvent.HasKey(KeyCode::KEY_DPAD_UP)||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_DOWN) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_LEFT) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_RIGHT);
+    bool hasKeyShift = keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT);
+    auto action = keyEvent.action;
+    bool isDirectionPressed = (!isDirectionalKey) &&
+        (action == KeyAction::UP || action == KeyAction::CANCEL);
+    if (isDirectionPressed && hasKeyShift) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto selectController = textFieldPattern->GetTextSelectController();
+        CHECK_NULL_VOID(selectController);
+        auto selectStart = selectController->GetStartIndex();
+        auto selectEnd = selectController->GetEndIndex();
+        textFieldPattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
+    }
 }
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
@@ -2337,7 +2363,7 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return result;
     }
 

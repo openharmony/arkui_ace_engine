@@ -35,6 +35,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetAlignItems(FrameNode* frameNode, FlexAlign alignItem);
     static void SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter);
+    static void CheckGutterLPX(const RefPtr<V2::Gutter>& gutter);
+    static void CheckNodeGutterLPX(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter);
+    static void CheckNodeGutterLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const RefPtr<V2::Gutter>& gutter);
     static void SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col);
     static void SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints);
     static void SetDirection(FrameNode* frameNode, V2::GridRowDirection direction);

@@ -83,12 +83,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listItemGroupLayoutProperty);
     auto layoutPolicy = listItemGroupLayoutProperty->GetLayoutPolicyProperty();
-    auto isCrossWrap =
-        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthWrap()) ||
-                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightWrap()));
-    auto isCrossFix =
-        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthFix()) ||
-                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightFix()));
+    const auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis_);
+    auto isCrossWrap = axisLayoutPolicy.IsCrossAxisWrap();
+    auto isCrossFix = axisLayoutPolicy.IsCrossAxisFix();
 
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpaceWidth().value_or(layoutProperty->GetSpace().value_or(Dimension(0)));
@@ -1329,7 +1326,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         float footerPos = 0.0f;
         if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
-            float stickyPos = contentStartOffset_ - mainPos;
+            auto contentStartOffset = isStackFromEnd_ ? contentEndOffset_ : contentStartOffset_;
+            float stickyPos = contentStartOffset - mainPos;
             stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             footerPos = std::max(footerPos, stickyPos);
             footerPos = std::min(footerPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
@@ -1344,7 +1342,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         float const listMainSize = endPos_ - startPos_ - startFixOffset_ - endFixOffset_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER)) {
             auto headerMainSize = headerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
-            float stickyPos = listMainSize - contentEndOffset_ - mainPos - headerMainSize;
+            auto contentEndOffset = isStackFromEnd_ ? contentStartOffset_ : contentEndOffset_;
+            float stickyPos = listMainSize - contentEndOffset - mainPos - headerMainSize;
             if (stickyPos < footerMainSize) {
                 stickyPos = footerMainSize;
             }
@@ -1375,7 +1374,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterLTR(LayoutWrapper* layoutWr
         float headerPos = 0.0f;
         if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
-            float stickyPos = contentStartOffset_ - mainPos;
+            auto contentStartOffset = isStackFromEnd_ ? contentEndOffset_ : contentStartOffset_;
+            float stickyPos = contentStartOffset - mainPos;
             stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             headerPos = std::max(headerPos, stickyPos);
         }
@@ -1389,7 +1389,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterLTR(LayoutWrapper* layoutWr
         float const listMainSize = endPos_ - startPos_ - startFixOffset_ - endFixOffset_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER)) {
             auto footerMainSize = footerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
-            float stickyPos = listMainSize - contentEndOffset_ - mainPos - footerMainSize;
+            auto contentEndOffset = isStackFromEnd_ ? contentStartOffset_ : contentEndOffset_;
+            float stickyPos = listMainSize - contentEndOffset - mainPos - footerMainSize;
             if (stickyPos < headerMainSize) {
                 stickyPos = headerMainSize;
             }

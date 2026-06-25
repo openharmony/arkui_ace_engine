@@ -37,6 +37,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

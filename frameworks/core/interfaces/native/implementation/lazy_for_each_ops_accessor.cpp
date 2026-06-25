@@ -54,6 +54,21 @@ void AssignCast(std::optional<LazyForEachCustomComponentFreezeMode>& dst,
             LOGE("Unexpected enum value in Ark_LazyForEachCustomComponentFreezeMode: %{public}d", src);
     }
 }
+template<>
+void AssignCast(std::optional<LazyForEachMemOptStrategy>& dst,
+    const Ark_LazyForEachMemOptStrategy& src)
+{
+    switch (src) {
+        case ARK_LAZY_FOR_EACH_MEM_OPT_STRATEGY_DEFAULT:
+            dst = LazyForEachMemOptStrategy::DEFAULT;
+            break;
+        case ARK_LAZY_FOR_EACH_MEM_OPT_STRATEGY_ENABLE_AUTO_CACHE_OPTIMIZATION:
+            dst = LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_LazyForEachMemOptStrategy: %{public}d", src);
+    }
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -118,7 +133,10 @@ void NotifyChangeImpl(Ark_VMContext vmContext,
 void SyncImpl(Ark_NativePointer node,
               Ark_Int32 totalCount,
               const Callback_CreateItem* creator,
-              const Callback_RangeUpdate* updater)
+              const Callback_RangeUpdate* updater,
+              const Callback_ClearCache* clear,
+              Ark_Int32 repeatMemOptStrategy,
+              const Callback_ReleaseItemByIndex* release)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode && creator && updater);
@@ -126,6 +144,7 @@ void SyncImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(lazyNode);
 
     lazyNode->SetTotalCount(totalCount);
+    lazyNode->SetRepeatMemoryOptimizationStrategy(repeatMemOptStrategy);
     lazyNode->SetCallbacks(
         [callback = CallbackHelper(*creator)](int32_t index) {
             return AceType::DynamicCast<UINode>(callback.BuildSync(index));
@@ -133,6 +152,12 @@ void SyncImpl(Ark_NativePointer node,
         [cb = CallbackHelper(*updater)](
             int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
             cb.InvokeSync(start, end, cacheStart, cacheEnd, isLoop);
+        },
+        [cb = CallbackHelper(*clear)]() {
+            cb.InvokeSync();
+        },
+        [cb = CallbackHelper(*release)](int32_t index) {
+            cb.InvokeSync(index);
         });
 }
 void SyncOnMoveOpsImpl(Ark_NativePointer node,
@@ -172,8 +197,10 @@ void SetOptionsImpl(Ark_NativePointer node, const Ark_LazyForEachOptions* option
     auto optFreezeMode =
         Converter::OptConvert<LazyForEachCustomComponentFreezeMode>(options->customComponentFreezeMode);
     auto optReleaseStrategy = Converter::OptConvert<LazyForEachReleaseStrategy>(options->releaseStrategy);
+    auto optMemOptStrategy = Converter::OptConvert<LazyForEachMemOptStrategy>(options->memoryOptimizationStrategy);
     lazyNode->SetOptions({ optFreezeMode.value_or(LazyForEachCustomComponentFreezeMode::AUTO),
-        optReleaseStrategy.value_or(LazyForEachReleaseStrategy::BATCH) });
+        optReleaseStrategy.value_or(LazyForEachReleaseStrategy::BATCH),
+        optMemOptStrategy.value_or(LazyForEachMemOptStrategy::DEFAULT) });
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()

@@ -33,8 +33,11 @@ RefPtr<FrameNode> LazyWaterFlowLayoutModelStatic::CreateFrameNode(int32_t nodeId
 void LazyWaterFlowLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::optional<Dimension>& rowGap)
 {
     if (rowGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(rowGap.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, RowGap, rowGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             LazyWaterFlowLayoutProperty, RowGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
@@ -43,8 +46,11 @@ void LazyWaterFlowLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::
 void LazyWaterFlowLayoutModelStatic::SetColumnGap(FrameNode* frameNode, const std::optional<Dimension>& columnGap)
 {
     if (columnGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(columnGap.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, ColumnGap, columnGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             LazyWaterFlowLayoutProperty, ColumnGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
@@ -57,6 +63,61 @@ void LazyWaterFlowLayoutModelStatic::SetOnVisibleIndexesChange(
     auto pattern = frameNode->GetPattern<LazyWaterFlowLayoutPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+}
+
+void LazyWaterFlowLayoutModelStatic::SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle)
+{
+    if (stickyStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            LazyWaterFlowLayoutProperty, StickyStyle, static_cast<StickyStyle>(stickyStyle.value()), frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<LazyWaterFlowLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            LazyWaterFlowLayoutProperty, StickyStyle, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void LazyWaterFlowLayoutModelStatic::SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!headerNode) {
+        pattern->RemoveHeader();
+        return;
+    }
+    pattern->AddHeader(headerNode);
+}
+
+void LazyWaterFlowLayoutModelStatic::SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!footerNode) {
+        pattern->RemoveFooter();
+        return;
+    }
+    pattern->AddFooter(footerNode);
+}
+
+void LazyWaterFlowLayoutModelStatic::RemoveHeader(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveHeader();
+}
+
+void LazyWaterFlowLayoutModelStatic::RemoveFooter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveFooter();
 }
 
 void LazyVWaterFlowLayoutModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)

@@ -714,11 +714,10 @@ void RichEditorSelectOverlay::ChangeHandleHeight(const GestureEvent& event, bool
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     auto touchOffset = event.GetGlobalLocation();
-    if (hasTransform_) {
-        auto transformOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
-        RevertLocalPointWithTransform(transformOffset);
-        transformOffset += GetPaintOffsetWithoutTransform();
-        touchOffset = Offset(transformOffset.GetX(), transformOffset.GetY());
+    if (HasRenderTransform()) {
+        auto localOffsetF = ConvertToLocalOffsetWithTransform(OffsetF(touchOffset.GetX(), touchOffset.GetY()));
+        auto paintOffset = GetPaintOffsetWithoutTransform();
+        touchOffset = Offset(localOffsetF.GetX() + paintOffset.GetX(), localOffsetF.GetY() + paintOffset.GetY());
     }
     auto& textSelector = pattern->textSelector_;
     auto& currentHandle = isFirst ? textSelector.firstHandle : textSelector.secondHandle;
@@ -882,22 +881,6 @@ float RichEditorSelectOverlay::GetHandleHotZoneRadius()
     CHECK_NULL_RETURN(theme, hotZoneRadius);
     hotZoneRadius = theme->GetHandleHotZoneRadius().ConvertToPx();
     return hotZoneRadius;
-}
-
-RectF RichEditorSelectOverlay::GetHandleRectWithTransform(const RectF& handleRect)
-{
-    CHECK_NULL_RETURN(hasTransform_, handleRect);
-    auto localPaintRect = handleRect;
-    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
-    auto left = localPaintRect.Left() + localPaintRect.Width() / DOUBLE;
-    std::vector<OffsetF> points = { OffsetF(left, localPaintRect.Top()), OffsetF(left, localPaintRect.Bottom()) };
-    GetGlobalPointsWithTransform(points);
-    auto startPoint = points[0];
-    auto endPoint = points[1];
-    auto offsetX = std::max(startPoint.GetX(), endPoint.GetX());
-    auto offsetY = std::min(startPoint.GetY(), endPoint.GetY());
-    auto height = endPoint.GetY() - startPoint.GetY();
-    return RectF(OffsetF(offsetX, offsetY), SizeF(localPaintRect.Width(), std::abs(height)));
 }
 
 void RichEditorSelectOverlay::OnHandleMarkInfoChange(

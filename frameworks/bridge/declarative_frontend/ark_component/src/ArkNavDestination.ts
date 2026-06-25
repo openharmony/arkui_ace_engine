@@ -137,6 +137,16 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillShowModifier.identity, NavDestinationOnWillShowModifier, callback);
     return this;
   }
+  onSaveState(callback: () => string): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnSaveStateModifier.identity,
+      NavDestinationOnSaveStateModifier, callback);
+    return this;
+  }
+  onRestoreState(callback: (state: ESObject) => void): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnRestoreStateModifier.identity,
+      NavDestinationOnRestoreStateModifier, callback);
+    return this;
+  }
   onWillDisappear(callback: () => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity, NavDestinationOnWillDisappearModifier, callback);
     return this;
@@ -208,6 +218,10 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
   recoverable(value: boolean | undefined): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
+    return this;
+  }
+  fullScreenOverlay(value: Optional<boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, FullScreenOverlayModifier.identity, FullScreenOverlayModifier, value);
     return this;
   }
   preferredOrientation(orientation: Optional<number>): this {
@@ -432,6 +446,21 @@ class NavDestinationRecoverableModifier extends ModifierWithKey<boolean | undefi
   }
 }
 
+class FullScreenOverlayModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('fullScreenOverlay');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetFullScreenOverlay(node);
+    } else {
+      getUINativeModule().navDestination.setFullScreenOverlay(node, this.value);
+    }
+  }
+}
+
 class PreferredOrientationModifier extends ModifierWithKey<Optional<number>> {
   constructor(value: Optional<number>) {
     super(value);
@@ -592,6 +621,34 @@ class NavDestinationOnWillShowModifier extends ModifierWithKey<Callback<void>> {
       getUINativeModule().navDestination.resetOnWillShow(node);
     } else {
       getUINativeModule().navDestination.setOnWillShow(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnSaveStateModifier extends ModifierWithKey<() => string> {
+  constructor(value: () => string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onSaveState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnSaveState(node);
+    } else {
+      getUINativeModule().navDestination.setOnSaveState(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnRestoreStateModifier extends ModifierWithKey<(state: ESObject) => void> {
+  constructor(value: (state: ESObject) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onRestoreState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnRestoreState(node);
+    } else {
+      getUINativeModule().navDestination.setOnRestoreState(node, this.value);
     }
   }
 }

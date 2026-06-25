@@ -1,0 +1,127 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_dialog_abc") {
+  src_js = rebase_path("dialog.js")
+  dst_file = rebase_path(target_out_dir + "/dialog.abc")
+  in_puts = [ "dialog.js" ]
+  out_puts = [ target_out_dir + "/dialog.abc" ]
+  extra_args = [ "--module" ]
+}
+
+base_output_path = get_label_info(":gen_dialog_abc", "target_out_dir")
+dialog_obj_path = base_output_path + "/dialog.o"
+dialog_abc_obj_path = base_output_path + "/dialog_abc.o"
+
+gen_obj("dialog_js") {
+  input = "dialog.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    dialog_obj_path = base_output_path + "/dialog.c"
+  }
+  output = dialog_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("dialog_abc") {
+  input = get_label_info(":gen_dialog_abc", "target_out_dir") + "/dialog.abc"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    dialog_abc_obj_path = base_output_path + "/dialog_abc.c"
+  }
+  output = dialog_abc_obj_path
+  snapshot_dep = [ ":gen_dialog_abc" ]
+}
+
+template("napi_dialog_static") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+
+    sources = [
+      "dialog_controller.cpp",
+      "dialog_params.cpp",
+      "js_dialog.cpp",
+    ]
+    deps = [
+      ":gen_obj_src_dialog_abc",
+      ":gen_obj_src_dialog_js",
+    ]
+    if (!is_arkui_x) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
+    external_deps = []
+    if (platform != "" && is_arkui_x) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+    } else {
+      external_deps += [ "napi:ace_napi" ]
+    }
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    deps += [ "../utils:napi_utils_static_${platform}" ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}
+
+foreach(item, ace_platforms) {
+  napi_dialog_static("napi_dialog_static_" + item.name) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    platform = item.name
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+  }
+}
+
+ohos_shared_library("dialog_napi") {
+  output_name = "dialog_napi"
+  sanitize = {
+    integer_overflow = true
+    boundary_sanitize = true
+    debug = ace_sanitize_debug
+  }
+  deps = [ ":napi_dialog_static_ohos" ]
+  if (use_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
+  relative_install_dir = "module/arkui"
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
+}

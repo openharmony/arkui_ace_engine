@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/video/video_node.h"
+#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -77,6 +78,11 @@ void VideoStaticPattern::EnableAnalyzer(bool enable)
 }
 } // namespace
 
+RefPtr<Pattern> VideoModelStatic::CreateVideoStaticPattern(const RefPtr<VideoControllerV2>& videoController)
+{
+    return AceType::MakeRefPtr<VideoStaticPattern>(videoController);
+}
+
 RefPtr<FrameNode> VideoModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto videoNode = VideoNode::GetOrCreateVideoNode(
@@ -126,6 +132,11 @@ void VideoModelStatic::SetSrc(FrameNode* frameNode,
 void VideoModelStatic::SetShowFirstFrame(FrameNode* frameNode, bool showFirstFrame)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        stateMachinePattern->UpdateShowFirstFrame(showFirstFrame);
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateShowFirstFrame(showFirstFrame);
@@ -134,6 +145,11 @@ void VideoModelStatic::SetShowFirstFrame(FrameNode* frameNode, bool showFirstFra
 void VideoModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        stateMachinePattern->SetContentTransition(contentTransition);
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
     videoPattern->SetContentTransition(contentTransition);
@@ -142,7 +158,13 @@ void VideoModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransit
 void VideoModelStatic::SetProgressRate(FrameNode* frameNode, double progressRate)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        stateMachinePattern->UpdateProgressRate(progressRate);
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateProgressRate(progressRate);
 }
 
@@ -154,7 +176,13 @@ void VideoModelStatic::SetPosterSourceInfo(FrameNode* frameNode, const ImageSour
 void VideoModelStatic::SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "SetVideoController ignored: node uses async controller");
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->SetVideoController(videoController);
 }
 
@@ -166,6 +194,11 @@ void VideoModelStatic::SetObjectFit(FrameNode* frameNode, std::optional<ImageFit
 void VideoModelStatic::SetSurfaceBackgroundColor(FrameNode* frameNode, const std::optional<Color>& optColor)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        stateMachinePattern->SetSurfaceBackgroundColor(optColor.value_or(Color::BLACK));
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
     videoPattern->SetSurfaceBackgroundColor(optColor.value_or(Color::BLACK));
@@ -174,7 +207,13 @@ void VideoModelStatic::SetSurfaceBackgroundColor(FrameNode* frameNode, const std
 void VideoModelStatic::EnableAnalyzer(FrameNode* frameNode, bool enable)
 {
     CHECK_NULL_VOID(frameNode);
+    auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
+    if (stateMachinePattern) {
+        stateMachinePattern->EnableAnalyzer(enable);
+        return;
+    }
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->EnableAnalyzer(enable);
 }
 

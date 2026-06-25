@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 
+#include <any>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -26,6 +27,8 @@
 #include "base/memory/referenced.h"
 #include "ui/base/utils/utils.h"
 #include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/property/layout_constraint.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/ng/offset_t.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,6 +95,7 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void(int32_t)> setWebDetachFunc = nullptr;
     std::function<void(void*, void*, std::function<void(void*)>)> defaultOnShowFileSelectorFunc = nullptr;
     std::function<void(void*, std::function<void()>)> defaultPermissionClipboardFunc = nullptr;
+    std::function<void(void*, void*, std::function<void(void*)>)> defaultOnFullScreenVideoOverlayEnterFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
@@ -478,6 +482,45 @@ struct ArkUIListItemGroupSpace {
     float value = 0.0f;
 };
 
+struct ArkUIStackLayoutAlgorithm {
+    ArkUI_Int32 alignContent = 4;
+};
+
+struct ArkUILayoutAlgorithmResource {
+    int32_t resId = 0;
+    int32_t resType = 0;
+    std::string bundleName;
+    std::string moduleName;
+};
+
+struct ArkUILayoutAlgorithmLengthMetrics {
+    ArkUI_Int32 unit = 1; // DimensionUnit::VP
+    ani_double value = 0.0;
+    bool isResource = false;
+    ArkUILayoutAlgorithmResource resource;
+};
+
+struct ArkUIRowLayoutAlgorithm {
+    ArkUILayoutAlgorithmLengthMetrics space;
+    ArkUI_Int32 alignItems = -1;     // VerticalAlign::Center
+    ArkUI_Int32 justifyContent = 0; // FlexAlign::Start
+    ani_boolean isReverse = false;
+};
+
+struct ArkUIColumnLayoutAlgorithm {
+    ArkUILayoutAlgorithmLengthMetrics space;
+    ArkUI_Int32 alignItems = -1;     // HorizontalAlign::Center
+    ArkUI_Int32 justifyContent = 0; // FlexAlign::Start
+    ani_boolean isReverse = false;
+};
+
+struct ArkUIGridLayoutAlgorithm {
+    const char* columnsTemplate = nullptr;
+    ArkUI_Int32 itemFillPolicy = -1;
+    ArkUILayoutAlgorithmLengthMetrics rowsGap;
+    ArkUILayoutAlgorithmLengthMetrics columnsGap;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -646,6 +689,7 @@ struct ArkUIAniCommonModifier {
     ani_long (*getPageRootNode)();
     ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
     void(*dumpLogPrint)(int32_t depth, const char* content);
+    void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -656,6 +700,8 @@ struct  ArkUICustomNodeInfo {
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<void(bool, bool)> setActiveFunc;
+    std::function<void()> clearParentReusePoolFunc;
+    std::function<int32_t()> getMemOptFunc;
     std::function<std::string()> onGetJsViewNameFunc;
 };
 struct ArkUIAniCustomNodeModifier {
@@ -705,6 +751,59 @@ struct ArkUIAniListModifier {
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
+
+struct ArkUICustomLayoutAlgorithm {
+    std::function<void(const OHOS::Ace::NG::LayoutConstraintF&)> onMeasureFunc = nullptr;
+    std::function<void(const OHOS::Ace::NG::OffsetF&)> onPlaceChildrenFunc = nullptr;
+};
+
+struct ArkUIAniDynamicLayoutModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id, ArkUI_Int32 flags);
+    bool (*setDynamicLayoutStackOptions)(ArkUINodeHandle node, ArkUIStackLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutRowOptions)(ArkUINodeHandle node, ArkUIRowLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutColumnOptions)(ArkUINodeHandle node, ArkUIColumnLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutCustomOptions)(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm);
+    bool (*setDynamicLayoutGridOptions)(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm);
+};
+
+enum ArkUIAniEnvironmentValueType {
+    ARKUI_ANI_ENV_VALUE_TYPE_NONE = 0,
+    ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE,
+    ARKUI_ANI_ENV_VALUE_TYPE_ENUM,
+    ARKUI_ANI_ENV_VALUE_TYPE_CUSTOM,
+};
+
+struct ArkUIAniEnvironmentQueryResult {
+    ArkUIAniEnvironmentValueType type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    ArkUI_Int32 intValue = 0;
+    double doubleValue = 0.0;
+    const char* enumName = nullptr;
+    std::any customValue;
+};
+
+struct ArkUIAniSystemEnvValue {
+    ArkUIAniEnvironmentValueType type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    ArkUI_Int32 intValue = 0;
+    double doubleValue = 0.0;
+};
+
+using ArkUIAniEnvironmentUpdateCallback =
+    std::function<void(const std::string&, const std::optional<ArkUIAniEnvironmentQueryResult>&)>;
+
+struct ArkUIAniWithEnvModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id);
+    void (*removeSystemEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setSystemEnvProperty)(ArkUINodeHandle node, const std::string& key, ArkUIAniSystemEnvValue value);
+    void (*removeCustomEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setCustomEnvProperty)(ArkUINodeHandle node, const std::string& key, std::any value);
+    bool (*findCustomEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    bool (*findSystemEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    void (*setOnCustomEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
+    void (*setOnSystemEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
+};
+
 struct ArkUIAniListItemGroupModifier {
     void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
     void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
@@ -788,9 +887,6 @@ struct ArkUIAniVideoModifier {
 };
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
-};
-struct ArkUIAniRichEditorModifier {
-    ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
     std::string (*persistentStorageGet)(const std::string& key, const int32_t areaMode);
@@ -899,6 +995,8 @@ struct ArkUIAniCommonNodeAniModifier {
 struct ArkUIAniVisualEffectModifier {
     OHOS::Ace::UiMaterial* (*constructMaterial)(int32_t type);
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
+    OHOS::Ace::UiMaterial* (*convertToECMaterial)(OHOS::Ace::UiMaterial* ptr);
+    OHOS::Ace::UiMaterial* (*convertToECSubMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
 struct ArkUIAniDetachedFreeRootModifier {
@@ -934,6 +1032,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
+    const ArkUIAniDynamicLayoutModifier* (*getArkUIAniDynamicLayoutModifier)();
     const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
@@ -945,7 +1044,6 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
-    const ArkUIAniRichEditorModifier* (*getRichEditorAniModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
@@ -964,6 +1062,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
     const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
     const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
+    const ArkUIAniWithEnvModifier* (*getArkUIAniWithEnvModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

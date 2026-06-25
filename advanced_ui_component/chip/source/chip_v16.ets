@@ -170,6 +170,8 @@ interface ChipNodeTheme {
   activated: boolean;
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
+  backgroundSystemMaterial: uiMaterial.Material;
+  activatedBackgroundSystemMaterial: uiMaterial.Material;
   focusOutlineColor: ResourceColor;
   borderColor: ResourceColor,
   defaultBorderWidth: Dimension;
@@ -403,6 +405,13 @@ export struct ChipComponent {
       activated: false,
       backgroundColor: $r('sys.color.chip_background_color'),
       activatedBackgroundColor: $r('sys.color.chip_container_activated_color'),
+      backgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+      }),
+      activatedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        materialColor: $r('sys.color.comp_background_emphasize')
+      }),
       focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
       focusOutlineMargin: 2,
       borderColor: $r('sys.color.chip_border_color'),
@@ -722,11 +731,11 @@ export struct ChipComponent {
     .size(this.getChipSize())
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
-    .backgroundColor(this.getChipBackgroundColor())
-    .systemMaterial(this.getBackgroundSystemMaterial())
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
+    .backgroundColor(this.getChipBackgroundColor())
+    .systemMaterial(this.getBackgroundSystemMaterial())
     .responseRegion(this.getChipResponseRegion())
     .scale(this.chipScale)
     .opacity(this.chipOpacity)
@@ -1331,12 +1340,21 @@ export struct ChipComponent {
     return typeof this.chipSize === 'string' && this.chipSize === ChipSize.SMALL;
   }
 
-  getChipBackgroundColor(): ResourceColor {
+  getChipBackgroundColor(): ResourceColor | undefined {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
+      if (!!this.activatedBackgroundSystemMaterial) {
+        return undefined;
+      }
+
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
         this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
+
+    if (!!this.backgroundSystemMaterial) {
+      return undefined;
+    }
+
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
@@ -1345,10 +1363,18 @@ export struct ChipComponent {
     if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
-    if (this.isChipActivated()) {
-      return this.activatedBackgroundSystemMaterial;
+    const info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.DISABLE) {
+      return undefined;
     }
-    return this.backgroundSystemMaterial;
+    if (this.isChipActivated()) {
+      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial ?
+        this.theme.chipNode.activatedBackgroundSystemMaterial :
+        this.activatedBackgroundSystemMaterial;
+    }
+    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial ?
+      this.theme.chipNode.backgroundSystemMaterial :
+      this.backgroundSystemMaterial;
   }
 
   getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {

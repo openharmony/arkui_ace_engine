@@ -324,6 +324,11 @@ const std::shared_ptr<const MMI::PointerEvent>& AxisInfo::GetPointerEvent() cons
     return pointerEvent_;
 }
 
+size_t AxisInfo::GetApproximateSize() const
+{
+    return sizeof(*this) + GetApproximateBaseEventSize() + InputManager::GetApproximatePointerEventSize();
+}
+
 void AxisEventTarget::SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback)
 {
     onAxisCallback_ = onAxisCallback;
@@ -362,8 +367,10 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
     if (!onAxisCallback_) {
         return false;
     }
-    Offset localLocation = Offset(
-        event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, event.passThrough, event.postEventNodeId);
+    Offset localLocation = Offset(localPoint.GetX(), localPoint.GetY());
     AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
     auto frameNodeWeak = node_;
     auto globalOffset = event.GetOffset();

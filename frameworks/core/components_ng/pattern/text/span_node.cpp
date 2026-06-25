@@ -391,10 +391,23 @@ void SpanItem::SpanDumpInfo()
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("--------Content: ")
                         .append("\"")
-                        .append(UtfUtils::Str16DebugToStr8(content))
+                        .append(StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(content)))
                         .append("\"")
                         .append(",spanItemType:")
-                        .append(StringUtils::ToString(spanItemType)));
+                        .append(StringUtils::ToString(spanItemType))
+                        .append(",NeedRemoveNewLine:")
+                        .append(needRemoveNewLine ? "true" : "false")
+                        .append(",position:")
+                        .append(std::to_string(position))
+                        .append(",length:")
+                        .append(std::to_string(length))
+                        .append(",placeholderIndex:")
+                        .append(std::to_string(placeholderIndex))
+                        .append(",interval:[")
+                        .append(std::to_string(interval.first))
+                        .append(",")
+                        .append(std::to_string(interval.second))
+                        .append("]"));
     auto textStyle = textStyle_;
     if (!textStyle || (spanItemType != SpanItemType::NORMAL && spanItemType != SpanItemType::SYMBOL)) {
         return;
@@ -440,9 +453,21 @@ void SpanItem::SpanDumpInfoAdvance()
             .append(" self: ")
             .append(
             fontStyle && fontStyle->HasFontFamily() ? GetFontFamilyInJson(fontStyle->GetFontFamilyValue()) : "Na"));
+    dumpLog.AddDesc(
+        std::string("fontVariations: ")
+            .append(GetFontVariationsInJson(textStyle->GetFontVariations()))
+            .append(" self: ")
+            .append(fontStyle && fontStyle->HasFontVariations()
+                        ? GetFontVariationsInJson(fontStyle->GetFontVariationsValue())
+                        : "Na"));
     ADD_FONT_STYLE_DESC_UTILS(TextCase, TextCase);
     ADD_LINE_STYLE_DESC_UTILS(TextOverflow, TextOverflow);
     ADD_LINE_STYLE_DESC_UTILS(WordBreak, WordBreak);
+    auto textShadowStr = StringUtils::ConvertTextShadowToString(textStyle->GetTextShadows());
+    std::string propTextShadowStr;
+    if (fontStyle && fontStyle->HasTextShadow()) {
+        propTextShadowStr = StringUtils::ConvertTextShadowToString(fontStyle->GetTextShadowValue());
+    }
     dumpLog.AddDesc(std::string("WordSpacing: ")
                         .append(textStyle->GetWordSpacing().ToString())
                         .append(" Decoration: ")
@@ -462,7 +487,11 @@ void SpanItem::SpanDumpInfoAdvance()
                         .append(" ")
                         .append(fontStyle && fontStyle->HasTextDecorationColor()
                                     ? fontStyle->GetTextDecorationColorValue().ColorToString()
-                                    : "Na"));
+                                    : "Na")
+                        .append(" TextShadow: ")
+                        .append(textShadowStr)
+                        .append(" self: ")
+                        .append(fontStyle && fontStyle->HasTextShadow() ? propTextShadowStr : "Na"));
 }
 
 #define DEFINE_SPAN_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                           \
@@ -576,7 +605,7 @@ void SpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObj
     AddResObj(key, resObj, std::move(updateFunc));
 }
 
-template void SpanNode::RegisterResource<CalcDimension>(
+template ACE_FORCE_EXPORT void SpanNode::RegisterResource<CalcDimension>(
     const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
 template void SpanNode::RegisterResource<Color>(
     const std::string&, const RefPtr<ResourceObject>&, Color);
@@ -712,7 +741,7 @@ void SpanNode::UnregisterResource(const std::string& key)
     BaseSpan::UnregisterResource(key);
 }
 
-void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
+ACE_FORCE_EXPORT void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
     std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     for (auto i = 0; i < static_cast<int32_t>(resObjArr.size()); ++i) {
@@ -1007,6 +1036,7 @@ void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextS
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, TailIndents, TailIndent);
 }
 
 void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
@@ -1394,7 +1424,12 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
     COPY_TEXT_STYLE(textLineStyle, ColorShaderStyle, UpdateColorShaderStyle);
-    sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetGradient());
+    if (textLineStyle->HasGradient()) {
+        sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetOptGradient());
+    } else {
+        sameSpan->textLineStyle->ResetGradient();
+    }
+    COPY_TEXT_STYLE(textLineStyle, TailIndents, UpdateTailIndents);
 }
 
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
@@ -2102,6 +2137,7 @@ void PlaceholderSpanItem::DumpInfo() const
 void PlaceholderSpanItem::DumpTextStyleInfo() const
 {
     auto& dumpLog = DumpLog::GetInstance();
+    CHECK_NULL_VOID(textStyle_);
     auto textStyle = textStyle_.value_or(TextStyle());
     dumpLog.AddDesc(
         std::string("FontSize: ")
@@ -2199,6 +2235,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
     json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
     json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
+    json->Put("FontVariations", GetFontVariationsInJson(textStyle->GetFontVariations()).c_str());
     json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());
     json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
     json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());

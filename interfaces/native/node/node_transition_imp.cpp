@@ -17,6 +17,7 @@
 #include "node/node_transition.h"
 
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,6 +113,19 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
     return option;
 }
 
+ArkUI_TransitionEffect* OH_ArkUI_CreateIdentityTransitionEffect()
+{
+    ArkUI_TransitionEffect* option = new ArkUI_TransitionEffect { ARKUI_TRANSITION_EFFECT_IDENTITY };
+    option->translate = nullptr;
+    option->scale = nullptr;
+    option->rotate = nullptr;
+    option->appear = nullptr;
+    option->disappear = nullptr;
+    option->combine = nullptr;
+    option->animation = nullptr;
+    return option;
+}
+
 void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* option)
 {
     CHECK_NULL_VOID(option);
@@ -124,7 +138,7 @@ void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* option)
 
 int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* option, ArkUI_TransitionEffect* combine)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     auto* currentOption = option;
     while (currentOption->combine) {
         currentOption = currentOption->combine;
@@ -135,7 +149,7 @@ int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* option, ArkUI_
 
 int32_t OH_ArkUI_TransitionEffect_SetAnimation(ArkUI_TransitionEffect* option, ArkUI_AnimateOption* animation)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     option->animation = animation;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

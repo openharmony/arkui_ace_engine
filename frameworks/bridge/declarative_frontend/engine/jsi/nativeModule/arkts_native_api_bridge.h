@@ -57,7 +57,6 @@ public:
 private:
     static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -74,13 +73,10 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -89,20 +85,14 @@ private:
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
     static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterWebAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterImageAnimatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #endif
@@ -121,8 +111,8 @@ private:
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSymbolSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard start
     static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard end

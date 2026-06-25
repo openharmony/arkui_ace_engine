@@ -523,6 +523,10 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         return;
     }
 
+    std::string captureName = "FormSnapshot_" + cardInfo_.bundleName + "_" + cardInfo_.cardName + "_" +
+        std::to_string(pixelMap->GetWidth()) + "x" + std::to_string(pixelMap->GetHeight());
+    pixelMap->SetMemoryName(captureName);
+
     auto uiTaskExecutor =
         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
@@ -622,6 +626,12 @@ void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 
     // delete image rs node and frame node
     RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+
+    // clean up snapshot data after recover
+    pixelMap_.Reset();
+    isSnapshot_ = false;
+    needSnapshotAgain_ = false;
+
     RequestRender();
     // handle cached pointer event
     if (needHandleCachedClick && formManagerBridge_) {

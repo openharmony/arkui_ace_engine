@@ -30,6 +30,7 @@ build_component_ng("rich_editor_pattern_ng") {
     "rich_editor_overlay_modifier.cpp",
     "rich_editor_paint_method.cpp",
     "rich_editor_pattern.cpp",
+    "rich_editor_pattern_multi_thread.cpp",
     "rich_editor_scroll_controller.cpp",
     "rich_editor_select_overlay.cpp",
     "rich_editor_styled_string_controller.cpp",

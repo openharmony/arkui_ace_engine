@@ -78,6 +78,7 @@ public:
     virtual void HandleLongPressOnAction(const GestureEvent& info) {}
     virtual void HandleLongPressOnActionEnd(const GestureEvent& info) {}
     virtual void HandleLongPressOnActionCancel(const GestureEvent& info) {}
+    virtual void HandleLongPressOnPending() {}
     virtual void HandlePreviewLongPressOnAction(const GestureEvent& info) {}
     virtual void HandlePreviewLongPressOnActionEnd(const GestureEvent& info) {}
     virtual void HandlePreviewLongPressOnActionCancel(const GestureEvent& info) {}

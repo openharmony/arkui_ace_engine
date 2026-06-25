@@ -20,6 +20,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
   files = [
     "./@ohos.arkui.advanced.Dialog.ets",
     "./@ohos.arkui.advanced.DialogV2.ets",
+    "./@ohos.arkui.advanced.DatePickerComponent.ets"
   ]
   if (!ace_engine_feature_wearable) {
     files += [
@@ -32,16 +33,21 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.ExceptionPrompt.ets",
       "./@ohos.arkui.advanced.ExceptionPromptV2.ets",
       "./@ohos.arkui.advanced.Filter.ets",
+      "./@ohos.arkui.advanced.FilterV2.ets",
       "./@ohos.arkui.advanced.GridObjectSortComponent.ets",
+      "./@ohos.arkui.advanced.GridObjectSortComponentV2.ets",
       "./@ohos.arkui.advanced.ProgressButton.ets",
       "./@ohos.arkui.advanced.ProgressButtonV2.ets",
       "./@ohos.arkui.advanced.SelectTitleBar.ets",
+      "./@ohos.arkui.advanced.SelectTitleBarV2.ets",
       "./@ohos.arkui.advanced.SplitLayout.ets",
+      "./@ohos.arkui.advanced.SplitLayoutV2.ets",
       "./@ohos.arkui.advanced.SubHeader.ets",
       "./@ohos.arkui.advanced.SubHeaderV2.ets",
       "./@ohos.arkui.advanced.SwipeRefresher.ets",
       "./@ohos.arkui.advanced.SwipeRefresherV2.ets",
       "./@ohos.arkui.advanced.TabTitleBar.ets",
+      "./@ohos.arkui.advanced.TabTitleBarV2.ets",
       "./@ohos.arkui.advanced.ToolBar.ets",
       "./@ohos.arkui.advanced.ToolBarV2.ets",
       "./@ohos.arkui.advanced.TreeView.ets",

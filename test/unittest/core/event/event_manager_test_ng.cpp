@@ -19,6 +19,24 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace OHOS::Ace {
+
+// Define RectCallback and RectCallbackListImpl for test access
+// These structures are defined in event_manager.cpp and are not exposed in the header
+struct RectCallback {
+    ~RectCallback() = default;
+    std::function<void(std::vector<Rect>&)> rectGetCallback;
+    std::function<void()> touchCallback;
+    std::function<void()> mouseCallback;
+};
+
+struct RectCallbackListImpl {
+    std::vector<RectCallback> callbacks;
+};
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 void EventManagerTestNg::SetUpTestSuite()
 {
@@ -384,12 +402,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
     eventManager->AddRectCallback(
         [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
         touchCallback, mouseCallback);
+    ASSERT_NE(eventManager->rectCallbackListImpl_, nullptr);
 
     /**
      * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
      * @tc.expected: callbacks size is 1 after out-of-rect handling
      */
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 1);
 
     point.SetSourceType(SourceType::MOUSE);
     eventManager->ClearRectCallbacks();
@@ -401,6 +421,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
      * @tc.expected: callbacks are cleared
      */
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 0);
 }
 
 /**
@@ -1748,5 +1769,119 @@ HWTEST_F(EventManagerTestNg, CleanHoverStatusForDragBegin004, TestSize.Level1)
     eventManager->CleanHoverStatusForDragBegin();
     EXPECT_TRUE(eventManager->mouseTestResults_.empty());
     EXPECT_FALSE(eventManager->isDragCancelPending_);
+}
+
+/**
+ * @tc.name: GetCurrentReferee001
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=true and existing referee in map
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t EVENT_HANDLE = 100000;
+    int32_t eventHandleId = EVENT_HANDLE * 2;
+    auto existingReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    eventManager->postEventRefereeWithStrategyNG_[2] = existingReferee;
+
+    auto result = eventManager->GetCurrentReferee(true, eventHandleId);
+    EXPECT_EQ(result, existingReferee);
+}
+
+/**
+ * @tc.name: GetCurrentReferee002
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=true and no referee in map (creates new)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t EVENT_HANDLE = 100000;
+    int32_t eventHandleId = EVENT_HANDLE * 3;
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_.count(3), 0);
+
+    auto result = eventManager->GetCurrentReferee(true, eventHandleId);
+    ASSERT_NE(result, nullptr);
+    EXPECT_NE(result, eventManager->refereeNG_);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_.count(3), 1);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_[3], result);
+}
+
+/**
+ * @tc.name: GetCurrentReferee003
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=false and key==0 (use refereeNG_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t eventHandleId = 0;
+
+    auto result = eventManager->GetCurrentReferee(false, eventHandleId);
+    EXPECT_EQ(result, eventManager->refereeNG_);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_[0], eventManager->refereeNG_);
+}
+
+/**
+ * @tc.name: GetCurrentReferee004
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=false and key==POST_ONCE (use refereeNG_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t EVENT_HANDLE = 100000;
+    int32_t eventHandleId = EVENT_HANDLE * 1;
+
+    auto result = eventManager->GetCurrentReferee(false, eventHandleId);
+    EXPECT_EQ(result, eventManager->refereeNG_);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_[1], eventManager->refereeNG_);
+}
+
+/**
+ * @tc.name: GetCurrentReferee005
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=false and key>1 with existing upper-level referee
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t EVENT_HANDLE = 100000;
+    int32_t eventHandleId = EVENT_HANDLE * 3;
+    auto upperReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    eventManager->postEventRefereeWithStrategyNG_[2] = upperReferee;
+
+    auto result = eventManager->GetCurrentReferee(false, eventHandleId);
+    EXPECT_EQ(result, upperReferee);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_[3], upperReferee);
+}
+
+/**
+ * @tc.name: GetCurrentReferee006
+ * @tc.desc: Test GetCurrentReferee with isNewReferee=false and key>1 without upper-level referee
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee006, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t EVENT_HANDLE = 100000;
+    int32_t eventHandleId = EVENT_HANDLE * 5;
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_.count(4), 0);
+
+    auto result = eventManager->GetCurrentReferee(false, eventHandleId);
+    EXPECT_EQ(result, nullptr);
+    EXPECT_EQ(eventManager->postEventRefereeWithStrategyNG_[5], nullptr);
 }
 } // namespace OHOS::Ace::NG

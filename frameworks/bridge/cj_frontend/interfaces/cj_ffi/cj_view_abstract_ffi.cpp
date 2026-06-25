@@ -22,12 +22,14 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_progressmask_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "pixel_map_impl.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/common/color_inverter.h"
+#include "core/components/theme/resource_adapter.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -1150,7 +1152,7 @@ void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, dou
     Dimension dOffsetY(offsetY, DimensionUnit::VP);
     double radiusVal = radius;
     if (LessOrEqual(radius, 0.0) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
         LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
         return;
     }
@@ -1648,6 +1650,10 @@ void FfiOHOSAceFrameworkViewAbstractSetMaskByProgressMask(int64_t progressId)
     if (nativeMask == nullptr) {
         LOGI("set mask error, Cannot get NativeProgressMask by id: %{public}" PRId64, progressId);
         return;
+    }
+    auto* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (frameNode != nullptr) {
+        nativeMask->SetHostFrameNode(AceType::WeakClaim(frameNode));
     }
     ViewAbstractModel::GetInstance()->SetProgressMask(nativeMask->GetProgressMask());
 }
@@ -2799,8 +2805,13 @@ void ParseSheetStyleV2(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
 void ParseSheetTitle(
     NativeOptionCallBack title, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
-    sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = title.hasValue ? CJLambda::Create(title.value) : ([]() -> void {});
+    if (title.hasValue) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = CJLambda::Create(title.value);
+    } else if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = ([]() -> void {});
+    }
 }
 
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)

@@ -107,6 +107,16 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
     style.punctuationOverflow = paraStyle.punctuationOverflow;
+    if (paraStyle.tailIndents.has_value() && paraStyle.tailIndents->HasValue()) {
+        style.tailIndents.clear();
+        for (const auto& indent : paraStyle.tailIndents->indentsArray.value()) {
+            if (indent.Unit() == DimensionUnit::PERCENT || indent.IsNegative()) {
+                style.tailIndents.push_back(0.0);
+            } else {
+                style.tailIndents.push_back(indent.ConvertToPx());
+            }
+        }
+    }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -267,6 +277,11 @@ void TxtParagraph::ReLayoutForeground(const TextStyle& textStyle)
         return style.relayoutChangeBitmap.any();
     });
     if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE(
+            "TxtParagraph::ReLayoutForeground textStyle id:%d relayoutChangeBitmap:%s paraStyle id:%d "
+            "isTextStyleChange:%d width:%f",
+            textStyle.GetTextStyleUid(), txtStyles.front().relayoutChangeBitmap.to_string().c_str(),
+            paraStyle_.textStyleUid, isTextStyleChange, paragraph_->GetMaxWidth());
         TAG_LOGI(AceLogTag::ACE_TEXT,
             "ReLayoutForeground id:%{public}d ReLayoutForeground: %{public}s parid:%{public}d "
             "isTextStyleChange:%{public}d",
@@ -280,7 +295,11 @@ float TxtParagraph::GetHeight()
 {
     auto paragrah = GetParagraph();
     CHECK_NULL_RETURN(paragrah, 0.0f);
-    return static_cast<float>(paragrah->GetHeight());
+    auto height = static_cast<float>(paragrah->GetHeight());
+    if (paraStyle_.isEndAddParagraphSpacing && text_.empty() && placeholderCnt_ == 0 && paraStyle_.maxLines != 0) {
+        height += static_cast<float>(paraStyle_.paragraphSpacing.ConvertToPx());
+    }
+    return height;
 }
 
 float TxtParagraph::GetTextWidth()

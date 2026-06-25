@@ -16,6 +16,7 @@
 #include "compatible/components/video/video_element_v2.h"
 
 #include "core/components/box/box_component.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 

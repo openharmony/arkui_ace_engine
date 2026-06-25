@@ -27,11 +27,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WithEnvModelNG : public WithEnvModel {
 public:
     void Create() override;
-    void SetEnvProperty(const std::string& key, const std::string& value) override;
-    void SetEnvProperty(const std::string& key, double value) override;
-    void SetEnvProperty(const std::string& key, bool value) override;
+    void RemoveSystemEnvProperty(const std::string& key) override;
+    void SetSystemEnvProperty(const std::string& key, TextDirection value) override;
+    void SetSystemEnvProperty(const std::string& key, double value) override;
+    void RemoveCustomEnvProperty(const std::string& key) override;
     void SetCustomEnvProperty(const std::string& key, std::any value) override;
-    const std::any* GetCustomEnvPropertyAny(const std::string& key) override;
 };
 
 } // namespace OHOS::Ace::NG

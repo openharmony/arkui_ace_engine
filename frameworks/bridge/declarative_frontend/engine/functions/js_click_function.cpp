@@ -252,8 +252,8 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
-    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    obj->SetProperty<double>("rawDeltaX", info.GetRawDeltaX());
+    obj->SetProperty<double>("rawDeltaY", info.GetRawDeltaY());
     obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
     obj->SetPropertyObject("getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetMouseHistoricalPoints));
     obj->Wrap<MouseInfo>(&info);

@@ -12,63 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Ace::NG {
-bool InspectorFilter::CheckFixedAttr(const FixedAttrBit attrBit) const
-{
-    return (filterFixed & (1ULL << attrBit)) != 0;
-}
-
-bool InspectorFilter::CheckExtAttr(const std::string& attr) const
-{
-    return std::find(filterExt.begin(), filterExt.end(), attr) != filterExt.end();
-}
-
-bool InspectorFilter::CheckFilterAttr(const FixedAttrBit fixedAttrBit, const char* extAttr) const
-{
-    if (CheckFixedAttr(fixedAttrBit)) {
-        return true;
-    }
-    if (extAttr == nullptr) {
-        return false;
-    }
-    return CheckExtAttr(extAttr);
-}
-
 bool InspectorFilter::IsFastFilter() const
 {
-    return FilterEmpty();
-}
-
-void InspectorFilter::AddFilterAttr(const std::string& attr)
-{
-    filterExt.emplace_back(attr);
-}
-
-void InspectorFilter::SetFilterID(std::string& id)
-{
-    filterId = id;
-}
-
-std::string InspectorFilter::GetFilterID(void) const
-{
-    return filterId;
-}
-
-void InspectorFilter::SetFilterDepth(size_t depth)
-{
-    filterDepth = static_cast<uint32_t>(depth);
-}
-
-size_t InspectorFilter::GetFilterDepth() const
-{
-    return filterDepth;
-}
-
-bool InspectorFilter::FilterEmpty() const
-{
-    return filterId.empty() && filterDepth == 0 && filterFixed == 0 && filterExt.empty();
+    return false;
 }
 } // namespace OHOS::Ace::NG

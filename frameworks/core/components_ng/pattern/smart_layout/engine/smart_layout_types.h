@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
  */
 enum class SmartLayoutType {
     UNKNOWN,
+    GENERAL,
     COLUMN,
     ROW,
     FLEX
@@ -75,6 +76,14 @@ struct EdgesSpaces {
     double right = 0.0;
     double top = 0.0;
     double bottom = 0.0;
+
+    void ClampToNonNegative()
+    {
+        left = std::max(left, 0.0);
+        right = std::max(right, 0.0);
+        top = std::max(top, 0.0);
+        bottom = std::max(bottom, 0.0);
+    }
 };
 
 /**

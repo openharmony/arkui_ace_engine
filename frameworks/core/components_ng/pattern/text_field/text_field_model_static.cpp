@@ -25,6 +25,7 @@
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -36,6 +37,21 @@ constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_ALPHA = 255;
+
+RefPtr<FrameNode> NormalizeShowUnitNode(const RefPtr<UINode>& unitNode)
+{
+    CHECK_NULL_RETURN(unitNode, nullptr);
+    auto unitFrameNode = AceType::DynamicCast<FrameNode>(unitNode);
+    if (unitFrameNode) {
+        return unitFrameNode;
+    }
+
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_RETURN(wrapperNode, nullptr);
+    unitNode->MountToParent(wrapperNode);
+    return wrapperNode;
+}
 }
 
 RefPtr<FrameNode> TextFieldModelStatic::CreateTextInputNode(
@@ -84,10 +100,11 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
         unitNode = builder();
     }
     CHECK_NULL_VOID(unitNode);
-    pattern->SetUnitNode(unitNode);
 
-    auto unitFrameNode = AceType::DynamicCast<FrameNode>(unitNode);
+    auto unitFrameNode = NormalizeShowUnitNode(unitNode);
     CHECK_NULL_VOID(unitFrameNode);
+    pattern->SetUnitNode(unitFrameNode);
+
     auto renderContext = unitFrameNode->GetRenderContext();
     if (renderContext && !renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
@@ -126,6 +143,7 @@ void TextFieldModelStatic::SetAdaptMinFontSize(FrameNode* frameNode, const std::
         TextFieldModelNG::SetAdaptMinFontSize(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
     }
 }
 
@@ -135,6 +153,7 @@ void TextFieldModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::
         TextFieldModelNG::SetAdaptMaxFontSize(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
     }
 }
 
@@ -176,6 +195,7 @@ void TextFieldModelStatic::SetTextIndent(FrameNode* frameNode, const std::option
         TextFieldModelNG::SetTextIndent(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_TEXT_INDENT, frameNode);
     }
 }
 
@@ -356,6 +376,11 @@ void TextFieldModelStatic::SetTextColor(FrameNode* frameNode, const std::optiona
     }
 }
 
+void TextFieldModelStatic::UpdateTextColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, color, frameNode);
+}
+
 void TextFieldModelStatic::SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
@@ -381,15 +406,18 @@ void TextFieldModelStatic::SetCaretStyle(FrameNode* frameNode, const std::option
         return;
     }
     ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_CARET_WIDTH, frameNode);
 }
 
 void TextFieldModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.value(), frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_CARET_WIDTH, frameNode);
         return;
     }
     ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_CARET_WIDTH, frameNode);
 }
 
 void TextFieldModelStatic::SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
@@ -455,10 +483,13 @@ void TextFieldModelStatic::SetPlaceholderFont(FrameNode* frameNode, const std::o
     if (valueOpt && valueOpt.value().fontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextFieldLayoutProperty, PlaceholderFontSize, valueOpt.value().fontSize.value(), frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            valueOpt.value().fontSize.value(), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, frameNode);
     } else {
         if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
             textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetFontSize();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, frameNode);
     }
     if (valueOpt && valueOpt.value().fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -496,6 +527,7 @@ void TextFieldModelStatic::SetFontSize(FrameNode* frameNode, const std::optional
     }
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelStatic::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
@@ -667,6 +699,7 @@ void TextFieldModelStatic::SetLetterSpacing(FrameNode* frameNode, const std::opt
         TextFieldModelNG::SetLetterSpacing(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_LETTER_SPACING, frameNode);
     }
 }
 
@@ -676,6 +709,7 @@ void TextFieldModelStatic::SetLineHeight(FrameNode* frameNode, const std::option
         TextFieldModelNG::SetLineHeight(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_LINE_HEIGHT, frameNode);
     }
 }
 
@@ -686,6 +720,7 @@ void TextFieldModelStatic::SetLineSpacing(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(valueOpt.value_or(Dimension()), LpxAttribute::LPX_LINE_SPACING, frameNode);
 }
 
 void TextFieldModelStatic::SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt)
@@ -827,6 +862,11 @@ void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::op
 void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextFieldModelStatic::SetPunctuationOverflow(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextFieldModelNG::SetPunctuationOverflow(frameNode, enable.value_or(false));
 }
 
 void TextFieldModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
@@ -1001,6 +1041,7 @@ void TextFieldModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(optValue.value_or(Dimension()), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void TextFieldModelStatic::SetMinLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)

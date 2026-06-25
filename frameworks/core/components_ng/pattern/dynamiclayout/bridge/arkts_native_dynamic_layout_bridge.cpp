@@ -12,13 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <memory>
+#include <cmath>
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dynamiclayout/algorithm_param_base.h"
+#include "core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h"
 #include "core/components_ng/layout/utils.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
 #include "core/components/common/layout/constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -62,7 +67,7 @@ void ParseLinearMainAxisAlignment(EcmaVM* vm, const Local<JSValueRef>& justifyVa
 void ParseSpace(EcmaVM* vm, const Local<JSValueRef>& spaceVal, CalcDimension &result)
 {
     if (spaceVal->IsObject(vm) && (!ArkTSUtils::ParseJsLengthMetrics(vm, spaceVal, result) || result.IsNegative())) {
-        result = CalcDimension(0);
+        result = CalcDimension(0, DimensionUnit::VP);
     }
 }
 
@@ -84,7 +89,7 @@ void ParseLinearAlgorithmOption(
     auto reverseVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isReverse"));
     FlexAlign crossAxisAlign = FlexAlign::CENTER;
     FlexAlign justifyContent = FlexAlign::FLEX_START;
-    CalcDimension space;
+    CalcDimension space(0, DimensionUnit::VP);
     bool isReverse = false;
     ParseLinearCrossAxisAlignment(vm, alignItemVal, crossAxisAlign);
     ParseLinearMainAxisAlignment(vm, justifyVal, justifyContent);
@@ -246,6 +251,78 @@ Local<panda::ObjectRef> GetFrameNode(int32_t nodeId, panda::ecmascript::EcmaVM* 
     return func->Call(vm, func.ToLocal(), params, PARAMS_NUM_TWO);
 }
 
+float GetMainSize(LayoutWrapper* layoutWrapper, Axis axis)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto geometry = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, 0.0f);
+    return geometry->GetPaddingSize().MainSize(axis);
+}
+
+Local<panda::ObjectRef> GenLazyLayoutInfoObj(EcmaVM* vm, LayoutWrapper* layoutWrapper,
+    const ViewPosReference& viewPosRef)
+{
+    float viewStart = viewPosRef.viewPosStart - viewPosRef.viewExtStart;
+    float viewEnd = viewPosRef.viewPosEnd + viewPosRef.viewExtEnd;
+    if (viewPosRef.referenceEdge == ReferenceEdge::START) {
+        viewStart -= viewPosRef.referencePos;
+        viewEnd -= viewPosRef.referencePos;
+    } else {
+        float mainSize = GetMainSize(layoutWrapper, viewPosRef.axis);
+        viewStart -= (viewPosRef.referencePos - mainSize);
+        viewEnd -= (viewPosRef.referencePos - mainSize);
+    }
+    Local<JSValueRef> lazyLayoutInfoValues[] = {
+        panda::NumberRef::New(vm, std::floor(viewStart)),
+        panda::NumberRef::New(vm, std::floor(viewEnd)),
+        panda::NumberRef::New(vm, static_cast<int32_t>(viewPosRef.referenceEdge))
+    };
+    const char* lazyLayoutInfoKeys[] = { "viewStart", "viewEnd", "lazyLayoutDirection" };
+    auto lazyLayoutInfoObj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(lazyLayoutInfoKeys), lazyLayoutInfoKeys, lazyLayoutInfoValues);
+    return lazyLayoutInfoObj;
+}
+
+void HandleLazyMeasureResult(EcmaVM* vm, FrameNode* frameNode, const Local<panda::JSValueRef>& result)
+{
+    if (!result->IsObject(vm)) {
+        return;
+    }
+    
+    auto resultObj = result->ToObject(vm);
+    
+    auto adjustedOffsetVal = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "adjustedOffset"));
+    if (adjustedOffsetVal->IsNumber()) {
+        float adjustedOffset = adjustedOffsetVal->ToNumber(vm)->Value();
+        if (std::isnan(adjustedOffset) || std::isinf(adjustedOffset)) {
+            adjustedOffset = 0.0f;
+        }
+        GetArkUINodeModifiers()->getDynamicLayoutModifier()->setAdjustedOffset(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), adjustedOffset);
+    }
+    
+    auto inActiveChildrenVal = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "inActiveChildren"));
+    if (!inActiveChildrenVal->IsArray(vm)) {
+        return;
+    }
+    auto array = inActiveChildrenVal->ToObject(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
+    std::vector<int32_t> inActiveChildren;
+    for (uint32_t i = 0; i < length; ++i) {
+        auto element = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (element->IsNumber()) {
+            auto number = element->ToNumber(vm)->Value();
+            if (!std::isnan(number) && number <= INT32_MAX && number >= 0) {
+                inActiveChildren.push_back(static_cast<int32_t>(number));
+            }
+        }
+    }
+    GetArkUINodeModifiers()->getDynamicLayoutModifier()->setInActiveChildren(
+        reinterpret_cast<ArkUINodeHandle>(frameNode),
+        inActiveChildren.data(),
+        static_cast<ArkUI_Uint32>(inActiveChildren.size()));
+}
+
 std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
     return [vm = vm, obj = panda::CopyableGlobal(vm, jsObj)]
@@ -254,9 +331,6 @@ std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Loc
         panda::TryCatch trycatch(vm);
         CHECK_NULL_VOID(!obj.IsEmpty());
         CHECK_NULL_VOID(obj->IsObject(vm));
-        auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
-        CHECK_NULL_VOID(funcObj->IsFunction(vm));
-        panda::Local<panda::FunctionRef> func = funcObj;
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         auto nodeId = host->GetId();
@@ -268,8 +342,23 @@ std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Loc
         CHECK_NULL_VOID(layoutProperty);
         auto layoutConstraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
         auto constraint = GenConstraintObj(vm, layoutConstraint);
-        panda::Local<panda::JSValueRef> measureParams[PARAMS_NUM_TWO] = { returnPtr, constraint };
-        func->Call(vm, obj.ToLocal(), measureParams, PARAMS_NUM_TWO);
+
+        auto lazyMeasureFuncObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__onMeasure__"));
+        if (lazyMeasureFuncObj->IsFunction(vm) && layoutConstraint.viewPosRef.has_value()) {
+            panda::Local<panda::FunctionRef> lazyMeasureFunc = lazyMeasureFuncObj;
+            const auto& viewPosRef = layoutConstraint.viewPosRef.value();
+            auto lazyLayoutInfoObj = GenLazyLayoutInfoObj(vm, layoutWrapper, viewPosRef);
+            panda::Local<panda::JSValueRef> lazyMeasureParams[] = { returnPtr, constraint, lazyLayoutInfoObj };
+            auto result = lazyMeasureFunc->Call(vm, obj.ToLocal(), lazyMeasureParams, ArraySize(lazyMeasureParams));
+            
+            HandleLazyMeasureResult(vm, AceType::RawPtr(host), result);
+        } else {
+            auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
+            CHECK_NULL_VOID(funcObj->IsFunction(vm));
+            panda::Local<panda::FunctionRef> func = funcObj;
+            panda::Local<panda::JSValueRef> measureParams[PARAMS_NUM_TWO] = { returnPtr, constraint };
+            func->Call(vm, obj.ToLocal(), measureParams, PARAMS_NUM_TWO);
+        }
     };
 }
 
@@ -324,6 +413,34 @@ void ParseCustomLayoutAlgorithmOption(
     params = customParams;
 }
 
+void ParseLazyCustomLayoutAlgorithmOption(
+    EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, RefPtr<AlgorithmParamBase>& params)
+{
+    auto jsMeasureSizeFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
+    auto jsOnLayoutFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onLayout"));
+    if (!jsMeasureSizeFunc->IsFunction(vm) && !jsOnLayoutFunc->IsFunction(vm)) {
+        return;
+    }
+    auto lazyCustomParams = AceType::MakeRefPtr<LazyCustomLayoutAlgorithmParam>();
+    if (jsMeasureSizeFunc->IsFunction(vm)) {
+        auto onMeasureSizeFunc = PrepareMeasureSizeFunc(vm, jsObj);
+        lazyCustomParams->SetOnMeasureSize(std::move(onMeasureSizeFunc));
+    }
+    if (jsOnLayoutFunc->IsFunction(vm)) {
+        auto onPlaceChildrenFunc = PreparePlaceChildrenFunc(vm, jsObj);
+        lazyCustomParams->SetOnPlaceChildren(std::move(onPlaceChildrenFunc));
+    }
+    auto axisVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "axis"));
+    if (axisVal->IsNumber()) {
+        auto axisValue = axisVal->Int32Value(vm);
+        if (axisValue == static_cast<int32_t>(Axis::VERTICAL) ||
+            axisValue == static_cast<int32_t>(Axis::HORIZONTAL)) {
+            lazyCustomParams->SetAxis(static_cast<Axis>(axisValue));
+        }
+    }
+    params = lazyCustomParams;
+}
+
 std::unordered_map<int32_t, ParsingParamFunc> parsingParamFuncMap = {
     { COLUMN_LAYOUT, &ParseColumnAlgorithmOption },
     { ROW_LAYOUT, &ParseRowAlgorithmOption },
@@ -350,13 +467,42 @@ bool ParseLayoutAlgorithmOption(
 
 void DynamicLayoutBridge::RegisterDynamicLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    const char* functionNames[] = { "create" };
+    const char* functionNames[] = { "create", "createLazyDynamicLayout", "setOnVisibleIndexesChange" };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DynamicLayoutBridge::CreateDynamicLayout),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DynamicLayoutBridge::CreateLazyDynamicLayout),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DynamicLayoutBridge::SetOnVisibleIndexesChange),
     };
     auto dynamicLayout =
         panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "dynamiclayout"), dynamicLayout);
+}
+
+ArkUINativeModuleValue DynamicLayoutBridge::CreateLazyDynamicLayout(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg.IsEmpty() || !firstArg->IsObject(vm)) {
+        nodeModifiers->getDynamicLayoutModifier()->createLazyDynamicLayout(
+            nullptr, static_cast<int32_t>(DynamicLayoutType::CUSTOM_LAYOUT));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto algorithmObj = firstArg->ToObject(vm);
+    RefPtr<AlgorithmParamBase> params;
+    ParseLazyCustomLayoutAlgorithmOption(vm, algorithmObj, params);
+    auto lazyCustomParams = AceType::DynamicCast<LazyCustomLayoutAlgorithmParam>(params);
+    if (lazyCustomParams) {
+        nodeModifiers->getDynamicLayoutModifier()->createLazyDynamicLayout(
+            reinterpret_cast<void*>(AceType::RawPtr(lazyCustomParams)),
+            static_cast<int32_t>(DynamicLayoutType::CUSTOM_LAYOUT));
+    } else {
+        nodeModifiers->getDynamicLayoutModifier()->createLazyDynamicLayout(
+            nullptr, static_cast<int32_t>(DynamicLayoutType::CUSTOM_LAYOUT));
+    }
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue DynamicLayoutBridge::CreateDynamicLayout(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -382,4 +528,75 @@ ArkUINativeModuleValue DynamicLayoutBridge::CreateDynamicLayout(ArkUIRuntimeCall
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
+namespace {
+bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& nodeArg, const EcmaVM* vm)
+{
+    CHECK_NULL_RETURN(vm, false);
+    if (!nodeArg.IsEmpty() && nodeArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (!nodeArg.IsEmpty() && nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value()) {
+        nativeNode = nullptr;
+        return true;
+    }
+
+    return false;
+}
+}
+
+ArkUINativeModuleValue DynamicLayoutBridge::SetOnVisibleIndexesChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, nodeArg, vm), false, panda::JSValueRef::Undefined(vm));
+    
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (!frameNode) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    
+    bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
+    
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getDynamicLayoutModifier()->resetOnVisibleIndexesChange(
+            reinterpret_cast<ArkUINodeHandle>(frameNode));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    // Transfer a heap-owned callback object across the C ABI so the modifier can take ownership immediately
+    // without relying on a stack address that expires when this bridge call returns.
+    // The pattern owns this callback after the C ABI transfer; resetOnVisibleIndexesChange replaces it
+    // before a new one is installed.
+    auto callback = std::make_unique<OnVisibleIndexesChangeEvent>(
+        [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), isJSView](
+            const std::vector<int32_t>& indexes) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(node);
+            
+            panda::Local<panda::ArrayRef> arrayParam = panda::ArrayRef::New(vm, indexes.size());
+            for (size_t i = 0; i < indexes.size(); ++i) {
+                panda::Local<panda::NumberRef> indexValue = panda::NumberRef::New(vm, indexes[i]);
+                arrayParam->Set(vm, i, indexValue);
+            }
+            panda::Local<panda::JSValueRef> params[1] = { arrayParam };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
+            if (isJSView) {
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            }
+        });
+
+    GetArkUINodeModifiers()->getDynamicLayoutModifier()->setOnVisibleIndexesChange(
+        reinterpret_cast<ArkUINodeHandle>(frameNode), callback.release());
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

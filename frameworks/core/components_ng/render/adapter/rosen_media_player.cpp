@@ -19,9 +19,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
+#include "base/resource/data_provider_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/video/media_player_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -488,6 +490,19 @@ int32_t RosenMediaPlayer::SetPlaybackSpeed(float speed)
 {
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetPlaybackSpeed(ConvertToMediaPlaybackSpeed(static_cast<float>(speed)));
+}
+
+int32_t RosenMediaPlayer::SetPlaybackRate(float speed, int32_t& errorCode, std::string& errorMsg)
+{
+    if (!mediaPlayer_ || !std::isfinite(speed)) {
+        errorCode = -1;
+        errorMsg = "NULL";
+        return -1;
+    }
+    int32_t ret = mediaPlayer_->SetPlaybackRate(speed);
+    errorCode = OHOS::Media::MSErrorToExtErrorAPI9(static_cast<Media::MediaServiceErrCode>(ret));
+    errorMsg = OHOS::Media::MSExtAVErrorToString(static_cast<OHOS::Media::MediaServiceExtErrCodeAPI9>(errorCode));
+    return ret;
 }
 
 int32_t RosenMediaPlayer::SetSurface()

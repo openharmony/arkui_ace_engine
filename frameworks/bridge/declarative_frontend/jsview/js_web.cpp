@@ -106,6 +106,7 @@ void EraseSpace(std::string& data)
         }
     }
 }
+
 }
 
 std::unique_ptr<WebModel> WebModel::instance_ = nullptr;
@@ -133,6 +134,31 @@ WebModel* WebModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
+
+namespace {
+class JsWebNoArgNodeCallback {
+public:
+    JsWebNoArgNodeCallback(const JSExecutionContext& execCtx, RefPtr<JsFunction> func, WeakPtr<NG::FrameNode> node,
+        std::string eventName)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), eventName_(std::move(eventName))
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(eventName_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<JsFunction> func_;
+    WeakPtr<NG::FrameNode> node_;
+    std::string eventName_;
+};
+} // namespace
+
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
 
@@ -2326,6 +2352,111 @@ private:
     RefPtr<WebNativeMessageCallback> callback_;
 };
 
+class JSFullScreenVideoOverlayHandler : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSFullScreenVideoOverlayHandler>::Declare("FullScreenVideoOverlayHandler");
+        JSClass<JSFullScreenVideoOverlayHandler>::CustomMethod(
+            "setVideoSurface", &JSFullScreenVideoOverlayHandler::SetVideoSurface);
+        JSClass<JSFullScreenVideoOverlayHandler>::CustomMethod(
+            "addListener", &JSFullScreenVideoOverlayHandler::AddListener);
+        JSClass<JSFullScreenVideoOverlayHandler>::CustomMethod(
+            "requestMediaControl", &JSFullScreenVideoOverlayHandler::RequestMediaControl);
+        JSClass<JSFullScreenVideoOverlayHandler>::Bind(
+            globalObj, &JSFullScreenVideoOverlayHandler::Constructor, &JSFullScreenVideoOverlayHandler::Destructor);
+    }
+
+    void SetEvent(const FullScreenVideoOverlayEnterEvent &eventInfo)
+    {
+        handler_ = eventInfo.GetHandler();
+    }
+
+    void SetVideoSurface(const JSCallbackInfo &args)
+    {
+        if ((args.Length() <= 0) || !(args[0]->IsString())) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "JSFullScreenVideoOverlayHandler SetSurfaceId type error");
+            return;
+        }
+        std::string surfaceId = args[0]->ToString();
+        if (handler_) {
+            handler_->SetVideoSurface(surfaceId);
+        }
+    }
+
+    void AddListener(const JSCallbackInfo& args)
+    {
+        if (args.Length() < 1 || !args[0]->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "AddListener failed, type error");
+            return;
+        }
+        auto listener = JSRef<JSObject>::Cast(args[0]);
+        if (listener.IsEmpty()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "AddListener failed, object is null");
+            return;
+        }
+
+        CHECK_NULL_VOID(handler_);
+        auto videoPlayerListener = std::make_shared<VideoPlayerListener>();
+        WeakPtr<NG::FrameNode> webNode = handler_->GetWebNode();
+        if (!(webNode.Upgrade())) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "AddListener webNode is null");
+            return;
+        }
+
+        BindListenerFuncIfPresent<int>(listener, "onStatusChanged", videoPlayerListener->OnStatusChanged,
+            args, webNode, "OnStatusChangedFunc");
+        BindListenerFuncIfPresent<bool>(listener, "onMutedChanged", videoPlayerListener->OnMutedChanged,
+            args, webNode, "OnMutedChanged");
+        BindListenerFuncIfPresent<double>(listener, "onPlaybackRateChanged", videoPlayerListener->OnPlaybackRateChanged,
+            args, webNode, "OnPlaybackRateChanged");
+        BindListenerFuncIfPresent<double>(listener, "onDurationChanged", videoPlayerListener->OnDurationChanged,
+            args, webNode, "OnDurationChanged");
+        BindListenerFuncIfPresent<double>(listener, "onTimeUpdate", videoPlayerListener->OnTimeUpdate,
+            args, webNode, "OnTimeUpdate");
+        BindListenerFuncIfPresent<double>(listener, "onBufferedEndTimeChanged",
+            videoPlayerListener->OnBufferedEndTimeChanged, args, webNode, "OnBufferedEndTimeChanged");
+        BindListenerFuncIfPresent<>(listener, "onEnded", videoPlayerListener->OnEnded,
+            args, webNode, "OnEnded");
+        BindListenerFuncIfPresent<int32_t, int32_t>(listener, "onVideoSizeChanged",
+            videoPlayerListener->OnVideoSizeChanged, args, webNode, "OnVideoSizeChanged");
+
+        TAG_LOGI(AceLogTag::ACE_WEB, "FullScreenVideoOverlayHandler AddListener success");
+        handler_->AddListener(std::move(videoPlayerListener));
+    }
+
+    void RequestMediaControl(const JSCallbackInfo &args)
+    {
+        if (args.Length() < 2 || !args[0]->IsNumber() || !args[1]->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "JSFullScreenVideoOverlayHandler MediaControl type error");
+            return;
+        }
+
+        auto action = args[0]->ToNumber<int32_t>();
+        auto param = args[1]->ToString();
+        if (handler_) {
+            handler_->RequestMediaControl(action, param);
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo &args)
+    {
+        auto jsFullScreenVideoOverlayHandler = Referenced::MakeRefPtr<JSFullScreenVideoOverlayHandler>();
+        jsFullScreenVideoOverlayHandler->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsFullScreenVideoOverlayHandler));
+    }
+
+    static void Destructor(JSFullScreenVideoOverlayHandler *jsFullScreenVideoOverlayHandler)
+    {
+        if (jsFullScreenVideoOverlayHandler != nullptr) {
+            jsFullScreenVideoOverlayHandler->DecRefCount();
+        }
+    }
+
+    RefPtr<FullScreenVideoOverlayHandler> handler_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -2398,6 +2529,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onContextMenuHide", &JSWeb::OnContextMenuHide);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
+    JSClass<JSWeb>::StaticMethod("enableFullscreenVideoOverlay", &JSWeb::EnableFullscreenVideoOverlay);
     JSClass<JSWeb>::StaticMethod("onDragStart", &JSWeb::JsOnDragStart);
     JSClass<JSWeb>::StaticMethod("onDragEnter", &JSWeb::JsOnDragEnter);
     JSClass<JSWeb>::StaticMethod("onDragMove", &JSWeb::JsOnDragMove);
@@ -2536,6 +2668,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebAppLinkCallback::JSBind(globalObj);
     JSWebKeyboardController::JSBind(globalObj);
     JSWebNativeMessageCallback::JSBind(globalObj);
+    JSFullScreenVideoOverlayHandler::JSBind(globalObj);
 }
 
 napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
@@ -3306,6 +3439,29 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             auto result = func->Call(webviewController, 1, argv);
         };
     }
+
+    auto onFullScreenVideoOverlayEnterFunction = controller->GetProperty("onFullScreenVideoOverlayEnter");
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onFullScreenVideoOverlayEnterCallback = nullptr;
+    if (onFullScreenVideoOverlayEnterFunction->IsFunction()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::onFullScreenVideoOverlayEnterFunc");
+        onFullScreenVideoOverlayEnterCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(onFullScreenVideoOverlayEnterFunction)]
+            (const std::shared_ptr<BaseEventInfo>& info) {
+            auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info.get());
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
+            auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
+            callbackEvent->SetEvent(*eventInfo);
+
+            obj->SetPropertyObject("handler", handlerObj);
+            JSRef<JSVal> mediaInfo = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetMediaInfo()));
+            obj->SetPropertyObject("mediaInfo", mediaInfo);
+            JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+            auto result = func->Call(webviewController, 1, argv);
+        };
+    }
+
+    WebModel::GetInstance()->SetOnFullScreenVideoOverlayEnterFunction(std::move(onFullScreenVideoOverlayEnterCallback));
     WebModel::GetInstance()->SetOnMediaCastEnter(std::move(onMediaCastEnterrCallback));
     WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
     WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
@@ -3944,6 +4100,11 @@ void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
     WebModel::GetInstance()->SetMediaPlayGestureAccess(isNeedGestureAccess);
 }
 
+void JSWeb::EnableFullscreenVideoOverlay(bool enable)
+{
+    WebModel::GetInstance()->SetEnableFullscreenVideoOverlay(enable);
+}
+
 void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -4511,14 +4672,7 @@ std::function<void()> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
     if (onMenuCallbackValue->IsFunction()) {
         RefPtr<JsFunction> jsOnMenuCallbackFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onMenuCallbackValue));
-        auto onMenuCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMenuCallbackFunc),
-                                  node = frameNode, eventName = name]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT(eventName);
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        return onMenuCallback;
+        return JsWebNoArgNodeCallback(info.GetExecutionContext(), std::move(jsOnMenuCallbackFunc), frameNode, name);
     }
     return nullptr;
 }
@@ -4553,13 +4707,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         }
         RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
-        selectMenuParam->previewBuilder = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                                              node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
+            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
     }
 }
 
@@ -4655,13 +4804,8 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    selectMenuParam->menuBuilder = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                         node = frameNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    selectMenuParam->menuBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(), std::move(builderFunc),
+        frameNode, "BindSelectionMenu");
 
     GetSelectionMenuParam(info, selectMenuParam);
     WebModel::GetInstance()->SetNewDragStyle(true);
@@ -7358,13 +7502,8 @@ void JSWeb::ParseJsCustomKeyboardOption(const JsiExecutionContext& context, cons
         CHECK_NULL_VOID(builderFunc);
         WeakPtr<NG::FrameNode> targetNode =
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto buildFunc = [execCtx = context, func = std::move(builderFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("WebCustomKeyboard");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        keyboardOption.customKeyboardBuilder_ = buildFunc;
+        keyboardOption.customKeyboardBuilder_ = JsWebNoArgNodeCallback(context, std::move(builderFunc), targetNode,
+            "WebCustomKeyboard");
         TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption" \
             ", isSystemKeyboard is %{public}d, parseCustomBuilder end", isSystemKeyboard);
     }

@@ -16,6 +16,7 @@
 
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_proxy.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include "base/utils/utils.h"
 #include "core/components/common/properties/ui_material.h"
@@ -86,7 +87,7 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
 void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .material = material });
         return;
     }
     uiMaterial_->material = material;
@@ -100,7 +101,7 @@ RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
 void RenderContext::SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.immersiveConfig = config});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .immersiveConfig = config });
         return;
     }
     uiMaterial_->immersiveConfig = config;
@@ -119,7 +120,7 @@ std::optional<int32_t> RenderContext::GetTransparencyCallbackId() const
 void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.transparencyCallbackId = id});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .transparencyCallbackId = id });
         return;
     }
     uiMaterial_->transparencyCallbackId = id;
@@ -236,15 +237,32 @@ void MockRenderContext::AttachNodeAnimatableProperty(const RefPtr<NodeAnimatable
     InitProp(modifier->GetProperty());
 }
 
-void MockRenderContext::CancelTranslateXYAnimation()
-{
-}
+void MockRenderContext::CancelTranslateXYAnimation() {}
 OffsetF MockRenderContext::GetTranslateXYProperty()
 {
     return {};
 }
-void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset)
-{
-}
+void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset) {}
 #endif
+
+bool RenderContext::HasTransitionOutAnimation() const { return false; }
+bool RenderContext::HasDisappearTransition() const { return false; }
+bool RenderContext::IsSynced() const { return false; }
+RectF RenderContext::GetPaintRectWithTransform() { return {}; }
+std::pair<RectF, bool> RenderContext::GetPaintRectWithTranslate() { return {}; }
+Matrix4 RenderContext::GetLocalTransformMatrix() { return Matrix4::CreateIdentity(); }
+Matrix4 RenderContext::GetMatrixWithTransformRotate() { return Matrix4::CreateIdentity(); }
+RectF RenderContext::GetPaintRectWithoutTransform() { return {}; }
+RectF RenderContext::GetPaintRectWithTransformWithoutDegree() { return {}; }
+RectF RenderContext::GetPropertyOfPosition() { return {}; }
+OffsetF RenderContext::GetShowingTranslateProperty() { return {}; }
+OffsetF RenderContext::GetTranslateXYProperty() { return {}; }
+int32_t RenderContext::CalcExpectedFrameRate(const std::string&, float) { return 0; }
+bool RenderContext::IsUniRenderEnabled() { return false; }
+bool RenderContext::DoTextureExport(uint64_t) { return false; }
+std::optional<Dimension> RenderContext::GetBackBlurRadius() const { return std::nullopt; }
+std::optional<BlurStyleOption> RenderContext::GetBackBlurStyle() const { return std::nullopt; }
+std::optional<EffectOption> RenderContext::GetBackgroundEffect() const { return std::nullopt; }
+void RenderContext::SetIsFree(bool) {}
+
 } // namespace OHOS::Ace::NG

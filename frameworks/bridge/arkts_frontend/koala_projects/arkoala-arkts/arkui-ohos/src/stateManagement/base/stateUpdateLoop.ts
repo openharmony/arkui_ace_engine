@@ -15,6 +15,7 @@
 import { WatchIdType } from '../decorator';
 import { int32 } from '@koalaui/common';
 import { WatchFunc } from '../decoratorImpl/decoratorWatch';
+import { scheduleCallback } from '@koalaui/runtime';
 
 export class StateUpdateLoop {
     private static callbacks: Array<() => void> = new Array<() => void>();
@@ -65,5 +66,18 @@ export class StateUpdateLoop {
         StateUpdateLoop.syncMode = true;
         task();
         StateUpdateLoop.syncMode = false;
+    }
+
+    /**
+     * Queue a callback to run on the next idle tick. Used by preRender to
+     * resolve its Promise after the synchronous build loop finishes and any
+     * tail observation work has settled.
+     *
+     * Implementation defers via koalaui's scheduleCallback. A future
+     * enhancement can replace this with a true idle-priority queue without
+     * changing the API.
+     */
+    public static queueIdleTask(callback: () => void): void {
+        scheduleCallback(callback);
     }
 }

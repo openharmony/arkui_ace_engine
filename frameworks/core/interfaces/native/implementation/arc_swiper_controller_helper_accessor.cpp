@@ -55,9 +55,7 @@ void FinishAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(peerImpl);
     auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
     if (arkCallbackOpt) {
-        auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
-            arkCallback.InvokeSync();
-        };
+        auto onFinish = GetSyncInvoker(*arkCallbackOpt);
         peerImpl->SetFinishCallback(onFinish);
     }
     peerImpl->TriggerFinishAnimation();

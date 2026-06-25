@@ -57,6 +57,7 @@ public:
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetOptimizeTrailingSpace(const JSCallbackInfo& info);
     static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
+    static void SetPunctuationOverflow(const JSCallbackInfo& info);
     static void SetShaderStyle(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
@@ -114,6 +115,8 @@ public:
     static void SetIncludeFontPadding(const JSCallbackInfo& info);
     static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
+    static void SetIncrementalUpdatePolicy(const JSCallbackInfo& info);
+    static void SetTailIndents(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

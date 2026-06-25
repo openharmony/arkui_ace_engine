@@ -167,13 +167,7 @@ class JSBuilderNode extends BaseNode {
       this.childrenWeakrefMap_.forEach((weakRefChild) => {
         const child = weakRefChild.deref();
         if (child) {
-          if (child instanceof ViewPU) {
-            child.aboutToReuseInternal(param);
-          }
-          else {
-            // FIXME fix for mixed V2 - V3 Hierarchies
-            child.aboutToReuseInternal(param);
-          }
+          child.aboutToReuseInternal(param);
         } // if child
       });
     } catch (err) {
@@ -186,13 +180,7 @@ class JSBuilderNode extends BaseNode {
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU) {
-          child.aboutToRecycleInternal();
-        }
-        else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          child.aboutToRecycleInternal();
-        }
+        child.aboutToRecycleInternal();
       } // if child
     });
   }

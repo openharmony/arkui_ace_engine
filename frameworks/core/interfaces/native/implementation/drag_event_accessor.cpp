@@ -115,6 +115,10 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(unifiedData);
     peer->dragInfo->SetUseDataLoadParams(false);
     peer->dragInfo->SetData(unifiedData->unifiedData);
+    if (unifiedData == peer->unifiedDataPeer) {
+        peer->unifiedDataPeer = nullptr;
+    }
+    PeerUtils::DestroyPeer(unifiedData);
 }
 Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
@@ -124,9 +128,11 @@ Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer->dragInfo, arkUnifiedData);
     auto data = peer->dragInfo->GetData();
     CHECK_NULL_RETURN(data, arkUnifiedData);
-    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
-    unifiedPeer->unifiedData = data;
-    return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
+    if (!peer->unifiedDataPeer) {
+        peer->unifiedDataPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
+    }
+    peer->unifiedDataPeer->unifiedData = data;
+    return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(peer->unifiedDataPeer);
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
@@ -186,9 +192,7 @@ void ExecuteDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->dragInfo;
     CHECK_NULL_VOID(info);
-    auto customDropAnimationCallback = [callback = CallbackHelper(*customDropAnimation)]() {
-        callback.InvokeSync();
-    };
+    auto customDropAnimationCallback = GetSyncInvoker(*customDropAnimation);
     info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
 void ExecuteFollowHandMorphDropAnimationImpl(Ark_DragEvent peer,

@@ -117,7 +117,7 @@ void UpdateRangeIndexes(const std::map<int32_t, LazyWaterFlowItemMainPos>& itemP
 {
     ResetRangeIndexes(startIndex, endIndex);
     for (const auto& [index, pos] : itemPositions) {
-        if (pos.endPos <= rangeStart || pos.startPos >= rangeEnd) {
+        if (LessNotEqual(pos.endPos, rangeStart) || GreatNotEqual(pos.startPos, rangeEnd)) {
             continue;
         }
         if (startIndex < 0) {
@@ -161,6 +161,7 @@ void LazyWaterFlowLayoutInfo::ResetPerFrameState()
 {
     posMap_.clear();
     ResetRangeIndexes(startIndex_, endIndex_);
+    ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
     totalMainSize_ = 0.0f;
     adjustOffset_ = {};
     ResetRangeIndexes(layoutedStartIndex_, layoutedEndIndex_);
@@ -606,6 +607,8 @@ void LazyWaterFlowLayoutInfo::TransformStoredIndexesAfterDataChange(int32_t inde
 {
     TransformStoredIndex(startIndex_, index, count);
     TransformStoredIndex(endIndex_, index, count);
+    TransformStoredIndex(visibleStartIndex_, index, count);
+    TransformStoredIndex(visibleEndIndex_, index, count);
     TransformStoredIndex(layoutedStartIndex_, index, count);
     TransformStoredIndex(layoutedEndIndex_, index, count);
     TransformStoredIndex(cachedStartIndex_, index, count);
@@ -646,7 +649,8 @@ void LazyWaterFlowLayoutInfo::CapturePendingAdjustAnchor()
     hasPendingAdjustAnchor_ = true;
     pendingAnchor_.startIndex = startIndex_;
     pendingAnchor_.endIndex = endIndex_;
-    pendingAnchor_.totalMainSize = totalMainSize_;
+    // Store the body total so UpdateAdjustOffset's totalDelta is a body delta.
+    pendingAnchor_.totalMainSize = totalMainSize_ - headerMainSize_ - footerMainSize_;
     pendingAnchor_.startPos.reset();
     pendingAnchor_.endPos.reset();
     auto startIter = posMap_.find(startIndex_);
@@ -704,6 +708,25 @@ void LazyWaterFlowLayoutInfo::UpdateVisibleRange(float viewStart, float viewEnd)
     UpdateRangeIndexes(posMap_, viewStart, viewEnd, startIndex_, endIndex_);
 }
 
+void LazyWaterFlowLayoutInfo::UpdateVisibleCallbackRange(float viewStart, float viewEnd)
+{
+    if (totalItemCount_ <= 0 || posMap_.empty()) {
+        ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
+        return;
+    }
+    if (!std::isfinite(viewEnd)) {
+        visibleStartIndex_ = posMap_.begin()->first;
+        visibleEndIndex_ = posMap_.rbegin()->first;
+        return;
+    }
+    if (viewEnd <= viewStart) {
+        ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
+        return;
+    }
+
+    UpdateRangeIndexes(posMap_, viewStart, viewEnd, visibleStartIndex_, visibleEndIndex_);
+}
+
 void LazyWaterFlowLayoutInfo::UpdateCachedRange(float cacheStart, float cacheEnd)
 {
     cacheStartPos_ = cacheStart;
@@ -726,6 +749,14 @@ bool LazyWaterFlowLayoutInfo::NeedPredict() const
     if (!std::isfinite(cacheEndPos_) || totalItemCount_ <= 0) {
         return false;
     }
+    // extendedView*Pos_ are body coords; compare against the body content end.
+    const float bodyContentEnd = std::max(0.0f, totalMainSize_ - headerMainSize_ - footerMainSize_);
+    const bool extendedViewOverlapsContent = GreatNotEqual(extendedViewEndPos_, 0.0f) &&
+        (!Positive(totalMainSize_) || LessNotEqual(extendedViewStartPos_, bodyContentEnd));
+    // An empty offscreen child cannot start its own predict loop from cache overlap alone.
+    if (posMap_.empty()) {
+        return extendedViewOverlapsContent;
+    }
     auto hasBackwardGap = false;
     if (cachedStartIndex_ > 0) {
         auto iter = posMap_.find(cachedStartIndex_);
@@ -740,6 +771,11 @@ bool LazyWaterFlowLayoutInfo::NeedPredict() const
             auto iter = posMap_.find(cachedEndIndex_);
             hasForwardGap = iter != posMap_.end() && LessNotEqual(iter->second.endPos, cacheEndPos_);
         }
+    }
+    if (!extendedViewOverlapsContent && startIndex_ < 0 && endIndex_ < 0) {
+        // Once parent predict has started an offscreen cache window, let idle predict finish that window.
+        const bool hasStartedOffscreenCache = cachedStartIndex_ >= 0 && cachedEndIndex_ >= cachedStartIndex_;
+        return hasStartedOffscreenCache && (hasBackwardGap || hasForwardGap);
     }
     return hasBackwardGap || hasForwardGap;
 }
@@ -897,7 +933,11 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
+    DumpLog::GetInstance().AddDesc("visibleStartIndex:" + std::to_string(visibleStartIndex_));
+    DumpLog::GetInstance().AddDesc("visibleEndIndex:" + std::to_string(visibleEndIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
     DumpLog::GetInstance().AddDesc("estimatedItemSize:" + std::to_string(estimateItemSize_));
     DumpLog::GetInstance().AddDesc("totalMainSize:" + std::to_string(totalMainSize_));
     DumpLog::GetInstance().AddDesc("layoutedStartIndex:" + std::to_string(layoutedStartIndex_));
@@ -911,7 +951,11 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(json);
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
+    json->Put("visibleStartIndex", visibleStartIndex_);
+    json->Put("visibleEndIndex", visibleEndIndex_);
     json->Put("itemTotalCount", totalItemCount_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
     json->Put("estimatedItemSize", estimateItemSize_);
     json->Put("totalMainSize", totalMainSize_);
     json->Put("layoutedStartIndex", layoutedStartIndex_);

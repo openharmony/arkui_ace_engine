@@ -26,8 +26,8 @@
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
@@ -66,7 +66,7 @@ public:
     void FlushIdleTask(const RefPtr<LazyColumnLayoutPattern>& pattern);
     void FlushListIdleTask(const RefPtr<ListPattern>& listPattern);
     void CreateRepeatVirtualScrollNode(
-        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& createFunc);
+        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& createFunc);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<LazyColumnLayoutPattern> pattern_;

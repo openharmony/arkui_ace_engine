@@ -34,7 +34,6 @@
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"

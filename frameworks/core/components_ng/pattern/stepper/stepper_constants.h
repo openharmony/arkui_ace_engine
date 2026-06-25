@@ -23,7 +23,6 @@ inline constexpr char ROW_ETS_TAG[] = "Row";
 inline constexpr char TEXT_ETS_TAG[] = "Text";
 inline constexpr char STEPPER_ETS_TAG[] = "Stepper";
 inline constexpr char SWIPER_ETS_TAG[] = "Swiper";
-inline constexpr char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
 inline constexpr char IMAGE_ETS_TAG[] = "Image";
 } // namespace OHOS::Ace::NG
 

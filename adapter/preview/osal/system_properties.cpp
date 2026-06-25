@@ -56,6 +56,7 @@ bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::dynamicDetectionTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::skipSecondaryMeasuredEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
@@ -644,8 +645,18 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
     return UiMaterialLevel::DEFAULT;
 }
 
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    return true;
+}
+
 int32_t SystemProperties::GetFormTaskPriority()
 {
     return DEFAULT_FORM_TASK_PRIORITY;
+}
+
+bool SystemProperties::IsSensorCorrectionEnabled()
+{
+    return false;
 }
 } // namespace OHOS::Ace

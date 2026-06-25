@@ -19,6 +19,7 @@
 #include <memory>
 #include <stack>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "base/memory/referenced.h"
@@ -28,7 +29,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/state_style_manager.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -212,6 +212,40 @@ enum class VisualState;
             (frameNode)->UnRegisterLpxAttribute(attribute);                     \
         }                                                                       \
     } while (false)
+#define ACE_CHECK_LPX_UPDATE_CALLBACK(dimension, attribute, callback)            \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(dimension, attribute, callback, frameNode); \
+    } while (false)
+#define ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(dimension, attribute, callback, frameNode) \
+    do {                                                                        \
+        CHECK_NULL_VOID(frameNode);                                             \
+        std::function<void()> lpxUpdateCallback = (callback);                   \
+        if ((dimension).Unit() == DimensionUnit::LPX) {                         \
+            (frameNode)->RegisterLpxAttribute(attribute);                        \
+            (frameNode)->RegisterLpxUpdateCallback(attribute, std::move(lpxUpdateCallback)); \
+        } else {                                                                 \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+            (frameNode)->UnRegisterLpxUpdateCallback(attribute);                 \
+        }                                                                       \
+    } while (false)
+#define ACE_SET_NODE_LPX_UPDATE_CALLBACK(isLpx, attribute, callback, frameNode)    \
+    do {                                                                        \
+        CHECK_NULL_VOID(frameNode);                                             \
+        std::function<void()> lpxUpdateCallback = (callback);                   \
+        if (isLpx) {                                                            \
+            (frameNode)->RegisterLpxAttribute(attribute);                        \
+            (frameNode)->RegisterLpxUpdateCallback(attribute, std::move(lpxUpdateCallback)); \
+        } else {                                                                 \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+            (frameNode)->UnRegisterLpxUpdateCallback(attribute);                 \
+        }                                                                       \
+    } while (false)
+#define ACE_SET_LPX_UPDATE_CALLBACK(isLpx, attribute, callback)                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(isLpx, attribute, callback, frameNode); \
+    } while (false)
 
 
 namespace OHOS::Ace::NG {
@@ -296,6 +330,7 @@ public:
    // Get main component include composed component created by js view.
     ACE_FORCE_EXPORT const RefPtr<UINode>& GetMainElementNode() const;
     ACE_FORCE_EXPORT void ApplyParentThemeScopeId(const RefPtr<UINode>& element);
+    ACE_FORCE_EXPORT void ApplyParentSelectionContainerId(const RefPtr<UINode>& element);
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);

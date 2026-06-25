@@ -16,13 +16,24 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RemoteWindowModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+#if defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::REMOTE_WINDOW_ETS_TAG, id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return {};
+#endif
 }
 } // RemoteWindowModifier
 namespace RemoteWindowInterfaceModifier {

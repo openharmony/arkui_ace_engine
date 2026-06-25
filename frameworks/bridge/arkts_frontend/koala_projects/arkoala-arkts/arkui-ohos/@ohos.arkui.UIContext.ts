@@ -66,7 +66,7 @@ import { TextLayoutOptions, Paragraph, StyledString, ContextMenu, FrameNodeExten
 import { InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, UIContextGetInfo, SystemOps } from 'arkui/component/idlize';
 import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
-import { GlobalScopeUicontextFontScale } from "#generated"
+import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
 import { RawInputEventType, SmartGestureAction, OperateIntention } from 'arkui/component/enums';
 
@@ -149,6 +149,9 @@ export class MeasureUtils {
 export class TextMenuController {
     public setMenuOptions(options: TextMenuOptions) : void {
         throw Error("setMenuOptions not implemented in TextMenuController!")
+    }
+    static disableSystemServiceMenuItems(disable: boolean) : void {
+        GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems(disable)
     }
 }
 
@@ -753,10 +756,6 @@ export class UIContext {
     isUpdateConfiguration_ = false;
     workerThreadId_: int32  = -1;
 
-    bufferSize = 4096
-    buffer: KBuffer = new KBuffer(this.bufferSize)
-    position: int64 = 0
-    deserializer: DeserializerBase = new DeserializerBase(this.buffer.buffer, this.bufferSize)
     static windowFreeInstanceId: int32 = -1
     static initFlag_ = false
 
@@ -805,18 +804,7 @@ export class UIContext {
     dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
     }
 
-    callCallbacks(): void {
-        if (this.position === 0) {
-            return
-        }
-        this.deserializer.resetCurrentPosition()
-        this.runScopedTask(() => {
-            while (this.deserializer.currentPosition() < this.position) {
-                deserializeAndCallCallback(this.deserializer)
-            }
-        })
-        this.position = 0;
-    }
+    callCallbacks(): void {}
 
     static getCallingScopeUIContext(): UIContext | undefined {
         const instanceId = ArkUIAniModule._GetCallingScopeUIContext();
@@ -1382,23 +1370,27 @@ export class UIContext {
         }
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const tag : string = (retvalDeserializer.readString() as string)
-        if (tag === 'Swiper') {
-            let ret: Array<SwiperDynamicSyncScene> =
-                [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
-                new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
-            let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+        try {
+            const tag : string = (retvalDeserializer.readString() as string)
+            if (tag === 'Swiper') {
+                let ret: Array<SwiperDynamicSyncScene> =
+                    [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
+                    new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
+                let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+                ArkUIAniModule._Common_Restore_InstanceId();
+                return result;
+            } else if (tag === 'Marquee') {
+                let ret: MarqueeDynamicSyncScene[] = [
+                    new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
+                let result: DynamicSyncScene[] = [ret[0]];
+                ArkUIAniModule._Common_Restore_InstanceId();
+                return result;
+            }
             ArkUIAniModule._Common_Restore_InstanceId();
-            return result;
-        } else if (tag === 'Marquee') {
-            let ret: MarqueeDynamicSyncScene[] = [
-                new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
-            let result: DynamicSyncScene[] = [ret[0]];
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return result;
+            return [];
+        } finally {
+            retvalDeserializer.dispose()
         }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return [];
     }
 
     public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {

@@ -21,7 +21,7 @@
 #include "ui/event/touch_event.h"
 #include "ui/gestures/gesture_info.h"
 #include "core/components_ng/event/event_constants.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 
 namespace OHOS::Ace {
 
@@ -171,6 +171,12 @@ public:
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     // if return false means need to stop event bubbling.
     virtual bool HandleEvent(const TouchEvent& point) = 0;
+
+    virtual bool HandleInteractionEvent(const TouchEvent& point)
+    {
+        return false;
+    }
+
     virtual bool HandleEvent(const AxisEvent& event)
     {
         return true;
@@ -197,10 +203,10 @@ public:
     virtual void AttachFrameNode(const WeakPtr<NG::FrameNode>& node);
     WeakPtr<NG::FrameNode> GetAttachedNode() const;
     virtual RefPtr<GestureSnapshot> Dump() const;
-    ACE_FORCE_EXPORT void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent);
-    RefPtr<NG::TargetComponent> GetTargetComponent();
     void SetIsPostEventResult(bool isPostEventResult);
     bool IsPostEventResult() const;
+    void SetIsPostTouchEventResult(bool isPostTouchEventResult);
+    bool IsPostTouchEventResult() const;
 
 private:
     virtual bool ShouldResponse()
@@ -215,12 +221,12 @@ protected:
     Offset subPipelineGlobalOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string nodeName_ = "NULL";
-    RefPtr<NG::TargetComponent> targetComponent_;
     std::optional<TimeStamp> firstInputTime_;
     float viewScale_ = 1.0f;
     int32_t nodeId_ = -1;
     Axis direction_ = Axis::NONE;
     bool isPostEventResult_ = false;
+    bool isPostTouchEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

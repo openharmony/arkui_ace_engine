@@ -17,6 +17,5 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_POINT_H
 
 #include "ui/base/geometry/point.h"
-#include "base/utils/utils.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_POINT_H

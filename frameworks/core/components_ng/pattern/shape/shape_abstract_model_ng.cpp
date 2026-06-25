@@ -59,6 +59,7 @@ void ShapeAbstractModelNG::SetFill(FrameNode* frameNode, const Color& color)
 
 void ShapeAbstractModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(dashOffset, LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET);
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset);
 }
 
@@ -89,11 +90,13 @@ void ShapeAbstractModelNG::SetFillOpacity(double opacity)
 
 void ShapeAbstractModelNG::SetStrokeWidth(const Dimension& lineWidth)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(lineWidth, LpxAttribute::LPX_SHAPE_STROKE_WIDTH);
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, lineWidth);
 }
 
 void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(lineWidth, LpxAttribute::LPX_SHAPE_STROKE_WIDTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, lineWidth, frameNode);
 }
 
@@ -408,6 +411,7 @@ void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const RefPtr<Res
             return;
         }
         auto strokeWidth = value.IsNegative() ? 1.0_vp : value;
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::LPX_SHAPE_STROKE_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth, frameNode);
         if (frameNode->GetRerenderable()) {
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

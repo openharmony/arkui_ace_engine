@@ -14,6 +14,8 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
@@ -474,6 +476,25 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex009, TestSize.Level1)
             !pattern_->isInitialized_) &&
         GreatOrEqual(pattern_->startMainPos_, pattern_->contentStartOffset_);
     EXPECT_FALSE(scrollDownToStart);
+}
+
+/**
+ * @tc.name: ScrollToIndex010
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex010, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(8);
+    CreateDone();
+    int32_t index = 7;
+
+    ScrollToIndex(index, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    EXPECT_FALSE(pattern_->animateOverScrollEnd_);
 }
 
 /**

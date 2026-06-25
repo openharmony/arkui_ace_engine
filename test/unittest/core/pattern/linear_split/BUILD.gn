@@ -31,4 +31,6 @@ ace_unittest("linear_split_test_ng") {
     ]
   }
 
+  sources += [ "linear_split_lpx_test_ng.cpp" ]
+
 }

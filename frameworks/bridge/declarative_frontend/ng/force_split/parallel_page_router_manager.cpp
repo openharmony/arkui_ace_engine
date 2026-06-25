@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -220,9 +221,8 @@ int32_t ParallelPageRouterManager::GetLastPageIndex()
     CHECK_NULL_RETURN(stageNode, -1);
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, -1);
-    auto dividerNode = stagePattern->GetDividerNode();
-    if (stagePattern->GetIsSplit() && stageNode->GetChildIndex(dividerNode) >= 0) {
-        return pageRouterStack_.size();
+    if (stagePattern->GetIsSplit()) {
+        return pageRouterStack_.size() - 1 + stagePattern->GetNonPageChildrenSize();
     }
     return pageRouterStack_.size() - 1;
 }
@@ -465,7 +465,7 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
-    if (pageRouterStack_.empty()) {
+    if (pageRouterStack_.empty() || !isPush) {
         stageManager->SetNeedClearSecondaryPage(false);
         return false;
     }

@@ -24,10 +24,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
@@ -38,6 +38,7 @@ namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 const int32_t BUFFER_NODE_NUMBER = 2;
+const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
 
 using TextPickerGetTextStyleFunc = const std::unique_ptr<FontStyle>& (TextPickerLayoutProperty::*)() const;
 void ResetTextPickerTextStyleColor(FrameNode* frameNode, TextPickerGetTextStyleFunc getTextStyleFunc)
@@ -157,7 +158,7 @@ RefPtr<FrameNode> TextPickerModelStatic::CreateButtonNode()
 RefPtr<FrameNode> TextPickerModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+        TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, textPickerNode);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>(textPickerNode->GetThemeScopeId());

@@ -160,6 +160,7 @@ void ContainerModelTestNg::Touch(Offset downOffset, Offset moveOffset, Offset up
 void ContainerModelTestNg::Mouse(MouseInfo mouseInfo)
 {
     auto mouseEventHub = frameNode_->GetOrCreateInputEventHub();
+    mouseEventHub->CreateMouseEventActuator();
     auto mouseEvent = mouseEventHub->mouseEventActuator_->userCallback_->GetOnMouseEventFunc();
     mouseEvent(mouseInfo);
 }
@@ -192,6 +193,7 @@ OnHoverEventFunc ContainerModelTestNg::GetHovertEvent(int32_t index)
     auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
     auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
+    inputHub->CreateHoverEventActuator();
     auto inputEvents = inputHub->hoverEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnHoverEventFunc();
 }
@@ -201,6 +203,7 @@ OnMouseEventFunc ContainerModelTestNg::GetMouseEvent(int32_t index)
     auto container_modal_control_buttons = frameNode_->GetChildAtIndex(2);
     auto btn = AceType::DynamicCast<FrameNode>(container_modal_control_buttons->GetChildAtIndex(index));
     auto inputHub = btn->GetOrCreateInputEventHub();
+    inputHub->CreateMouseEventActuator();
     auto inputEvents = inputHub->mouseEventActuator_->inputEvents_;
     return inputEvents.front()->GetOnMouseEventFunc();
 }
@@ -846,6 +849,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent, TestSize.Level1)
     imageLayoutProperty->UpdateAlt(
         ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
     view.AddButtonHoverEvent(inputEventHub, frameNode, frameNode2, false);
+    inputEventHub->CreateHoverEventActuator();
 
     auto hoverEventActuator = inputEventHub->hoverEventActuator_;
     auto Events = hoverEventActuator->inputEvents_;
@@ -878,6 +882,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent2, TestSize.Level1)
     imageLayoutProperty->UpdateAlt(
         ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
     view.AddButtonHoverEvent(inputEventHub, frameNode, frameNode2, true);
+    inputEventHub->CreateHoverEventActuator();
 
     auto hoverEventActuator = inputEventHub->hoverEventActuator_;
     auto Events = hoverEventActuator->inputEvents_;
@@ -910,6 +915,7 @@ HWTEST_F(ContainerModelTestNg, AddButtonOnEvent, TestSize.Level1)
     imageLayoutProperty->UpdateAlt(
         ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
     view.AddButtonOnEvent(inputEventHub, frameNode, frameNode2, true);
+    inputEventHub->CreateMouseEventActuator();
 
     auto mouseEventActuator_ = inputEventHub->mouseEventActuator_;
     auto Events = mouseEventActuator_->inputEvents_;

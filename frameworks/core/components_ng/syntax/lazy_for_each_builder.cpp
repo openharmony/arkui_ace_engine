@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -68,6 +68,9 @@ namespace OHOS::Ace::NG {
         }
         for (auto& [index, node] : cachedItems_) {
             if (node.second) {
+                if (!enableSyncLoad_) {
+                    syncLoadCache_.try_emplace(index, WeakClaim(RawPtr(node.second)));
+                }
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
             }
         }
@@ -772,6 +775,9 @@ namespace OHOS::Ace::NG {
         if (itemConstraint && !canRunLongPredictTask) {
             return false;
         }
+        if (!enableSyncLoad_ && !isSyncLoad_) {
+            return false;
+        }
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::set<int32_t> idleIndexes;
@@ -788,7 +794,9 @@ namespace OHOS::Ace::NG {
             ProcessOffscreenNodesNotInExpiring(cache);
             if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
                 CollectNodesForDelayedRelease(cache);
-                RemovingExpiringItem(deadline);
+            }
+            if (reduceCache_) {
+                ProcessNodesForCleanCache(cache);
             }
             return result;
         }
@@ -803,8 +811,11 @@ namespace OHOS::Ace::NG {
         ProcessOffscreenNodesNotInExpiring(cache);
         if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
             CollectNodesForDelayedRelease(cache);
-            RemovingExpiringItem(deadline);
         }
+        if (reduceCache_) {
+            ProcessNodesForCleanCache(cache);
+        }
+        reduceCache_ = result ? false : reduceCache_;
         return result;
     }
 
@@ -897,6 +908,7 @@ namespace OHOS::Ace::NG {
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
+        RecordActiveRange(start, end);
         for (auto iter = cachedItems_.begin(); iter != cachedItems_.end();) {
             auto& [index, node] = *iter;
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
@@ -1000,7 +1012,11 @@ namespace OHOS::Ace::NG {
         if (count == 0) {
             return;
         }
-        for (int32_t i = 1; i <= cacheCount_ - endShowCached_; i++) {
+        int32_t range = cacheCount_ - endShowCached_;
+        if (reduceCache_) {
+            range = ReduceCacheCount(range);
+        }
+        for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
                     startIndex_ > endIndex_ + i) {
@@ -1014,7 +1030,11 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
-        for (int32_t i = 1; i <= cacheCount_ - startShowCached_; i++) {
+        range = cacheCount_ - startShowCached_;
+        if (reduceCache_) {
+            range = ReduceCacheCount(range);
+        }
+        for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
@@ -1396,5 +1416,96 @@ namespace OHOS::Ace::NG {
             }
             node.second->UpdateThemeScopeUpdate(themeScopeId);
         }
+    }
+
+    void LazyForEachBuilder::CleanCache(bool syncClean)
+    {
+        reduceCache_ = true;
+        if (!syncClean) {
+            return;
+        }
+        auto count = OnGetTotalCount();
+        std::unordered_map<std::string, LazyForEachCacheChild> cache;
+        std::set<int32_t> idleIndexes;
+        if (startIndex_ != -1 && endIndex_ != -1) {
+            CheckCacheIndex(idleIndexes, count);
+        }
+        ProcessCachedIndex(cache, idleIndexes);
+        expiringItem_.swap(cache);
+        ProcessOffscreenNodesNotInExpiring(cache);
+        ProcessNodesForCleanCache(cache);
+        removingNodeList_.clear();
+        reduceCache_ = false;
+    }
+
+    void LazyForEachBuilder::RestoreCache()
+    {
+        reduceCache_ = false;
+    }
+
+    int32_t LazyForEachBuilder::ReduceCacheCount(int32_t count)
+    {
+        if (startShowCached_ || endShowCached_) {
+            return count;
+        }
+        const int32_t maxCacheCount = 2;
+        return count < maxCacheCount ? count : maxCacheCount;
+    }
+
+    void LazyForEachBuilder::ProcessNodesForCleanCache(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        auto enableDebugTrace = SystemProperties::GetSyntaxTraceEnabled();
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) != expiringItem_.end()) {
+                continue;
+            }
+            ForEachBaseNode::DisableRecycle(node.second);
+            removingNodeList_[node.second->GetId()] = node.second;
+            if (enableDebugTrace) {
+                TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH,
+                    "LazyForEachBuilder.ProcessNodesForCleanCache tag[%{public}s] id[%{public}d]",
+                    node.second->GetTag().c_str(), node.second->GetId());
+                ACE_SCOPED_TRACE("LazyForEachBuilder.ProcessNodesForCleanCache tag[%s] id[%d]",
+                    node.second->GetTag().c_str(), node.second->GetId());
+            }
+        }
+    }
+
+    void LazyForEachBuilder::SetEnableSyncLoad(bool value)
+    {
+        enableSyncLoad_ = value;
+    }
+
+    void LazyForEachBuilder::SetIsSyncLoad(bool value)
+    {
+        isSyncLoad_ = value;
+        if (isSyncLoad_) {
+            syncLoadCache_.clear();
+        }
+    }
+
+    void LazyForEachBuilder::ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children)
+    {
+        if (enableSyncLoad_ || isSyncLoad_) {
+            return;
+        }
+        for (auto index = activeRangeStart_ + static_cast<int32_t>(children.size()); index <= activeRangeEnd_;
+            index++) {
+            auto it = syncLoadCache_.find(index);
+            if (it != syncLoadCache_.end()) {
+                auto node = it->second.Upgrade();
+                CHECK_NULL_VOID(node);
+                children.push_back(node);
+            } else {
+                return;
+            }
+        }
+    }
+
+    void LazyForEachBuilder::RecordActiveRange(int32_t start, int32_t end)
+    {
+        activeRangeStart_ = start;
+        activeRangeEnd_ = end;
     }
 }

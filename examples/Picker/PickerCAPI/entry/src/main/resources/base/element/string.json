@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Picker CAPI Demo"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Picker CAPI Demo Entry Ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "PickerCAPI"
+    }
+  ]
+}

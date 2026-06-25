@@ -92,6 +92,9 @@ import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelShadowOptions, ArkGau
 import { DataPanelExtender, GaugeExtender } from '#generated';
 import { ArkToggleComponent, ToggleOptions } from "#generated";
 import { ToggleHandWritten } from "./ToggleHandWritten";
+import { ArkDynamicLayoutComponent } from '@ohos.arkui.components.ArkDynamicLayout';
+import { LayoutAlgorithm } from './../LayoutAlgorithm';
+import { DynamicLayoutHandWritten } from './DynamicLayoutHandWritten';
 
 export function hookId(component: object, value?: string) {}
 
@@ -890,6 +893,10 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
 
 export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
   ListHandWritten.hookListChildrenMainSizeImpl(node.getPeer(), value)
+}
+
+export function hookSetDynamicLayoutOptions(node: ArkDynamicLayoutComponent, value: LayoutAlgorithm): void {
+  DynamicLayoutHandWritten.hookSetDynamicLayoutOptionsImpl(node.getPeer(), value)
 }
 
 export function hookListChildrenMainSizeImpl(peer: ArkListPeer, value: ChildrenMainSize | undefined): void {

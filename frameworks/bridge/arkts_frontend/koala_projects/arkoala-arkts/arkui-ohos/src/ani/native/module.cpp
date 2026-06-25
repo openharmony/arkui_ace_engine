@@ -45,7 +45,6 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
-#include "rich_editor/rich_editor_module.h"
 #include "text_based_modifier/text_based_modifier_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
@@ -60,6 +59,8 @@
 #include "visual_effect/visual_effect_module.h"
 #include "security_component/paste_button_module.h"
 #include "security_component/save_button_module.h"
+#include "dynamiclayout/dynamiclayout_module.h"
+#include "with_env/with_env_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -75,6 +76,81 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array staticMethods = {
+        ani_native_function {
+            "_SetDynamicLayoutStackLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutStackLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_DynamicLayout_construct",
+            "ii:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DynamicLayoutConstruct)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutRowLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutRowLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutColumnLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutColumnLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutCustomLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutCustomLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutGridLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutGridLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_WithEnv_construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvConstruct)
+        },
+        ani_native_function {
+            "_WithEnv_removeSystemEnvProperty",
+            "lC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setSystemEnvProperty",
+            "lC{std.core.String}Y:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setCustomEnvProperty",
+            "liY:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_removeCustomEnvProperty",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveCustomEnvProperty)
+        },
+        ani_native_function {
+            "_CustomNode_findCustomValueByKey",
+            "li:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindCustomEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_findSystemEnvValueByKey",
+            "lC{std.core.String}:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindSystemEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnCustomEnvUpdateCallback",
+            "lC{std.core.Function2}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnSystemEnvUpdateCallback",
+            "lC{std.core.Function2}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
+        },
         ani_native_function {
             "_Extractors_ToDrawableDescriptorPtr",
             nullptr,
@@ -716,6 +792,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "_Drawable_CreateAnimatedDrawableByString", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawableByString)
         },
+        ani_native_function { "_Drawable_CreatePictureDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePictureDrawable)
+        },
         ani_native_function { "_Drawable_CreatePixelMap", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMap)
         },
@@ -742,6 +821,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_SetBlendMode", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetBlendMode)
+        },
+        ani_native_function { "_Drawable_SetHdrComposition", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetHdrComposition)
+        },
+        ani_native_function { "_Drawable_Invalidate", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableInvalidate)
         },
         ani_native_function { "_Drawable_NativeTransferStatic", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableNativeTransferStatic)
@@ -828,6 +913,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_UiMaterial_DestroyMaterial",
             "l:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_ConvertToECMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConvertToECMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_ConvertToECSubMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConvertToECSubMaterial)
         },
         ani_native_function {
             "_CreateViewStackProcessor",
@@ -1035,11 +1130,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
         },
         ani_native_function {
-            "_RichEditor_Transfer_PixelMap",
-            "C{@ohos.multimedia.image.image.PixelMap}:l",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::RichEditorTransferPixelMap)
-        },
-        ani_native_function {
             "_PersistentStorage_Get",
             "C{std.core.String}i:C{std.core.String}",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
@@ -1151,6 +1241,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_CheckThreadValid",
             "zl:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckThreadValid)
+        },
+        ani_native_function {
+            "_FireArkUIObjectLifecycleCallback",
+            "C{std.core.Object}C{std.core.String}C{std.core.String}l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FireArkUIObjectLifecycleCallback)
         },
         ani_native_function {
             "_Common_SetCustomPropertyCallBack",

@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
@@ -81,8 +82,8 @@ ViewContextModel* ViewContextModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
+constexpr int32_t DEFAULT_DURATION = 1000; // ms
+constexpr int32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t INVALID_ID = -1;
 constexpr int32_t INDEX_ONE = 1;
@@ -116,6 +117,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     auto animationInterfaceName = GetAnimationInterfaceName(interface);
     CHECK_NULL_VOID(animationInterfaceName);
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        HistogramInfiniteAnimationEvent(interface);
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
                 "keyframe inf iteration. dur:%{public}d", option.GetDuration());
@@ -191,14 +193,10 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         if (context->GetInstanceId() == triggerId) {
             return;
         }
+        context->PrepareCloseImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled) {
-            if (tokenOut != tokenIn) {
-                context->PrepareCloseImplicitAnimation();
-                AnimationUtils::CloseImplicitAnimation(context);
-            }
-        } else {
-            context->PrepareCloseImplicitAnimation();
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::CloseImplicitAnimation(context);
         }
     });
     pipelineContext->CloseImplicitAnimation();
@@ -259,14 +257,10 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         if (context->GetInstanceId() == triggerId) {
             return;
         }
+        context->PrepareOpenImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled) {
-            if (tokenOut != tokenIn) {
-                context->PrepareOpenImplicitAnimation();
-                AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
-            }
-        } else {
-            context->PrepareOpenImplicitAnimation();
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
         }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
@@ -1429,6 +1423,8 @@ void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
         JSTextField::SetKeyboardAppearanceConfig(info);
     } else if (nodeTag == V2::SEARCH_ETS_TAG) {
         JSTextField::SetSearchKeyboardAppearanceConfig(info);
+    } else if (nodeTag == V2::RICH_EDITOR_ETS_TAG) {
+        JSRichEditor::SetRichEditorKeyboardAppearanceConfig(info);
     }
 }
 

@@ -55,6 +55,7 @@ ohos_source_set("rosen_render_context_test_mock") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_theme_utils.cpp",
     "$ace_root/test/unittest/core/rosen/mock_animated_image.cpp",
@@ -88,6 +89,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/sidebar_content_mask_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_effect_converter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_mixed_render_child_list.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp",
@@ -141,6 +143,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/frameworks/core/common/mock_container.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_data_detector_adapter.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_font_loader_ng.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_frontend.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_image_analyzer_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_layout_inspector.cpp",
@@ -152,6 +155,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/frameworks/core/common/mock_text_translation_adapter.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_decoder.cpp",
@@ -173,6 +177,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "overlay_modifier_test_ng.cpp",
     "rosen_render_context_test.cpp",
     "rosen_render_context_test_new.cpp",
+    "ui_material_filter_creator_test_ng.cpp",
   ]
 
   configs = [ ":rosen_render_context_config" ]
@@ -204,6 +209,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
+    "napi:ace_napi",
   ]
   defines = [ "ACE_NON_VIRTUAL=virtual" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
@@ -231,6 +237,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/sidebar_content_mask_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_effect_converter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_mixed_render_child_list.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp",
@@ -344,6 +351,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
+    "napi:ace_napi",
   ]
 
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]

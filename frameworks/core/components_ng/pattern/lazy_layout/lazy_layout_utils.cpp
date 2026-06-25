@@ -32,6 +32,11 @@ bool LazyLayoutUtils::IsAllowedIntermediateNode(const RefPtr<UINode>& node)
 
 bool LazyLayoutUtils::IsVerticalScrollableParent(const RefPtr<UINode>& node)
 {
+    return IsScrollableParent(node, Axis::VERTICAL);
+}
+
+bool LazyLayoutUtils::IsScrollableParent(const RefPtr<UINode>& node, Axis axis)
+{
     CHECK_NULL_RETURN(node, false);
     const auto& tag = node->GetTag();
     if (tag != V2::SCROLL_ETS_TAG && tag != V2::WATERFLOW_ETS_TAG && tag != V2::LIST_ETS_TAG) {
@@ -41,11 +46,17 @@ bool LazyLayoutUtils::IsVerticalScrollableParent(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetAxis() == Axis::VERTICAL;
+    return pattern->GetAxis() == axis;
 }
 
 void LazyLayoutUtils::ValidateLazyLayoutParent(
     const RefPtr<FrameNode>& host, const std::string& componentName)
+{
+    ValidateLazyLayoutParentWithAxis(host, componentName, Axis::VERTICAL);
+}
+
+void LazyLayoutUtils::ValidateLazyLayoutParentWithAxis(
+    const RefPtr<FrameNode>& host, const std::string& componentName, Axis axis)
 {
     CHECK_NULL_VOID(host);
     host->SetNeedLazyLayout(true);
@@ -61,7 +72,7 @@ void LazyLayoutUtils::ValidateLazyLayoutParent(
             parent = parent->GetParent();
             continue;
         }
-        if (IsVerticalScrollableParent(parent)) {
+        if (IsScrollableParent(parent, axis)) {
             return;
         }
         LOGF_ABORT("%{public}s cannot be used under the %{public}s",

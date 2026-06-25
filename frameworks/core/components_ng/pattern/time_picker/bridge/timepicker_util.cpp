@@ -15,15 +15,16 @@
 
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <string>
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"
 #include "interfaces/inner_api/ace_kit/include/ui/gestures/gesture_event.h"
 
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"

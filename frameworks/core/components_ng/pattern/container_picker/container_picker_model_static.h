@@ -22,11 +22,12 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 class ACE_EXPORT ContainerPickerModelStatic {
 public:

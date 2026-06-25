@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/axis.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 namespace OHOS::Ace {
 
+#define SCROLLABLE_LIST_ATTRIBUTE "Scrollable.ListAttribute."
 std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
 std::mutex ListModel::mutex_;
 
@@ -288,12 +290,6 @@ void JSList::Create(const JSCallbackInfo& args)
         JSRef<JSVal> spaceWidthValue = obj->GetProperty("spaceWidth");
         CalcDimension space;
         RefPtr<ResourceObject> resObj;
-        if (spaceValue->IsNull() || spaceValue->IsUndefined()) {
-            ListModel::GetInstance()->ResetListSpace();
-        }
-        if (spaceWidthValue->IsNull() || spaceWidthValue->IsUndefined()) {
-            ListModel::GetInstance()->ResetListSpaceWidth();
-        }
         if (!spaceWidthValue->IsNull() && !spaceWidthValue->IsUndefined()) {
             ConvertFromJSValue(spaceWidthValue, space, resObj);
             ListModel::GetInstance()->SetSpaceWidth(space);
@@ -301,6 +297,8 @@ void JSList::Create(const JSCallbackInfo& args)
             ListModel::GetInstance()->ResetListSpaceWidth();
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
+        } else {
+            ListModel::GetInstance()->ResetListSpaceWidth();
         }
         ListModel::GetInstance()->CreateWithResourceObjSpace(resObj);
         int32_t initialIndex = 0;
@@ -683,11 +681,53 @@ void JSList::SetEditModeOptions(const JSCallbackInfo& info)
 
 void JSList::SetEnableEditMode(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     bool enableEditMode = false;
-    if (info[0]->IsBoolean()) {
-        ParseJsBool(info[0], enableEditMode);
+    JSRef<JSVal> changeEventVal;
+    auto enableVal = info[0];
+    if (enableVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(enableVal);
+        enableVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (enableVal->IsBoolean()) {
+        ParseJsBool(enableVal, enableEditMode);
     }
     ListModel::GetInstance()->SetEnableEditMode(enableEditMode);
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("List.EnableEditModeChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ListModel::GetInstance()->SetEnableEditModeBindingEvent(std::move(changeEvent));
+    }
+}
+
+void JSList::SetOnEditModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.OnEditModeChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ListModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
@@ -788,6 +828,9 @@ void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
             return true;
         };
         ListModel::GetInstance()->SetOnItemDelete(std::move(onItemDelete));
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "OnItemDelete", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "OnItemDelete", 0);
     }
     args.ReturnSelf();
 }
@@ -1087,6 +1130,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
     JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
+    JSClass<JSList>::StaticMethod("onEditModeChange", &JSList::SetOnEditModeChange);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

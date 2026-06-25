@@ -96,7 +96,8 @@ export class StateMgmtTool {
         return undefined;
     }
     static createProxy<T extends Object>(value: T, allowDeep: boolean = false, isAPI: boolean = false): T {
-        const ifaces: FixedArray<Class> = Class.of(value).getInterfaces();
+        const interfaces = Class.of(value).getInterfaces();
+        const ifaces: FixedArray<Class> = [...interfaces, Class.from<JsonReplacer>()] as FixedArray<Class>;
         const linker = Class.current().getLinker();
         return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep, isAPI)) as T;
     }

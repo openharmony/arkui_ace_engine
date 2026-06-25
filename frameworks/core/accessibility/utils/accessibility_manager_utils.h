@@ -24,6 +24,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -428,6 +429,100 @@ public:
 private:
     int64_t currentActionId_ = -1;
     std::unordered_set<uint32_t> blockedEvents_;
+};
+
+class VirtualNodeContainerIdManager {
+public:
+    static VirtualNodeContainerIdManager& GetInstance();
+
+    // Allocate container ID. Return value: 1-255 on success, 0 on failure
+    uint8_t AllocateContainerId(const RefPtr<FrameNode>& containerNode);
+
+    // Release container ID
+    void ReleaseContainerId(uint8_t containerId);
+
+    // Release container ID by FrameNode
+    void ReleaseContainerId(const RefPtr<FrameNode>& containerNode);
+
+    // Find FrameNode by container ID
+    RefPtr<FrameNode> GetContainerNode(uint8_t containerId) const;
+
+    // Find container ID by FrameNode. Return value: 1-255 if found, 0 if not found
+    uint8_t GetContainerId(const RefPtr<FrameNode>& containerNode) const;
+
+    // Check whether the given ID belongs to a virtual node container
+    bool IsVirtualNodeContainer(uint8_t containerId) const;
+
+    // Check whether the given FrameNode is a virtual node container
+    bool IsVirtualNodeContainer(const RefPtr<FrameNode>& containerNode) const;
+
+    // Clear all mappings
+    void Clear();
+
+    // Get statistics
+    size_t GetContainerCount() const;
+    size_t GetAvailableIdCount() const;
+    
+    // Static utility methods: ID encoding / decoding
+
+    /* Encode accessibility ID for virtual node container.
+     * containerId: container ID (1-255)
+     * componentId: component ID (lower 32 bits of parent FrameNode's accessibility ID)
+     * Return: complete 64-bit accessibility ID
+     */
+    static int64_t EncodeVirtualNodeAccessibilityId(uint8_t containerId, int64_t componentId);
+
+    // Decode accessibility ID to extract container ID and component ID
+    static void DecodeAccessibilityId(int64_t accessibilityId, uint8_t& containerId, int64_t& componentId);
+
+    // Check whether the accessibility ID belongs to a virtual node container
+    static bool IsVirtualNodeContainerId(int64_t accessibilityId);
+
+    // Extract container ID from accessibility ID
+    static uint8_t ExtractContainerId(int64_t accessibilityId);
+
+    // Extract component ID from accessibility ID (clear container ID bits)
+    static int64_t ExtractComponentId(int64_t accessibilityId);
+
+    // Get parent FrameNode's full accessibility ID (clear container ID bits)
+    static int64_t GetParentAccessibilityId(int64_t accessibilityId);
+
+private:
+    VirtualNodeContainerIdManager() = default;
+    ~VirtualNodeContainerIdManager() = default;
+    
+    // Disallow copy and assignment
+    VirtualNodeContainerIdManager(const VirtualNodeContainerIdManager&) = delete;
+    VirtualNodeContainerIdManager& operator=(const VirtualNodeContainerIdManager&) = delete;
+
+    // Find next available container ID
+    uint8_t FindNextAvailableId();
+
+    // Container ID range
+    static constexpr uint8_t MIN_CONTAINER_ID = 1;
+    static constexpr uint8_t MAX_CONTAINER_ID = 255;
+    static constexpr uint8_t INVALID_CONTAINER_ID = 0;
+
+    static constexpr size_t CONTAINER_ID_POOL_SIZE = 256;
+
+    // ID encoding constants
+    // Bit 39-32: containerId (uint8)
+    // Bit 31-0: componentId (int32)
+    // To avoid truncating componentId's sign bit, encode and decode via unsigned cast.
+    static constexpr uint64_t CONTAINER_ID_MASK = 0x000000FF00000000ULL;
+    static constexpr int CONTAINER_ID_SHIFT = 32;
+    static constexpr uint64_t COMPONENT_ID_MASK = 0x00000000FFFFFFFFULL;
+
+    // Member variables
+    mutable std::mutex mutex_;
+
+    std::bitset<CONTAINER_ID_POOL_SIZE> idPool_;
+
+    // Container ID to FrameNode mapping
+    std::unordered_map<uint8_t, WeakPtr<FrameNode>> containerNodeMap_;
+
+    // FrameNode accessibility ID to container ID mapping
+    std::unordered_map<int64_t, uint8_t> nodeToContainerMap_;
 };
 
 } // namespace OHOS::Ace::NG

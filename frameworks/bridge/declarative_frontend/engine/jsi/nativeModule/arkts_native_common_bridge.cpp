@@ -40,6 +40,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/input_event_monitor_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/event/focus_axis_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
@@ -2115,6 +2116,44 @@ LayoutCalPolicy CommonBridge::ParseLayoutPolicy(const std::string& layoutPolicy)
     return LayoutCalPolicy::NO_MATCH;
 }
 
+void ResetLayoutPolicy(ArkUINodeHandle nativeNode, bool isWidth)
+{
+    if (isWidth) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetWidthLayoutPolicy(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetHeightLayoutPolicy(nativeNode);
+    }
+}
+
+void ApplyLayoutPolicy(ArkUINodeHandle nativeNode, LayoutCalPolicy policy, bool isWidth)
+{
+    if (policy == LayoutCalPolicy::NO_MATCH) {
+        ResetLayoutPolicy(nativeNode, isWidth);
+        return;
+    }
+    auto layoutPolicy = static_cast<ArkUI_Int32>(policy) - NUM_1;
+    if (isWidth) {
+        GetArkUINodeModifiers()->getCommonModifier()->setWidthLayoutPolicy(nativeNode, layoutPolicy);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->setHeightLayoutPolicy(nativeNode, layoutPolicy);
+    }
+}
+
+bool TryApplyLayoutPolicy(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& jsValue, bool isWidth)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+    if (!layoutPolicy->IsString(vm)) {
+        return false;
+    }
+    auto policy = CommonBridge::ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+    ApplyLayoutPolicy(nativeNode, policy, isWidth);
+    return true;
+}
+
 ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2127,20 +2166,14 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width, widthResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
-        if (jsValue->IsObject(vm)) {
-            auto obj = jsValue->ToObject(vm);
-            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
-            if (layoutPolicy->IsString(vm)) {
-                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
-                return panda::JSValueRef::Undefined(vm);
-            }
+        if (TryApplyLayoutPolicy(vm, nativeNode, jsValue, true)) {
+            return panda::JSValueRef::Undefined(vm);
         }
     } else {
         if (LessNotEqual(width.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+                ResetLayoutPolicy(nativeNode, true);
                 return panda::JSValueRef::Undefined(vm);
             }
             width.SetValue(0.0);
@@ -2155,7 +2188,7 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
                 nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str(), widthRawResObj);
         }
     }
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    ResetLayoutPolicy(nativeNode, true);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2181,20 +2214,14 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, heightResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
-        if (jsValue->IsObject(vm)) {
-            auto obj = jsValue->ToObject(vm);
-            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
-            if (layoutPolicy->IsString(vm)) {
-                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
-                return panda::JSValueRef::Undefined(vm);
-            }
+        if (TryApplyLayoutPolicy(vm, nativeNode, jsValue, false)) {
+            return panda::JSValueRef::Undefined(vm);
         }
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+                ResetLayoutPolicy(nativeNode, false);
                 return panda::JSValueRef::Undefined(vm);
             }
             height.SetValue(0.0);
@@ -2208,7 +2235,7 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str(), heightRawResObj);
         }
     }
-    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    ResetLayoutPolicy(nativeNode, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5098,15 +5125,14 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto actionVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
     auto enabledVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enabled"));
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
-    if (!actionVal->IsNumber() || !enabledVal->IsBoolean()) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    if (actionVal->IsNumber()) {
+        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
     }
-    if (actionVal->Int32Value(vm) != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.enabled = false;
+    if (enabledVal->IsBoolean()) {
+        config.enabled = enabledVal->BooleaValue(vm);
     }
-    config.enabled = enabledVal->BooleaValue(vm);
     config.selectable = config.enabled;
     if (!selectableVal->IsUndefined() && selectableVal->IsBoolean()) {
         config.selectable = selectableVal->BooleaValue(vm);
@@ -8484,12 +8510,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
     Local<JSValueRef> gestureDistanceMap = runtimeCallInfo->GetCallArgRef(argNumber);
     if (!gestureDistanceMap.IsNull() && !gestureDistanceMap->IsUndefined() && gestureDistanceMap->IsMap(vm)) {
         Local<panda::MapRef> distanceMapRef(gestureDistanceMap);
         int32_t distanceMapSize = distanceMapRef->GetSize(vm);
-        PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
-            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
         for (int32_t i = 0; i < distanceMapSize; i++) {
             SourceTool sourceTool = static_cast<SourceTool>(distanceMapRef->GetKey(vm, i)->ToNumber(vm)->Value());
             double distance = static_cast<double>(distanceMapRef->GetValue(vm, i)->ToNumber(vm)->Value());
@@ -8498,6 +8524,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
                 distanceMap[sourceTool] = Dimension(distance, DimensionUnit::VP);
             }
         }
+        auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+        gesturePtr->SetDistanceMap(distanceMap);
+        return;
+    }
+    Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber - 2);
+    if (distanceArg.IsNull() || distanceArg->IsUndefined()) {
         auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
         gesturePtr->SetDistanceMap(distanceMap);
     }
@@ -8820,7 +8852,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
@@ -9697,7 +9729,7 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
     return obj;
@@ -11332,7 +11364,7 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO, nativeSize);
     return obj;
@@ -11458,7 +11490,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_AXIS_INFO, nativeSize);
     return obj;
@@ -12225,6 +12257,33 @@ ArkUINativeModuleValue CommonBridge::ResetOnNeedSoftkeyboard(ArkUIRuntimeCallInf
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto doubleSided = true;
+    if (secondArg->IsBoolean()) {
+        doubleSided = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setDoubleSided(nativeNode, doubleSided);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getCommonModifier()->resetDoubleSided(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

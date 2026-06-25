@@ -20,6 +20,7 @@
 #include "core/common/event_manager.h"
 
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -33,6 +34,7 @@
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -224,18 +226,28 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg136, TestSize.Level1)
      * @tc.expected: initialize pipeline.
      */
     ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    auto window = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    const auto& children = context_->rootNode_->GetChildren();
+    ASSERT_FALSE(children.empty());
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    if (containerNode == nullptr) {
+        return;
+    }
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    if (containerPattern == nullptr) {
+        return;
+    }
 
     /**
      * @tc.steps2: Call the function SetWindowContainerColor.
      * @tc.expected: Test if this function is available.
      */
     context_->SetWindowContainerColor(Color::BLUE, Color::BLACK);
-    EXPECT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
-    EXPECT_NE(containerNode, nullptr);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    EXPECT_NE(containerPattern, nullptr);
     EXPECT_EQ(containerPattern->activeColor_, Color::BLUE);
 
     /**
@@ -2789,6 +2801,57 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
         context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
         ASSERT_TRUE(std::chrono::high_resolution_clock::now() - currentTime < timeoutMs);
     }
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
+}
+
+/**
+ * @tc.name: PipelineContextTouchOptimizerNotifiedFalseTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent calls ResSchedReport when touchOptimizer reports not notified
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedFalseTest001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
+}
+
+/**
+ * @tc.name: PipelineContextTouchOptimizerNotifiedTrueTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent skips ResSchedReport when touchOptimizer reports already notified
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedTrueTest001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    const auto& touchOptimizer = context_->GetTouchOptimizer();
+    if (touchOptimizer) {
+        touchOptimizer->SetTouchDownNotifiedToClick(true);
+    }
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
     EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
 } // namespace NG

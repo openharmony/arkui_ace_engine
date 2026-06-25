@@ -46,6 +46,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -68,10 +69,6 @@ constexpr int32_t IMAGE_ALT_PLACEHOLDER = 1;
 constexpr int32_t IMAGE_ALT_ERROR = 2;
 constexpr int32_t IMAGE_ALT_NORMAL = 3;
 constexpr uint32_t FIT_MATRIX = 16;
-constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
-constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
-constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
-constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
@@ -336,6 +333,14 @@ void JSImage::Create(const JSCallbackInfo& info)
     CreateImage(info);
 }
 
+void JSImage::CreateImageSpan(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    CreateImage(info, true);
+}
+
 void JSImage::CheckIsCard(std::string& src, const JSRef<JSVal>& imageInfo)
 {
     bool isCard = false;
@@ -391,9 +396,43 @@ ImageType JSImage::ParseImageType(const JSRef<JSVal>& imageInfo)
         return ImageType::ANIMATED_DRAWABLE;
     } else if (typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
         return ImageType::PIXELMAP_DRAWABLE;
+    } else if (typeName == PICTURE_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::PICTURE_DRAWABLE;
     } else {
         return ImageType::BASE;
     }
+}
+
+void JSImage::ResolveImageSource(const JSRef<JSVal>& imageInfo, ImageInfoConfig& config)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    config.type = ParseImageType(imageInfo);
+    switch (config.type) {
+        case ImageType::ANIMATED_DRAWABLE:
+        case ImageType::PICTURE_DRAWABLE: {
+            auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(imageInfo));
+            config.drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+            break;
+        }
+        case ImageType::PIXELMAP_DRAWABLE: {
+            auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(imageInfo));
+            config.type = ImageType::BASE;
+            if (drawableAddr) {
+                config.pixelMap = drawableAddr->GetPixelMap();
+            }
+            break;
+        }
+        case ImageType::DRAWABLE:
+        case ImageType::LAYERED_DRAWABLE: {
+            config.pixelMap = PixelMap::GetFromDrawable(UnwrapNapiValue(imageInfo));
+            break;
+        }
+        default: {
+            config.pixelMap = CreatePixelMapFromNapiValue(imageInfo);
+            break;
+        }
+    }
+#endif
 }
 
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
@@ -407,29 +446,15 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId, resObj);
     CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
     CheckIsCard(src, imageInfo);
-    RefPtr<PixelMap> pixmap = nullptr;
-    RefPtr<DrawableDescriptor> drawable = nullptr;
-    ImageType type = ImageType::BASE;
-#ifdef PIXEL_MAP_SUPPORTED
-    if (!srcValid) {
-        type = ParseImageType(imageInfo);
-        if (type == ImageType::ANIMATED_DRAWABLE || type == ImageType::PIXELMAP_DRAWABLE) {
-            auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(imageInfo));
-            drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-        } else if (type == ImageType::DRAWABLE || type == ImageType::LAYERED_DRAWABLE) {
-            pixmap = PixelMap::GetFromDrawable(UnwrapNapiValue(imageInfo));
-        } else {
-            pixmap = CreatePixelMapFromNapiValue(imageInfo);
-        }
-    }
-#endif
     ImageInfoConfig config;
-    config.type = type;
     config.src = std::make_shared<std::string>(src);
-    config.pixelMap = pixmap;
-    config.drawable = drawable;
     config.bundleName = bundleName;
     config.moduleName = moduleName;
+#ifdef PIXEL_MAP_SUPPORTED
+    if (!srcValid) {
+        ResolveImageSource(imageInfo, config);
+    }
+#endif
     config.isUriPureNumber = (resId == -1);
     config.isImageSpan = isImageSpan;
     // Parse reloadKey
@@ -1010,6 +1035,9 @@ void JSImage::DestructorCallback(ImageColorFilter* obj)
 
 void JSImage::SetColorFilterMatrix(const JSRef<JSVal>& jsArray)
 {
+    if (!jsArray->IsArray()) {
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsArray);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
@@ -1148,6 +1176,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::Declare("Image");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSImage>::StaticMethod("create", &JSImage::Create, opt);
+    JSClass<JSImage>::StaticMethod("createImageSpan", &JSImage::CreateImageSpan, opt);
     JSClass<JSImage>::StaticMethod("alt", &JSImage::SetAlt, opt);
     JSClass<JSImage>::StaticMethod("objectFit", &JSImage::SetObjectFit, opt);
     JSClass<JSImage>::StaticMethod("imageMatrix", &JSImage::SetImageMatrix, opt);

@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
@@ -23,7 +24,9 @@
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
+#define private public
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#undef private
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -583,6 +586,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
      */
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     EXPECT_TRUE(pattern_->scrollBar_->NeedPaint());
     pattern_->CreateScrollBarOverlayModifier();
@@ -631,6 +635,7 @@ HWTEST_F(GridScrollLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
      */
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     auto paintProperty = pattern_->CreatePaintProperty();
     PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
@@ -1020,5 +1025,17 @@ HWTEST_F(GridScrollLayoutTestNg, IsAtBottom, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtBottom());
     FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: GridScrollLayoutAlgorithmWrapperInitTest
+ * @tc.desc: Test wrapper_ is nullptr after default construction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutAlgorithmWrapperInitTest, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    GridScrollLayoutAlgorithm algorithm(info);
+    EXPECT_EQ(algorithm.wrapper_, nullptr);
 }
 } // namespace OHOS::Ace::NG

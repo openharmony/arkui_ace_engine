@@ -20,6 +20,7 @@ build_component("navigation_bar") {
     "navigation_bar_component_base.cpp",
     "navigation_bar_component_v2.cpp",
     "navigation_bar_element.cpp",
+    "navigation_bar_theme.cpp",
     "navigation_container_component.cpp",
   ]
 

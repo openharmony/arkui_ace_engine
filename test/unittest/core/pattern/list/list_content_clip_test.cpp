@@ -19,6 +19,9 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
+#include <utility>
+#include <vector>
+
 #define private public
 #define protected public
 
@@ -30,8 +33,11 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #undef private
@@ -42,6 +48,8 @@ class ListContentClipTestNg : public ListTestNg {
 public:
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
     ListModelNG CreateHorizontalList();
+    RefPtr<LazyWaterFlowLayoutPattern> CreateLazyVWaterFlowLayout(int32_t itemCount, float itemHeight,
+        LazyWaterFlowLayoutModel::VisibleIndexesChangeEvent onVisibleIndexesChange = nullptr);
 };
 
 PaddingProperty ListContentClipTestNg::CreatePadding(float left, float top, float right, float bottom)
@@ -68,6 +76,29 @@ ListModelNG ListContentClipTestNg::CreateHorizontalList()
     model.SetScroller(scrollController, proxy);
     GetList();
     return model;
+}
+
+RefPtr<LazyWaterFlowLayoutPattern> ListContentClipTestNg::CreateLazyVWaterFlowLayout(int32_t itemCount,
+    float itemHeight, LazyWaterFlowLayoutModel::VisibleIndexesChangeEvent onVisibleIndexesChange)
+{
+    LazyVWaterFlowLayoutModel lazyWaterFlowModel;
+    lazyWaterFlowModel.Create();
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    lazyWaterFlowModel.SetColumnsTemplate("1fr 1fr");
+    if (onVisibleIndexesChange) {
+        LazyWaterFlowLayoutModel::SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+    }
+
+    auto lazyWaterFlowFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto lazyWaterFlowPattern = lazyWaterFlowFrameNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    for (int32_t i = 0; i < itemCount; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+        ViewAbstract::SetHeight(CalcLength(itemHeight));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    return lazyWaterFlowPattern;
 }
 
 /**
@@ -1360,5 +1391,511 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithLazyVGridLayout001, TestS
     EXPECT_EQ(lazyGridVisibleStart, 0);
     EXPECT_EQ(lazyGridVisibleEnd, 5);
     EXPECT_LE(lazyGridVisibleEnd, lazyGridPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVGridLayout001
+ * @tc.desc: Test List with three LazyVGridLayout and ContentClip SAFE_AREA mode, verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding
+     * List frame height is 400.f (HEIGHT), with 100.f bottom safeAreaPadding
+     * First LazyVGridLayout: height 350.f (larger than content area but smaller than clip extension)
+     * Second LazyVGridLayout: upper boundary at 350.f (just within clip extension range)
+     * Third LazyVGridLayout: upper boundary at 700.f (outside first LazyVGridLayout)
+     */
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.bottom = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+
+    // create 3 lazyVGridLayout
+    for (int32_t i = 0; i < 3; i++) {
+        LazyVGridLayoutModel lazyGridModel1;
+        lazyGridModel1.Create();
+        ViewAbstract::SetWidth(CalcLength(WIDTH));
+        lazyGridModel1.SetColumnsTemplate("1fr 1fr");
+        for (int32_t i = 0; i < 14; i++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(50.f));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].endPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700);
+
+    /**
+     * @tc.steps: step2. Get LazyVGridLayout patterns
+     */
+    auto lazyGrid1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(lazyGrid1, nullptr);
+    auto lazyGridPattern1 = lazyGrid1->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern1, nullptr);
+
+    auto lazyGrid2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ASSERT_NE(lazyGrid2, nullptr);
+    auto lazyGridPattern2 = lazyGrid2->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern2, nullptr);
+
+    auto lazyGrid3 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    ASSERT_NE(lazyGrid3, nullptr);
+    auto lazyGridPattern3 = lazyGrid3->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify first LazyVGridLayout preload range
+     * First grid at Y=0, height 350.f (14 items / 2 columns * 50.f = 7 rows)
+     * First grid fully visible and within clip extension, callback triggered
+     * @tc.expected: first grid visible and preload range should cover all 14 items
+     */
+    auto layoutInfo1 = lazyGridPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo1->startIndex_, 0);
+    EXPECT_EQ(layoutInfo1->endIndex_, layoutInfo1->totalItemCount_ - 1);
+    EXPECT_EQ(layoutInfo1->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo1->cachedEndIndex_, layoutInfo1->totalItemCount_ - 1);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVGridLayout preload range
+     * Second grid starts at Y=350.f, within clip extension (350.f < 400.f frame + 100.f safeAreaPadding extension)
+     * Callback not triggered (no fully visible items), but preload triggered for items within grid
+     * @tc.expected: second grid visible range -1 (callback not triggered), preload range items 0-3
+     */
+    auto layoutInfo2 = lazyGridPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 0);
+    EXPECT_EQ(layoutInfo2->endIndex_, 3);
+    EXPECT_EQ(layoutInfo2->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo2->cachedEndIndex_, 7);
+
+    /**
+     * @tc.steps: step5. Verify third LazyVGridLayout preload range
+     * Third grid starts at Y=700.f, outside clip extension (700.f > 400.f frame + 100.f
+     * safeAreaPadding + 200.f clipExtension)
+     * Callback not triggered, preload not triggered
+     * @tc.expected: third grid visible range -1, preload range -1
+     */
+    auto layoutInfo3 = lazyGridPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo3->startIndex_, -1);
+    EXPECT_EQ(layoutInfo3->endIndex_, -1);
+    EXPECT_EQ(layoutInfo3->cachedStartIndex_, -1);
+    EXPECT_EQ(layoutInfo3->cachedEndIndex_, -1);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVGridLayout002
+ * @tc.desc: Test List with three LazyVGridLayout and ContentClip SAFE_AREA mode and stackFromEnd, verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding and stackFromEnd
+     * List frame height is 400.f (HEIGHT), with 100.f top safeAreaPadding
+     * Third LazyVGridLayout: upper boundary at 50.f (just within clip extension range)
+     * Second LazyVGridLayout: bottom boundary at 50.f (just within clip extension range)
+     * First LazyVGridLayout: bottom boundary at -400 (outside first LazyVGridLayout)
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetStackFromEnd(true);
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.top = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+    
+    // create 3 lazyVGridLayout
+    for (int32_t i = 0; i < 3; i++) {
+        LazyVGridLayoutModel lazyGridModel1;
+        lazyGridModel1.Create();
+        ViewAbstract::SetWidth(CalcLength(WIDTH));
+        lazyGridModel1.SetColumnsTemplate("1fr 1fr");
+        for (int32_t i = 0; i < 14; i++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(50.f));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[2].endPos, 300);
+    EXPECT_EQ(pattern_->itemPosition_[2].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -400);
+
+    /**
+     * @tc.steps: step2. Get LazyVGridLayout patterns
+     */
+    auto lazyGrid1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(lazyGrid1, nullptr);
+    auto lazyGridPattern1 = lazyGrid1->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern1, nullptr);
+
+    auto lazyGrid2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ASSERT_NE(lazyGrid2, nullptr);
+    auto lazyGridPattern2 = lazyGrid2->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern2, nullptr);
+
+    auto lazyGrid3 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    ASSERT_NE(lazyGrid3, nullptr);
+    auto lazyGridPattern3 = lazyGrid3->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify third LazyVGridLayout preload range (stackFromEnd order: first child is at bottom)
+     * Third grid: startPos=-50.f, endPos=300.f, height 350.f
+     * Covers visible area [0, 400] and clip extension [-200, 600]
+     * @tc.expected: third grid visible and preload range should cover all 14 items
+     */
+    auto layoutInfo3 = lazyGridPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo3->startIndex_, 0);
+    EXPECT_EQ(layoutInfo3->endIndex_, 13);
+    EXPECT_EQ(layoutInfo3->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo3->cachedEndIndex_, 13);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVGridLayout preload range (stackFromEnd order)
+     * Second grid: startPos=-400.f, endPos=-50.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: second grid visible range -1, preload range items 10-13 (bottom 2 rows)
+     */
+    auto layoutInfo2 = lazyGridPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 10);
+    EXPECT_EQ(layoutInfo2->endIndex_, 13);
+    EXPECT_EQ(layoutInfo2->cachedStartIndex_, 6);
+    EXPECT_EQ(layoutInfo2->cachedEndIndex_, 13);
+
+    /**
+     * @tc.steps: step5. Verify first LazyVGridLayout preload range (stackFromEnd order)
+     * First grid: startPos=-750.f, endPos=-400.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: first grid visible range -1, preload range -1
+     */
+    auto layoutInfo1 = lazyGridPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo1->startIndex_, -1);
+    EXPECT_EQ(layoutInfo1->endIndex_, -1);
+    EXPECT_EQ(layoutInfo1->cachedStartIndex_, layoutInfo1->totalItemCount_);
+    EXPECT_EQ(layoutInfo1->cachedEndIndex_, layoutInfo1->totalItemCount_);
+}
+
+/**
+ * @tc.name: ContentClipBoundaryWithLazyVWaterFlowLayout001
+ * @tc.desc: Test List with LazyVWaterFlowLayout and ContentClip BOUNDARY mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipBoundaryWithLazyVWaterFlowLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVWaterFlowLayout and content clip
+     */
+    int32_t lazyWaterFlowVisibleStart = -1;
+    int32_t lazyWaterFlowVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    PaddingProperty padding = CreatePadding(0, 0, 0, 150);
+    layoutProperty_->UpdatePadding(padding);
+
+    auto lazyWaterFlowPattern = CreateLazyVWaterFlowLayout(20, 100.f,
+        [&lazyWaterFlowVisibleStart, &lazyWaterFlowVisibleEnd](int32_t start, int32_t end) {
+            lazyWaterFlowVisibleStart = start;
+            lazyWaterFlowVisibleEnd = end;
+        });
+    ASSERT_NE(lazyWaterFlowPattern, nullptr);
+
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. check LazyVWaterFlowLayout visible indexes
+     * @tc.expected: visible indexes should exclude padding area
+     */
+    EXPECT_EQ(lazyWaterFlowVisibleStart, 0);
+    EXPECT_EQ(lazyWaterFlowVisibleEnd, 5);
+    EXPECT_LE(lazyWaterFlowVisibleEnd, lazyWaterFlowPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipBoundaryWithLazyVWaterFlowLayout002
+ * @tc.desc: Test List with LazyVWaterFlowLayout and ContentClip BOUNDARY mode with scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipBoundaryWithLazyVWaterFlowLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVWaterFlowLayout and content clip
+     */
+    int32_t lazyWaterFlowVisibleStart = -1;
+    int32_t lazyWaterFlowVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    PaddingProperty padding = CreatePadding(0, 100, 0, 150);
+    layoutProperty_->UpdatePadding(padding);
+
+    auto lazyWaterFlowPattern = CreateLazyVWaterFlowLayout(30, 100.f,
+        [&lazyWaterFlowVisibleStart, &lazyWaterFlowVisibleEnd](int32_t start, int32_t end) {
+            lazyWaterFlowVisibleStart = start;
+            lazyWaterFlowVisibleEnd = end;
+        });
+    ASSERT_NE(lazyWaterFlowPattern, nullptr);
+
+    CreateDone();
+    EXPECT_EQ(lazyWaterFlowVisibleStart, 0);
+    EXPECT_EQ(lazyWaterFlowVisibleEnd, 3);
+
+    /**
+     * @tc.steps: step2. scroll and check visible indexes
+     * @tc.expected: visible indexes should update correctly after scroll
+     */
+    UpdateCurrentOffset(-210.f);
+
+    EXPECT_EQ(lazyWaterFlowVisibleStart, 4);
+    EXPECT_EQ(lazyWaterFlowVisibleEnd, 7);
+    EXPECT_GT(lazyWaterFlowVisibleStart, lazyWaterFlowPattern->layoutInfo_->startIndex_);
+    EXPECT_LE(lazyWaterFlowVisibleEnd, lazyWaterFlowPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithLazyVWaterFlowLayout001
+ * @tc.desc: Test List with LazyVWaterFlowLayout and ContentClip SAFE_AREA mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithLazyVWaterFlowLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVWaterFlowLayout and SAFE_AREA content clip
+     */
+    int32_t lazyWaterFlowVisibleStart = -1;
+    int32_t lazyWaterFlowVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty paddingProperty;
+    paddingProperty.bottom = std::make_optional<CalcLength>(150);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+
+    auto lazyWaterFlowPattern = CreateLazyVWaterFlowLayout(20, 100.f,
+        [&lazyWaterFlowVisibleStart, &lazyWaterFlowVisibleEnd](int32_t start, int32_t end) {
+            lazyWaterFlowVisibleStart = start;
+            lazyWaterFlowVisibleEnd = end;
+        });
+    ASSERT_NE(lazyWaterFlowPattern, nullptr);
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step2. check visible indexes
+     * @tc.expected: visible indexes should exclude safe area padding
+     */
+    EXPECT_EQ(lazyWaterFlowVisibleStart, 0);
+    EXPECT_EQ(lazyWaterFlowVisibleEnd, 5);
+    EXPECT_LE(lazyWaterFlowVisibleEnd, lazyWaterFlowPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVWaterFlowLayout001
+ * @tc.desc: Test List with three LazyVWaterFlowLayout and ContentClip SAFE_AREA mode, verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVWaterFlowLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding
+     * List frame height is 400.f (HEIGHT), with 100.f bottom safeAreaPadding
+     * First LazyVWaterFlowLayout: height 350.f (larger than content area but smaller than clip extension)
+     * Second LazyVWaterFlowLayout: upper boundary at 350.f (just within clip extension range)
+     * Third LazyVWaterFlowLayout: upper boundary at 700.f (outside first LazyVWaterFlowLayout)
+     */
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.bottom = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+
+    std::vector<RefPtr<LazyWaterFlowLayoutPattern>> lazyWaterFlowPatterns;
+    // create 3 lazyVWaterFlowLayout
+    for (int32_t i = 0; i < 3; i++) {
+        auto lazyWaterFlowPattern = CreateLazyVWaterFlowLayout(14, 50.f);
+        ASSERT_NE(lazyWaterFlowPattern, nullptr);
+        lazyWaterFlowPatterns.emplace_back(lazyWaterFlowPattern);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].endPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700);
+
+    /**
+     * @tc.steps: step2. Get LazyVWaterFlowLayout patterns
+     */
+    ASSERT_EQ(lazyWaterFlowPatterns.size(), 3);
+    auto lazyWaterFlowPattern1 = lazyWaterFlowPatterns[0];
+    ASSERT_NE(lazyWaterFlowPattern1, nullptr);
+
+    auto lazyWaterFlowPattern2 = lazyWaterFlowPatterns[1];
+    ASSERT_NE(lazyWaterFlowPattern2, nullptr);
+
+    auto lazyWaterFlowPattern3 = lazyWaterFlowPatterns[2];
+    ASSERT_NE(lazyWaterFlowPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify first LazyVWaterFlowLayout preload range
+     * First waterflow at Y=0, height 350.f (14 items / 2 columns * 50.f = 7 rows)
+     * First waterflow fully visible and within clip extension, callback triggered
+     * @tc.expected: first waterflow visible and preload range should cover all 14 items
+     */
+    auto layoutInfo1 = lazyWaterFlowPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo1->startIndex_, 0);
+    EXPECT_EQ(layoutInfo1->endIndex_, layoutInfo1->totalItemCount_ - 1);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVWaterFlowLayout preload range
+     * Second waterflow starts at Y=350.f, within clip extension (350.f < 400.f frame + 100.f safeAreaPadding
+     * extension)
+     * Callback not triggered (no fully visible items), but preload triggered for items within waterflow
+     * @tc.expected: second waterflow visible range -1 (callback not triggered), preload range items 0-3
+     */
+    auto layoutInfo2 = lazyWaterFlowPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 0);
+    EXPECT_EQ(layoutInfo2->endIndex_, 3);
+
+    /**
+     * @tc.steps: step5. Verify third LazyVWaterFlowLayout preload range
+     * Third waterflow starts at Y=700.f, outside clip extension (700.f > 400.f frame + 100.f
+     * safeAreaPadding + 200.f clipExtension)
+     * Callback not triggered, preload not triggered
+     * @tc.expected: third waterflow visible range -1, preload range -1
+     */
+    auto layoutInfo3 = lazyWaterFlowPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo3->startIndex_, -1);
+    EXPECT_EQ(layoutInfo3->endIndex_, -1);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVWaterFlowLayout002
+ * @tc.desc: Test List with three LazyVWaterFlowLayout and ContentClip SAFE_AREA mode and stackFromEnd,
+ *           verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVWaterFlowLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding and stackFromEnd
+     * List frame height is 400.f (HEIGHT), with 100.f top safeAreaPadding
+     * Third LazyVWaterFlowLayout: upper boundary at 50.f (just within clip extension range)
+     * Second LazyVWaterFlowLayout: bottom boundary at 50.f (just within clip extension range)
+     * First LazyVWaterFlowLayout: bottom boundary at -400 (outside first LazyVWaterFlowLayout)
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetStackFromEnd(true);
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.top = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+
+    std::vector<RefPtr<LazyWaterFlowLayoutPattern>> lazyWaterFlowPatterns;
+    // create 3 lazyVWaterFlowLayout
+    for (int32_t i = 0; i < 3; i++) {
+        auto lazyWaterFlowPattern = CreateLazyVWaterFlowLayout(14, 50.f);
+        ASSERT_NE(lazyWaterFlowPattern, nullptr);
+        lazyWaterFlowPatterns.emplace_back(lazyWaterFlowPattern);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[2].endPos, 300);
+    EXPECT_EQ(pattern_->itemPosition_[2].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -400);
+
+    /**
+     * @tc.steps: step2. Get LazyVWaterFlowLayout patterns
+     */
+    ASSERT_EQ(lazyWaterFlowPatterns.size(), 3);
+    auto lazyWaterFlowPattern1 = lazyWaterFlowPatterns[0];
+    ASSERT_NE(lazyWaterFlowPattern1, nullptr);
+
+    auto lazyWaterFlowPattern2 = lazyWaterFlowPatterns[1];
+    ASSERT_NE(lazyWaterFlowPattern2, nullptr);
+
+    auto lazyWaterFlowPattern3 = lazyWaterFlowPatterns[2];
+    ASSERT_NE(lazyWaterFlowPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify third LazyVWaterFlowLayout preload range (stackFromEnd order:
+     *            first child is at bottom)
+     * Third waterflow: startPos=-50.f, endPos=300.f, height 350.f
+     * Covers visible area [0, 400] and clip extension [-200, 600]
+     * @tc.expected: third waterflow visible and preload range should cover all 14 items
+     */
+    auto layoutInfo3 = lazyWaterFlowPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo3->startIndex_, 0);
+    EXPECT_EQ(layoutInfo3->endIndex_, 13);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVWaterFlowLayout preload range (stackFromEnd order)
+     * Second waterflow: startPos=-400.f, endPos=-50.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: second waterflow visible range -1, preload range items 10-13 (bottom 2 rows)
+     */
+    auto layoutInfo2 = lazyWaterFlowPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 10);
+    EXPECT_EQ(layoutInfo2->endIndex_, 13);
+
+    /**
+     * @tc.steps: step5. Verify first LazyVWaterFlowLayout preload range (stackFromEnd order)
+     * First waterflow: startPos=-750.f, endPos=-400.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: first waterflow visible range -1, preload range -1
+     */
+    auto layoutInfo1 = lazyWaterFlowPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyWaterFlowPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo1->startIndex_, -1);
+    EXPECT_EQ(layoutInfo1->endIndex_, -1);
 }
 } // namespace OHOS::Ace::NG

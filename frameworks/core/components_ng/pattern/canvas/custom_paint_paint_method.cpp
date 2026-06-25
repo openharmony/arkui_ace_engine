@@ -31,6 +31,9 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/render/drawing.h"
 #ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
+#include "adapter/ohos/entrance/ace_container.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
@@ -1514,6 +1517,18 @@ double CustomPaintPaintMethod::GetBaselineOffset(TextBaseline baseline, std::uni
 }
 
 #ifndef ACE_UNITTEST
+void CustomPaintPaintMethod::ApplyFontWeightVariations(Rosen::TextStyle& txtStyle, const TextStyle& textStyle)
+{
+#ifdef ENABLE_STANDARD_INPUT
+    auto pipelineContext = context_.Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!fontWeightScale_.has_value()) {
+        fontWeightScale_ = Platform::AceContainer::GetFontWeightScaleFromConfig(pipelineContext->GetInstanceId());
+    }
+    Constants::SetFontWeightVariations(txtStyle, fontWeightScale_.value(), textStyle);
+#endif
+}
+
 double CustomPaintPaintMethod::GetFontBaseline(
     const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const
 {
@@ -2135,6 +2150,7 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
     RSTextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), txtStyle);
+    ApplyFontWeightVariations(txtStyle, state.GetTextStyle());
     txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
@@ -2197,6 +2213,7 @@ bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
     UpdateFontFamilies();
     txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
     ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
+    ApplyFontWeightVariations(txtStyle, state_.fillState.GetTextStyle());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         RSBrush brush;
         RSSamplingOptions options;
@@ -2262,6 +2279,7 @@ bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
         InitPaintBlend(pen);
     }
     ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+    ApplyFontWeightVariations(txtStyle, state_.strokeState.GetTextStyle());
     txtStyle.fontEdging =
         fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
@@ -2288,6 +2306,7 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
     shadowStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateFontFamilies();
     ConvertTxtStyle(state_.strokeState.GetTextStyle(), shadowStyle);
+    ApplyFontWeightVariations(shadowStyle, state_.strokeState.GetTextStyle());
     shadowStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
     RSPen shadowPen;
     shadowPen.SetColor(state_.shadow.GetColor().GetValue());

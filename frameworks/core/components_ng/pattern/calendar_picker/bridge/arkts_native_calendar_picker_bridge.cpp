@@ -18,6 +18,7 @@
 #include "calendar_picker_utils.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/date_util.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -25,7 +26,6 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -779,7 +779,6 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     if (IsJsView(firstArg, vm)) {
         SetCalendarPickerJSBorder(vm, secondArg);
         return panda::JSValueRef::Undefined(vm);
@@ -798,6 +797,8 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     }
 
     if (leftArg->IsUndefined() && rightArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
+        auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
         RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
         CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorder(

@@ -114,6 +114,7 @@ public:
     void RemoveForceSplitStateListener(int32_t nodeId);
     void NotifyForceSplitStateChange();
     void OnForceSplitEnableChange();
+    void ChangeForceSplitModeTo(ForceSplitMode mode);
 
     bool HasRelatedPage() const
     {
@@ -150,9 +151,41 @@ public:
     {
         return splitRatio_;
     }
-    void UpdateForceSplitRatio();
+    void SetDragStoppedRatio(float ratio);
+    void SetWideSplitIsDraggable(bool isDraggable)
+    {
+        wideSplitIsDraggable_ = isDraggable;
+    }
+    void SetSquareSplitIsDraggable(bool isDraggable)
+    {
+        squareSplitIsDraggable_ = isDraggable;
+    }
+    bool IsSplitDraggable() const;
+    void SetIsForceSplitDragging(bool isDragging)
+    {
+        isForceSplitDragging_ = isDragging;
+    }
+    bool IsForceSplitDragging() const
+    {
+        return isForceSplitDragging_;
+    }
+    void SetTemporarySplitRatio(float ratio)
+    {
+        temporarySplitRatio_ = ratio;
+    }
+    std::optional<float> GetTemporarySplitRatio() const
+    {
+        return temporarySplitRatio_;
+    }
+    void ClearTemporarySplitRatio()
+    {
+        temporarySplitRatio_ = std::nullopt;
+    }
+    float FindNearestSnapRatio(float currentRatio) const;
     void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
     void RemoveForceSplitRatioListener(int32_t nodeId);
+    void AddIsDraggableChangeListener(int32_t nodeId, std::function<void(bool isDraggable)>&& listener);
+    void RemoveIsDraggableChangeListener(int32_t nodeId);
 
     void SetBehaviorMode(ForceSplitBehaviorMode mode)
     {
@@ -175,6 +208,12 @@ public:
     bool CanPushPageToPrimary() const;
     bool IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const;
 
+    RefPtr<FrameNode> CreateDragMaskNode();
+    ForceSplitMode GetForceSplitMode() const
+    {
+        return mode_;
+    }
+
 private:
     bool IsTopFullScreenPage();
     bool IsWindowConditionMatched();
@@ -184,6 +223,10 @@ private:
     void FlushArkUIHook();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
+    void NotifyWindowFirstTimeDraggableRatioIfNeeded(float ratio);
+    void NotifyWindowDraggableRatioChangeIfNeeded(float ratio);
+    bool IsDraggable(ForceSplitMode mode);
+    void NotifyIsDraggableChange(bool isDraggable);
 
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
@@ -194,15 +237,22 @@ private:
     std::unordered_set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
+    bool wideSplitIsDraggable_ = false;
     std::optional<float> wideSplitRatio_;
+    bool squareSplitIsDraggable_ = false;
     std::optional<float> squareSplitRatio_;
+    bool isForceSplitDragging_ = false;
+    std::optional<float> temporarySplitRatio_;
     float splitRatio_;
+    std::optional<float> preWideSplitWindowNotifyRatio_;
+    std::optional<float> preSquareSplitWindowNotifyRatio_;
     ForceSplitMode mode_;
     ForceSplitBehaviorMode behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
     std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs_;
     std::unordered_set<std::string> transPages_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     std::unordered_map<int32_t, std::function<void(float)>> forceSplitRatioListeners_;
+    std::unordered_map<int32_t, std::function<void(bool isDraggable)>> isDraggableListeners_;
     int32_t appIconId_ = 0;
     // for navigation force split, we need disable forcesplit before router transition.
     bool disableNavForceSplitInternal_ = false;

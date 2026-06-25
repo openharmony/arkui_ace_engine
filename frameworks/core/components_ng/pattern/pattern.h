@@ -45,6 +45,7 @@ class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace {
+struct ImmersiveOptions;
 struct UiMaterialParam;
 class NotifyDragEvent;
 class GestureEvent;
@@ -168,22 +169,9 @@ public:
         return std::nullopt;
     }
 
-    void DetachFromFrameNode(FrameNode* frameNode)
-    {
-        onDetach_ = true;
-        OnDetachFromFrameNode(frameNode);
-        onDetach_ = false;
-        frameNode_.Reset();
-    }
+    void DetachFromFrameNode(FrameNode* frameNode);
 
-    void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
-    {
-        if (frameNode_ == frameNode) {
-            return;
-        }
-        frameNode_ = frameNode;
-        OnAttachToFrameNode();
-    }
+    void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode);
 
     virtual bool CustomizeExpandSafeArea()
     {
@@ -267,80 +255,10 @@ public:
         envFontScale_ = fontScale;
     }
 
-    void PropagateForegroundColorToChildren()
-    {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        const auto& children = frameNode->GetChildren();
-        if (children.empty()) {
-            return;
-        }
-        const auto& renderContext = frameNode->GetRenderContext();
-        if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
-            return;
-        }
-        std::list<RefPtr<FrameNode>> childrenList {};
-        std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(frameNode);
-        RefPtr<FrameNode> parentNode;
-        while (!queue.empty()) {
-            parentNode = queue.front();
-            queue.pop();
-            auto childs = parentNode->GetChildren();
-            if (childs.empty()) {
-                continue;
-            }
-            for (auto child : childs) {
-                if (!AceType::InstanceOf<NG::FrameNode>(child)) {
-                    continue;
-                }
-                auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-                auto childRenderContext = childFrameNode->GetRenderContext();
-                if (childRenderContext->HasForegroundColorFlag() && childRenderContext->GetForegroundColorFlagValue()) {
-                    continue;
-                }
-                queue.emplace(childFrameNode);
-                childrenList.emplace_back(childFrameNode);
-            }
-        }
-        UpdateChildRenderContext(renderContext, childrenList);
-    }
+    void PropagateForegroundColorToChildren();
 
     void UpdateChildRenderContext(
-        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
-    {
-        bool isForegroundColor = renderContext->HasForegroundColor();
-        for (auto child : childrenList) {
-            auto childRenderContext = child->GetRenderContext();
-            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
-                if (isForegroundColor) {
-                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
-                    childRenderContext->ResetForegroundColorStrategy();
-                    childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
-                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
-                    childRenderContext->ResetForegroundColor();
-                    childRenderContext->UpdateForegroundColorFlag(false);
-                }
-            } else {
-                if (!childRenderContext->HasForegroundColorFlag()) {
-                    continue;
-                }
-                if (childRenderContext->GetForegroundColorFlagValue()) {
-                    continue;
-                }
-                if (isForegroundColor) {
-                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
-                    childRenderContext->ResetForegroundColorStrategy();
-                    childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
-                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
-                    childRenderContext->ResetForegroundColor();
-                    childRenderContext->UpdateForegroundColorFlag(false);
-                }
-            }
-        }
-    }
+        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList);
 
     virtual void OnAfterModifyDone() {}
 
@@ -398,74 +316,21 @@ public:
         return true;
     }
 
-    std::optional<SizeF> GetHostFrameSize() const
-    {
-        auto frameNode = frameNode_.Upgrade();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        return frameNode->GetGeometryNode()->GetMarginFrameSize();
-    }
+    std::optional<SizeF> GetHostFrameSize() const;
 
-    std::optional<OffsetF> GetHostFrameOffset() const
-    {
-        auto frameNode = frameNode_.Upgrade();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        return frameNode->GetGeometryNode()->GetFrameOffset();
-    }
+    std::optional<OffsetF> GetHostFrameOffset() const;
 
-    std::optional<OffsetF> GetHostFrameGlobalOffset() const
-    {
-        auto frameNode = frameNode_.Upgrade();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        return frameNode->GetGeometryNode()->GetFrameOffset() + frameNode->GetGeometryNode()->GetParentGlobalOffset();
-    }
+    std::optional<OffsetF> GetHostFrameGlobalOffset() const;
 
-    std::optional<SizeF> GetHostContentSize() const
-    {
-        auto frameNode = frameNode_.Upgrade();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        const auto& content = frameNode->GetGeometryNode()->GetContent();
-        if (!content) {
-            return std::nullopt;
-        }
-        return content->GetRect().GetSize();
-    }
+    std::optional<SizeF> GetHostContentSize() const;
 
-    RefPtr<FrameNode> GetHost() const
-    {
-        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
-            LOGF_ABORT("fatal: can't GetHost at detaching period");
-        }
-        return frameNode_.Upgrade();
-    }
+    RefPtr<FrameNode> GetHost() const;
 
-    int32_t GetHostInstanceId() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
-        return host->GetInstanceId();
-    }
+    int32_t GetHostInstanceId() const;
 
-    PipelineContext* GetContext() const
-    {
-        auto frameNode = GetHost();
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        return frameNode->GetContext();
-    }
+    PipelineContext* GetContext() const;
 
-    RenderContext* GetRenderContext() const
-    {
-        auto frameNode = GetHost();
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        return frameNode->GetRenderContext().GetRawPtr();
-    }
+    RenderContext* GetRenderContext() const;
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
@@ -511,12 +376,7 @@ public:
         return DynamicCast<T>(host->GetEventHub<T>());
     }
 
-    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(flag);
-    }
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF);
 
     // Called after frameNode RebuildRenderContextTree.
     virtual void OnRebuildFrame() {}
@@ -581,14 +441,7 @@ public:
 
     virtual void OnRestoreInfo(const std::string& restoreInfo) {}
 
-    virtual bool IsNeedAdjustByAspectRatio()
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        auto layoutProperty = host->GetLayoutProperty();
-        CHECK_NULL_RETURN(host, false);
-        return layoutProperty->HasAspectRatio();
-    }
+    virtual bool IsNeedAdjustByAspectRatio();
 
     virtual void OnTouchTestHit(SourceType hitTestType) {}
 
@@ -677,6 +530,11 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
+    virtual FrameNodeChangeInfoFlag CollectDescendantChangeFlags()
+    {
+        return FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;
@@ -727,12 +585,7 @@ public:
 
     std::string GetResCacheMapByKey(const std::string& key);
 
-    int32_t GetThemeScopeId() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, 0);
-        return host->GetThemeScopeId();
-    }
+    int32_t GetThemeScopeId() const;
 
     virtual bool ReusedNodeSkipMeasure()
     {
@@ -764,16 +617,7 @@ public:
     };
 
     bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd, std::unique_ptr<JsonValue>& json,
-        std::unique_ptr<JsonValue>& params)
-    {
-        json = JsonUtil::ParseJsonString(command);
-        CHECK_NULL_RETURN(json && !json->IsNull(), false);
-        cmd = json->GetString("cmd");
-        CHECK_NULL_RETURN(!cmd.empty(), false);
-        params = json->GetValue("params");
-        CHECK_NULL_RETURN(params && params->IsObject(), false);
-        return true;
-    }
+        std::unique_ptr<JsonValue>& params);
 
     virtual bool BorderUnoccupied() const
     {
@@ -887,6 +731,13 @@ public:
     virtual void OnBorderWidthReset() {}
     virtual void OnBorderColorReset() {}
     virtual void OnBackShadowReset() {}
+    // process default lightEffectOptions and interactive behavior. If the user does not set related parameters
+    // or disable the ability, the default behavior of the component needs to be processed if it has.
+    virtual void ProcessDefaultImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options) {}
+    virtual bool EnableCachePredictNodes() const
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

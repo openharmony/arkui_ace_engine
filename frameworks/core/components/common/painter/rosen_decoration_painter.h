@@ -23,7 +23,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
-#include "core/components/common/properties/border_image_edge.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
@@ -46,6 +45,7 @@ struct SkSize;
 namespace OHOS::Ace {
 
 class Border;
+class Gradient;
 class Offset;
 class Size;
 

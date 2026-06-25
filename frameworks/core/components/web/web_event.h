@@ -21,6 +21,8 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#include "web_full_screen_video_overlay_handler.h"
+
 #ifdef DELETE
 #undef DELETE
 #endif
@@ -1319,6 +1321,33 @@ private:
     int writePipe_;
     int connectId_ = 0;
     RefPtr<WebNativeMessageCallback> callback_;
+};
+
+class ACE_EXPORT FullScreenVideoOverlayEnterEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenVideoOverlayEnterEvent, BaseEventInfo);
+
+public:
+    FullScreenVideoOverlayEnterEvent(
+        const char* mediaInfo, const RefPtr<FullScreenVideoOverlayHandler> handler)
+        : BaseEventInfo("FullScreenVideoOverlayEnterEvent"), mediaInfo_(mediaInfo),
+          handler_(handler)
+    {}
+
+    ~FullScreenVideoOverlayEnterEvent() = default;
+
+    const RefPtr<FullScreenVideoOverlayHandler>& GetHandler() const
+    {
+        return handler_;
+    }
+
+    const std::string& GetMediaInfo() const
+    {
+        return mediaInfo_;
+    }
+
+private:
+    std::string mediaInfo_ = "";
+    RefPtr<FullScreenVideoOverlayHandler> handler_;
 };
 
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {

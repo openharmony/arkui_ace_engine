@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
@@ -646,6 +647,9 @@ void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
     if (type != WindowChangeType::RECT_CHANGE) {
         overlay->HideAllMenusWithoutAnimation(false);
         overlay->HideAllPopupsWithoutAnimation();
+        if (container->IsSubContainer()) {
+            SubwindowManager::GetInstance()->HideToastSubWindowNG(instanceId);
+        }
     }
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
@@ -1322,7 +1326,12 @@ void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config, sptr<I
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
          ": %{public}s, entryPoint: %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(), entryPoint.c_str());
-    Platform::AceContainer::RunDynamicPage(instanceId_, startUrl_, "", entryPoint);
+    DynamicOptions options;
+    options.content = startUrl_;
+    options.params = "";
+    options.entryPoint = entryPoint;
+    options.hapPath = hapPath_;
+    Platform::AceContainer::RunDynamicPage(instanceId_, options);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1583,7 +1592,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
-        } else {
+        }
+        // Initialize DC components from the context to avoid temporary dark-mode updates
+        // on the main thread affecting their initialization.
+        if (resourceManager == nullptr || uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             auto config = context->GetConfiguration();
             if (config) {
                 auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
@@ -1729,6 +1741,11 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
 #endif
     if (isDynamicRender_) {
         ContainerScope::UpdateLocalCurrent(instanceId_);
+        // Mark this thread as isolated (dc scenario) so that base query functions
+        // (ContainerCount, SingletonId, RecentActiveId, etc.) return thread-local values,
+        // preventing cross-thread instance ID confusion.
+        ContainerScope::MarkIsolatedThread();
+        ContainerScope::AddLocal(instanceId_);
     }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
@@ -2234,6 +2251,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
     });
     NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
+    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
+    });
+    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
@@ -2939,6 +2960,10 @@ void UIContentImpl::Foreground()
     if (!isDynamicRender_) {
         ContainerScope::UpdateRecentForeground(instanceId_);
     }
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush. Exclude form/dc (dynamic render) instances.
+        PostPreFreezeRegisterTask(false);
+    }
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2957,11 +2982,41 @@ void UIContentImpl::Background()
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
     PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Register instanceId from pre-freeze flush when app goes to background.
+        PostPreFreezeRegisterTask(true);
+    }
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
+}
+
+// Posts a task to UI thread to register/unregister the instance for pre-freeze flush.
+// Uses ContainerScope to ensure correct engine context and WillRunOnCurrentThread optimization.
+void UIContentImpl::PostPreFreezeRegisterTask(bool needRegister)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto task = [instanceId = instanceId_, needRegister]() {
+        ContainerScope scope(instanceId);
+        if (needRegister) {
+            DetachedRsNodeManager::GetInstance().RegisterPreFreezeInstance(instanceId);
+        } else {
+            DetachedRsNodeManager::GetInstance().UnregisterPreFreezeInstance(instanceId);
+        }
+    };
+
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI,
+            needRegister ? "RegisterPreFreeze" : "UnregisterPreFreeze");
+    }
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)
@@ -3029,6 +3084,10 @@ void UIContentImpl::Destroy()
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush.
+        PostPreFreezeRegisterTask(false);
+    }
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
@@ -3037,6 +3096,8 @@ void UIContentImpl::Destroy()
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
     ContainerScope::RemoveAndCheck(instanceId_);
+    // Remove instance from thread-local set and clean up local active/foreground cache.
+    ContainerScope::RemoveLocal(instanceId_);
     UnregisterDisplayManagerCallback();
     SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 
@@ -5828,8 +5889,7 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, 
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
 }
 
-void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
-                                        const std::optional<AppForceSplitConfig>& appConfig)
+void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -5844,60 +5904,35 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     }
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
-    if (appConfig.has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using app forceSplitConfig");
-        NG::ForceSplitConfig config;
-        if (!NG::ForceSplitUtils::ParseAppForceSplitConfig(appConfig->isRouter, appConfig->configJsonStr, config)) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse app forceSplit config!");
-            return;
-        }
-        NG::ForceSplitUtils::LogAppForceSplitConfig(appConfig->isRouter, config);
-        context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
-        forceSplitMgr->SetIsRouter(appConfig->isRouter);
-        forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
-        forceSplitMgr->SetHomePageName(config.homePage);
-        forceSplitMgr->SetRelatedPageName(config.relatedPage);
-        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
-        forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
-        forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
-        forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
-            config.splitDividerColorDark);
-        forceSplitMgr->SetBehaviorMode(config.behaviorMode);
-        forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
-        forceSplitMgr->SetTransPages(std::move(config.transPages));
-        if (!(appConfig->isRouter)) {
-            navManager->SetForceSplitNavigationId(config.navigationId);
-            navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
-            navManager->SetDividerDisabled(config.navigationDisableDivider);
-        }
-        return;
-    }
-    if (!systemConfig.has_value()) {
+    if (!splitConfig.has_value()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is not supported.");
         context->SetIsArkUIHookEnabled(false);
         forceSplitMgr->IsForceSplitEnable(false);
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using system forceSplitConfig");
-    NG::ForceSplitConfig config;
-    if (!NG::ForceSplitUtils::ParseSystemForceSplitConfig(systemConfig->configJsonStr, config)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse system forceSplit config!");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is supported.");
+    NG::ForceSplitParam config;
+    if (!NG::ForceSplitUtils::ParseForceSplitParam(splitConfig->isRouter, splitConfig->configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
     }
-    NG::ForceSplitUtils::LogSystemForceSplitConfig(systemConfig->isRouter, systemConfig->homePage, config);
+    NG::ForceSplitUtils::LogForceSplitParam(splitConfig->isRouter, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    forceSplitMgr->SetIsRouter(splitConfig->isRouter);
     forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
-    forceSplitMgr->SetIsRouter(systemConfig->isRouter);
-    forceSplitMgr->SetHomePageName(systemConfig->homePage);
+    forceSplitMgr->SetHomePageName(config.homePage);
+    forceSplitMgr->SetRelatedPageName(config.relatedPage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
     forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
     forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
+    forceSplitMgr->SetWideSplitIsDraggable(config.wideSplitIsDraggable);
+    forceSplitMgr->SetSquareSplitIsDraggable(config.squareSplitIsDraggable);
     forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
         config.splitDividerColorDark);
     forceSplitMgr->SetBehaviorMode(config.behaviorMode);
     forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
     forceSplitMgr->SetTransPages(std::move(config.transPages));
-    if (!(systemConfig->isRouter)) {
+    if (!(splitConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);
         navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
@@ -6682,16 +6717,18 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
 void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](
-        const std::string& funcName, const std::string& params) -> uint32_t {
+        const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj,
+        int32_t nodeId) ->
+        std::pair<uint32_t, std::string> {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
         auto taskExecutor = weakTaskExecutor.Upgrade();
-        CHECK_NULL_RETURN(taskExecutor, AI_CALL_ENV_INVALID);
-        uint32_t result = AI_CALL_ENV_INVALID;
+        CHECK_NULL_RETURN(taskExecutor, std::make_pair(AI_CALL_ENV_INVALID, ""));
+        std::pair<uint32_t, std::string> result = { AI_CALL_ENV_INVALID, "" };
         taskExecutor->PostSyncTask(
-            [funcName, params, &result]() {
+            [funcName, params, remoteObj, nodeId, &result]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                result = pipeline->ExeAppAIFunctionCallback(funcName, params);
+                result = pipeline->ExeAppAIFunctionCallback(funcName, params, remoteObj, nodeId);
             },
             TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
         return result;

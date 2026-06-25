@@ -22,10 +22,14 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 struct ColumnOptions {
+    std::optional<Dimension> space;
+};
+struct ColumnOptionsV2 {
     std::optional<Dimension> space;
 };
 }
@@ -36,6 +40,36 @@ ColumnOptions Convert(const Ark_ColumnOptions& src)
 {
     return {
         .space = OptConvert<Dimension>(src.space),
+    };
+}
+
+template<>
+ColumnOptionsV2 Convert(const Ark_ColumnOptionsV2& src)
+{
+    std::optional<Dimension> space;
+    Converter::VisitUnionPtr(&src.space,
+        [&space](const Ark_String& value) {
+            auto optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension dim;
+                auto result = StringUtils::StringToDimensionWithUnitNG(optStr.value(), dim, DimensionUnit::VP);
+                if (result) {
+                    space = dim;
+                }
+            }
+        },
+        [&space](const Ark_Float64& value) {
+            auto optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                space = Dimension(optValue.value(), DimensionUnit::VP);
+            }
+        },
+        [&space](const Ark_Resource& value) {
+            space = Converter::OptConvertFromArkResource(value, DimensionUnit::VP);
+        },
+        []() {});
+    return {
+        .space = space,
     };
 }
 
@@ -74,8 +108,9 @@ void SetColumnOptionsImpl(Ark_NativePointer node,
             auto opts = Converter::Convert<ColumnOptions>(colOptions);
             ColumnModelNGStatic::SetSpace(frameNode, opts.space);
         },
-        [](const Ark_ColumnOptionsV2& colOptionsV2) {
-            LOGE("ColumnInterfaceModifier::SetColumnOptionsImpl Ark_ColumnOptionsV2 is not supported");
+        [frameNode](const Ark_ColumnOptionsV2& colOptionsV2) {
+            auto opts = Converter::Convert<ColumnOptionsV2>(colOptionsV2);
+            ColumnModelNGStatic::SetSpace(frameNode, opts.space);
         },
         []() {});
 }

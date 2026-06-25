@@ -199,6 +199,11 @@ bool IsMeasureDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
 }
 
+bool IsSkipSecondaryMeasuredEnabled()
+{
+    return (system::GetParameter("persist.ace.measure.skip.secondary.enabled", "false") == "true");
+}
+
 bool IsSafeAreaDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
@@ -579,6 +584,16 @@ UiMaterialLevel ReadUiMaterialLevel()
     return result;
 }
 
+bool ReadUiMaterialEnabled()
+{
+    bool result = true;
+    if (MaterialUtils::GetDeviceUiMaterialEnabled(result)) {
+        return result;
+    }
+    result = system::GetBoolParameter("const.support_immersive", true);
+    return result;
+}
+
 bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
@@ -725,6 +740,7 @@ bool SystemProperties::dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEna
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
 bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -825,6 +841,7 @@ bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
+int32_t SystemProperties::sensorCorrectionEnable_ = 0;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
 
@@ -972,6 +989,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
         syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
         measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+        skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
         vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
         safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
         pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -1012,6 +1030,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
         autoResizeEnabled_ = system::GetBoolParameter(ENABLE_IMAGE_AUTO_RESIZE_KEY, false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();
+        sensorCorrectionEnable_ = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", -1);
 
         // watch animation scale
         animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
@@ -1458,6 +1477,11 @@ bool SystemProperties::IsAutoFillSupport()
     return isAutoFillSupport_;
 }
 
+bool SystemProperties::IsSensorCorrectionEnabled()
+{
+    return sensorCorrectionEnable_ == 1;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
@@ -1600,6 +1624,12 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     static auto uiMaterialLevel = ReadUiMaterialLevel();
     return uiMaterialLevel;
+}
+
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    static auto enabled = ReadUiMaterialEnabled();
+    return enabled;
 }
 
 int32_t SystemProperties::GetFormTaskPriority()

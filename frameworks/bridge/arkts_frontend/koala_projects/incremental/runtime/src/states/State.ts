@@ -96,7 +96,7 @@ export interface StateManager extends StateContext {
     frozen: boolean
     reset(): void
 }
-interface DependentInfoStore {
+export interface DependentInfoStore {
     /**
     * return collection of nodes
     */
@@ -1459,14 +1459,15 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     private recycleOrDispose(child: ManagedScope): void {
         const key = child.reuseKey
-        const node = child.node?.getParentNodeWhenRecycle(this._nodeRef) ?? this._nodeRef;
-        const recycled = key && node && !node.disposed && node.recycle(key, child, child.id)
+        const childNode = child.node
+        const node = childNode?.getParentNodeWhenRecycle(this._nodeRef) ?? this._nodeRef;
+        const recycled = !childNode?.forbidRecycle && key && node && !node!.disposed && node!.recycle(key!, child, child.id)
         if (recycled) {
             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
-            if (!child.node) {
+            if (!childNode) {
                 throw Error('reusable scope does not have a node')
             }
-            child.node!.detach()
+            childNode.detach()
         } else {
             child.dispose()
         }

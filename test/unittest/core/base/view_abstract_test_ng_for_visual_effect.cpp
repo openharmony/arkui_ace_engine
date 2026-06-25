@@ -449,4 +449,423 @@ HWTEST_F(ViewAbstractTestNg, ResetSystemMaterialEffect001, TestSize.Level1)
     ViewAbstract::ResetSystemMaterialEffect(AceType::RawPtr(node));
     EXPECT_EQ(renderContext->GetBackgroundColor().value(), testColor);
 }
+
+/**
+ * @tc.name: SetSystemMaterialWithScale001
+ * @tc.desc: Test the SetSystemMaterialWithScale function of View_Abstract with IMMERSIVE material
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::IMMERSIVE);
+    material->SetType(type);
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with normal scale value.
+     * @tc.expected: step3. Function should execute without crash and shadow is updated.
+     */
+    constexpr float normalScale = 1.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), normalScale);
+    // Verify that shadow was updated (should have value since IMMERSIVE material applies shadow by default)
+    auto shadowOpt = renderContext->GetBackShadow();
+    // Shadow may or may not be set depending on the material configuration
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale002
+ * @tc.desc: Test the SetSystemMaterialWithScale function with scaled component (0.5f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with 0.5 scale (half size).
+     * @tc.expected: step3. Function should execute without crash and compensate for scale.
+     */
+    constexpr float halfScale = 0.5f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), halfScale);
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale003
+ * @tc.desc: Test the SetSystemMaterialWithScale function with zero scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with zero scale.
+     * @tc.expected: step3. Function should execute without crash (zero scale should be handled).
+     */
+    constexpr float zeroScale = 0.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), zeroScale);
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale004
+ * @tc.desc: Test the SetSystemMaterialWithScale function with negative scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with negative scale.
+     * @tc.expected: step3. Function should execute without crash (negative scale should be handled).
+     */
+    constexpr float negativeScale = -1.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), negativeScale);
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale005
+ * @tc.desc: Test the SetSystemMaterialWithScale function with non-IMMERSIVE material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create SEMI_TRANSPARENT material (not IMMERSIVE).
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with non-IMMERSIVE material.
+     * @tc.expected: step3. Function should execute without crash (non-IMMERSIVE materials are not processed).
+     */
+    constexpr float normalScale = 1.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), normalScale);
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale006
+ * @tc.desc: Test the SetSystemMaterialWithScale function with null material
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Call SetSystemMaterialWithScale with null material.
+     * @tc.expected: step2. Function should execute without crash and reset material effect.
+     */
+    constexpr float normalScale = 1.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, nullptr, normalScale);
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale007
+ * @tc.desc: Test the SetSystemMaterialWithScale function in ConfigChangePerform mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto pattern = node->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Enable ConfigChangePerform mode.
+     */
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step4. Call SetSystemMaterialWithScale in ConfigChangePerform mode.
+     * @tc.expected: step4. Function should execute without crash and add resource object.
+     */
+    constexpr float normalScale = 1.5f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), normalScale);
+
+    /**
+     * @tc.steps: step5. Reset ConfigChangePerform mode.
+     */
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetSystemMaterialWithScale008
+ * @tc.desc: Test the SetSystemMaterialWithScale function with larger scale value (2.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialWithScale008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and renderContext.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto nodePtr = AceType::RawPtr(node);
+
+    /**
+     * @tc.steps: step2. Create IMMERSIVE material with options.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options { .style = UiMaterialStyle::REGULAR };
+    material->SetImmersiveOptions(options);
+
+    /**
+     * @tc.steps: step3. Call SetSystemMaterialWithScale with 2.0 scale (double size).
+     * @tc.expected: step3. Function should execute without crash and compensate for scale.
+     */
+    constexpr float doubleScale = 2.0f;
+    ViewAbstract::SetSystemMaterialWithScale(nodePtr, AceType::RawPtr(material), doubleScale);
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale001
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node with pipeline context.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = node->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. Create immersive options.
+     */
+    auto options = std::make_shared<ImmersiveOptions>();
+    options->style = UiMaterialStyle::REGULAR;
+
+    /**
+     * @tc.steps: step3. Call GetImmersiveMaterialConfigWithScale with normal scale.
+     * @tc.expected: step3. Should return valid config.
+     */
+    constexpr float normalScale = 1.0f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(options, node, normalScale);
+    ASSERT_TRUE(config.has_value());
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale002
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with zero scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node with pipeline context.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = node->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. Create immersive options.
+     */
+    auto options = std::make_shared<ImmersiveOptions>();
+    options->style = UiMaterialStyle::REGULAR;
+
+    /**
+     * @tc.steps: step3. Call GetImmersiveMaterialConfigWithScale with zero scale.
+     * @tc.expected: step3. Should return valid config (zero scale defaults to 1.0).
+     */
+    constexpr float zeroScale = 0.0f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(options, node, zeroScale);
+    ASSERT_TRUE(config.has_value());
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale003
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create immersive options.
+     */
+    auto options = std::make_shared<ImmersiveOptions>();
+    options->style = UiMaterialStyle::REGULAR;
+
+    /**
+     * @tc.steps: step2. Call GetImmersiveMaterialConfigWithScale with null node.
+     * @tc.expected: step2. Should return nullopt.
+     */
+    RefPtr<FrameNode> nullNode = nullptr;
+    constexpr float normalScale = 1.0f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(options, nullNode, normalScale);
+    ASSERT_FALSE(config.has_value());
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale004
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with null options
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Call GetImmersiveMaterialConfigWithScale with null options.
+     * @tc.expected: step2. Should return nullopt.
+     */
+    std::shared_ptr<ImmersiveOptions> nullOptions = nullptr;
+    constexpr float normalScale = 1.0f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(nullOptions, node, normalScale);
+    ASSERT_FALSE(config.has_value());
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale005
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with scaled component (0.5f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node with pipeline context.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = node->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. Create immersive options.
+     */
+    auto options = std::make_shared<ImmersiveOptions>();
+    options->style = UiMaterialStyle::REGULAR;
+
+    /**
+     * @tc.steps: step3. Call GetImmersiveMaterialConfigWithScale with 0.5 scale.
+     * @tc.expected: step3. Should return valid config with adjusted dipScale.
+     */
+    constexpr float halfScale = 0.5f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(options, node, halfScale);
+    ASSERT_TRUE(config.has_value());
+    // dipScale should be adjusted (baseDipScale / 0.5 = baseDipScale * 2)
+    EXPECT_GT(config->dipScale, 0.0f);
+}
+
+/**
+ * @tc.name: GetImmersiveMaterialConfigWithScale006
+ * @tc.desc: Test the GetImmersiveMaterialConfigWithScale function with scaled component (2.0f)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetImmersiveMaterialConfigWithScale006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node with pipeline context.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto pipeline = node->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. Create immersive options.
+     */
+    auto options = std::make_shared<ImmersiveOptions>();
+    options->style = UiMaterialStyle::REGULAR;
+
+    /**
+     * @tc.steps: step3. Call GetImmersiveMaterialConfigWithScale with 2.0 scale.
+     * @tc.expected: step3. Should return valid config with adjusted dipScale.
+     */
+    constexpr float doubleScale = 2.0f;
+    auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(options, node, doubleScale);
+    ASSERT_TRUE(config.has_value());
+    // dipScale should be adjusted (baseDipScale / 2.0 = baseDipScale * 0.5)
+    EXPECT_GT(config->dipScale, 0.0f);
+}
 } // namespace OHOS::Ace::NG

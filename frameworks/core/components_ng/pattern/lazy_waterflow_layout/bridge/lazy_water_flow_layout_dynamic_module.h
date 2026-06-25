@@ -37,6 +37,7 @@ public:
     const void* GetCjModifier() override;
     // Return a Model singleton pointer used by the bridge layer when creating nodes / handling property changes.
     void* GetModel() override;
+    const void* GetCustomModifier(const std::string& name = "") override;
 };
 
 } // namespace OHOS::Ace

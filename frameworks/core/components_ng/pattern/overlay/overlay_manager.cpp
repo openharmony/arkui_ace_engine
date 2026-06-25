@@ -17,6 +17,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/with_theme_node.h"
@@ -32,7 +34,9 @@
 #endif
 
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/ng/offset_t.h"
@@ -83,11 +87,13 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/text_picker/bridge/textpicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
@@ -100,6 +106,9 @@
 #endif
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -214,6 +223,253 @@ OverlayManager::~OverlayManager()
     tipsEnterAndLeaveInfoMap_.clear();
     tipsStatusList_.clear();
     detachedProxyMap_.clear();
+}
+
+bool OverlayManager::HasPopupInfo(int32_t targetId) const
+{
+    return popupMap_.find(targetId) != popupMap_.end();
+}
+
+void OverlayManager::SetDismissDialogId(int32_t id)
+{
+    dismissDialogId_ = id;
+}
+
+int32_t OverlayManager::GetDismissDialogId() const
+{
+    return dismissDialogId_;
+}
+
+std::unordered_map<int32_t, RefPtr<FrameNode>> OverlayManager::GetDialogMap()
+{
+    return dialogMap_;
+}
+
+void OverlayManager::SetSubWindowId(int32_t subWindowId)
+{
+    subWindowId_ = subWindowId;
+}
+
+int32_t OverlayManager::GetSubwindowId()
+{
+    return subWindowId_;
+}
+
+void OverlayManager::SetMaskNodeId(int32_t dialogId, int32_t maskId)
+{
+    maskNodeIdMap_[dialogId] = maskId;
+}
+
+void OverlayManager::RegisterOnHideDialog(std::function<void()> callback)
+{
+    onHideDialogCallback_ = callback;
+}
+
+void OverlayManager::SetBackPressEvent(std::function<bool()> event)
+{
+    backPressEvent_ = event;
+}
+
+bool OverlayManager::GetHasPixelMap()
+{
+    return hasPixelMap_;
+}
+
+void OverlayManager::SetHasPixelMap(bool hasPixelMap)
+{
+    hasPixelMap_ = hasPixelMap;
+}
+
+bool OverlayManager::GetHasDragPixelMap() const
+{
+    return hasDragPixelMap_;
+}
+
+void OverlayManager::SetHasDragPixelMap(bool hasDragPixelMap)
+{
+    hasDragPixelMap_ = hasDragPixelMap;
+}
+
+bool OverlayManager::GetHasGatherNode()
+{
+    return hasGatherNode_;
+}
+
+RefPtr<FrameNode> OverlayManager::GetPixelMapNode()
+{
+    return pixmapColumnNodeWeak_.Upgrade();
+}
+
+bool OverlayManager::GetHasFilter()
+{
+    return hasFilter_;
+}
+
+void OverlayManager::SetHasFilter(bool hasFilter)
+{
+    hasFilter_ = hasFilter;
+}
+
+bool OverlayManager::GetHasEvent()
+{
+    return hasEvent_;
+}
+
+void OverlayManager::SetHasEvent(bool hasEvent)
+{
+    hasEvent_ = hasEvent;
+}
+
+bool OverlayManager::GetIsOnAnimation()
+{
+    return isOnAnimation_;
+}
+
+void OverlayManager::SetIsOnAnimation(bool isOnAnimation)
+{
+    isOnAnimation_ = isOnAnimation;
+}
+
+void OverlayManager::SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+{
+    filterColumnNodeWeak_ = columnNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetFilterColumnNode() const
+{
+    return filterColumnNodeWeak_.Upgrade();
+}
+
+void OverlayManager::SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
+{
+    isContextMenuDragHideFinished_ = isContextMenuDragHideFinished;
+}
+
+bool OverlayManager::IsContextMenuDragHideFinished() const
+{
+    return isContextMenuDragHideFinished_ == true;
+}
+
+bool OverlayManager::IsOriginDragMoveVector() const
+{
+    return dragMoveVector_.NonOffset() && lastDragMoveVector_.NonOffset();
+}
+
+bool OverlayManager::IsUpdateDragMoveVector() const
+{
+    return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
+}
+
+OffsetF OverlayManager::GetUpdateDragMoveVector() const
+{
+    return dragMoveVector_ - lastDragMoveVector_;
+}
+
+bool OverlayManager::IsModalEmpty() const
+{
+    return modalStack_.empty();
+}
+
+void OverlayManager::SetDismissTarget(const DismissTarget& dismissTarget)
+{
+    dismissTarget_ = dismissTarget;
+}
+
+void OverlayManager::SetDismissSheet(int32_t sheetId)
+{
+    dismissSheetId_ = sheetId;
+}
+
+int32_t OverlayManager::GetDismissSheet() const
+{
+    return dismissSheetId_;
+}
+
+std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> OverlayManager::GetSheetMap()
+{
+    return sheetMap_;
+}
+
+void OverlayManager::SetFilterActive(bool actived)
+{
+    hasFilterActived = actived;
+}
+
+void OverlayManager::SetDismissPopupId(int32_t targetId)
+{
+    dismissPopupId_ = targetId;
+}
+
+RefPtr<FrameNode> OverlayManager::GetGatherNode() const
+{
+    return gatherNodeWeak_.Upgrade();
+}
+
+void OverlayManager::SetDragNodeCopy(const RefPtr<FrameNode>& dragNodeCopy)
+{
+    dragNodeCopyWeak_ = dragNodeCopy;
+}
+
+RefPtr<FrameNode> OverlayManager::GetDragNodeCopy()
+{
+    return dragNodeCopyWeak_.Upgrade();
+}
+
+const std::vector<GatherNodeChildInfo>& OverlayManager::GetGatherNodeChildrenInfo()
+{
+    return gatherNodeChildrenInfo_;
+}
+
+RefPtr<FrameNode> OverlayManager::GetOverlayNode()
+{
+    return overlayNode_;
+}
+
+void OverlayManager::SetIsAttachToCustomNode(bool isAttachToCustomNode)
+{
+    isAttachToCustomNode_ = isAttachToCustomNode;
+}
+
+std::optional<OverlayManagerInfo> OverlayManager::GetOverlayManagerOptions()
+{
+    return overlayInfo_;
+}
+
+const std::set<WeakPtr<UINode>>& OverlayManager::GetwindowScenes()
+{
+    return windowSceneSet_;
+}
+
+CancelableCallback<void()>& OverlayManager::GetPreviewFilterTask()
+{
+    return previewFilterTask_;
+}
+
+void OverlayManager::SetOnSheetMiniDragStartCallback(std::function<void()>&& onSheetMiniDragStart)
+{
+    onSheetMiniDragStart_ = std::move(onSheetMiniDragStart);
+}
+
+std::function<void()> OverlayManager::GetOnSheetMiniDragStartCallback()
+{
+    return onSheetMiniDragStart_;
+}
+
+void OverlayManager::SetOnSheetMiniDragResumeCallback(std::function<void()>&& onSheetMiniDragResume)
+{
+    onSheetMiniDragResume_ = std::move(onSheetMiniDragResume);
+}
+
+std::function<void()> OverlayManager::GetOnSheetMiniDragResumeCallback()
+{
+    return onSheetMiniDragResume_;
+}
+
+void OverlayManager::CleanViewContextMap(int32_t instanceId, int32_t sheetContentId)
+{
+    if (cleanViewContextMapCallback_) {
+        cleanViewContextMapCallback_(instanceId, sheetContentId);
+    }
 }
 
 bool OverlayManager::CheckMenuManager()
@@ -465,7 +721,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
 }
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
-    bool isReadFirstNode)
+    bool isReadFirstNode, std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
@@ -481,6 +737,23 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     CHECK_NULL_VOID(root);
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed, parent is null.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     OpenDialogAnimationInner(node, dialogProps, isReadFirstNode);
@@ -617,7 +890,8 @@ void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const
     }
 }
 
-void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
+void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+    std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
@@ -663,6 +937,23 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 
     CHECK_NULL_VOID(root);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed in SetDialogTransitionEffect, parent is null.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     if (isTopOrder) {
@@ -798,6 +1089,7 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 
 void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.ShowToast", 1);
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -1150,16 +1442,25 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     }
 }
 
+const WeakPtr<UINode>& OverlayManager::GetEmbeddedNode(const PopupInfo& popupInfo) const
+{
+    if (popupInfo.embeddedOveraly) {
+        return popupInfo.embeddedOveraly->GetRootNode();
+    }
+    return rootNodeWeak_;
+}
+
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindPopup", 1);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show popup enter, targetId: %{public}d", targetId);
     if (!UpdatePopupMap(targetId, popupInfo)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
             popupInfo.target.Upgrade()->GetTag().c_str());
         return;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
     if (frameNode && !frameNode->IsLayoutComplete()) {
@@ -1473,6 +1774,11 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     // TargetNode may be destroyed when MontPopup is thrown thread.
     auto targetNode = popupInfo.target.Upgrade();
     CHECK_NULL_VOID(targetNode);
+    auto popupInfoInMap = GetPopupInfo(targetId);
+    if (popupInfoInMap.popupNode && popupInfoInMap.popupNode->IsOnMainTree()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Popup Node is already on main tree, stop mounting");
+        return;
+    }
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     ACE_UINODE_TRACE(popupNode);
@@ -1484,7 +1790,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1602,7 +1908,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1720,7 +2026,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     if (!autoCancel && !isForceClear) {
         return nullptr;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -1887,7 +2193,8 @@ void OverlayManager::ErasePopup(int32_t targetId)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
     auto it = popupMap_.find(targetId);
     if (it != popupMap_.end()) {
-        auto rootNode = rootNodeWeak_.Upgrade();
+        auto popupInfo = GetPopupInfo(targetId);
+        auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
         CHECK_NULL_VOID(rootNode);
         auto popupNode = it->second.popupNode;
         CHECK_NULL_VOID(popupNode);
@@ -2152,6 +2459,11 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
+    if (dialogProps.isAlertDialog) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("UIContext.ShowAlertDialog", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.ShowDialog", 1);
+    }
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
     // create custom builder content
@@ -2237,6 +2549,89 @@ RefPtr<FrameNode> OverlayManager::GetDialogNodeWithExistContent(const RefPtr<UIN
         iter++;
     }
     return nullptr;
+}
+
+RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps,
+    std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    RefPtr<UINode> customNode;
+    if (buildFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to build customNode");
+            return nullptr;
+        }
+    }
+
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to create dialog node");
+        return nullptr;
+    }
+    ACE_UINODE_TRACE(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
+}
+
+
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dialogProps,
+    const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    ACE_UINODE_TRACE(dialog);
+    BeforeShowDialog(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
 }
 
 void OverlayManager::RegisterDialogLifeCycleCallback(
@@ -2353,6 +2748,7 @@ bool OverlayManager::IsMenuShow()
 void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
     std::function<void(int32_t)> &&callback, const RefPtr<FrameNode> dialog, bool showComponentContent)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.OpenCustomDialog", 1);
     if (!dialog) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
         callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : -1);
@@ -2427,6 +2823,97 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
         if (GetDialogNodeWithExistContent(contentNode)) {
             TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
             callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+            return nullptr;
+        }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+        customNode = RebuildCustomBuilder(contentNode);
+        showComponentContent = true;
+    }
+    auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
+    ACE_UINODE_TRACE(dialog);
+    OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
+    return dialog;
+}
+
+void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback, const RefPtr<FrameNode> dialog,
+    bool showComponentContent)
+{
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
+        callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : ERROR_CODE_INTERNAL_ERROR, -1);
+        return;
+    }
+
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+    if (dialogProps.dialogCallback) {
+        dialogProps.dialogCallback(dialog);
+    }
+
+    int32_t dialogId = showComponentContent ? 0 : dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    CustomDialogRecordEvent(dialogProps);
+}
+
+RefPtr<FrameNode> OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    RefPtr<UINode> customNode;
+    bool showComponentContent = false;
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
+        return nullptr;
+    }
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    if (dialogProps.customBuilderWithId) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder with id.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilderWithId(nodeId);
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customBuilder) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilder();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customCNode.Upgrade()) {
+        auto contentNode = dialogProps.customCNode.Upgrade();
+        customNode = RebuildCustomBuilder(contentNode);
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom cnode.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else {
+        auto contentNode = dialogProps.contentNode.Upgrade();
+        if (!contentNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+        if (GetDialogNodeWithExistContent(contentNode)) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, -1);
             return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
@@ -2808,8 +3295,15 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto* modifier = NG::NodeModifier::GetDatepickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    DatePickerUtil::DatePickerDialogInfo dialogInfo = { .dialogProperties = dialogProps,
+        .settingData = settingData,
+        .buttonInfos = buttonInfos,
+        .datePickerNode = nullptr };
+    modifier->setDatePickerDialogViewShow(dialogInfo, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RefPtr<FrameNode> dialogNode = dialogInfo.datePickerNode;
+    CHECK_NULL_VOID(dialogNode);
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
@@ -2847,7 +3341,9 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = TextPickerDialogView::Show(
+    auto* modifier = NG::NodeModifier::GetTextPickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    auto dialogNode = modifier->setTextPickerDialogViewShow(
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
@@ -3506,17 +4002,6 @@ bool OverlayManager::RemoveModalInOverlay()
 {
     auto topModalNode = GetModalStackTop();
     CHECK_NULL_RETURN(topModalNode, false);
-    auto rootNode = FindWindowScene(topModalNode);
-    CHECK_NULL_RETURN(rootNode, true);
-    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
-    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto sheetWrapperPattern = overlay->GetPattern<SheetWrapperPattern>();
-        CHECK_NULL_RETURN(sheetWrapperPattern, false);
-        if (sheetWrapperPattern->GetSheetPageNode() != topModalNode) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "Refuse to back because sheet is in animation");
-            return true;
-        }
-    }
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
@@ -3922,7 +4407,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     auto pattern = overlay->GetPattern();
     auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, false, false);
     if (InstanceOf<SheetWrapperPattern>(pattern)) {
-        ret = SheetManager::GetInstance().RemoveSheetByESC() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+        ret = RemoveModalInOverlay() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (ret == OVERLAY_EXISTS) {
         return false;
@@ -4741,7 +5226,7 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetWrapper = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     auto wrapperParent = sheetWrapper->GetParent();
     CHECK_NULL_VOID(wrapperParent);
@@ -4901,7 +5386,8 @@ void OverlayManager::UpdateSheetRender(
 
     sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
+    // if use effectComponent, set blur on effectComponent, not on sheetpage
+    if (sheetStyle.backgroundBlurStyle.has_value() && !sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
     sheetNodePattern->SetSheetBorderWidth();
@@ -4911,15 +5397,20 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else if (sheetTheme->IsOuterBorderEnable()) {
-        auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
-        auto shadow = sheetNodePattern->GetShadowFromTheme(style);
-        sheetRenderContext->UpdateBackShadow(shadow);
-    } else if (!isPartialUpdate) {
-        auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
-        sheetRenderContext->UpdateBackShadow(shadow);
+    if (!(sheetStyle.systemMaterial && sheetStyle.systemMaterial->IsForceShadow())) {
+        if (sheetStyle.shadow.has_value()) {
+            sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, sheetStyle.shadow.value(), sheetPageNode);
+        } else if (sheetTheme->IsOuterBorderEnable()) {
+            auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+            auto shadow = sheetNodePattern->GetShadowFromTheme(style);
+            sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
+        } else if (!isPartialUpdate) {
+            auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
+            sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
+        }
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
@@ -4993,7 +5484,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
@@ -5023,7 +5514,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ComputeSheetOffset(sheetStyle, sheetNode);
@@ -5146,7 +5637,7 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
         (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
         auto context = sheetNode->GetContext();
@@ -5179,6 +5670,51 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     }
 }
 
+RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
+    const RefPtr<FrameNode>& sheetWrapperNode, NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetPageNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
+    CHECK_NULL_RETURN(sheetPageNode, nullptr);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetNodePattern, nullptr);
+
+    if (!sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
+        return nullptr;
+    }
+    auto sheetECNode = FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<EffectComponentPattern>());
+    CHECK_NULL_RETURN(sheetECNode, nullptr);
+    sheetECNode->MountToParent(sheetWrapperNode);
+    auto eventHub = sheetECNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, nullptr);
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->SetSheetECNode(sheetECNode);
+
+    if (sheetStyle.systemMaterial) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
+    }
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
+        auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
+        CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
+        sheetNodeRSContext->UpdateUseEffect(true);
+    }
+    return sheetECNode;
+#else
+    return nullptr;
+#endif
+}
+
 RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<FrameNode>& sheetNode,
     const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle)
 {
@@ -5194,12 +5730,17 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         sheetWrapperNode->SetThemeScopeId(targetNode->GetThemeScopeId());
         sheetWrapperNode->AllowUseParentTheme(false);
     }
+    auto sheetECNode = MountSheetEffectComponent(sheetWrapperNode, sheetStyle, sheetNode);
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
         return SheetView::CreateSheetMaskShowInSubwindow(sheetNode, sheetWrapperNode, targetNode, sheetStyle);
     }
-    sheetNode->MountToParent(sheetWrapperNode);
+    if (!sheetECNode) {
+        sheetNode->MountToParent(sheetWrapperNode);
+    } else {
+        sheetNode->MountToParent(sheetECNode);
+    }
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
@@ -5464,8 +6005,15 @@ void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode,
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
     } else if (sheetStyle.backgroundColor.has_value() || !isPartialUpdate) {
-        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
-            sheetTheme->GetSheetBackgoundColor()));
+        // - has systemMaterial and not SMOOTH -> do not set backgroundColor
+        // - has systemMaterial and SMOOTH -> use default backgroundColor
+        // - no systemMaterial -> follow the normal backgroundColor setting logic
+        if (!sheetStyle.systemMaterial) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(
+                sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        }
     }
 }
 
@@ -5649,7 +6197,7 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChang
         CHECK_NULL_VOID(sheetNode);
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         if (sheetPattern->IsShowInSubWindow()) {
-            auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+            auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetParent);
             auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
             CHECK_NULL_VOID(sheetWrapperPattern);
@@ -5784,7 +6332,7 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProp, nullptr);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_RETURN(sheetParent, nullptr);
     if (showInSubWindow) {
         auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
@@ -5998,13 +6546,18 @@ void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard
     customKeyboardMap_[targetId] = customKeyboard;
     customKeyboardNode_ = WeakClaim(RawPtr(customKeyboard));
     oldTargetId_ = targetId;
-    if (!isKeyBoardContinue_) {
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard, isKeyBoardContinue = isKeyBoardContinue_] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        if (!isKeyBoardContinue) {
             overlayManager->PlayKeyboardTransition(customKeyboard, true);
-        });
-    }
+            return;
+        }
+        auto renderContext = customKeyboard->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto keyboardOffsetInfo = overlayManager->CalcCustomKeyboardOffset(customKeyboard);
+        renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
+    });
 }
 
 void OverlayManager::CloseKeyboard(int32_t targetId)
@@ -7748,6 +8301,11 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     }
     FocusNextOrderNode(topFocusableNode);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+    // Call OnRemoveChild for popup nodes to trigger RemoveOnAreaChangeNode
+    auto pattern = node->GetPattern<PopupBasePattern>();
+    if (pattern) {
+        pattern->OnRemoveChild(node);
+    }
 }
 
 RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)

@@ -52,6 +52,86 @@ bool IsResponseRegionOverRectWithPrecision(const RectF& responseRect, const Rect
 } // namespace
 
 
+void CustomAccessibilityProperty::SetAccessibilityText(const std::string& text)
+{
+    accessibilityText_ = text;
+}
+
+const std::string& CustomAccessibilityProperty::GetAccessibilityText() const
+{
+    return accessibilityText_;
+}
+
+void CustomAccessibilityProperty::SetAccessibilityLevel(const std::string& level)
+{
+    accessibilityLevel_ = level;
+}
+
+const std::string& CustomAccessibilityProperty::GetAccessibilityLevel() const
+{
+    return accessibilityLevel_;
+}
+
+void CustomAccessibilityProperty::SetAccessibilityGroup(bool group)
+{
+    accessibilityGroup_ = group;
+}
+
+bool CustomAccessibilityProperty::GetAccessibilityGroup() const
+{
+    return accessibilityGroup_;
+}
+
+void CustomAccessibilityProperty::SetRole(const std::string& role)
+{
+    role_ = role;
+}
+
+const std::string& CustomAccessibilityProperty::GetRole() const
+{
+    return role_;
+}
+
+void CustomAccessibilityProperty::SetCheckable(bool checkable)
+{
+    checkable_ = checkable;
+}
+
+bool CustomAccessibilityProperty::GetCheckable() const
+{
+    return checkable_;
+}
+
+void CustomAccessibilityProperty::SetChecked(bool checked)
+{
+    checked_ = checked;
+}
+
+bool CustomAccessibilityProperty::GetChecked() const
+{
+    return checked_;
+}
+
+void CustomAccessibilityProperty::SetEnabled(bool enabled)
+{
+    isEnable_ = enabled;
+}
+
+bool CustomAccessibilityProperty::GetEnabled() const
+{
+    return isEnable_;
+}
+
+void CustomAccessibilityProperty::SetSelected(bool selected)
+{
+    isSelected_ = selected;
+}
+
+bool CustomAccessibilityProperty::GetSelected() const
+{
+    return isSelected_;
+}
+
 std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 {
     static const AceAction allActions[] = {
@@ -101,6 +181,165 @@ void AccessibilityProperty::ResetSupportAction()
     if (callback) {
         callback();
     }
+}
+
+void AccessibilityProperty::SetHost(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
+
+void AccessibilityProperty::AddSupportAction(AceAction action)
+{
+    supportActions_ |= (1UL << static_cast<uint32_t>(action));
+}
+
+void AccessibilityProperty::SetActionSetText(const ActionSetTextImpl& actionSetTextImpl)
+{
+    actionSetTextImpl_ = actionSetTextImpl;
+}
+
+void AccessibilityProperty::SetActionSetSelection(const ActionSetSelectionImpl& actionSetSelection)
+{
+    actionSetSelectionImpl_ = actionSetSelection;
+}
+
+void AccessibilityProperty::SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl)
+{
+    actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
+}
+
+void AccessibilityProperty::SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
+{
+    actionExecSubComponentImpl_ = actionExecSubComponentImpl;
+}
+
+void AccessibilityProperty::SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl)
+{
+    actionGetCursorIndexImpl_ = actionGetCursorIndexImpl;
+}
+
+void AccessibilityProperty::SetActionMoveText(const ActionMoveTextImpl& actionMoveText)
+{
+    actionMoveTextImpl_ = actionMoveText;
+}
+
+void AccessibilityProperty::SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl)
+{
+    actionScrollForwardImpl_ = actionScrollForwardImpl;
+}
+
+void AccessibilityProperty::SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl)
+{
+    actionScrollForwardWithParamImpl_ = actionScrollForwardImpl;
+}
+
+void AccessibilityProperty::SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl)
+{
+    actionScrollBackwardImpl_ = actionScrollBackwardImpl;
+}
+
+void AccessibilityProperty::SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl)
+{
+    actionScrollBackwardWithParamImpl_ = actionScrollBackwardImpl;
+}
+
+void AccessibilityProperty::SetActionCopy(const ActionCopyImpl& actionCopyImpl)
+{
+    actionCopyImpl_ = actionCopyImpl;
+}
+
+bool AccessibilityProperty::ActActionSetText(const std::string& text)
+{
+    if (actionSetTextImpl_) {
+        actionSetTextImpl_(text);
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityProperty::ActActionSetSelection(int32_t start, int32_t end, bool isForward)
+{
+    if (actionSetSelectionImpl_) {
+        actionSetSelectionImpl_(start, end, isForward);
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityProperty::ActActionSetIndex(int32_t index)
+{
+    if (actionSetCursorIndexImpl_) {
+        actionSetCursorIndexImpl_(index);
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityProperty::ActActionExecSubComponent(int32_t spanId)
+{
+    if (actionExecSubComponentImpl_) {
+        return actionExecSubComponentImpl_(spanId);
+    }
+    return false;
+}
+
+int32_t AccessibilityProperty::ActActionGetIndex()
+{
+    if (actionGetCursorIndexImpl_) {
+        return actionGetCursorIndexImpl_();
+    }
+    return -1;
+}
+
+bool AccessibilityProperty::ActActionMoveText(int32_t moveUnit, bool forward)
+{
+    if (actionMoveTextImpl_) {
+        actionMoveTextImpl_(moveUnit, forward);
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityProperty::ActActionScrollForward(AccessibilityScrollType scrollType)
+{
+    if (actionScrollForwardWithParamImpl_ == nullptr) {
+        scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+    }
+
+    if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollForwardImpl_)) {
+        actionScrollForwardImpl_();
+        return true;
+    }
+
+    if (actionScrollForwardWithParamImpl_) {
+        actionScrollForwardWithParamImpl_(scrollType);
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityProperty::ActActionScrollBackward(AccessibilityScrollType scrollType)
+{
+    if (actionScrollBackwardWithParamImpl_ == nullptr) {
+        scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+    }
+
+    if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollBackwardImpl_)) {
+        actionScrollBackwardImpl_();
+        return true;
+    }
+
+    if (actionScrollBackwardWithParamImpl_) {
+        actionScrollBackwardWithParamImpl_(scrollType);
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetAccessibilityHoverConsume(
+    const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl)
+{
+    accessibilityHoverConsumeCheckImpl_ = accessibilityHoverConsumeCheckImpl;
 }
 
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
@@ -1544,7 +1783,22 @@ void AccessibilityProperty::ResetAccessibilityActionOptions()
 void AccessibilityProperty::SetAccessibilityCustomActions(
     const std::vector<AccessibilityCustomAction>& accessibilityCustomActions)
 {
-    accessibilityCustomActions_ = accessibilityCustomActions;
+    std::vector<AccessibilityCustomAction> actions = accessibilityCustomActions;
+    if (actions.size() > ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "Custom actions size %{public}zu exceeds max count %{public}zu, truncating list",
+            actions.size(), ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT);
+        actions.resize(ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT);
+    }
+    for (auto& action : actions) {
+        if (action.actionName.size() > ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES) {
+            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+                "Custom action name exceeds %{public}zu bytes, truncating",
+                ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES);
+            action.actionName.resize(ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES);
+        }
+    }
+    accessibilityCustomActions_ = std::move(actions);
 }
 
 std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()
@@ -1581,5 +1835,29 @@ void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
     json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
     json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
+}
+
+RefPtr<CustomAccessibilityProperty> AccessibilityProperty::CreateCustomAccessibilityProperty()
+{
+    return AceType::MakeRefPtr<CustomAccessibilityProperty>();
+}
+
+RefPtr<CustomAccessibilityProperty> AccessibilityProperty::GetCustomAccessibilityProperty() const
+{
+    return customAccessibilityProperty_;
+}
+
+bool AccessibilityProperty::IsAccessibilityHoverConsume(const NG::PointF& point) const
+{
+    if (!accessibilityHoverConsumeCheckImpl_) {
+        return true;
+    }
+
+    return accessibilityHoverConsumeCheckImpl_(point);
+}
+
+void AccessibilityProperty::SetCustomAccessibilityProperty(const RefPtr<CustomAccessibilityProperty>& property)
+{
+    customAccessibilityProperty_ = property;
 }
 } // namespace OHOS::Ace::NG

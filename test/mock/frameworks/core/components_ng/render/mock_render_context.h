@@ -319,6 +319,7 @@ public:
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
+    OffsetF translateXYValue_;
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;

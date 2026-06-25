@@ -47,8 +47,8 @@ export class ArkStackNode extends ArkBaseNode implements StackAttribute {
         return this;
     }
 
-    syncLoad(value: boolean): this {
-        const value_casted = value as (boolean);
+    syncLoad(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
         this.getPeer()?.setSyncLoadAttribute(value_casted);
         this.markDirty();
         return this;

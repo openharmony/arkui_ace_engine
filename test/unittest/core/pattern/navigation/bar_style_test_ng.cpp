@@ -148,21 +148,21 @@ HWTEST_F(BarStyleTestNg, BarStyleTest001, TestSize.Level1)
     auto titleOfNavBar = titleBarOfNavBar->GetTitle();
     ASSERT_NE(titleOfNavBar, nullptr);
     /**
-     * @tc.steps: step3. check whether the barStyle is set correctlly.
-     */
+    * @tc.steps: step3. check whether the barStyle is set correctlly.
+    */
     // check the barStyle in navBar's title bar
     auto patternOfNavBarTitleBar = titleBarOfNavBar->GetPattern<TitleBarPattern>();
     ASSERT_NE(patternOfNavBarTitleBar, nullptr);
     auto navBarTitleBarStyle =
-        patternOfNavBarTitleBar->GetTitleBarOptions().brOptions.barStyle.value_or(BarStyle::STANDARD);
+    patternOfNavBarTitleBar->GetTitleBarOptions().brOptions.barStyle.value_or(BarStyle::STANDARD);
     ASSERT_EQ(navBarTitleBarStyle, candidateBarStyle);
     // check the barStyle in navBar's pattern
     auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
     ASSERT_NE(navBarPattern, nullptr);
     ASSERT_EQ(navBarPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD), candidateBarStyle);
     /**
-     * @tc.steps: step3. create destination with barStyle.
-     */
+    * @tc.steps: step3. create destination with barStyle.
+    */
     NavigationTitlebarOptions optionsOfNavDest;
     optionsOfNavDest.brOptions.barStyle = candidateBarStyle;
     auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", std::nullopt);
@@ -172,8 +172,8 @@ HWTEST_F(BarStyleTestNg, BarStyleTest001, TestSize.Level1)
     auto titleOfNavDest = titleBarOfNavDest->GetTitle();
     ASSERT_NE(titleOfNavDest, nullptr);
     /**
-     * @tc.steps: step4. check whether the barStyle of dest is set correctlly.
-     */
+    * @tc.steps: step4. check whether the barStyle of dest is set correctlly.
+    */
     // check the barStyle in navDestination's title bar
     auto patternOfNavDestTitleBar = titleBarOfNavDest->GetPattern<TitleBarPattern>();
     ASSERT_NE(patternOfNavDestTitleBar, nullptr);

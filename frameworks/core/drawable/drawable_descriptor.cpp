@@ -22,6 +22,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/drawable_descriptor_info.h"
 #include "core/drawable/layered_drawable_descriptor.h"
@@ -29,6 +30,11 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+const char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+const char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+const char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+const char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+const char PICTURE_DRAWABLE_DESCRIPTOR_NAME[] = "PictureDrawableDescriptor";
 constexpr int32_t STRING = 10003;
 constexpr int32_t MEDIA = 20000;
 constexpr int32_t RAWFILE = 30000;

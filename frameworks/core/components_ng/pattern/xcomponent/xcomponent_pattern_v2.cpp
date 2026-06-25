@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include "base/display_manager/display_manager.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
@@ -124,6 +125,9 @@ void XComponentPatternV2::OnAttachToMainTree()
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
+    }
+    if (renderSurface_) {
+        renderSurface_->UpdateBufferTypeLeak(GetLeakType());
     }
     CHECK_NULL_VOID(displaySync_);
     if (needRecoverDisplaySync_  && !displaySync_->IsOnPipeline()) {
@@ -569,6 +573,10 @@ void XComponentPatternV2::InitializeRenderContext(bool isThreadSafeNode)
     renderContextForSurface_->SetSurfaceRotation(isSurfaceLock_);
     renderContextForSurface_->SetSurfaceBufferOpaque(isOpaque_);
     renderContextForSurface_->SetRenderFit(renderFit_);
+#ifdef ENABLE_ROSEN_BACKEND
+    XComponentPattern::SetCompensationAngleToRS(renderContextForSurface_,
+        DisplayManager::GetInstance().GetFoldDisplayMode(), GetId());
+#endif
 }
 
 void XComponentPatternV2::OnModifyDone()

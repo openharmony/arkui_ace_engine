@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
@@ -477,7 +476,7 @@ static void HandleNodeParams(
     } else if (nodeType == ARKUI_TOGGLE) {
         ArkUI_Toggle_Params params;
         params.nodeType = ARKUI_TOGGLE;
-        ToggleBridge::ParseParams(runtimeCallInfo, params);
+        ArkTSUtils::ParseToggleParams(runtimeCallInfo, params);
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
     } else {
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
@@ -1185,7 +1184,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
         vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
     return obj;
@@ -1294,7 +1293,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO, nativeSize);
     return eventObj;
@@ -1430,7 +1429,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
         vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO, nativeSize);
     return obj;
@@ -1573,7 +1572,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* 
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
         panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(
         vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
     return eventObj;
@@ -1685,8 +1684,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
-        panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
+        panda::NumberRef::New(vm, info.GetRawDeltaX()),
+        panda::NumberRef::New(vm, info.GetRawDeltaY()),
         panda::NumberRef::New(vm, info.GetTargetDisplayId()),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
@@ -1727,7 +1726,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetMouseHistoricalPoints));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
         vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO, nativeSize);
     return obj;

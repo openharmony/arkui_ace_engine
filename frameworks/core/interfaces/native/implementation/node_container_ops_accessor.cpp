@@ -69,10 +69,7 @@ void SetAboutToAppearImpl(Ark_NativePointer self,
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto aboutToAppearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto aboutToAppearFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerAboutToAppear(std::move(aboutToAppearFunc));
 }
 void SetAboutToDisappearImpl(Ark_NativePointer self,
@@ -83,10 +80,7 @@ void SetAboutToDisappearImpl(Ark_NativePointer self,
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto aboutToDisappearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto aboutToDisappearFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerAboutToDisappear(std::move(aboutToDisappearFunc));
 }
 void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Size_Void* value)
@@ -110,10 +104,7 @@ void SetOnAttachImpl(Ark_NativePointer self,
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto onAttachFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto onAttachFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerOnAttach(std::move(onAttachFunc));
 }
 void SetOnDetachImpl(Ark_NativePointer self,
@@ -124,10 +115,7 @@ void SetOnDetachImpl(Ark_NativePointer self,
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto onDetachFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto onDetachFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerOnDetach(std::move(onDetachFunc));
 }
 void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value)

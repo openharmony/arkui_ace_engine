@@ -25,11 +25,13 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/components/declaration/text/text_declaration.h"
 
 namespace OHOS::Ace {
+
+// Forward declaration
+class TextStyle;
 
 // A component can show text.
 class ACE_FORCE_EXPORT TextComponent : public ComponentGroup {

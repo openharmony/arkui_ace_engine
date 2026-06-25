@@ -2168,4 +2168,73 @@ HWTEST_F(WebModifierTest, setPinchSmoothTestDefaultValues, TestSize.Level1)
         "Default value for attribute 'pinchSmooth'";
 }
 
+/*
+ * @tc.name: setEnableFullscreenVideoOverlayTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setEnableFullscreenVideoOverlayTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::optional<std::string> resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_NAME);
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_DEFAULT_VALUE)) <<
+        "Default value for attribute 'enableFullscreenVideoOverlay'";
+}
+
+/*
+ * @tc.name: setEnableFullscreenVideoOverlayTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setEnableFullscreenVideoOverlayTestValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableFullscreenVideoOverlay;
+
+    // Initial setup
+    initValueEnableFullscreenVideoOverlay = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableFullscreenVideoOverlay](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableFullscreenVideoOverlay = initValueEnableFullscreenVideoOverlay;
+
+        inputValueEnableFullscreenVideoOverlay = value;
+        modifier_->setEnableFullscreenVideoOverlay(node_, inputValueEnableFullscreenVideoOverlay);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_NAME);
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input <<
+            ", method: setEnableFullscreenVideoOverlay, attribute: enableFullscreenVideoOverlay";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: resetEnableFullscreenVideoOverlayTest
+ * @tc.desc: Test resetEnableFullscreenVideoOverlay reverts to default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, resetEnableFullscreenVideoOverlayTest, TestSize.Level1)
+{
+    // Set to true first
+    Ark_Boolean trueValue = 1;
+    modifier_->setEnableFullscreenVideoOverlay(node_, trueValue);
+
+    // Verify it was set to "true"
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_NAME);
+    EXPECT_THAT(resultStr, Optional(std::string("true")));
+
+    // Reset and verify it reverts to default "false"
+    modifier_->resetEnableFullscreenVideoOverlay(node_);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_NAME);
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_FULLSCREEN_VIDEO_OVERLAY_DEFAULT_VALUE)) <<
+        "Reset value for attribute 'enableFullscreenVideoOverlay'";
+}
+
 } // namespace OHOS::Ace::NG

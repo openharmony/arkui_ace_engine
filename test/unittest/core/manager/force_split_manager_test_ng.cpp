@@ -60,6 +60,8 @@ class ForceSplitManagerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+
+    void SetUp() override;
 };
 
 void ForceSplitManagerTestNg::SetUpTestSuite()
@@ -74,6 +76,16 @@ void ForceSplitManagerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void ForceSplitManagerTestNg::SetUp()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    if (pipeline) {
+        auto mgr = AceType::MakeRefPtr<ForceSplitManager>();
+        mgr->SetPipelineContext(WeakPtr(pipeline));
+        pipeline->forceSplitMgr_ = mgr;
+    }
 }
 
 /**
@@ -294,7 +306,6 @@ HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable001, TestSize.Level1)
 
     manager->SetForceSplitEnable(false, ForceSplitMode::NOT_SPLIT, false);
     EXPECT_FALSE(manager->isForceSplitEnable_);
-    EXPECT_EQ(manager->mode_, ForceSplitMode::NOT_SPLIT);
 }
 
 /**
@@ -542,81 +553,6 @@ HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitRatioListener002, TestSize.Lev
     // Should not crash when removing non-existent listener
     manager->RemoveForceSplitRatioListener(nodeId);
     EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId) == manager->forceSplitRatioListeners_.end());
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio001
- * @tc.desc: Test UpdateForceSplitRatio updates split ratio
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio001, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-    manager->SetWideSplitRatio(0.6f);
-
-    // Update force split ratio
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.6f);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio002
- * @tc.desc: Test UpdateForceSplitRatio with NOT_SPLIT mode
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio002, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->mode_ = ForceSplitMode::NOT_SPLIT;
-    manager->splitRatio_ = 0.7f;
-
-    // Update force split ratio with NOT_SPLIT mode should set to default
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.5f);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio003
- * @tc.desc: Test UpdateForceSplitRatio with SQUARE_SPLIT mode
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio003, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
-    manager->SetSquareSplitRatio(0.55f);
-
-    // Update force split ratio
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.55f);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio004
- * @tc.desc: Test UpdateForceSplitRatio with same ratio (no update)
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio004, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-    manager->SetWideSplitRatio(0.6f);
-    manager->UpdateForceSplitRatio();
-
-    float oldRatio = manager->GetSplitRatio();
-    // Call again with same ratio
-    manager->UpdateForceSplitRatio();
-    // Ratio should remain the same
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), oldRatio);
 }
 
 /**
@@ -1119,32 +1055,6 @@ HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio004, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSplitRatio001
- * @tc.desc: Test GetSplitRatio after mode changes
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, GetSplitRatio001, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->SetWideSplitRatio(0.6f);
-    manager->SetSquareSplitRatio(0.55f);
-
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.6f);
-
-    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.55f);
-
-    manager->mode_ = ForceSplitMode::NOT_SPLIT;
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.5f);
-}
-
-/**
  * @tc.name: AddForceSplitRatioListener002
  * @tc.desc: Test AddForceSplitRatioListener with multiple listeners
  * @tc.type: FUNC
@@ -1198,78 +1108,6 @@ HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitRatioListener003, TestSize.Lev
     manager->RemoveForceSplitRatioListener(nodeId2);
     EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 2);
     EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId2) == manager->forceSplitRatioListeners_.end());
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio005
- * @tc.desc: Test UpdateForceSplitRatio triggers OnForceSplitRatioUpdate when ratio changes
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio005, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->splitRatio_ = 0.5f;
-    manager->SetWideSplitRatio(0.6f);
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->splitRatio_, 0.6f);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio006
- * @tc.desc: Test UpdateForceSplitRatio does not trigger when ratio unchanged
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio006, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->splitRatio_ = 0.6f;
-    manager->SetWideSplitRatio(0.6f);
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->splitRatio_, 0.6f);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio007
- * @tc.desc: Test UpdateForceSplitRatio with ratio just above default
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio007, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    constexpr float expectedRatio = 0.51f;
-    manager->SetWideSplitRatio(expectedRatio);
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
-}
-
-/**
- * @tc.name: UpdateForceSplitRatio008
- * @tc.desc: Test UpdateForceSplitRatio with ratio just below default
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio008, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    constexpr float expectedRatio = 0.49f;
-    manager->SetWideSplitRatio(expectedRatio);
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-
-    manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
 }
 
 /**
@@ -1807,4 +1645,114 @@ HWTEST_F(ForceSplitManagerTestNg, ForceSplitModeEnum003, TestSize.Level1)
     EXPECT_LT(static_cast<int32_t>(ForceSplitMode::WIDE_SPLIT), static_cast<int32_t>(ForceSplitMode::SQUARE_SPLIT));
 }
 
+/**
+ * @tc.name: IsSplitDraggable001
+ * @tc.desc: Test basic logic of IsSplitDraggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsSplitDraggable001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->mode_ = ForceSplitMode::NOT_SPLIT;
+    manager->wideSplitIsDraggable_ = true;
+    manager->squareSplitIsDraggable_ = true;
+    EXPECT_FALSE(manager->IsSplitDraggable());
+
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->wideSplitIsDraggable_ = true;
+    EXPECT_TRUE(manager->IsSplitDraggable());
+
+    manager->wideSplitIsDraggable_ = false;
+    EXPECT_FALSE(manager->IsSplitDraggable());
+
+    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
+    manager->squareSplitIsDraggable_ = true;
+    EXPECT_TRUE(manager->IsSplitDraggable());
+
+    manager->squareSplitIsDraggable_ = false;
+    EXPECT_FALSE(manager->IsSplitDraggable());
+}
+
+/**
+ * @tc.name: IsSplitDraggable002
+ * @tc.desc: Branch: Test all combinations of mode and isDraggable flags
+ *           IsSplitDraggable with NOT_SPLIT mode ignores both flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsSplitDraggable002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->mode_ = ForceSplitMode::NOT_SPLIT;
+    manager->wideSplitIsDraggable_ = false;
+    manager->squareSplitIsDraggable_ = false;
+    EXPECT_FALSE(manager->IsSplitDraggable());
+
+    manager->wideSplitIsDraggable_ = true;
+    manager->squareSplitIsDraggable_ = true;
+    EXPECT_FALSE(manager->IsSplitDraggable());
+}
+
+/**
+ * @tc.name: IsSplitDraggable003
+ * @tc.desc: Branch: WIDE_SPLIT mode with wideSplitIsDraggable_=true, squareSplitIsDraggable_=false
+ *           IsSplitDraggable returns wideSplitIsDraggable_ ignoring squareSplitIsDraggable_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsSplitDraggable003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->wideSplitIsDraggable_ = true;
+    manager->squareSplitIsDraggable_ = false;
+    EXPECT_TRUE(manager->IsSplitDraggable());
+
+    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
+    manager->wideSplitIsDraggable_ = false;
+    manager->squareSplitIsDraggable_ = true;
+    EXPECT_TRUE(manager->IsSplitDraggable());
+}
+
+/**
+ * @tc.name: FindNearestSnapRatio001
+ * @tc.desc: test basic logic of FindNearestSnapRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, FindNearestSnapRatio001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float belowLowerBoundary = 0.3f;
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    auto result = manager->FindNearestSnapRatio(belowLowerBoundary);
+    EXPECT_FLOAT_EQ(result, minSplitRatio);
+    result = manager->FindNearestSnapRatio(minSplitRatio);
+    EXPECT_FLOAT_EQ(result, minSplitRatio);
+
+    constexpr float betweenBoundaries = 0.5f;
+    constexpr float defaultSplitRatio = 0.5f;
+    result = manager->FindNearestSnapRatio(betweenBoundaries);
+    EXPECT_FLOAT_EQ(result, defaultSplitRatio);
+
+    constexpr float aboveUpperBoundary = 0.7f;
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+    result = manager->FindNearestSnapRatio(aboveUpperBoundary);
+    EXPECT_FLOAT_EQ(result, maxSplitRatio);
+    result = manager->FindNearestSnapRatio(maxSplitRatio);
+    EXPECT_FLOAT_EQ(result, maxSplitRatio);
+
+    constexpr float lowerBoundary = 5.0f / 12.0f;
+    result = manager->FindNearestSnapRatio(lowerBoundary);
+    EXPECT_FLOAT_EQ(result, defaultSplitRatio);
+
+    constexpr float upperBoundary = 7.0f / 12.0f;
+    result = manager->FindNearestSnapRatio(upperBoundary);
+    EXPECT_FLOAT_EQ(result, maxSplitRatio);
+}
 } // namespace OHOS::Ace::NG

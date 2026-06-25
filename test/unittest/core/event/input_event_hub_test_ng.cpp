@@ -112,6 +112,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubMouseEventTest002, TestSize.Level1)
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     OnMouseEventFunc onMouse1 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse1));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
 
     /**
@@ -122,6 +123,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubMouseEventTest002, TestSize.Level1)
     OnMouseEventFunc onMouse2 = onMouse;
     auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse2));
     inputEventHub->AddOnMouseEvent(inputEvent);
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
 
     /**
@@ -166,6 +168,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      */
     OnHoverFunc onHover = [](bool, HoverInfo) {};
     inputEventHub->SetHoverEvent(std::move(onHover));
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_, nullptr);
 
     /**
@@ -176,6 +179,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
     OnMouseEventFunc onHover2 = [](MouseInfo& info) {};
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_, nullptr);
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
 
@@ -213,6 +217,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubAxisEventTest004, TestSize.Level1)
     OnMouseEventFunc onAxis = [](MouseInfo& info) {};
     auto onAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
     inputEventHub->AddOnAxisEvent(onAxisEvent);
+    inputEventHub->CreateAxisEventActuator();
     EXPECT_NE(inputEventHub->axisEventActuator_, nullptr);
     EXPECT_EQ(inputEventHub->axisEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
 
@@ -284,6 +289,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      */
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     /**
@@ -292,6 +298,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
     OnHoverFunc onHover1 = onHover;
     inputEventHub->SetHoverEvent(std::move(onHover1));
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     /**
@@ -301,6 +308,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse3));
     inputEventHub->AddOnMouseEvent(inputEvent);
     inputEventHub->AddOnMouseEvent(nullptr);
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
@@ -310,6 +318,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
     inputEventHub->AddOnHoverEvent(nullptr);
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
@@ -490,6 +499,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitTest006, TestSize.L
      * @tc.expected: axisEventActuator_ will be initialized, and the list of inputEvents and the size will be 1.
      */
     inputEventHub->AddOnAxisEvent(onAxisEvent);
+    inputEventHub->CreateAxisEventActuator();
     EXPECT_EQ(inputEventHub->axisEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
 
     /**
@@ -527,6 +537,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest007, TestSize.Leve
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->BindContextMenu(std::move(onMouse1));
     inputEventHub->BindContextMenu(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
 }
 
@@ -553,6 +564,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest008, TestSize.Level1)
     const OnAccessibilityHoverFunc onHover = [](bool, AccessibilityHoverInfo) { accessibilityHover = true; };
     OnAccessibilityHoverFunc onHover1 = onHover;
     inputEventHub->SetAccessibilityHoverEvent(std::move(onHover1));
+    inputEventHub->CreateAccessibilityHoverEventActuator();
     EXPECT_NE(inputEventHub->accessibilityHoverEventActuator_->userCallback_, nullptr);
 
     /**
@@ -599,6 +611,7 @@ HWTEST_F(InputEventHubTestNg, DisableMouseEvent001, TestSize.Level1)
     std::string result;
     OnMouseEventFunc onMouse = [&result](MouseInfo& info) { result = RESULT_SUCCESS_ONE; };
     inputEventHub->SetMouseEvent(std::move(onMouse));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     MouseInfo press;
@@ -620,6 +633,7 @@ HWTEST_F(InputEventHubTestNg, DisableMouseEvent001, TestSize.Level1)
      */
     OnMouseEventFunc onMouse2 = [&result](MouseInfo& info) { result = RESULT_SUCCESS_TWO; };
     inputEventHub->SetMouseEvent(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     MouseInfo release;
@@ -654,6 +668,7 @@ HWTEST_F(InputEventHubTestNg, DisableAxisEvent001, TestSize.Level1)
     std::string result;
     OnAxisEventFunc onAxis = [&result](AxisInfo& info) { result = RESULT_SUCCESS_ONE; };
     inputEventHub->SetAxisEvent(std::move(onAxis));
+    inputEventHub->CreateAxisEventActuator();
     EXPECT_NE(inputEventHub->axisEventActuator_->userCallback_, nullptr);
 
     AxisInfo axis;
@@ -673,6 +688,7 @@ HWTEST_F(InputEventHubTestNg, DisableAxisEvent001, TestSize.Level1)
      */
     OnAxisEventFunc onAxis2 = [&result](AxisInfo& info) { result = RESULT_SUCCESS_TWO; };
     inputEventHub->SetAxisEvent(std::move(onAxis2));
+    inputEventHub->CreateAxisEventActuator();
     EXPECT_NE(inputEventHub->axisEventActuator_->userCallback_, nullptr);
 
     AxisInfo axis2;
@@ -705,6 +721,7 @@ HWTEST_F(InputEventHubTestNg, DisableHoverEvent001, TestSize.Level1)
     std::string result;
     OnHoverFunc onHover = [&result](bool, HoverInfo) { result = RESULT_SUCCESS_ONE; };
     inputEventHub->SetHoverEvent(std::move(onHover));
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     HoverInfo hover;
@@ -724,6 +741,7 @@ HWTEST_F(InputEventHubTestNg, DisableHoverEvent001, TestSize.Level1)
      */
     OnHoverFunc onHover2 = [&result](bool, HoverInfo) { result = RESULT_SUCCESS_TWO; };
     inputEventHub->SetHoverEvent(std::move(onHover2));
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     HoverInfo hover2;
@@ -794,6 +812,7 @@ HWTEST_F(InputEventHubTestNg, RemoveAllTipsMouseEvents001, TestSize.Level1)
     mouseEvent2->SetTipsFollowCursor(true);
     inputEventHub->AddOnMouseEvent(mouseEvent1);
     inputEventHub->AddOnMouseEvent(mouseEvent2);
+    inputEventHub->CreateMouseEventActuator();
     ASSERT_NE(inputEventHub->mouseEventActuator_, nullptr);
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
     inputEventHub->RemoveAllTipsMouseEvents();
@@ -824,6 +843,7 @@ HWTEST_F(InputEventHubTestNg, RemoveAllTipsHoverEvents001, TestSize.Level1)
     hoverEvent2->SetIstips(true);
     inputEventHub->AddOnHoverEvent(hoverEvent1);
     inputEventHub->AddOnHoverEvent(hoverEvent2);
+    inputEventHub->CreateHoverEventActuator();
     ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
     inputEventHub->RemoveAllTipsHoverEvents();
@@ -969,6 +989,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHasCoastingAxisEventTest001, TestSize
      */
     OnCoastingAxisEventFunc onCoasting = [](CoastingAxisInfo& info) {};
     inputEventHub->SetCoastingAxisEvent(std::move(onCoasting));
+    inputEventHub->CreateCoastingAxisEventActuator();
     EXPECT_NE(inputEventHub->coastingAxisEventActuator_, nullptr);
     EXPECT_TRUE(inputEventHub->HasCoastingAxisEvent());
 
@@ -1004,6 +1025,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitCoasting001, TestSi
     auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     OnCoastingAxisEventFunc onCoasting = [](CoastingAxisInfo& info) {};
     inputEventHub->SetCoastingAxisEvent(std::move(onCoasting));
+    inputEventHub->CreateCoastingAxisEventActuator();
     EXPECT_NE(inputEventHub->coastingAxisEventActuator_, nullptr);
     EXPECT_TRUE(inputEventHub->coastingAxisEventActuator_->HasUserCallback());
 
@@ -1038,6 +1060,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuReplace001, TestSize.L
     int32_t secondCallCount = 0;
     OnMouseEventFunc onMouse1 = [&firstCallCount](MouseInfo& info) { firstCallCount++; };
     inputEventHub->BindContextMenu(std::move(onMouse1));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
     EXPECT_NE(inputEventHub->showMenu_, nullptr);
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
@@ -1049,6 +1072,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuReplace001, TestSize.L
      */
     OnMouseEventFunc onMouse2 = [&secondCallCount](MouseInfo& info) { secondCallCount++; };
     inputEventHub->BindContextMenu(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->showMenu_, nullptr);
     EXPECT_NE(inputEventHub->showMenu_, firstMenu);
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);

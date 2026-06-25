@@ -24,31 +24,17 @@
 #include <vector>
 
 #include "base/json/json_util.h"
+#include "base/log/performance_check_types.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "bridge/common/utils/source_map.h"
 
 namespace OHOS::Ace {
-struct PerformanceCheckNode {
-    int32_t pageDepth = 0;      // node depth
-    int32_t childrenSize = 0;   // node children size
-    int32_t codeRow = 0;        // js code row
-    int32_t codeCol = 0;        // js code col
-    int64_t layoutTime = 0;     // node layout time
-    int32_t flexLayouts = 0;    // node flex layout times
-    bool isForEachItem = false; // foreach item
-    int32_t foreachItems = 0;   // foreach item count
-    std::string nodeTag;        // node tag
-    std::string pagePath;       // page path
-};
-
 struct CodeInfo {
     int32_t row = 0;     // ets code row
     int32_t col = 0;     // ets code col
     std::string sources; // ets page
 };
-
-using PerformanceCheckNodeMap = std::unordered_map<int32_t, PerformanceCheckNode>;
 
 class ACE_EXPORT AcePerformanceCheck final {
 public:

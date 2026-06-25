@@ -18,8 +18,10 @@
 
 #include "base/memory/referenced.h"
 #include "base/system_bar/system_bar_style.h"
+#include "core/common/display_info.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -118,6 +120,8 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    void SetNavigationConfiguration(const NavigationConfiguration& config);
+
     bool JudgeFoldStateChangeAndUpdateState();
 
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback = true);
@@ -170,6 +174,8 @@ public:
     {
         return navigationStack_->GetAllNavDestinationNodes();
     }
+
+    bool ProcessAutoCleanAndRestore(int32_t lastStandardIndex);
 
     void RemoveIfNeeded(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
@@ -675,6 +681,20 @@ public:
 
     void FireChangeCallbackAfterLayout();
 
+    void IncreasePendingToCleanCount()
+    {
+        pendingToCleanCount_++;
+    }
+
+    void DecreasePendingToCleanCount()
+    {
+        if (pendingToCleanCount_ <= 0) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "pendingToCleanCount already 0, shouldn't decrease!");
+            return;
+        }
+        pendingToCleanCount_--;
+    }
+
     //-------for force split------- begin------
     bool CreateRelatedDestination(
         const std::string& name, RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& relatedDest);
@@ -777,7 +797,20 @@ private:
     NavigationTransition ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
-    void DoAnimation(NavigationMode usrNavigationMode);
+    void HandleForceSplitDragStart();
+    void HandleForceSplitDragUpdate(float xOffset);
+    void HandleForceSplitDragEnd(bool isDragCanceled = false);
+    void UpdateForceSplitScaleAndTranslateByRatio(float ratio);
+    void UpdateForceSplitScaleAndTranslate(
+        float primaryScale, float primaryTranslateX, float secondaryScale, float secondaryTranslateX);
+    void CreateForceSplitMaskNodes();
+    void OnForceSplitDragStart();
+    void UpdateForceSplitDragZIndex(bool isDragging);
+    void OnForceSplitDragEnd();
+    void InitForceSplitDragEvent();
+    void PlayForceSplitSnapAnimation(ForceSplitMode mode, float fromRatio, float toRatio);
+    void OnForceSplitSnapAnimationEnd(float toRatio);
+    void OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio);
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
     bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
@@ -797,6 +830,7 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void UpdateRealNavBarWidth();
     void OnHover(bool isHover);
     float GetPaintRectHeight(const RefPtr<FrameNode>& node)
     {
@@ -815,6 +849,9 @@ private:
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
+    int32_t GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const;
+    bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreStartIndex, int32_t cleanMinIndex) const;
+    bool RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex = -1);
     void RefreshNavDestination();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
     void NotifyNavDestinationSwitch(RefPtr<NavDestinationContext> from,
@@ -830,6 +867,9 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
+
+    void PageTransitionReport(const std::string& fromNavDestinationName, const std::string& toNavDestinationName,
+        const std::string& fromComponentName, const std::string& toComponentName);
 
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
     void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -870,6 +910,7 @@ private:
         std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
         std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
+    void HandleAllPendingToClean();
     void SetRequestedOrientationIfNeeded();
     void UpdatePageLevelConfigForSizeChanged();
     void UpdatePageLevelConfigForSizeChangedWhenNoAnimation();
@@ -1018,6 +1059,10 @@ private:
         const RefPtr<NavDestinationGroupNode>& preTopDest,
         const RefPtr<NavDestinationGroupNode>& curTopDest);
     void CollectActiveNodes(std::vector<RefPtr<NavDestinationGroupNode>>& destNodes);
+    bool UpdateForceSplitDividerColor(const RefPtr<FrameNode>& dividerNode);
+    void OnForceSplitIsDraggableChange(bool isDraggable);
+    void ClearForceSplitDragBarEvent();
+    void AbortForceSplitDragging();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -1065,7 +1110,7 @@ private:
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
-    int32_t lastPreIndex_ = false;
+    int32_t lastPreIndex_ = 0;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;
@@ -1087,6 +1132,9 @@ private:
     bool windowSizeChangedDuringTransition_ = false;
     bool enableVisibilityLifecycleWithContentCover_ = true;
     bool enableLockOrientation_ = false;
+    NavigationConfiguration config_;
+    bool configInitialed_ = false;
+    int32_t pendingToCleanCount_ = 0;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
@@ -1113,6 +1161,12 @@ private:
     WeakPtr<NavDestinationNodeBase> splitPopExitNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopMoveNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
+    RefPtr<PanEvent> forceSplitDragEvent_;
+    std::shared_ptr<AnimationUtils::Animation> forceSplitSnapAnimation_;
+    bool forceSplitSnapAnimationAborted_ = false;
+    float primaryPartitionWidth_ = 0.0f;
+    float forceSplitDividerWidth_ = 1.0f;
+    float secondaryPartitionWidth_ = 0.0f;
     //-------for force split------- end  ------
 };
 

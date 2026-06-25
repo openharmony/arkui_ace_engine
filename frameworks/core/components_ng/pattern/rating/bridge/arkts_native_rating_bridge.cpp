@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -49,9 +50,14 @@ panda::Local<panda::JSValueRef> JsRatingChangeCallback(panda::JsiRuntimeCallInfo
     if (obj->GetNativePointerFieldCount(vm) < 1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    if (weak->Invalid()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    RatingModelNG::SetChangeValue(frameNode, value);
+    RatingModelNG::SetChangeValue(AceType::RawPtr(frameNode), value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -282,7 +288,8 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
                 panda::FunctionRef::New(vm, JsRatingChangeCallback) };
             auto rating = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
             rating->SetNativePointerFieldCount(vm, 1);
-            rating->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
+            rating->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, rating };
             panda::TryCatch trycatch(vm);
             auto makeFunc = obj.ToLocal()->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

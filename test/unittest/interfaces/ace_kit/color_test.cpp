@@ -178,9 +178,19 @@ HWTEST_F(ColorTest, ColorTest008, TestSize.Level1)
     EXPECT_EQ(color.GetGreen(), 200);
 }
 
+namespace {
+    const uint32_t TEST_RESOURCE_ID_BRAND = 125830976;
+    const uint32_t TEST_RESOURCE_ID_FONT_PRIMARY = 125830982;
+    const uint32_t TEST_RESOURCE_ID_ICON_PRIMARY = 125830991;
+    const uint32_t TEST_RESOURCE_ID_WARNING = 125830979;
+    const uint32_t TEST_RESOURCE_ID_COMP_DIVIDER = 125831013;
+    const uint32_t TEST_RESOURCE_ID_NORMAL = 999999;
+    const uint32_t TEST_COLOR_VALUE_RED = 0xFFFF0000;
+}
+
 /**
  * @tc.name: ColorTestFillColorPlaceholderIfNeed001
- * @tc.desc:
+ * @tc.desc: Test FillColorPlaceholderIfNeed with resource name string
  * @tc.type: FUNC
  */
 HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeed001, TestSize.Level1)
@@ -194,5 +204,154 @@ HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeed001, TestSize.Level1)
     Color c3;
     c3.FillColorPlaceholderIfNeed("app.color.nocolor");
     EXPECT_EQ(c3.GetPlaceholder(), ColorPlaceholder::NONE);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId001
+ * @tc.desc: Test FillColorPlaceholderIfNeed with brand resource ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId001, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_BRAND);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::BRAND);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId002
+ * @tc.desc: Test FillColorPlaceholderIfNeed with font_primary resource ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId002, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_FONT_PRIMARY);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId003
+ * @tc.desc: Test FillColorPlaceholderIfNeed with icon_primary resource ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId003, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_ICON_PRIMARY);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::ICON_PRIMARY);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId004
+ * @tc.desc: Test FillColorPlaceholderIfNeed with warning resource ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId004, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_WARNING);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::WARNING);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId005
+ * @tc.desc: Test FillColorPlaceholderIfNeed with comp_divider resource ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId005, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_COMP_DIVIDER);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::COMP_DIVIDER);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithResourceId006
+ * @tc.desc: Test FillColorPlaceholderIfNeed with non-special resource ID keeps NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithResourceId006, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_NORMAL);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::NONE);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithName002
+ * @tc.desc: Test FillColorPlaceholderIfNeed with font_secondary name
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithName002, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed("sys.color.font_secondary");
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::FONT_SECONDARY);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithName003
+ * @tc.desc: Test FillColorPlaceholderIfNeed with icon_emphasize name
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithName003, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed("sys.color.icon_emphasize");
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::ICON_EMPHASIZE);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithName004
+ * @tc.desc: Test FillColorPlaceholderIfNeed with comp_background_secondary name
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithName004, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed("sys.color.comp_background_secondary");
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::COMP_BACKGROUND_SECONDARY);
+}
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeedWithName005
+ * @tc.desc: Test FillColorPlaceholderIfNeed with interactive_hover name
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeedWithName005, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed("sys.color.interactive_hover");
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::INTERACTIVE_HOVER);
+}
+
+/**
+ * @tc.name: ColorTestPlaceholderAndValueCombined001
+ * @tc.desc: Test Color with both placeholder and value set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestPlaceholderAndValueCombined001, TestSize.Level1)
+{
+    Color color;
+    color.SetValue(TEST_COLOR_VALUE_RED);
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_BRAND);
+    
+    EXPECT_EQ(color.GetValue(), TEST_COLOR_VALUE_RED);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::BRAND);
+}
+
+/**
+ * @tc.name: ColorTestPlaceholderAndValueCombined002
+ * @tc.desc: Test GetResourceId returns zero after FillColorPlaceholderIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestPlaceholderAndValueCombined002, TestSize.Level1)
+{
+    Color color;
+    color.FillColorPlaceholderIfNeed(TEST_RESOURCE_ID_FONT_PRIMARY);
+    
+    EXPECT_EQ(color.GetResourceId(), 0);
+    EXPECT_EQ(color.GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
 }
 } // namespace OHOS::Ace

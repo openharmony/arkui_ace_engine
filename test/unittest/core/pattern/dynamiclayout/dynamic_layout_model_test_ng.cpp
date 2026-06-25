@@ -356,9 +356,15 @@ HWTEST_F(DynamicLayoutModelTestNg, DynamicLayoutNode_SetAndGetLayoutType_001, Te
     EXPECT_EQ(node->GetLayoutType(), DynamicLayoutType::COLUMN_LAYOUT);
 
     node->SetLayoutType(DynamicLayoutType::ROW_LAYOUT);
+    /**
+     * @tc.expected: node->GetLayoutType() is DynamicLayoutType::ROW_LAYOUT
+     */
     EXPECT_EQ(node->GetLayoutType(), DynamicLayoutType::ROW_LAYOUT);
 
     node->SetLayoutType(DynamicLayoutType::STACK_LAYOUT);
+    /**
+     * @tc.expected: node->GetLayoutType() is DynamicLayoutType::STACK_LAYOUT
+     */
     EXPECT_EQ(node->GetLayoutType(), DynamicLayoutType::STACK_LAYOUT);
 
     node->SetLayoutType(DynamicLayoutType::CUSTOM_LAYOUT);

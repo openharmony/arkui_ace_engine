@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"
@@ -114,6 +115,7 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dataSyncOptions)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("AniDragAndDrop.DragEvent.StartDataLoading", 1);
     ani_string value = {};
     auto dragEvent = reinterpret_cast<ani_ref>(pointer);
     const auto* modifier = GetNodeAniModifier();

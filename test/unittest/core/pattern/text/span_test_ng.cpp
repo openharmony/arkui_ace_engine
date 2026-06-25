@@ -20,9 +20,9 @@
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 using namespace testing;
 using namespace testing::ext;
@@ -1259,6 +1259,9 @@ HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create image span node
+     */
     ImageModelNG imageSpan;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
@@ -1268,9 +1271,18 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     imageInfoConfig.pixelMap = pixMap;
     imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
+
+    /**
+     * @tc.steps: step2. set onComplete event
+     */
     bool isTrigger = false;
     auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
     imageSpan.SetOnComplete(std::move(onComplete));
+
+    /**
+     * @tc.steps: step3. trigger onComplete event
+     * @tc.expected: onComplete event is triggered
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -2172,6 +2184,133 @@ HWTEST_F(SpanTestNg, SpanDumpLog005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanDumpLog006
+ * @tc.desc: Test SpanNode DumpInfo (json) includes FontVariations field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 400.0f, std::nullopt } };
+    textStyle.SetFontVariations(fontVariations);
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call DumpInfo with json.
+     * @tc.expected: json contains FontVariations key.
+     */
+    auto json = JsonUtil::Create(true);
+    spanNode->DumpInfo(json);
+    EXPECT_TRUE(json->Contains("FontVariations"));
+    EXPECT_NE(json->GetValue("FontVariations")->GetString(), "");
+}
+
+/**
+ * @tc.name: SpanDumpLog007
+ * @tc.desc: Test SpanNode DumpInfo (json) with empty fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing empty fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    textStyle.SetFontVariations(FONT_VARIATIONS_LIST());
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call DumpInfo with json.
+     * @tc.expected: FontVariations is "[]".
+     */
+    auto json = JsonUtil::Create(true);
+    spanNode->DumpInfo(json);
+    EXPECT_TRUE(json->Contains("FontVariations"));
+    EXPECT_EQ(json->GetValue("FontVariations")->GetString(), "[]");
+}
+
+/**
+ * @tc.name: SpanDumpInfoAdvance001
+ * @tc.desc: Test SpanDumpInfoAdvance includes fontVariations in dump log.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpInfoAdvance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 700.0f, true }, { "wdth", 100.0f, std::nullopt } };
+    textStyle.SetFontVariations(fontVariations);
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call SpanDumpInfoAdvance.
+     * @tc.expected: dump log includes fontVariations description.
+     */
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+    bool foundFontVariations = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("fontVariations") != std::string::npos) {
+            foundFontVariations = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundFontVariations);
+}
+
+/**
+ * @tc.name: SpanDumpInfoAdvance002
+ * @tc.desc: Test SpanDumpInfoAdvance with fontStyle containing fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpInfoAdvance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with fontStyle containing fontVariations but no textStyle.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    spanNode->spanItem_->textStyle_ = std::nullopt;
+    auto fontStyle = std::make_unique<FontStyle>();
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 400.0f, std::nullopt } };
+    fontStyle->UpdateFontVariations(fontVariations);
+    spanNode->spanItem_->fontStyle = std::move(fontStyle);
+
+    /**
+     * @tc.steps: step2. call SpanDumpInfoAdvance.
+     * @tc.expected: no crash, returns early when textStyle is null.
+     */
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+}
+
+/**
  * @tc.name: SpanMouseHoverEvent001
  * @tc.desc: test text_select_overlay.cpp on hover event
  * @tc.type: FUNC
@@ -2392,34 +2531,30 @@ HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
 
 /**
  * @tc.name: SpanItemToJsonValue003
- * @tc.desc: Test SpanItem ToJsonValue contains variableFontWeight and fontWeightConfigs.
+ * @tc.desc: Verify SpanItem.ToJsonValue correctly serializes variableFontWeight and fontWeightConfigs
+ *           (enableVariableFontWeight, enableDeviceFontWeightCategory) into JSON output.
  * @tc.type: FUNC
  */
 HWTEST_F(SpanTestNg, SpanItemToJsonValue003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create SpanModelNG instance and set font properties
-     *            - variableFontWeight: 350
-     *            - enableVariableFontWeight: true
-     *            - enableDeviceFontWeightCategory: false
-     * @tc.expected: SpanModelNG is initialized with specified properties
+     * @tc.steps: step1. Create SpanNode with variableFontWeight=350,
+     *            enableVariableFontWeight=true, enableDeviceFontWeightCategory=false
+     * @tc.expected: step1. SpanNode is created and properties are set
      */
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetVariableFontWeight(350);
     spanModelNG.SetEnableVariableFontWeight(true);
     spanModelNG.SetEnableDeviceFontWeightCategory(false);
-
-    /**
-     * @tc.steps: step2. Create SpanNode from ViewStackProcessor
-     * @tc.expected: SpanNode is created successfully
-     */
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
 
     /**
-     * @tc.steps: step3. Create TextFrameNode and TextPattern, then set to SpanItem
-     * @tc.expected: TextPattern is created and set successfully
+     * @tc.steps: step2. Attach TextPattern to SpanItem and call ToJsonValue
+     * @tc.expected: step2. JSON contains variableFontWeight="350",
+     *            fontWeightConfigs with enableVariableFontWeight="true",
+     *            enableDeviceFontWeightCategory="false"
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();

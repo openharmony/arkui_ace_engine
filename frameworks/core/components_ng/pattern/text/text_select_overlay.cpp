@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
@@ -528,7 +529,7 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     auto isDragging = GetIsHandleDragging();
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->UpdateParentGlobalOffset();
@@ -604,44 +605,7 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
 {
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (GetRenderClipValue()) {
-        return;
-    }
-    auto clipNode = host->GetAncestorNodeOfFrame(true);
-    RefPtr<FrameNode> prevNode;
-    while (clipNode) {
-        renderContext = clipNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        if (renderContext->GetClipEdge().value_or(false)) {
-            break;
-        }
-        prevNode = clipNode;
-        clipNode = clipNode->GetAncestorNodeOfFrame(true);
-    }
-    if (clipNode) {
-        RectF visibleRect;
-        RectF frameRect;
-        clipNode->GetVisibleRect(visibleRect, frameRect);
-        if (GreatNotEqual(rect.Top(), visibleRect.Bottom()) || GreatNotEqual(rect.Left(), visibleRect.Right())) {
-            return;
-        }
-        rect.SetHeight(visibleRect.Bottom() - rect.Top());
-        rect.SetWidth(visibleRect.Right() - rect.Left());
-        return;
-    }
-    // root node.
-    if (prevNode) {
-        auto geoNode = prevNode->GetGeometryNode();
-        CHECK_NULL_VOID(geoNode);
-        RectF visibleRect = geoNode->GetFrameRect();
-        if (GreatNotEqual(rect.Top(), visibleRect.Height()) || GreatNotEqual(rect.Left(), visibleRect.Width())) {
-            return;
-        }
-        rect.SetHeight(visibleRect.Height() - rect.Top());
-        rect.SetWidth(visibleRect.Width() - rect.Left());
-    }
+    BaseTextSelectGeometryUtils::UpdateClipHandleViewPort(host, GetRenderClipValue(), rect);
 }
 
 void TextSelectOverlay::TriggerScrollableParentToScroll(
@@ -736,10 +700,7 @@ bool TextSelectOverlay::GetRenderClipValue() const
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, defaultClipValue);
     auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, defaultClipValue);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultClipValue);
-    return renderContext->GetClipEdge().value_or(defaultClipValue);
+    return BaseTextSelectGeometryUtils::GetRenderClipValue(host, defaultClipValue);
 }
 
 std::optional<SelectOverlayInfo> TextSelectOverlay::GetSelectOverlayInfo()
@@ -778,7 +739,10 @@ void TextSelectOverlay::GetVisibleDragViewHandles(RectF& first, RectF& second)
     CHECK_NULL_VOID(selectOverlayInfo);
     RectF firstHandle;
     RectF secondHandle;
-    if (!GetDragViewHandleRects(firstHandle, secondHandle)) {
+    if (hasTransform_) {
+        firstHandle = ConvertToGlobalRectWithTransform(selectOverlayInfo->firstHandle.localPaintRect);
+        secondHandle = ConvertToGlobalRectWithTransform(selectOverlayInfo->secondHandle.localPaintRect);
+    } else if (!GetDragViewHandleRects(firstHandle, secondHandle)) {
         return;
     }
     if (selectOverlayInfo->firstHandle.isShow) {

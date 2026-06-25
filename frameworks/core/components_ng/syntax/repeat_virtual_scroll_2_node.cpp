@@ -24,8 +24,15 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+namespace {
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -33,11 +40,12 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 
 // REPEAT
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen,
-    uint32_t totalCount, const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
+    uint32_t totalCount, int32_t memOptStrategy,
+    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge,
-    const std::function<void()>& onUpdateDirty)
+    const std::function<void()>& onPurgeAll, const std::function<void()>& onUpdateDirty)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
     if (node) {
@@ -49,24 +57,40 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
     }
     ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<RepeatVirtualScroll2Node>(
-        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
-        onMoveFromTo, onPurge, onUpdateDirty);
+        nodeId, arrLen, totalCount, memOptStrategy, onGetRid4Index, onRecycleItems, onActiveRange,
+        onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
 
     ElementRegister::GetInstance()->AddUINode(node);
+    if (node->GetMemOptStrategy() == RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        node->RegisterWindowStateChangedCallback();
+        node->RegisterMemoryLevelChangedCallback();
+        node->PostMemOptTask();
+    }
     return node;
 }
 
 RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
-    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
+    int32_t memOptStrategy,
+    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge,
+    const std::function<void()>& onPurgeAll,
     const std::function<void()>& onUpdateDirty)
-    : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount), caches_(onGetRid4Index),
+    : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount),
+      caches_(onGetRid4Index), memOptStrategy_(static_cast<RepeatMemOptStrategy>(memOptStrategy)),
       onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onMoveFromTo_(onMoveFromTo),
-      onPurge_(onPurge), onUpdateDirty_(onUpdateDirty), postUpdateTaskHasBeenScheduled_(false)
+      onPurge_(onPurge), onPurgeAll_(onPurgeAll), onUpdateDirty_(onUpdateDirty), postUpdateTaskHasBeenScheduled_(false)
 {}
+
+RepeatVirtualScroll2Node::~RepeatVirtualScroll2Node()
+{
+    if (GetMemOptStrategy() == RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        UnregisterWindowStateChangedCallback();
+        UnregisterMemoryLevelChangedCallback();
+    }
+}
 
 void RepeatVirtualScroll2Node::UpdateTotalCount(uint32_t totalCount)
 {
@@ -113,6 +137,10 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
         // step 5: order a resync from layout
         // what these calls exactly do has never been defined for us.
         RequestSyncTree();
+    }
+
+    if (GetMemOptStrategy() == RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        setActiveRangeTime_ = GetSysTimestamp();
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -391,6 +419,7 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
 // must do a full run even if range is unchanged (which is typically the case).
 void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index)
 {
+    caches_.OrganizeSyncLoadCache();
     caches_.UpdateL1Rid4Index(l1Rd4Index);
 
     // run next DoSetActiveChild range even if range unchanged
@@ -434,7 +463,7 @@ void RepeatVirtualScroll2Node::NotifyContainerLayoutChange(int32_t index, int32_
     children_.clear();
 
     auto frameNode = GetParentFrameNode();
-    if (frameNode && frameNode->GetTag() == V2::LIST_ETS_TAG) {
+    if (frameNode && (frameNode->GetTag() == V2::LIST_ETS_TAG || frameNode->GetTag() == V2::SWIPER_ETS_TAG)) {
         frameNode->NotifyChange(index + startIndex_, count, accessibilityId, notificationType);
     }
 }
@@ -590,6 +619,8 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
         });
     }
 
+    caches_.ProcessSyncLoadTempChildren(children_, prevVisibleRangeStart_, prevVisibleRangeEnd_);
+
     return children_;
 }
 
@@ -654,6 +685,71 @@ void RepeatVirtualScroll2Node::Purge()
     onPurge_();
 }
 
+// PurgeAll is called to purge all cached nodes regardless of cache limits
+// used in scenarios like memory pressure, window hide, etc.
+void RepeatVirtualScroll2Node::PurgeAll()
+{
+    // swap the ViewStackProcessor instance for secondary and push this node
+    // call sequence is C++ -> TS -> JS
+    // for TS -> JS to find 'this' node, we need to put 'this' to the 2nd
+    // ViewStackProcessor
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    auto* viewStack = NG::ViewStackProcessor::GetInstance();
+    viewStack->Push(Referenced::Claim(this));
+
+    onPurgeAll_();
+}
+
+void RepeatVirtualScroll2Node::AddPendingRemoveNodes(
+    const std::vector<uint32_t>& rids, const std::vector<int32_t>& indexes)
+{
+    // Store rids in pending list for later processing
+    pendingRemoveRids_.insert(pendingRemoveRids_.end(), rids.begin(), rids.end());
+    cleanedCacheIndexes_ = indexes;
+}
+
+bool RepeatVirtualScroll2Node::RemovingExpiringItem(int64_t deadline)
+{
+    if (pendingRemoveRids_.empty()) {
+        return true;
+    }
+    int64_t startTimeStamp = 0;
+    int64_t endTimeStamp = 0;
+    int64_t averageTime = 0;
+    int64_t totalTime = 0;
+    int32_t count = 0;
+    auto enableDebugTrace = SystemProperties::GetSyntaxTraceEnabled();
+    do {
+        startTimeStamp = GetSysTimestamp();
+        auto it = pendingRemoveRids_.begin();
+        RepeatVirtualScroll2Caches::OptCacheItem cacheItemOpt = caches_.GetCacheItem4RID(*it);
+        if (cacheItemOpt.has_value()) {
+            ForEachBaseNode::DisableRecycle(cacheItemOpt.value()->node_);
+            if (enableDebugTrace) {
+                TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.RemovingExpiringItem tag[%{public}s] id[%{public}d]",
+                    cacheItemOpt.value()->node_->GetTag().c_str(), cacheItemOpt.value()->node_->GetId());
+                ACE_SCOPED_TRACE("Repeat.RemovingExpiringItem tag[%s] id[%d]",
+                    cacheItemOpt.value()->node_->GetTag().c_str(), cacheItemOpt.value()->node_->GetId());
+            }
+        }
+        RemoveNode(*it);
+        pendingRemoveRids_.erase(it);
+        endTimeStamp = GetSysTimestamp();
+        count++;
+        totalTime += endTimeStamp - startTimeStamp;
+        averageTime = totalTime / count;
+    } while (!pendingRemoveRids_.empty() && deadline - endTimeStamp > averageTime);
+    return pendingRemoveRids_.empty();
+}
+
+void RepeatVirtualScroll2Node::DisableChildrenAndCachesRecycle()
+{
+    caches_.ForEachCacheItem([](RIDType rid, const CacheItem& cacheItem) {
+        CHECK_NULL_VOID(cacheItem->node_);
+        ForEachBaseNode::DisableRecycle(cacheItem->node_);
+    });
+}
+
 void RepeatVirtualScroll2Node::SetNodeIndexOffset(int32_t start, int32_t /*count*/)
 {
     startIndex_ = start;
@@ -680,7 +776,7 @@ void RepeatVirtualScroll2Node::PostIdleTask()
     auto* context = GetContext();
     CHECK_NULL_VOID(context);
 
-    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t /*deadline*/, bool /*canUseLongPredictTask*/) {
+    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         ACE_SCOPED_TRACE("Repeat.IdleTask, nodeId[%d]", node->GetId());
@@ -688,11 +784,20 @@ void RepeatVirtualScroll2Node::PostIdleTask()
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).PostIdleTask idle task calls GetChildren",
             static_cast<int32_t>(node->GetId()));
         node->GetChildren();
-
+        if (!node->caches_.CheckIsSyncLoad()) {
+            node->PostIdleTask();
+            return;
+        }
+        node->RestoreCache(deadline, canUseLongPredictTask);
         TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls Purge");
         node->Purge();
         if (node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             node->FreezeSpareNode();
+        }
+
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls RemovingExpiringItem");
+        if (!node->RemovingExpiringItem(deadline)) {
+            node->PostIdleTask();
         }
 
         TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ after caches.purge ============= ");
@@ -883,7 +988,13 @@ void RepeatVirtualScroll2Node::fireOnUpdateDirty()
 
 bool RepeatVirtualScroll2Node::IsAllowAnimation()
 {
-    return GetParentFrameNode()->GetTag() == V2::LIST_ETS_TAG;
+    auto parent = GetParentFrameNode();
+    if (!parent) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT,
+            "RepeatVirtualScroll2Node::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
+        return false;
+    }
+    return LazyForEachUtils::GetEnableRepeatAnimation() && parent->GetTag() == V2::LIST_ETS_TAG;
 }
 
 bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)
@@ -905,10 +1016,209 @@ bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)
 #endif
 }
 
+void RepeatVirtualScroll2Node::SetEnableSyncLoad(bool value)
+{
+    caches_.SetEnableSyncLoad(value);
+}
+
+void RepeatVirtualScroll2Node::SetIsSyncLoad(bool value)
+{
+    caches_.SetIsSyncLoad(value);
+}
+
 bool RepeatVirtualScroll2Node::IsChildOnMainTree(uint32_t rid)
 {
     std::optional<RefPtr<RepeatVirtualScroll2CacheItem>> optCacheItem = caches_.GetCacheItem4RID(rid);
     return optCacheItem.has_value() ? optCacheItem.value()->node_->IsOnMainTree() : false;
+}
+
+RepeatMemOptStrategy RepeatVirtualScroll2Node::GetMemOptStrategy()
+{
+    return memOptStrategy_;
+}
+
+void RepeatVirtualScroll2Node::OnWindowShow()
+{
+    ScheduleRestoreCacheTask();
+    PostMemOptTask();
+}
+
+void RepeatVirtualScroll2Node::OnWindowHide()
+{
+    CleanCache(true);
+}
+
+void RepeatVirtualScroll2Node::OnNotifyMemoryLevel(int32_t level)
+{
+    if (level == MEMORY_LEVEL_LOW || level == MEMORY_LEVEL_CRITICAL) {
+        CleanCache(false);
+    }
+}
+
+void RepeatVirtualScroll2Node::RegisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowStateChangedCallback(GetId());
+}
+
+void RepeatVirtualScroll2Node::UnregisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowStateChangedCallback(GetId());
+}
+
+void RepeatVirtualScroll2Node::RegisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddNodesToNotifyMemoryLevel(GetId());
+}
+
+void RepeatVirtualScroll2Node::UnregisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveNodesToNotifyMemoryLevel(GetId());
+}
+
+bool RepeatVirtualScroll2Node::CheckParentFrameNodeVisibility()
+{
+    auto parent = GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    return !(parent->IsDisappearOrNoVisibleArea(context->GetVsyncTime()));
+}
+
+void RepeatVirtualScroll2Node::ScheduleCleanCacheTask()
+{
+    pendingRestoreCache_ = false;
+    CHECK_EQUAL_VOID(pendingCleanCache_, true);
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.ScheduleCleanCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("Repeat.ScheduleCleanCacheTask id[%d]", GetId());
+    pendingCleanCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void RepeatVirtualScroll2Node::ScheduleRestoreCacheTask()
+{
+    pendingCleanCache_ = false;
+    CHECK_EQUAL_VOID(pendingRestoreCache_, true);
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.ScheduleRestoreCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("Repeat.ScheduleRestoreCacheTask id[%d]", GetId());
+    pendingRestoreCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void RepeatVirtualScroll2Node::TryExecuteScheduledCacheTask()
+{
+    CHECK_EQUAL_VOID(pendingCleanCache_ || pendingRestoreCache_, false);
+    auto timeStamp = GetSysTimestamp();
+    CHECK_EQUAL_VOID(timeStamp - cacheTaskPostTime_ < CACHE_TASK_DELAY_TIME, true);
+    if (pendingCleanCache_) {
+        CHECK_EQUAL_VOID(timeStamp - setActiveRangeTime_ < CACHE_TASK_DELAY_TIME, true);
+        CleanCache(false);
+    } else if (pendingRestoreCache_) {
+        if (!CheckParentFrameNodeVisibility()) {
+            pendingCleanCache_ = false;
+            pendingRestoreCache_ = false;
+            return;
+        }
+        StartRestoreCache();
+    }
+}
+
+void RepeatVirtualScroll2Node::CleanCache(bool syncClean)
+{
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.CleanCache id[%{public}d] syncClean[%{public}d]", GetId(), syncClean);
+    ACE_SCOPED_TRACE("Repeat.CleanCache id[%d] syncClean[%d]", GetId(), syncClean);
+    restoringCache_ = false;
+    PurgeAll();
+    if (syncClean) {
+        for (const auto rid : pendingRemoveRids_) {
+            RepeatVirtualScroll2Caches::OptCacheItem cacheItemOpt = caches_.GetCacheItem4RID(rid);
+            if (cacheItemOpt.has_value()) {
+                ForEachBaseNode::DisableRecycle(cacheItemOpt.value()->node_);
+            }
+            RemoveNode(rid);
+        }
+        pendingRemoveRids_.clear();
+    } else {
+        PostIdleTask();
+    }
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+}
+
+void RepeatVirtualScroll2Node::StartRestoreCache()
+{
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.StartRestoreCache id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("Repeat.StartRestoreCache id[%d]", GetId());
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+    restoringCache_ = true;
+    PostIdleTask();
+}
+
+void RepeatVirtualScroll2Node::RestoreCache(int64_t deadline, bool canUseLongPredictTask)
+{
+    CHECK_EQUAL_VOID(restoringCache_, false);
+    TAG_LOGI(AceLogTag::ACE_REPEAT, "Repeat.RestoreCache id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("Repeat.RestoreCache id[%d]", GetId());
+    if (!canUseLongPredictTask) {
+        PostIdleTask();
+        return;
+    }
+    while (!cleanedCacheIndexes_.empty()) {
+        auto it = cleanedCacheIndexes_.begin();
+        if (!caches_.RestoreL2CacheByIndex(*it, deadline)) {
+            PostIdleTask();
+            return;
+        }
+        cleanedCacheIndexes_.erase(it);
+    }
+    restoringCache_ = false;
+}
+
+void RepeatVirtualScroll2Node::SetParentVisibility(bool visibility)
+{
+    isParentVisible_ = visibility;
+}
+
+bool RepeatVirtualScroll2Node::GetParentVisibility()
+{
+    return isParentVisible_;
+}
+
+void RepeatVirtualScroll2Node::PostMemOptTask()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    const uint32_t delay = 1000; // 1 seconds in milliseconds
+    auto weakNode = AceType::WeakClaim(this);
+    taskExecutor->PostDelayedTask(
+        [weakNode]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pipeline = node->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_EQUAL_VOID(pipeline->GetOnShow(), false);
+            auto visible = node->CheckParentFrameNodeVisibility();
+            if (visible != node->GetParentVisibility()) {
+                node->SetParentVisibility(visible);
+                visible ? node->ScheduleRestoreCacheTask() : node->ScheduleCleanCacheTask();
+            }
+            node->TryExecuteScheduledCacheTask();
+            node->PostMemOptTask();
+        },
+        TaskExecutor::TaskType::UI,
+        delay,
+        "RepeatMemOptTask");
 }
 
 void RepeatVirtualScroll2Node::DumpInfo()
@@ -918,5 +1228,14 @@ void RepeatVirtualScroll2Node::DumpInfo()
                                         .append(std::to_string(arrLen_).c_str()));
     DumpLog::GetInstance().AddDesc(std::string("totalCount of source data:")
                                         .append(std::to_string(totalCount_).c_str()));
+    DumpLog::GetInstance().AddDesc(std::string("cachedItems:")
+                                        .append(caches_.GetL2ItemsDump().c_str()));
+}
+
+void RepeatVirtualScroll2Node::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto info = caches_.GetL2ItemsDump();
+    CHECK_EQUAL_VOID(info.empty(), true);
+    json->Put("$CachedItems", info.c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ import { uiUtils } from '../base/uiUtilsImpl';
  * 6) Static StorageProperty and Dynamic ObservedPropertyPU will store same raw value and will bind each other to
  * notify value change event.
  */
-class InteropStorageValue {
+export class InteropStorageValue {
     value?: DecoratedVariableBase;
 }
 export class InteropStorageBase extends StorageBase {
@@ -288,11 +288,11 @@ export class InteropStorageBase extends StorageBase {
             return undefined;
         }
         if (interopValue.value) {
-            return (interopValue.value as StorageProperty<T>).get();
+            return (interopValue.value as StorageProperty<T>).rawGet();
         }
         // initialize interop value by ArkTS1.1
         interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
-        return (interopValue.value as StorageProperty<T>).get();
+        return (interopValue.value as StorageProperty<T>).rawGet();
     }
 
     /**

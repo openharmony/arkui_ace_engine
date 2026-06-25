@@ -136,6 +136,9 @@ public:
     }
     void OnStageNodeStructureChanged() override;
 
+    bool IsVirtualStackBasedSplit() const;
+    RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
+
 private:
     class StageOptScope {
     public:
@@ -199,11 +202,9 @@ private:
 
     void RebuildRouterColumnNodesIfNeeded() const;
     void InvalidateRouterColumnNodes() const;
-    bool IsVirtualStackBasedSplit() const;
     void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
     void OnWindowStateChangeInVirtualStackBasedSplit(bool show);
-    bool PushPageInVirtualStackBasedSplit(
-        const RefPtr<FrameNode>& node, bool isNewLifecycle, bool needHideLast, bool needTransition);
+    bool PushPageInVirtualStackBasedSplit(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
     bool PopPageInVirtualStackBasedSplit(bool needShowNext, bool needTransition);
     bool PopPageToIndexInVirtualStackBasedSplit(int32_t index, bool needShowNext, bool needTransition);
     bool CleanPageStackInVirtualStackBasedSplit(const RefPtr<ParallelStagePattern>& stagePattern);
@@ -214,7 +215,8 @@ private:
         bool needShowNext, PageTransitionType hideTransitionType, PageTransitionType showTransitionType);
     void EnsureSplitSecondaryPageIfNeeded();
     bool HasRouterPushPageToPrimaryState() const;
-    bool ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const;
+    bool ShouldCurrentPushPageToPrimary(
+        const RefPtr<FrameNode>& currentTopPage, const RefPtr<FrameNode>& newPageNode) const;
     RefPtr<FrameNode> GetLastPageInStack() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages(
@@ -225,7 +227,6 @@ private:
     void FireRouterShowByVisibleDiff(const RouterVisiblePages& preVisiblePages,
         const RouterVisiblePages& newVisiblePages, PageTransitionType transitionType = PageTransitionType::NONE);
     RouterVisiblePages GetRouterVisiblePagesForCurrentStackTree() const;
-    RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
     RouterVisiblePages GetRouterVisiblePages();
     RouterVisiblePages ResolveRouterVisiblePagesFromStackPages(
         const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& secondaryFallbackPage) const;

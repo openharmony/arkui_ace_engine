@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_PICKER_OPTION_COMPONENT_H
 
 #include "core/components/box/box_component.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/sole_child_component.h"
 
@@ -66,10 +69,7 @@ public:
     {
         return theme_;
     }
-    void SetTheme(const RefPtr<PickerTheme>& value)
-    {
-        theme_ = value;
-    }
+    void SetTheme(const RefPtr<PickerTheme>& value);
 
     uint32_t GetIndex() const
     {

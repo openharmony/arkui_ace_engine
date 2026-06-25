@@ -65,6 +65,9 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void DefaultOnFullScreenVideoOverlayEnter(
+    const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,

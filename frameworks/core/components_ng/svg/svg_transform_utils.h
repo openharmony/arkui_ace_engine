@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/matrix4.h"
+#include "base/geometry/offset.h"
 
 namespace OHOS::Ace {
 

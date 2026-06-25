@@ -31,7 +31,6 @@ namespace {
 constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 constexpr float HALF = 0.5f;
 inline constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
-constexpr int32_t NUMBER_TWO = 2;
 } // namespace
 
 void MarqueePattern::OnAttachToFrameNode()
@@ -202,7 +201,7 @@ void MarqueePattern::StartMarqueeAnimation()
             needSecondPlay, StartMarqueeAnimationType::BOTH);
         return;
     }
-    auto startPosition = GetTextOffset();
+    auto startPosition = GetTextOffset(true);
     PlayMarqueeAnimation(startPosition, repeatCount, needSecondPlay);
 }
 
@@ -267,6 +266,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             auto onFinish = [weak, needSecondPlay, playCount, animationId]() {
+                TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation onfinish", animationId);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (animationId != pattern->animationId_) {
@@ -287,11 +287,13 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 pattern->PlayMarqueeAnimation(newStart, newPlayCount, false, false);
             };
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation go onfinish", animationId);
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask(
-                [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
+            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation oosttask onfinish", animationId);
+            taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
+                "ArkUIMarqueePlayAnimation", PriorityType::VIP);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -390,7 +392,7 @@ void MarqueePattern::StopAndResetAnimation()
 void MarqueePattern::ExecuteStopMarquee()
 {
     float offsetX = 0.0f;
-    if (!hasStart_ || GetTextOffsetOnly() != offsetX) {
+    if (!hasStart_ || GetTextOffset() != offsetX) {
         return;
     }
     hasStart_ = false;
@@ -470,7 +472,7 @@ void MarqueePattern::UpdateTextTranslateXY(float offsetX, bool cancel, bool isFi
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-float MarqueePattern::GetTextOffset()
+float MarqueePattern::GetTextOffset(bool needResetOffset)
 {
     float offsetX = 0.0f;
     if (!IsRunMarquee()) {
@@ -487,28 +489,9 @@ float MarqueePattern::GetTextOffset()
     if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
         lastAnimationOffset_.has_value()) {
         offsetX = lastAnimationOffset_.value().GetX();
-        lastAnimationOffset_ = std::nullopt;
-    }
-    return offsetX;
-}
-
-float MarqueePattern::GetTextOffsetOnly()
-{
-    float offsetX = 0.0f;
-    if (!IsRunMarquee()) {
-        return offsetX;
-    }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, offsetX);
-    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, offsetX);
-    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
-    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, offsetX);
-    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
-    if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
-        lastAnimationOffset_.has_value()) {
-        offsetX = lastAnimationOffset_.value().GetX();
+        if (needResetOffset) {
+            lastAnimationOffset_ = std::nullopt;
+        }
     }
     return offsetX;
 }
@@ -991,6 +974,33 @@ bool InRegion(float value, float start, float end)
     return (GreatOrEqual(value, start) && LessOrEqual(value, end));
 }
 
+float MarqueePattern::NormalizeDoubleAnimationPhase(float firstStart, float textTotalLen, bool directionMoveLeft)
+{
+    CHECK_NULL_RETURN(GreatNotEqual(textTotalLen, 0.0f), 0.0f);
+    auto phase = directionMoveLeft ? -firstStart : firstStart;
+    phase = std::fmod(phase, textTotalLen);
+    if (LessNotEqual(phase, 0.0f)) {
+        phase += textTotalLen;
+    }
+    return phase;
+}
+
+std::pair<float, float> MarqueePattern::GetDoubleAnimationOffsetByPhase(
+    float phase, float textTotalLen, bool directionMoveLeft)
+{
+    if (!GreatNotEqual(textTotalLen, 0.0f)) {
+        return std::pair<float, float>(0.0f, 0.0f);
+    }
+    phase = std::fmod(phase, textTotalLen);
+    if (LessNotEqual(phase, 0.0f)) {
+        phase += textTotalLen;
+    }
+    if (directionMoveLeft) {
+        return { -phase, textTotalLen - phase };
+    }
+    return { phase, -textTotalLen + phase };
+}
+
 void MarqueePattern::CalcAnimationStart(float& firstStart, float& secondStart,
     float textTotalLen, float aniStartPos, float aniEndPos, bool directionMoveLeft)
 {
@@ -1005,6 +1015,14 @@ void MarqueePattern::CalcAnimationStart(float& firstStart, float& secondStart,
     auto marqueeSize = geoNode->GetFrameSize();
     auto visibleAreaStart = 0;
     auto visibleAreaEnd = marqueeSize.Width() - padding.right.value_or(0) - padding.left.value_or(0);
+    TAG_LOGI(AceLogTag::ACE_MARQUEE, "CalcAnimationStart before clamp, nodeId:%{public}d"
+        "firstStart:%{public}f secondStart:%{public}f textWidth:%{public}f textTotalLen:%{public}f "
+        "visibleArea:[%{public}d,%{public}f] directionMoveLeft:%{public}d",
+        host->GetId(), firstStart, secondStart, textWidth, textTotalLen,
+        visibleAreaStart, visibleAreaEnd, directionMoveLeft);
+    firstStart = std::min(textTotalLen, std::max(firstStart, -textTotalLen));
+    secondStart = std::min(textTotalLen, std::max(secondStart, -textTotalLen));
+
     if (InRegion(visibleAreaStart, firstStart, firstStart + textWidth) ||
         InRegion(visibleAreaEnd, firstStart, firstStart + textWidth)) {
         if (directionMoveLeft) {
@@ -1043,22 +1061,11 @@ int32_t MarqueePattern::CalcAnimeDuration(float end, float start, double step)
     return duration;
 }
 
-void MarqueePattern::CalcDuration(MarqueeAnimationParam& param, double step,
-    bool directionMoveLeft, bool needSecondPlay)
+void MarqueePattern::CalcDuration(MarqueeAnimationParam& param, double step)
 {
-    param.totalDuration = 0;
-    if ((directionMoveLeft && LessOrEqual(param.start, 0)) || (!directionMoveLeft && GreatOrEqual(param.start, 0))) {
-        param.firstDuration = 0;
-        param.secondDuration = CalcAnimeDuration(param.end, param.start, step);
-    } else {
-        param.firstDuration = CalcAnimeDuration(param.start, 0, step);
-        param.secondDuration = CalcAnimeDuration(0, param.end, step);
-        param.totalDuration += param.delay;
-    }
-    param.totalDuration += param.firstDuration + param.secondDuration;
-    if (!needSecondPlay) {
-        param.totalDuration += param.delay;
-    }
+    param.firstDuration = CalcAnimeDuration(param.zero, param.start, step);
+    param.secondDuration = CalcAnimeDuration(param.end, param.zero, step);
+    param.totalDuration = param.firstDuration + param.delay + param.secondDuration;
 }
 
 void MarqueePattern::PlayMarqueeDoubleAnimation(float startPosition, float secondStartPos,
@@ -1077,42 +1084,34 @@ void MarqueePattern::PlayMarqueeDoubleAnimation(float startPosition, float secon
     }
     auto delay = layoutProperty->HasMarqueeDelay() ? layoutProperty->GetMarqueeDelayValue() : 0;
 
-    auto firstPlayCount = playCount;
-    auto secondPlayCount = playCount;
-
-    auto textTotalLen = textWidth + GetMarqueeSpacing();
+    auto textTotalLen = textWidth + std::max(GetMarqueeSpacing(), 0.0f);
+    CHECK_NULL_VOID(GreatNotEqual(textTotalLen, 0.0f));
     bool directionMoveLeft = (paintProperty->GetDirection().value_or(MarqueeDirection::LEFT) == MarqueeDirection::LEFT)
         ^ (GetCurrentTextDirection() == TextDirection::RTL);
 
-    float aniStartPos = directionMoveLeft ? textTotalLen : -textTotalLen;
-    float aniEndPos = directionMoveLeft ? -textTotalLen : textTotalLen;
-    float firstStart = startType == StartMarqueeAnimationType::BOTH ? startPosition : aniStartPos;
-    float secondStart = startType == StartMarqueeAnimationType::BOTH ? secondStartPos : aniStartPos;
+    auto phase = NormalizeDoubleAnimationPhase(startPosition, textTotalLen, directionMoveLeft);
+    auto startOffset = GetDoubleAnimationOffsetByPhase(phase, textTotalLen, directionMoveLeft);
+    auto distanceToZero = NearZero(phase) ? textTotalLen : textTotalLen - phase;
+    auto distanceAfterZero = NearZero(phase) ? 0.0f : phase;
+    auto zeroOffset = directionMoveLeft ?
+        std::make_pair(startOffset.first - distanceToZero, startOffset.second - distanceToZero) :
+        std::make_pair(startOffset.first + distanceToZero, startOffset.second + distanceToZero);
+    auto endOffset = directionMoveLeft ?
+        std::make_pair(zeroOffset.first - distanceAfterZero, zeroOffset.second - distanceAfterZero) :
+        std::make_pair(zeroOffset.first + distanceAfterZero, zeroOffset.second + distanceAfterZero);
 
-    if (startType == StartMarqueeAnimationType::BOTH) {
-        CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
-        firstPlayCount = playCount != -1 ? playCount / NUMBER_TWO + 1 : -1;
-        secondPlayCount = playCount != -1 ? playCount / NUMBER_TWO + playCount % NUMBER_TWO : -1;
-        if ((directionMoveLeft && LessNotEqual(secondStart, firstStart)) ||
-            (!directionMoveLeft && GreatNotEqual(secondStart, firstStart))) {
-            std::swap(firstPlayCount, secondPlayCount);
-        }
-    }
-
-    MarqueeAnimationParam firstParam = CreateAnimationParam(true, firstStart, delay, aniEndPos, firstPlayCount);
-    MarqueeAnimationParam secondParam = CreateAnimationParam(false, secondStart, delay, aniEndPos, secondPlayCount);
+    MarqueeAnimationParam firstParam =
+        CreateAnimationParam(true, startOffset.first, delay, endOffset.first, playCount);
+    firstParam.zero = zeroOffset.first;
+    firstParam.secondStart = startOffset.second;
+    firstParam.secondZero = zeroOffset.second;
+    firstParam.secondEnd = endOffset.second;
 
     AnimationOption option;
-    AnimationOption option2;
-    CreateAnimationOptions(
-        firstParam, secondParam, step, directionMoveLeft, needSecondPlay, option, option2);
+    CreateAnimationOptions(firstParam, step, option);
 
-    if (startType == StartMarqueeAnimationType::BOTH || startType == StartMarqueeAnimationType::FIRST) {
-        animation_ = ActionDoubleAnimation(option, firstParam, needSecondPlay);
-    }
-    if (startType == StartMarqueeAnimationType::BOTH || startType == StartMarqueeAnimationType::SECOND) {
-        secondAnimation_ = ActionDoubleAnimation(option2, secondParam, needSecondPlay);
-    }
+    animation_ = ActionDoubleAnimation(option, firstParam);
+    secondAnimation_.reset();
 }
 
 MarqueeAnimationParam MarqueePattern::CreateAnimationParam(bool isFirst, float start, int32_t delay,
@@ -1122,88 +1121,74 @@ MarqueeAnimationParam MarqueePattern::CreateAnimationParam(bool isFirst, float s
         .playCount = playCount };
 }
 
-void MarqueePattern::CreateAnimationOptions(MarqueeAnimationParam& firstParam, MarqueeAnimationParam& secondParam,
-    double step, bool directionMoveLeft, bool needSecondPlay, AnimationOption& option, AnimationOption& option2)
+void MarqueePattern::CreateAnimationOptions(MarqueeAnimationParam& param, double step, AnimationOption& option)
 {
-    CalcDuration(firstParam, step, directionMoveLeft, needSecondPlay);
-    CalcDuration(secondParam, step, directionMoveLeft, needSecondPlay);
+    CalcDuration(param, step);
 
-    option = AnimationOption(Curves::LINEAR, firstParam.totalDuration);
-    option2 = AnimationOption(Curves::LINEAR, secondParam.totalDuration);
+    option = AnimationOption(Curves::LINEAR, param.totalDuration);
 
     auto iter = frameRateRange_.find(MarqueeDynamicSyncSceneType::ANIMATE);
     if (iter != frameRateRange_.end()) {
         option.SetFrameRateRange(iter->second);
-        option2.SetFrameRateRange(iter->second);
     }
-    option.SetIteration(needSecondPlay ? 1 : firstParam.playCount);
-    option2.SetIteration(needSecondPlay ? 1 : secondParam.playCount);
+    option.SetIteration(param.playCount);
 }
 
-void MarqueePattern::BuildAnimationKeyframes(const MarqueeAnimationParam& param,
-    bool needSecondPlay, bool isFirst)
+void MarqueePattern::BuildAnimationKeyframes(const MarqueeAnimationParam& param)
 {
 #if !defined(ACE_UNITTEST)
     auto weak = AceType::WeakClaim(this);
     auto delay = param.delay;
     auto end = param.end;
     auto start = param.start;
+    auto zero = param.zero;
+    auto secondStart = param.secondStart;
+    auto secondZero = param.secondZero;
+    auto secondEnd = param.secondEnd;
 
-    if (!needSecondPlay) {
-        AnimationUtils::AddDurationKeyFrame(delay, Curves::LINEAR, []() {});
-    }
-    AnimationUtils::AddDurationKeyFrame(0, Curves::LINEAR, [weak, start, isFirst]() {
+    AnimationUtils::AddDurationKeyFrame(0, Curves::LINEAR, [weak, start, secondStart]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateTextTranslateXY(start, false, isFirst);
+        pattern->UpdateTextTranslateXY(start);
+        pattern->UpdateTextTranslateXY(secondStart, false, false);
     });
-    if (param.firstDuration != 0) {
-        AnimationUtils::AddDurationKeyFrame(param.firstDuration, Curves::LINEAR, [weak, isFirst]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->UpdateTextTranslateXY(0, false, isFirst);
-        });
-        AnimationUtils::AddDurationKeyFrame(delay, Curves::LINEAR, []() {});
-    }
-    AnimationUtils::AddDurationKeyFrame(param.secondDuration, Curves::LINEAR, [weak, end, isFirst]() {
+    AnimationUtils::AddDurationKeyFrame(param.firstDuration, Curves::LINEAR, [weak, zero, secondZero]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateTextTranslateXY(end, false, isFirst);
+        pattern->UpdateTextTranslateXY(zero);
+        pattern->UpdateTextTranslateXY(secondZero, false, false);
+    });
+    AnimationUtils::AddDurationKeyFrame(delay, Curves::LINEAR, []() {});
+    AnimationUtils::AddDurationKeyFrame(param.secondDuration, Curves::LINEAR, [weak, end, secondEnd]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateTextTranslateXY(end);
+        pattern->UpdateTextTranslateXY(secondEnd, false, false);
     });
 #endif
 }
 
-void MarqueePattern::HandleAnimationFinish(int32_t animationId, bool isFirst, int32_t playCount, bool needSecondPlay)
+void MarqueePattern::HandleAnimationFinish(int32_t animationId)
 {
-    if ((isFirst && animationId != animationId_) ||
-        (!isFirst && animationId != secondAnimationId_)) {
+    if (animationId != animationId_) {
         return;
     }
-    auto newPlayCount = playCount > 0 ? playCount - 1 : playCount;
-    if (newPlayCount == 0 || !needSecondPlay) {
-        if (!isFirst) {
-            ExecuteStopMarquee();
-        }
-        OnDoubleAnimationFinish(isFirst);
-        return;
-    }
-    PlayMarqueeDoubleAnimation(0.0f, 0.0f, newPlayCount, false,
-        isFirst ? StartMarqueeAnimationType::FIRST : StartMarqueeAnimationType::SECOND);
+    ExecuteStopMarquee();
+    OnDoubleAnimationFinish(false);
 }
 
-std::function<void()> MarqueePattern::CreateAnimationFinishCallback(
-    int32_t animationId, bool isFirst, int32_t playCount, bool needSecondPlay)
+std::function<void()> MarqueePattern::CreateAnimationFinishCallback(int32_t animationId)
 {
     auto weak = AceType::WeakClaim(this);
     auto id = Container::CurrentId();
-    return [weak, animationId, needSecondPlay, playCount, isFirst, id]() {
+    return [weak, animationId, id]() {
         ContainerScope scope(id);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto onFinish = [weak, needSecondPlay, playCount, animationId, isFirst]() {
+        auto onFinish = [weak, animationId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->HandleAnimationFinish(animationId, isFirst, playCount, needSecondPlay);
+            pattern->HandleAnimationFinish(animationId);
         };
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             onFinish();
@@ -1215,21 +1200,18 @@ std::function<void()> MarqueePattern::CreateAnimationFinishCallback(
 }
 
 std::shared_ptr<AnimationUtils::Animation> MarqueePattern::ActionDoubleAnimation(
-    AnimationOption& option, MarqueeAnimationParam& param, bool needSecondPlay)
+    AnimationOption& option, MarqueeAnimationParam& param)
 {
-    TAG_LOGI(AceLogTag::ACE_MARQUEE, "Action Animation, param: %{public}s, needSecondPlay: %{public}d",
-        param.ToString().c_str(), needSecondPlay);
-    auto isFirst = param.isFirst;
-    isFirst ? animationId_++ : secondAnimationId_++;
+    TAG_LOGI(AceLogTag::ACE_MARQUEE, "Action Animation, param: %{public}s", param.ToString().c_str());
+    animationId_++;
 
-    auto buildKeyframes = [weak = AceType::WeakClaim(this), param, needSecondPlay, isFirst]() {
+    auto buildKeyframes = [weak = AceType::WeakClaim(this), param]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->BuildAnimationKeyframes(param, needSecondPlay, isFirst);
+        pattern->BuildAnimationKeyframes(param);
     };
 
-    auto finishCallback = CreateAnimationFinishCallback(
-        isFirst ? animationId_ : secondAnimationId_, isFirst, param.playCount, needSecondPlay);
+    auto finishCallback = CreateAnimationFinishCallback(animationId_);
 
     auto bounceCallback = [weak = AceType::WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -1237,11 +1219,8 @@ std::shared_ptr<AnimationUtils::Animation> MarqueePattern::ActionDoubleAnimation
         pattern->FireBounceEvent();
     };
 
-    if (isFirst) {
-        lastAnimationStart_ = param.start;
-    } else {
-        lastSecondAnimationStart_ = param.start;
-    }
+    lastAnimationStart_ = param.start;
+    lastSecondAnimationStart_ = param.secondStart;
     return AnimationUtils::StartAnimation(option, buildKeyframes, finishCallback, bounceCallback);
 }
 

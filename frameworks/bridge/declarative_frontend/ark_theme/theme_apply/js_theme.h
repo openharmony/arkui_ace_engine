@@ -18,9 +18,10 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/base/log/log.h"
 #include "ui/view/theme/token_theme.h"
 
-#define COLORS_NUMBER (51)
+#define COLORS_NUMBER (::OHOS::Ace::TokenColors::TOTAL_NUMBER)
 
 #define BRAND (0)
 #define WARNING (1)
@@ -80,6 +81,9 @@
 #define INTERACTIVE_ACTIVE (48)
 #define INTERACTIVE_SELECT (49)
 #define INTERACTIVE_CLICK (50)
+#define TOKEN_PRIMARY (51)
+#define TOKEN_ON_PRIMARY (52)
+#define TOKEN_CONTAINER (53)
 
 namespace OHOS::Ace::Framework {
 
@@ -110,6 +114,18 @@ public:
     Color Confirm() const
     {
         return ConvertJsValueToColor(CONFIRM);
+    }
+    Color Primary() const
+    {
+        return ConvertJsValueToColor(TOKEN_PRIMARY);
+    }
+    Color OnPrimary() const
+    {
+        return ConvertJsValueToColor(TOKEN_ON_PRIMARY);
+    }
+    Color Container() const
+    {
+        return ConvertJsValueToColor(TOKEN_CONTAINER);
     }
 
     Color FontPrimary() const
@@ -309,7 +325,7 @@ public:
 private:
     Color ConvertJsValueToColor(const int32_t resNum) const
     {
-        if (colors_.size() != COLORS_NUMBER) {
+        if (colors_.size() != static_cast<size_t>(COLORS_NUMBER)) {
             LOGE("JSThemeColors not SetColors yet!");
             return Color();
         }

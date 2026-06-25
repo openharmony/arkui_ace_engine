@@ -16,6 +16,7 @@ import { LengthMetrics } from '@ohos.arkui.node';
 import { Callback } from '@ohos.base';
 import { intl } from '@kit.LocalizationKit';
 import i18n from '@ohos.i18n';
+import { commonEventManager } from '@kit.BasicServicesKit';
 
 export enum DateMode {
   DATE = 0,
@@ -72,6 +73,8 @@ export class DatePickerComponentOptions {
 class DatePickerConstant {
   public static readonly MIN_YEAR = 0;
   public static readonly MAX_YEAR = 10000;
+  public static readonly DEFAULT_START_YEAR = 1970;
+  public static readonly DEFAULT_END_YEAR = 2100;
   public static readonly MIN_MONTH = 0;
   public static readonly MAX_MONTH = 11;
   public static readonly MIN_DAY = 1;
@@ -83,6 +86,8 @@ class DatePickerConstant {
   public static readonly MAX_SECOND = 59;
   public static readonly MONTHS_IN_YEAR = 12;
   public static readonly DEFAULT_STEP = 1;
+  public static readonly SYSTEM_MIN_DATE = new Date(1970, 0, 1);
+  public static readonly SYSTEM_MAX_DATE = new Date(2100, 11, 31);
 }
 
 @Component
@@ -95,14 +100,26 @@ export struct DatePickerComponent {
   @State selectedHour: number = 0;
   @State selectedMinute: number = 0;
   @State selectedSecond: number = 0;
-  @State startYear: number = DatePickerConstant.MIN_YEAR;
-  @State endYear: number = DatePickerConstant.MAX_YEAR;
+  @State startYear: number = DatePickerConstant.DEFAULT_START_YEAR;
+  @State endYear: number = DatePickerConstant.DEFAULT_END_YEAR;
+  @State startMonth: number = DatePickerConstant.MIN_MONTH;
+  @State endMonth: number = DatePickerConstant.MAX_MONTH;
+  @State startDay: number = DatePickerConstant.MIN_DAY;
+  @State endDay: number = 31;
+  @State startHour: number = DatePickerConstant.MIN_HOUR;
+  @State endHour: number = DatePickerConstant.MAX_HOUR;
+  @State startMinute: number = DatePickerConstant.MIN_MINUTE;
+  @State endMinute: number = DatePickerConstant.MAX_MINUTE;
+  @State startSecond: number = DatePickerConstant.MIN_SECOND;
+  @State endSecond: number = DatePickerConstant.MAX_SECOND;
   @State dateMode: DateMode = DateMode.DATE;
   @State timeFormat: TimeFormat = TimeFormat.HOUR_MINUTE;
   @State useMilitaryTime: boolean = false;
   @State lunar: boolean = false;
-  @State canLoop: boolean = true;
-  @State hapticFeedback: boolean = true;
+  @State dateCanLoop: boolean = true;
+  @State timeCanLoop: boolean = true;
+  @State dateHapticFeedback: boolean = true;
+  @State timeHapticFeedback: boolean = true;
   @State yearArray: string[] = [];
   @State monthArray: string[] = [];
   @State dayArray: string[] = [];
@@ -111,16 +128,40 @@ export struct DatePickerComponent {
   @State secondArray: string[] = [];
   @State periodArray: string[] = [];
   @State selectedPeriod: number = 0;
-  private onChange?: Callback<DatePickerComponentResult>;
-  private onScrollStop?: Callback<DatePickerComponentResult>;
+  private dateOnChange?: Callback<DatePickerComponentResult>;
+  private dateOnScrollStop?: Callback<DatePickerComponentResult>;
+  private timeOnChange?: Callback<DatePickerComponentResult>;
+  private timeOnScrollStop?: Callback<DatePickerComponentResult>;
   @State @Watch('onLocaleChange') currentLocale: string = '';
   private locale: intl.Locale = new intl.Locale();
   private initFlag: boolean = true;
   private lunarCalendar: i18n.Calendar | null = null;
+  private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  private formatter: intl.NumberFormat = new intl.NumberFormat();
+  private yearFormatter: intl.NumberFormat = new intl.NumberFormat('', { useGrouping: false });
+  private userLunar: boolean = false;  // Save user-set lunar value
+  @State firstColumnWidth: number = 0;
+  @State lastColumnWidth: number = 0;
   
   aboutToAppear(): void {
     this.currentLocale = i18n.System.getSystemLanguage();
     this.locale = new intl.Locale(this.currentLocale);
+    this.formatter = new intl.NumberFormat();
+    this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
+    
+    // Issue 2: Save user-set lunar value, decide whether to apply based on current language
+    this.userLunar = this.lunar;
+    const isChinese = this.isChineseLocale();
+    if (!isChinese) {
+      // Static scenario: non-Chinese language, force lunar to false
+      this.lunar = false;
+      this.lunarCalendar = null;
+    } else {
+      // Chinese language: apply lunar based on user setting
+      if (this.lunar) {
+        this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+      }
+    }
     
     if (this.selectedYear === 0 || this.selectedMonth === 0 || this.selectedDay === 0) {
       const now = new Date();
@@ -132,22 +173,94 @@ export struct DatePickerComponent {
       this.selectedSecond = now.getSeconds();
     }
     
-    if (this.lunar) {
-      this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
-    }
-    
     if (this.options !== undefined && this.options !== null) {
       this.onOptionsChange();
     } else {
       this.initArrays();
     }
+    
+    this.createLocaleChangeSubscriber();
+  }
+  
+  aboutToDisappear(): void {
+    this.lunarCalendar = null;
+    
+    // Unsubscribe from locale change events
+    if (this.subscriber !== null) {
+      commonEventManager.unsubscribe(this.subscriber, (err) => {
+        if (err) {
+          console.error(`Failed to unsubscribe common event. error code: ${err.code}, message: ${err.message}.`);
+        }
+      });
+      this.subscriber = null;
+    }
+  }
+  
+  private createLocaleChangeSubscriber(): void {
+    const subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
+      events: [commonEventManager.Support.COMMON_EVENT_LOCALE_CHANGED]
+    };
+    
+    commonEventManager.createSubscriber(subscribeInfo)
+      .then((commonEventSubscriber: commonEventManager.CommonEventSubscriber) => {
+        this.subscriber = commonEventSubscriber;
+        commonEventManager.subscribe(this.subscriber, (err, data) => {
+          if (err) {
+            console.error(`Failed to subscribe common event. error code: ${err.code}, message: ${err.message}.`);
+            return;
+          }
+          // Update locale when system language changes
+          this.currentLocale = i18n.System.getSystemLanguage();
+        });
+      })
+      .catch((err: Error) => {
+        console.error(`CreateSubscriber failed, code is ${err.message}`);
+      });
   }
   
   private onLocaleChange(): void {
     this.locale = new intl.Locale(this.currentLocale);
-    if (this.lunar) {
-      this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+    this.formatter = new intl.NumberFormat();
+    this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
+    
+    const isChinese = this.isChineseLocale();
+    const prevLunar = this.lunar;
+    const prevLunarCalendar = this.lunarCalendar;
+    
+    // Handle lunar calendar based on language
+    if (isChinese) {
+      // Chinese locale: use user-set lunar value
+      this.lunar = this.userLunar;
+      if (this.lunar) {
+        this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+      } else {
+        this.lunarCalendar = null;
+      }
+    } else {
+      // Non-Chinese locale: disable lunar calendar but keep user setting
+      this.lunar = false;
+      this.lunarCalendar = null;
     }
+    
+    // Convert date when switching between lunar and gregorian modes
+    if (prevLunar !== this.lunar) {
+      if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
+        // Switching from gregorian to lunar: convert gregorian date to lunar date
+        this.lunarCalendar.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
+        this.selectedMonth = this.lunarCalendar.get('month');
+        this.selectedDay = this.lunarCalendar.get('date');
+      } else if (prevLunar && !this.lunar && prevLunarCalendar !== null) {
+        // Switching from lunar to gregorian: convert lunar date to gregorian date
+        // Use prevLunarCalendar for conversion since current lunarCalendar is null
+        const gregorianDate = this.convertLunarToGregorianWithCalendar(prevLunarCalendar, this.selectedYear, this.selectedMonth, this.selectedDay);
+        if (gregorianDate !== null) {
+          this.selectedYear = gregorianDate.getFullYear();
+          this.selectedMonth = gregorianDate.getMonth();
+          this.selectedDay = gregorianDate.getDate();
+        }
+      }
+    }
+    
     this.initArrays();
   }
   
@@ -194,7 +307,7 @@ export struct DatePickerComponent {
       let month2Start: Date | null = null;
       
       for (let month = 0; month < 12; month++) {
-        for (let day = 1; day <= 28; day++) {
+        for (let day = 1; day <= 31; day++) {
           const testDate = new Date(gregorianYear, month, day);
           this.lunarCalendar.setTime(testDate);
           const currentLunarMonth = this.lunarCalendar.get('month');
@@ -231,13 +344,44 @@ export struct DatePickerComponent {
     }
   }
   
+  private convertLunarToGregorian(gregorianYear: number, lunarMonth: number, lunarDay: number): Date | null {
+    return this.convertLunarToGregorianWithCalendar(this.lunarCalendar, gregorianYear, lunarMonth, lunarDay);
+  }
+  
+  private convertLunarToGregorianWithCalendar(calendar: i18n.Calendar | null, gregorianYear: number, lunarMonth: number, lunarDay: number): Date | null {
+    if (calendar === null) {
+      return null;
+    }
+    
+    try {
+      // Find the gregorian date for the given lunar date
+      // Iterate through gregorian dates to find matching lunar month and day
+      for (let month = 0; month < 12; month++) {
+        for (let day = 1; day <= 31; day++) {
+          const testDate = new Date(gregorianYear, month, day);
+          calendar.setTime(testDate);
+          const currentLunarMonth = calendar.get('month');
+          const currentLunarDay = calendar.get('date');
+          
+          if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
+            return testDate;
+          }
+        }
+      }
+      
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+  
   private formatLunarYear(gregorianYear: number): string {
-    return `${gregorianYear}年`;
+    return `${this.yearFormatter.format(gregorianYear)}年`;
   }
   
   private formatLunarMonth(month: number, isLeap: boolean): string {
     const lunarMonthNames = ['正月', '二月', '三月', '四月', '五月', '六月',
-                             '七月', '八月', '九月', '十月', '十一月', '十二月'];
+                             '七月', '八月', '九月', '十月', '冬月', '腊月'];
     
     if (isLeap) {
       return `闰${lunarMonthNames[month]}`;
@@ -265,7 +409,17 @@ export struct DatePickerComponent {
   
   private initMonthArray(): void {
     this.monthArray = [];
-    for (let i = DatePickerConstant.MIN_MONTH; i <= DatePickerConstant.MAX_MONTH; i++) {
+    let startMonthIndex = DatePickerConstant.MIN_MONTH;
+    let endMonthIndex = DatePickerConstant.MAX_MONTH;
+    
+    if (this.selectedYear === this.startYear) {
+      startMonthIndex = this.startMonth;
+    }
+    if (this.selectedYear === this.endYear) {
+      endMonthIndex = this.endMonth;
+    }
+    
+    for (let i = startMonthIndex; i <= endMonthIndex; i++) {
       this.monthArray.push(this.formatMonth(i));
     }
   }
@@ -273,38 +427,183 @@ export struct DatePickerComponent {
   private initDayArray(): void {
     this.dayArray = [];
     const daysInMonth = this.getDaysInMonth(this.selectedYear, this.selectedMonth);
-    for (let i = DatePickerConstant.MIN_DAY; i <= daysInMonth; i++) {
+    let startDayIndex = DatePickerConstant.MIN_DAY;
+    let endDayIndex = daysInMonth;
+    
+    if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+      startDayIndex = this.startDay;
+    }
+    if (this.selectedYear === this.endYear && this.selectedMonth === this.endMonth) {
+      endDayIndex = Math.min(this.endDay, daysInMonth);
+    }
+    
+    for (let i = startDayIndex; i <= endDayIndex; i++) {
       this.dayArray.push(this.formatDay(i));
     }
   }
   
   private initTimeArrays(): void {
-    this.hourArray = [];
-    if (this.useMilitaryTime) {
-      for (let i = DatePickerConstant.MIN_HOUR; i <= DatePickerConstant.MAX_HOUR; i++) {
-        this.hourArray.push(i.toString().padStart(2, '0'));
-      }
+    this.periodArray = [];
+    if (!this.useMilitaryTime) {
+      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+      this.updatePeriodArray();
+      this.updateHourArrayFor12Hour();
     } else {
-      for (let i = 1; i <= 12; i++) {
+      this.hourArray = [];
+      for (let i = this.startHour; i <= this.endHour; i++) {
         this.hourArray.push(i.toString().padStart(2, '0'));
       }
     }
     
     this.minuteArray = [];
-    for (let i = DatePickerConstant.MIN_MINUTE; i <= DatePickerConstant.MAX_MINUTE; i++) {
+    let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+    let endMinuteIndex = DatePickerConstant.MAX_MINUTE;
+    
+    if (this.selectedHour === this.startHour) {
+      startMinuteIndex = this.startMinute;
+    }
+    if (this.selectedHour === this.endHour) {
+      endMinuteIndex = this.endMinute;
+    }
+    
+    for (let i = startMinuteIndex; i <= endMinuteIndex; i++) {
       this.minuteArray.push(this.formatMinute(i));
     }
     
+    if (this.selectedMinute < startMinuteIndex) {
+      this.selectedMinute = startMinuteIndex;
+    }
+    if (this.selectedMinute > endMinuteIndex) {
+      this.selectedMinute = endMinuteIndex;
+    }
+    
     this.secondArray = [];
-    for (let i = DatePickerConstant.MIN_SECOND; i <= DatePickerConstant.MAX_SECOND; i++) {
+    let startSecondIndex = DatePickerConstant.MIN_SECOND;
+    let endSecondIndex = DatePickerConstant.MAX_SECOND;
+    
+    if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+      startSecondIndex = this.startSecond;
+    }
+    if (this.selectedHour === this.endHour && this.selectedMinute === this.endMinute) {
+      endSecondIndex = this.endSecond;
+    }
+    
+    for (let i = startSecondIndex; i <= endSecondIndex; i++) {
       this.secondArray.push(this.formatSecond(i));
     }
     
+    if (this.selectedSecond < startSecondIndex) {
+      this.selectedSecond = startSecondIndex;
+    }
+    if (this.selectedSecond > endSecondIndex) {
+      this.selectedSecond = endSecondIndex;
+    }
+  }
+  
+  private updateHourArrayFor12Hour(): void {
+    this.hourArray = [];
+    
+    const isAM = this.selectedPeriod === 0;
+    
+    // For 12-hour format, build hour array based on current period and time range
+    // AM period: 12 (midnight 0:00) and 1-11 (1:00-11:00)
+    // PM period: 12 (noon 12:00) and 1-11 (13:00-23:00)
+    
+    if (isAM) {
+      // Check if 12 AM (hour24=0) is within range
+      const hour24ForAm12 = 0;
+      if (hour24ForAm12 >= this.startHour && hour24ForAm12 <= this.endHour) {
+        this.hourArray.push('12');
+      }
+      
+      // Check if 1-11 AM (hour24=1-11) are within range
+      for (let displayHour = 1; displayHour <= 11; displayHour++) {
+        const hour24 = displayHour;
+        if (hour24 >= this.startHour && hour24 <= this.endHour) {
+          this.hourArray.push(displayHour.toString().padStart(2, '0'));
+        }
+      }
+    } else {
+      // Check if 12 PM (hour24=12) is within range
+      const hour24ForPm12 = 12;
+      if (hour24ForPm12 >= this.startHour && hour24ForPm12 <= this.endHour) {
+        this.hourArray.push('12');
+      }
+      
+      // Check if 1-11 PM (hour24=13-23) are within range
+      for (let displayHour = 1; displayHour <= 11; displayHour++) {
+        const hour24 = displayHour + 12;
+        if (hour24 >= this.startHour && hour24 <= this.endHour) {
+          this.hourArray.push(displayHour.toString().padStart(2, '0'));
+        }
+      }
+    }
+    
+    // Fallback: if no hours available for current period, show all 12 hours
+    if (this.hourArray.length === 0) {
+      for (let i = 1; i <= 12; i++) {
+        this.hourArray.push(i.toString().padStart(2, '0'));
+      }
+    }
+  }
+  
+  private updatePeriodArray(): void {
     this.periodArray = [];
-    if (!this.useMilitaryTime) {
-      this.periodArray.push('AM');
-      this.periodArray.push('PM');
-      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+    
+    // Check if AM period (hour24=0-11) has any available hours
+    let canSelectAM = false;
+    for (let hour = 0; hour <= 11; hour++) {
+      if (hour >= this.startHour && hour <= this.endHour) {
+        canSelectAM = true;
+        break;
+      }
+    }
+    
+    // Check if PM period (hour24=12-23) has any available hours
+    let canSelectPM = false;
+    for (let hour = 12; hour <= 23; hour++) {
+      if (hour >= this.startHour && hour <= this.endHour) {
+        canSelectPM = true;
+        break;
+      }
+    }
+    
+    if (canSelectAM && canSelectPM) {
+      this.periodArray.push(this.formatPeriod(true));
+      this.periodArray.push(this.formatPeriod(false));
+    } else if (canSelectAM && !canSelectPM) {
+      this.periodArray.push(this.formatPeriod(true));
+      if (this.selectedPeriod === 1) {
+        this.selectedPeriod = 0;
+        // Adjust selectedHour to AM range when forced to switch to AM
+        if (this.selectedHour >= 12) {
+          const minAMHour = Math.max(0, this.startHour);
+          const maxAMHour = Math.min(11, this.endHour);
+          if (this.selectedHour === 12) {
+            this.selectedHour = 0; // 12 PM -> 12 AM (0:00)
+          } else {
+            this.selectedHour = Math.max(minAMHour, Math.min(maxAMHour, this.selectedHour - 12));
+          }
+        }
+      }
+    } else if (!canSelectAM && canSelectPM) {
+      this.periodArray.push(this.formatPeriod(false));
+      if (this.selectedPeriod === 0) {
+        this.selectedPeriod = 1;
+        // Adjust selectedHour to PM range when forced to switch to PM
+        if (this.selectedHour < 12) {
+          const minPMHour = Math.max(12, this.startHour);
+          const maxPMHour = Math.min(23, this.endHour);
+          // Calculate target hour (24-hour format): 12 AM->12, 1-11 AM->13-23
+          let targetHour24 = this.selectedHour === 0 ? 12 : this.selectedHour + 12;
+          // Ensure target hour is within valid range
+          this.selectedHour = Math.max(minPMHour, Math.min(maxPMHour, targetHour24));
+        }
+      }
+    } else {
+      // Fallback: show both periods if no hours available (shouldn't happen with valid ranges)
+      this.periodArray.push(this.formatPeriod(true));
+      this.periodArray.push(this.formatPeriod(false));
     }
   }
   
@@ -315,9 +614,9 @@ export struct DatePickerComponent {
   
   private formatYear(year: number): string {
     if (this.isChineseLocale()) {
-      return `${year}年`;
+      return `${this.yearFormatter.format(year)}年`;
     }
-    return year.toString();
+    return this.yearFormatter.format(year);
   }
   
   private formatMonth(month: number): string {
@@ -330,32 +629,36 @@ export struct DatePickerComponent {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     
+    const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
     try {
       const localeStr = this.locale.toString();
       if (!localeStr || localeStr.length === 0) {
-        return monthNames[month];
+        return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
       }
       
+      const monthFormat = this.displayMode === DisplayMode.DATE_TIME ? 'short' : 'long';
       const dateFormat = new Intl.DateTimeFormat(localeStr, {
-        month: 'long'
+        month: monthFormat
       });
       const safeMonth = Math.max(0, Math.min(11, month));
       const date = new Date(2026, safeMonth, 15);
       return dateFormat.format(date);
     } catch (error) {
-      return monthNames[month];
+      return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
     }
   }
   
   private formatDay(day: number): string {
     if (this.isChineseLocale()) {
-      return `${day}日`;
+      return `${this.formatter.format(day)}日`;
     }
     
     try {
       const localeStr = this.locale.toString();
       if (!localeStr || localeStr.length === 0) {
-        return `${day}`;
+        return this.formatter.format(day);
       }
       
       const dateFormat = new Intl.DateTimeFormat(localeStr, {
@@ -365,7 +668,7 @@ export struct DatePickerComponent {
       const date = new Date(2026, 0, safeDay);
       return dateFormat.format(date);
     } catch (error) {
-      return `${day}`;
+      return this.formatter.format(day);
     }
   }
   
@@ -373,8 +676,43 @@ export struct DatePickerComponent {
     return minute.toString().padStart(2, '0');
   }
   
-  private formatSecond(second: number): string {
-    return second.toString().padStart(2, '0');
+private formatSecond(second: number): string {
+  return second.toString().padStart(2, '0');
+  }
+  
+  private formatPeriod(isAM: boolean): string {
+  try {
+    const localeStr = this.locale.toString();
+    if (!localeStr || localeStr.length === 0) {
+      return isAM ? 'AM' : 'PM';
+    }
+    
+    if (this.isChineseLocale()) {
+      return isAM ? '上午' : '下午';
+    }
+    
+    const hour = isAM ? 10 : 22;
+    const dateFormat = new Intl.DateTimeFormat(localeStr, {
+      hour: 'numeric',
+      hour12: true
+    });
+    const date = new Date(2026, 0, 1, hour, 0, 0);
+    const formatted = dateFormat.format(date);
+    
+    if (formatted.includes('上午')) {
+      return isAM ? '上午' : '下午';
+    } else if (formatted.includes('下午')) {
+      return isAM ? '上午' : '下午';
+    } else if (formatted.includes('AM') || formatted.includes('am')) {
+      return isAM ? 'AM' : 'PM';
+    } else if (formatted.includes('PM') || formatted.includes('pm')) {
+      return isAM ? 'AM' : 'PM';
+    }
+    
+    return isAM ? 'AM' : 'PM';
+  } catch (error) {
+    return isAM ? 'AM' : 'PM';
+  }
   }
   
   private getDaysInMonth(year: number, month: number): number {
@@ -392,149 +730,517 @@ export struct DatePickerComponent {
     return 30;
   }
   
+  private validateDate(date: Date): Date | undefined {
+    try {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      
+      // Check for Invalid Date (NaN values)
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return undefined;
+      }
+      
+      // Check if year, month, day are in valid ranges
+      if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
+        return undefined;
+      }
+      if (month < DatePickerConstant.MIN_MONTH || month > DatePickerConstant.MAX_MONTH) {
+        return undefined;
+      }
+      if (day < DatePickerConstant.MIN_DAY || day > 31) {
+        return undefined;
+      }
+      
+      const daysInMonth = this.getDaysInMonth(year, month);
+      if (day > daysInMonth) {
+        return undefined;
+      }
+      
+      // Detect JavaScript auto-correction by checking year jump
+      // If year jumped significantly (> 1 year), it indicates abnormal input
+      // Create expected Date without correction
+      const originalTime = date.getTime();
+      const correctedDate = new Date(year, month, day);
+      const correctedTime = correctedDate.getTime();
+      
+      // If time difference > 365 days, indicates year jump due to abnormal month/day
+      const timeDiff = Math.abs(originalTime - correctedTime);
+      const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+      if (timeDiff > oneYearInMs) {
+        return undefined;
+      }
+      
+      return correctedDate;
+    } catch (e) {
+      return undefined;
+    }
+  }
+  
+  private validateTime(date: Date): Date | undefined {
+    try {
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+      const second = date.getSeconds();
+      
+      // Check for Invalid Date (NaN values)
+      if (isNaN(hour) || isNaN(minute) || isNaN(second)) {
+        return undefined;
+      }
+      
+      if (hour < DatePickerConstant.MIN_HOUR || hour > DatePickerConstant.MAX_HOUR) {
+        return undefined;
+      }
+      if (minute < DatePickerConstant.MIN_MINUTE || minute > DatePickerConstant.MAX_MINUTE) {
+        return undefined;
+      }
+      if (second < DatePickerConstant.MIN_SECOND || second > DatePickerConstant.MAX_SECOND) {
+        return undefined;
+      }
+      
+      // Detect JavaScript auto-correction by checking time jump
+      // Use original year/month/day to construct comparison time
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      
+      const originalTime = date.getTime();
+      const correctedTime = new Date(year, month, day, hour, minute, second).getTime();
+      
+      // If time difference > 1 hour, indicates abnormal minute/second overflow
+      const timeDiff = Math.abs(originalTime - correctedTime);
+      const oneHourInMs = 60 * 60 * 1000;
+      if (timeDiff > oneHourInMs) {
+        return undefined;
+      }
+      
+      // Return Date with fixed base date (2026-01-01) + validated time
+      // This ensures timeOptions only considers time part, ignoring date part
+      return new Date(2026, 0, 1, hour, minute, second);
+    } catch (e) {
+      return undefined;
+    }
+  }
+  
+  private createDateFromParams(year: number, month: number, day: number): Date {
+    return new Date(year, month, day);
+  }
+  
   private onOptionsChange(): void {
-    if (this.options.displayMode !== undefined) {
+    // Issue 4: Restore defaults for undefined/null values
+    if (this.options.displayMode !== undefined && this.options.displayMode !== null) {
       this.displayMode = this.options.displayMode;
+    } else {
+      this.displayMode = DisplayMode.DATE;
     }
     
-    if (this.options.dateOptions !== undefined) {
+    if (this.options.dateOptions !== undefined && this.options.dateOptions !== null) {
       this.updateDateOptions(this.options.dateOptions);
+    } else {
+      // Restore defaults when dateOptions is undefined
+      this.dateMode = DateMode.DATE;
+      this.lunar = false;
+      this.userLunar = false;
+      this.lunarCalendar = null;
+      this.dateCanLoop = true;
+      this.dateHapticFeedback = true;
+      this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+      this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+      this.endDay = 31;
     }
     
-    if (this.options.timeOptions !== undefined) {
+    if (this.options.timeOptions !== undefined && this.options.timeOptions !== null) {
       this.updateTimeOptions(this.options.timeOptions);
+    } else {
+      // Restore defaults when timeOptions is undefined
+      this.timeFormat = TimeFormat.HOUR_MINUTE;
+      this.useMilitaryTime = false;
+      this.timeCanLoop = true;
+      this.timeHapticFeedback = true;
+      this.startHour = DatePickerConstant.MIN_HOUR;
+      this.endHour = DatePickerConstant.MAX_HOUR;
+      this.startMinute = DatePickerConstant.MIN_MINUTE;
+      this.endMinute = DatePickerConstant.MAX_MINUTE;
+      this.startSecond = DatePickerConstant.MIN_SECOND;
+      this.endSecond = DatePickerConstant.MAX_SECOND;
+      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
     }
     
     this.initArrays();
   }
   
   private updateDateOptions(dateOptions: DateOptions): void {
-    if (dateOptions.mode !== undefined) {
+    // Issue 4: Restore defaults for undefined/null values
+    if (dateOptions.mode !== undefined && dateOptions.mode !== null) {
       this.dateMode = dateOptions.mode;
+    } else {
+      this.dateMode = DateMode.DATE;
     }
     
-    if (dateOptions.lunar !== undefined) {
-      this.lunar = dateOptions.lunar;
-      if (this.lunar) {
-        this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+    if (dateOptions.lunar !== undefined && dateOptions.lunar !== null) {
+      // Issue 2: Save user-set value first, then decide based on current language
+      this.userLunar = dateOptions.lunar;
+      const isChinese = this.isChineseLocale();
+      if (isChinese) {
+        this.lunar = dateOptions.lunar;
+        if (this.lunar) {
+          this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
+        } else {
+          this.lunarCalendar = null;
+        }
       } else {
+        // Non-Chinese language: force lunar to false, do not apply
+        this.lunar = false;
         this.lunarCalendar = null;
       }
+    } else {
+      this.lunar = false;
+      this.userLunar = false;
+      this.lunarCalendar = null;
     }
     
-    if (dateOptions.loop !== undefined) {
-      this.canLoop = dateOptions.loop;
+    if (dateOptions.loop !== undefined && dateOptions.loop !== null) {
+      this.dateCanLoop = dateOptions.loop;
+    } else {
+      this.dateCanLoop = true;
     }
     
-    if (dateOptions.enableHapticFeedback !== undefined) {
-      this.hapticFeedback = dateOptions.enableHapticFeedback;
+    if (dateOptions.enableHapticFeedback !== undefined && dateOptions.enableHapticFeedback !== null) {
+      this.dateHapticFeedback = dateOptions.enableHapticFeedback;
+    } else {
+      this.dateHapticFeedback = true;
     }
+    
+    let startValid = false;
+    let endValid = false;
+    let startDate: Date | undefined = undefined;
+    let endDate: Date | undefined = undefined;
     
     if (dateOptions.start !== undefined) {
-      this.startYear = dateOptions.start.getFullYear();
+      startDate = this.validateDate(dateOptions.start);
+      if (startDate !== undefined) {
+        startValid = true;
+      }
     }
     
     if (dateOptions.end !== undefined) {
-      this.endYear = dateOptions.end.getFullYear();
+      endDate = this.validateDate(dateOptions.end);
+      if (endDate !== undefined) {
+        endValid = true;
+      }
     }
     
-    if (dateOptions.selected !== undefined) {
-      if (this.initFlag) {
-        this.initFlag = false;
-        if (this.lunar && this.lunarCalendar !== null) {
-          this.lunarCalendar.setTime(dateOptions.selected);
-          const lunarYear = this.lunarCalendar.get('year');
-          const lunarMonth = this.lunarCalendar.get('month');
-          const lunarDay = this.lunarCalendar.get('date');
-          const cyclicalYear = this.lunarCalendar.get('year');
-          
-          const baseYear = 1984;
-          const baseCyclical = 1;
-          const gregorianYear = baseYear + ((cyclicalYear - baseCyclical + 60) % 60);
-          
-          this.selectedYear = gregorianYear;
-          this.selectedMonth = lunarMonth;
-          this.selectedDay = lunarDay;
-        } else {
-          this.selectedYear = dateOptions.selected.getFullYear();
-          this.selectedMonth = dateOptions.selected.getMonth();
-          this.selectedDay = dateOptions.selected.getDate();
-        }
+    if (startValid && endValid) {
+      if (startDate! > endDate!) {
+        this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+        this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+        this.startMonth = DatePickerConstant.MIN_MONTH;
+        this.endMonth = DatePickerConstant.MAX_MONTH;
+        this.startDay = DatePickerConstant.MIN_DAY;
+        this.endDay = 31;
+      } else {
+        this.startYear = startDate!.getFullYear();
+        this.startMonth = startDate!.getMonth();
+        this.startDay = startDate!.getDate();
+        this.endYear = endDate!.getFullYear();
+        this.endMonth = endDate!.getMonth();
+        this.endDay = endDate!.getDate();
+      }
+    } else if (startValid && !endValid) {
+      this.startYear = startDate!.getFullYear();
+      this.startMonth = startDate!.getMonth();
+      this.startDay = startDate!.getDate();
+      if (this.startYear < DatePickerConstant.MIN_YEAR) {
+        this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+        this.startMonth = DatePickerConstant.MIN_MONTH;
+        this.startDay = DatePickerConstant.MIN_DAY;
+      }
+      if (this.startYear > DatePickerConstant.MAX_YEAR) {
+        this.startYear = DatePickerConstant.DEFAULT_END_YEAR;
+        this.startMonth = DatePickerConstant.MAX_MONTH;
+        this.startDay = 31;
+      }
+      this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.endDay = 31;
+    } else if (!startValid && endValid) {
+      this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+      this.endYear = endDate!.getFullYear();
+      this.endMonth = endDate!.getMonth();
+      this.endDay = endDate!.getDate();
+      if (this.endYear < DatePickerConstant.MIN_YEAR) {
+        this.endYear = DatePickerConstant.DEFAULT_START_YEAR;
+        this.endMonth = DatePickerConstant.MIN_MONTH;
+        this.endDay = DatePickerConstant.MIN_DAY;
+      }
+      if (this.endYear > DatePickerConstant.MAX_YEAR) {
+        this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+        this.endMonth = DatePickerConstant.MAX_MONTH;
+        this.endDay = 31;
       }
     } else {
-      if (this.initFlag) {
-        this.initFlag = false;
-        const now = new Date();
-        if (this.lunar && this.lunarCalendar !== null) {
-          this.lunarCalendar.setTime(now);
-          const lunarMonth = this.lunarCalendar.get('month');
-          const lunarDay = this.lunarCalendar.get('date');
-          const cyclicalYear = this.lunarCalendar.get('year');
-          
-          const baseYear = 1984;
-          const baseCyclical = 1;
-          const gregorianYear = baseYear + ((cyclicalYear - baseCyclical + 60) % 60);
-          
-          this.selectedYear = gregorianYear;
-          this.selectedMonth = lunarMonth;
-          this.selectedDay = lunarDay;
-        } else {
-          this.selectedYear = now.getFullYear();
-          this.selectedMonth = now.getMonth();
-          this.selectedDay = now.getDate();
-        }
+      this.startYear = DatePickerConstant.DEFAULT_START_YEAR;
+      this.endYear = DatePickerConstant.DEFAULT_END_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+      this.endDay = 31;
+    }
+    
+    if (this.startYear > this.endYear) {
+      const tempYear = this.startYear;
+      const tempMonth = this.startMonth;
+      const tempDay = this.startDay;
+      this.startYear = this.endYear;
+      this.startMonth = this.endMonth;
+      this.startDay = this.endDay;
+      this.endYear = tempYear;
+      this.endMonth = tempMonth;
+      this.endDay = tempDay;
+    }
+    
+    // If user explicitly sets valid start or end, force loop to false
+    if (startValid || endValid) {
+      this.dateCanLoop = false;
+    }
+    
+    if (this.startYear < DatePickerConstant.MIN_YEAR) {
+      this.startYear = DatePickerConstant.MIN_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+    }
+    if (this.endYear > DatePickerConstant.MAX_YEAR) {
+      this.endYear = DatePickerConstant.MAX_YEAR;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.endDay = 31;
+    }
+    if (this.startYear > DatePickerConstant.MAX_YEAR && this.endYear > DatePickerConstant.MAX_YEAR) {
+      this.startYear = DatePickerConstant.MAX_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+      this.endYear = DatePickerConstant.MAX_YEAR;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.endDay = 31;
+    }
+    if (this.startYear < DatePickerConstant.MIN_YEAR && this.endYear < DatePickerConstant.MIN_YEAR) {
+      this.startYear = DatePickerConstant.MIN_YEAR;
+      this.startMonth = DatePickerConstant.MIN_MONTH;
+      this.startDay = DatePickerConstant.MIN_DAY;
+      this.endYear = DatePickerConstant.MIN_YEAR;
+      this.endMonth = DatePickerConstant.MAX_MONTH;
+      this.endDay = 31;
+    }
+    
+    const now = new Date();
+    let selectedDate: Date | undefined = undefined;
+    let selectedValid = false;
+    
+    if (dateOptions.selected !== undefined) {
+      selectedDate = this.validateDate(dateOptions.selected);
+      if (selectedDate !== undefined) {
+        selectedValid = true;
       }
+    }
+    
+    // Create Date objects for start and end
+    const startDateObj = this.createDateFromParams(this.startYear, this.startMonth, this.startDay);
+    const endDateObj = this.createDateFromParams(this.endYear, this.endMonth, this.endDay);
+    
+    // Determine the initial selected date
+    let targetDate: Date;
+    if (selectedValid) {
+      targetDate = selectedDate!;
+    } else {
+      targetDate = now;
+    }
+    
+    // Adjust selected date to be within range
+    if (targetDate < startDateObj) {
+      targetDate = startDateObj;
+    } else if (targetDate > endDateObj) {
+      targetDate = endDateObj;
+    }
+    
+    // Extract year, month, day from adjusted date
+    if (this.lunar && this.lunarCalendar !== null) {
+      this.lunarCalendar.setTime(targetDate);
+      const lunarMonth = this.lunarCalendar.get('month');
+      const lunarDay = this.lunarCalendar.get('date');
+      
+      this.selectedYear = targetDate.getFullYear();
+      this.selectedMonth = lunarMonth;
+      this.selectedDay = lunarDay;
+    } else {
+      this.selectedYear = targetDate.getFullYear();
+      this.selectedMonth = targetDate.getMonth();
+      this.selectedDay = targetDate.getDate();
+    }
+    
+    // Ensure day doesn't exceed days in month
+    const daysInMonth = this.getDaysInMonth(this.selectedYear, this.selectedMonth);
+    if (this.selectedDay > daysInMonth) {
+      this.selectedDay = daysInMonth;
     }
     
     if (dateOptions.onChange !== undefined) {
-      this.onChange = dateOptions.onChange;
+      this.dateOnChange = dateOptions.onChange;
     }
     
     if (dateOptions.onScrollStop !== undefined) {
-      this.onScrollStop = dateOptions.onScrollStop;
+      this.dateOnScrollStop = dateOptions.onScrollStop;
     }
   }
   
   private updateTimeOptions(timeOptions: TimeOptions): void {
-    if (timeOptions.format !== undefined) {
+    // Issue 4: Restore defaults for undefined/null values
+    if (timeOptions.format !== undefined && timeOptions.format !== null) {
       this.timeFormat = timeOptions.format;
+    } else {
+      this.timeFormat = TimeFormat.HOUR_MINUTE;
     }
     
-    if (timeOptions.useMilitaryTime !== undefined) {
+    if (timeOptions.useMilitaryTime !== undefined && timeOptions.useMilitaryTime !== null) {
       this.useMilitaryTime = timeOptions.useMilitaryTime;
+    } else {
+      this.useMilitaryTime = false;
     }
     
-    if (timeOptions.loop !== undefined) {
-      this.canLoop = timeOptions.loop;
+    if (timeOptions.loop !== undefined && timeOptions.loop !== null) {
+      this.timeCanLoop = timeOptions.loop;
+    } else {
+      this.timeCanLoop = true;
     }
     
-    if (timeOptions.enableHapticFeedback !== undefined) {
-      this.hapticFeedback = timeOptions.enableHapticFeedback;
+    if (timeOptions.enableHapticFeedback !== undefined && timeOptions.enableHapticFeedback !== null) {
+      this.timeHapticFeedback = timeOptions.enableHapticFeedback;
+    } else {
+      this.timeHapticFeedback = true;
     }
+    
+    let startValid = false;
+    let endValid = false;
+    let startTime: Date | undefined = undefined;
+    let endTime: Date | undefined = undefined;
+    
+    if (timeOptions.start !== undefined) {
+      startTime = this.validateTime(timeOptions.start);
+      if (startTime !== undefined) {
+        startValid = true;
+      }
+    }
+    
+    if (timeOptions.end !== undefined) {
+      endTime = this.validateTime(timeOptions.end);
+      if (endTime !== undefined) {
+        endValid = true;
+      }
+    }
+    
+    if (startValid && endValid) {
+      if (startTime!.getHours() > endTime!.getHours() ||
+          (startTime!.getHours() === endTime!.getHours() && startTime!.getMinutes() > endTime!.getMinutes()) ||
+          (startTime!.getHours() === endTime!.getHours() && startTime!.getMinutes() === endTime!.getMinutes() && startTime!.getSeconds() > endTime!.getSeconds())) {
+        this.startHour = DatePickerConstant.MIN_HOUR;
+        this.endHour = DatePickerConstant.MAX_HOUR;
+        this.startMinute = DatePickerConstant.MIN_MINUTE;
+        this.endMinute = DatePickerConstant.MAX_MINUTE;
+        this.startSecond = DatePickerConstant.MIN_SECOND;
+        this.endSecond = DatePickerConstant.MAX_SECOND;
+      } else {
+        this.startHour = startTime!.getHours();
+        this.startMinute = startTime!.getMinutes();
+        this.startSecond = startTime!.getSeconds();
+        this.endHour = endTime!.getHours();
+        this.endMinute = endTime!.getMinutes();
+        this.endSecond = endTime!.getSeconds();
+      }
+    } else if (startValid && !endValid) {
+      this.startHour = startTime!.getHours();
+      this.startMinute = startTime!.getMinutes();
+      this.startSecond = startTime!.getSeconds();
+      this.endHour = DatePickerConstant.MAX_HOUR;
+      this.endMinute = DatePickerConstant.MAX_MINUTE;
+      this.endSecond = DatePickerConstant.MAX_SECOND;
+    } else if (!startValid && endValid) {
+      this.startHour = DatePickerConstant.MIN_HOUR;
+      this.startMinute = DatePickerConstant.MIN_MINUTE;
+      this.startSecond = DatePickerConstant.MIN_SECOND;
+      this.endHour = endTime!.getHours();
+      this.endMinute = endTime!.getMinutes();
+      this.endSecond = endTime!.getSeconds();
+    } else {
+      this.startHour = DatePickerConstant.MIN_HOUR;
+      this.endHour = DatePickerConstant.MAX_HOUR;
+      this.startMinute = DatePickerConstant.MIN_MINUTE;
+      this.endMinute = DatePickerConstant.MAX_MINUTE;
+      this.startSecond = DatePickerConstant.MIN_SECOND;
+      this.endSecond = DatePickerConstant.MAX_SECOND;
+    }
+    
+    this.startHour = Math.max(DatePickerConstant.MIN_HOUR, Math.min(DatePickerConstant.MAX_HOUR, this.startHour));
+    this.endHour = Math.max(DatePickerConstant.MIN_HOUR, Math.min(DatePickerConstant.MAX_HOUR, this.endHour));
+    this.startMinute = Math.max(DatePickerConstant.MIN_MINUTE, Math.min(DatePickerConstant.MAX_MINUTE, this.startMinute));
+    this.endMinute = Math.max(DatePickerConstant.MIN_MINUTE, Math.min(DatePickerConstant.MAX_MINUTE, this.endMinute));
+    this.startSecond = Math.max(DatePickerConstant.MIN_SECOND, Math.min(DatePickerConstant.MAX_SECOND, this.startSecond));
+    this.endSecond = Math.max(DatePickerConstant.MIN_SECOND, Math.min(DatePickerConstant.MAX_SECOND, this.endSecond));
+    
+    // If user explicitly sets valid start or end, force loop to false
+    if (startValid || endValid) {
+      this.timeCanLoop = false;
+    }
+    
+    const now = new Date();
+    let selectedTime: Date | undefined = undefined;
+    let selectedValid = false;
     
     if (timeOptions.selected !== undefined) {
-      if (this.initFlag) {
-        this.initFlag = false;
-        this.selectedHour = timeOptions.selected.getHours();
-        this.selectedMinute = timeOptions.selected.getMinutes();
-        this.selectedSecond = timeOptions.selected.getSeconds();
+      selectedTime = this.validateTime(timeOptions.selected);
+      if (selectedTime !== undefined) {
+        selectedValid = true;
       }
+    }
+    
+    // Determine the initial selected time
+    let targetTime: Date;
+    if (selectedValid) {
+      targetTime = selectedTime!;
     } else {
-      if (this.initFlag) {
-        this.initFlag = false;
-        const now = new Date();
-        this.selectedHour = now.getHours();
-        this.selectedMinute = now.getMinutes();
-        this.selectedSecond = now.getSeconds();
-      }
+      targetTime = now;
+    }
+    
+    // Create Date objects for start and end time on same day
+    const startTimeObj = new Date(2026, 0, 1, this.startHour, this.startMinute, this.startSecond);
+    const endTimeObj = new Date(2026, 0, 1, this.endHour, this.endMinute, this.endSecond);
+    const targetTimeObj = new Date(2026, 0, 1, targetTime.getHours(), targetTime.getMinutes(), targetTime.getSeconds());
+    
+    // Adjust selected time to be within range
+    if (targetTimeObj < startTimeObj) {
+      targetTimeObj.setTime(startTimeObj.getTime());
+    } else if (targetTimeObj > endTimeObj) {
+      targetTimeObj.setTime(endTimeObj.getTime());
+    }
+    
+    // Extract hour, minute, second from adjusted time
+    this.selectedHour = targetTimeObj.getHours();
+    this.selectedMinute = targetTimeObj.getMinutes();
+    this.selectedSecond = targetTimeObj.getSeconds();
+    
+    // Set selectedPeriod based on selectedHour for 12-hour format
+    if (!this.useMilitaryTime) {
+      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
     }
     
     if (timeOptions.onChange !== undefined) {
-      this.onChange = timeOptions.onChange;
+      this.timeOnChange = timeOptions.onChange;
     }
     
     if (timeOptions.onScrollStop !== undefined) {
-      this.onScrollStop = timeOptions.onScrollStop;
+      this.timeOnScrollStop = timeOptions.onScrollStop;
     }
   }
   
@@ -545,7 +1251,9 @@ export struct DatePickerComponent {
     result.month = this.selectedMonth;
     result.day = this.selectedDay;
     
+    // Always return 24-hour format (selectedHour is always 0-23)
     result.hour = this.selectedHour;
+    
     result.minute = this.selectedMinute;
     result.second = this.selectedSecond;
     return result;
@@ -553,73 +1261,201 @@ export struct DatePickerComponent {
   
   private onYearChange(selectedIndex: number): void {
     this.selectedYear = this.startYear + selectedIndex;
+    
+    // Update month array based on new year
+    this.initMonthArray();
+    
+    // Adjust selectedMonth to be within new month range
+    let startMonthIndex = DatePickerConstant.MIN_MONTH;
+    let endMonthIndex = DatePickerConstant.MAX_MONTH;
+    if (this.selectedYear === this.startYear) {
+      startMonthIndex = this.startMonth;
+    }
+    if (this.selectedYear === this.endYear) {
+      endMonthIndex = this.endMonth;
+    }
+    
+    if (this.selectedMonth < startMonthIndex) {
+      this.selectedMonth = startMonthIndex;
+    }
+    if (this.selectedMonth > endMonthIndex) {
+      this.selectedMonth = endMonthIndex;
+    }
+    
+    // Update day array based on new year and adjusted month
     this.updateDaysArray();
-    this.onChange?.(this.getResult());
+    this.dateOnChange?.(this.getResult());
   }
   
   private onMonthChange(selectedIndex: number): void {
-    this.selectedMonth = selectedIndex;
+    let startMonthIndex = DatePickerConstant.MIN_MONTH;
+    if (this.selectedYear === this.startYear) {
+      startMonthIndex = this.startMonth;
+    }
+    this.selectedMonth = startMonthIndex + selectedIndex;
     this.updateDaysArray();
-    this.onChange?.(this.getResult());
+    this.dateOnChange?.(this.getResult());
   }
   
   private onDayChange(selectedIndex: number): void {
-    this.selectedDay = selectedIndex + 1;
-    this.onChange?.(this.getResult());
+    let startDayIndex = DatePickerConstant.MIN_DAY;
+    if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+      startDayIndex = this.startDay;
+    }
+    this.selectedDay = startDayIndex + selectedIndex;
+    this.dateOnChange?.(this.getResult());
   }
   
 private onHourChange(selectedIndex: number): void {
     if (this.useMilitaryTime) {
-      this.selectedHour = selectedIndex;
+      this.selectedHour = this.startHour + selectedIndex;
     } else {
-      const displayHour = selectedIndex + 1;
-      if (displayHour === 12) {
+      const oldDisplayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
+                            (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
+      
+      // Get the actual display hour from hourArray
+      const newDisplayHour = parseInt(this.hourArray[selectedIndex]);
+      
+      // Crossing 11↔12 always triggers period toggle
+      const crossingBoundary = (oldDisplayHour === 11 && newDisplayHour === 12) || 
+                               (oldDisplayHour === 12 && newDisplayHour === 11);
+      
+      if (crossingBoundary) {
+        // Toggle period
+        this.selectedPeriod = this.selectedPeriod === 0 ? 1 : 0;
+      }
+      
+      // Convert display hour to 24-hour format based on CURRENT period (after toggle)
+      if (newDisplayHour === 12) {
         if (this.selectedPeriod === 0) {
-          this.selectedHour = 0;
+          this.selectedHour = 0; // 12 AM = 0:00 (24-hour)
         } else {
-          this.selectedHour = 12;
+          this.selectedHour = 12; // 12 PM = 12:00 (24-hour)
         }
       } else {
         if (this.selectedPeriod === 0) {
-          this.selectedHour = displayHour;
+          this.selectedHour = newDisplayHour; // 1-11 AM
         } else {
-          this.selectedHour = displayHour + 12;
+          this.selectedHour = newDisplayHour + 12; // 1-11 PM = 13-23
         }
       }
     }
-    this.onChange?.(this.getResult());
+    this.updateTimeArrays();
+    this.timeOnChange?.(this.getResult());
   }
   
   private onPeriodChange(selectedIndex: number): void {
-    this.selectedPeriod = selectedIndex;
+    // Determine selectedPeriod based on periodArray content, not directly using selectedIndex
+    // This ensures correct mapping even if periodArray has only one option
+    const selectedPeriodStr = this.periodArray[selectedIndex];
+    this.selectedPeriod = selectedPeriodStr === this.formatPeriod(true) ? 0 : 1;
+    
     if (!this.useMilitaryTime) {
-      const displayHourIndex = this.getHourSelectedIndex();
-      const displayHour = displayHourIndex + 1;
-      if (displayHour === 12) {
-        if (this.selectedPeriod === 0) {
-          this.selectedHour = 0;
-        } else {
-          this.selectedHour = 12;
+      // Update hourArray
+      this.updateHourArrayFor12Hour();
+      
+      // Adjust selectedHour based on new period
+      const isAM = this.selectedPeriod === 0;
+      if (isAM) {
+        // Switch to AM period
+        const minHour = Math.max(0, this.startHour);
+        const maxHour = Math.min(11, this.endHour < 12 ? this.endHour : 11);
+        
+        // If current hour is not in AM range, adjust to within range
+        if (this.selectedHour >= 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       } else {
-        if (this.selectedPeriod === 0) {
-          this.selectedHour = displayHour;
-        } else {
-          this.selectedHour = displayHour + 12;
+        // Switch to PM period
+        const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12);
+        const maxHour = Math.min(23, this.endHour);
+        
+        // If current hour is not in PM range, adjust to within range
+        if (this.selectedHour < 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       }
+      
+      // Update minute and second arrays
+      this.updateTimeArrays();
     }
-    this.onChange?.(this.getResult());
+    
+    this.timeOnChange?.(this.getResult());
   }
   
   private onMinuteChange(selectedIndex: number): void {
-    this.selectedMinute = selectedIndex;
-    this.onChange?.(this.getResult());
+    let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+    if (this.selectedHour === this.startHour) {
+      startMinuteIndex = this.startMinute;
+    }
+    this.selectedMinute = startMinuteIndex + selectedIndex;
+    this.updateSecondArray();
+    this.timeOnChange?.(this.getResult());
   }
   
   private onSecondChange(selectedIndex: number): void {
-    this.selectedSecond = selectedIndex;
-    this.onChange?.(this.getResult());
+    let startSecondIndex = DatePickerConstant.MIN_SECOND;
+    if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+      startSecondIndex = this.startSecond;
+    }
+    this.selectedSecond = startSecondIndex + selectedIndex;
+    this.timeOnChange?.(this.getResult());
+  }
+  
+  private updateTimeArrays(): void {
+    this.minuteArray = [];
+    let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+    let endMinuteIndex = DatePickerConstant.MAX_MINUTE;
+    
+    if (this.selectedHour === this.startHour) {
+      startMinuteIndex = this.startMinute;
+    }
+    if (this.selectedHour === this.endHour) {
+      endMinuteIndex = this.endMinute;
+    }
+    
+    for (let i = startMinuteIndex; i <= endMinuteIndex; i++) {
+      this.minuteArray.push(this.formatMinute(i));
+    }
+    
+    if (this.selectedMinute < startMinuteIndex) {
+      this.selectedMinute = startMinuteIndex;
+    }
+    if (this.selectedMinute > endMinuteIndex) {
+      this.selectedMinute = endMinuteIndex;
+    }
+    
+    this.updateSecondArray();
+  }
+  
+  private updateSecondArray(): void {
+    this.secondArray = [];
+    let startSecondIndex = DatePickerConstant.MIN_SECOND;
+    let endSecondIndex = DatePickerConstant.MAX_SECOND;
+    
+    if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+      startSecondIndex = this.startSecond;
+    }
+    if (this.selectedHour === this.endHour && this.selectedMinute === this.endMinute) {
+      endSecondIndex = this.endSecond;
+    }
+    
+    for (let i = startSecondIndex; i <= endSecondIndex; i++) {
+      this.secondArray.push(this.formatSecond(i));
+    }
+    
+    if (this.selectedSecond < startSecondIndex) {
+      this.selectedSecond = startSecondIndex;
+    }
+    if (this.selectedSecond > endSecondIndex) {
+      this.selectedSecond = endSecondIndex;
+    }
   }
   
   private updateDaysArray(): void {
@@ -631,9 +1467,26 @@ private onHourChange(selectedIndex: number): void {
       this.initLunarDayArray();
     } else {
       const daysInMonth = this.getDaysInMonth(this.selectedYear, this.selectedMonth);
-      if (this.selectedDay > daysInMonth) {
-        this.selectedDay = daysInMonth;
+      
+      // Determine the valid day range based on selected year and month
+      let startDayIndex = DatePickerConstant.MIN_DAY;
+      let endDayIndex = daysInMonth;
+      
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+        startDayIndex = this.startDay;
       }
+      if (this.selectedYear === this.endYear && this.selectedMonth === this.endMonth) {
+        endDayIndex = Math.min(this.endDay, daysInMonth);
+      }
+      
+      // Adjust selectedDay to be within valid range
+      if (this.selectedDay < startDayIndex) {
+        this.selectedDay = startDayIndex;
+      }
+      if (this.selectedDay > endDayIndex) {
+        this.selectedDay = endDayIndex;
+      }
+      
       this.initDayArray();
     }
   }
@@ -643,42 +1496,188 @@ private onHourChange(selectedIndex: number): void {
   }
   
   private getMonthSelectedIndex(): number {
-    return this.selectedMonth;
+    let startMonthIndex = DatePickerConstant.MIN_MONTH;
+    if (this.selectedYear === this.startYear) {
+      startMonthIndex = this.startMonth;
+    }
+    return this.selectedMonth - startMonthIndex;
   }
   
   private getDaySelectedIndex(): number {
-    return this.selectedDay - 1;
+    let startDayIndex = DatePickerConstant.MIN_DAY;
+    if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+      startDayIndex = this.startDay;
+    }
+    return this.selectedDay - startDayIndex;
   }
   
   private getHourSelectedIndex(): number {
     if (this.useMilitaryTime) {
-      return this.selectedHour;
+      return this.selectedHour - this.startHour;
     } else {
-      if (this.selectedHour === 0) {
-        return 11;
-      } else if (this.selectedHour === 12) {
-        return 11;
-      } else if (this.selectedHour > 12) {
-        return this.selectedHour - 13;
-      } else {
-        return this.selectedHour - 1;
-      }
+      // Convert selectedHour to display hour (1-12)
+      const displayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
+                         (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
+      
+      // Find the index of displayHour in hourArray
+      const displayHourStr = displayHour.toString().padStart(2, '0');
+      const index = this.hourArray.indexOf(displayHourStr);
+      
+      // Fallback to first element if not found (shouldn't happen with correct logic)
+      return index >= 0 ? index : 0;
     }
   }
   
-  private getPeriodSelectedIndex(): number {
-    return this.selectedPeriod;
-  }
-  
   private getMinuteSelectedIndex(): number {
-    return this.selectedMinute;
+    let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+    if (this.selectedHour === this.startHour) {
+      startMinuteIndex = this.startMinute;
+    }
+    return this.selectedMinute - startMinuteIndex;
   }
   
   private getSecondSelectedIndex(): number {
-    return this.selectedSecond;
+    let startSecondIndex = DatePickerConstant.MIN_SECOND;
+    if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+      startSecondIndex = this.startSecond;
+    }
+    return this.selectedSecond - startSecondIndex;
+  }
+  
+  private isRTL(): boolean {
+    return i18n.isRTL(this.locale.toString()) ?? false;
+  }
+  
+  private getDateColumnCount(): number {
+    if (this.dateMode === DateMode.DATE) {
+      return 3;
+    } else {
+      return 2;
+    }
+  }
+  
+  private getTimeColumnCount(): number {
+    if (this.timeFormat === TimeFormat.HOUR_MINUTE) {
+      return this.useMilitaryTime ? 2 : 3;
+    } else {
+      return this.useMilitaryTime ? 3 : 4;
+    }
+  }
+  
+  private getColumnCount(): number {
+    let columnCount = 0;
+    
+    if (this.displayMode === DisplayMode.DATE) {
+      columnCount = this.getDateColumnCount();
+    } else if (this.displayMode === DisplayMode.TIME) {
+      columnCount = this.getTimeColumnCount();
+    } else {
+      columnCount = this.getDateColumnCount() + this.getTimeColumnCount();
+    }
+    
+    return columnCount;
+  }
+  
+  private getFontSize(): string {
+    const columnCount = this.getColumnCount();
+    return columnCount >= 6 ? '14vp' : '16vp';
+  }
+  
+  private getDatePartRatio(): number {
+    const timeColumns = this.getTimeColumnCount();
+    const dateColumns = this.getDateColumnCount();
+    if (timeColumns === 4) {
+      if (dateColumns === 3) {
+        return 1;
+      } else {
+        return 2;
+      }
+    } else if (timeColumns === 2) {
+      if (dateColumns === 3) {
+        return 3;
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+  }
+  
+  private getTimePartRatio(): number {
+    const timeColumns = this.getTimeColumnCount();
+    const dateColumns = this.getDateColumnCount();
+    if (timeColumns === 4) {
+      if (dateColumns === 3) {
+        return 1;
+      } else {
+        return 3;
+      }
+    } else if (timeColumns === 2) {
+      if (dateColumns === 3) {
+        return 2;
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+  }
+  
+  private getDateColumnWidth(columnIndex: number): string {
+    const inDateTimeMode = this.displayMode === DisplayMode.DATE_TIME;
+    let parts: number[] = [];
+    
+    if (this.dateMode === DateMode.DATE) {
+      parts = [3, 2, 2];
+    } else if (this.dateMode === DateMode.YEAR_AND_MONTH) {
+      parts = [3, 2];
+    } else {
+      parts = [1, 1];
+    }
+    
+    const totalParts = parts.reduce((a, b) => a + b, 0);
+    const columnPart = parts[columnIndex];
+    
+    if (inDateTimeMode) {
+      const dateRatio = this.getDatePartRatio();
+      const timeRatio = this.getTimePartRatio();
+      const totalRatio = dateRatio + timeRatio;
+      const percent = (dateRatio / totalRatio) * (columnPart / totalParts) * 100;
+      return `${percent.toFixed(2)}%`;
+    } else {
+      const percent = (columnPart / totalParts) * 100;
+      return `${percent.toFixed(2)}%`;
+    }
+  }
+  
+  private getTimeColumnWidth(columnIndex: number): string {
+    const inDateTimeMode = this.displayMode === DisplayMode.DATE_TIME;
+    const totalColumns = this.getTimeColumnCount();
+    
+    if (inDateTimeMode) {
+      const dateRatio = this.getDatePartRatio();
+      const timeRatio = this.getTimePartRatio();
+      const totalRatio = dateRatio + timeRatio;
+      const percent = (timeRatio / totalRatio) * (1 / totalColumns) * 100;
+      return `${percent.toFixed(2)}%`;
+    } else {
+      const percent = (1 / totalColumns) * 100;
+      return `${percent.toFixed(2)}%`;
+    }
   }
   
   private getFirstPickerIndicator(radius: number = 20): PickerIndicatorStyle {
+    if (this.isRTL()) {
+      return {
+        type: PickerIndicatorType.BACKGROUND,
+        borderRadius: {
+          topLeft: 0,
+          topRight: radius,
+          bottomLeft: 0,
+          bottomRight: radius
+        } as BorderRadiuses
+      };
+    }
     return {
       type: PickerIndicatorType.BACKGROUND,
       borderRadius: {
@@ -703,6 +1702,17 @@ private onHourChange(selectedIndex: number): void {
   }
   
   private getLastPickerIndicator(radius: number = 20): PickerIndicatorStyle {
+    if (this.isRTL()) {
+      return {
+        type: PickerIndicatorType.BACKGROUND,
+        borderRadius: {
+          topLeft: radius,
+          topRight: 0,
+          bottomLeft: radius,
+          bottomRight: 0
+        } as BorderRadiuses
+      };
+    }
     return {
       type: PickerIndicatorType.BACKGROUND,
       borderRadius: {
@@ -714,6 +1724,15 @@ private onHourChange(selectedIndex: number): void {
     };
   }
   
+  private getAdjustedRadius(): number {
+    const minColumnWidth = Math.min(this.firstColumnWidth, this.lastColumnWidth);
+    if (minColumnWidth <= 0) {
+      return 20;
+    }
+    const calculatedRadius = Math.min(minColumnWidth / 2, 20);
+    return Math.max(calculatedRadius, 0);
+  }
+  
   build() {
     Row() {
       if (this.displayMode === DisplayMode.DATE || this.displayMode === DisplayMode.DATE_TIME) {
@@ -721,129 +1740,213 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getYearSelectedIndex() }) {
             ForEach(this.yearArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%')
+          .width(this.getDateColumnWidth(0))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.getFirstPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
             this.selectedYear = this.startYear + selectedIndex;
             this.updateDaysArray();
-            this.onScrollStop?.(this.getResult());
+            this.dateOnScrollStop?.(this.getResult());
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            const newWidth = newValue.width as number;
+            if (this.firstColumnWidth !== newWidth) {
+              this.firstColumnWidth = newWidth;
+            }
           })
           
           UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%')
+          .width(this.getDateColumnWidth(1))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
           .selectionIndicator(this.getMiddlePickerIndicator())
           .onChange((selectedIndex: number) => {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.selectedMonth = selectedIndex;
-            this.onScrollStop?.(this.getResult());
+            let startMonthIndex = DatePickerConstant.MIN_MONTH;
+            if (this.selectedYear === this.startYear) {
+              startMonthIndex = this.startMonth;
+            }
+            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.dateOnScrollStop?.(this.getResult());
           })
           
           UIPickerComponent({ selectedIndex: this.getDaySelectedIndex() }) {
             ForEach(this.dayArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
+          .width(this.getDateColumnWidth(2))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.selectedDay = selectedIndex + 1;
-            this.onScrollStop?.(this.getResult());
+            let startDayIndex = DatePickerConstant.MIN_DAY;
+            if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+              startDayIndex = this.startDay;
+            }
+            this.selectedDay = startDayIndex + selectedIndex;
+            this.dateOnScrollStop?.(this.getResult());
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            if (this.displayMode !== DisplayMode.DATE_TIME) {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
+            }
           })
         } else if (this.dateMode === DateMode.YEAR_AND_MONTH) {
           UIPickerComponent({ selectedIndex: this.getYearSelectedIndex() }) {
             ForEach(this.yearArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+          .width(this.getDateColumnWidth(0))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.getFirstPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
             this.selectedYear = this.startYear + selectedIndex;
             this.updateDaysArray();
-            this.onScrollStop?.(this.getResult());
+            this.dateOnScrollStop?.(this.getResult());
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            const newWidth = newValue.width as number;
+            if (this.firstColumnWidth !== newWidth) {
+              this.firstColumnWidth = newWidth;
+            }
           })
           
-          UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
+UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+          .width(this.getDateColumnWidth(1))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.selectedMonth = selectedIndex;
-            this.onScrollStop?.(this.getResult());
+            let startMonthIndex = DatePickerConstant.MIN_MONTH;
+            if (this.selectedYear === this.startYear) {
+              startMonthIndex = this.startMonth;
+            }
+            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.dateOnScrollStop?.(this.getResult());
           })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            if (this.displayMode !== DisplayMode.DATE_TIME) {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
+            }
+          })
+          
         } else if (this.dateMode === DateMode.MONTH_AND_DAY) {
           UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+          .width(this.getDateColumnWidth(0))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.getFirstPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.getFirstPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.selectedMonth = selectedIndex;
-            this.onScrollStop?.(this.getResult());
+            let startMonthIndex = DatePickerConstant.MIN_MONTH;
+            if (this.selectedYear === this.startYear) {
+              startMonthIndex = this.startMonth;
+            }
+            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.dateOnScrollStop?.(this.getResult());
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            const newWidth = newValue.width as number;
+            if (this.firstColumnWidth !== newWidth) {
+              this.firstColumnWidth = newWidth;
+            }
           })
           
           UIPickerComponent({ selectedIndex: this.getDaySelectedIndex() }) {
             ForEach(this.dayArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
-          .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+          .width(this.getDateColumnWidth(1))
           .height(200)
-          .canLoop(this.canLoop)
-          .enableHapticFeedback(this.hapticFeedback)
-          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator())
+          .canLoop(this.dateCanLoop)
+          .enableHapticFeedback(this.dateHapticFeedback)
+          .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getLastPickerIndicator(this.getAdjustedRadius()))
           .onChange((selectedIndex: number) => {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.selectedDay = selectedIndex + 1;
-            this.onScrollStop?.(this.getResult());
+            let startDayIndex = DatePickerConstant.MIN_DAY;
+            if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+              startDayIndex = this.startDay;
+            }
+            this.selectedDay = startDayIndex + selectedIndex;
+            this.dateOnScrollStop?.(this.getResult());
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            if (this.displayMode !== DisplayMode.DATE_TIME) {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
+            }
           })
         }
       }
@@ -854,91 +1957,145 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+            .width(this.getTimeColumnWidth(0))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedHour = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              this.selectedHour = this.startHour + selectedIndex;
+              this.updateTimeArrays();
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              if (this.displayMode === DisplayMode.TIME) {
+                const newWidth = newValue.width as number;
+                if (this.firstColumnWidth !== newWidth) {
+                  this.firstColumnWidth = newWidth;
+                }
+              }
             })
             
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
+            .width(this.getTimeColumnWidth(1))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.getLastPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onMinuteChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedMinute = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+              if (this.selectedHour === this.startHour) {
+                startMinuteIndex = this.startMinute;
+              }
+              this.selectedMinute = startMinuteIndex + selectedIndex;
+              this.updateSecondArray();
+              this.timeOnScrollStop?.(this.getResult());
             })
+.onAreaChange((oldValue: Area, newValue: Area) => {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
+            })
+            
           } else {
-            UIPickerComponent({ selectedIndex: this.getPeriodSelectedIndex() }) {
+            UIPickerComponent({ selectedIndex: this.selectedPeriod }) {
               ForEach(this.periodArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
+            .width(this.getTimeColumnWidth(0))
             .height(200)
             .canLoop(false)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator())
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onPeriodChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
               this.selectedPeriod = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              this.timeOnScrollStop?.(this.getResult());
             })
-            
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              if (this.displayMode === DisplayMode.TIME) {
+                const newWidth = newValue.width as number;
+                if (this.firstColumnWidth !== newWidth) {
+                  this.firstColumnWidth = newWidth;
+                }
+              }
+            })
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '34%')
+            .width(this.getTimeColumnWidth(1))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
             .selectionIndicator(this.getMiddlePickerIndicator())
             .onChange((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
-              this.onScrollStop?.(this.getResult());
+              this.timeOnScrollStop?.(this.getResult());
             })
             
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
+            .width(this.getTimeColumnWidth(2))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.getLastPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onMinuteChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedMinute = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+              if (this.selectedHour === this.startHour) {
+                startMinuteIndex = this.startMinute;
+              }
+              this.selectedMinute = startMinuteIndex + selectedIndex;
+              this.updateSecondArray();
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
             })
           }
         } else if (this.timeFormat === TimeFormat.HOUR_MINUTE_SECOND) {
@@ -946,127 +2103,195 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%')
+            .width(this.getTimeColumnWidth(0))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedHour = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              this.selectedHour = this.startHour + selectedIndex;
+              this.updateTimeArrays();
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              if (this.displayMode === DisplayMode.TIME) {
+                const newWidth = newValue.width as number;
+                if (this.firstColumnWidth !== newWidth) {
+                  this.firstColumnWidth = newWidth;
+                }
+              }
             })
             
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%')
+            .width(this.getTimeColumnWidth(1))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
             .selectionIndicator(this.getMiddlePickerIndicator())
             .onChange((selectedIndex: number) => {
               this.onMinuteChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedMinute = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+              if (this.selectedHour === this.startHour) {
+                startMinuteIndex = this.startMinute;
+              }
+              this.selectedMinute = startMinuteIndex + selectedIndex;
+              this.updateSecondArray();
+              this.timeOnScrollStop?.(this.getResult());
             })
             
             UIPickerComponent({ selectedIndex: this.getSecondSelectedIndex() }) {
               ForEach(this.secondArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
+            .width(this.getTimeColumnWidth(2))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.getLastPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onSecondChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedSecond = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startSecondIndex = DatePickerConstant.MIN_SECOND;
+              if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+                startSecondIndex = this.startSecond;
+              }
+              this.selectedSecond = startSecondIndex + selectedIndex;
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
             })
           } else {
-            UIPickerComponent({ selectedIndex: this.getPeriodSelectedIndex() }) {
+            UIPickerComponent({ selectedIndex: this.selectedPeriod }) {
               ForEach(this.periodArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%')
+            .width(this.getTimeColumnWidth(0))
             .height(200)
             .canLoop(false)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator())
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.displayMode === DisplayMode.DATE_TIME ? this.getMiddlePickerIndicator() : this.getFirstPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onPeriodChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
               this.selectedPeriod = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              if (this.displayMode === DisplayMode.TIME) {
+                const newWidth = newValue.width as number;
+                if (this.firstColumnWidth !== newWidth) {
+                  this.firstColumnWidth = newWidth;
+                }
+              }
             })
             
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%')
+            .width(this.getTimeColumnWidth(1))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
             .selectionIndicator(this.getMiddlePickerIndicator())
             .onChange((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
               this.onHourChange(selectedIndex);
-              this.onScrollStop?.(this.getResult());
+              this.timeOnScrollStop?.(this.getResult());
             })
             
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%')
+            .width(this.getTimeColumnWidth(2))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
             .selectionIndicator(this.getMiddlePickerIndicator())
             .onChange((selectedIndex: number) => {
               this.onMinuteChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedMinute = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
+              if (this.selectedHour === this.startHour) {
+                startMinuteIndex = this.startMinute;
+              }
+              this.selectedMinute = startMinuteIndex + selectedIndex;
+              this.updateSecondArray();
+              this.timeOnScrollStop?.(this.getResult());
             })
             
             UIPickerComponent({ selectedIndex: this.getSecondSelectedIndex() }) {
               ForEach(this.secondArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .fontSize(this.getFontSize())
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
-            .width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%')
+            .width(this.getTimeColumnWidth(3))
             .height(200)
-            .canLoop(this.canLoop)
-            .enableHapticFeedback(this.hapticFeedback)
-            .selectionIndicator(this.getLastPickerIndicator())
+            .canLoop(this.timeCanLoop)
+            .enableHapticFeedback(this.timeHapticFeedback)
+            .selectionIndicator(this.getLastPickerIndicator(this.getAdjustedRadius()))
             .onChange((selectedIndex: number) => {
               this.onSecondChange(selectedIndex);
             })
             .onScrollStop((selectedIndex: number) => {
-              this.selectedSecond = selectedIndex;
-              this.onScrollStop?.(this.getResult());
+              let startSecondIndex = DatePickerConstant.MIN_SECOND;
+              if (this.selectedHour === this.startHour && this.selectedMinute === this.startMinute) {
+                startSecondIndex = this.startSecond;
+              }
+              this.selectedSecond = startSecondIndex + selectedIndex;
+              this.timeOnScrollStop?.(this.getResult());
+            })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              const newWidth = newValue.width as number;
+              if (this.lastColumnWidth !== newWidth) {
+                this.lastColumnWidth = newWidth;
+              }
             })
           }
         }

@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_RESOURCE_CONFIGURATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_RESOURCE_CONFIGURATION_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "base/json/json_util.h"
 #include "base/utils/device_type.h"
 #include "base/utils/device_config.h"
 
 namespace OHOS::Ace {
+
+class JsonValue;
 
 class ResourceConfiguration {
 public:

@@ -281,13 +281,13 @@ HWTEST_F(CustomMenuItemPatternTestNg, OnTouch001, TestSize.Level1)
 
 /**
  * @tc.name: OnKeyEvent001
- * @tc.desc: Test CustomMenuItem OnKeyEvent
+ * @tc.desc: Test CustomMenuItem OnKeyEvent without subBuilder
  * @tc.type: FUNC
  */
 HWTEST_F(CustomMenuItemPatternTestNg, OnKeyEvent001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create menuItem.
+     * @tc.steps: step1. Create CustomMenuItem without subBuilder
      */
     MenuItemModelNG model;
     auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
@@ -298,17 +298,37 @@ HWTEST_F(CustomMenuItemPatternTestNg, OnKeyEvent001, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     /**
-     * @tc.steps: step2. execute OnKeyEvent
-     * @tc.expected: result as expected
+     * @tc.steps: step2. KEY_ESCAPE returns false
      */
     KeyEvent keyEvent(KeyCode::KEY_ESCAPE, KeyAction::DOWN);
     auto ret = pattern->OnKeyEvent(keyEvent);
     EXPECT_FALSE(ret);
 
+    /**
+     * @tc.steps: step3. KEY_ENTER without subBuilder calls CloseMenu
+     */
     keyEvent.code = KeyCode::KEY_ENTER;
     ret = pattern->OnKeyEvent(keyEvent);
     EXPECT_TRUE(ret);
 
+    /**
+     * @tc.steps: step4. KEY_SPACE without subBuilder calls CloseMenu
+     */
+    keyEvent.code = KeyCode::KEY_SPACE;
+    ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step5. KEY_DPAD_RIGHT without subBuilder returns false
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step6. KEY_ACTION_UP returns false
+     */
+    keyEvent.code = KeyCode::KEY_ENTER;
     keyEvent.action = KeyAction::UP;
     ret = pattern->OnKeyEvent(keyEvent);
     EXPECT_FALSE(ret);
@@ -580,5 +600,572 @@ HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure003, T
     EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Width()));
     EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Height()));
     EXPECT_EQ(layoutAlgorithm->layoutPolicyChildren_.size(), 0);
+}
+
+/**
+ * @tc.name: SetSubBuilder001
+ * @tc.desc: Test CustomMenuItemPattern SetSubBuilder and GetSubBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, SetSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomMenuItem
+     */
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Verify default state - GetSubBuilder returns nullptr
+     */
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step3. Set subBuilder and verify
+     */
+    std::function<void()> buildFunc = []() {};
+    pattern->SetSubBuilder(buildFunc);
+    EXPECT_NE(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step4. Reset subBuilder to nullptr
+     */
+    pattern->SetSubBuilder(nullptr);
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+}
+
+/**
+ * @tc.name: SetSubBuilderStatic001
+ * @tc.desc: Test MenuItemModelNG::SetSubBuilder static method with FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, SetSubBuilderStatic001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomMenuItem FrameNode
+     */
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify default state
+     */
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step3. Set subBuilder via static method
+     */
+    std::function<void()> buildFunc = []() {};
+    MenuItemModelNG::SetSubBuilder(AceType::RawPtr(menuItemNode), std::move(buildFunc));
+    EXPECT_NE(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step4. Reset via nullptr
+     */
+    MenuItemModelNG::SetSubBuilder(AceType::RawPtr(menuItemNode), nullptr);
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+}
+
+/**
+ * @tc.name: ShowSubMenuWithSubBuilder001
+ * @tc.desc: Test ShowSubMenu after SetSubBuilder on CustomMenuItemPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, ShowSubMenuWithSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set subBuilder and call ShowSubMenu
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu();
+
+    /**
+     * @tc.steps: step3. Verify submenu was created
+     */
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    EXPECT_NE(mainMenuPattern->showedSubMenu_, nullptr);
+}
+
+/**
+ * @tc.name: OnKeyEventWithSubBuilder001
+ * @tc.desc: Test OnKeyEvent with subBuilder: KEY_ENTER/KEY_SPACE trigger OnClick, DPAD_RIGHT shows submenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnKeyEventWithSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto pattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set subBuilder
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    pattern->SetSubBuilder(buildFun);
+
+    /**
+     * @tc.steps: step3. KEY_ENTER with subBuilder triggers OnClick (shows submenu)
+     */
+    KeyEvent keyEvent(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    auto ret = pattern->OnKeyEvent(keyEvent);
+    EXPECT_TRUE(ret);
+
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    EXPECT_NE(mainMenuPattern->showedSubMenu_, nullptr);
+}
+
+/**
+ * @tc.name: OnKeyEventWithSubBuilder002
+ * @tc.desc: Test OnKeyEvent DPAD_RIGHT with subBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnKeyEventWithSubBuilder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto pattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Without subBuilder, DPAD_RIGHT returns false
+     */
+    KeyEvent rightEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    EXPECT_FALSE(pattern->OnKeyEvent(rightEvent));
+
+    /**
+     * @tc.steps: step3. Set subBuilder, DPAD_RIGHT shows submenu when not yet showed
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    pattern->SetSubBuilder(buildFun);
+    pattern->SetIsSubMenuShowed(false);
+    pattern->OnKeyEvent(rightEvent);
+
+    /**
+     * @tc.steps: step4. When submenu already showed, DPAD_RIGHT returns false
+     */
+    pattern->SetIsSubMenuShowed(true);
+    EXPECT_FALSE(pattern->OnKeyEvent(rightEvent));
+}
+
+/**
+ * @tc.name: OnTouchWithSubBuilder001
+ * @tc.desc: Test OnTouch does not CloseMenu when subBuilder is set (OnClick handles submenu)
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnTouchWithSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set subBuilder
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+
+    /**
+     * @tc.steps: step3. Simulate touch down then touch up (click gesture)
+     * @tc.expected: OnTouch does not call CloseMenu when subBuilder is set
+     */
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    Offset location(1, 1);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    menuItemPattern->OnTouch(info);
+
+    info.touches_.clear();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    menuItemPattern->OnTouch(info);
+
+    /**
+     * @tc.steps: step4. Verify menu wrapper still has children (not closed)
+     */
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OnClickWithSubBuilder001
+ * @tc.desc: Test OnClick shows submenu when subBuilder is set on CustomMenuItemPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnClickWithSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set subBuilder and call OnClick
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->OnClick();
+
+    /**
+     * @tc.steps: step3. Verify submenu was created
+     */
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    EXPECT_NE(mainMenuPattern->showedSubMenu_, nullptr);
+}
+
+/**
+ * @tc.name: OnModifyDoneWithoutSubBuilder001
+ * @tc.desc: Test OnModifyDone does not affect OnClick behavior when subBuilder is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnModifyDoneWithoutSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem (no subBuilder)
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto pattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Without subBuilder, call OnModifyDone then OnClick
+     * @tc.expected: no submenu created
+     */
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+    pattern->OnModifyDone();
+    pattern->OnClick();
+
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    EXPECT_EQ(mainMenuPattern->showedSubMenu_, nullptr);
+}
+
+/**
+ * @tc.name: OnModifyDoneWithSubBuilder001
+ * @tc.desc: Test OnModifyDone registers click/hover and OnClick shows submenu when subBuilder is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnModifyDoneWithSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto pattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set subBuilder, call OnModifyDone, then OnClick
+     * @tc.expected: submenu created
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    pattern->SetSubBuilder(buildFun);
+    pattern->OnModifyDone();
+    pattern->OnClick();
+
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    EXPECT_NE(mainMenuPattern->showedSubMenu_, nullptr);
+}
+
+/**
+ * @tc.name: OnTouchWithoutSubBuilder001
+ * @tc.desc: Test OnTouch calls CloseMenu when subBuilder is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, OnTouchWithoutSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem (no subBuilder)
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    EXPECT_EQ(menuItemPattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate touch down then touch up (click gesture)
+     * @tc.expected: OnTouch calls CloseMenu since no subBuilder
+     */
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    Offset location(1, 1);
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    menuItemPattern->OnTouch(info);
+
+    info.touches_.clear();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    menuItemPattern->OnTouch(info);
+
+    /**
+     * @tc.steps: step3. Verify menu was closed (wrapper children cleared)
+     */
+    EXPECT_NE(wrapperNode->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: StackModeNoHeader001
+ * @tc.desc: Test CustomMenuItem with STACK mode does not add header to submenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, StackModeNoHeader001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu hierarchy with CustomMenuItem, set STACK expanding mode
+     */
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    auto mainMenuLayoutProp = mainMenu->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(mainMenuLayoutProp, nullptr);
+    mainMenuLayoutProp->UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<CustomMenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+
+    /**
+     * @tc.steps: step2. Set subBuilder and show submenu
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu();
+
+    /**
+     * @tc.steps: step3. Verify submenu was created
+     */
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    auto subMenu = mainMenuPattern->showedSubMenu_;
+    ASSERT_NE(subMenu, nullptr);
+
+    /**
+     * @tc.steps: step4. Verify submenu has no header child (AddStackSubMenuHeader was skipped)
+     * @tc.expected: submenu first child is not a header MenuItem
+     */
+    auto subMenuFrame = AceType::DynamicCast<FrameNode>(subMenu);
+    ASSERT_NE(subMenuFrame, nullptr);
+    // CustomMenuItem should not have stack header added
+    EXPECT_NE(subMenuFrame->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: CustomMenuItemPatternTestNg_OnTouchRegionInBoundsClick001
+ * @tc.desc: Test CustomMenuItem OnTouch recognizes an in-bounds swipe as a click and fires onChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemPatternTestNg_OnTouchRegionInBoundsClick001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    itemNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    bool onChangeFired = false;
+    auto hub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_TRUE(hub);
+    hub->SetOnChange([&onChangeFired](bool /*selected*/) { onChangeFired = true; });
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    // DOWN inside the item bounds
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    ASSERT_TRUE(pattern->lastTouchOffset_);
+    EXPECT_FALSE(pattern->movedOutOfRegion_);
+
+    // a swipe that stays inside the item keeps it a click candidate (the reported bug scenario)
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(40.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_FALSE(pattern->movedOutOfRegion_);
+
+    // UP inside the item bounds -> recognized as a click -> onChange fires
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(70.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_TRUE(onChangeFired);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: CustomMenuItemPatternTestNg_OnTouchRegionMoveOutNoClick001
+ * @tc.desc: Test CustomMenuItem OnTouch drops the click once the finger leaves the item bounds on MOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemPatternTestNg_OnTouchRegionMoveOutNoClick001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    itemNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    bool onChangeFired = false;
+    auto hub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_TRUE(hub);
+    hub->SetOnChange([&onChangeFired](bool /*selected*/) { onChangeFired = true; });
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+
+    // MOVE out of the item bounds marks the gesture as no longer a click
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(200.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_TRUE(pattern->movedOutOfRegion_);
+
+    // UP -> not a click, onChange must not fire
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_FALSE(onChangeFired);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

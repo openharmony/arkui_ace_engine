@@ -17,14 +17,23 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_GRADIENT_H
 #include "ui/base/ace_type.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
  
 #define ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE()                        \
     RefPtr<OptGradient> propGradient;                                         \
 public:                                                                       \
+    bool HasGradient() const                                                  \
+    {                                                                         \
+        CHECK_NULL_RETURN(propGradient, false);                               \
+        return propGradient->GetGradient().has_value();                       \
+    }                                                                         \
     std::optional<Gradient> GetGradient() const                               \
     {                                                                         \
         CHECK_NULL_RETURN(propGradient, std::nullopt);                        \
+        return propGradient->GetGradient();                                   \
+    }                                                                         \
+    std::optional<Gradient>& GetOptGradient() const                           \
+    {                                                                         \
         return propGradient->GetGradient();                                   \
     }                                                                         \
     void SetGradient(const Gradient& newValue)                                \
@@ -46,20 +55,29 @@ public:                                                                       \
             propGradient = AceType::MakeRefPtr<OptGradient>();                \
         }                                                                     \
         CHECK_NULL_VOID(propGradient);                                        \
-        propGradient->SetGradient(newValue.value());                          \
+        propGradient->SetGradient(newValue);                                  \
     }                                                                         \
     void ResetGradient()                                                      \
     {                                                                         \
         CHECK_NULL_VOID(propGradient);                                        \
         propGradient->ResetGradient();                                        \
     }
- 
+
 #define ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE()                     \
     RefPtr<OptNGGradient> propGradient;                                       \
 public:                                                                       \
+    bool HasGradient() const                                                  \
+    {                                                                         \
+        CHECK_NULL_RETURN(propGradient, false);                               \
+        return propGradient->GetGradient().has_value();                       \
+    }                                                                         \
     std::optional<NG::Gradient> GetGradient() const                           \
     {                                                                         \
         CHECK_NULL_RETURN(propGradient, std::nullopt);                        \
+        return propGradient->GetGradient();                                   \
+    }                                                                         \
+    std::optional<NG::Gradient>& GetOptGradient() const                       \
+    {                                                                         \
         return propGradient->GetGradient();                                   \
     }                                                                         \
     void SetGradient(const NG::Gradient& newValue)                            \
@@ -81,7 +99,7 @@ public:                                                                       \
             propGradient = AceType::MakeRefPtr<OptNGGradient>();              \
         }                                                                     \
         CHECK_NULL_VOID(propGradient);                                        \
-        propGradient->SetGradient(newValue.value());                          \
+        propGradient->SetGradient(newValue);                                  \
     }                                                                         \
     void ResetGradient()                                                      \
     {                                                                         \

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 
 #include <cstdint>
@@ -571,6 +572,9 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.hoverModeArea.has_value()) {
         properties.hoverModeArea = pickerDialog.hoverModeArea.value();
     }
+    properties.systemMaterial = pickerDialog.systemMaterial;
+    properties.distortionMode = pickerDialog.distortionMode;
+    properties.edgeLightMode = pickerDialog.edgeLightMode;
 
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["start"] = pickerDialog.parseStartTime;

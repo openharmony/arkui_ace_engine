@@ -19,9 +19,12 @@
 #include <utility>
 #include <string>
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_types.h"
 
 namespace OHOS::Ace::NG {
 

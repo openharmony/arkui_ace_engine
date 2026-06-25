@@ -1180,6 +1180,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0014, TestSize.Level1)
     auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
     ASSERT_NE(hoverEventActuator, nullptr);
     auto mouseEvents = hoverEventActuator->inputEvents_;

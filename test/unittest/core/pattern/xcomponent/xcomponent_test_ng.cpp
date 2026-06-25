@@ -70,6 +70,11 @@ const std::string XCOMPONENT_ID = "xcomponent";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
 const std::string SURFACE_ID = "2430951489577";
+const std::string LEAK_TYPE_PREFIX = "xcomponent";
+const std::string LEAK_TYPE_SURFACE_TAG = "s";
+const std::string LEAK_TYPE_TEXTURE_TAG = "t";
+const std::string LEAK_TYPE_TEST_NODE_ID = "2026";
+const std::string LEAK_TYPE_TEST_INSPECTOR_ID = "xcomponent_inspector";
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
 constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
 constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
@@ -230,7 +235,8 @@ HWTEST_F(XComponentTestNg, InitControllerMultiThreadTest001, TestSize.Level1)
     pattern->xcomponentController_->ConfigSurface(
         static_cast<uint32_t>(SURFACE_WIDTH), static_cast<uint32_t>(SURFACE_HEIGHT));
     EXPECT_EQ(pattern->xcomponentController_->surfaceId_, pattern->surfaceId_);
-    auto controllerNG = static_cast<XComponentControllerNG*>(pattern->xcomponentController_.get());
+    auto controllerNG =
+        static_cast<XComponentControllerNG*>(pattern->xcomponentController_.get());
     EXPECT_TRUE(controllerNG);
     EXPECT_FALSE(controllerNG->pattern_.Invalid());
     EXPECT_EQ(controllerNG->pattern_.Upgrade(), pattern);
@@ -804,7 +810,8 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto onLoad2 =
         [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
-    auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
+    auto onDestroy2 =
+        [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
@@ -1382,11 +1389,13 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      */
     auto xComponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_NODE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(
+        XCOMPONENT_ID, XCOMPONENT_NODE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
     xComponent.SetDetachCallback(std::move(onDetach));
 
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode =
+        AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
 
     /**
@@ -1400,13 +1409,15 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
 
 
     onDetachKey.clear();
-    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
+    XComponentModelNG::SetXComponentType(
+        Referenced::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
     xComponent.SetDetachCallback(std::move(onDetach));
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
 
     onDetachKey.clear();
-    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
+    XComponentModelNG::SetXComponentType(
+        Referenced::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
     xComponent.SetDetachCallback(std::move(onDetach));
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_EQ(onDetachKey, CHECK_KEY);
@@ -1536,6 +1547,105 @@ HWTEST_F(XComponentTestNg, AddLayoutTask001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetLeakType001
+ * @tc.desc: Test GetLeakType returns id-based leak type for surface type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, GetLeakType001, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    auto leakType = pattern->GetLeakType();
+    EXPECT_EQ(leakType, LEAK_TYPE_PREFIX + "-" + LEAK_TYPE_SURFACE_TAG + "-" + XCOMPONENT_ID);
+}
+
+/**
+ * @tc.name: GetLeakType002
+ * @tc.desc: Test GetLeakType returns id-based leak type for texture type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, GetLeakType002, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    auto leakType = pattern->GetLeakType();
+    EXPECT_EQ(leakType, LEAK_TYPE_PREFIX + "-" + LEAK_TYPE_TEXTURE_TAG + "-" + XCOMPONENT_ID);
+}
+
+/**
+ * @tc.name: GetLeakType003
+ * @tc.desc: Test GetLeakType uses inspector id when xcomponent id is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, GetLeakType003, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    frameNode->UpdateInspectorId(LEAK_TYPE_TEST_INSPECTOR_ID);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->id_ = std::nullopt;
+    pattern->nodeId_ = LEAK_TYPE_TEST_NODE_ID;
+
+    auto leakType = pattern->GetLeakType();
+    EXPECT_EQ(leakType, LEAK_TYPE_PREFIX + "-" + LEAK_TYPE_SURFACE_TAG + "-" + LEAK_TYPE_TEST_INSPECTOR_ID);
+}
+
+/**
+ * @tc.name: GetLeakType004
+ * @tc.desc: Test GetLeakType falls back to nodeId when inspector id is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, GetLeakType004, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    frameNode->UpdateInspectorId("");
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->id_ = std::nullopt;
+    pattern->nodeId_ = LEAK_TYPE_TEST_NODE_ID;
+
+    auto leakType = pattern->GetLeakType();
+    EXPECT_EQ(leakType, LEAK_TYPE_PREFIX + "-" + LEAK_TYPE_SURFACE_TAG + "-nodeId_" + LEAK_TYPE_TEST_NODE_ID);
+}
+
+/**
+ * @tc.name: GetLeakType005
+ * @tc.desc: Test GetLeakType falls back to nodeId when host is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, GetLeakType005, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->id_ = std::nullopt;
+    pattern->nodeId_ = LEAK_TYPE_TEST_NODE_ID;
+    pattern->frameNode_.Reset();
+
+    auto leakType = pattern->GetLeakType();
+    EXPECT_EQ(leakType, LEAK_TYPE_PREFIX + "-" + LEAK_TYPE_SURFACE_TAG + "-nodeId_" + LEAK_TYPE_TEST_NODE_ID);
+}
+
+/**
  * @tc.name: UpdateSdrRatioIfNeed
  * @tc.desc: Test UpdateSdrRatioIfNeed for XComponent
  * @tc.type: FUNC
@@ -1579,6 +1689,25 @@ HWTEST_F(XComponentTestNg, UpdateSdrRatioIfNeed001, TestSize.Level1)
     pattern->UpdateSdrRatioIfNeed();
     EXPECT_EQ((pattern->xcomponentSizeSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
     EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+}
+
+/**
+ * @tc.name: HandleSurfaceDestroyed001
+ * @tc.desc: LayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, HandleSurfaceDestroyed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_COMPONENT_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->HandleSurfaceDestroyed(frameNode.GetRawPtr());
 }
 
 } // namespace OHOS::Ace::NG

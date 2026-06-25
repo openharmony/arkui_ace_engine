@@ -108,12 +108,12 @@ void SetPointLightImpl(Ark_NativePointer node,
 #endif
 }
 void SetSyncLoadImpl(Ark_NativePointer node,
-                     Ark_Boolean value)
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    StackModelNG::SetSyncLoad(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    StackModelNG::SetSyncLoad(frameNode, convValue.value_or(true));
 }
 } // StackAttributeModifier
 const GENERATED_ArkUIStackModifier* GetStackModifier()

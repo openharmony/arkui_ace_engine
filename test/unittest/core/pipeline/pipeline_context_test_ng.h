@@ -70,6 +70,7 @@ constexpr uint32_t AI_CALLER_INVALID = 1;
 constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
 constexpr uint32_t AI_CALL_NODE_INVALID = 3;
 constexpr uint32_t AI_CALL_ENV_INVALID = 4;
+constexpr uint32_t AI_CALL_NODE_AMBIGUOUS = 5;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {

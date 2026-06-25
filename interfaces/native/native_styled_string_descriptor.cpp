@@ -293,6 +293,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorChangeEvent_GetReplacementStyledString(
     const OH_ArkUI_TextEditorChangeEvent* event, ArkUI_StyledString_Descriptor* descriptor)
 {
     CHECK_NULL_RETURN(event && descriptor, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* changeEvent = reinterpret_cast<const ArkUITextEditorChangeEvent*>(event);
     OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->getReplacementStyledString(changeEvent, descriptor);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -302,6 +304,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorChangeEvent_GetPreviewStyledString(
     const OH_ArkUI_TextEditorChangeEvent* event, ArkUI_StyledString_Descriptor* descriptor)
 {
     CHECK_NULL_RETURN(event && descriptor, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* changeEvent = reinterpret_cast<const ArkUITextEditorChangeEvent*>(event);
     OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->getPreviewStyledString(changeEvent, descriptor);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;

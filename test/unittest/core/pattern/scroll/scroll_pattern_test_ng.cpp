@@ -132,7 +132,7 @@ HWTEST_F(ScrollPatternTestNg, ScrollPatternTestNg005, TestSize.Level1)
     result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(result, false);
     dirtySwapConfig.contentSizeChange = true;
-    paintProperty->UpdateContentClip(std::make_pair(ContentClipMode::DEFAULT, nullptr));
+    paintProperty->UpdateContentClip(ContentClip(ContentClipMode::DEFAULT, nullptr));
     result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(result, true);
     dirtySwapConfig.frameSizeChange = false;

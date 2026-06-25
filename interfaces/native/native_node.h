@@ -151,6 +151,24 @@ typedef enum {
      * @since 23
      */
     ARKUI_NODE_PICKER = 1018,
+    /**
+     * ArcList container.
+     * @systemapi
+     * @since 26.0.0
+     */
+    ARKUI_NODE_ARC_LIST = 1019,
+    /**
+     * ArcListItem container.
+     * @systemapi
+     * @since 26.0.0
+     */
+    ARKUI_NODE_ARC_LIST_ITEM = 1020,
+    /**
+     * ArcScrollBar container.
+     * @systemapi
+     * @since 26.0.0
+     */
+    ARKUI_NODE_ARC_SCROLL_BAR = 1021,
 } ArkUI_NodeType;
 
 /**
@@ -2333,6 +2351,32 @@ typedef enum {
      */
     NODE_INSPECTOR_LABEL = 126,
     /**
+     * @brief Defines the system material attribute, which can be set, reset, and obtained as required through APIs.
+     * Only devices that support systemMaterial can use this attribute. Otherwise, when setting this attribute,
+     * the error code {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} will be returned.
+     * Whether a device supports materials can be determined by calling
+     * {@link OH_ArkUI_NativeModule_GetSystemMaterialSupported}.
+     * The material effect behaves differently on devices with different level of computing powers.
+     * The level is defined by {@link ArkUI_MaterialLevel}, which can be obtained by
+     * {@link OH_ArkUI_NativeModule_GetGlobalMaterialLevel}.
+     * On devices with the computing power level of ARKUI_MATERIAL_LEVEL_SMOOTH, it affects attributes such as the
+     * backgroundColor, borderWidth, borderColor, shadow.
+     * On devices with the computing power levels of ARKUI_MATERIAL_LEVEL_EXQUISITE or ARKUI_MATERIAL_LEVEL_GENTLE,
+     * it affects shadow attribute and adds a filter effect at the system material layer, which can produce an effect
+     * similar to glass.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: system material object. The parameter type is {@link ArkUI_ImmersiveMaterialHandle}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: system material object. The parameter type is {@link ArkUI_ImmersiveMaterialHandle}.\n
+     * The ArkUI_ImmersiveMaterialHandle object of the return value is a pointer to static member, so do not release
+     * the return object by calling {@link OH_ArkUI_NativeModule_ImmersiveMaterial_Destroy}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_SYSTEM_MATERIAL = 127,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -3062,6 +3106,38 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_TEXT_CONTROLLER = 1054,
+
+    /**
+     * @brief Sets whether to enable punctuation overflow at line ends.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * <br>Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+     * <br>.value[0].i32: whether to enable punctuation overflow, the default value is false.
+     *
+     * <br>Format of the return value {@link ArkUI_AttributeItem}:
+     * <br>.value[0].i32: whether to enable punctuation overflow.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_PUNCTUATION_OVERFLOW = 1055,
+
+    /**
+     * @brief Defines the tail indentation for each line in a text block.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: tail indent value, in fp. When size is 1, all lines share the same tail indent.\n
+     * .size: number of tail indent values. When size > 1, the i-th value specifies the tail indent
+     * for the i-th line. If the number of text lines exceeds size, the last value is used
+     * for the remaining lines. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: first tail indent value, in vp. \n
+     * .size: number of tail indent values. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_TAIL_INDENTS = 1056,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -4344,6 +4420,20 @@ typedef enum {
     NODE_TEXT_INPUT_RADIAL_GRADIENT = 7052,
 
     /**
+     * @brief Sets whether to enable punctuation overflow at line ends.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * <br>Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+     * <br>.value[0].i32: whether to enable punctuation overflow, the default value is false.
+     *
+     * <br>Format of the return value {@link ArkUI_AttributeItem}:
+     * <br>.value[0].i32: whether to enable punctuation overflow.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW = 7053,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5029,6 +5119,20 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_TEXT_AREA_RADIAL_GRADIENT = 8049,
+
+    /**
+     * @brief Sets whether to enable punctuation overflow at line ends.
+     * <br>This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * <br>Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+     * <br>.value[0].i32: whether to enable punctuation overflow, the default value is false.
+     *
+     * <br>Format of the return value {@link ArkUI_AttributeItem}:
+     * <br>.value[0].i32: whether to enable punctuation overflow.
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_PUNCTUATION_OVERFLOW = 8050,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -7217,6 +7321,23 @@ typedef enum {
     NODE_SCROLL_AUTO_ADJUST_MARGIN = 1002028,
 
     /**
+     * @brief Defines the scrollbar track height. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+     * .value[0].f32: height of the scrollbar track, in vp. 
+     * Default value: adaptive to the height of the scrollable component. 
+     * Value range: The value must be greater than or equal to 0. If set to a value less than 0,
+     * the default value is used. If set to 0, the scrollbar is not displayed. 
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:
+     * .value[0].f32: height of the scrollbar track, in vp. 
+     *
+     * @since 26.0.0
+     */
+    NODE_SCROLL_BAR_HEIGHT = 1002029,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -9160,6 +9281,291 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_PICKER_ITEM_HEIGHT = 1018005,
+
+    /**
+     * @brief Sets the digital crown sensitivity of the ArcList component. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: digital crown sensitivity type. The parameter type is {@link ArkUI_CrownSensitivity}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: digital crown sensitivity type. The parameter type is {@link ArkUI_CrownSensitivity}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_DIGITAL_CROWN_SENSITIVITY = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_LIST,
+
+    /**
+     * @brief Sets the interval between child components of ArcList in the main axis direction. This attribute can be set,
+     * reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: interval between child components in the main axis direction, in vp. Default value: 0.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: interval between child components in the main axis direction.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SPACE = 1019001,
+
+    /**
+     * @brief Sets the cache count of the ArcList component. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: cache count.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: cache count.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_CACHED_COUNT = 1019002,
+
+    /**
+     * @brief Scrolls to the specified index.
+     *
+     * When smooth animation is enabled, all items being scrolled through will be loaded and layout calculated. This may
+     * cause performance issues when a large number of items are loaded.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: index of the target element to scroll to in the current container.\n
+     * .value[1]?.i32: whether to enable animation when scrolling to the specified index. Value 1 indicates enable and
+     * value 0 indicates disable. Default value: 0.\n
+     * .value[2]?.i32: alignment of the element scrolled to with respect to the current container. The parameter type
+     * is {@link ArkUI_ScrollAlignment}. Default value: ARKUI_SCROLL_ALIGNMENT_START.\n
+     * .value[3]?.f32: additional offset. Default value: 0, unit: vp.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SCROLL_TO_INDEX = 1019003,
+
+    /**
+     * @brief Sets whether to enable chain animation for ArcList. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable chain animation. Value 0 means not to enable, and value 1 means to enable. Default
+     * value: 0.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable chain animation.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_CHAIN_ANIMATION = 1019004,
+
+    /**
+     * @brief Sets the default main axis size of ArcList child components. This attribute can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: parameter format is {@link ArkUI_ListChildrenMainSize}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: parameter format is {@link ArkUI_ListChildrenMainSize}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_CHILDREN_MAIN_SIZE = 1019005,
+
+    /**
+     * @brief Sets the header component of ArcList. This attribute can be set, reset, and obtained as required through
+     * APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: use {@link ArkUI_NodeHandle} object as the ArcList header component.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: use {@link ArkUI_NodeHandle} object as the ArcList header component.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SET_HEADER = 1019006,
+
+    /**
+     * @brief Sets the scroll bar status of ArcList. This attribute can be set, reset, and obtained as required through
+     * APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: scroll bar status. The parameter type is {@link ArkUI_ScrollBarDisplayMode}. Default value:
+     * ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: scroll bar status. The parameter type is {@link ArkUI_ScrollBarDisplayMode}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SCROLL_BAR = 1019007,
+
+    /**
+     * @brief Sets the scroll bar color of ArcList. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .data[0].u32: scroll bar color, in ARGB format. Default value: 0x66182431 \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .data[0].u32: scroll bar color, in ARGB format.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SCROLL_BAR_COLOR = 1019008,
+
+    /**
+     * @brief Sets the width of the scroll bar of ArcList. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: scroll bar width, in vp. Default value: 4.\n
+     * Value range: if the value is less than 0, it is processed as the default value. If the value is 0, the scroll bar
+     * will not be displayed.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: scroll bar width, in vp.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_SCROLL_BAR_WIDTH = 1019009,
+
+    /**
+     * @brief Sets whether ArcList supports scroll gesture. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support scroll gesture. Default value: 1. Value 1 means support, and value 0 means not
+     * support.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to support scroll gesture.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ENABLE_SCROLL_INTERACTION = 1019010,
+
+    /**
+     * @brief Sets the fading edge effect of ArcList. This attribute can be set, reset, and obtained as required through
+     * APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable fading edge effect. Value 0 means to disable fading edge effect, and value 1
+     * means to enable it. Default value: 0 \n
+     * .value[1]?.f32: length of the fading edge effect. Unit: vp. Default value: 32. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable fading edge effect. Value 0 means to disable fading edge effect, and value 1
+     * means to enable it. \n
+     * .value[1].f32: length of the fading edge effect. Unit: vp. \n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_FADING_EDGE = 1019011,
+
+    /**
+     * @brief Sets the friction coefficient of ArcList. This attribute can be set, reset, and obtained as required through
+     * APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: friction coefficient. Default value: 0.9 for wearable devices.\n
+     * Value range: (0, +∞). If the value is less than or equal to 0, it is processed as the default value.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: friction coefficient.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_FRICTION = 1019012,
+
+    /**
+     * @brief Sets the maximum initial velocity of Fling animation for ArcList. This attribute can be set, reset, and
+     * obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: maximum initial velocity at the start of Fling animation. Unit: vp/s. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: maximum initial velocity at the start of Fling animation. \n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_FLING_SPEED_LIMIT = 1019013,
+
+    /**
+     * @brief Sets whether to enable auto scale for ArcListItem. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable auto scale. Value 0 means not to enable, and value 1 means to enable. Default
+     * value: 1.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable auto scale.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ITEM_AUTO_SCALE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_LIST_ITEM,
+
+    /**
+     * @brief Sets the swipe action component of ArcListItem. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: use {@link ArkUI_ListItemSwipeActionOption} object to construct.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: use {@link ArkUI_ListItemSwipeActionOption} object to construct.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ITEM_SWIPE_ACTION = 1020001,
+
+    /**
+     * @brief Sets the scrollable component bound by ArcScrollBar. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: use {@link ArkUI_NodeHandle} object as the scrollable component bound by the scroll bar.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: use {@link ArkUI_NodeHandle} object as the scrollable component bound by the scroll bar.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_SCROLL_BAR_BIND_SCROLLABLE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SCROLL_BAR,
+
+    /**
+     * @brief Sets the scroll bar status of ArcScrollBar. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: scroll bar status. The parameter type is {@link ArkUI_ScrollBarDisplayMode}. Default value:
+     * ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: scroll bar status. The parameter type is {@link ArkUI_ScrollBarDisplayMode}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_SCROLL_BAR_DISPLAY_MODE = 1021001,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -10914,7 +11320,27 @@ typedef enum {
      * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
-    
+
+    /**
+     * @brief Defines the edit mode state change event of the <b>List</b> component.
+     *
+     * This event is triggered when the edit mode state changes, which occurs in the following cases:
+     * 1. The {@link NODE_LIST_ENABLE_EDIT_MODE} attribute is set to change the edit mode state.
+     * 2. When {@link NODE_LIST_EDIT_MODE_OPTIONS} has two-finger sliding multi-selection enabled,
+     * a two-finger sliding gesture triggers the change to multi-selection state.
+     * Registering this event callback is a prerequisite for entering multi-selection state via
+     * two-finger sliding. If this callback is not registered, two-finger sliding will not enter
+     * multi-selection state.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edit mode state. <b>0</b>: not in edit mode. <b>1</b>: in edit mode. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_ON_EDIT_MODE_CHANGE,
+
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -11282,6 +11708,123 @@ typedef enum {
       * @since 23
       */
     NODE_PICKER_EVENT_ON_SCROLL_STOP = 1018001,
+
+    /**
+     * @brief Defines the event triggered when a child component enters or leaves the ArcList display area.
+     *
+     * Conditions for triggering the event:\n
+     * This event is triggered once when the list is initialized and when the index value of the first or last child
+     * component in the ArcList display area changes.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 3 parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index value of the first child component in the ArcList display area.\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index value of the last child component in the ArcList display area.\n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: index value of the child component in the middle position of the
+     * ArcList display area.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_LIST,
+
+    /**
+     * @brief Defines the event triggered when the ArcList component reaches the start position.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the component reaches the start position.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_REACH_START = 1019001,
+
+    /**
+     * @brief Defines the event triggered when the ArcList component reaches the end position.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the component reaches the end position.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_REACH_END = 1019002,
+
+    /**
+     * @brief Defines the event triggered when the ArcList component starts scrolling.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the scrolling component starts scrolling.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 1 parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_SCROLL_START = 1019003,
+
+    /**
+     * @brief Defines the event triggered when the ArcList component stops scrolling.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the scrolling component triggers scrolling and then stops.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 1 parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_SCROLL_STOP = 1019004,
+
+    /**
+     * @brief Defines the event triggered before the ArcList component scrolls.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the scrolling component triggers scrolling.\n
+     * 2. Called through the scroll controller API.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 3 parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: distance of this scrolling. The offset is positive when the
+     * content scrolls up and is negative when the content scrolls down. Unit: vp.\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. The parameter type is {@link
+     * ArkUI_ScrollState}.\n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: current scroll source. The parameter type is
+     * {@link ArkUI_ScrollSource}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_WILL_SCROLL = 1019005,
+
+    /**
+     * @brief Defines the event triggered when the ArcList component scrolls.
+     *
+     * Conditions for triggering the event:\n
+     * 1. This event is triggered when the scrolling component triggers scrolling.\n
+     * 2. Called through the scroll controller API.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 2 parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: distance of each frame scrolling. The offset is positive when the
+     * content scrolls up and is negative when the content scrolls down. Unit: vp.\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. The parameter type is {@link
+     * ArkUI_ScrollState}.\n
+     *
+     * @systemapi
+     * @since 26.0.0
+     */
+    NODE_ARC_LIST_ON_DID_SCROLL = 1019006,
 } ArkUI_NodeEventType;
 
 /**
@@ -11457,27 +12000,7 @@ typedef enum {
     NODE_NEED_RENDER,
 } ArkUI_NodeDirtyFlag;
 
-/**
- * @brief Defines the custom component event type.
- *
- * @since 12
- */
-typedef enum {
-    /** Measure type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE = 1 << 0,
-    /** Layout type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT = 1 << 1,
-    /** Draw type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW = 1 << 2,
-    /** Foreground type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_FOREGROUND_DRAW = 1 << 3,
-    /** Overlay type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW = 1 << 4,
-    /** Draw front type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT = 1 << 5,
-    /** Draw behind type. */
-    ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND = 1 << 6,
-} ArkUI_NodeCustomEventType;
+#include "node_attributes/node_attr_custom.h"
 
 /**
  * @brief Defines the general structure of a custom component event.
@@ -13368,22 +13891,30 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
 ArkUI_GestureCollectInterceptInfo* OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo(ArkUI_NodeEvent* nodeEvent);
 
 /**
- * @brief Retrieves the latest error message, which includes the error code, method name, and error cause.
- * When other interfaces return an error code, they save the corresponding error message,
- * and this interface can retrieve the currently stored error message.
- * The information returned by this interface may evolve with versions and is intended solely for
- * output to aid in analysis and troubleshooting. It should not be used for logical decisions.
+ * @brief Set the subnode mounting policy of the target node.
  *
- * The returned string is a thread-local string created by the system. Different threads maintain
- * independent error messages, and other threads do not overwrite the current thread's result.
- * The pointer remains valid until the current thread records another error or exits. The caller must
- * not modify its content. If any editing is required, create a copy of the string content yourself.
- * No memory deallocation is required by the caller.
- * 
- * @return Returns the most recent error message.
+ * @param node the target node handle.
+ * @param policy the policy to set. Valid values correspond to {@link OH_ArkUI_NodeMountPolicy}.
+ * @return Error code.
+ *          <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *          </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *          </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
  * @since 26.0.0
  */
-const char* OH_ArkUI_NativeModule_GetErrorMessage();
+ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy policy);
+
+/**
+ * @brief Get the current child mount policy of the specified node.
+ *
+ * @param node the target node handle.
+ * @param policy the pointer to receive child mounting policy of the target node.
+ * @return Error code.
+ *          <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *          </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *          </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy* policy);
 
 #ifdef __cplusplus
 }

@@ -18,7 +18,7 @@
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
+
 namespace OHOS::Ace::NG {
 using panda::JSValueRef;
 using panda::Local;

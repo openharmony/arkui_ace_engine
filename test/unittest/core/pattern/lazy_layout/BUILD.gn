@@ -17,9 +17,14 @@ ace_unittest("lazy_grid_layout_test") {
   module_name = "ScrollingSet-LazyVGridLayout"
   type = "new"
   sources = [
+    "grid_layout/lazy_grid_layout_header_footer_test.cpp",
     "grid_layout/lazy_grid_layout_test.cpp",
     "grid_layout/lazy_grid_layout_syntax_test.cpp",
     "grid_layout/lazy_grid_generated_layout_test.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
@@ -56,6 +61,7 @@ ace_unittest("lazy_column_layout_test") {
   module_name = "ScrollingSet-LazyColumnLayout"
   type = "new"
   sources = [
+    "column_layout/lazy_column_layout_header_footer_test.cpp",
     "column_layout/lazy_column_layout_test.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.cpp",

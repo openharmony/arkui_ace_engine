@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/quaternion.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -21,6 +22,55 @@ namespace {
 constexpr double KEPSILON = 1e-5;
 
 } // namespace
+
+Quaternion Quaternion::operator+(const Quaternion& q) const
+{
+    auto x = this->x_ + q.x_;
+    auto y = this->y_ + q.y_;
+    auto z = this->z_ + q.z_;
+    auto w = this->w_ + q.w_;
+    return Quaternion(x, y, z, w);
+}
+
+Quaternion Quaternion::operator*(const Quaternion& q) const
+{
+    auto x = w_ * q.x_ + x_ * q.w_ + y_ * q.z_ - z_ * q.y_;
+    auto y = w_ * q.y_ - x_ * q.z_ + y_ * q.w_ + z_ * q.x_;
+    auto z = w_ * q.z_ + x_ * q.y_ - y_ * q.x_ + z_ * q.w_;
+    auto w = w_ * q.w_ - x_ * q.x_ - y_ * q.y_ - z_ * q.z_;
+    return Quaternion(x, y, z, w);
+}
+
+bool Quaternion::operator==(const Quaternion& q) const
+{
+    return NearEqual(x_, q.x_) && NearEqual(y_, q.y_)
+        && NearEqual(z_, q.z_) && NearEqual(w_, q.w_);
+}
+
+bool Quaternion::operator!=(const Quaternion& q) const
+{
+    return !operator==(q);
+}
+
+Quaternion Quaternion::inverse() const
+{
+    return { -x_, -y_, -z_, w_ };
+}
+
+Quaternion Quaternion::flip() const
+{
+    return { -x_, -y_, -z_, -w_ };
+}
+
+Quaternion operator*(const Quaternion& q, double s)
+{
+    return Quaternion(q.GetX() * s, q.GetY() * s, q.GetZ() * s, q.GetW() * s);
+}
+
+Quaternion operator*(double s, const Quaternion& q)
+{
+    return Quaternion(q.GetX() * s, q.GetY() * s, q.GetZ() * s, q.GetW() * s);
+}
 
 Quaternion Quaternion::Slerp(const Quaternion& to, double t) const
 {

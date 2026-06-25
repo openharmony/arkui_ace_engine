@@ -8,10 +8,10 @@
 
 ---
 
-## Claude 参考指南
+## Agent 参考指南
 
 ### 文档用途
-本文档是 Claude 的内部参考知识库，用于：
+本文档是 Agent 的内部参考知识库，用于：
 1. **快速定位 SDK API 与实现层的映射关系** - 当用户询问组件功能时，能迅速找到源码位置
 2. **理解 ArkUI 架构层次** - 区分 Static API、Dynamic API、ace_engine Pattern 的职责
 3. **准确回答开发问题** - 提供基于实际代码的权威答案，避免猜测
@@ -32,9 +32,9 @@
 ```
 用户问题: "FrameNode 和 BuilderNode 有什么区别？"
 查找步骤:
-1. 查看"2.1 核心 Node API 类型"章节
+1. 查看"2.2 Node API 核心节点类型"章节
 2. 对比 FrameNode 和 BuilderNode 的核心特性
-3. 查看"6.2 Node 层级关系"理解架构设计
+3. 查看"7.2 Node 层级关系"理解架构设计
 4. 查看"常见问题解答"获取更多说明
 ```
 
@@ -42,7 +42,7 @@
 ```
 用户问题: "@State 和 @Link 的区别是什么？"
 查找步骤:
-1. 查看"5. 状态管理 API"章节
+1. 查看"6. 状态管理 API"章节
 2. 理解各装饰器的用途
 3. 查看"常见问题解答"中的状态管理对比
 ```
@@ -52,16 +52,16 @@
 | 想查找什么 | 跳转到章节 |
 |-----------|-----------|
 | 组件列表和实现位置 | 第 3 章 "组件 API 分类清单" |
-| 核心 API (FrameNode/BuilderNode) | 第 2.1 节 "核心 Node API 类型" |
-| 组件属性设置方法 | 第 6.1 节 "Modifier 模式" |
-| 状态管理装饰器 | 第 5 章 "状态管理 API" |
-| SDK → ace_engine 映射 | 第 7 章 "与 ace_engine 的对应关系" |
+| 核心 API (FrameNode/BuilderNode) | 第 2.2 节 "Node API 核心节点类型" |
+| 组件属性设置方法 | 第 2.4 节 "Modifier 模式" |
+| 声明文件结构（Attribute/Options） | 第 4 章 "组件声明文件结构规范" |
+| 状态管理装饰器 | 第 6 章 "状态管理 API" |
+| SDK → ace_engine 映射 | 第 8 章 "与 ace_engine 的对应关系" |
+| 命名规范与导入约定 | 第 9 章 "API 定义规范" |
 | 常见问题解答 | 第 10 章 "常见问题解答" |
-| 版本变更和兼容性 | 第 9 章 "版本演进" |
-| API 快速参考 | 第 8 章 "API 快速参考" |
 
 ### 代码验证原则
-根据 ace_engine 的 **CLAUDE.md** 原则，回答问题时：
+根据 ace_engine 的 **AGENTS.md** 原则，回答问题时：
 1. **Always provide actual code** - 使用 Read/Grep 工具读取实际源码
 2. **Never guess** - 如果代码未找到，明确说明"此代码在 ace_engine 中未找到"
 3. **Verify before answering** - 用户建议可能有误，务必验证实际代码
@@ -72,49 +72,118 @@
 ## 1. 目录结构概览
 
 ```
-OpenHarmony/interface/sdk-js/api/arkui/
-├── [根目录]                           # 核心 Node API 和 Modifier 接口
-│   ├── FrameNode.d.ts                # 框架节点定义
-│   ├── BuilderNode.d.ts              # 构建器节点定义
-│   ├── RenderNode.d.ts               # 渲染节点定义
-│   ├── Graphics.d.ts                 # 图形绘制类型定义
-│   ├── CommonModifier.d.ts           # 通用属性修饰器
-│   ├── XComponentNode.d.ts           # XComponent 组件节点
-│   ├── NodeContent.d.ts              # 节点内容封装
-│   ├── ComponentContent.d.ts         # 组件内容封装
-│   ├── [76个 *Modifier.d.ts 文件]    # 动态 API: Modifier 类定义
-│   └── [74个 *Modifier.static.d.ets] # 静态 API: Component 定义
-├── component/                        # 组件静态接口定义 (129 个文件)
-│   ├── button.static.d.ets
-│   ├── text.static.d.ets
-│   ├── list.static.d.ets
-│   ├── grid.static.d.ets
-│   └── [... 126 个其他组件]
-├── incremental/                      # 增量渲染 API
-│   └── runtime/
-│       └── state.static.d.ets        # 增量状态管理
-└── stateManagement/                  # 状态管理 API
-    ├── decorator.static.d.ets        # 状态装饰器
-    ├── remember.static.d.ets         # 记忆函数
-    ├── utils.static.d.ets            # 工具函数
-    └── storage/                      # 存储相关
-        ├── appStorage.static.d.ets
-        ├── localStorage.static.d.ets
-        └── [... 4 个存储相关文件]
+OpenHarmony/interface/sdk-js/api/
+├── arkui/
+│   ├── component/                         # 静态 API：组件+属性定义（*.static.d.ets）
+│   │   ├── column.static.d.ets
+│   │   ├── text.static.d.ets
+│   │   ├── button.static.d.ets
+│   │   └── [... 130 个静态组件定义文件]
+│   ├── [76个 *Modifier.d.ts 文件]        # 动态 API：Modifier 定义
+│   ├── [74个 *Modifier.static.d.ets 文件] # 静态 API：Modifier 定义
+│   ├── FrameNode.d.ts / BuilderNode.d.ts / RenderNode.d.ts
+│   ├── FrameNode.static.d.ets / BuilderNode.static.d.ets / RenderNode.static.d.ets
+│   ├── stateManagement/                  # 状态管理静态 API
+│   └── incremental/                      # 增量渲染静态 API
+└── @internal/component/ets/
+    ├── column.d.ts                       # 动态 API：组件+属性定义
+    ├── text.d.ts
+    ├── button.d.ts
+    └── [... 140 个动态组件定义文件]
 ```
 
-**统计概览**:
-- 根目录文件总数: 169 个
-- component 目录文件: 129 个
-- Modifier.d.ts 文件: 76 个
-- Modifier.static.d.ets 文件: 74 个
-- 总计 API 定义文件: **298 个**
+**统计概览（当前仓库快照）**:
+
+组件 DSL 与 Modifier：
+
+- `arkui/` 根目录文件: 172 个
+- `arkui/component/*.static.d.ets`: 130 个
+- `arkui/*Modifier.d.ts`: 76 个
+- `arkui/*Modifier.static.d.ets`: 74 个
+- `@internal/component/ets/*.d.ts`: 140 个
+
+ArkUI 模块 API（`@ohos.arkui.*`，按需 `import`）：
+
+- `@ohos.arkui.*.d.ts`（动态模块声明）: 27 个
+- `@ohos.arkui.*.static.d.ets`（静态模块声明，含 `advanced/` 高级组件）: 61 个
+- `@ohos.arkui.advanced.*.d.ets`（高级组件动态）: 36 个
+- `@ohos.arkui.advanced.*.static.d.ets`（高级组件静态）: 34 个
+
+相关通用 `@ohos.*` 模块（由 ArkUI 提供 NAPI 实现）：
+
+- 代表模块均提供动态 + 静态双声明：`@ohos.router`、`@ohos.promptAction`、`@ohos.mediaquery`、`@ohos.animator`、`@ohos.font`、`@ohos.measure`、`@ohos.curves`、`@ohos.matrix4`
+- ace_engine NAPI 实现根目录：`interfaces/napi/kits/`（31 个子目录），详见第 8.4 节
 
 ---
 
 ## 2. API 类型分类说明
 
-### 2.1 核心 Node API 类型
+ArkUI 对开发者暴露**两个正交维度**的 API，互为补充：
+
+| 维度 | 范式 | 代表 API | 适用场景 | 主声明位置 |
+|------|------|----------|----------|------------|
+| **组件 API** | **声明式 DSL** | `Text(...)`、`Button(...)`、`Column(){...}` + `.attr()` 链 + `AttributeModifier<T>` | 页面 UI 描述、主流业务开发 | `@internal/component/ets/*.d.ts`（Dynamic）<br>`arkui/component/*.static.d.ets`（Static） |
+| **Node API** | **命令式接口** | `FrameNode` / `BuilderNode` / `RenderNode` / `NodeContent` / `ComponentContent` | 自定义节点树、动态插拔、高性能列表项、跨场景复用 | `arkui/FrameNode.d.ts`、`arkui/BuilderNode.d.ts`、`arkui/RenderNode.d.ts`、`arkui/NodeContent.d.ts` |
+
+两套维度通过 **Modifier 模式**（`AttributeModifier<T>` / `CommonModifier`）桥接：组件 API 用 `.attribute(modifier)` 接入 Modifier，Node API 用 `FrameNode` 同名机制接入同一份 Modifier 实例，最终都汇聚到 ace_engine 的 `Pattern` 实现。
+
+后续小节按"组件 API → Node API → 配套类型 → 桥接模式"顺序展开：
+
+- 2.1：组件 API（声明式 DSL）
+- 2.2：Node API 核心节点类型（FrameNode / BuilderNode / RenderNode / NodeContent）
+- 2.3：Node API 配套图形类型（Graphics）
+- 2.4：组件 API ↔ Node API 共用的 Modifier 模式
+
+### 2.1 组件 API（声明式 DSL）
+
+组件 API 是 ArkUI 主流业务开发范式，以**全局可用的组件函数 + 链式属性 + 子组件块**形式描述 UI 树。
+
+**调用形态：**
+
+```ts
+@Entry
+@Component
+struct Demo {
+  @State count: number = 0
+  build() {
+    Column({ space: 8 }) {            // 容器组件 + Options
+      Text(`Count: ${this.count}`)    // 叶子组件 + 文本参数
+        .fontSize(20)                 // 链式属性
+        .fontColor(Color.Blue)
+      Button('+1')
+        .onClick(() => { this.count++ })  // 事件回调
+    }
+    .width('100%')
+    .padding(16)
+  }
+}
+```
+
+**两套声明并存：**
+
+| 项 | Dynamic | Static |
+|----|---------|--------|
+| 组件声明 | `@internal/component/ets/<comp>.d.ts`（140 个） | `arkui/component/<comp>.static.d.ets`（130 个） |
+| Modifier 声明 | `arkui/<Comp>Modifier.d.ts`（76 个） | `arkui/<Comp>Modifier.static.d.ets`（74 个） |
+| 公共基座 | `@internal/component/ets/common.d.ts` | `arkui/component/common.static.d.ets` |
+| 枚举/单位 | `@internal/component/ets/enums.d.ts` | `arkui/component/enums.static.d.ets`、`units.static.d.ets` |
+| 调用方式 | 全局函数，无需 `import` | 同上 |
+| 编译链路 | bridge 运行时分发 | koala 生成 → `components.abc` |
+
+**典型组成（每个组件三段式）：**
+
+- **构造函数**：`Component(options?: ComponentOptions): ComponentAttribute`
+- **Attribute 接口**：`ComponentAttribute extends CommonMethod<ComponentAttribute>` — 暴露链式属性方法
+- **Options 接口**：`ComponentOptions` — 初始化参数
+
+**ace_engine 实现路径（双轨）：**
+
+- Dynamic：`frameworks/bridge/declarative_frontend/jsview/js_<comp>.cpp` → `Pattern`
+- Static：`frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/<comp>.ets` → `Pattern`
+
+> 完整组件清单按分类见第 3 节"组件 API 分类清单"；声明文件结构细节见第 4 节。
+
+### 2.2 Node API 核心节点类型
 
 #### FrameNode (框架节点)
 
@@ -152,40 +221,18 @@ OpenHarmony/interface/sdk-js/api/arkui/
 - 支持跨语言访问控制（CrossLanguageOptions）
 - 提供 UI 状态管理和交互事件绑定
 
-**主要接口**:
-```typescript
-class FrameNode {
-  // 节点树操作
-  appendChild(node: FrameNode): void
-  insertChildAfter(child: FrameNode, sibling: FrameNode | null): void
-  removeChild(node: FrameNode): void
-  clearChildren(): void
+**API 定义位置**: `OpenHarmony/interface/sdk-js/api/arkui/FrameNode.d.ts`
 
-  // 节点查询
-  getChild(index: number): FrameNode | null
-  getChildren(): Array<FrameNode>
+**常用方法速查**:
 
-  // 布局和几何
-  getLayoutProperty(): LayoutProperty
-  getLayoutConstraint(): LayoutConstraint
-  getPositionToParent(): Position
-
-  // 渲染节点访问
-  getRenderNode(): RenderNode
-  getRenderResult(): FinishEventType
-
-  // 事件绑定
-  on(event: string, callback: Function): void
-  off(event: string, callback?: Function): void
-
-  // 生命周期
-  dispose(): void
-
-  // 状态管理
-  getUIStates(): number
-  setUIStatesChangeHandler(handler: UIStatesChangeHandler): void
-}
-```
+| 分组 | 方法 | 说明 |
+|------|------|------|
+| 树操作 | `appendChild(node)` / `insertChildAfter(child, sibling)` / `removeChild(node)` / `clearChildren()` | 动态增删子节点 |
+| 树查询 | `getChild(index)` / `getChildren()` | 按索引或全量获取子节点 |
+| 布局 | `getLayoutProperty()` / `getLayoutConstraint()` / `getPositionToParent()` | 读取布局属性与位置 |
+| 渲染 | `getRenderNode()` / `getRenderResult()` | 获取关联 RenderNode 与渲染结果 |
+| 事件 | `on(event, callback)` / `off(event, callback?)` | 注册/移除事件监听 |
+| 生命周期 | `dispose()` | 销毁节点，释放资源（调用后不可再用） |
 
 #### BuilderNode (构建器节点)
 
@@ -222,35 +269,23 @@ class FrameNode {
 - 可嵌套在其他 FrameNode 中使用
 - 提供参数更新和事件分发能力
 
-**主要接口**:
-```typescript
-class BuilderNode<Args extends Object[]> {
-  constructor(uiContext: UIContext, options?: RenderOptions)
+**API 定义位置**:
+- `OpenHarmony/interface/sdk-js/api/arkui/BuilderNode.d.ts`
+- API 12+ 新增 `ReactiveBuilderNode` 同文件
 
-  // 构建和更新
-  build(builder: WrappedBuilder<Args>, arg?: Object): void
-  update(arg: Object): void
+**典型生命周期**:
 
-  // 节点访问
-  getFrameNode(): FrameNode | null
-
-  // 事件分发
-  postTouchEvent(event: TouchEvent): boolean
-  postInputEvent(event: InputEventType): boolean
-
-  // 生命周期
-  dispose(): void
-  reuse(param?: Object): void
-  recycle(): void
-  updateConfiguration(): void
-}
-
-// API 12+ 新增
-class ReactiveBuilderNode<Args extends Object[]> {
-  build(builder: WrappedBuilder<Args>, config: BuildOptions, ...args: Args): void
-  flushState(): void  // 强制同步更新
-}
+```ts
+const builderNode = new BuilderNode(uiContext)
+builderNode.build(wrappedBuilder, args)   // 仅可调用一次
+const frameNode = builderNode.getFrameNode()
+builderNode.update(newArgs)               // 参数更新
+builderNode.reuse(param)                  // 复用
+builderNode.recycle()                     // 回收
+builderNode.dispose()                     // 销毁
 ```
+
+要点：`build()` 重复调用会报错；`reuse()/recycle()` 用于组件池；API 12+ 优先使用 `ReactiveBuilderNode.flushState()` 强制同步状态。
 
 #### RenderNode (渲染节点)
 
@@ -266,54 +301,7 @@ class ReactiveBuilderNode<Args extends Object[]> {
 - 支持自定义绘制回调
 - 可独立于 FrameNode 使用
 
-**主要接口**:
-```typescript
-class RenderNode {
-  // 树操作
-  appendChild(node: RenderNode): void
-  insertChildAfter(child: RenderNode, sibling: RenderNode | null): void
-  removeChild(node: RenderNode): void
-
-  // 渲染属性
-  backgroundColor: number
-  opacity: number
-  clipToFrame: boolean
-  size: Size
-  position: Position
-  frame: Frame
-
-  // 变换
-  pivot: Pivot
-  scale: Scale
-  translation: Translation
-  rotation: Rotation
-  transform: Matrix4
-
-  // 阴影
-  shadowColor: number
-  shadowOffset: Offset
-  shadowAlpha: number
-  shadowElevation: number
-  shadowRadius: number
-
-  // 边框
-  borderStyle: Edges<BorderStyle>
-  borderWidth: Edges<number>
-  borderColor: Edges<number>
-  borderRadius: BorderRadiuses
-
-  // 形状遮罩和裁剪
-  shapeMask: ShapeMask
-  shapeClip: ShapeClip
-
-  // 绘制
-  draw(context: DrawContext): void
-  invalidate(): void
-
-  // 生命周期
-  dispose(): void
-}
-```
+**API 定义位置**: `OpenHarmony/interface/sdk-js/api/arkui/RenderNode.d.ts`
 
 #### NodeContent & ComponentContent
 
@@ -326,197 +314,31 @@ class RenderNode {
 - ComponentContent: 组件内容的封装，通过 @Builder 创建，支持参数更新
 - ReactiveComponentContent: API 22+ 新增，支持响应式状态管理
 
-**主要接口**:
-```typescript
-class NodeContent extends Content {
-  addFrameNode(node: FrameNode): void
-  removeFrameNode(node: FrameNode): void
-}
-
-class ComponentContent<T> extends Content {
-  constructor(uiContext: UIContext, builder: WrappedBuilder<...>)
-  update(args: T): void
-  reuse(param?: Object): void
-  recycle(): void
-  dispose(): void
-  updateConfiguration(): void
-}
-
-class ReactiveComponentContent<T> extends Content {
-  constructor(uiContext: UIContext, builder: WrappedBuilder<T>,
-              config: BuildOptions, ...args: T)
-  flushState(): void  // 强制同步更新状态
-}
-```
+**API 定义位置**:
+- `OpenHarmony/interface/sdk-js/api/arkui/NodeContent.d.ts`
+- `OpenHarmony/interface/sdk-js/api/arkui/ComponentContent.d.ts`
+- API 22+ 新增 `ReactiveComponentContent` 同 `ComponentContent.d.ts`
 
 ---
 
-### 2.2 图形类型 (Graphics)
+### 2.3 图形类型 (Graphics)
 
-**文件**: `Graphics.d.ts`
+**API 定义位置**: `OpenHarmony/interface/sdk-js/api/arkui/Graphics.d.ts`
 
-#### 基础图形类型
-```typescript
-// 尺寸和位置
-interface Size {
-  width: number   // 单位: vp
-  height: number  // 单位: vp
-}
+提供 Node API 配套的几何、变换、形状、度量、绘制上下文等类型，主要分四类：
 
-interface Offset {
-  x: number
-  y: number
-}
+| 分组 | 能力 | 代表类型 |
+|------|------|----------|
+| 基础几何 | 尺寸、位置、变换参数 | `Size` / `Offset` / `Position` / `Frame` / `Pivot` / `Scale` / `Translation` / `Rotation` / `Matrix4` / `Edges<T>` / `BorderRadiuses` |
+| 形状与遮罩 | 矩形/圆/路径形状，节点裁剪和遮罩 | `Rect` / `RoundRect` / `Circle` / `CommandPath` / `ShapeMask` / `ShapeClip` |
+| 长度与颜色度量 | 多单位长度、颜色构造与混合 | `LengthUnit`（PX/VP/FP/PERCENT/LPX）/ `LengthMetrics` / `ColorMetrics` |
+| 绘制上下文 | `RenderNode.draw()` 回调参数 | `DrawContext`（含 `drawing.Canvas`） |
 
-interface Position {
-  x: number
-  y: number
-}
-
-interface Frame {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-// 变换相关
-interface Pivot {
-  x: number  // [0.0, 1.0]
-  y: number  // [0.0, 1.0]
-}
-
-interface Scale {
-  x: number
-  y: number
-}
-
-interface Translation {
-  x: number  // 单位: px
-  y: number
-}
-
-interface Rotation {
-  x: number  // 单位: degree
-  y: number
-  z: number
-}
-
-type Matrix4 = [number, number, ..., number]  // 16 个数字
-
-// 边框和圆角
-interface Edges<T> {
-  left: T
-  right: T
-  top: T
-  bottom: T
-}
-
-interface BorderRadiuses {
-  topLeft: number
-  topRight: number
-  bottomLeft: number
-  bottomRight: number
-}
-```
-
-#### 形状类型
-```typescript
-interface Rect {
-  left: number
-  top: number
-  right: number
-  bottom: number
-}
-
-interface RoundRect {
-  rect: Rect
-  corners: CornerRadius
-}
-
-interface Circle {
-  centerX: number
-  centerY: number
-  radius: number
-}
-
-interface CommandPath {
-  commands: string
-}
-
-// 形状遮罩和裁剪
-class ShapeMask {
-  setRectShape(rect: Rect): void
-  setRoundRectShape(roundRect: RoundRect): void
-  setCircleShape(circle: Circle): void
-  setOvalShape(oval: Rect): void
-  setCommandPath(path: CommandPath): void
-  fillColor: number
-  strokeColor: number
-  strokeWidth: number
-}
-
-class ShapeClip {
-  setRectShape(rect: Rect): void
-  setRoundRectShape(roundRect: RoundRect): void
-  setCircleShape(circle: Circle): void
-  setOvalShape(oval: Rect): void
-  setCommandPath(path: CommandPath): void
-}
-```
-
-#### 长度和颜色度量
-```typescript
-enum LengthUnit {
-  PX = 0,       // 物理像素
-  VP = 1,       // 密度无关像素
-  FP = 2,       // 字体缩放像素
-  PERCENT = 3,  // 百分比
-  LPX = 4       // 逻辑像素
-}
-
-class LengthMetrics {
-  constructor(value: number, unit?: LengthUnit)
-  static px(value: number): LengthMetrics
-  static vp(value: number): LengthMetrics
-  static fp(value: number): LengthMetrics
-  static percent(value: number): LengthMetrics
-  static lpx(value: number): LengthMetrics
-  static resource(value: Resource): LengthMetrics
-
-  unit: LengthUnit
-  value: number
-}
-
-class ColorMetrics {
-  static numeric(value: number): ColorMetrics
-  static rgba(red: number, green: number, blue: number, alpha?: number): ColorMetrics
-  static colorWithSpace(colorSpace: ColorSpace, red: number,
-                        green: number, blue: number, alpha?: number): ColorMetrics
-  static resourceColor(color: ResourceColor): ColorMetrics
-
-  blendColor(overlayColor: ColorMetrics): ColorMetrics
-
-  color: string
-  red: number
-  green: number
-  blue: number
-  alpha: number
-}
-```
-
-#### 绘制上下文
-```typescript
-class DrawContext {
-  size: Size              // 画布尺寸
-  sizeInPixel: Size       // 像素单位画布尺寸
-  canvas: drawing.Canvas  // 绘制画布
-}
-```
+> 完整字段与方法签名详见 `Graphics.d.ts` 源文件。
 
 ---
 
-### 2.3 Modifier 模式
+### 2.4 Modifier 模式
 
 #### CommonModifier (通用修饰器)
 
@@ -559,681 +381,633 @@ class ButtonModifier extends ButtonAttribute
 
 ## 3. 组件 API 分类清单
 
+> 每个分类下分别给出 **Dynamic 视图** 与 **Static 视图**：
+>
+> - Dynamic 视图：组件声明（`@internal/component/ets/<comp>.d.ts`）+ Modifier 声明（`arkui/<Comp>Modifier.d.ts`）
+> - Static 视图：组件声明（`arkui/component/<comp>.static.d.ets`）+ Modifier 声明（`arkui/<Comp>Modifier.static.d.ets`）
+>
+> ace_engine Pattern 与功能说明在两种范式间共享，列在分类后的"实现与知识库"小节中。
+
 ### 3.1 基础组件 (15 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Text** | TextModifier.d.ts | text.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp` | [知识库](../pattern/text/Text_Knowledge_Base_CN.md) | 文本显示 |
-| **Image** | ImageModifier.d.ts | image.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_pattern.cpp` | [知识库](../pattern/image/Image_Knowledge_Base.md) | 图片显示 |
-| **TextInput** | TextInputModifier.d.ts | textInput.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_input/text_input_pattern.cpp` | - | 文本输入 |
-| **TextArea** | TextAreaModifier.d.ts | textArea.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_area/text_area_pattern.cpp` | - | 多行文本输入 |
-| **Button** | ButtonModifier.d.ts | button.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/button/button_pattern.cpp` | - | 按钮 |
-| **Toggle** | ToggleModifier.d.ts | toggle.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/toggle_pattern.cpp` | - | 开关 |
-| **Checkbox** | CheckboxModifier.d.ts | checkbox.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/checkbox/checkbox_pattern.cpp` | - | 复选框 |
-| **Radio** | - | radio.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/radio/radio_pattern.cpp` | - | 单选框 |
-| **Slider** | SliderModifier.d.ts | slider.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/slider/slider_pattern.cpp` | - | 滑块 |
-| **Progress** | ProgressModifier.d.ts | progress.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/progress/progress_pattern.cpp` | - | 进度条 |
-| **LoadingProgress** | LoadingProgressModifier.d.ts | loadingProgress.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.cpp` | - | 加载进度 |
-| **Divider** | DividerModifier.d.ts | divider.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp` | - | 分割线 |
-| **Blank** | BlankModifier.d.ts | blank.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/blank/blank_pattern.cpp` | - | 空白占位 |
-| **Span** | SpanModifier.d.ts | span.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/span/span_pattern.cpp` | - | 文本片段 |
-| **ImageSpan** | - | imageSpan.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_span/image_span_pattern.cpp` | - | 图片片段 |
-| **Counter** | CounterModifier.d.ts | counter.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_pattern.cpp` | [知识库](../pattern/counter/Counter_Knowledge_Base.md) | 计数器 |
+**Dynamic 视图**
+
+| 组件名 | 组件声明 | Modifier 声明 |
+|--------|----------|---------------|
+| Text | text.d.ts | TextModifier.d.ts |
+| Image | image.d.ts | ImageModifier.d.ts |
+| TextInput | text_input.d.ts | TextInputModifier.d.ts |
+| TextArea | text_area.d.ts | TextAreaModifier.d.ts |
+| Button | button.d.ts | ButtonModifier.d.ts |
+| Toggle | toggle.d.ts | ToggleModifier.d.ts |
+| Checkbox | checkbox.d.ts | CheckboxModifier.d.ts |
+| Radio | radio.d.ts | RadioModifier.d.ts |
+| Slider | slider.d.ts | SliderModifier.d.ts |
+| Progress | progress.d.ts | ProgressModifier.d.ts |
+| LoadingProgress | loading_progress.d.ts | LoadingProgressModifier.d.ts |
+| Divider | divider.d.ts | DividerModifier.d.ts |
+| Blank | blank.d.ts | BlankModifier.d.ts |
+| Span | span.d.ts | SpanModifier.d.ts |
+| ImageSpan | image_span.d.ts | ImageSpanModifier.d.ts |
+| Counter | counter.d.ts | CounterModifier.d.ts |
+
+**Static 视图**
+
+| 组件名 | 组件声明 | Modifier 声明 |
+|--------|----------|---------------|
+| Text | text.static.d.ets | TextModifier.static.d.ets |
+| Image | image.static.d.ets | ImageModifier.static.d.ets |
+| TextInput | textInput.static.d.ets | TextInputModifier.static.d.ets |
+| TextArea | textArea.static.d.ets | TextAreaModifier.static.d.ets |
+| Button | button.static.d.ets | ButtonModifier.static.d.ets |
+| Toggle | toggle.static.d.ets | ToggleModifier.static.d.ets |
+| Checkbox | checkbox.static.d.ets | CheckboxModifier.static.d.ets |
+| Radio | radio.static.d.ets | RadioModifier.static.d.ets |
+| Slider | slider.static.d.ets | SliderModifier.static.d.ets |
+| Progress | progress.static.d.ets | ProgressModifier.static.d.ets |
+| LoadingProgress | loadingProgress.static.d.ets | LoadingProgressModifier.static.d.ets |
+| Divider | divider.static.d.ets | DividerModifier.static.d.ets |
+| Blank | blank.static.d.ets | BlankModifier.static.d.ets |
+| Span | span.static.d.ets | SpanModifier.static.d.ets |
+| ImageSpan | imageSpan.static.d.ets | ImageSpanModifier.static.d.ets |
+| Counter | counter.static.d.ets | CounterModifier.static.d.ets |
+
+**实现与知识库**
+
+| 组件 | ace_engine Pattern | 知识库 | 功能 |
+|------|--------------------|--------|------|
+| Text | `pattern/text/text_pattern.cpp` | [Text](../pattern/text/Text_Knowledge_Base_CN.md) | 文本显示 |
+| Image | `pattern/image/image_pattern.cpp` | [Image](../pattern/image/Image_Knowledge_Base.md) | 图片显示 |
+| TextInput | `pattern/text_input/text_input_pattern.cpp` | - | 单行文本输入 |
+| TextArea | `pattern/text_area/text_area_pattern.cpp` | - | 多行文本输入 |
+| Button | `pattern/button/button_pattern.cpp` | - | 按钮 |
+| Toggle | `pattern/toggle/toggle_pattern.cpp` | - | 开关 |
+| Checkbox | `pattern/checkbox/checkbox_pattern.cpp` | - | 复选框 |
+| Radio | `pattern/radio/radio_pattern.cpp` | - | 单选框 |
+| Slider | `pattern/slider/slider_pattern.cpp` | - | 滑块 |
+| Progress | `pattern/progress/progress_pattern.cpp` | - | 进度条 |
+| LoadingProgress | `pattern/loading_progress/loading_progress_pattern.cpp` | - | 加载进度 |
+| Divider | `pattern/divider/divider_pattern.cpp` | - | 分割线 |
+| Blank | `pattern/blank/blank_pattern.cpp` | - | 空白占位 |
+| Span | `pattern/text/span_node.cpp` | - | 文本片段 |
+| ImageSpan | `pattern/text/span/image_span_view.cpp` | - | 图片片段 |
+| Counter | `pattern/counter/counter_pattern.cpp` | [Counter](../pattern/counter/Counter_Knowledge_Base.md) | 计数器 |
+
+> Pattern 路径前缀为 `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/`。
 
 ### 3.2 容器组件 (27 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Column** | ColumnModifier.d.ts | column.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/linear_col/linear_col_pattern.cpp` | - | 纵向布局 |
-| **Row** | RowModifier.d.ts | row.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/linear_row/linear_row_pattern.cpp` | - | 横向布局 |
-| **Stack** | StackModifier.d.ts | stack.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/stack/stack_pattern.cpp` | - | 堆叠布局 |
-| **Flex** | FlexModifier.d.ts | flex.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_pattern.cpp` | - | 弹性布局 |
-| **Grid** | GridModifier.d.ts | grid.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp` | - | 网格布局 |
-| **GridRow** | GridRowModifier.d.ts | gridRow.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid_row/grid_row_pattern.cpp` | - | 栅格行容器 |
-| **GridCol** | GridColModifier.d.ts | gridCol.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid_col/grid_col_pattern.cpp` | - | 栅格列容器 |
-| **GridItem** | GridItemModifier.d.ts | gridItem.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid_item/grid_item_pattern.cpp` | - | 栅格子项 |
-| **List** | ListModifier.d.ts | list.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/list/list_pattern.cpp` | - | 列表 |
-| **ListItem** | ListItemModifier.d.ts | listItem.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/list_item/list_item_pattern.cpp` | - | 列表项 |
-| **ListItemGroup** | ListItemGroupModifier.d.ts | listItemGroup.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/list_item_group/list_item_group_pattern.cpp` | - | 列表分组 |
-| **Scroll** | ScrollModifier.d.ts | scroll.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp` | [知识库](../pattern/scroll/Scroll_Knowledge_Base.md) | 滚动容器 |
-| **Swiper** | SwiperModifier.d.ts | swiper.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp` | - | 轮播容器 |
-| **Tabs** | TabsModifier.d.ts | tabs.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/tabs/tabs_pattern.cpp` | - | 标签页容器 |
-| **TabContent** | - | tabContent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/tab_content/tab_content_pattern.cpp` | - | 标签页内容 |
-| **Navigator** | NavigatorModifier.d.ts | navigator.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/navigator/navigator_pattern.cpp` | - | 导航容器 |
-| **NavRouter** | NavRouterModifier.d.ts | navRouter.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/nav_router/nav_router_pattern.cpp` | - | 路由导航 |
-| **Navigation** | NavigationModifier.d.ts | navigation.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp` | - | 导航栏 |
-| **NavDestination** | - | navDestination.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/nav_destination/nav_destination_pattern.cpp` | - | 导航目标页 |
-| **SideBarContainer** | SideBarContainerModifier.d.ts | sideBarContainer.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/side_bar_container/side_bar_container_pattern.cpp` | - | 侧边栏容器 |
-| **Refresh** | RefreshModifier.d.ts | refresh.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp` | [知识库](../pattern/refresh/Refresh_Knowledge_Base.md) | 下拉刷新 |
-| **WaterFlow** | WaterFlowModifier.d.ts | waterFlow.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/water_flow/water_flow_pattern.cpp` | [知识库](../pattern/waterflow/WaterFlow_Knowledge_Base.md) | 瀑布流 |
-| **FlowItem** | - | flowItem.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flow_item/flow_item_pattern.cpp` | - | 瀑布流子项 |
-| **RelativeContainer** | RelativeContainerModifier.d.ts | relativeContainer.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/relative_container/relative_container_pattern.cpp` | - | 相对布局容器 |
-| **ColumnSplit** | ColumnSplitModifier.d.ts | columnSplit.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/column_split/column_split_pattern.cpp` | - | 纵向分割容器 |
-| **RowSplit** | RowSplitModifier.d.ts | rowSplit.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/row_split/row_split_pattern.cpp` | - | 横向分割容器 |
-| **FolderStack** | FolderStackModifier.d.ts | folderStack.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/folder_stack/folder_stack_pattern.cpp` | - | 文件夹堆叠 |
+**Dynamic 视图**
 
-### 3.3 选择器组件 (8 个)
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Column | column.d.ts | ColumnModifier.d.ts |
+| Row | row.d.ts | RowModifier.d.ts |
+| Stack | stack.d.ts | StackModifier.d.ts |
+| Flex | flex.d.ts | - |
+| Grid | grid.d.ts | GridModifier.d.ts |
+| GridRow | grid_row.d.ts | GridRowModifier.d.ts |
+| GridCol | grid_col.d.ts | GridColModifier.d.ts |
+| GridItem | gridItem.d.ts | GridItemModifier.d.ts |
+| List | list.d.ts | ListModifier.d.ts |
+| ListItem | list_item.d.ts | ListItemModifier.d.ts |
+| ListItemGroup | list_item_group.d.ts | ListItemGroupModifier.d.ts |
+| Scroll | scroll.d.ts | ScrollModifier.d.ts |
+| Swiper | swiper.d.ts | SwiperModifier.d.ts |
+| Tabs | tabs.d.ts | TabsModifier.d.ts |
+| TabContent | tab_content.d.ts | - |
+| Navigator | navigator.d.ts | NavigatorModifier.d.ts |
+| NavRouter | nav_router.d.ts | NavRouterModifier.d.ts |
+| Navigation | navigation.d.ts | NavigationModifier.d.ts |
+| NavDestination | nav_destination.d.ts | NavDestinationModifier.d.ts |
+| SideBarContainer | sidebar.d.ts | SideBarContainerModifier.d.ts |
+| Refresh | refresh.d.ts | RefreshModifier.d.ts |
+| WaterFlow | water_flow.d.ts | WaterFlowModifier.d.ts |
+| FlowItem | flow_item.d.ts | - |
+| RelativeContainer | relative_container.d.ts | RelativeContainerModifier.static.d.ets 对应 |
+| ColumnSplit | column_split.d.ts | ColumnSplitModifier.d.ts |
+| RowSplit | row_split.d.ts | RowSplitModifier.d.ts |
+| FolderStack | folder_stack.d.ts | FolderStackModifier.d.ts |
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Select** | SelectModifier.d.ts | select.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/select/select_pattern.cpp` | - | 下拉选择 |
-| **DatePicker** | DatePickerModifier.d.ts | datePicker.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_pattern.cpp` | [知识库](../pattern/picker/Date_Picker_Knowledge_Base.md) | 日期选择器 |
-| **TimePicker** | TimePickerModifier.d.ts | timePicker.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_pattern.cpp` | [知识库](../pattern/time_picker/Time_Picker_Knowledge_Base.md) | 时间选择器 |
-| **TextPicker** | TextPickerModifier.d.ts | textPicker.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_pattern.cpp` | [知识库](../pattern/text_picker/Text_Picker_Knowledge_Base.md) | 文本选择器 |
-| **CalendarPicker** | CalendarPickerModifier.d.ts | calendarPicker.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_pattern.cpp` | [知识库](../pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md) | 日历选择器 |
-| **ContainerPicker** | ContainerPickerModifier.d.ts | containerPicker.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp` | [知识库](../pattern/container_picker/Container_Picker_Knowledge_Base.md) | 容器选择器 |
-| **CheckboxGroup** | CheckboxGroupModifier.d.ts | checkboxgroup.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/checkbox/checkbox_group_pattern.cpp` | - | 复选框组 |
-| **Rating** | RatingModifier.d.ts | rating.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rating/rating_pattern.cpp` | - | 评分组件 |
-| **UIPickerComponent** | UIPickerComponentModifier.d.ts | uiPickerComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/ui_picker/ui_picker_pattern.cpp` | - | UI 选择器 |
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Column | column.static.d.ets | ColumnModifier.static.d.ets |
+| Row | row.static.d.ets | RowModifier.static.d.ets |
+| Stack | stack.static.d.ets | StackModifier.static.d.ets |
+| Flex | flex.static.d.ets | FlexModifier.static.d.ets |
+| Grid | grid.static.d.ets | GridModifier.static.d.ets |
+| GridRow | gridRow.static.d.ets | GridRowModifier.static.d.ets |
+| GridCol | gridCol.static.d.ets | GridColModifier.static.d.ets |
+| GridItem | gridItem.static.d.ets | GridItemModifier.static.d.ets |
+| List | list.static.d.ets | ListModifier.static.d.ets |
+| ListItem | listItem.static.d.ets | ListItemModifier.static.d.ets |
+| ListItemGroup | listItemGroup.static.d.ets | ListItemGroupModifier.static.d.ets |
+| Scroll | scroll.static.d.ets | ScrollModifier.static.d.ets |
+| Swiper | swiper.static.d.ets | SwiperModifier.static.d.ets |
+| Tabs | tabs.static.d.ets | TabsModifier.static.d.ets |
+| TabContent | tabContent.static.d.ets | - |
+| Navigation | navigation.static.d.ets | NavigationModifier.static.d.ets |
+| NavDestination | navDestination.static.d.ets | NavDestinationModifier.static.d.ets |
+| SideBarContainer | sidebar.static.d.ets | SideBarContainerModifier.static.d.ets |
+| Refresh | refresh.static.d.ets | RefreshModifier.static.d.ets |
+| WaterFlow | waterFlow.static.d.ets | WaterFlowModifier.static.d.ets |
+| RelativeContainer | relativeContainer.static.d.ets | RelativeContainerModifier.static.d.ets |
+| ColumnSplit | columnSplit.static.d.ets | ColumnSplitModifier.static.d.ets |
+| RowSplit | rowSplit.static.d.ets | RowSplitModifier.static.d.ets |
+| FolderStack | folderStack.static.d.ets | FolderStackModifier.static.d.ets |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| Column | `pattern/linear_layout/linear_layout_pattern.cpp` | - | 纵向布局 |
+| Row | `pattern/linear_layout/linear_layout_pattern.cpp` | - | 横向布局 |
+| Stack | `pattern/stack/stack_pattern.cpp` | - | 堆叠布局 |
+| Flex | `pattern/flex/flex_layout_pattern.cpp` | - | 弹性布局 |
+| Grid | `pattern/grid/grid_pattern.cpp` | - | 网格布局 |
+| GridRow | `pattern/grid_row/grid_row_pattern.cpp` | - | 栅格行 |
+| GridCol | `pattern/grid_col/grid_col_pattern.cpp` | - | 栅格列 |
+| GridItem | `pattern/grid_item/grid_item_pattern.cpp` | - | 栅格子项 |
+| List | `pattern/list/list_pattern.cpp` | - | 列表 |
+| ListItem | `pattern/list/list_item_pattern.cpp` | - | 列表项 |
+| ListItemGroup | `pattern/list/list_item_group_pattern.cpp` | - | 列表分组 |
+| Scroll | `pattern/scroll/scroll_pattern.cpp` | [Scroll](../pattern/scroll/Scroll_Knowledge_Base.md) | 滚动容器 |
+| Swiper | `pattern/swiper/swiper_pattern.cpp` | - | 轮播 |
+| Tabs | `pattern/tabs/tabs_pattern.cpp` | - | 标签页 |
+| TabContent | `pattern/tabs/tab_content_pattern.cpp` | - | 标签页内容 |
+| Navigator | (legacy `components/navigator/`) | - | 导航跳转 |
+| NavRouter | `pattern/navrouter/nav_router_pattern.cpp` | - | 路由导航 |
+| Navigation | `pattern/navigation/navigation_pattern.cpp` | - | 导航栏 |
+| NavDestination | `pattern/navigation/nav_destination_pattern.cpp` | - | 导航目标页 |
+| SideBarContainer | `pattern/side_bar/side_bar_container_pattern.cpp` | - | 侧边栏 |
+| Refresh | `pattern/refresh/refresh_pattern.cpp` | [Refresh](../pattern/refresh/Refresh_Knowledge_Base.md) | 下拉刷新 |
+| WaterFlow | `pattern/waterflow/water_flow_pattern.cpp` | [WaterFlow](../pattern/waterflow/WaterFlow_Knowledge_Base.md) | 瀑布流 |
+| FlowItem | `pattern/waterflow/water_flow_item_pattern.cpp` | - | 瀑布流子项 |
+| RelativeContainer | `pattern/relative_container/relative_container_pattern.cpp` | - | 相对布局 |
+| ColumnSplit | `pattern/linear_split/linear_split_pattern.cpp` | - | 纵向分割 |
+| RowSplit | `pattern/linear_split/linear_split_pattern.cpp` | - | 横向分割 |
+| FolderStack | `pattern/folder_stack/folder_stack_pattern.cpp` | - | 文件夹堆叠 |
+
+### 3.3 选择器组件 (9 个)
+
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Select | select.d.ts | SelectModifier.d.ts |
+| DatePicker | date_picker.d.ts | DatePickerModifier.d.ts |
+| TimePicker | time_picker.d.ts | TimePickerModifier.d.ts |
+| TextPicker | text_picker.d.ts | TextPickerModifier.d.ts |
+| CalendarPicker | calendar_picker.d.ts | CalendarPickerModifier.d.ts |
+| CheckboxGroup | checkboxgroup.d.ts | CheckboxGroupModifier.d.ts |
+| Rating | rating.d.ts | RatingModifier.d.ts |
+| UIPickerComponent | ui_picker_component.d.ts | UIPickerComponentModifier.d.ts |
+| ContainerPicker | - | - |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Select | select.static.d.ets | SelectModifier.static.d.ets |
+| DatePicker | datePicker.static.d.ets | DatePickerModifier.static.d.ets |
+| TimePicker | timePicker.static.d.ets | TimePickerModifier.static.d.ets |
+| TextPicker | textPicker.static.d.ets | TextPickerModifier.static.d.ets |
+| CalendarPicker | calendarPicker.static.d.ets | CalendarPickerModifier.static.d.ets |
+| CheckboxGroup | checkboxgroup.static.d.ets | CheckboxGroupModifier.static.d.ets |
+| Rating | rating.static.d.ets | RatingModifier.static.d.ets |
+| UIPickerComponent | uiPickerComponent.static.d.ets | UIPickerComponentModifier.static.d.ets |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| Select | `pattern/select/select_pattern.cpp` | - | 下拉选择 |
+| DatePicker | `pattern/picker/date_picker_pattern.cpp` | [DatePicker](../pattern/picker/Date_Picker_Knowledge_Base.md) | 日期选择器 |
+| TimePicker | `pattern/time_picker/time_picker_pattern.cpp` | [TimePicker](../pattern/time_picker/Time_Picker_Knowledge_Base.md) | 时间选择器 |
+| TextPicker | `pattern/text_picker/text_picker_pattern.cpp` | [TextPicker](../pattern/text_picker/Text_Picker_Knowledge_Base.md) | 文本选择器 |
+| CalendarPicker | `pattern/picker/calendar_picker_pattern.cpp` | [CalendarPicker](../pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md) | 日历选择器 |
+| CheckboxGroup | `pattern/checkboxgroup/checkboxgroup_pattern.cpp` | - | 复选框组 |
+| Rating | `pattern/rating/rating_pattern.cpp` | - | 评分 |
+| UIPickerComponent | `pattern/picker/picker_pattern.cpp` | - | UI 选择器 |
 
 ### 3.4 形状组件 (7 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Rect** | RectModifier.d.ts | rect.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rect/rect_pattern.cpp` | - | 矩形 |
-| **Circle** | - | circle.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/circle/circle_pattern.cpp` | - | 圆形 |
-| **Ellipse** | EllipseModifier.d.ts | ellipse.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/ellipse/ellipse_pattern.cpp` | - | 椭圆 |
-| **Path** | PathModifier.d.ts | path.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/path/path_pattern.cpp` | - | 路径 |
-| **Polyline** | PolylineModifier.d.ts | polyline.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/polyline/polyline_pattern.cpp` | - | 折线 |
-| **Polygon** | - | polygon.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/polygon/polygon_pattern.cpp` | - | 多边形 |
-| **Shape** | ShapeModifier.d.ts | shape.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/shape/shape_pattern.cpp` | - | 形状 |
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Rect | rect.d.ts | RectModifier.d.ts |
+| Circle | circle.d.ts | - |
+| Ellipse | ellipse.d.ts | - |
+| Path | path.d.ts | PathModifier.d.ts |
+| Line | line.d.ts | LineModifier.d.ts |
+| Polyline | polyline.d.ts | PolylineModifier.d.ts |
+| Polygon | polygon.d.ts | PolygonModifier.d.ts |
+| Shape | shape.d.ts | ShapeModifier.d.ts |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Rect | rect.static.d.ets | RectModifier.static.d.ets |
+| Circle | circle.static.d.ets | - |
+| Ellipse | ellipse.static.d.ets | - |
+| Path | path.static.d.ets | PathModifier.static.d.ets |
+| Line | line.static.d.ets | LineModifier.static.d.ets |
+| Polyline | polyline.static.d.ets | PolylineModifier.static.d.ets |
+| Polygon | polygon.static.d.ets | PolygonModifier.static.d.ets |
+| Shape | shape.static.d.ets | ShapeModifier.static.d.ets |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| Rect | `pattern/shape/rect_pattern.cpp` | - | 矩形 |
+| Circle | `pattern/shape/circle_pattern.cpp` | - | 圆形 |
+| Ellipse | `pattern/shape/ellipse_pattern.cpp` | - | 椭圆 |
+| Path | `pattern/shape/path_pattern.cpp` | - | 路径 |
+| Line | `pattern/shape/line_pattern.cpp` | - | 线 |
+| Polyline | `pattern/shape/polyline_pattern.cpp` | - | 折线 |
+| Polygon | `pattern/shape/polygon_pattern.cpp` | - | 多边形 |
+| Shape | `pattern/shape/shape_pattern.cpp` | - | 形状容器 |
 
 ### 3.5 媒体组件 (4 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Video** | VideoModifier.d.ts | video.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/video/video_pattern.cpp` | - | 视频播放器 |
-| **ImageAnimator** | ImageAnimatorModifier.d.ts | imageAnimator.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp` | [知识库](../pattern/image_animator/Image_Animator_Knowledge_Base.md) | 帧动画 |
-| **Canvas** | - | canvas.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp` | - | 画布 |
-| **XComponent** | - | xcomponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp` | - | 原生组件容器 |
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Video | video.d.ts | VideoModifier.d.ts |
+| ImageAnimator | image_animator.d.ts | ImageAnimatorModifier.d.ts |
+| Canvas | canvas.d.ts | - |
+| XComponent | xcomponent.d.ts | - |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Video | video.static.d.ets | VideoModifier.static.d.ets |
+| ImageAnimator | imageAnimator.static.d.ets | ImageAnimatorModifier.static.d.ets |
+| Canvas | canvas.static.d.ets | - |
+| XComponent | xcomponent.static.d.ets | - |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| Video | `pattern/video/video_pattern.cpp` | - | 视频 |
+| ImageAnimator | `pattern/image_animator/image_animator_pattern.cpp` | [ImageAnimator](../pattern/image_animator/Image_Animator_Knowledge_Base.md) | 帧动画 |
+| Canvas | `pattern/canvas/canvas_pattern.cpp` | - | 画布 |
+| XComponent | `pattern/xcomponent/xcomponent_pattern.cpp` | - | 原生组件容器 |
 
 ### 3.6 数据展示组件 (7 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **TextClock** | TextClockModifier.d.ts | textClock.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp` | [知识库](../pattern/text_clock/TextClock_Knowledge_Base_CN.md) | 文本时钟 |
-| **TextTimer** | - | textTimer.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_timer/text_timer_pattern.cpp` | [知识库](../pattern/texttimer/TextTimer_Knowledge_Base_CN.md) | 文本计时器 |
-| **DataPanel** | DataPanelModifier.d.ts | dataPanel.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/data_panel/data_panel_pattern.cpp` | - | 数据面板 |
-| **Gauge** | GaugeModifier.d.ts | gauge.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp` | [知识库](../pattern/gauge/Gauge_Knowledge_Base.md) | 仪表盘 |
-| **QRCode** | QRCodeModifier.d.ts | qrcode.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp` | - | 二维码 |
-| **Badge** | - | badge.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp` | [知识库](../pattern/badge/Badge_Knowledge_Base_CN.md) | 徽章 |
-| **AlphabetIndexer** | AlphabetIndexerModifier.d.ts | alphabetIndexer.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/alphabet_indexer/alphabet_indexer_pattern.cpp` | - | 字母索引 |
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| TextClock | text_clock.d.ts | TextClockModifier.d.ts |
+| TextTimer | text_timer.d.ts | TextTimerModifier.d.ts |
+| DataPanel | data_panel.d.ts | DataPanelModifier.d.ts |
+| Gauge | gauge.d.ts | GaugeModifier.d.ts |
+| QRCode | qrcode.d.ts | QRCodeModifier.d.ts |
+| Badge | badge.d.ts | - |
+| AlphabetIndexer | alphabet_indexer.d.ts | AlphabetIndexerModifier.d.ts |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| TextClock | textClock.static.d.ets | TextClockModifier.static.d.ets |
+| TextTimer | textTimer.static.d.ets | TextTimerModifier.static.d.ets |
+| DataPanel | dataPanel.static.d.ets | DataPanelModifier.static.d.ets |
+| Gauge | gauge.static.d.ets | GaugeModifier.static.d.ets |
+| QRCode | qrcode.static.d.ets | QRCodeModifier.static.d.ets |
+| Badge | badge.static.d.ets | - |
+| AlphabetIndexer | alphabetIndexer.static.d.ets | AlphabetIndexerModifier.static.d.ets |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| TextClock | `pattern/text_clock/text_clock_pattern.cpp` | [TextClock](../pattern/text_clock/TextClock_Knowledge_Base_CN.md) | 文本时钟 |
+| TextTimer | `pattern/text_timer/text_timer_pattern.cpp` | [TextTimer](../pattern/texttimer/TextTimer_Knowledge_Base_CN.md) | 文本计时器 |
+| DataPanel | `pattern/data_panel/data_panel_pattern.cpp` | - | 数据面板 |
+| Gauge | `pattern/gauge/gauge_pattern.cpp` | [Gauge](../pattern/gauge/Gauge_Knowledge_Base.md) | 仪表盘 |
+| QRCode | `pattern/qrcode/qrcode_pattern.cpp` | - | 二维码 |
+| Badge | `pattern/badge/badge_pattern.cpp` | [Badge](../pattern/badge/Badge_Knowledge_Base_CN.md) | 徽章 |
+| AlphabetIndexer | `pattern/indexer/indexer_pattern.cpp` | - | 字母索引 |
 
 ### 3.7 富文本组件 (4 个)
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **RichEditor** | RichEditorModifier.d.ts | richEditor.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp` | - | 富文本编辑器 |
-| **ContainerSpan** | ContainerSpanModifier.d.ts | containerSpan.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_span/container_span_pattern.cpp` | - | 容器片段 |
-| **StyledString** | - | styledString.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/styled_string/styled_string_pattern.cpp` | - | 样式字符串 |
-| **Hyperlink** | HyperlinkModifier.d.ts | hyperlink.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/hyperlink/hyperlink_pattern.cpp` | - | 超链接 |
+**Dynamic 视图**
 
-### 3.8 弹窗和菜单组件 (9 个)
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| RichEditor | rich_editor.d.ts | RichEditorModifier.d.ts |
+| ContainerSpan | container_span.d.ts | ContainerSpanModifier.d.ts |
+| StyledString | styled_string.d.ts | - |
+| Hyperlink | hyperlink.d.ts | HyperlinkModifier.d.ts |
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **AlertDialog** | - | alertDialog.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/dialog/alert_dialog_pattern.cpp` | - | 警告对话框 |
-| **ActionSheet** | - | actionSheet.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/dialog/action_sheet_pattern.cpp` | - | 操作列表 |
-| **Menu** | MenuModifier.d.ts | menu.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp` | [知识库](../pattern/menu/Menu_Knowledge_Base.md) | 菜单 |
-| **MenuItem** | MenuItemModifier.d.ts | menuItem.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_item_pattern.cpp` | - | 菜单项 |
-| **CustomDialogController** | - | customDialogController.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/dialog/custom_dialog_pattern.cpp` | - | 自定义对话框控制器 |
-| **BindSheet** | BindSheetModifier.d.ts | - | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/bind_sheet/bind_sheet_pattern.cpp` | - | 半模态转场 |
-| **Panel** | PanelModifier.d.ts | panel.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/panel/panel_pattern.cpp` | - | 半屏弹窗 |
-| **Popover** | PopoverModifier.d.ts | popover.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/popover/popover_pattern.cpp` | - | 气泡弹窗 |
-| **Toast** | - | toast.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toast/toast_pattern.cpp` | - | 提示条 |
-| **Dialog** | - | dialog.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp` | - | 对话框 |
+**Static 视图**
 
-### 3.9 高级组件 (19+ 个)
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| RichEditor | richEditor.static.d.ets | RichEditorModifier.static.d.ets |
+| ContainerSpan | containerSpan.static.d.ets | ContainerSpanModifier.static.d.ets |
+| StyledString | styledString.static.d.ets | - |
+| Hyperlink | hyperlink.static.d.ets | HyperlinkModifier.static.d.ets |
 
-| 组件名 | Modifier 文件 | Static 文件 | ace_engine Pattern 位置 | 知识库 | 功能说明 |
-|--------|---------------|-------------|-------------------------|--------|----------|
-| **Web** | - | web.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/web/web_pattern.cpp` | - | Web 浏览器 |
-| **FormComponent** | FormComponentModifier.d.ts | formComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/form/form_pattern.cpp` | - | 表单组件 |
-| **PatternLock** | PatternLockModifier.d.ts | patternLock.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/pattern_lock/pattern_lock_pattern.cpp` | - | 图案锁 |
-| **Stepper** | StepperModifier.d.ts | stepper.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/stepper/stepper_pattern.cpp` | - | 步骤条 |
-| **StepperItem** | StepperItemModifier.d.ts | - | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/stepper/stepper_item_pattern.cpp` | - | 步骤条项 |
-| **Search** | SearchModifier.d.ts | search.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_pattern.cpp` | [知识库](../pattern/search/Search_Knowledge_Base_CN.md) | 搜索框 |
-| **ContentSlot** | - | contentSlot.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/content_slot/content_slot_pattern.cpp` | - | 内容插槽 |
-| **RemoteWindow** | - | remoteWindow.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/remote_window/remote_window_pattern.cpp` | - | 远程窗口 |
-| **GridTree** | - | gridTree.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid_tree/grid_tree_pattern.cpp` | - | 网格树 |
-| **UIExtensionComponent** | - | uiExtensionComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.cpp` | - | UI 扩展组件 |
-| **EmbeddedComponent** | - | embeddedComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/embedded_component/embedded_component_pattern.cpp` | - | 嵌入式组件 |
-| **EffectComponent** | - | effectComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/effect_component/effect_component_pattern.cpp` | - | 效果组件 |
-| **Component3D** | - | component3d.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/component3d/component3d_pattern.cpp` | - | 3D 组件 |
-| **SecurityComponent** | - | securityComponent.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/security/security_component_pattern.cpp` | - | 安全组件 |
-| **SymbolGlyph** | - | symbolglyph.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/symbol/symbol_glyph_pattern.cpp` | - | 符号图标 |
-| **SymbolSpan** | SymbolSpanModifier.d.ts | symbolSpan.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/symbol/symbol_span_pattern.cpp` | - | 符号片段 |
-| **Marquee** | MarqueeModifier.d.ts | marquee.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp` | [知识库](../pattern/marquee/Marquee_Knowledge_Base.md) | 跑马灯 |
-| **LazyGrid** | LazyGridModifier.d.ts | lazyGrid.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp` | [知识库](../pattern/lazy_layout/LazyGrid_Knowledge_Base.md) | 懒加载网格 |
-| **Particle** | ParticleModifier.d.ts | particle.static.d.ets | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/particle/particle_pattern.cpp` | - | 粒子效果 |
+**实现与知识库**
 
-### 3.10 工具和辅助类 (27+ 个)
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| RichEditor | `pattern/rich_editor/rich_editor_pattern.cpp` | - | 富文本编辑器 |
+| ContainerSpan | `pattern/text/span_node.cpp` | - | 容器片段 |
+| StyledString | `pattern/text/styled_string/styled_string.cpp` | - | 样式字符串 |
+| Hyperlink | `pattern/hyperlink/hyperlink_pattern.cpp` | - | 超链接 |
 
-| 类名 | Static 文件 | 功能说明 |
-|------|-------------|----------|
-| **Common** | common.static.d.ets | 通用属性和方法 |
-| **Units** | units.static.d.ets | 单位类型定义 |
-| **Enums** | enums.static.d.ets | 枚举类型定义 |
-| **Resources** | resources.static.d.ets | 资源管理 |
-| **Gesture** | gesture.static.d.ets | 手势识别 |
-| **Focus** | focus.static.d.ets | 焦点控制 |
-| **Animation** | animation.static.d.ets | 动画 |
-| **Screen** | screen.static.d.ets | 屏幕信息 |
-| **CustomComponent** | customComponent.static.d.ets | 自定义组件 |
-| **ExtendableComponent** | extendableComponent.static.d.ets | 可扩展组件 |
-| **Builder** | builder.static.d.ets | 构建器函数 |
-| **ForEach** | forEach.static.d.ets | 循环渲染 |
-| **If** | if.static.d.ets | 条件渲染 |
-| **LazyForEach** | - | 懒加载循环渲染 |
-| **Repeat** | repeat.static.d.ets | 重复渲染 |
-| **WithTheme** | withTheme.static.d.ets | 主题切换 |
-| **ScrollBar** | scrollBar.static.d.ets | 滚动条 |
-| **IndicatorComponent** | indicatorcomponent.static.d.ets | 指示器 |
-| **RootScene** | rootScene.static.d.ets | 根场景 |
-| **WindowScene** | windowScene.static.d.ets | 窗口场景 |
-| **FormLink** | formLink.static.d.ets | 卡片链接 |
-| **SaveButton** | saveButton.static.d.ets | 保存按钮 |
-| **PasteButton** | pasteButton.static.d.ets | 粘贴按钮 |
+### 3.8 弹窗和菜单组件 (10 个)
+
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| AlertDialog | alert_dialog.d.ts | - |
+| ActionSheet | action_sheet.d.ts | - |
+| Menu | menu.d.ts | MenuModifier.d.ts |
+| MenuItem | menu_item.d.ts | MenuItemModifier.d.ts |
+| MenuItemGroup | menu_item_group.d.ts | - |
+| CustomDialogController | custom_dialog_controller.d.ts | - |
+| Panel | panel.d.ts | PanelModifier.d.ts |
+| ContextMenu | context_menu.d.ts | - |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| AlertDialog | alertDialog.static.d.ets | - |
+| ActionSheet | actionSheet.static.d.ets | - |
+| Menu | menu.static.d.ets | MenuModifier.static.d.ets |
+| MenuItem | menuItem.static.d.ets | MenuItemModifier.static.d.ets |
+| MenuItemGroup | menuItemGroup.static.d.ets | - |
+| CustomDialogController | customDialogController.static.d.ets | - |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| AlertDialog | `pattern/dialog/alert_dialog_pattern.cpp` | - | 警告对话框 |
+| ActionSheet | `pattern/dialog/action_sheet_pattern.cpp` | - | 操作列表 |
+| Menu | `pattern/menu/menu_pattern.cpp` | [Menu](../pattern/menu/Menu_Knowledge_Base.md) | 菜单 |
+| MenuItem | `pattern/menu/menu_item/menu_item_pattern.cpp` | - | 菜单项 |
+| MenuItemGroup | `pattern/menu/menu_item_group/menu_item_group_pattern.cpp` | - | 菜单分组 |
+| CustomDialogController | `pattern/dialog/dialog_pattern.cpp` | - | 自定义对话框控制器 |
+| Panel | `pattern/panel/sliding_panel_pattern.cpp` | - | 半屏弹窗 |
+| ContextMenu | `pattern/menu/menu_pattern.cpp` | - | 上下文菜单 |
+
+### 3.9 高级组件 (19 个)
+
+**Dynamic 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Web | web.d.ts | - |
+| FormComponent | form_component.d.ts | FormComponentModifier.d.ts |
+| PatternLock | pattern_lock.d.ts | PatternLockModifier.d.ts |
+| Stepper | stepper.d.ts | StepperModifier.d.ts |
+| StepperItem | stepper_item.d.ts | StepperItemModifier.d.ts |
+| Search | search.d.ts | SearchModifier.d.ts |
+| ContentSlot | content_slot.d.ts | - |
+| RemoteWindow | remote_window.d.ts | - |
+| UIExtensionComponent | ui_extension_component.d.ts | - |
+| EmbeddedComponent | embedded_component.d.ts | - |
+| EffectComponent | effect_component.d.ts | - |
+| Component3D | component3d.d.ts | - |
+| SecurityComponent | security_component.d.ts | - |
+| SymbolGlyph | symbolglyph.d.ts | SymbolGlyphModifier.d.ts |
+| SymbolSpan | symbol_span.d.ts | SymbolSpanModifier.d.ts |
+| Marquee | marquee.d.ts | MarqueeModifier.d.ts |
+| LazyGridLayout | lazy_grid_layout.d.ts | - |
+| Particle | particle.d.ts | ParticleModifier.d.ts |
+| PluginComponent | plugin_component.d.ts | - |
+
+**Static 视图**
+
+| 组件 | 组件声明 | Modifier 声明 |
+|------|----------|---------------|
+| Web | web.static.d.ets | - |
+| FormComponent | formComponent.static.d.ets | FormComponentModifier.static.d.ets |
+| PatternLock | patternLock.static.d.ets | PatternLockModifier.static.d.ets |
+| Search | search.static.d.ets | SearchModifier.static.d.ets |
+| ContentSlot | contentSlot.static.d.ets | - |
+| RemoteWindow | remoteWindow.static.d.ets | - |
+| UIExtensionComponent | uiExtensionComponent.static.d.ets | - |
+| EmbeddedComponent | embeddedComponent.static.d.ets | - |
+| EffectComponent | effectComponent.static.d.ets | - |
+| Component3D | component3d.static.d.ets | - |
+| SecurityComponent | securityComponent.static.d.ets | - |
+| SymbolGlyph | symbolglyph.static.d.ets | SymbolGlyphModifier.static.d.ets |
+| SymbolSpan | symbolSpan.static.d.ets | SymbolSpanModifier.static.d.ets |
+| Marquee | marquee.static.d.ets | MarqueeModifier.static.d.ets |
+| LazyGridLayout | lazyGridLayout.static.d.ets | - |
+| Particle | particle.static.d.ets | ParticleModifier.static.d.ets |
+| PluginComponent | pluginComponent.static.d.ets | - |
+| UnionEffectContainer | unionEffectContainer.static.d.ets | - |
+| MediaCachedImage | mediaCachedImage.static.d.ets | - |
+
+**实现与知识库**
+
+| 组件 | Pattern | 知识库 | 功能 |
+|------|---------|--------|------|
+| Web | `pattern/web/web_pattern.cpp` | - | Web 浏览器 |
+| FormComponent | `pattern/form/form_pattern.cpp` | - | 卡片组件 |
+| PatternLock | `pattern/patternlock/patternlock_pattern.cpp` | - | 图案锁 |
+| Stepper | `pattern/stepper/stepper_pattern.cpp` | - | 步骤条 |
+| StepperItem | `pattern/stepper/stepper_item_pattern.cpp` | - | 步骤项 |
+| Search | `pattern/search/search_pattern.cpp` | [Search](../pattern/search/Search_Knowledge_Base_CN.md) | 搜索框 |
+| ContentSlot | `pattern/content_slot/content_slot_pattern.cpp` | - | 内容插槽 |
+| RemoteWindow | `pattern/remote_window/remote_window_pattern.cpp` | - | 远程窗口 |
+| UIExtensionComponent | `pattern/ui_extension/ui_extension_pattern.cpp` | - | UI 扩展 |
+| EmbeddedComponent | `pattern/ui_extension/embedded_component_pattern.cpp` | - | 嵌入式组件 |
+| EffectComponent | `pattern/effect_component/effect_component_pattern.cpp` | - | 效果组件 |
+| Component3D | `pattern/model/model_pattern.cpp` | - | 3D 组件 |
+| SecurityComponent | `pattern/security_component/security_component_pattern.cpp` | - | 安全组件 |
+| SymbolGlyph | `pattern/symbol/symbol_pattern.cpp` | - | 符号图标 |
+| SymbolSpan | `pattern/text/span_node.cpp` | - | 符号片段 |
+| Marquee | `pattern/marquee/marquee_pattern.cpp` | [Marquee](../pattern/marquee/Marquee_Knowledge_Base.md) | 跑马灯 |
+| LazyGridLayout | `pattern/grid/grid_pattern.cpp` | [LazyGrid](../pattern/lazy_layout/LazyGrid_Knowledge_Base.md) | 懒加载网格 |
+| Particle | `pattern/particle/particle_pattern.cpp` | - | 粒子效果 |
+| PluginComponent | `pattern/plugin/plugin_pattern.cpp` | - | 插件组件 |
+
+### 3.10 工具和辅助类 (24 个)
+
+> 此类条目大多是声明式语法基座或通用类型/容器，无需 Modifier；下表同时给出 Dynamic 与 Static 声明文件位置（`-` 表示未提供）。
+
+| 名称 | Dynamic 声明 | Static 声明 | 功能说明 |
+|------|--------------|-------------|----------|
+| Common | common.d.ts | common.static.d.ets | 通用属性和方法 |
+| Units | units.d.ts | units.static.d.ets | 单位类型定义 |
+| Enums | enums.d.ts | enums.static.d.ets | 枚举类型定义 |
+| Resources | - | resources.static.d.ets | 资源管理 |
+| Gesture | gesture.d.ts | gesture.static.d.ets | 手势识别 |
+| Focus | focus.d.ts | focus.static.d.ets | 焦点控制 |
+| Animation | - | animation.static.d.ets | 动画 |
+| Screen | screen.d.ts | screen.static.d.ets | 屏幕信息 |
+| CustomComponent | - | customComponent.static.d.ets | 自定义组件基类 |
+| ExtendableComponent | - | extendableComponent.static.d.ets | 可扩展组件 |
+| Builder | - | builder.static.d.ets | 构建器函数 |
+| ForEach | for_each.d.ts | forEach.static.d.ets | 循环渲染 |
+| If | - | if.static.d.ets | 条件渲染 |
+| LazyForEach | lazy_for_each.d.ts | lazyForEach.static.d.ets | 懒加载循环渲染 |
+| Repeat | repeat.d.ts | repeat.static.d.ets | 重复渲染 |
+| WithTheme | with_theme.d.ts | withTheme.static.d.ets | 主题切换 |
+| ScrollBar | scroll_bar.d.ts | scrollBar.static.d.ets | 滚动条 |
+| IndicatorComponent | indicatorcomponent.d.ts | indicatorcomponent.static.d.ets | 指示器 |
+| RootScene | root_scene.d.ts | rootScene.static.d.ets | 根场景 |
+| WindowScene | window_scene.d.ts | windowScene.static.d.ets | 窗口场景 |
+| FormLink | form_link.d.ts | - | 卡片链接 |
+| SaveButton | save_button.d.ts | saveButton.static.d.ets | 保存按钮 |
+| PasteButton | paste_button.d.ts | pasteButton.static.d.ets | 粘贴按钮 |
+| Inspector | inspector.d.ts | inspector.static.d.ets | 检查器 |
+| NodeContainer | node_container.d.ts | nodeContainer.static.d.ets | 节点容器 |
+| TextCommon | text_common.d.ts | textCommon.static.d.ets | 文本通用类型 |
+| Matrix2D | matrix2d.d.ts | matrix2d.static.d.ets | 2D 变换矩阵 |
+| Toolbar | toolbar.d.ts | toolbar.static.d.ets | 工具栏 |
+| Interop | - | interop.static.d.ets | 互操作 |
+| PageTransition | page_transition.d.ts | pageTransition.static.d.ets | 页面转场 |
+| MenuItemGroup | menu_item_group.d.ts | menuItemGroup.static.d.ets | 菜单分组 |
 
 ---
 
-## 4. Component Static API 详解
+## 4. 组件声明文件结构规范
 
-本章详细说明 `interface/sdk-js/api/arkui/component` 目录中的 Static API 定义文件结构、模式和规范。
+本章统一说明 Dynamic 与 Static 两种范式下组件声明文件（`*.d.ts` / `*.static.d.ets`）的共同结构与差异，并给出通用基座文件（common / enums / units / gesture / builder）的入口。
 
-### 4.1 Static API 文件结构
+> 路径前缀均省略 `OpenHarmony/interface/sdk-js/api/`。`-` 表示该范式无对应概念。
 
-每个 `.static.d.ets` 文件定义了一个组件或功能的完整 Static API。文件包含以下类型的定义：
+### 4.1 三段式约定
 
-#### 4.1.1 枚举定义 (`export declare enum`)
+两种范式都采用「Interface / Attribute / Options」三段式描述一个组件，只是命名和导出方式不同：
 
-用于定义组件特定的枚举值。
+| 段 | 角色 | Dynamic（`@internal/component/ets/<comp>.d.ts`） | Static（`arkui/component/<comp>.static.d.ets`） |
+|---|---|---|---|
+| 构造入口 | 组件可被全局调用 | `interface {Comp}Interface { (...): {Comp}Attribute; }` | `export declare function {Comp}(...): {Comp}Attribute;`（带 `@ComponentBuilder`） |
+| 属性链 | 链式样式/事件方法 | `interface {Comp}Attribute extends CommonMethod<...>` | `export declare interface {Comp}Attribute extends CommonMethod` |
+| 参数选项 | 构造参数对象 | `interface {Comp}Options { ... }` | `export declare interface {Comp}Options { ... }` |
+| 模式配置 | Modifier/自定义渲染 | `-`（少数组件有） | `export declare interface {Comp}Configuration extends CommonConfiguration<T>` |
 
-**示例**（Button 组件）:
-```typescript
-// 文件: button.static.d.ets
-export declare enum ButtonType {
-    Capsule,        // 胶囊按钮（默认圆角为高度的一半）
-    Circle,         // 圆形按钮
-    Normal,         // 普通按钮（默认无圆角）
-    ROUNDED_RECTANGLE = 3  // 圆角矩形按钮
+**Dynamic 示例**（`text.d.ts`）：
+```ts
+interface TextInterface {
+  (content?: string | Resource, value?: TextOptions): TextAttribute;
 }
-
-export declare enum ButtonStyleMode {
-    NORMAL = 0,     // 普通按钮
-    EMPHASIZED = 1, // 强调按钮
-    TEXTUAL = 2     // 文本按钮
+interface TextAttribute extends CommonMethod<TextAttribute> {
+  fontSize(value: number | string | Resource): TextAttribute;
+  // ...
 }
+declare const Text: TextInterface;   // 暴露为全局
 ```
 
-**示例**（List 组件）:
-```typescript
-// 文件: list.static.d.ets
-export declare enum ScrollState {
-    Idle,           // 空闲状态
-    Scroll,         // 滚动状态
-    Fling           // 惯性滚动状态
-}
+**Static 示例**（`text.static.d.ets`）：
+```ts
+@ComponentBuilder
+export declare function Text(
+  content?: string | Resource,
+  value?: TextOptions,
+  content_?: CustomBuilder            // 尾随闭包
+): TextAttribute;
 
-export declare enum ListItemAlign {
-    Start,          // 列表项交叉轴起始对齐
-    Center,         // 列表项交叉轴居中对齐
-    End             // 列表项交叉轴末尾对齐
-}
-```
-
-#### 4.1.2 接口定义 (`export declare interface`)
-
-组件的 Static API 定义包含多种接口类型：
-
-| 接口类型 | 命名模式 | 用途 | 示例 |
-|---------|---------|------|------|
-| **Attribute** | `{ComponentName}Attribute` | 组件属性接口（继承自 CommonMethod） | `TextAttribute`, `ButtonAttribute` |
-| **Configuration** | `{ComponentName}Configuration` | 组件配置接口（用于 Modifier 模式） | `ButtonConfiguration` |
-| **Options** | `{ComponentName}Options` | 组件选项接口（参数配置） | `CalendarOptions` |
-| **Param** | `{ComponentName}Param` | 组件参数接口（对话框等特殊组件） | `AlertDialogParam` |
-
-**Attribute 接口示例**（Text 组件）:
-```typescript
-// 文件: text.static.d.ets
 export declare interface TextAttribute extends CommonMethod {
-    // 字体相关（8个属性）
-    default font(fontValue: Font | undefined, options?: FontSettingOptions | undefined): this;
-    default fontColor(value: ResourceColor | undefined): this;
-    default fontSize(value: double | string | Resource | undefined): this;
-    default minFontSize(value: double | string | Resource | undefined): this;
-    default maxFontSize(value: double | string | Resource | undefined): this;
-
-    // 文本布局（12个属性）
-    default textAlign(value: TextAlign | undefined): this;
-    default lineHeight(value: string | number | Resource | undefined): this;
-    default lineSpacing(value: string | number | Length[] | undefined): this;
-    default maxLines(value: number | undefined): this;
-    default textOverflow(value: TextOverflow | undefined): this;
-
-    // 文本行为（10个属性）
-    default textSelectable(value: boolean | undefined): this;
-    default copyOption(value: CopyOptions | undefined): this;
-    default draggable(value: boolean | undefined): this;
-
-    // 事件回调（5个事件）
-    default onCopy(callback: Callback<TextRange> | undefined): this;
-    default onTextSelectionChange(callback: Callback<TextRange> | undefined): this;
-}
-
-// TextOptions 接口定义
-export declare interface TextOptions {
-    controller: TextController;
-}
-```
-`TextOptions` 只有一个 `controller` 属性，用于控制 Text 组件。
-
----
-
-**函数声明**：
-```typescript
-// 文件: text.static.d.ets
-/**
- * Defines Text Component.
- *
- * @param { string | Resource } [content]
- * @param { TextOptions } [value]
- * @param { CustomBuilder } [content_]
- * @returns { TextAttribute }
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 23 static
- */
-@ComponentBuilder
-export declare function Text(
-    content?: string | Resource,
-    value?: TextOptions,
-    content_?: CustomBuilder
-): TextAttribute;
-```
-
-**Configuration 接口示例**（Button 组件）:
-```typescript
-// 文件: button.static.d.ets
-export declare interface ButtonConfiguration extends CommonConfiguration<ButtonConfiguration> {
-    label: string;              // 按钮文本标签
-    stateEffect?: boolean;      // 是否启用按下效果
-    type?: ButtonType;          // 按钮类型
-    role?: ButtonRole;          // 按钮角色
+  default fontSize(value: double | string | Resource | undefined): this;
 }
 ```
 
-#### 4.1.3 类型定义 (`export type`)
+**关键差异**：
+- Dynamic 把组件名注册为 `declare const`/`interface`，Static 用 `export declare function` + `@ComponentBuilder` 装饰器；
+- Static 的 Attribute 方法返回 `this`、参数允许 `undefined`，与静态类型系统兼容；
+- Static 通过 `Configuration + ContentModifier` 提供命令式渲染入口，Dynamic 对应的是 `arkui/*Modifier.d.ts` 系列附加文件。
 
-用于定义回调函数类型等复杂类型。
+### 4.2 @ComponentBuilder 与尾随闭包（Static 专有）
 
-**示例**:
-```typescript
-// 文件: button.static.d.ets
-export type ButtonTriggerClickCallback = (xPos: double, yPos: double) => void;
+`@ComponentBuilder` 标记 Static 组件构造函数，告诉编译器最后一个 `CustomBuilder` 参数可写成 DSL 闭包：
 
-// 文件: list.static.d.ets
-export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
-export type OnItemDragStartCallback = (item: ListItem, index: number) => ItemDragInfo;
-```
+```ts
+export type CustomBuilder = @Builder (() => void);
 
-#### 4.1.4 函数声明 (`export declare function`)
-
-组件的构造函数声明。
-
-**示例**:
-```typescript
-// 文件: text.static.d.ets
-/**
- * Defines Text Component.
- *
- * @param { string | Resource } [content]
- * @param { TextOptions } [value]
- * @param { CustomBuilder } [content_]
- * @returns { TextAttribute }
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 23 static
- */
-@ComponentBuilder
-export declare function Text(
-    content?: string | Resource,
-    value?: TextOptions,
-    content_?: CustomBuilder
-): TextAttribute;
-
-// 文件: button.static.d.ets
-export declare function Button(value: string | Resource | undefined): ButtonAttribute;
-
-// 文件: list.static.d.ets
-export declare function List(value: { (item: ListItem, index: number) => void } | undefined): ListAttribute;
-```
-
-### 4.2 文档注释规范
-
-Static API 文件使用标准的 JSDoc 注释格式：
-
-#### 4.2.1 文件头注释
-
-```typescript
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @file
- * @kit ArkUI
- */
-```
-
-#### 4.2.2 方法注释
-
-```typescript
-/**
- * Called when the font size is set.
- * 设置字体大小
- *
- * <p><strong>NOTE</strong>:
- * <br>If fontSize is of the number type, the unit fp is used.
- * <br>如果 fontSize 是 number 类型，则使用 fp 单位
- * </p>
- *
- * @param { double | string | Resource } value - Font size value. Default value is 16fp.
- * @returns { TextAttribute } The attribute of the text.
- * @default 16
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 23 static
- */
-default fontSize(value: double | string | Resource | undefined): this;
-```
-
-#### 4.2.3 常用 JSDoc 标签说明
-
-| 标签 | 用途 | 示例 |
-|------|------|------|
-| `@file` | 文件标识 | `@file` |
-| `@kit` | 所属 Kit | `@kit ArkUI` |
-| `@param` | 参数说明 | `@param { string } value - 参数描述` |
-| `@returns` | 返回值说明 | `@returns { this } 返回自身，支持链式调用` |
-| `@default` | 默认值 | `@default 16` |
-| `@syscap` | 系统能力 | `@syscap SystemCapability.ArkUI.ArkUI.Full` |
-| `@since` | 起始版本 | `@since 23 static` |
-| `@systemapi` | 系统API标识 | `@systemapi` |
-
-#### 4.2.4 @ComponentBuilder 装饰器
-
-`@ComponentBuilder` 是组件构造函数的标记装饰器，表示该函数可以接受：
-- 普通参数（如 `content`, `value`）
-- 尾随闭包参数（通常命名为 `xxx_`，类型为 `CustomBuilder`）
-
-**示例**：
-```typescript
-@ComponentBuilder
-export declare function Text(
-    content?: string | Resource,
-    value?: TextOptions,
-    content_?: CustomBuilder  // 尾随闭包参数
-): TextAttribute;
-```
-
-##### CustomBuilder 类型
-
-**定义**: `export type CustomBuilder = @Builder (() => void);`
-
-`CustomBuilder` 是 `@Builder` 装饰的函数类型，用于组件的尾随闭包。
-
-**示例**:
-```typescript
-@Builder
-function MyBuilder() {
-  Text('Child Text')
-}
-
-// 使用
-Text() {  // content_ 参数
-  MyBuilder()
-}
-```
-
-##### 尾随闭包 (Trailing Closure)
-
-尾随闭包是 ArkUI 的语法特性，允许在组件调用后直接写子组件。
-
-**参数命名约定**: 通常在原参数名后加下划线 `_`，如 `content_`
-
-**完整示例**:
-```typescript
-// 定义
 @ComponentBuilder
 export declare function Column(
-    space?: Length | Resource,
-    value?: ColumnOptions,
-    content_?: CustomBuilder  // 尾随闭包参数
+  space?: Length | Resource,
+  value?: ColumnOptions,
+  content_?: CustomBuilder            // 尾随闭包参数
 ): ColumnAttribute;
 
-// 使用
-Column({ space: 10 }) {  // value 参数
-  Text('Hello')          // content_ 尾随闭包
+// 调用
+Column({ space: 10 }) {
+  Text('Hello')
   Text('World')
 }
 ```
 
-### 4.3 文件规模统计
+Dynamic 范式没有该装饰器，子组件由 `declarative_frontend` 在 transformer 阶段插桩，写法上对开发者是相同的 `Column() { ... }`。
 
-| 文件名 | 行数 | 类型 | 说明 |
-|--------|------|------|------|
-| **common.static.d.ets** | 14,174 | 核心支持 | 定义所有组件通用的属性方法 |
-| **web.static.d.ets** | 6,935 | 组件 | Web 组件（最大组件文件） |
-| **enums.static.d.ets** | 4,329 | 核心支持 | 定义所有枚举类型 |
-| **richEditor.static.d.ets** | 2,428 | 组件 | 富文本编辑器 |
-| **gesture.static.d.ets** | 2,318 | 核心支持 | 手势识别定义 |
-| **navigation.static.d.ets** | 1,955 | 组件 | 导航组件 |
-| **textInput.static.d.ets** | 1,947 | 组件 | 文本输入框 |
-| **canvas.static.d.ets** | 1,925 | 组件 | 画布组件 |
-| **styledString.static.d.ets** | 1,696 | 组件 | 样式字符串 |
-| **units.static.d.ets** | 1,609 | 核心支持 | 单位类型定义 |
-| **text.static.d.ets** | 1,240 | 组件 | 文本组件 |
-| **list.static.d.ets** | 1,060 | 组件 | 列表组件 |
+### 4.3 通用基座 `CommonMethod`
 
----
+`CommonMethod` 是所有 `{Comp}Attribute` 的父接口，定义全部组件共享的样式 / 布局 / 事件 / 动画方法。
 
-## 5. 核心支持文件详解
+**API 定义位置**：
+- Dynamic：`@internal/component/ets/common.d.ts`（38,611 行）
+- Static：`arkui/component/common.static.d.ets`（14,174 行）
 
-本章详细说明 `component` 目录中的核心支持文件，这些文件被所有组件依赖使用。
+主要分类（两个范式方法集基本一致，Static 在签名上更严格）：
 
-### 5.1 common.static.d.ets - 通用属性定义
+| 分类 | 方法数（量级） | 代表方法 |
+|---|---|---|
+| 尺寸 | 15 | `width` / `height` / `size` / `constraintSize` |
+| 位置 | 8 | `position` / `offset` / `markAnchor` / `pivot` |
+| 布局 | 12 | `padding` / `margin` / `layoutWeight` / `align` |
+| 背景与边框 | 25 | `backgroundColor` / `border*` / `borderRadius` |
+| 显示与透明度 | 8 | `visibility` / `opacity` / `alpha` |
+| 事件 | 20+ | `onClick` / `onTouch` / `onHover` / `onAreaChange` |
+| 动画与转场 | 10 | `animation` / `transition` / `animateTo` |
+| 其他 | 30+ | `id` / `key` / `enabled` / `focusable` / `accessibility*` |
+| **合计** | **100+** | 所有组件公共属性方法 |
 
-**文件路径**: `interface/sdk-js/api/arkui/component/common.static.d.ets`
-**文件规模**: 14,174 行
-**作用**: 定义所有组件通用的属性方法（CommonMethod 接口）
+Static 的 `common.static.d.ets` 同时导出全局函数 `postCardAction / $r / $rawfile / animateToImmediately / makeBindable / $$ / applyStyles`，Dynamic 范式下这些由前端运行时注入而非声明文件导出。
 
-#### 5.1.1 CommonMethod 接口结构
+### 4.4 通用枚举 / 单位 / 手势 / 构建器
 
-CommonMethod 是所有组件 Attribute 接口的基类，定义了约 100+ 个通用方法：
+| 文件主题 | Dynamic 路径 | Static 路径 | 主要内容 |
+|---|---|---|---|
+| 枚举（对齐/布局/字体/颜色/动画…） | `@internal/component/ets/enums.d.ts`（12,599 行） | `arkui/component/enums.static.d.ets`（4,329 行） | `Alignment` / `Axis` / `FontWeight` / `Color` / `Curve` / `TouchType` 等 200+ 枚举 |
+| 单位类型（长度/颜色/盒模型） | `@internal/component/ets/units.d.ts`（4,117 行） | `arkui/component/units.static.d.ets`（1,609 行） | `Length` / `ResourceColor` / `SizeOptions` / `Padding` / `Margin` / `BorderRadiuses` |
+| 手势识别 | `@internal/component/ets/gesture.d.ts`（5,127 行） | `arkui/component/gesture.static.d.ets`（2,318 行） | `GestureType` / `TapGesture` / `LongPressGesture` / `PanGesture` / `GestureRecognizer` |
+| 构建器 | 由 `common.d.ts` / 状态管理装饰器共同提供 | `arkui/component/builder.static.d.ets`（146 行） | `CustomBuilder` / `WrappedBuilder<T>` / `wrapBuilder` |
 
-```typescript
-export declare interface CommonMethod {
-    // ========== 尺寸属性 (15个) ==========
-    default width(value: Length | undefined): this;
-    default height(value: Length | undefined): this;
-    default size(value: SizeOptions | undefined): this;
-    default constraintSize(value: ConstraintSizeOptions | undefined): this;
+要点：
+- Dynamic 行数远大于 Static，源于 Dynamic 文件累积多版本 `@since` JSDoc 注释；实际声明数量相近。
+- 新组件优先在两套文件中保持枚举/单位一致，并通过 `common` 复用样式 API，不应在组件文件里重复定义。
+- 若 Static 缺少某个 Dynamic 已有的枚举（或反之），需在第 3 章对应组件行标注 `-`，并同步更新本表。
 
-    // ========== 位置属性 (8个) ==========
-    default position(value: Position | undefined): this;
-    default offset(value: Offset | undefined): this;
-    default markAnchor(value: Offset | undefined): this;
-    default pivot(value: Pivot | undefined): this;
+### 4.5 文档注释与版本标签
 
-    // ========== 布局属性 (12个) ==========
-    default padding(value: Padding | Length | undefined): this;
-    default margin(value: Margin | Length | undefined): this;
-    default layoutWeight(value: number | string | undefined): this;
-    default align(alignment: Alignment | undefined): this;
+两个范式的 JSDoc 标签约定相同（`@param` / `@returns` / `@default` / `@syscap` / `@since` / `@systemapi` / `@crossplatform` / `@form` / `@atomicservice` 等），区别只在 `@since` 后缀：
 
-    // ========== 背景和边框 (25个) ==========
-    default backgroundColor(value: ResourceColor | undefined): this;
-    default borderRadius(value: BorderRadiuses | Length | undefined): this;
-    default borderStyle(value: EdgeStyles | BorderStyle | undefined): this;
-    default borderWidth(value: EdgeWidths | Length | undefined): this;
-    default borderColor(value: EdgeColors | LocalizedEdgeColors | undefined): this;
+- Dynamic：`@since 11 dynamic`
+- Static：`@since 23 static`
 
-    // ========== 显示和透明度 (8个) ==========
-    default visibility(value: Visibility | undefined): this;
-    default opacity(value: number | Resource | undefined): this;
-    default alpha(value: number | undefined): this;
-
-    // ========== 事件处理 (20+个) ==========
-    default onClick(callback: Callback | undefined): this;
-    default onTouch(callback: Callback | undefined): this;
-    default onHover(callback: Callback | undefined): this;
-
-    // ========== 动画相关 (10个) ==========
-    default animateTo(value: AnimateParam | undefined): this;
-    default transition(value: AnimateParam | undefined): this;
-
-    // ... 更多方法
-}
-```
-
-#### 5.1.2 主要分类统计
-
-| 分类 | 方法数量 | 说明 |
-|------|---------|------|
-| **尺寸属性** | 15 | width, height, size, constraintSize 等 |
-| **位置属性** | 8 | position, offset, markAnchor, pivot 等 |
-| **布局属性** | 12 | padding, margin, layoutWeight, align 等 |
-| **背景和边框** | 25 | backgroundColor, borderRadius, border 等 |
-| **显示相关** | 8 | visibility, opacity, alpha 等 |
-| **事件处理** | 20+ | onClick, onTouch, onHover 等 |
-| **动画相关** | 10 | animateTo, transition 等 |
-| **其他** | 30+ | id, key, enabled, focusable 等 |
-| **总计** | **100+** | 所有组件通用的属性方法 |
-
-### 5.2 enums.static.d.ets - 枚举类型定义
-
-**文件路径**: `interface/sdk-js/api/arkui/component/enums.static.d.ets`
-**文件规模**: 4,329 行
-**作用**: 定义所有组件使用的枚举类型
-
-#### 5.2.1 主要枚举分类
-
-| 分类 | 枚举示例 | 数量 |
-|------|---------|------|
-| **对齐相关** | `HorizontalAlign`, `VerticalAlign`, `Alignment` | ~10 |
-| **布局相关** | `Axis`, `Direction`, `ItemAlign`, `FlexAlign` | ~15 |
-| **样式相关** | `BorderStyle`, `FontStyle`, `FontWeight`, `Color` | ~20 |
-| **文本相关** | `TextOverflow`, `EllipsisMode`, `TextAlign` | ~15 |
-| **动画相关** | `Curve`, `PlayMode`, `FillMode` | ~10 |
-| **交互相关** | `TouchType`, `MouseButton`, `MouseAction` | ~15 |
-| **手势相关** | `GestureType`, `GestureMask` | ~10 |
-| **滚动相关** | `EdgeEffect`, `ScrollState`, `BarState` | ~15 |
-| **显示相关** | `Visibility`, `RenderStrategy`, `HoverEffect` | ~10 |
-| **其他** | `ResponseType`, `FocusPriority`, `ItemType` 等 | ~80 |
-| **总计** | **~200+** | 所有枚举类型 |
-
-### 5.3 units.static.d.ets - 单位类型定义
-
-**文件路径**: `interface/sdk-js/api/arkui/component/units.static.d.ets`
-**文件规模**: 1,609 行
-**作用**: 定义长度、颜色、尺寸等单位类型
-
-#### 5.3.1 主要类型定义
-
-```typescript
-// ========== 长度类型 ==========
-type Length = string | number | Resource;
-
-// ========== 颜色类型 ==========
-type ResourceColor = Color | string | Resource | LinearGradient;
-
-// ========== 尺寸和位置 ==========
-interface SizeOptions {
-    width?: Length;
-    height?: Length;
-}
-
-interface Padding {
-    top?: Length; right?: Length; bottom?: Length; left?: Length;
-}
-
-interface Margin {
-    top?: Length; right?: Length; bottom?: Length; left?: Length;
-}
-
-// ========== 圆角 ==========
-interface BorderRadiuses {
-    topLeft?: Length; topRight?: Length;
-    bottomLeft?: Length; bottomRight?: Length;
-}
-```
-
-### 5.4 gesture.static.d.ets - 手势识别定义
-
-**文件路径**: `interface/sdk-js/api/arkui/component/gesture.static.d.ets`
-**文件规模**: 2,318 行
-**作用**: 定义手势识别相关类型和接口
-
-#### 5.4.1 主要内容
-
-```typescript
-// ========== 手势类型 ==========
-enum GestureType {
-    Tap,        // 点击
-    LongPress,  // 长按
-    Pan,        // 拖动
-    Pinch,      // 捏合
-    Rotation,   // 旋转
-    Swipe       // 滑动
-}
-
-// ========== 手势识别器 ==========
-class GestureRecognizer {
-    gestureID: number;
-    priority: GesturePriority;
-}
-
-class TapGestureRecognizer extends GestureRecognizer {
-    count: number;          // 点击次数
-    fingers: number;        // 手指数量
-}
-```
-
-### 5.5 builder.static.d.ets - 构建器定义
-
-**文件路径**: `interface/sdk-js/api/arkui/component/builder.static.d.ets`
-**文件规模**: 146 行
-**作用**: 定义构建器相关类型
-
-```typescript
-// 自定义构建器装饰器
-declare function CustomBuilder(type: FunctionType): void;
-
-// 包装构建器
-declare class WrappedBuilder<T> {
-    initialize(...args: T): void;
-}
-
-// 包装构建器函数以便复用
-declare function wrapBuilder<T>(builder: T): WrappedBuilder<T>;
-```
+跨范式追踪一个 API 时，以 `@since` 后缀区分；缺失后缀的为历史遗留写法，应在新增 API 时补齐。
 
 ---
+---
 
-## 6. 增量渲染 API
+## 5. 增量渲染 API
 
 **文件**: `incremental/runtime/state.static.d.ets`
 
-### 4.1 增量状态管理
+### 5.1 增量状态管理
 
 ```typescript
 // 可读状态接口
@@ -1266,9 +1040,9 @@ type __memo_id_type = int
 
 ---
 
-## 7. 状态管理 API
+## 6. 状态管理 API
 
-### 7.1 状态装饰器
+### 6.1 状态装饰器
 
 **文件**: `stateManagement/decorator.static.d.ets`
 
@@ -1291,7 +1065,7 @@ type __memo_id_type = int
 @LocalStorageLink    // LocalStorage 双向绑定
 ```
 
-### 7.2 存储管理
+### 6.2 存储管理
 
 **文件目录**: `stateManagement/storage/`
 
@@ -1318,7 +1092,7 @@ storage.setOrCreate('pageData', { key: 'value' })
 PersistentStorage.persistProp('userSettings', 'defaultSettings')
 ```
 
-### 7.3 记忆函数
+### 6.3 记忆函数
 
 **文件**: `stateManagement/remember.static.d.ets`
 
@@ -1329,9 +1103,9 @@ PersistentStorage.persistProp('userSettings', 'defaultSettings')
 
 ---
 
-## 8. 关键概念说明
+## 7. 关键概念说明
 
-### 8.1 Modifier 模式
+### 7.1 Modifier 模式
 
 **定义**:
 Modifier 是一种属性修改器模式，用于链式设置组件属性。
@@ -1364,7 +1138,7 @@ Text('Hello')
   .fontWeight(FontWeight.Bold)
 ```
 
-### 8.2 Node 层级关系
+### 7.2 Node 层级关系
 
 ```
 Content (抽象基类)
@@ -1404,7 +1178,7 @@ BuilderNode<Args> (构建器节点)
 └── dispose()
 ```
 
-### 8.3 单位系统
+### 7.3 单位系统
 
 | 单位 | 名称 | 说明 |
 |------|------|------|
@@ -1417,66 +1191,149 @@ BuilderNode<Args> (构建器节点)
 
 ---
 
-## 9. 与 ace_engine 的对应关系
+## 8. 与 ace_engine 的对应关系
 
-### 9.1 SDK API → ace_engine 层次映射
+### 8.1 SDK API → ace_engine 层次映射
 
 | SDK API 类型 | ace_engine 层次 | 路径示例 |
 |-------------|-----------------|----------|
-| **Static API (.static.d.ets)** | Bridge 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/` |
-| **Dynamic API (*.d.ts)** | Core 层 (Pattern + Property) | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/` |
+| **Static API 组件/属性定义 (`component/*.static.d.ets`)** | Bridge 层（ArkTS Static 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/` |
+| **Static API Modifier (`*Modifier.static.d.ets`)** | Bridge 层（ArkTS Static 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/` |
+| **Dynamic API 组件/属性定义 (`@internal/component/ets/*.d.ts`)** | Bridge 层（Declarative 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/` |
+| **Dynamic API Modifier (`*Modifier.d.ts`)** | Bridge 层（Declarative 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/` |
 | **FrameNode** | Base 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.h` |
 | **BuilderNode** | Bridge 层 + Core 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_builder_node.cpp` |
 | **RenderNode** | Render 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/render_node.h` |
-| **Modifier** | Property 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/*_property.cpp` |
+| **Native Node Modifier 实现汇聚点** | Core Native Node 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/interfaces/native/node/node_modifiers.cpp` |
 | **状态管理** | Bridge 层 State Management | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
 
-### 9.2 组件从 SDK 到 ace_engine 的完整路径
+### 8.2 组件从 SDK 到 ace_engine 的完整路径（双轨）
 
-**示例**: Text 组件
+**示例 A：Dynamic API（Column）**
 
 ```
 应用层 (App)
   ↓
-SDK API 层 (OpenHarmony/interface/sdk-js/api/arkui/)
-  ├── text.static.d.ets          (Static API - 声明式语法)
-  └── TextModifier.d.ts           (Dynamic API - 声明式配置对象)
+SDK API 层
+  ├── OpenHarmony/interface/sdk-js/api/@internal/component/ets/column.d.ts
+  └── OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.d.ts
   ↓
-ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
-  ├── Bridge 层
-  │   ├── frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp  (Static API 实现)
-  │   └── frameworks/bridge/declarative_frontend/jsview/js_text.cpp             (Dynamic API 实现)
-  └── Core 层
-      ├── Pattern 层
-      │   ├── frameworks/core/components_ng/pattern/text/text_pattern.h
-      │   └── frameworks/core/components_ng/pattern/text/text_pattern.cpp
-      ├── Property 层
-      │   ├── frameworks/core/components_ng/property/text_property.h
-      │   └── frameworks/core/components_ng/property/text_property.cpp
-      └── Render 层
-          └── frameworks/core/components_ng/render/text_render_property.cpp
+Bridge 层（declarative_frontend）
+  ├── frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp
+  ├── frameworks/bridge/declarative_frontend/jsview/js_column.cpp
+  ├── frameworks/bridge/declarative_frontend/ark_component/src/ArkColumn.ts
+  ├── frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts
+  └── frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp
+  ↓
+Core Native Node Modifier
+  └── frameworks/core/interfaces/native/node/column_modifier.cpp
+  ↓
+Core Pattern / Layout / Render
+  └── frameworks/core/components_ng/pattern/linear_layout/
 ```
 
-### 9.3 关键文件路径对照表
+**示例 B：Static API（Column）**
 
-| SDK API 文件 | ace_engine 实现文件 |
+```
+应用层 (App)
+  ↓
+SDK API 层
+  ├── OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets
+  └── OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets
+  ↓
+Bridge 层（arkts_frontend）
+  ├── frameworks/bridge/arkts_frontend/arkoala_generator/BUILD.gn
+  │   └── --input: ${ohos_ets_api_path}
+  ├── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/column.ets
+  ├── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ColumnModifier.ets
+  └── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/BUILD.gn
+      └── generate_static_abc(...)-> modules_static.abc -> components.abc
+  ↓
+Native Node Modifier
+  └── frameworks/core/interfaces/native/node/column_modifier.cpp
+```
+
+### 8.3 关键文件路径对照表
+
+| SDK API 文件 | ace_engine 关联实现 |
 |-------------|-------------------|
-| `OpenHarmony/interface/sdk-js/api/arkui/FrameNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/BuilderNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_builder_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/RenderNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/render_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/ButtonModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/button_property.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/button.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_button_modifier.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
+| `OpenHarmony/interface/sdk-js/api/@internal/component/ets/column.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_column.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/column.ets` |
+| `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ColumnModifier.ets` |
+| `OpenHarmony/interface/sdk-js/api/@internal/component/ets/text.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/text.ets` |
+| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ColumnModifier.ets` |
+
+**Pattern 路径速查（按组件类别）**:
+
+| 组件类型 | Pattern 路径模式 | 示例 |
+|----------|-----------------|------|
+| 基础组件 | `pattern/{component}/` | `pattern/text/` |
+| 容器组件 | `pattern/{component}/` | `pattern/list/` |
+| 对话框 | `pattern/dialog/{dialog}_pattern.cpp` | `pattern/dialog/alert_dialog_pattern.cpp` |
+| 选择器 | `pattern/{name}_picker/` | `pattern/date_picker/` |
+
+### 8.4 ArkUI NAPI 模块（`@ohos.arkui.*` 与相关通用 `@ohos.*`）
+
+ArkUI 暴露的非 DSL 能力（路由、弹窗、节点、Modifier、媒体查询、字体度量、组件快照、拖拽、Inspector 等）以**模块**形式发布，应用通过 `import xxx from '@ohos.xxx'` 使用。这些模块在 ace_engine 内部由 NAPI 实现，集中在：
+
+- 实现根目录：`OpenHarmony/foundation/arkui/ace_engine/interfaces/napi/kits/`（34 个子目录）
+- 模块注册：`interfaces/napi/kits/BUILD.gn`、`interfaces/napi/kits/napi_lib.gni`
+
+> 应用侧的导入与签名口径详见 [docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md](../api/ArkUI_API_Paradigm_Knowledge_Base_CN.md) 第 0.2/0.3 节，本节仅做 SDK ↔ ace_engine 映射。
+
+| 模块 API（声明） | 静态版本 | ace_engine NAPI 实现目录 |
+|------------------|----------|--------------------------|
+| `@ohos.router.d.ts` | `@ohos.router.static.d.ets`（如有） | `interfaces/napi/kits/router/` |
+| `@ohos.promptAction.d.ts` | `@ohos.promptAction.static.d.ets`（如有） | `interfaces/napi/kits/promptaction/`（legacy `prompt/`） |
+| `@ohos.mediaquery.d.ts` | — | `interfaces/napi/kits/mediaquery/` |
+| `@ohos.animator.d.ts` | `@ohos.animator.static.d.ets` | `interfaces/napi/kits/animator/` |
+| `@ohos.font.d.ts` | — | `interfaces/napi/kits/font/` |
+| `@ohos.measure.d.ts` | — | `interfaces/napi/kits/measure/` |
+| `@ohos.arkui.componentSnapshot.d.ts` | — | `interfaces/napi/kits/component_snapshot/` |
+| `@ohos.arkui.componentUtils.d.ts` | — | `interfaces/napi/kits/componentutils/` |
+| `@ohos.arkui.observer.d.ts` | — | `interfaces/napi/kits/observer/` |
+| `@ohos.arkui.inspector.d.ts` | — | `interfaces/napi/kits/inspector/` |
+| `@ohos.arkui.dragController.d.ts` | — | `interfaces/napi/kits/drag_controller/` |
+| `@ohos.arkui.drawableDescriptor.d.ts` | — | `interfaces/napi/kits/drawabledescriptor/` |
+| `@ohos.arkui.performanceMonitor.d.ts` | — | `interfaces/napi/kits/performancemonitor/` |
+| `@ohos.arkui.UIContext.d.ts`（Overlay 等） | — | `interfaces/napi/kits/overlay/` |
+| `@ohos.arkui.focusController.d.ts`（如有） | — | `interfaces/napi/kits/focus_controller/` |
+| `@ohos.arkui.atomicServiceTabs.d.ts` 等 | — | `interfaces/napi/kits/atomic_service_bar/` |
+| `@ohos.arkui.pluginComponent.d.ts` | — | `interfaces/napi/kits/plugincomponent/` |
+| `@ohos.arkui.displaySync.d.ts` | — | `interfaces/napi/kits/display_sync/` |
+| `@ohos.arkui.intelligence.*` | — | `interfaces/napi/kits/intelligence/` |
+| `@ohos.arkui.smartGesture.*`（如有） | — | `interfaces/napi/kits/smart_gesture_controller/` |
+| `@ohos.arkui.textMenuController.*`（如有） | — | `interfaces/napi/kits/text_menu_controller/` |
+
+其他 NAPI 子目录：`atomic_service_bar/`、`color_sampler/`、`component_test/`、`configuration/`、`container_utils/`、`device/`、`grid/`、`luminance_sampler/`、`ui_material/`、`utils/`。
+
+**典型对应示例：**
+
+| SDK API 声明 | NAPI 实现文件 |
+|--------------|---------------|
+| `OpenHarmony/interface/sdk-js/api/@ohos.router.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/interfaces/napi/kits/router/js_router.cpp` |
+
+**调用链概述：**
+
+```
+应用：import router from '@ohos.router'
+       └─→ NAPI 入口注册（interfaces/napi/kits/napi_lib.gni 列出模块）
+            └─→ kits/<module>/js_<module>.cpp 解析参数
+                 └─→ 调用 ace_engine 内部能力（Pattern / Pipeline / DragManager 等）
+```
+
+调试时若发现 `import '@ohos.arkui.xxx'` 报错或行为异常，先到 `interfaces/napi/kits/<对应子目录>/` 中定位实现入口，再向 Pattern/Pipeline 层追溯。
 
 ---
 
-## 10. API 定义规范
+## 9. API 定义规范
 
 本章说明 ArkUI Component Static API 的定义规范和命名约定。
 
-### 10.1 文件命名规范
+### 9.1 文件命名规范
 
 **Static API 文件命名**: `{componentName}.static.d.ets`
 - 使用小写开头的小驼峰命名：`text.static.d.ets`, `button.static.d.ets`
@@ -1488,7 +1345,16 @@ ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
 - `units.static.d.ets` (1,609行) - 单位类型
 - `gesture.static.d.ets` (2,318行) - 手势识别
 
-### 10.2 接口命名规范
+**跨范式命名转换**：
+
+| 层 | 命名风格 | 示例（TextInput） |
+|----|----------|-------------------|
+| Dynamic 文件名 | 小驼峰 + `.d.ts` | `text_input.d.ts`（snake_case 例外）/ `textInput` 概念 |
+| Static 文件名 | 小驼峰 + `.static.d.ets` | `textInput.static.d.ets` |
+| Modifier | 大驼峰 + `Modifier` | `TextInputModifier` |
+| ace_engine Pattern | 全小写 + 下划线 + `_pattern` | `text_input_pattern.cpp` |
+
+### 9.2 接口命名规范
 
 | 接口类型 | 命名模式 | 示例 |
 |---------|---------|------|
@@ -1497,7 +1363,7 @@ ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
 | **Options** | `{ComponentName}Options` | `CalendarOptions` |
 | **Param** | `{ComponentName}Param` | `AlertDialogParam` |
 
-### 10.3 枚举命名规范
+### 9.3 枚举命名规范
 
 使用大驼峰命名（PascalCase）：
 ```typescript
@@ -1509,7 +1375,7 @@ export declare enum ButtonType {
 }
 ```
 
-### 10.4 函数命名规范
+### 9.4 函数命名规范
 
 **组件构造函数**: 与组件名相同（首字母大写）
 ```typescript
@@ -1523,7 +1389,7 @@ default fontSize(value: number | undefined): this;
 default fontColor(value: ResourceColor | undefined): this;
 ```
 
-### 10.5 事件方法规范
+### 9.5 事件方法规范
 
 **命名模式**: `on` + 事件名称（首字母大写）
 ```typescript
@@ -1532,7 +1398,7 @@ default onTouch(callback: Callback<TouchEvent> | undefined): this;
 default onScroll(callback: OnScrollCallback | undefined): this;
 ```
 
-### 10.6 导入依赖规范
+### 9.6 导入依赖规范
 
 标准导入顺序：
 ```typescript
@@ -1549,191 +1415,12 @@ import { Resource, ResourceColor, Font, Length } from "./units";
 import { TextRange } from "./textCommon";
 ```
 
----
-
-## 11. API 快速参考
-
-### 11.1 FrameNode 常用方法和属性
-
-#### 树操作
-| 方法 | 说明 | 使用场景 |
-|------|------|----------|
-| `appendChild(node: FrameNode)` | 添加子节点到末尾 | 动态添加组件 |
-| `insertChildAfter(child, sibling)` | 在指定节点后插入 | 精确控制子节点位置 |
-| `removeChild(node: FrameNode)` | 移除子节点 | 删除组件 |
-| `clearChildren()` | 清空所有子节点 | 批量清理 |
-| `getChild(index: number)` | 获取指定索引的子节点 | 访问特定子组件 |
-| `getChildren(): Array<FrameNode>` | 获取所有子节点 | 遍历子组件 |
-
-#### 布局和几何
-| 方法 | 说明 | 返回类型 |
-|------|------|----------|
-| `getLayoutProperty()` | 获取布局属性 | LayoutProperty |
-| `getLayoutConstraint()` | 获取布局约束 | LayoutConstraint |
-| `getPositionToParent()` | 获取相对父节点的位置 | Position |
-| `getRenderNode()` | 获取渲染节点 | RenderNode |
-| `getRenderResult()` | 获取渲染结果 | FinishEventType |
-
-#### 事件绑定
-| 方法 | 说明 | 示例 |
-|------|------|------|
-| `on(event: string, callback)` | 注册事件监听 | `frameNode.on('touch', callback)` |
-| `off(event: string, callback?)` | 移除事件监听 | `frameNode.off('touch', callback)` |
-
-#### 生命周期
-| 方法 | 说明 | 注意事项 |
-|------|------|----------|
-| `dispose()` | 销毁节点，释放资源 | 调用后节点不可再用 |
-
-### 11.2 BuilderNode 使用要点
-
-#### 创建和构建
-```typescript
-// 1. 创建 BuilderNode
-const builderNode = new BuilderNode(uiContext)
-
-// 2. 构建（只能调用一次）
-builderNode.build(wrappedBuilder, args)
-
-// 3. 获取 FrameNode
-const frameNode = builderNode.getFrameNode()
-
-// 4. 后续更新
-builderNode.update(newArgs)  // 参数更新
-builderNode.reuse(param)     // 复用
-builderNode.recycle()        // 回收
-builderNode.dispose()        // 销毁
-```
-
-#### 关键注意事项
-- build() 只能调用一次，重复调用会报错
-- update() 参数类型必须与 @Builder 定义匹配
-- reuse()/recycle() 用于性能优化，实现组件复用
-- ReactiveBuilderNode（API 12+）提供 flushState() 强制同步状态
-
-### 11.3 组件命名规则
-
-#### SDK API 文件命名
-| 类型 | 命名规则 | 示例 |
-|------|----------|------|
-| Static API | `{componentName}.static.d.ets` | `text.static.d.ets` |
-| Dynamic API (Modifier) | `{ComponentName}Modifier.d.ts` | `TextModifier.d.ts` |
-| 状态管理 | `{category}/{name}.static.d.ets` | `stateManagement/decorator.static.d.ets` |
-
-#### ace_engine 源码命名
-| 层次 | 命名规则 | 示例 |
-|------|----------|------|
-| Pattern | `{component}_pattern.{h\|cpp}` | `text_pattern.cpp` |
-| Layout Property | `{component}_layout_property.{h\|cpp}` | `text_layout_property.cpp` |
-| Paint Property | `{component}_paint_property.{h\|cpp}` | `text_paint_property.cpp` |
-| Event Hub | `{component}_event_hub.{h\|cpp}` | `text_event_hub.cpp` |
-| Model | `{component}_model_ng.{h\|cpp}` | `text_model_ng.cpp` |
-
-#### 命名转换规则
-- SDK API: 小写开头，驼峰命名 → `textInput`
-- Modifier: 大写开头，驼峰命名 + Modifier → `TextInputModifier`
-- Pattern: 全小写，下划线连接 + _pattern → `text_input_pattern`
-
-### 11.4 文件路径快速查询
-
-#### 从组件名查找实现
-```
-Text 组件
-├── SDK API (Static):     OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
-├── SDK API (Dynamic):    OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
-├── Bridge 层 (Static):   OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
-├── Bridge 层 (Dynamic):  OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
-├── Pattern 层:           OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
-├── Property 层:          OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
-└── Render 层:            OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
-```
-
-#### 特殊组件路径
-| 组件类型 | Pattern 路径模式 | 示例 |
-|----------|-----------------|------|
-| 基础组件 | `pattern/{component}/` | `pattern/text/` |
-| 容器组件 | `pattern/{component}/` | `pattern/list/` |
-| 对话框 | `pattern/dialog/{dialog}_pattern.cpp` | `pattern/dialog/alert_dialog_pattern.cpp` |
-| 选择器 | `pattern/{name}_picker/` | `pattern/date_picker/` |
 
 ---
 
-## 12. 版本演进
+## 10. 常见问题解答
 
-### 12.1 API 11 - API 23 重要变更
-
-#### API 11 (初始版本)
-- 引入 FrameNode/BuilderNode/RenderNode 核心 API
-- 基础组件库（Text、Image、Button、List 等）
-- 状态管理装饰器（@State、@Prop、@Link）
-- Modifier 模式属性设置
-
-#### API 12 (性能优化)
-- **ReactiveBuilderNode**: 新增响应式构建器节点，支持 flushState() 强制同步
-- **LazyForEach 性能增强**: 优化大数据列表渲染
-- **新的动画接口**: 更灵活的动画控制
-- **组件生命周期增强**: 更精确的生命周期回调
-
-#### API 13 - API 15 (功能扩展)
-- **新增组件**: SymbolGlyph、Particle、Marquee 等
-- **状态管理 V2**: AppStorage V2、LocalStorage V2
-- **增强的手势识别**: 更丰富的手势类型
-- **无障碍增强**: 更好的辅助功能支持
-
-#### API 16 - API 19 (平台能力)
-- **多窗口增强**: WindowScene、RemoteWindow
-- **3D 组件**: Component3D 支持
-- **安全组件**: SecurityComponent
-- **嵌入式组件**: EmbeddedComponent、UIExtensionComponent
-
-#### API 20 - API 23 (现代化)
-- **声明式 UI 增强**: 更简洁的语法
-- **性能优化**: LazyGrid、LazyForEach 进一步优化
-- **新的状态管理**: @ObservedV2、@TraceV2
-- **渲染性能提升**: 增量渲染改进
-
-### 12.2 兼容性注意事项
-
-#### 废弃的 API
-| API | 废弃版本 | 替代方案 |
-|-----|----------|----------|
-| 旧的组件生命周期方法 | API 12 | 新的 onWillAppear/onWillDisappear |
-| 某些动画接口 | API 14 | 新的 animateTo 接口 |
-| 旧的状态存储方式 | API 16 | AppStorage V2 / LocalStorage V2 |
-
-#### 不兼容变更
-1. **FrameNode 创建方式**: API 12+ 必须传入 UIContext
-2. **Builder 构建方式**: API 12+ 支持参数化构建
-3. **事件回调签名**: 部分组件的事件参数类型有变化
-
-### 12.3 新旧 API 迁移指南
-
-#### 从 API 11 迁移到 API 12+
-```typescript
-// ❌ 旧方式 (API 11)
-const builderNode = new BuilderNode()
-builderNode.build(builder)
-
-// ✅ 新方式 (API 12+)
-const builderNode = new BuilderNode(uiContext, options)
-builderNode.build(builder, config, ...args)
-builderNode.flushState()  // 强制同步状态
-```
-
-#### 状态管理迁移
-```typescript
-// ❌ 旧方式
-@State count: number = 0
-
-// ✅ 新方式 (API 20+)
-@Local count: number = 0  // 更精确的语义
-```
-
----
-
-## 13. 常见问题解答
-
-### 13.1 SDK API 和 ace_engine 的关系
+### 10.1 SDK API 和 ace_engine 的关系
 
 **Q: SDK API 和 ace_engine 是什么关系？**
 
@@ -1755,59 +1442,33 @@ A: SDK API 是应用开发者使用的接口，ace_engine 是底层实现：
 ┌─────────────────────────────────────┐
 │  ace_engine 实现层                  │
 │  OpenHarmony/foundation/arkui/ace_engine/
-│  - Bridge 层 (Static API 实现)      │
-│  - Core 层 (Pattern + Property)     │
-│  - Render 层 (绘制)                 │
+│  - Dynamic: declarative_frontend    │
+│  - Static:  arkts_frontend          │
+│  - Core: Pattern/Layout/Render      │
 └─────────────────────────────────────┘
 ```
 
 **关键要点**:
 - SDK API 定义接口契约（TypeScript/ETS）
 - ace_engine 提供实际实现（C++）
-- Static API 通过 Bridge 层连接到 Core 层
-- Dynamic API 直接操作 Core 层
+- Dynamic API（组件/属性 + Modifier）主要走 `frameworks/bridge/declarative_frontend/`
+- Static API（组件/属性 + Modifier）主要走 `frameworks/bridge/arkts_frontend/`
+- 两条路径最终都汇聚到 Core Native Node Modifier 和 NG Pattern
 
-### 10.2 Static API 和 Dynamic API 的区别
+### 13.2 Static API 和 Dynamic API 的区别
 
-**Q: Static API (.static.d.ets) 和 Dynamic API (*.d.ts) 有什么区别？**
+本节聚焦于 **SDK API ↔ ace_engine 实现映射**。Static / Dynamic / 类web (full/lite) 等**前端范式与调用面**（import 路径、全局可用 API、范式选择依据、跨范式对照清单）已统一收敛到：
 
-A:
+- [docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md](../api/ArkUI_API_Paradigm_Knowledge_Base_CN.md)
 
-| 特性 | Static API | Dynamic API |
-|------|-----------|-------------|
-| **文件类型** | `.static.d.ets` | `*.d.ts` |
-| **使用方式** | 声明式 `Text().width(100)` | 声明式 `new TextModifier().width(100)` |
-| **实现位置** | Modifier 层 | Bridge 层 |
-| **性能** | 编译时优化 | 运行时动态设置 |
-| **灵活性** | 较低，编译时确定 | 高，可动态修改 |
-| **适用场景** | 常规 UI 开发 | 动态属性修改、复用 |
+本文档保留的层面：
 
-**说明**：两者都是声明式 API，Dynamic API 的 "Dynamic" 指的是支持运行时动态修改属性值，而非使用方式是命令式的。
+- 两套 API 在 ace_engine 源码侧的实现入口：
+  - Static API → [frameworks/bridge/arkts_frontend/](../../frameworks/bridge/arkts_frontend/)（koala 生成 → `components.abc`）
+  - Dynamic API → [frameworks/bridge/declarative_frontend/](../../frameworks/bridge/declarative_frontend/)（bridge 运行时分发）
+- 两套 API 在组件层最终汇聚到同一份 `components_ng/pattern/<component>/` Pattern 实现（详见本文档第 8 章 ace_engine 对应关系）。
 
-**示例对比**:
-```typescript
-// Static API (推荐用于常规开发)
-Text('Hello')
-  .fontSize(20)
-  .fontColor(Color.Red)
-
-// Dynamic API (推荐用于动态属性修改和复用)
-const modifier = new TextModifier()  // 声明式创建配置对象
-modifier.fontSize(20)                // 声明式设置属性
-modifier.fontColor(Color.Red)
-Text().attribute(modifier)           // 应用配置
-// modifier 可以复用，动态修改属性
-```
-
-**Q: 什么时候用 Dynamic API？**
-
-A: 以下场景优先使用 Dynamic API：
-- 需要复用属性配置
-- 动态切换组件属性
-- 与 C++/Cangjie 等其他语言交互
-- 需要精细控制属性更新时机
-
-### 13.3 如何查找组件实现
+### 10.3 如何查找组件实现
 
 **Q: 如何从 SDK API 快速找到 ace_engine 的实现代码？**
 
@@ -1820,13 +1481,13 @@ A: 按以下步骤操作：
 3. **查找 Property 文件**:
    - 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/`
    - 文件: `{component}_property.cpp`
-4. **查找 Bridge 实现** (Static API):
-   - 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/`
-   - 文件: `js_{component}.cpp`
+4. **查找 Bridge 实现**:
+   - Dynamic API 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/`
+   - Static API 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/`
 
 **快捷工具**: 使用本知识库"第 3 章 组件 API 分类清单"快速查找
 
-### 13.4 API 版本兼容性问题
+### 10.4 API 版本兼容性问题
 
 **Q: 不同 API 版本之间有哪些常见兼容性问题？**
 
@@ -1845,78 +1506,8 @@ A:
 1. 查看文件顶部的 `@since` 标签（如 `@since API 12`）
 2. 查看接口定义中的版本注释
 3. 参考官方文档的 API Reference
-4. 使用本知识库"第 9 章 版本演进"
 
-### 13.5 常见错误和陷阱
-
-#### 陷阱 1: FrameNode 未附加到 UIContext
-```typescript
-// ❌ 错误
-const frameNode = FrameNode.create('Text')  // 缺少 UIContext
-
-// ✅ 正确
-const frameNode = FrameNode.create(uiContext, 'Text')
-```
-
-#### 陷阱 2: BuilderNode 重复调用 build()
-```typescript
-// ❌ 错误
-builderNode.build(builder, arg1)
-builderNode.build(builder, arg2)  // 报错：build 只能调用一次
-
-// ✅ 正确
-builderNode.build(builder, arg1)
-builderNode.update(arg2)  // 使用 update 更新参数
-```
-
-#### 陷阱 3: 忘记释放资源
-```typescript
-// ❌ 错误：内存泄漏
-const builderNode = new BuilderNode(uiContext)
-// 使用后未释放
-
-// ✅ 正确
-const builderNode = new BuilderNode(uiContext)
-try {
-  // 使用 builderNode
-} finally {
-  builderNode.dispose()  // 释放资源
-}
-```
-
-#### 陷阱 4: 在错误的线程操作 FrameNode
-```typescript
-// ❌ 错误：在非 UI 线程操作
-setTimeout(() => {
-  frameNode.appendChild(childNode)  // 可能崩溃
-}, 1000)
-
-// ✅ 正确：在 UI 线程操作
-uiContext.runTask(() => {
-  frameNode.appendChild(childNode)
-})
-```
-
-#### 陷阱 5: Static 和 Dynamic API 混用不当
-```typescript
-// ❌ 可能的问题
-const text = Text('Hello')
-const modifier = new TextModifier()
-modifier.fontSize(20)
-text.fontSize(30)  // Static 设置覆盖了 Dynamic，行为不确定
-
-// ✅ 明确使用一种方式
-// 方式 1: 纯 Static
-Text('Hello').fontSize(20)
-
-// 方式 2: 纯 Dynamic
-const modifier = new TextModifier()
-modifier.fontSize(20)
-const frameNode = FrameNode.create(uiContext, 'Text')
-frameNode.appendChild(modifier)
-```
-
-### 13.6 性能优化建议
+### 10.5 性能优化建议
 
 **Q: 如何优化 ArkUI 应用性能？**
 
@@ -1931,23 +1522,24 @@ A: 关键优化点：
 
 ---
 
-## 14. 开发调试指南
+## 11. 开发调试指南
 
-### 14.1 从 SDK API 追踪到源码
+### 11.1 从 SDK API 追踪到源码
 
 **步骤 1: 确定入口点**
 ```
-应用代码 → SDK API (.static.d.ets / *.d.ts)
+应用代码 → SDK API（先区分 Static 还是 Dynamic）
 ```
 
 **步骤 2: 找到 Bridge 实现**
 ```
-SDK API → frameworks/bridge/declarative_frontend/jsview/js_*.cpp
+Dynamic API  → frameworks/bridge/declarative_frontend/
+Static API   → frameworks/bridge/arkts_frontend/
 ```
 
 **步骤 3: 定位 Pattern 实现**
 ```
-Bridge → frameworks/core/components_ng/pattern/*/*_pattern.cpp
+Bridge/NativeNodeModifier → frameworks/core/components_ng/pattern/*/*_pattern.cpp
 ```
 
 **步骤 4: 查看 Property 和 Render**
@@ -1956,232 +1548,52 @@ Pattern → frameworks/core/components_ng/property/*_property.cpp
 Pattern → frameworks/core/components_ng/render/*_render_property.cpp
 ```
 
-**示例追踪 Text 组件**:
+**示例追踪 Text 组件（Dynamic + Static）**:
 ```bash
-# 1. 从 SDK API 开始
-OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
+# 1) Dynamic API 定义
+OpenHarmony/interface/sdk-js/api/@internal/component/ets/text.d.ts
+OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
 
-# 2. Bridge 层实现 (Static API)
-OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
-
-# 3. Bridge 层实现 (Dynamic API)
+# 2) Dynamic Bridge 层实现
 OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.cpp
 
-# 4. Pattern 层实现
+# 3) Static API 定义
+OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
+OpenHarmony/interface/sdk-js/api/arkui/TextModifier.static.d.ets
+
+# 4) Static Bridge 层实现
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/text.ets
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/TextModifier.ets
+
+# 5) Native Node Modifier
+OpenHarmony/foundation/arkui/ace_engine/frameworks/core/interfaces/native/node/node_text_modifier.cpp
+
+# 6) Pattern 层实现
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
 
-# 5. Property 层
+# 7) Property 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
 
-# 6. Render 层
+# 8) Render 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
 ```
 
-### 14.2 常用调试技巧
-
-#### 查看 FrameNode 树结构
-```typescript
-// 递归打印 FrameNode 树
-function printFrameTree(node: FrameNode, indent: number = 0) {
-  const prefix = '  '.repeat(indent)
-  const info = node.getChildren()
-  console.log(`${prefix}Node: ${node.getType()}`)
-  info.forEach(child => printFrameTree(child, indent + 1))
-}
-```
-
-#### 监听布局变化
-```typescript
-frameNode.on('layout', () => {
-  const layout = frameNode.getLayoutProperty()
-  console.log('Layout changed:', layout)
-})
-```
-
-#### 跟踪属性更新
-```cpp
-// 在 C++ Pattern 层添加日志
-// text_pattern.cpp
-void TextPattern::OnModifyDone() {
-  LOGI("TextPattern::OnModifyDone - text: %{public}s", text_.c_str());
-  // ... 实现代码
-}
-```
-
-### 14.3 日志分析方法
-
-#### 启用详细日志
-```bash
-# 设置日志级别
-export ACE_LOG_LEVEL=DEBUG
-
-# 查看组件生命周期日志
-hilog -t ACE | grep "TextPattern"
-```
-
-#### 常用日志标签
-| 标签 | 说明 |
-|------|------|
-| `ACE` | ACE Engine 主标签 |
-| `JSApp` | JavaScript 应用层 |
-| `Pattern` | Pattern 层日志 |
-| `Render` | 渲染层日志 |
-| `Layout` | 布局计算日志 |
-
-#### 性能分析
-```bash
-# 使用 hdc 工具抓取性能数据
-hdc shell hilog -b D -T ACE,Pattern,Render > performance.log
-
-# 分析布局耗时
-grep "Layout" performance.log | awk '{print $1, $2, $NF}'
-```
-
 ---
 
-## 15. 实战示例
+## 12. 总结
 
-本章通过实际示例帮助开发者深入理解 ArkUI Component Static API 的使用方法和最佳实践。
+本文按以下脉络组织 ArkUI SDK API：
 
-### 15.1 从 Static API 追溯到实现代码
+- **第 1 章** 给出文件分布与统计快照（动态/静态组件、Modifier、`@ohos.arkui.*` 模块及相关 NAPI 模块）。
+- **第 2~3 章** 说明组件 / Node / 图形 / Modifier 四类 API 的角色，并按基础、容器、选择器、形状、媒体、高级等分类列出全部组件。
+- **第 4 章** 明确 Dynamic 与 Static 两种范式下组件声明文件的三段式结构、`@ComponentBuilder` 与 `CommonMethod` 基座。
+- **第 5~6 章** 覆盖增量渲染（`@memo` / `@param`）与状态管理（`@State` / `@Prop` / `@Link` 等）装饰器。
+- **第 7~9 章** 解释 Modifier 桥接机制、与 ace_engine 源码（`components_ng` / `interfaces/native/node` / NAPI 实现）的对应关系，以及跨范式命名转换规则。
+- **第 10~11 章** 汇总常见问题与从 SDK API 追踪到源码的调试路径。
 
-#### 15.1.1 Static API vs Dynamic API 调用路径
-
-**Static API（声明式语法）**：
-```typescript
-Text('Hello').fontSize(20)
-```
-- **实现路径**: `node_text_modifier.cpp` (Modifier 层）
-- **说明**: Static API 的 "Static" 指的是声明式语法（Declarative Syntax），不是"静态"的意思
-
-**Dynamic API（Modifier 模式）**：
-```typescript
-const modifier = new TextModifier()
-modifier.fontSize(20)
-Text().attribute(modifier)
-```
-- **实现路径**: `js_text.cpp` (Bridge 层）
-- **说明**: Dynamic API 的 "Dynamic" 指的是命令式动态修改（Imperative Dynamic Modification）
-
-#### 15.1.2 Static API 完整调用链
-
-**完整调用链示例 - Text 组件**：
-
-```
-应用层: Text('Hello').fontSize(20)
-  ↓
-Static API: text.static.d.ets (TextAttribute 接口)
-  ↓
-Modifier 层: node_text_modifier.cpp (SetTextFontSize)
-  ↓
-Property 层: text_property.cpp (TextProperty::SetFontSize)
-  ↓
-Pattern 层: text_pattern.cpp (TextPattern::OnModifyDone)
-  ↓
-Render 层: text_render_property.cpp (Paint 方法)
-  ↓
-屏幕显示
-```
-
-**快速查找实现代码的路径**：
-- **Static API**: `interface/sdk-js/api/arkui/component/text.static.d.ets`
-- **Modifier 层**: `ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp`
-- **Property 层**: `ace_engine/frameworks/core/components_ng/property/text_property.cpp`
-- **Pattern 层**: `ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp`
-- **Render 层**: `ace_engine/frameworks/core/components_ng/render/text_render_property.cpp`
-
-### 15.2 理解 Attribute 接口
-
-**核心特性**：
-
-1. **继承 CommonMethod** - 所有通用属性（width, height, padding等）自动可用
-2. **链式调用** - 所有方法返回 `this`，支持 `.fontSize(20).fontColor(Color.Red)`
-3. **可选参数** - 支持 `undefined` 恢复为默认值
-4. **default 关键字** - 属性方法使用 `default` 修饰
-
-**使用示例**：
-```typescript
-// 基础使用
-Text('Hello World')
-  .fontSize(20)
-  .fontColor(Color.Red)
-  .textAlign(TextAlign.Center)
-
-// 结合状态管理
-@Component
-struct Example {
-  @State fontSize: number = 16
-  build() {
-    Text('Hello')
-      .fontSize(this.fontSize)
-      .onClick(() => { this.fontSize = 24 })
-  }
-}
-```
-
-### 15.3 Configuration vs Options vs Attribute
-
-| 特性 | Attribute | Configuration | Options |
-|------|-----------|----------------|---------|
-| **API 模式** | 声明式 | 声明式 | 初始化参数 |
-| **链式调用** | ✅ | ❌ | ❌ |
-| **配置复用** | ❌ | ✅ | ⚠️ |
-| **动态修改** | ⚠️ | ✅ | ❌ |
-| **推荐场景** | 常规 UI 开发 | 属性复用 | 组件初始化 |
-
-**说明**：
-
-- **三者都是声明式的**：
-  - **Attribute**: 声明式属性设置（`.fontSize(20)`）
-  - **Configuration**: 声明式配置对象（`new TextModifier().fontSize(20)`）
-  - **Options**: 初始化参数（`Text({ controller: this.controller })`）
-
-- **Configuration 不是"命令式"**：
-  - Configuration 对象本身是声明式创建的
-  - 用于配置复用、动态属性修改、条件属性应用
-
-**Configuration 的实际作用**：
-
-```typescript
-// 1. 配置复用
-const myStyle = new TextModifier()
-myStyle.fontSize(20).fontColor(Color.Red)
-
-Text('H1').attribute(myStyle)
-Text('H2').attribute(myStyle)
-
-// 2. 动态修改
-myStyle.fontSize(24)  // 所有使用 myStyle 的地方都会更新
-```
-
----
-
-## 16. 总结
-
-### 16.1 统计数据
-
-| 类别 | 数量 |
-|------|------|
-| **总 API 定义文件** | 298 个 |
-| **核心 Node API** | 6 个 |
-| **Modifier 类** | 76 个 |
-| **Component 接口** | 129 个 |
-| **基础组件** | 14 个 |
-| **容器组件** | 27 个 |
-| **选择器组件** | 9 个 |
-| **形状组件** | 6 个 |
-| **媒体组件** | 4 个 |
-| **高级组件** | 17 个 |
-| **辅助工具** | 27+ 个 |
-
-### 16.2 API 特点
-
-1. **完整的组件库**: 涵盖基础、容器、选择器、形状、媒体等全场景
-2. **强大的状态管理**: @State, @Prop, @Link, @Provide 等多种装饰器
-3. **灵活的节点操作**: FrameNode/BuilderNode/RenderNode 三层架构
-4. **类型安全**: TypeScript 完整类型定义
-5. **增量渲染**: 支持性能优化的增量更新机制
-6. **跨语言支持**: 支持 Cangjie 等其他语言调用
+后续维护时应同步更新第 1 章的统计、第 3 章的组件清单及第 8 章的源码映射，确保声明文件与 ace_engine 实现保持一致。
 
 ---
 

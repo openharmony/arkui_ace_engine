@@ -215,6 +215,13 @@ RefPtr<SpanBase> ParseParagraphStyle(const ArkUISpanStyle& style, int32_t start,
     ParseLeadingMargin(spanParagraphStyle, paragraphStyle);
     spanParagraphStyle.textDirection = static_cast<OHOS::Ace::TextDirection>(paragraphStyle.textDirection);
     ParseShaderStyle(spanParagraphStyle, paragraphStyle);
+    if (paragraphStyle.tailIndents.has_value()) {
+        NG::TailIndentsArray indentsArray;
+        for (const auto& indent : paragraphStyle.tailIndents.value()) {
+            indentsArray.push_back(Dimension(std::max(indent, 0.0f), DimensionUnit::FP));
+        }
+        spanParagraphStyle.tailIndents = NG::TailIndents { indentsArray };
+    }
     auto paragraphStyleSpan = AceType::MakeRefPtr<NapiParagraphStyleSpan>(spanParagraphStyle, start, start + length);
     paragraphStyleSpan->onNapiDrawLeadingMargin_ = paragraphStyle.onDrawLeadingMargin;
     paragraphStyleSpan->onNapiGetLeadingMargin_ = paragraphStyle.onGetLeadingMargin;
@@ -548,6 +555,7 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithString(ArkUI
     auto spans = ParseSpanBaseVector(styles, maxLength);
     spanString->BindWithSpans(spans);
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
@@ -557,6 +565,7 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithImage(ArkUII
     ImageSpanOptions options = CreateImageSpanOptions(attachment);
     MutableSpanString* spanString = new MutableSpanString(options);
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
@@ -569,13 +578,17 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithCustomSpan(A
     MutableSpanString* spanString = new MutableSpanString(span);
     ArkUI_StyledString_Descriptor* descriptor = new ArkUI_StyledString_Descriptor();
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
 ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
-    return new ArkUI_StyledString_Descriptor();
+    auto* descriptor = new ArkUI_StyledString_Descriptor();
+    descriptor->spanString = nullptr;
+    descriptor->html = nullptr;
+    return descriptor;
 }
 
 void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
@@ -583,14 +596,10 @@ void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descripto
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor destroy");
     CHECK_NULL_VOID(descriptor);
     if (descriptor->html) {
-        delete descriptor->html;
+        delete[] descriptor->html;
         descriptor->html = nullptr;
     }
-    if (descriptor->spanString) {
-        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
-        delete spanString;
-        descriptor->spanString = nullptr;
-    }
+    DestroySpanString(descriptor);
     delete descriptor;
     descriptor = nullptr;
 }
@@ -607,6 +616,7 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     MutableSpanString* spanString = new MutableSpanString(u"");
     spanString->DecodeTlvExt(vec, spanString, nullptr);
+    DestroySpanString(descriptor);
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1023,6 +1033,13 @@ void ApplyParagraphStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     if (gradient.has_value()) {
         ApplyParagraphShaderStyle(gradient.value(), paragraphStyle);
     }
+    if (spanParagraphStyle.tailIndents.has_value() && spanParagraphStyle.tailIndents->HasValue()) {
+        std::vector<ArkUI_Float32> indents;
+        for (const auto& dim : spanParagraphStyle.tailIndents->indentsArray.value()) {
+            indents.push_back(dim.Value());
+        }
+        paragraphStyle.tailIndents = indents;
+    }
     style.paragraphStyle = paragraphStyle;
 }
 
@@ -1126,6 +1143,7 @@ ArkUI_Int32 FromHtml(ArkUI_StyledString_Descriptor* descriptor, ArkUI_CharPtr ht
     auto styledString = HtmlUtils::FromHtml(std::string(html));
     MutableSpanString* spanString = new MutableSpanString(u"");
     spanString->AppendSpanString(styledString);
+    DestroySpanString(descriptor);
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1303,6 +1321,7 @@ void GetReplacementStyledString(const ArkUITextEditorChangeEvent* event, ArkUI_S
         auto length = replacementStyledString->GetLength();
         result->AppendSpanString(replacementStyledString->GetSubSpanString(0, length));
     }
+    DestroySpanString(descriptor);
     descriptor->spanString = result;
 }
 
@@ -1316,9 +1335,19 @@ void GetPreviewStyledString(const ArkUITextEditorChangeEvent* event, ArkUI_Style
         auto length = previewStyledString->GetLength();
         result->AppendSpanString(previewStyledString->GetSubSpanString(0, length));
     }
+    DestroySpanString(descriptor);
     descriptor->spanString = result;
 }
 } // namespace
+
+void DestroySpanString(ArkUI_StyledString_Descriptor* descriptor)
+{
+    if (descriptor && descriptor->spanString) {
+        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
+        delete spanString;
+        descriptor->spanString = nullptr;
+    }
+}
 
 const ArkUIStyledStringAPI* GetStyledStringAPI()
 {

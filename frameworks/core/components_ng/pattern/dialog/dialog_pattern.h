@@ -423,6 +423,7 @@ public:
 
     bool NeedDistortion();
     bool NeedEdgeLight();
+    bool ShouldApplySystemMaterialShadow() const;
 
 private:
     bool AvoidKeyboard() const override
@@ -430,6 +431,7 @@ private:
         return false;
     }
     void OnModifyDone() override;
+    void UpdateDrawFocusLevel();
 
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
@@ -459,7 +461,9 @@ private:
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
     void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props,
         bool isCustomBorder, RefPtr<DialogTheme> dialogTheme);
-    void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
+    void UpdateContentBorderRadius(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateDialogShadow(const RefPtr<RenderContext>& renderContext, const DialogProperties& props);
+    bool SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
@@ -534,9 +538,7 @@ private:
     void OnWindowShow() override;
     void PlayFlowLight();
     void PlayDistortion();
-#if defined(ENABLE_ROSEN_BACKEND)
-    void UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode);
-#endif
+    void StartMaskColorAnimation();
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -607,7 +609,6 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
-    RectF lastPaintRect_;
     bool isDialogShow_ = true;
     bool hasExtraNodeForDistortion_ = false;
     std::function<void()> onFinishEvent_ = nullptr;

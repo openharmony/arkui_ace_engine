@@ -59,6 +59,13 @@ declare enum ScrollSource {
   SCROLLER_ANIMATION,
 }
 
+declare enum StickyStyle {
+  None = 0,
+  Header = 1,
+  Footer = 2,
+  Both = 3,
+}
+
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}
@@ -76,6 +83,13 @@ interface RichEditorAttribute extends CommonAttribute {}
 interface RowAttribute extends CommonAttribute {}
 interface RowSplitAttribute extends CommonAttribute {}
 interface SearchAttribute extends CommonAttribute {}
+interface SelectionContainerAttribute extends CommonAttribute {}
+interface SelectionContainerMenuOptions {
+  onAppear?: Callback<string>;
+  onDisappear?: Callback<void>;
+  onMenuShow?: Callback<string>;
+  onMenuHide?: Callback<string>;
+}
 interface SpanAttribute extends CommonAttribute {}
 interface SideBarContainerAttribute extends CommonAttribute {}
 interface StackAttribute extends CommonAttribute {}
@@ -156,10 +170,13 @@ interface ParticleAttribute extends CommonAttribute {}
 interface SymbolGlyphAttribute extends CommonAttribute {}
 interface SymbolSpanAttribute extends CommonAttribute {}
 interface Component3DAttribute extends CommonAttribute {}
+interface ContainerReaderAttribute extends CommonAttribute {}
 interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
 interface LazyColumnLayoutAttribute extends CommonAttribute {}
 interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
+interface DividerOptions extends CommonAttribute {}
+interface PickerBackgroundStyle extends CommonAttribute {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;
@@ -184,6 +201,7 @@ type BorderImageOption = object;
 type BackgroundOptions = { color?: ResourceColor };
 type BackgroundEffectOptions = object;
 type BackgroundBrightnessOptions = object;
+type BreakpointOptions = object;
 type BrightnessOptions = object;
 type ForegroundBlurStyleOptions = object;
 type BackgroundBlurStyleOptions = object;
@@ -282,6 +300,7 @@ type SelectionOptions = object;
 type TextDataDetectorType = 'phoneNumber' | 'url' | 'email' | 'address' | 'dateTime' | 'currency';
 type TextDataDetectorConfig = object;
 type LineSpacingOptions = object;
+type FontWeightConfigs = object;
 
 type VoidCallback = () => void;
 type Callback<T = object, R = void> = (value: T) => R;
@@ -293,6 +312,9 @@ type ImageInterpolation = 'none' | 'low' | 'medium' | 'high';
 type ImageSpanAlignment = 'baseline' | 'bottom' | 'center' | 'top';
 
 type CopyOptions = 'none' | 'inApp' | 'local' | 'distributed';
+type SelectionContainerTextJoinStyle = number;
+type TextSpanType = number;
+type TextResponseType = number;
 type TextInputType = 'text' | 'multiline' | 'number' | 'numberPassword' | 'email' | 'password' | 'phoneNumber' | 'userName' | 'newPassword';
 type TextInputAction = 'none' | 'default' | 'go' | 'search' | 'send' | 'next' | 'done' | 'previous';
 type TextAreaType = 'text' | 'multiline' | 'number' | 'numberPassword' | 'email' | 'password' | 'phoneNumber' | 'userName' | 'newPassword';
@@ -348,8 +370,13 @@ type SliderInteraction = object;
 type SlideRange = object;
 type SliderPrefixOptions = object;
 type SliderSuffixOptions = object;
+type TextBackgroundStyle = object;
+type ColorFilter = object;
+type DrawingColorFilter = object;
 
 type ToggleType = 'checkbox' | 'switch' | 'button';
+type SwitchStyle = object;
+type ToggleConfiguration = object;
 
 type ArrowPosition = 'end' | 'start' | 'center';
 type OptionWidthMode = 'default' | 'fit_content' | 'fit_trigger';
@@ -465,6 +492,7 @@ type RadioConfiguration = object;
 type DataPanelConfiguration = object;
 type DataPanelShadowOptions = object;
 type GaugeConfiguration = object;
+type LoadingProgressConfiguration = object;
 type GaugeIndicatorOptions = object;
 type StarStyleOptions = object;
 type ShaderStyle = object;

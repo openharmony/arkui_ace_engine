@@ -1033,5 +1033,6 @@ void RichEditorScrollController::ScrollToVisible(int32_t start, int32_t end)
     float distanceY = contentRect_.Top() - destOffset.GetY();
     OnScrollWithAxisCallback(distanceY, SCROLL_FROM_NONE, Axis::VERTICAL);
     IF_TRUE(IsSupportHorizontalScroll(), OnScrollWithAxisCallback(distanceX, SCROLL_FROM_NONE, Axis::HORIZONTAL));
+    pattern->UpdateScrollBarOffset();
 }
 } // namespace OHOS::Ace::NG

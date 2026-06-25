@@ -34,7 +34,7 @@ bool TaihangOptimizer::IsEnable()
     return false;
 }
 
-bool TaihangOptimizer::CheckSwiperPathValid(const std::string& bundleName, const std::string& pageNames)
+bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageNames)
 {
     return true;
 }
@@ -48,6 +48,10 @@ void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string,
 }
 
 void TaihangOptimizer::PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index)
+{
+}
+
+void TaihangOptimizer::ParseReplyPages(const std::unordered_map<std::string, std::string>& reply)
 {
 }
 } // namespace OHOS::Ace

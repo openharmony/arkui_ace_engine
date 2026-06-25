@@ -50,8 +50,7 @@ public:
         assetManager_ = assetManager;
     }
 
-    UIContentErrorCode RunDynamicPage(
-        const std::string& content, const std::string& params, const std::string& entryPoint) override;
+    UIContentErrorCode RunDynamicPage(const DynamicOptions& options) override;
 
     void SetModuleName(const std::string& moduleName)
     {
@@ -84,6 +83,8 @@ public:
     }
 
 private:
+    UIContentErrorCode InnerRunDynamicPage(const DynamicOptions& options);
+
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<AssetManager> assetManager_;

@@ -45,7 +45,7 @@ export interface RenderOptions {
     selfIdealSize?: Size;
     type?: NodeRenderType;
     surfaceId?: string;
-    isWeak?: boolean;
+    enableMinimized?: boolean;
 }
 export interface BuildOptions {
     nestingBuilderSupported?: boolean;
@@ -357,7 +357,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__uiContext = uiContext as UIContext;
         this._instanceId = (uiContext as UIContext).instanceId_;
         if (options !== undefined) {
-            this.__isWeak = options?.isWeak ?? false;
+            this.__isWeak = options?.enableMinimized ?? false;
             let buildOptions: BuilderNodeOptions = {};
             if (options?.selfIdealSize !== undefined) {
                 buildOptions.selfIdealSize = options.selfIdealSize;
@@ -678,6 +678,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             return;
         }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
+        const frameNodePtr = this.__frameNode?.nodePtr_;
+        if (frameNodePtr) {
+            const weakRef: WeakRef<JSBuilderNode<T>> = new WeakRef<JSBuilderNode<T>>(this)
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                weakRef as object,
+                'BuilderNode', 'BuilderNode', frameNodePtr!);
+        }
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;

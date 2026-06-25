@@ -57,6 +57,7 @@ bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::dynamicDetectionTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::skipSecondaryMeasuredEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
@@ -127,6 +128,7 @@ bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
 UiMaterialLevel g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+bool g_isDeviceSystemMaterialSupported = true;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
@@ -371,6 +373,11 @@ bool SystemProperties::ConfigChangePerform()
     return g_isConfigChangePerform;
 }
 
+void SystemProperties::SetConfigChangePerform()
+{
+    g_isConfigChangePerform = true;
+}
+
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
@@ -517,5 +524,10 @@ void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     return g_uiMaterialLevel;
+}
+
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    return g_isDeviceSystemMaterialSupported;
 }
 } // namespace OHOS::Ace

@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+
+#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/pipeline/container_window_manager.h"
 #include <cstdint>
 #include <ctime>
@@ -23,7 +27,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -35,6 +41,12 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<EventHub> TimePickerRowPattern::CreateEventHub()
+{
+    return MakeRefPtr<TimePickerEventHub>();
+}
+
 namespace {
 constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
@@ -808,6 +820,18 @@ void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
         timePickerEventHub->FireEnterSelectedAreaEvent(info.get());
         timePickerEventHub->FireDialogEnterSelectedAreaEvent(str);
     }
+}
+
+FocusPattern TimePickerRowPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
 }
 
 std::string TimePickerRowPattern::GetSelectedObject(bool isColumnChange, int32_t status)
@@ -2393,10 +2417,15 @@ void TimePickerRowPattern::OnWindowSizeChanged(int32_t width, int32_t height, Wi
         default:
             break;
     }
-    if (oldFullscreen != isWindowFullscreen_) {
-        for (auto& column : timePickerColumns_) {
-            auto columnNode = column.Upgrade();
-            CHECK_NULL_VOID(columnNode);
+    for (auto& column : timePickerColumns_) {
+        auto columnNode = column.Upgrade();
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (columnPattern) {
+            columnPattern->FlushCurrentOptions(false, false, false, false);
+            columnNode->MarkModifyDone();
+        }
+        if (oldFullscreen != isWindowFullscreen_) {
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }

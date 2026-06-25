@@ -916,14 +916,13 @@ HWTEST_F(SearchTestTwoNg, PackInnerRecognizerr001, TestSize.Level1)
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     int32_t touchId = 0;
     int32_t originalId = 0;
-    RefPtr<TargetComponent> targetComponent;
     searchgestureEventHub->innerParallelRecognizer_ = nullptr;
     searchgestureEventHub->CheckClickActuator();
     auto clickEventActuator = searchgestureEventHub->GetUserClickEventActuator();
     GestureEventFunc callback = [](GestureEvent& info) {};
     clickEventActuator->SetUserCallback(std::move(callback));
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId);
 }
 
 /**
@@ -2794,6 +2793,7 @@ HWTEST_F(SearchTestTwoNg, searchTriggerButtonMouseEventTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     auto events = inputHub->hoverEventActuator_->inputEvents_;
     for (const auto& callback : events) {
         if (callback) {
@@ -2958,7 +2958,7 @@ HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
     pattern->ToJsonValueForCancelButton(jsonValue, filter);
     pattern->ToJsonValueForCursor(jsonValue, filter);
     pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
-    EXPECT_TRUE(filter.CheckExtAttr("content"));
+    EXPECT_TRUE(filter.CheckFixedAttr(FIXED_ATTR_CONTENT));
     EXPECT_EQ(filter.IsFastFilter(), true);
 
     InspectorFilter filter2;
@@ -4067,4 +4067,160 @@ HWTEST_F(SearchTestTwoNg, GetInspectorIdTest002, TestSize.Level1)
     auto result = searchPattern->GetInspectorId();
     EXPECT_NE(result, value);
 }
+
+/**
+ * @tc.name: SetTextFieldLayoutConstraintHeightTest001
+ * @tc.desc: Test SetTextFieldLayoutConstraintHeight branch conditions for FallbackLineSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SetTextFieldLayoutConstraintHeightTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Setup theme manager mock before creating search component.
+     * @tc.expected: Theme manager returns valid themes, no crash during Create.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return AceType::MakeRefPtr<SearchTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return AceType::MakeRefPtr<SearchTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+    /**
+     * @tc.steps: step2. Create search, get frameNode and layoutAlgorithm.
+     * @tc.expected: FrameNode and layoutAlgorithm is not null.
+     */
+
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. API >= TWELVE, HasLineHeight() == true: constraint height is NOT set.
+     * @tc.expected: selfIdealSize height remains unset.
+     */
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    textFieldLayoutProperty->UpdateLineHeight(1.0_vp);
+    textFieldLayoutProperty->ResetFallbackLineSpacing();
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.selfIdealSize.SetWidth(30);
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childConstraint, 50.0, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_FALSE(childConstraint.selfIdealSize.Height().has_value());
+
+    /**
+     * @tc.steps: step4. API >= TWELVE, !HasLineHeight(), !HasFallbackLineSpacing(): constraint height IS set.
+     * @tc.expected: selfIdealSize height is set to 50.0.
+     */
+    textFieldLayoutProperty->ResetLineHeight();
+    textFieldLayoutProperty->ResetFallbackLineSpacing();
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childConstraint, 50.0, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childConstraint.selfIdealSize.Height().value(), 50.0);
+}
+
+/**
+ * @tc.name: SetTextFieldLayoutConstraintHeightTest002
+ * @tc.desc: Test SetTextFieldLayoutConstraintHeight branch conditions for FallbackLineSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SetTextFieldLayoutConstraintHeightTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Setup theme manager mock before creating search component.
+     * @tc.expected: Theme manager returns valid themes, no crash during Create.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return AceType::MakeRefPtr<SearchTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return AceType::MakeRefPtr<SearchTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+    /**
+     * @tc.steps: step2. Create search, get frameNode and layoutAlgorithm.
+     * @tc.expected: FrameNode and layoutAlgorithm is not null.
+     */
+
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. API >= TWELVE, !HasLineHeight(), HasFallbackLineSpacing() && GetFallbackLineSpacing() == false:
+     *                   constraint height IS set.
+     * @tc.expected: selfIdealSize height is set to 50.0.
+     */
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    textFieldLayoutProperty->ResetLineHeight();
+    textFieldLayoutProperty->UpdateFallbackLineSpacing(false);
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.selfIdealSize.SetWidth(30);
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childConstraint, 50.0, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(childConstraint.selfIdealSize.Height().value(), 50.0);
+
+    /**
+     * @tc.steps: step4. API >= TWELVE, !HasLineHeight(), HasFallbackLineSpacing() && GetFallbackLineSpacing() == true:
+     *                   constraint height is NOT set. This is the key new branch added by the modification.
+     * @tc.expected: selfIdealSize height remains unset.
+     */
+    textFieldLayoutProperty->ResetLineHeight();
+    textFieldLayoutProperty->UpdateFallbackLineSpacing(true);
+    childConstraint.selfIdealSize.Reset();
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childConstraint, 50.0, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_FALSE(childConstraint.selfIdealSize.Height().has_value());
+}
+
 } // namespace OHOS::Ace::NG

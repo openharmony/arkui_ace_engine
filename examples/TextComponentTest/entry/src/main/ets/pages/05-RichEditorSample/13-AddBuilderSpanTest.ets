@@ -141,7 +141,7 @@ struct Index {
           this.controller.getSpans({
             start: this.start,
             end: this.end
-          }).forEach(item => {
+          })?.forEach(item => {
             if (typeof (item as RichEditorImageSpanResult)['imageStyle'] != 'undefined') {
               if ((item as RichEditorImageSpanResult).valueResourceStr == "") {
                 console.info("builder span index " + (item as RichEditorImageSpanResult).spanPosition.spanIndex + ", range : " + (item as RichEditorImageSpanResult).offsetInSpan[0] + ", " +

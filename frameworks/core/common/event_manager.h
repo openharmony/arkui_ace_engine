@@ -41,7 +41,6 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
-#include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
 namespace NG {
@@ -50,6 +49,7 @@ class GestureDebugBoundaryManager;
 class SelectOverlayManager;
 class SmartGestureManager;
 class ResponseCtrl;
+class ActiveRecognizerManager;
 #ifdef RELAXED_INTERACTION_SUPPORT
 class RelaxedInteractionManager;
 #endif
@@ -213,7 +213,7 @@ public:
 
     RefPtr<NG::GestureReferee> GetGestureRefereeNG(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
-        if (recognizer && recognizer->IsPostEventResult()) {
+        if (recognizer && recognizer->IsPostTouchEventResult()) {
             return postEventRefereeNG_;
         }
         return refereeNG_;
@@ -488,10 +488,13 @@ public:
     {
         touchTimingCallback_ = nullptr;
     }
+    
+    RefPtr<NG::ActiveRecognizerManager> GetOrCreateActiveRecognizerManager();
     void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
     void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
 
 private:
+    RefPtr<NG::ActiveRecognizerManager> activeRecognizerManager_;
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,

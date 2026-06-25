@@ -129,6 +129,7 @@ const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
+const std::string EXT_BUNDLE = "@bundle:";
 
 #ifdef PREVIEW
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
@@ -255,7 +256,8 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 #else
     std::string str("arkui_binary_stateMgmt_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
+        reinterpret_cast<const uint8_t*>(_binary_stateMgmt_abc_start),
+        _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
 #endif
 }
 
@@ -674,7 +676,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
-    LOGI("preload js enums in PreloadAceModuleWorker");
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
@@ -806,6 +807,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Badge", "arkui.components.arkbadge" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
         { "Checkbox", "arkui.components.arkcheckbox" },
@@ -817,6 +819,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
 #endif
         { "Gauge", "arkui.components.arkgauge" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "ImageSpan", "arkui.components.arkimagespan" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
         { "Marquee", "arkui.components.arkmarquee" },
         { "Menu", "arkui.components.arkmenu" },
@@ -825,18 +828,30 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Radio", "arkui.components.arkradio" },
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },
+        { "SymbolSpan", "arkui.components.arksymbolspan" },
+        { "Refresh", "arkui.components.arkrefresh" },
         { "RowSplit", "arkui.components.arkrowsplit" },
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
         { "Slider", "arkui.components.arkslider" },
+        { "LoadingProgress", "arkui.components.arkloadingprogress" },
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "Toggle", "arkui.components.arktoggle" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
         { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
+        { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
+        { "ImageAnimator", "arkui.components.arkimageanimator" },
+        { "DatePicker", "arkui.components.arkdatepicker" },
+        { "DatePickerDialog", "arkui.components.arkdatepicker" },
+        { "TextPicker", "arkui.components.arktextpicker" },
+        { "TextPickerDialog", "arkui.components.arktextpicker" },
+        { "Progress", "arkui.components.arkprogress" },
+        { "TextTimer", "arkui.components.arktexttimer" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
@@ -1885,8 +1900,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             auto fileMapperPtr = data.release();
             if (!arkRuntime->ExecuteModuleBufferSecure(fileMapperPtr->GetDataPtr(), fileMapperPtr->GetDataLen(),
                 abcPath, true, static_cast<void*>(fileMapperPtr))) {
-                fileMapperPtr->SetAutoReleaseMem(true);
-                delete fileMapperPtr;
                 return false;
             }
         }
@@ -1992,7 +2005,7 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
     }
 
     const char binExt[] = ".abc";
-    std::string urlName = entryPoint.substr(bundleName.size() + 1) + binExt;
+    std::string urlName = EXT_BUNDLE + entryPoint + binExt;
     LOGD("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
     runtime->ExecuteJsBin(urlName);
     if (trycatch.HasCaught()) {

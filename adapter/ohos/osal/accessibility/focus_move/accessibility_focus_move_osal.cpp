@@ -120,7 +120,7 @@ FocusMoveResult FocusStrategyOsal::ExecuteFocusMoveSearch(
     CHECK_NULL_RETURN(checkNode, errorResult);
     UpdateNextFocus(checkNode);
     std::shared_ptr<FocusRulesCheckNode> targetNode;
-    AccessibilityFocusStrategy strategy;
+    AccessibilityFocusStrategy strategy(param.type);
     AceFocusMoveResult result = AceFocusMoveResult::FIND_FAIL;
     if (param.direction == FocusMoveDirection::BACKWARD) {
         result = strategy.FindPrevReadableNode(condition, checkNode, targetNode);
@@ -234,10 +234,15 @@ bool FocusStrategyOsal::CheckIsRootType(
 }
 
 bool FocusStrategyOsal::CheckIsReadable(
-    const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode, Accessibility::FocusRuleType focusRuleType)
 {
     auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
+
+    if (!CheckNodeMatchedFocusType(checkNode, focusRuleType)) {
+        return false;
+    }
+
     bool isReadable = false;
     auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
     CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
@@ -255,7 +260,8 @@ bool FocusStrategyOsal::CheckIsReadableRulesEnable()
 }
 
 bool FocusStrategyOsal::NeedChangeToReadableNodeThroughAncestor(
-    const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode)
+    const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode,
+    Accessibility::FocusRuleType focusRuleType)
 {
     auto result = CheckIsReadableRulesEnable();
     CHECK_NE_RETURN(result, true, false);
@@ -265,7 +271,7 @@ bool FocusStrategyOsal::NeedChangeToReadableNodeThroughAncestor(
         if (CheckIsRootType(targetCheckNode)) {
             break;
         }
-        if (CheckIsReadable(targetCheckNode)) {
+        if (CheckIsReadable(targetCheckNode, focusRuleType)) {
             targetNode = targetCheckNode;
             return true;
         }
@@ -445,6 +451,7 @@ bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode
         if ((checkResult == Accessibility::RET_OK) && isHit) {
             break;
         }
+        // no condition param in this function, no need to check focus type
         checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
         if ((checkResult == Accessibility::RET_OK) && isReadable) {
             readableNode = targetCheckNode;

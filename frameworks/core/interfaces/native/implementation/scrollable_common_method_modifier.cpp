@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/shape.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -203,9 +204,7 @@ void SetOnWillStartDraggingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnWillStartDragging(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnWillStartDragging(frameNode, std::move(onEvent));
 }
 void SetOnWillStopDraggingImpl(Ark_NativePointer node,
@@ -250,9 +249,7 @@ void SetOnWillStartFlingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnWillStartFling(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnWillStartFling(frameNode, std::move(onEvent));
 }
 void SetOnDidStopFlingImpl(Ark_NativePointer node,
@@ -265,9 +262,7 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnDidStopFling(frameNode, nullptr);
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onEvent = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
 void SetEnableScrollWithMouse(Ark_NativePointer node, const Opt_Boolean* value)
@@ -287,9 +282,7 @@ void SetOnReachStartImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnReachStart(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnReachStart(frameNode, std::move(modelCallback));
 }
 void SetOnReachEndImpl(Ark_NativePointer node,
@@ -302,9 +295,7 @@ void SetOnReachEndImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnReachEnd(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStartImpl(Ark_NativePointer node,
@@ -317,9 +308,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnScrollStart(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStopImpl(Ark_NativePointer node,
@@ -332,9 +321,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
         ScrollableModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
-    auto modelCallback = [callbackHelper = CallbackHelper(*optValue)]() {
-        callbackHelper.Invoke();
-    };
+    auto modelCallback = GetAsyncInvoker(*optValue);
     ScrollableModelStatic::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
 void SetFlingSpeedLimitImpl(Ark_NativePointer node,
@@ -390,6 +377,22 @@ void SetBackToTopImpl(Ark_NativePointer node,
         return;
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
+}
+void SetScrollBarHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    if (!convValue) {
+        ScrollableModelStatic::SetScrollBarHeight(frameNode, std::nullopt);
+        return;
+    }
+    Validator::ValidateNonNegative(convValue);
+    if (LessNotEqual(convValue->Value(), 0.0)) {
+        ScrollableModelStatic::SetScrollBarHeight(frameNode, std::nullopt);
+        return;
+    }
+    ScrollableModelStatic::SetScrollBarHeight(frameNode, convValue);
 }
 void SetEdgeEffectImpl(Ark_NativePointer node,
                        const Opt_EdgeEffect* edgeEffect,
@@ -452,6 +455,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetClipContentImpl,
         ScrollableCommonMethodModifier::SetDigitalCrownSensitivityImpl,
         ScrollableCommonMethodModifier::SetBackToTopImpl,
+        ScrollableCommonMethodModifier::SetScrollBarHeightImpl,
         ScrollableCommonMethodModifier::SetEdgeEffectImpl,
         ScrollableCommonMethodModifier::SetFadingEdgeImpl,
     };

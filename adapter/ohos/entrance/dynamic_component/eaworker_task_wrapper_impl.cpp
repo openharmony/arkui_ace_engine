@@ -34,7 +34,13 @@ void GetVM(int32_t hostInstanceId, ani_vm **vm)
 {
     auto container = Container::GetContainer(hostInstanceId);
     CHECK_NULL_VOID(container);
-    RefPtr<Frontend> frontend = container->GetFrontend();
+    RefPtr<Frontend> frontend = nullptr;
+    auto frontendType = container->GetFrontendType();
+    if (frontendType == FrontendType::STATIC_HYBRID_DYNAMIC || frontendType == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        frontend = container->GetSubFrontend();
+    } else {
+        frontend = container->GetFrontend();
+    }
     CHECK_NULL_VOID(frontend);
     *vm = frontend->GetVM();
 }
@@ -181,7 +187,19 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
     bool isNeedDetach = false;
     GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv, isNeedDetach);
     auto callerWorkerId = arkts::concurrency_helpers::GetWorkerId(callerAniEnv);
+
+    auto detachThread = [this, tid, isNeedDetach] {
+        if (isNeedDetach) {
+            ani_vm *vm = nullptr;
+            GetVM(hostInstanceId_, &vm);
+            CHECK_NULL_VOID(vm);
+            vm->DetachCurrentThread();
+            attachCurrentThreads_.erase(tid);
+        }
+    };
+
     if (callerAniEnv == nullptr) {
+        detachThread();
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl callerAniEnv is nullptr, "
             "callerWorkerId: %{public}d, workerId: %{public}d", callerWorkerId, workerId_);
         return;
@@ -207,13 +225,7 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
     }
-    if (isNeedDetach) {
-        ani_vm *vm = nullptr;
-        GetVM(hostInstanceId_, &vm);
-        CHECK_NULL_VOID(vm);
-        vm->DetachCurrentThread();
-        attachCurrentThreads_.erase(tid);
-    }
+    detachThread();
 }
 
 extern "C" ACE_FORCE_EXPORT TaskWrapper* OHOS_ACE_CreatEaWorkerTaskWrapper(

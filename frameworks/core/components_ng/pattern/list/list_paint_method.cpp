@@ -17,8 +17,7 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -230,16 +229,19 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto shapeMode = scrollBar->GetShapeMode();
     if (shapeMode == ShapeMode::ROUND) {
-        auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
-        CHECK_NULL_VOID(arcScrollBarOverlayModifier);
-        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
-        CHECK_NULL_VOID(arcScrollBar);
-        scrollBarOverlayModifier->SetBarColor(arcScrollBar->GetArcForegroundColor());
-        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
-        arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
-            arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
-            arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
+        bool updated = false;
+        auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
+        if (mod && mod->updateArcScrollBarOverlay) {
+            mod->updateArcScrollBarOverlay(AceType::RawPtr(scrollBarOverlayModifier),
+                AceType::RawPtr(scrollBar), updated);
+        }
+        if (!updated) {
+            return;
+        }
     } else {
+        scrollBarOverlayModifier->SetNeedPaintTrack(scrollBar->GetUseInnerScrollBar());
+        scrollBarOverlayModifier->SetTrackRect(scrollBar->GetTrackRect());
+        scrollBarOverlayModifier->SetTrackColor(scrollBar->GetBackgroundColor());
         scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());

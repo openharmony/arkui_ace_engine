@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,14 +33,24 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
-import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 import { ArkCustomComponentRootPeer } from './staticComponents';
 import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
-import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateManagement/utils';
+import { ActiveAndInactiveCallbackType, CustomComponentContext, IReusePool } from '../stateManagement/utils';
 import { IVariableOwner } from '../stateManagement/decorator';
+import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
+import { UIContextUtil } from '../base/UIContextUtil';
+
+// GlobalReuse pool ownership type
+export enum ReusePoolOwnership {
+  SHARED = 'shared',
+  PER_INSTANCE = 'perInstance',
+  OFF = 'off',
+}
+
+
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -177,7 +187,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         styles: ((instance: T) => void) | undefined
     ) {
         super();
-        this.uiContext = uiContext;
+        this.uiContext = uiContext ?? UIContextUtil.getOrCreateCurrentUIContext();
         this.instance = instance;
         this.instance.__setDelegate__Internal(this);
         this.styles = styles;
@@ -261,6 +271,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return ArkUIAniModule._CustomNode_QueryRouterPageInfo(this.getPeer()!.peer.ptr);
     }
 
+    findCustomValueByKey(key: int32): Any | undefined {
+        return ArkUIAniModule._CustomNode_findCustomValueByKey(this.getPeer()!.peer.ptr, key);
+    }
+
+    findWritableSystemEnvValueByKey(key: string): Any | undefined {
+        return ArkUIAniModule._CustomNode_findSystemEnvValueByKey(this.getPeer()!.peer.ptr, key);
+    }
+
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void {
+        ArkUIAniModule._CustomNode_registerOnCustomEnvUpdateCallback(this.getPeer()!.peer.ptr, callback);
+    }
+
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void {
+        ArkUIAniModule._CustomNode_registerOnSystemEnvUpdateCallback(this.getPeer()!.peer.ptr, callback);
+    }
+
     queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
         if (isInner == undefined) {
             return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);
@@ -274,6 +300,14 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     getDialogController(): promptAction.DialogController | undefined {
         return promptAction.getDialogController(this.getPeer()!.peer.ptr);
+    }
+
+    ClearParentReusePool(): void {
+        this.instance.ClearParentReusePool();
+    }
+
+    __getMemOpt__Internal(): int32 {
+        return this.instance.__getMemOpt__Internal();
     }
 
     aboutToAppear(): void {
@@ -293,6 +327,20 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 `${Class.of(this.instance).getName()}[${this.getUniqueId()}] is in process of destruction`);
         }
         this.instance.__clearStateVariables__Internal();
+        const envSet = this.instance.getEnvSet();
+        if (envSet.size > 0) {
+            for (const envItem of envSet) {
+                envItem.unRegisterEnv();
+            }
+            envSet.clear();
+        }
+        const unregisterFuncs = this.instance.__getReadonlyEnvUnregisterFuncs__Internal();
+        if (unregisterFuncs.size > 0) {
+            unregisterFuncs.forEach((unregisterFunc: () => void, _: string) => {
+                unregisterFunc();
+            });
+        }
+        this.instance.__clearAllEnvRegistrations__Internal();
     }
     onDidBuild(): void {
         this.instance.onDidBuild();
@@ -305,7 +353,6 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.build();
         ExtendableComponent.current = current;
     }
-
     onPageShow(): void {
         if (this.instance instanceof PageLifeCycle) {
             const page = this.instance as PageLifeCycle;
@@ -411,21 +458,70 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     switchHasBeenRecycle(recycle: boolean): void {
-        this.instance.__switchHasBeenRecycle_Ineternal(recycle);
+        this.instance.__switchHasBeenRecycle_Internal(recycle);
+    }
+
+    private unrecycleChildren(component: ExtendableComponent): void {
+        component.__getChildrenWeakRefMap__Internal().forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            if (child !== undefined) {
+                child.__switchHasBeenRecycle_Internal(false);
+                child.__unfreezeWhenReuse__Internal();
+                this.unrecycleChildren(child!);
+            }
+        });
     }
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
+        console.log(`GlobalReuse: aboutToReuse ENTRY instance=${Class.of(this.instance as Object).getName()} uniqueId=${this.getUniqueId()} hasParam=${param !== undefined} hasInitializers=${initializers !== undefined}`)
+        this.instance.__switchHasBeenRecycle_Internal(false);
         if (this.instance instanceof ReusableLifeCycle) {
+
+            // Cross-parent reuse: koalaui memo-cache may have skipped _instantiateReusable's body,
+            // leaving _initializers pointing at the previous parent's closure. Consume the stash
+            // so resetStateVarsOnReuse sees the new parent's values.
+            const stashedInitObj = GlobalReusePool.pendingInitializersForReuse;
+            if (stashedInitObj !== undefined) {
+                this._initializers = stashedInitObj as (() => T_Options);
+                GlobalReusePool.pendingInitializersForReuse = undefined;
+            }
+
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
+            const _userAboutToReuse = Class.of(this.instance as Object).getInstanceMethod('aboutToReuse');
+            const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
+            // Restore parent_ from the stash captured at POP time
+            let pendingParent: ExtendableComponent | undefined = undefined;
+            if (GlobalReusePool.pendingParentQueue.length > 0) {
+                pendingParent = GlobalReusePool.pendingParentQueue.shift();
+            }
+            if (pendingParent !== undefined) {
+                console.log(`GlobalReuse: CD.aboutToReuse restored parent=${Class.of(pendingParent!).getName()} queueRemaining=${GlobalReusePool.pendingParentQueue.length}`);
+                this.instance.__removeMeFromParent__Internal();
+                this.instance.__setParent__Internal(pendingParent!);
+                this.instance.__addMeToParent__Internal();
+            }
+            console.log(`GlobalReuse: V1 reusable class=${Class.of(this.instance as Object).getName()}`);
+            this.unrecycleChildren(this.instance);
+            if (initializers0 !== undefined) { console.log(`GlobalReuse: V1 PROBE initializers0 class=${Class.of(initializers0 as Object).getName()}`); }
+            const _userMethod = Class.of(this.instance as Object).getInstanceMethod('resetStateVarsOnReuse'); 
+            if (_userMethod !== undefined && initializers0 !== undefined) { 
+                try {
+                    _userMethod!.invoke(this.instance as Object, [initializers0! as Object]);
+                    console.log(`GlobalReuse: V1 resetStateVarsOnReuse INVOKE OK`);
+                } catch (e) {
+                    console.log(`GlobalReuse: V1 resetStateVarsOnReuse THREW: ${e.message}`);
+                }
+            } 
             this.instance.__unfreezeWhenReuse__Internal();
             StateUpdateLoop.clearFreezeTaskWhenReuse(this.getUniqueId());
-            const reusable = this.instance as ReusableLifeCycle;
             if (param) {
                 StateUpdateLoop.execTaskInSyncMode(() => {
                     // update propref and objectlink in sync mode, means no wait next update loop
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
-                reusable.aboutToReuse(new ReuseObject(param))
+                if (_userAboutToReuse !== undefined) {
+                    _userAboutToReuse!.invoke(this.instance as Object, [new ReuseObject(param) as Object]);
+                }
                 this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(param));
                 this.switchNodeFreeze();
                 this.updateUISync();
@@ -435,7 +531,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 StateUpdateLoop.execTaskInSyncMode(() => {
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
-                reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
+                if (_userAboutToReuse !== undefined) {
+                    console.log(`GlobalReuse: V1 invoking user aboutToReuse ownerClass=${_userAboutToReuse!.getOwner().getName()}`);
+                    _userAboutToReuse!.invoke(this.instance as Object, [new ReuseObject({} as Record<string, RecordData> as RecordData) as Object]);
+                }
                 this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
@@ -444,15 +543,33 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 StateUpdateLoop.execTaskInSyncMode(() => {
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
-                reusable.aboutToReuse(new ReuseObject(params));
+                if (_userAboutToReuse !== undefined) {
+                    _userAboutToReuse!.invoke(this.instance as Object, [new ReuseObject(params) as Object]);
+                }
                 this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(params));
             }
             this.switchNodeFreeze();
-            this.updateUISync();
+            this.updateUISync(); 
         } else if (this.instance instanceof ReusableV2LifeCycle) {
+            console.log(`GlobalReuse: CD.aboutToReuse for ${Class.of(this.instance as Object).getName()}`);
+            // Clear stale global stash - _initializers already set correctly by setInitializers()
+            GlobalReusePool.pendingInitializersForReuse = undefined;
+
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableV2LifeCycle<T_Options>;
+              // Restore parent_ so @Consumer rebinds to the new @Provider chain
+            let pendingParent: ExtendableComponent | undefined = undefined;
+            if (GlobalReusePool.pendingParentQueue.length > 0) {
+                pendingParent = GlobalReusePool.pendingParentQueue.shift();
+            }
+            if (pendingParent !== undefined) {
+                this.instance.__removeMeFromParent__Internal();
+                this.instance.__setParent__Internal(pendingParent!);
+                this.instance.__addMeToParent__Internal();
+            }
             const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
+            // Un-recycle and unfreeze all nested children so @Param updates propagate after reuse
+            this.unrecycleChildren(this.instance);
             reusable.resetStateVarsOnReuse(initializers0);
             this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
@@ -463,7 +580,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             throw new Error('not an custom component');
         }
     }
+
     aboutToRecycle(): void {
+        console.log(`GlobalReuse: aboutToRecycle hit instance=${Class.of(this.instance as Object).getName()}`);
+        this.instance.__switchHasBeenRecycle_Internal(true);
         if (this.instance instanceof ReusableLifeCycle || this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnRecycle(this.getPeer()!.peer.ptr);
             const component = this.instance as BaseCustomComponent<T_Options>;
@@ -563,6 +683,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.uiContext!;
     }
 
+    __updateUIContext__Internal(newContext: UIContext): void {
+        this.uiContext = newContext;
+    }
+
     getPeerNode(): PeerNode | undefined {
         return this.getPeer();
     }
@@ -609,7 +733,7 @@ function createInstance<T extends ExtendableComponent, T_Options>(
     return new CustomDelegate<T, T_Options>(uiContext, factory(), style);
 }
 
-interface OptionsCallback<T_Options> {
+export interface OptionsCallback<T_Options> {
     __initializeStruct(
         initializers?: T_Options,
         /** @memo */
@@ -621,7 +745,7 @@ interface OptionsCallback<T_Options> {
     ): void {}
 }
 
-interface HasCommonMethod {
+export interface HasCommonMethod {
     __applyStyles(instance: CommonMethod): void;
     readonly __hasCommonMethod: boolean;
 }
@@ -692,6 +816,10 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
 
     aboutToRecycle(): void {}
 
+    clearReusePool(): void {
+        this.__clearReusePool__Internal();
+    }
+
     __toRecord(param: object): Record<string, object> { return {} }
  
     __applyStyles(instance: CommonMethod): void {
@@ -715,11 +843,18 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
 
 }
 
-interface ReusableLifeCycle {
+export interface ReusableLifeCycle<T_Options> {
+    resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(params: ReuseObject): void;
 }
 
-export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle {
+export interface CustomComponentBaseOptions {
+    memoryOptimizationStrategy? : ReusableMemOptStrategy,
+}
+
+export interface CustomComponentV1InvokeOptions extends CustomComponentBaseOptions {}
+
+export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle<T_Options> {
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
@@ -733,6 +868,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         /** @memo */
         content?: () => void
     ): void {
+        console.log(`GlobalReuse: V1 _invokeImpl PRE-CONTEXT reuseKey=${reuseKey ?? 'NONE'}`);
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
@@ -740,15 +876,41 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
-     aboutToReuse(params: ReuseObject): void {}
+    aboutToReuse(params: ReuseObject): void {}
+    resetStateVarsOnReuse(params?: T_Options): void {}
+
+    /** @memo */
+    static _invokeImpl<S extends CustomComponent<S, S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: string,
+        /** @memo */
+        content?: () => void,
+        options?: CustomComponentV1InvokeOptions
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => {
+                const instance = factory();
+                instance.memopt_ = (options?.memoryOptimizationStrategy == ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION? 1: 0) as int32;
+                return new CustomDelegate<S, S_Options>(uiContext, instance, style);
+            },
+            content,
+            initializers,
+            reuseKey);
+    }
 }
 
-interface ReusableV2LifeCycle<T_Options> {
+export interface ReusableV2LifeCycle<T_Options> {
     resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(): void;
 }
 
-export interface CustomComponentInvokeOptions {
+export interface CustomComponentInvokeOptions extends CustomComponentBaseOptions {
     sClass?: Class
 }
 
@@ -777,21 +939,36 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         content?: () => void,
         options?: CustomComponentInvokeOptions
     ): void {
+        console.log(`GlobalReuse: V2 _invokeImpl ENTRY hasReuseKeyLambda=${reuseKey !== undefined} hasStyle=${style !== undefined} hasOptions=${options !== undefined} hasSClass=${options?.sClass !== undefined}`);
         const context: StateManager = __context() as StateManager;
-        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined;
         const uiContext = data?.uiContext;
+
         const reuseKeyValue = remember(() => {
-            if (reuseKey) {
-                let key: string = reuseKey(); // this means reusekey should be only calculated once
-                if (!key && options?.sClass) { // include '' empty string
-                    key = transferTypeName(options!.sClass!.getName());
-                }
-                return key;
+            // No reuseKey lambda from transpiler → this isn't a reusable component.
+            if (!reuseKey) {
+                return undefined;
             }
-            return undefined;
+            const incoming = reuseKey();
+            if (!options?.sClass) {
+                return incoming || undefined;
+            }
+            const className = transferTypeName(options!.sClass!.getName());
+            if (!incoming || incoming === className) {
+                return className;
+            }
+            return `${className}#${incoming}`;
         });
+
         ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
-            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
+            () => {
+                const instance = factory();
+                instance.memopt_ = (options?.memoryOptimizationStrategy == ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION? 1: 0) as int32;
+                return new CustomDelegate<S, S_Options>(uiContext, instance, style);
+            },
+            content,
+            initializers,
+            reuseKeyValue);
     }
 
     aboutToReuse(): void {}
@@ -835,6 +1012,11 @@ export enum CustomComponentLifecycleState {
     DISAPPEARED = 4      // Component has disappeared
 }
 
+export enum ReusableMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1,
+}
+
 /**
  * Lifecycle observer interface
  */
@@ -871,7 +1053,39 @@ export class CustomComponentContextImpl implements CustomComponentContext {
         this.customComponent = customComponent;
     }
 
+    /**
+     * Returns the reuse pool only if this component directly owns one.
+     * Does NOT walk the parent chain — ancestor pools belong to ancestors,
+     * not to this component. Child components and their descendants should
+     * not claim ownership of a parent's pool.
+    */
+    getReusePool(): IReusePool | undefined {
+        const comp = this.customComponent as Object as ExtendableComponent;
+
+        // If this component owns a pool, return it directly.
+        if (comp.___reusePool !== undefined) {
+            return comp.___reusePool as Object as IReusePool;
+        }
+
+        // Otherwise walk the parent chain for the nearest ancestor pool
+        // that accepts this component's class and is still active.
+        const classKey = CustomComponentContextImpl.shortClassName_(comp);
+        const pool = comp.__getReusePoolForClass__Internal(classKey);
+        return pool as IReusePool | undefined;
+    }
+
     registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {
         this.customComponent.__registerActiveAndInactiveCallback__Internal(active, inactive);
+    }
+
+    /**
+     * Strips any module/path prefix from the runtime class name, so
+     * "entry.src.main.ets.pages.Index.ReusableChild" becomes "ReusableChild" —
+     * matching the short names declared in the user's `poolAccepts` array.
+     */
+    private static shortClassName_(comp: ExtendableComponent): string {
+        const full = Class.of(comp).getName();
+        const lastDot = full.lastIndexOf('.');
+        return lastDot >= 0 ? full.substring(lastDot + 1) : full;
     }
 }

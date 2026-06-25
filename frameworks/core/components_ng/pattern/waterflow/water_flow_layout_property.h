@@ -43,6 +43,7 @@ public:
         ResetScrollEnabled();
         ResetSyncLoad();
         itemLayoutConstraint_.reset();
+        contentClip_.reset();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -151,6 +152,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
     std::optional<std::string> GetFinalColumnsTemplate(double width);
 
+    void UpdateContentClip(std::optional<ContentClip> contentClip) override
+    {
+        if (contentClip_ != contentClip) {
+            contentClip_ = contentClip;
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -168,6 +177,7 @@ protected:
             value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
         }
         value->propItemFillPolicy_ = CloneItemFillPolicy();
+        value->contentClip_ = contentClip_;
     }
 
 private:
@@ -176,6 +186,7 @@ private:
     void ResetWaterflowLayoutInfoAndMeasure() const;
     std::string GetWaterflowDirectionStr() const;
     std::unique_ptr<MeasureProperty> itemLayoutConstraint_;
+    std::optional<ContentClip> contentClip_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_PROPERTY_H

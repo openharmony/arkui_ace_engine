@@ -157,6 +157,9 @@ export class ArkColorsImpl implements Colors {
         if (src.warning !== undefined) dst.warning = src.warning!;
         if (src.alert !== undefined) dst.alert = src.alert!;
         if (src.confirm !== undefined) dst.confirm = src.confirm!;
+        if (src.primary !== undefined) dst.primary = src.primary!;
+        if (src.onPrimary !== undefined) dst.onPrimary = src.onPrimary!;
+        if (src.container !== undefined) dst.container = src.container!;
 
         if (src.fontPrimary !== undefined) dst.fontPrimary = src.fontPrimary!;
         if (src.fontSecondary !== undefined) dst.fontSecondary = src.fontSecondary!;
@@ -227,6 +230,15 @@ export class ArkColorsImpl implements Colors {
         }
         if (src.confirm !== undefined) {
             dst.confirm = src.confirm!;
+        }
+        if (src.primary !== undefined) {
+            dst.primary = src.primary!;
+        }
+        if (src.onPrimary !== undefined) {
+            dst.onPrimary = src.onPrimary!;
+        }
+        if (src.container !== undefined) {
+            dst.container = src.container!;
         }
 
         if (src.fontPrimary !== undefined) {
@@ -378,7 +390,7 @@ export class ArkColorsImpl implements Colors {
         }
     }
 
-    static expandByBrandColor(colors: CustomColors) {
+    static expandByBrandColor(colors: CustomColors, isDark: boolean = false) {
         if (colors!.brand) {
             const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors.brand);
             colors.fontEmphasize = colors.fontEmphasize ?? brandColors.primary!;
@@ -395,6 +407,44 @@ export class ArkColorsImpl implements Colors {
 
             colors.interactiveFocus = colors.interactiveFocus ?? brandColors.primary!;
             colors.interactiveActive = colors.interactiveActive ?? brandColors.primary!;
+        }
+
+        if (colors.primary) {
+            colors.fontPrimary = colors.fontPrimary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.9);
+            colors.fontSecondary = colors.fontSecondary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.6);
+            colors.fontTertiary = colors.fontTertiary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.4);
+            colors.fontFourth = colors.fontFourth ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.2);
+
+            colors.iconPrimary = colors.iconPrimary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.9);
+            colors.iconSecondary = colors.iconSecondary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.6);
+            colors.iconTertiary = colors.iconTertiary ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.4);
+            colors.iconFourth = colors.iconFourth ?? ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.2);
+        }
+
+        if (colors.onPrimary) {
+            colors.fontOnPrimary = colors.fontOnPrimary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 1.0);
+            colors.fontOnSecondary = colors.fontOnSecondary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.6);
+            colors.fontOnTertiary = colors.fontOnTertiary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.4);
+            colors.fontOnFourth = colors.fontOnFourth ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.2);
+
+            colors.iconOnPrimary = colors.iconOnPrimary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 1.0);
+            colors.iconOnSecondary = colors.iconOnSecondary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.6);
+            colors.iconOnTertiary = colors.iconOnTertiary ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.4);
+            colors.iconOnFourth = colors.iconOnFourth ?? ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.2);
+        }
+
+        if (colors.container) {
+            colors.compBackgroundSecondary = colors.compBackgroundSecondary ??
+                ArkColorsImpl.makeColorWithOpacity(colors.container, 0.1);
+            colors.compBackgroundTertiary = colors.compBackgroundTertiary ??
+                ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.1 : 0.05);
+            colors.compDivider = colors.compDivider ?? ArkColorsImpl.makeColorWithOpacity(colors.container, 0.2);
+            colors.interactiveHover = colors.interactiveHover ??
+                ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.1 : 0.05);
+            colors.interactivePressed = colors.interactivePressed ??
+                ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.15 : 0.1);
+            colors.interactiveClick = colors.interactiveClick ??
+                ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.15 : 0.1);
         }
     }
 
@@ -450,6 +500,30 @@ export class ArkColorsImpl implements Colors {
             moduleName: resourceColor.moduleName,
             opacityRatio: opacityRatio,
         } as ArkThemeResource;
+    }
+
+    static makeColorWithOpacity(color: ResourceColor | undefined, opacityRatio: number): ResourceColor | undefined {
+        if (!color) {
+            return undefined;
+        }
+        if (opacityRatio >= 1.0) {
+            return color;
+        }
+        if (color instanceof Color) {
+            const colorValue = ArkColorsImpl.convertColorEnumToValue(color);
+            const argbColor = ArkUIAniModule._GetStringColorValue(colorValue).toInt();
+            return ArkColorsImpl.blendOpacity(argbColor, opacityRatio).toInt();
+        }
+        if (color instanceof Resource) {
+            return ArkColorsImpl.makeResourceWithOpacity(color, opacityRatio) as ArkThemeResource;
+        }
+        let argbColor = (0xff000000).toInt();
+        if (color instanceof int32) {
+            argbColor = color.toInt();
+        } else if (color instanceof string) {
+            argbColor = ArkUIAniModule._GetStringColorValue(color).toInt();
+        }
+        return ArkColorsImpl.blendOpacity(argbColor, opacityRatio).toInt();
     }
 
     static blendOpacity(argbColor: number, opacityRatio: number): number {

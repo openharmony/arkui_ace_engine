@@ -15,9 +15,14 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 
 #include "base/utils/utils.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -25,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 

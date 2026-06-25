@@ -25,7 +25,8 @@ import {
     IVariableOwner,
     ConsumeOptions,
     IObservedObject,
-    MakeMonitorOptions
+    MakeMonitorOptions,
+    CustomEnvKey
 } from '../decorator';
 import {
     IStateDecoratedVariable,
@@ -43,7 +44,11 @@ import {
     IMonitorDecoratedVariable,
     IComputedDecoratedVariable,
     IEnvDecoratedVariable,
-    EnvOptions
+    IGlobalReusePoolVariable,
+    ReusePoolOwnership,
+    EnvOptions,
+    ICustomEnvDecoratedVariable,
+    SystemEnvKey
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -70,8 +75,9 @@ import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
 import { EnvDecoratedVariable } from '@decoratorEnv';
+import { CustomEnvDecoratedVariable } from '../decoratorImpl/decoratorCustomEnv';
 import { ObservedObjectRegistry } from '../tools/stateMgmtDFX';
-
+import { GlobalReusePoolDecoratedVariable } from '../decoratorImpl/decoratorGlobalReusePool';
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
         return FactoryInternal.mkMutableStateMeta('');
@@ -91,6 +97,10 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();
     }
+    makeGlobalReusePool(ownership: ReusePoolOwnership, acceptedClasses: Class[], owner: IVariableOwner): IGlobalReusePoolVariable {
+        return new GlobalReusePoolDecoratedVariable(ownership, acceptedClasses.map((c: Class): string => c.getName()), owner);
+    }
+
     makeLocal<T>(owningView: IVariableOwner, varName: string, initValue: T): ILocalDecoratedVariable<T> {
         return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue) as T);
     }
@@ -271,7 +281,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -289,7 +300,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -307,7 +319,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -325,7 +338,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -343,7 +357,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -361,7 +376,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -379,7 +395,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -397,7 +414,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -415,7 +433,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -433,7 +452,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             (newValue: T) => source.set(newValue),
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -453,7 +473,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             },
             watchFunc
         );
-        source.registerWatchToSource(link);
+        const __wid = source.registerWatchToSource(link);
+        link.setMyTriggerFromSourceWatchId(__wid);
         return link;
     }
 
@@ -620,7 +641,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeEnv<T>(
         owningView: IVariableOwner,
-        envValue: string,
+        envValue: string | SystemEnvKey<T>,
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T> {
@@ -644,5 +665,19 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             true,
             options?.functionName
         );
+    }
+
+    makeCustomEnv<T>(
+        owningView: IVariableOwner,
+        envKey: CustomEnvKey<T>,
+        varName: string,
+        defaultValue: T
+    ): ICustomEnvDecoratedVariable<T> {
+        return new CustomEnvDecoratedVariable<T>(
+            owningView,
+            envKey,
+            varName,
+            uiUtils.autoProxyObject(defaultValue) as T
+        ) as ICustomEnvDecoratedVariable<T>;
     }
 }

@@ -1286,7 +1286,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertPriorityText, TestSize.Level1)
     HtmlToSpan toSpan;
     auto dstSpan = toSpan.ToSpanString(html);
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
-    EXPECT_EQ(spans.size(), 9);
+    EXPECT_EQ(spans.size(), 8);
     auto it = spans.begin();
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(20, DimensionUnit::VP));
     ++it;
@@ -2541,4 +2541,205 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithInlineFontSizeRoundTrip, Test
     EXPECT_NE(out.find("font-size: 20.00px;"), std::string::npos);
 }
 
+namespace {
+const Dimension LIST_INDENT_PER_LEVEL_VP = Dimension(32.0, DimensionUnit::VP);
+}
+
+bool VerifyDrawableLeadingMargin(const RefPtr<SpanString>& spanString, int32_t start, int32_t length,
+    int32_t indentLevel)
+{
+    auto spans = spanString->GetSpans(start, length, SpanType::ParagraphStyle);
+    if (spans.empty()) {
+        ADD_FAILURE() << "No ParagraphStyle spans found";
+        return false;
+    }
+    auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans.front());
+    if (!paraSpan) {
+        ADD_FAILURE() << "Span is not ParagraphStyleSpan";
+        return false;
+    }
+    auto paraStyle = paraSpan->GetParagraphStyle();
+    if (!paraStyle.drawableLeadingMargin.has_value()) {
+        ADD_FAILURE() << "drawableLeadingMargin is not set";
+        return false;
+    }
+    auto drawable = paraStyle.drawableLeadingMargin.value();
+    Dimension expectedIndentWidth = LIST_INDENT_PER_LEVEL_VP * indentLevel;
+    EXPECT_EQ(drawable.size.Width(), expectedIndentWidth);
+    EXPECT_EQ(drawable.size.Height(), Dimension(0.0));
+    auto leadingMarginResult = drawable.getLeadingMarginFunc_();
+    EXPECT_EQ(leadingMarginResult, CalcDimension(expectedIndentWidth));
+    EXPECT_NE(drawable.onDraw_, nullptr);
+    return true;
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvertUnorderedList001, TestSize.Level1)
+{
+    auto html = "<html><body><ul><li>item</li></ul></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 1);
+    ASSERT_TRUE(VerifyDrawableLeadingMargin(dstSpan, 0, dstSpan->GetLength(), 1));
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvertUnorderedList002, TestSize.Level1)
+{
+    auto html = "<html><body><ul><li>first</li><li>second</li><li>third</li></ul></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 3);
+    auto text = dstSpan->GetU16string();
+    EXPECT_NE(text.find(u"first"), std::u16string::npos);
+    EXPECT_NE(text.find(u"second"), std::u16string::npos);
+    EXPECT_NE(text.find(u"third"), std::u16string::npos);
+    auto spans = dstSpan->GetSpans(0, dstSpan->GetLength(), SpanType::ParagraphStyle);
+    EXPECT_EQ(spans.size(), 3);
+    for (auto& span : spans) {
+        auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(span);
+        ASSERT_NE(paraSpan, nullptr);
+        auto style = paraSpan->GetParagraphStyle();
+        ASSERT_TRUE(style.drawableLeadingMargin.has_value());
+        EXPECT_EQ(style.drawableLeadingMargin.value().size.Width(), LIST_INDENT_PER_LEVEL_VP);
+        EXPECT_EQ(style.drawableLeadingMargin.value().size.Height(), Dimension(0.0));
+    }
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvertOrderedList001, TestSize.Level1)
+{
+    auto html = "<html><body><ol><li>item</li></ol></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 1);
+    ASSERT_TRUE(VerifyDrawableLeadingMargin(dstSpan, 0, dstSpan->GetLength(), 1));
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvertOrderedList002, TestSize.Level1)
+{
+    auto html = "<html><body><ol><li>alpha</li><li>beta</li><li>gamma</li></ol></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_GE(items.size(), 3);
+    auto text = dstSpan->GetU16string();
+    EXPECT_NE(text.find(u"alpha"), std::u16string::npos);
+    EXPECT_NE(text.find(u"beta"), std::u16string::npos);
+    EXPECT_NE(text.find(u"gamma"), std::u16string::npos);
+    auto spans = dstSpan->GetSpans(0, dstSpan->GetLength(), SpanType::ParagraphStyle);
+    EXPECT_EQ(spans.size(), 3);
+    for (auto& span : spans) {
+        auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(span);
+        ASSERT_NE(paraSpan, nullptr);
+        auto style = paraSpan->GetParagraphStyle();
+        ASSERT_TRUE(style.drawableLeadingMargin.has_value());
+        auto drawable = style.drawableLeadingMargin.value();
+        EXPECT_EQ(drawable.size.Width(), LIST_INDENT_PER_LEVEL_VP);
+        EXPECT_EQ(drawable.size.Height(), Dimension(0.0));
+        EXPECT_EQ(drawable.getLeadingMarginFunc_(), CalcDimension(LIST_INDENT_PER_LEVEL_VP));
+    }
+}
+
+/**
+ * @tc.name: HtmlParagraphNestedHeadingNoExtraNewline
+ * @tc.desc: Verify <p> containing <h1> produces only one trailing \n.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlParagraphNestedHeadingNoExtraNewline, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>text<h1>Title</h1></p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "text\nTitle\n");
+}
+
+/**
+ * @tc.name: HtmlParagraphAfterBrNoExtraNewline
+ * @tc.desc: Verify <p> ending with <br> does not add extra \n.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlParagraphAfterBrNoExtraNewline, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>a<br></p>b</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "a\nb");
+}
+
+/**
+ * @tc.name: HtmlEmptyParagraphNoNewline
+ * @tc.desc: Verify empty <p></p> add \n to content.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlEmptyParagraphNoNewline, TestSize.Level1)
+{
+    const std::string html = "<html><body><p></p>b</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "\nb");
+}
+
+/**
+ * @tc.name: HtmlParagraphMultipleHeadings
+ * @tc.desc: Verify <p> with multiple heading children produces only one trailing \n.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlParagraphMultipleHeadings, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>a<h1>b</h1><h2>c</h2></p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "a\nb\nc\n");
+}
+
+/**
+ * @tc.name: HtmlParagraphNestedParagraph
+ * @tc.desc: Verify nested <p> inside <p> does not produce double \n.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlParagraphNestedParagraph, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>a<p>b</p></p>c</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "a\nb\nc");
+}
+
+/**
+ * @tc.name: HtmlHeadingAddsBlockLineBreaksInsideDiv
+ * @tc.desc: Verify <p> following block element inside <div> does not produce double \n.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlHeadingAddsBlockLineBreaksInsideDiv, TestSize.Level1)
+{
+    const std::string html = "<html><body><div><h1>A</h1><p>B</p></div></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "A\nB\n");
+}
+
+/**
+ * @tc.name: HtmlParagraphInlineBeforeHeading
+ * @tc.desc: Verify inline element between text and heading does not interfere with EndsWithLineBreak.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlParagraphInlineBeforeHeading, TestSize.Level1)
+{
+    const std::string html = "<html><body><p>a<b>b</b><h1>c</h1></p></body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+    EXPECT_EQ(dstSpan->GetString(), "ab\nc\n");
+}
 } // namespace OHOS::Ace::NG

@@ -70,6 +70,7 @@ import { EnvironmentCallback } from '@kit.AbilityKit';
 import deviceInfo from '@ohos.deviceInfo';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -211,6 +212,8 @@ export interface ChipNodeTheme {
   activated: boolean;
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
+  backgroundSystemMaterial: uiMaterial.Material;
+  activatedBackgroundSystemMaterial: uiMaterial.Material;
   focusOutlineColor: ResourceColor;
   borderColor: ResourceColor,
   defaultBorderWidth: Dimension;
@@ -281,6 +284,8 @@ export interface ChipOptions {
   activated?: boolean;
   backgroundColor?: ResourceColor;
   activatedBackgroundColor?: ResourceColor;
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
@@ -314,7 +319,7 @@ class LengthMetricsUtils {
 }
 
 @Builder
-export function Chip(options: ChipOptions) {
+export function Chip(options: ChipOptions): void {
   ChipComponent({
     chipSize: (options.size ?? ChipSize.NORMAL),
     prefixIcon: options.prefixIcon,
@@ -329,6 +334,8 @@ export function Chip(options: ChipOptions) {
     chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
     chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+    backgroundSystemMaterial: options.backgroundSystemMaterial,
+    activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
     chipNodeRadius: options.borderRadius,
     chipDirection: (options.direction ?? Direction.Auto),
     chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -350,11 +357,11 @@ export class EnvironmentCallbackEntry implements EnvironmentCallback {
     this.chipComponent = chipComponent; 
   }
 
-  onConfigurationUpdated(config: Configuration) { 
+  onConfigurationUpdated(config: Configuration): void { 
     this.chipComponent.updateLanguageLineHeight(); 
   }
 
-  onMemoryLevel(level: AbilityConstant.MemoryLevel) {} 
+  onMemoryLevel(level: AbilityConstant.MemoryLevel): void {} 
 }
 
 @Component
@@ -443,6 +450,13 @@ export struct ChipComponent {
       activated: false,
       backgroundColor: $r('sys.color.chip_background_color'),
       activatedBackgroundColor: $r('sys.color.chip_container_activated_color'),
+      backgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+      }),
+      activatedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        materialColor: $r('sys.color.comp_background_emphasize')
+      }),
       focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
       focusOutlineMargin: 2,
       borderColor: $r('sys.color.chip_border_color'),
@@ -492,6 +506,8 @@ export struct ChipComponent {
   @PropRef suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
   @PropRef chipNodeBackgroundColor?: ResourceColor;
   @PropRef chipNodeActivatedBackgroundColor?: ResourceColor;
+  @PropRef backgroundSystemMaterial?: uiMaterial.Material;
+  @PropRef activatedBackgroundSystemMaterial?: uiMaterial.Material;
   @PropRef chipNodeRadius?: Dimension;
   @PropRef chipEnabled?: boolean;
   @PropRef chipActivated?: boolean;
@@ -579,6 +595,16 @@ export struct ChipComponent {
     }
   }
 
+  private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return undefined;
+    }
+    if (this.isChipActivated()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
+  }
+
   private getShadowStyles(): ShadowStyle | undefined {
     if (!this.chipNodeInFocus) {
       return undefined;
@@ -605,7 +631,7 @@ export struct ChipComponent {
   }
 
   @Builder
-  ChipBuilder() {
+  ChipBuilder(): void {
     Button({ type: ButtonType.Normal } as ButtonOptions) {
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
         if (this.hasPrefixSymbol()) {
@@ -736,8 +762,9 @@ export struct ChipComponent {
     .size(this.getChipSize())
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
+    .systemMaterial(this.getBackgroundSystemMaterial())
     .backgroundColor(this.getChipBackgroundColor())
-    .borderWidth(this.theme.chipNode.defaultBorderWidth)
+    .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
     .responseRegion(this.getChipResponseRegion())
@@ -759,6 +786,7 @@ export struct ChipComponent {
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChip();
       }
+      return true;
     })
     .onFocus(() => {
       if (this.isSuffixIconFocusStyleCustomized) {
@@ -1128,9 +1156,19 @@ export struct ChipComponent {
     return this.chipNodeInFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
 
-  private getChipNodeBorderColor(): ResourceColor {
+  private getChipNodeBorderColor(): ResourceColor | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
+  }
+
+  private getChipNodeBorderWidth(): Dimension | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
+    return this.theme.chipNode.defaultBorderWidth;
   }
 
   private getLabelFontColor(): ResourceColor {
@@ -1466,7 +1504,7 @@ export struct ChipComponent {
     return undefined;
   }
 
-  build() {
+  build(): void {
     if (this.isChipExist) {
       this.ChipBuilder()
     } else {

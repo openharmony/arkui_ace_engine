@@ -153,6 +153,16 @@ public:
         return nullptr;
     }
 };
+
+class Picture {};
+
+class PictureNapi {
+public:
+    static std::shared_ptr<Picture> GetPicture(napi_env env, napi_value picture)
+    {
+        return nullptr;
+    }
+};
 } // namespace Media
 } // namespace OHOS
 

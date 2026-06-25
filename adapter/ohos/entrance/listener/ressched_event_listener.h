@@ -33,7 +33,7 @@ public:
     static sptr<ResschedEventListener> GetInstance();
 
 private:
-    void OnComponentPreMake(std::unordered_map<std::string, std::string> extInfo);
+    void OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo);
 
     int32_t GetContainerId(int32_t windowId);
 

@@ -18,7 +18,7 @@
 
 #include "ffi_remote_data.h"
 
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
 
 namespace OHOS::Ace::Framework {
 

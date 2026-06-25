@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,14 +70,14 @@ const RESOURCE_TYPE_MEDIA = 20000;
 const RESOURCE_TYPE_RAWFILE = 30000;
 const RESOURCE_TYPE_SYMBOL = 40000;
 
-interface IconTheme {
+export interface IconTheme {
   size: SizeOptions;
   margin: LocalizedMargin;
   fillColor: ResourceColor;
   borderRadius: Length;
 }
 
-interface TitleTheme {
+export interface TitleTheme {
   margin: LocalizedMargin;
   minFontSize: number;
   fontWeight: FontWeight;
@@ -85,7 +85,7 @@ interface TitleTheme {
   fontColor: ResourceColor;
 }
 
-interface ButtonTheme {
+export interface ButtonTheme {
   margin: LocalizedMargin;
   padding: LocalizedPadding;
   fontSize: Resource;
@@ -97,14 +97,14 @@ interface ButtonTheme {
   backgroundColor: ResourceColor;
 }
 
-interface MessageTheme {
+export interface MessageTheme {
   fontSize: Resource;
   fontColor: ResourceColor;
   fontWeight: FontWeight;
   plainFontColor: ResourceColor;
 }
 
-interface CloseButtonTheme {
+export interface CloseButtonTheme {
   size: SizeOptions;
   margin: LocalizedMargin;
   padding: LocalizedPadding;
@@ -116,11 +116,11 @@ interface CloseButtonTheme {
   accessibilityMessage: Resource;
 }
 
-interface WindowsTheme {
+export interface WindowsTheme {
   padding: LocalizedPadding;
 }
 
-interface PopupTheme {
+export interface PopupTheme {
   icon: IconTheme;
   title: TitleTheme;
   button: ButtonTheme;

@@ -293,7 +293,12 @@ void SetFillColorImpl(Ark_NativePointer node,
         ImageModelNG::ResetImageFill(frameNode);
         return;
     }
-    auto color = Converter::OptConvertPtr<Color>(value);
+    std::optional<Color> color;
+    if (value->value.selector == SELECTOR_ID_0) {
+        color = Converter::OptConvertColorForMaterial(value->value.value0);
+    } else {
+        color = Converter::OptConvertPtr<Color>(value);
+    }
     if (!color) {
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -511,9 +516,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
         ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
         return;
     }
-    auto onFinish = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onFinish = GetAsyncInvoker(*optValue);
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onFinish));
 }
 void SetEnableAnalyzerImpl(Ark_NativePointer node,

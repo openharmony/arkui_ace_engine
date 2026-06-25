@@ -31,7 +31,14 @@ constexpr int32_t POPUP_NODE_2 = 2;
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
+
+// Constants for MountPopup duplicate prevention tests
+constexpr int32_t EXPECTED_POPUP_COUNT_ONE = 1;
+constexpr int32_t EXPECTED_POPUP_COUNT_TWO = 2;
+constexpr int32_t POPUP_NODE_ID_1 = 1;
+constexpr int32_t POPUP_NODE_ID_ZERO = 0;
 } // namespace
+
 class OverlayManagerPopupTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2202,5 +2209,409 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest004, TestSize.Leve
     popupParam->FireOnDidDisappear();
     // If we reach here, the test passes (no crash)
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetEmbeddedNodeTest001
+ * @tc.desc: Test OverlayManager::GetEmbeddedNode when embeddedOverlay is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, GetEmbeddedNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create root node and embedded overlay.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto embeddedRootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 2, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(embeddedRootNode, nullptr);
+    auto embeddedOverlayManager = AceType::MakeRefPtr<OverlayManager>(embeddedRootNode);
+    ASSERT_NE(embeddedOverlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create popupInfo with embeddedOverlay set.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.embeddedOveraly = embeddedOverlayManager;
+
+    /**
+     * @tc.steps: step3. Call GetEmbeddedNode and verify it returns embedded root node.
+     * @tc.expected: GetEmbeddedNode returns the embedded root node when embeddedOverlay is set.
+     */
+    auto embeddedNode = overlayManager->GetEmbeddedNode(popupInfo);
+    EXPECT_EQ(embeddedNode.Upgrade(), embeddedRootNode);
+}
+
+/**
+ * @tc.name: GetEmbeddedNodeTest002
+ * @tc.desc: Test OverlayManager::GetEmbeddedNode when embeddedOverlay is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, GetEmbeddedNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create popupInfo without embeddedOverlay set.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+
+    /**
+     * @tc.steps: step3. Call GetEmbeddedNode and verify it returns root node.
+     * @tc.expected: GetEmbeddedNode returns the default root node when embeddedOverlay is not set.
+     */
+    auto embeddedNode = overlayManager->GetEmbeddedNode(popupInfo);
+    EXPECT_EQ(embeddedNode.Upgrade(), rootNode);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate001
+ * @tc.desc: Test MountPopup prevents duplicate popup mounting for same targetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create target node and popup nodes.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_ID_1);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId = targetNodes[0]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    /**
+     * @tc.steps: step2. Mount first popup successfully.
+     * @tc.expected: First popup is mounted and isCurrentOnShow is true.
+     */
+    overlayManager->ShowPopup(targetId, popups[0], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId].isCurrentOnShow);
+
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+
+    const auto& rootChildren = rootUINode->GetChildren();
+    int32_t popupCountBefore = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCountBefore++;
+        }
+    }
+    EXPECT_EQ(popupCountBefore, EXPECTED_POPUP_COUNT_ONE);
+
+    /**
+     * @tc.steps: step3. Create second popup with same targetId and try to mount.
+     * @tc.expected: Second popup mounting should be prevented.
+     */
+    auto popupId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode2 = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId2,
+        AceType::MakeRefPtr<BubblePattern>(targetId, targetNodes[0]->GetTag()));
+
+    PopupInfo popupInfo2;
+    popupInfo2.popupId = popupId2;
+    popupInfo2.popupNode = popupNode2;
+    popupInfo2.target = targetNodes[0];
+    popupInfo2.markNeedUpdate = true;
+    popupInfo2.isBlockEvent = false;
+
+    overlayManager->MountPopup(targetId, popupInfo2, nullptr);
+
+    /**
+     * @tc.steps: step4. Verify only one popup exists on tree.
+     * @tc.expected: No duplicate popup should be mounted.
+     */
+    int32_t popupCountAfter = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCountAfter++;
+        }
+    }
+    EXPECT_EQ(popupCountAfter, popupCountBefore);
+    EXPECT_EQ(popupCountAfter, EXPECTED_POPUP_COUNT_ONE);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate002
+ * @tc.desc: Test MountPopup allows mounting for different targetIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create two different target nodes and popup nodes.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    /**
+     * @tc.steps: step2. Mount first popup for targetId1.
+     * @tc.expected: First popup is mounted successfully.
+     */
+    overlayManager->MountPopup(targetId1, popups[0], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    /**
+     * @tc.steps: step3. Mount second popup for different targetId2.
+     * @tc.expected: Second popup should also be mounted successfully.
+     */
+    overlayManager->MountPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+
+    /**
+     * @tc.steps: step4. Verify both popups exist on tree.
+     * @tc.expected: Two popups should be mounted for different targetIds.
+     */
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+
+    const auto& rootChildren = rootUINode->GetChildren();
+    int32_t popupCount = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCount++;
+        }
+    }
+    EXPECT_EQ(popupCount, EXPECTED_POPUP_COUNT_TWO);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate003
+ * @tc.desc: Test MountPopup prevents duplicate when ShowPopup called twice quickly
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create target node and two popup nodes with same targetId.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_ID_1);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId = targetNodes[0]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    /**
+     * @tc.steps: step2. Create second popup info with same targetId.
+     */
+    auto popupId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode2 = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId2,
+        AceType::MakeRefPtr<BubblePattern>(targetId, targetNodes[0]->GetTag()));
+
+    PopupInfo popupInfo2;
+    popupInfo2.popupId = popupId2;
+    popupInfo2.popupNode = popupNode2;
+    popupInfo2.target = targetNodes[0];
+    popupInfo2.markNeedUpdate = true;
+    popupInfo2.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step3. Call ShowPopup twice quickly with same targetId.
+     * @tc.expected: Second popup should be prevented from mounting.
+     */
+    overlayManager->ShowPopup(targetId, popups[0], nullptr);
+    overlayManager->ShowPopup(targetId, popupInfo2, nullptr);
+
+    /**
+     * @tc.steps: step4. Verify only one popup exists on tree after both calls.
+     * @tc.expected: Duplicate mounting prevented, only one popup on tree.
+     */
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+
+    const auto& rootChildren = rootUINode->GetChildren();
+    int32_t popupCount = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCount++;
+        }
+    }
+    EXPECT_LE(popupCount, EXPECTED_POPUP_COUNT_ONE);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate004
+ * @tc.desc: Test MountPopup check logic with null rootNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlayManager with null rootNode scenario.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_ID_1);
+    auto targetId = targetNodes[0]->GetId();
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    /**
+     * @tc.steps: step2. Call MountPopup after rootNode is destroyed.
+     * @tc.expected: MountPopup should handle null rootNode gracefully.
+     */
+    overlayManager->rootNodeWeak_ = WeakPtr<FrameNode>();  // Set to null
+    overlayManager->MountPopup(targetId, popups[0], nullptr);
+
+    // Test passes if no crash occurs
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate005
+ * @tc.desc: Test MountPopup check logic when popupNode is already mounted
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create and mount first popup.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_ID_1);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId = targetNodes[0]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    overlayManager->MountPopup(targetId, popups[0], nullptr);
+
+    /**
+     * @tc.steps: step2. Try to mount the same popupNode again.
+     * @tc.expected: Mounting the same popupNode should not create duplicate.
+     */
+    overlayManager->MountPopup(targetId, popups[0], nullptr);
+
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+
+    const auto& rootChildren = rootUINode->GetChildren();
+    int32_t popupCount = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCount++;
+        }
+    }
+    EXPECT_EQ(popupCount, EXPECTED_POPUP_COUNT_ONE);
+}
+
+/**
+ * @tc.name: MountPopupPreventDuplicate006
+ * @tc.desc: Test MountPopup when popupMap_ has no record for targetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, MountPopupPreventDuplicate006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create targetNode and popupInfo without adding to popupMap_.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_ID_1);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, POPUP_NODE_ID_1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId = targetNodes[0]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(POPUP_NODE_ID_ZERO);
+
+    /**
+     * @tc.steps: step2. Ensure popupMap_ has no record for this targetId.
+     * @tc.expected: popupMap_ should not contain targetId.
+     */
+    EXPECT_FALSE(overlayManager->HasPopupInfo(targetId));
+
+    /**
+     * @tc.steps: step3. Call MountPopup directly without ShowPopup (popupMap_ empty).
+     * @tc.expected: MountPopup should proceed when popupMap_ has no record.
+     */
+    overlayManager->MountPopup(targetId, popups[0], nullptr);
+
+    /**
+     * @tc.steps: step4. Verify popup is mounted successfully.
+     * @tc.expected: Popup should be mounted even though popupMap_ initially had no record.
+     */
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+
+    const auto& rootChildren = rootUINode->GetChildren();
+    int32_t popupCount = 0;
+    for (const auto& child : rootChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetPattern<BubblePattern>()) {
+            popupCount++;
+        }
+    }
+    EXPECT_EQ(popupCount, EXPECTED_POPUP_COUNT_ONE);
 }
 } // namespace OHOS::Ace::NG

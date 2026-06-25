@@ -85,6 +85,10 @@ Media::PixelFormat PixelMapOhos::ConvertToMediaPixelFormat(Ace::PixelFormat pixe
             return Media::PixelFormat::NV12;
         case PixelFormat::CMYK:
             return Media::PixelFormat::CMYK;
+        case PixelFormat::YCBCR_P010:
+            return Media::PixelFormat::YCBCR_P010;
+        case PixelFormat::YCRCB_P010:
+            return Media::PixelFormat::YCRCB_P010;
         default:
             return Media::PixelFormat::UNKNOWN;
     }
@@ -479,7 +483,7 @@ uint32_t PixelMapOhos::GetInnerColorGamut() const
 void PixelMapOhos::SetMemoryName(std::string pixelMapName) const
 {
     CHECK_NULL_VOID(pixmap_);
-    LOGD("PixelMapOhos::SetMemoryName, %{public}s", pixelMapName.c_str());
+    LOGD("PixelMapOhos::SetMemoryName, %{private}s", pixelMapName.c_str());
     pixmap_->SetMemoryName(pixelMapName);
 }
 } // namespace OHOS::Ace

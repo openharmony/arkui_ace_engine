@@ -116,11 +116,7 @@ void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
     themeModifier->createThemeScope(node, theme);
 
     CHECK_NULL_VOID(onThemeScopeDestroy);
-    std::function<void()> func = [callback = CallbackHelper(*onThemeScopeDestroy),
-                                     instanceId = Container::CurrentIdSafely()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    std::function<void()> func = GetContainerScopedSyncInvoker(*onThemeScopeDestroy, Container::CurrentIdSafely());
     themeModifier->setOnThemeScopeDestroy(node, reinterpret_cast<void*>(&func));
 #endif
 }

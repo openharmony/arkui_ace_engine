@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,44 +44,44 @@ public:
     // Set by user define, which will replace old one.
     void SetMouseEvent(OnMouseEventFunc&& onMouseEventFunc)
     {
-        if (!mouseEventActuator_) {
-            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        mouseEventActuator_->ReplaceInputEvent(std::move(onMouseEventFunc));
+        userMouseFunc_ = std::move(onMouseEventFunc);
     }
     void SetFrameNodeCommonOnMouseEvent(OnMouseEventFunc&& onMouseEventFunc)
     {
-        if (!mouseEventActuator_) {
-            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        mouseEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onMouseEventFunc));
+        userJSFrameNodeMouseFunc_ = std::move(onMouseEventFunc);
     }
 
     void AddOnMouseEvent(const RefPtr<InputEvent>& onMouseEvent)
     {
-        if (!mouseEventActuator_) {
-            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (mouseInputEvents_.empty()) {
+            mouseInputEvents_.emplace_back(onMouseEvent);
+            return;
         }
-        mouseEventActuator_->AddInputEvent(onMouseEvent);
+        if (std::find(mouseInputEvents_.begin(), mouseInputEvents_.end(), onMouseEvent) == mouseInputEvents_.end()) {
+            mouseInputEvents_.emplace_back(onMouseEvent);
+        }
     }
 
     void RemoveOnMouseEvent(const RefPtr<InputEvent>& onMouseEvent)
     {
-        if (!mouseEventActuator_) {
-            return;
+        mouseInputEvents_.remove(onMouseEvent);
+        if (mouseEventActuator_) {
+            mouseEventActuator_->RemoveInputEvent(onMouseEvent);
         }
-        mouseEventActuator_->RemoveInputEvent(onMouseEvent);
     }
 
     void RemoveAllTipsMouseEvents()
     {
-        if (!mouseEventActuator_) {
-            return;
+        mouseInputEvents_.remove_if([](const RefPtr<InputEvent>& event) {
+            CHECK_NULL_RETURN(event, false);
+            return event->GetIstips();
+        });
+        if (mouseEventActuator_) {
+            mouseEventActuator_->RemoveAllTipsEvents();
         }
-        mouseEventActuator_->RemoveAllTipsEvents();
     }
 
-    void SetHoverEffect(HoverEffectType type);
+    ACE_FORCE_EXPORT void SetHoverEffect(HoverEffectType type);
 
     HoverEffectType GetHoverEffect()
     {
@@ -102,33 +102,26 @@ public:
         return hoverEffectAuto_;
     }
 
-    // Set by user define, which will replace old one.
     void SetHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
-        if (!hoverEventActuator_) {
-            hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        hoverEventActuator_->ReplaceInputEvent(std::move(onHoverEventFunc));
+        userHoverFunc_ = std::move(onHoverEventFunc);
     }
 
     void SetHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
     {
-        if (!hoverMoveEventActuator_) {
-            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        hoverMoveEventActuator_->ReplaceInputEvent(std::move(onHoverMoveEventFunc));
+        userHoverMoveFunc_ = std::move(onHoverMoveEventFunc);
     }
 
     void SetAccessibilityHoverEvent(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc)
     {
-        if (!accessibilityHoverEventActuator_) {
-            accessibilityHoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        accessibilityHoverEventActuator_->ReplaceInputEvent(std::move(onAccessibilityHoverEventFunc));
+        userAccessibilityHoverFunc_ = std::move(onAccessibilityHoverEventFunc);
     }
 
     bool HasAccessibilityHoverEvent()
     {
+        if (userAccessibilityHoverFunc_) {
+            return true;
+        }
         if (accessibilityHoverEventActuator_) {
             return accessibilityHoverEventActuator_->HasUserCallback();
         }
@@ -137,78 +130,79 @@ public:
 
     void SetFrameNodeCommonOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
-        if (!hoverEventActuator_) {
-            hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        hoverEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverEventFunc));
+        userJSFrameNodeHoverFunc_ = std::move(onHoverEventFunc);
     }
 
     void SetFrameNodeCommonOnHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
     {
-        if (!hoverMoveEventActuator_) {
-            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverMoveEventFunc));
+        userJSFrameNodeHoverMoveFunc_ = std::move(onHoverMoveEventFunc);
     }
 
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
-        if (!hoverEventActuator_) {
-            hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (hoverInputEvents_.empty()) {
+            hoverInputEvents_.emplace_back(onHoverEvent);
+            return;
         }
-        hoverEventActuator_->AddInputEvent(onHoverEvent);
+        if (std::find(hoverInputEvents_.begin(), hoverInputEvents_.end(), onHoverEvent) == hoverInputEvents_.end()) {
+            hoverInputEvents_.emplace_back(onHoverEvent);
+        }
     }
 
     void RemoveOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
-        if (!hoverEventActuator_) {
-            return;
+        hoverInputEvents_.remove(onHoverEvent);
+        if (hoverEventActuator_) {
+            hoverEventActuator_->RemoveInputEvent(onHoverEvent);
         }
-        hoverEventActuator_->RemoveInputEvent(onHoverEvent);
     }
 
     void RemoveAllTipsHoverEvents()
     {
-        if (!hoverEventActuator_) {
-            return;
+        hoverInputEvents_.remove_if([](const RefPtr<InputEvent>& event) {
+            CHECK_NULL_RETURN(event, false);
+            return event->GetIstips();
+        });
+        if (hoverEventActuator_) {
+            hoverEventActuator_->RemoveAllTipsEvents();
         }
-        hoverEventActuator_->RemoveAllTipsEvents();
     }
 
     void AddOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
     {
-        if (!hoverMoveEventActuator_) {
-            hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (hoverMoveInputEvents_.empty()) {
+            hoverMoveInputEvents_.emplace_back(onHoverMoveEvent);
+            return;
         }
-        hoverMoveEventActuator_->AddInputEvent(onHoverMoveEvent);
+        if (std::find(hoverMoveInputEvents_.begin(), hoverMoveInputEvents_.end(), onHoverMoveEvent) ==
+            hoverMoveInputEvents_.end()) {
+            hoverMoveInputEvents_.emplace_back(onHoverMoveEvent);
+        }
     }
 
     void RemoveOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
     {
-        if (!hoverMoveEventActuator_) {
-            return;
+        hoverMoveInputEvents_.remove(onHoverMoveEvent);
+        if (hoverMoveEventActuator_) {
+            hoverMoveEventActuator_->RemoveInputEvent(onHoverMoveEvent);
         }
-        hoverMoveEventActuator_->RemoveInputEvent(onHoverMoveEvent);
     }
 
     void SetAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
     {
-        if (!axisEventActuator_) {
-            axisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        axisEventActuator_->ReplaceInputEvent(std::move(onAxisEventFunc));
+        userAxisFunc_ = std::move(onAxisEventFunc);
     }
 
     void SetCoastingAxisEvent(OnCoastingAxisEventFunc&& onCoastingAxisEventFunc)
     {
-        if (!coastingAxisEventActuator_) {
-            coastingAxisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
-        }
-        coastingAxisEventActuator_->ReplaceInputEvent(std::move(onCoastingAxisEventFunc));
+        userCoastingAxisFunc_ = std::move(onCoastingAxisEventFunc);
     }
 
     bool HasCoastingAxisEvent()
     {
+        if (userCoastingAxisFunc_) {
+            return true;
+        }
         if (coastingAxisEventActuator_) {
             return coastingAxisEventActuator_->HasUserCallback();
         }
@@ -217,18 +211,21 @@ public:
 
     void AddOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
     {
-        if (!axisEventActuator_) {
-            axisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (axisInputEvents_.empty()) {
+            axisInputEvents_.emplace_back(onAxisEvent);
+            return;
         }
-        axisEventActuator_->AddInputEvent(onAxisEvent);
+        if (std::find(axisInputEvents_.begin(), axisInputEvents_.end(), onAxisEvent) == axisInputEvents_.end()) {
+            axisInputEvents_.emplace_back(onAxisEvent);
+        }
     }
 
     void RemoveOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
     {
-        if (!axisEventActuator_) {
-            return;
+        axisInputEvents_.remove(onAxisEvent);
+        if (axisEventActuator_) {
+            axisEventActuator_->RemoveInputEvent(onAxisEvent);
         }
-        axisEventActuator_->RemoveInputEvent(onAxisEvent);
     }
 
     // the return value means prevents event bubbling.
@@ -251,6 +248,7 @@ public:
         if (hoverEventActuator_) {
             hoverEventActuator_->ClearUserCallback();
         }
+        userHoverFunc_ = nullptr;
     }
 
     void ClearUserOnHoverMove()
@@ -258,6 +256,7 @@ public:
         if (hoverMoveEventActuator_) {
             hoverMoveEventActuator_->ClearUserCallback();
         }
+        userHoverMoveFunc_ = nullptr;
     }
 
     void ClearUserOnAccessibilityHover()
@@ -265,6 +264,7 @@ public:
         if (accessibilityHoverEventActuator_) {
             accessibilityHoverEventActuator_->ClearUserCallback();
         }
+        userAccessibilityHoverFunc_ = nullptr;
     }
 
     void ClearJSFrameNodeOnHover()
@@ -272,6 +272,7 @@ public:
         if (hoverEventActuator_) {
             hoverEventActuator_->ClearJSFrameNodeCallback();
         }
+        userJSFrameNodeHoverFunc_ = nullptr;
     }
 
     void ClearJSFrameNodeOnHoverMove()
@@ -279,6 +280,7 @@ public:
         if (hoverMoveEventActuator_) {
             hoverMoveEventActuator_->ClearJSFrameNodeCallback();
         }
+        userJSFrameNodeHoverMoveFunc_ = nullptr;
     }
 
     void ClearUserOnMouse()
@@ -286,6 +288,7 @@ public:
         if (mouseEventActuator_) {
             mouseEventActuator_->ClearUserCallback();
         }
+        userMouseFunc_ = nullptr;
     }
 
     void ClearJSFrameNodeOnMouse()
@@ -293,6 +296,7 @@ public:
         if (mouseEventActuator_) {
             mouseEventActuator_->ClearJSFrameNodeCallback();
         }
+        userJSFrameNodeMouseFunc_ = nullptr;
     }
 
     void ClearUserOnAxisEvent()
@@ -300,6 +304,7 @@ public:
         if (axisEventActuator_) {
             axisEventActuator_->ClearUserCallback();
         }
+        userAxisFunc_ = nullptr;
     }
 
     void ClearUserOnCoastingAxisEvent()
@@ -307,18 +312,45 @@ public:
         if (coastingAxisEventActuator_) {
             coastingAxisEventActuator_->ClearUserCallback();
         }
+        userCoastingAxisFunc_ = nullptr;
     }
 
     void AddTouchpadInteractionListenerInner(TouchpadInteractionCallback&& listener);
 
+    void CreateMouseEventActuator();
+    void CreateHoverEventActuator();
+    void CreateHoverMoveEventActuator();
+    void CreateAxisEventActuator();
+    void CreateCoastingAxisEventActuator();
+    void CreateAccessibilityHoverEventActuator();
+
 private:
     WeakPtr<EventHub> eventHub_;
+
+    OnMouseEventFunc userMouseFunc_;
+    OnMouseEventFunc userJSFrameNodeMouseFunc_;
+    std::list<RefPtr<InputEvent>> mouseInputEvents_;
     RefPtr<InputEventActuator> mouseEventActuator_;
+
+    OnHoverFunc userHoverFunc_;
+    OnHoverFunc userJSFrameNodeHoverFunc_;
+    std::list<RefPtr<InputEvent>> hoverInputEvents_;
     RefPtr<InputEventActuator> hoverEventActuator_;
+
+    OnHoverMoveFunc userHoverMoveFunc_;
+    OnHoverMoveFunc userJSFrameNodeHoverMoveFunc_;
+    std::list<RefPtr<InputEvent>> hoverMoveInputEvents_;
     RefPtr<InputEventActuator> hoverMoveEventActuator_;
     RefPtr<InputEventActuator> hoverEffectActuator_;
+
+    OnAxisEventFunc userAxisFunc_;
+    std::list<RefPtr<InputEvent>> axisInputEvents_;
     RefPtr<InputEventActuator> axisEventActuator_;
+
+    OnCoastingAxisEventFunc userCoastingAxisFunc_;
     RefPtr<InputEventActuator> coastingAxisEventActuator_;
+
+    OnAccessibilityHoverFunc userAccessibilityHoverFunc_;
     RefPtr<InputEventActuator> accessibilityHoverEventActuator_;
 
     RefPtr<InputEvent> showMenu_;

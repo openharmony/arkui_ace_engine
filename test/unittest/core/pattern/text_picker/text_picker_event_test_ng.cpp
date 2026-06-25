@@ -29,7 +29,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -940,6 +940,66 @@ HWTEST_F(TextPickerEventTestNg, LinearFontSize002, TestSize.Level1)
     Dimension dimension1;
     dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 2);
     EXPECT_FALSE(dimension < dimension1);
+}
+
+/**
+ * @tc.name: LinearFontSize003
+ * @tc.desc: TextPickerColumnPattern LinearFontSize with LPX unit for startFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerEventTestNg, LinearFontSize003, TestSize.Level1)
+{
+    InitTextPickerEventTestNg();
+    constexpr double lpxValue10 = 10.0;
+    constexpr double pxValue20 = 20.0;
+    constexpr double percentValue = 0.5;
+
+    Dimension startFontSize(lpxValue10, DimensionUnit::LPX);
+    Dimension endFontSize(pxValue20, DimensionUnit::PX);
+
+    auto result = textPickerColumnPattern_->LinearFontSize(startFontSize, endFontSize, percentValue);
+    EXPECT_EQ(result.Unit(), DimensionUnit::PX);
+    EXPECT_NEAR(result.Value(), 15.0, 0.01);
+}
+
+/**
+ * @tc.name: LinearFontSize004
+ * @tc.desc: TextPickerColumnPattern LinearFontSize with LPX unit for endFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerEventTestNg, LinearFontSize004, TestSize.Level1)
+{
+    InitTextPickerEventTestNg();
+    constexpr double pxValue10 = 10.0;
+    constexpr double lpxValue20 = 20.0;
+    constexpr double percentValue = 0.5;
+
+    Dimension startFontSize(pxValue10, DimensionUnit::PX);
+    Dimension endFontSize(lpxValue20, DimensionUnit::LPX);
+
+    auto result = textPickerColumnPattern_->LinearFontSize(startFontSize, endFontSize, percentValue);
+    EXPECT_EQ(result.Unit(), DimensionUnit::PX);
+    EXPECT_NEAR(result.Value(), 15.0, 0.01);
+}
+
+/**
+ * @tc.name: LinearFontSize005
+ * @tc.desc: TextPickerColumnPattern LinearFontSize with LPX units for both start and end
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerEventTestNg, LinearFontSize005, TestSize.Level1)
+{
+    InitTextPickerEventTestNg();
+    constexpr double lpxValue5 = 5.0;
+    constexpr double lpxValue15 = 15.0;
+    constexpr double percentValue = 0.5;
+
+    Dimension startFontSize(lpxValue5, DimensionUnit::LPX);
+    Dimension endFontSize(lpxValue15, DimensionUnit::LPX);
+
+    auto result = textPickerColumnPattern_->LinearFontSize(startFontSize, endFontSize, percentValue);
+    EXPECT_EQ(result.Unit(), DimensionUnit::PX);
+    EXPECT_NEAR(result.Value(), 10.0, 0.01);
 }
 
 /**

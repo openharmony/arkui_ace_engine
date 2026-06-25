@@ -13,7 +13,71 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
+class TextInputAutoCapitalizationModifier extends ModifierWithKey<AutoCapitalizationMode> {
+  constructor(value: AutoCapitalizationMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputKeyboardAppearanceModifier extends ModifierWithKey<KeyboardAppearance> {
+  constructor(value: KeyboardAppearance) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputKeyboardAppearance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetKeyboardAppearance(node);
+    } else {
+      getUINativeModule().textInput.setKeyboardAppearance(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputStopBackPressModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStopBackPress');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetStopBackPress(node);
+    } else {
+      getUINativeModule().textInput.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetWidth(node);
+    } else {
+      getUINativeModule().textInput.setWidth(node, this.value);
+    }
+  }
+}
+
 class TextInputSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -32,6 +96,9 @@ class TextInputSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
 }
 
 class TextInputStyleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -45,6 +112,9 @@ class TextInputStyleModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLengthModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -58,6 +128,9 @@ class TextInputMaxLengthModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLinesModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -71,8 +144,8 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
+class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputDecoration');
@@ -80,12 +153,14 @@ class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecoration
     if (reset) {
       getUINativeModule().textInput.resetDecoration(node);
     } else {
-      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
+      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color, this.value!.style,
+        this.value.style, this.value.thicknessScale);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
+        this.stageValue.thicknessScale !== this.value.thicknessScale) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
@@ -340,6 +415,9 @@ class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
 }
 
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputShowPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -369,6 +447,9 @@ class TextInputShowPasswordModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputTextAlignModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -383,6 +464,9 @@ class TextInputTextAlignModifier extends ModifierWithKey<number> {
 }
 
 class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPlaceholderFont');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -412,6 +496,9 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
 }
 
 class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -426,6 +513,9 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
+  constructor(value: PasswordIcon) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -441,6 +531,9 @@ class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
 }
 
 class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -455,6 +548,9 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceC
 }
 
 class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -468,6 +564,9 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputShowUnderLine');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -547,6 +646,9 @@ class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined
   }
 }
 class TextInputTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -575,6 +677,9 @@ class TextInputCustomKeyboardModifier extends ModifierWithKey<ArkCustomKeyboard>
 }
 
 class TextInputCaretPositionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCaretPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -589,6 +694,9 @@ class TextInputCaretPositionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCopyOptionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -603,6 +711,9 @@ class TextInputCopyOptionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -617,6 +728,9 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
 }
 
 class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
+  constructor(value: CaretStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -638,6 +752,9 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 }
 
 class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputEnterKeyType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -652,6 +769,9 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
 }
 
 class TextInputBarStateModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -666,6 +786,9 @@ class TextInputBarStateModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textinputCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -679,6 +802,9 @@ class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -694,6 +820,9 @@ class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
 
 
 class TextInputFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontSize');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -709,6 +838,9 @@ class TextInputFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class TextInputFontStyleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -740,6 +872,9 @@ class TextInputFontWeightModifier extends ModifierWithKey<number | string | Reso
 }
 
 class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1026,6 +1161,9 @@ class TextInputContentTypeModifier extends ModifierWithKey<ContentType> {
       getUINativeModule().textInput.setContentType(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
 class TextInputTextModifier extends ModifierWithKey<ResourceStr> {
@@ -1129,11 +1267,11 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
   applyStage(node: KNode, component?: ArkComponent): boolean {
     if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
-      this.applyPeer(node, true, component);
+      this.applyPeer(node, true);
       return true;
     }
     this.value = this.stageValue;
-    this.applyPeer(node, false, component);
+    this.applyPeer(node, false);
     return false;
   }
   applyPeer(node: KNode, reset: boolean): void {
@@ -1142,7 +1280,7 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
     } else {
       const valueType: string = typeof this.value;
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        getUINativeModule().textInput.setBorderColor(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().textInput.setBorderColor(node, this.value, this.value, this.value, this.value, false);
       } else {
         if ((Object.keys(this.value).indexOf('start') >= 0) ||
             (Object.keys(this.value).indexOf('end') >= 0)) {
@@ -1224,7 +1362,7 @@ class TextInputBorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeSty
   }
 }
 
-class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | LocalizedBorderRadius> {
   constructor(value: Length | BorderRadiuses | LocalizedBorderRadius) {
     super(value);
   }
@@ -1289,6 +1427,9 @@ class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     } else {
       getUINativeModule().textInput.setBackgroundColor(node, this.value);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1445,7 +1586,7 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> 
   constructor(value: EditMenuOptions) {
     super(value);
   }
-  static identity: Symbol = Symbol('textEditMenuOptions');
+  static identity: Symbol = Symbol('textInputEditMenuOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textInput.resetSelectionMenuOptions(node);
@@ -1510,11 +1651,11 @@ class TextInputStrokeWidthModifier extends ModifierWithKey<LengthMetrics> {
   static identity: Symbol = Symbol('textInputStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().textArea.resetStrokeWidth(node);
+      getUINativeModule().textInput.resetStrokeWidth(node);
     } else if (!isObject(this.value)) {
-      getUINativeModule().textArea.resetStrokeWidth(node);
+      getUINativeModule().textInput.resetStrokeWidth(node);
     } else {
-      getUINativeModule().textArea.setStrokeWidth(node, this.value.value, this.value.unit);
+      getUINativeModule().textInput.setStrokeWidth(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -1529,9 +1670,9 @@ class TextInputStrokeColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputStrokeColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetStrokeColor(node);
+      getUINativeModule().textInput.resetStrokeColor(node);
     } else {
-      getUINativeModule().text.setStrokeColor(node, this.value);
+      getUINativeModule().textInput.setStrokeColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -1561,7 +1702,7 @@ class TextInputOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('textInputOrphanCharOptimizationModifier');
+  static identity: Symbol = Symbol('textInputOrphanCharOptimization');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textInput.resetOrphanCharOptimization(node);
@@ -1584,6 +1725,23 @@ class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolea
       getUINativeModule().textInput.resetCompressLeadingPunctuation(node);
     } else {
       getUINativeModule().textInput.setCompressLeadingPunctuation(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputPunctuationOverflowModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().textInput.setPunctuationOverflow(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -1654,14 +1812,15 @@ class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelec
     }
     }
   checkObjectDiff(): boolean {
-      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
-class TextInputDirectionModifier extends ModifierWithKey<TextDirection> {
+class TextInputTextDirectionModifier extends ModifierWithKey<TextDirection> {
   constructor(value: TextDirection) {
     super(value);
   }
-  static identity: Symbol = Symbol('textInputDirection');
+  static identity: Symbol = Symbol('textInputTextDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textInput.resetTextDirection(node);
@@ -1701,6 +1860,15 @@ class TextInputShaderStyleModifier extends ModifierWithKey<{
   colors: Array<[ ResourceColor, number ]>;
   repeating?: boolean;
   color: ResourceColor;
+  options?: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+    color: ResourceColor;
+  };
 }> {
   constructor(value: {
     center: Array<any>;
@@ -1710,6 +1878,15 @@ class TextInputShaderStyleModifier extends ModifierWithKey<{
     colors: Array<[ ResourceColor, number ]>;
     repeating?: boolean;
     color: ResourceColor;
+    options?: {
+      center: Array<any>;
+      radius: number | string;
+      angle?: number | string;
+      direction?: GradientDirection;
+      colors: Array<[ ResourceColor, number ]>;
+      repeating?: boolean;
+      color: ResourceColor;
+    };
   }) {
     super(value);
   }
@@ -1733,11 +1910,11 @@ class TextInputShaderStyleModifier extends ModifierWithKey<{
   }
 }
 
-class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
+class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): TextInputAttribute {
+  initialize(value: Object[]): this {
     if (value[0] !== undefined) {
       this.setPlaceholder((value[0] as TextInputParam).placeholder);
       this.setText((value[0] as TextInputParam).text);
@@ -1749,149 +1926,149 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
     return this;
   }
-  setText(value: ResourceStr): TextInputAttribute {
+  setText(value: ResourceStr): this {
     modifierWithKey(this._modifiersWithKeys, TextInputTextModifier.identity,
       TextInputTextModifier, value);
     return this;
   }
-  setPlaceholder(value: ResourceStr): TextInputAttribute {
+  setPlaceholder(value: ResourceStr): this {
     modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderModifier.identity,
       TextInputPlaceholderModifier, value);
     return this;
   }
-  setController(value: TextInputController): TextInputAttribute {
+  setController(value: TextInputController): this {
     modifierWithKey(this._modifiersWithKeys, TextInputControllerModifier.identity,
       TextInputControllerModifier, value);
     return this;
   }
-  cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
+  cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): this {
     modifierWithKey(this._modifiersWithKeys, TextInputCancelButtonModifier.identity,
       TextInputCancelButtonModifier, value);
     return this;
   }
-  selectAll(value: boolean): TextInputAttribute {
+  selectAll(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectAllModifier.identity,
       TextInputSelectAllModifier, value);
     return this;
   }
-  enableAutoFill(value: boolean): TextInputAttribute {
+  enableAutoFill(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity,
       TextInputEnableAutoFillModifier, value);
     return this;
   }
-  passwordRules(value: string): TextInputAttribute {
+  passwordRules(value: string): this {
     modifierWithKey(this._modifiersWithKeys, TextInputPasswordRulesModifier.identity,
       TextInputPasswordRulesModifier, value);
     return this;
   }
-  enableAutoFillAnimation(value: boolean): TextInputAttribute {
+  enableAutoFillAnimation(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillAnimationModifier.identity,
       TextInputEnableAutoFillAnimationModifier, value);
     return this;
   }
-  showCounter(value: boolean, options?: InputCounterOptions): TextInputAttribute {
+  showCounter(value: boolean, options?: InputCounterOptions): this {
     let arkValue: ArkTextFieldShowCounter = new ArkTextFieldShowCounter();
     arkValue.value = value;
     arkValue.highlightBorder = options?.highlightBorder;
     arkValue.thresholdPercentage = options?.thresholdPercentage;
-    arkValue.counterTextcolor = options?.counterTextcolor;
-    arkValue.counterTextOverflow = options?.counterTextOverflow;
+    arkValue.counterTextColor = options?.counterTextColor;
+    arkValue.counterTextOverflowColor = options?.counterTextOverflowColor;
     modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity,
       TextInputShowCounterModifier, arkValue);
     return this;
   }
 
-  type(value: InputType): TextInputAttribute {
+  type(value: InputType): this {
 
     modifierWithKey(this._modifiersWithKeys, TextInputTypeModifier.identity,
       TextInputTypeModifier, value);
     return this;
   }
 
-  placeholderColor(value: ResourceColor): TextInputAttribute {
+  placeholderColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderColorModifier.identity,
       TextInputPlaceholderColorModifier, value);
     return this;
   }
 
-  placeholderFont(value?: Font): TextInputAttribute {
+  placeholderFont(value?: Font): this {
     modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderFontModifier.identity,
       TextInputPlaceholderFontModifier, value);
     return this;
   }
-  enterKeyType(value: EnterKeyType): TextInputAttribute {
+  enterKeyType(value: EnterKeyType): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnterKeyTypeModifier.identity,
       TextInputEnterKeyTypeModifier, value);
     return this;
   }
-  caretColor(value: ResourceColor): TextInputAttribute {
+  caretColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextInputCaretColorModifier.identity,
       TextInputCaretColorModifier, value);
     return this;
   }
-  onEditChanged(callback: (isEditing: boolean) => void): TextInputAttribute {
+  onEditChanged(callback: (isEditing: boolean) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnEditChangeModifier.identity,
       TextInputOnEditChangeModifier, callback);
     return this;
   }
-  onEditChange(callback: (isEditing: boolean) => void): TextInputAttribute {
+  onEditChange(callback: (isEditing: boolean) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnEditChangeModifier.identity,
       TextInputOnEditChangeModifier, callback);
     return this;
   }
-  onSubmit(callback: (enterKey: EnterKeyType, event: SubmitEvent) => void): TextInputAttribute {
+  onSubmit(callback: (enterKey: EnterKeyType, event: SubmitEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnSubmitModifier.identity,
       TextInputOnSubmitModifier, callback);
     return this;
   }
-  onChange(callback: (value: ChangeValueInfo) => void): TextInputAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnChangeModifier.identity,
       TextInputOnChangeModifier, callback);
     return this;
   }
-  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextInputAttribute {
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnTextSelectionChangeModifier.identity,
       TextInputOnTextSelectionChangeModifier, callback);
     return this;
   }
-  onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextInputAttribute {
+  onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnContentScrollModifier.identity,
       TextInputOnContentScrollModifier, callback);
     return this;
   }
-  maxLength(value: number): TextInputAttribute {
+  maxLength(value: number): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxLengthModifier.identity,
       TextInputMaxLengthModifier, value);
     return this;
   }
-  fontColor(value: ResourceColor): TextInputAttribute {
+  fontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontColorModifier.identity,
       TextInputFontColorModifier, value);
     return this;
   }
 
-  fontSize(value: Length): TextInputAttribute {
+  fontSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontSizeModifier.identity,
       TextInputFontSizeModifier, value);
     return this;
   }
-  fontStyle(value: FontStyle): TextInputAttribute {
+  fontStyle(value: FontStyle): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontStyleModifier.identity,
       TextInputFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string | Resource): TextInputAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontWeightModifier.identity,
       TextInputFontWeightModifier, value);
     return this;
   }
 
-  fontFamily(value: ResourceStr): TextInputAttribute {
+  fontFamily(value: ResourceStr): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontFamilyModifier.identity,
       TextInputFontFamilyModifier, value);
     return this;
   }
-  inputFilter(value: ResourceStr, error?: (value: string) => void): TextInputAttribute {
+  inputFilter(value: ResourceStr, error?: (value: string) => void): this {
     let arkValue = new ArkTextInputFilter();
     arkValue.value = value;
     arkValue.error = error;
@@ -1899,53 +2076,53 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputFilterModifier, arkValue);
     return this;
   }
-  onWillCopy(callback: Callback<string, boolean>): TextInputAttribute {
+  onWillCopy(callback: Callback<string, boolean>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnWillCopyModifier.identity,
       TextInputOnWillCopyModifier, callback);
     return this;
   }
-  onCopy(callback: (value: string) => void): TextInputAttribute {
+  onCopy(callback: (value: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity,
       TextInputOnCopyModifier, callback);
     return this;
   }
-  onWillCut(callback: Callback<string, boolean>): TextInputAttribute {
+  onWillCut(callback: Callback<string, boolean>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnWillCutModifier.identity,
       TextInputOnWillCutModifier, callback);
     return this;
   }
-  onCut(callback: (value: string) => void): TextInputAttribute {
+  onCut(callback: (value: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCutModifier.identity,
       TextInputOnCutModifier, callback);
     return this;
   }
-  onPaste(callback: (value: string) => void): TextInputAttribute {
+  onPaste(callback: (value: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnPasteModifier.identity,
       TextInputOnPasteModifier, callback);
     return this;
   }
-  copyOption(value: CopyOptions): TextInputAttribute {
+  copyOption(value: CopyOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextInputCopyOptionModifier.identity,
       TextInputCopyOptionModifier, value);
     return this;
   }
 
-  showPasswordIcon(value: boolean): TextInputAttribute {
+  showPasswordIcon(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordIconModifier.identity,
       TextInputShowPasswordIconModifier, value);
     return this;
   }
-  showPassword(value: boolean): TextInputAttribute {
+  showPassword(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity,
       TextInputShowPasswordModifier, value);
     return this;
   }
-  textAlign(value: TextAlign): TextInputAttribute {
+  textAlign(value: TextAlign): this {
     modifierWithKey(this._modifiersWithKeys, TextInputTextAlignModifier.identity,
       TextInputTextAlignModifier, value);
     return this;
   }
-  style(value: TextInputStyle | TextContentStyle): TextInputAttribute {
+  style(value: TextInputStyle | TextContentStyle): this {
     modifierWithKey(this._modifiersWithKeys, TextInputStyleModifier.identity,
       TextInputStyleModifier, value);
     return this;
@@ -1956,57 +2133,57 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
 
-  selectedBackgroundColor(value: ResourceColor): TextInputAttribute {
+  selectedBackgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectedBackgroundColorModifier.identity,
       TextInputSelectedBackgroundColorModifier, value);
     return this;
   }
-  caretPosition(value: number): TextInputAttribute {
+  caretPosition(value: number): this {
     modifierWithKey(this._modifiersWithKeys, TextInputCaretPositionModifier.identity,
       TextInputCaretPositionModifier, value);
     return this;
   }
-  enableKeyboardOnFocus(value: boolean): TextInputAttribute {
+  enableKeyboardOnFocus(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableKeyboardOnFocusModifier.identity,
       TextInputEnableKeyboardOnFocusModifier, value);
     return this;
   }
 
-  passwordIcon(value: PasswordIcon): TextInputAttribute {
+  passwordIcon(value: PasswordIcon): this {
     modifierWithKey(this._modifiersWithKeys, TextInputPasswordIconModifier.identity,
       TextInputPasswordIconModifier, value);
     return this;
   }
-  showError(value: ResourceStr | undefined): TextInputAttribute {
+  showError(value: ResourceStr | undefined): this {
     modifierWithKey(this._modifiersWithKeys, TextInputShowErrorModifier.identity,
       TextInputShowErrorModifier, value);
     return this;
   }
-  showUnit(event: () => void): TextInputAttribute {
+  showUnit(event: () => void): this {
     throw new BusinessError(100201, 'showUnit function not supported in attributeModifier scenario.');
   }
-  showUnderline(value: boolean): TextInputAttribute {
+  showUnderline(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity,
       TextInputShowUnderlineModifier, value);
     return this;
   }
-  selectionMenuHidden(value: boolean): TextInputAttribute {
+  selectionMenuHidden(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectionMenuHiddenModifier.identity, TextInputSelectionMenuHiddenModifier, value);
     return this;
   }
-  barState(value: BarState): TextInputAttribute {
+  barState(value: BarState): this {
     modifierWithKey(this._modifiersWithKeys, TextInputBarStateModifier.identity, TextInputBarStateModifier, value);
     return this;
   }
-  maxLines(value: number): TextInputAttribute {
+  maxLines(value: number): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxLinesModifier.identity, TextInputMaxLinesModifier, value);
     return this;
   }
-  fontFeature(value: FontFeature): TextInputAttribute {
+  fontFeature(value: FontFeature): this {
     modifierWithKey(this._modifiersWithKeys, TextInputFontFeatureModifier.identity, TextInputFontFeatureModifier, value);
     return this;
   }
-  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): TextInputAttribute {
+  customKeyboard(value: ComponentContent, options?: { supportAvoidance?: boolean }): this {
     let arkValue: ArkCustomKeyboard = new ArkCustomKeyboard();
     arkValue.value = value;
     arkValue.supportAvoidance = options?.supportAvoidance;
@@ -2014,7 +2191,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputCustomKeyboardModifier, arkValue);
     return this;
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextInputAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): this {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
     return this;
   }
@@ -2030,36 +2207,36 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
     return this;
   }
-  underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
+  underlineColor(value: ResourceColor | UnderlineColor | undefined): this {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
     return this;
   }
-  wordBreak(value: WordBreak): TextInputAttribute {
+  wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
     return this;
   }
-  lineBreakStrategy(value: LineBreakStrategy): TextInputAttribute {
+  lineBreakStrategy(value: LineBreakStrategy): this {
     modifierWithKey(this._modifiersWithKeys, TextInputLineBreakStrategyModifier.identity,
       TextInputLineBreakStrategyModifier, value);
     return this;
   }
-  minFontSize(value: number | string | Resource): TextInputAttribute {
+  minFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMinFontSizeModifier.identity, TextInputMinFontSizeModifier, value);
     return this;
   }
-  maxFontSize(value: number | string | Resource): TextInputAttribute {
+  maxFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
     return this;
   }
-  minFontScale(value: number | Resource): TextInputAttribute {
+  minFontScale(value: number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMinFontScaleModifier.identity, TextInputMinFontScaleModifier, value);
     return this;
   }
-  maxFontScale(value: number | Resource): TextInputAttribute {
+  maxFontScale(value: number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxFontScaleModifier.identity, TextInputMaxFontScaleModifier, value);
     return this;
   }
-  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): this {
     modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
     return this;
   }
@@ -2075,6 +2252,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
     return this;
   }
+  stopBackPress(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStopBackPressModifier.identity, TextInputStopBackPressModifier, value);
+    return this;
+  }
+  keyboardAppearance(value: KeyboardAppearance): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputKeyboardAppearanceModifier.identity, TextInputKeyboardAppearanceModifier, value);
+    return this;
+  }
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
@@ -2085,19 +2270,19 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
         arkValue.left = value;
       }
       else {
-        arkValue.top = value.top;
-        arkValue.bottom = value.bottom;
+        arkValue.top = (value as any).top;
+        arkValue.bottom = (value as any).bottom;
         if (Object.keys(value).indexOf('right') >= 0) {
-          arkValue.right = value.right;
+          arkValue.right = (value as any).right;
         }
         if (Object.keys(value).indexOf('end') >= 0) {
-          arkValue.right = value.end;
+          arkValue.right = (value as any).end;
         }
         if (Object.keys(value).indexOf('left') >= 0) {
-          arkValue.left = value.left;
+          arkValue.left = (value as any).left;
         }
         if (Object.keys(value).indexOf('start') >= 0) {
-          arkValue.left = value.start;
+          arkValue.left = (value as any).start;
         }
       }
       modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, arkValue);
@@ -2145,19 +2330,19 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
         arkValue.bottom = <Length>value;
         arkValue.left = <Length>value;
       } else {
-        arkValue.top = value.top;
-        arkValue.bottom = value.bottom;
+        arkValue.top = (value as any).top;
+        arkValue.bottom = (value as any).bottom;
         if (Object.keys(value).indexOf('right') >= 0) {
-          arkValue.right = value.right;
+          arkValue.right = (value as any).right;
         }
         if (Object.keys(value).indexOf('end') >= 0) {
-          arkValue.right = value.end;
+          arkValue.right = (value as any).end;
         }
         if (Object.keys(value).indexOf('left') >= 0) {
-          arkValue.left = value.left;
+          arkValue.left = (value as any).left;
         }
         if (Object.keys(value).indexOf('start') >= 0) {
-          arkValue.left = value.start;
+          arkValue.left = (value as any).start;
         }
       }
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, arkValue);
@@ -2190,9 +2375,17 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
     return this;
   }
+  autoCapitalizationMode(value: AutoCapitalizationMode): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputAutoCapitalizationModifier.identity, TextInputAutoCapitalizationModifier, value);
+    return this;
+  }
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputWidthModifier.identity, TextInputWidthModifier, value);
     return this;
   }
   enableHapticFeedback(value: boolean): this {
@@ -2214,6 +2407,15 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   orphanCharOptimization(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
       TextInputOrphanCharOptimizationModifier, value);
+    return this;
+  }
+  compressLeadingPunctuation(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputCompressLeadingPunctuationModifier.identity, TextInputCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputPunctuationOverflowModifier.identity,
+        TextInputPunctuationOverflowModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {
@@ -2242,7 +2444,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   textDirection(value: TextDirection): this {
-    modifierWithKey(this._modifiersWithKeys, TextInputDirectionModifier.identity, TextInputDirectionModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TextInputTextDirectionModifier.identity, TextInputTextDirectionModifier, value);
     return this;
   }
   strokeJoinStyle(value: JoinStyle): this {
@@ -2263,11 +2465,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
 }
+
 // @ts-ignore
-globalThis.TextInput.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkTextInputComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.TextInputModifier(nativePtr, classType);
-  });
-};
+if (globalThis.TextInput !== undefined) {
+  (globalThis as any).TextInput.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkTextInputComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.TextInputModifier(nativePtr, classType);
+    });
+  };
+}

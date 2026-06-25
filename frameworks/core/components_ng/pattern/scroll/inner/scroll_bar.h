@@ -145,9 +145,37 @@ public:
     {
         return minHeight_;
     }
+    void SetScrollBarHeight(const Dimension& scrollBarHeight)
+    {
+        scrollBarHeight_ = scrollBarHeight;
+    }
+    const Dimension& GetScrollBarHeight() const
+    {
+        return scrollBarHeight_;
+    }
     void SetMinDynamicHeight(const Dimension& minDynamicHeight)
     {
         minDynamicHeight_ = minDynamicHeight;
+    }
+    void SetUseInnerScrollBar(bool useInnerScrollBar)
+    {
+        if (useInnerScrollBar_ == useInnerScrollBar) {
+            return;
+        }
+        useInnerScrollBar_ = useInnerScrollBar;
+        UpdateInnerScrollBarThemeValues(useInnerScrollBar_);
+    }
+    bool GetUseInnerScrollBar() const
+    {
+        return useInnerScrollBar_;
+    }
+    void SetScrollBarInteractive(bool scrollBarInteractive)
+    {
+        scrollBarInteractive_ = scrollBarInteractive;
+    }
+    bool GetScrollBarInteractive() const
+    {
+        return scrollBarInteractive_;
     }
     const Dimension& GetMinDynamicHeight() const
     {
@@ -177,9 +205,21 @@ public:
     {
         return touchWidth_;
     }
+    void SetNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
+    {
+        normalBackgroundWidth_ = normalBackgroundWidth;
+    }
+    const Dimension& GetNormalBackgroundWidth() const
+    {
+        return normalBackgroundWidth_;
+    }
     const Rect& GetBarRect() const
     {
         return barRect_;
+    }
+    const Rect& GetTrackRect() const
+    {
+        return trackRect_;
     }
     bool IsScrollable() const
     {
@@ -201,14 +241,6 @@ public:
     void SetOutBoundary(double outBoundary)
     {
         outBoundary_ = outBoundary;
-    }
-    void SetPosition(const Dimension& position)
-    {
-        position_ = position;
-    }
-    const Dimension& GetPosition() const
-    {
-        return position_;
     }
     void SetPressed(bool press)
     {
@@ -297,6 +329,14 @@ public:
     const Dimension& GetEndReservedHeight() const
     {
         return endReservedHeight_;
+    }
+    void SetScrollBarStartMargin(const Dimension& scrollBarStartMargin)
+    {
+        scrollBarStartMargin_ = scrollBarStartMargin;
+    }
+    const Dimension& GetScrollBarStartMargin() const
+    {
+        return scrollBarStartMargin_;
     }
     void SetHostBorderRadius(const BorderRadiusProperty& hostBorderRadius)
     {
@@ -396,9 +436,10 @@ public:
         return autoAdjustScrollBarMargin_;
     }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
     ACE_FORCE_EXPORT Color GetForegroundColor() const;
+    void UpdateInnerScrollBarThemeValues(bool useInnerScrollBar);
     void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
     void SetNormalWidth(const Dimension& normalWidth, const RefPtr<PipelineContext>& context = nullptr);
     void SetScrollable(bool isScrollable);
@@ -437,7 +478,7 @@ public:
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
@@ -493,6 +534,7 @@ protected:
     virtual void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
         double mainScrollExtent);
     double NormalizeToPx(const Dimension& dimension, const RefPtr<PipelineContext>& context = nullptr) const;
+    double NormalizeTrackSizeToPx(double maxTrackSize, const RefPtr<PipelineContext>& context = nullptr) const;
     Dimension GetNormalWidth()
     {
         return normalWidth_;
@@ -705,16 +747,22 @@ private:
     Rect touchRegion_;
     Rect hoverRegion_;
     Rect barRect_;
+    Rect trackRect_;
     Rect activeRect_;
     Dimension minHeight_;           // this is min static height
+    Dimension scrollBarHeight_ = 1.0_pct;     // this is preferred scrollbar track length for inner scrollbar
     Dimension minDynamicHeight_;    // this is min dynamic height when on the top or bottom
+    bool useInnerScrollBar_ = true;
+    bool scrollBarInteractive_ = true;
     Dimension startReservedHeight_; // this is reservedHeight on the start
     Dimension endReservedHeight_;   // this is reservedHeight on the end
+    Dimension scrollBarStartMargin_;  // layered start margin, effective when no explicit scrollBarMargin is set
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;         // user-set width of the scrollbar
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
+    Dimension normalBackgroundWidth_;
     Dimension hoverWidth_;
     double barWidth_ = 0.0;         // actual width of the scrollbar
     Dimension position_;

@@ -30,6 +30,7 @@
 #include "span_style_native_impl.h"
 #include "text_native_impl.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/styled_string_impl.h"
 #include "interfaces/native/node/event_converter.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -1056,5 +1057,417 @@ HWTEST_F(NativeStyledStringTest, TestRadialGradientOptions001, TestSize.Level1) 
      * @tc.steps: step6. destroy radial gradient options
      */
     OH_ArkUI_RadialGradientOptions_Destroy(options);
+}
+
+/**
+ * @tc.name: SpanStyleLineHeightStyle001
+ * @tc.desc: Test OH_ArkUI_SpanStyle_GetLineHeightStyle correctly copies lineHeightMultiple.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, SpanStyleLineHeightStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test LineHeightStyle set/get lineHeightMultiple with value
+     * branch: lineHeightMultiple has value
+     */
+    OH_ArkUI_LineHeightStyle* lineHeightStyle = OH_ArkUI_LineHeightStyle_Create();
+    auto errorCode = OH_ArkUI_LineHeightStyle_SetLineHeight(lineHeightStyle, 30.0f);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = OH_ArkUI_LineHeightStyle_SetLineHeightMultiple(lineHeightStyle, 1.5f);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    float getLineHeight = 0.0f;
+    float getLineHeightMultiple = 0.0f;
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeight(lineHeightStyle, &getLineHeight);
+    EXPECT_EQ(getLineHeight, 30.0f);
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(lineHeightStyle, &getLineHeightMultiple);
+    EXPECT_EQ(getLineHeightMultiple, 1.5f);
+
+    /**
+     * @tc.steps: step2. test SpanStyle set/get LineHeightStyle preserves lineHeightMultiple
+     * branch: lineHeightMultiple preserved through SpanStyle round-trip
+     */
+    OH_ArkUI_SpanStyle* spanStyle = OH_ArkUI_SpanStyle_Create();
+    errorCode = OH_ArkUI_SpanStyle_SetLineHeightStyle(spanStyle, lineHeightStyle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_LineHeightStyle* getResult = OH_ArkUI_LineHeightStyle_Create();
+    errorCode = OH_ArkUI_SpanStyle_GetLineHeightStyle(spanStyle, getResult);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(getResult->lineHeight, 30.0f);
+    EXPECT_TRUE(getResult->lineHeightMultiple.has_value());
+    EXPECT_EQ(getResult->lineHeightMultiple.value(), 1.5f);
+
+    /**
+     * @tc.steps: step3. test LineHeightStyle without lineHeightMultiple
+     * branch: lineHeightMultiple is nullopt
+     */
+    OH_ArkUI_LineHeightStyle* noMultiple = OH_ArkUI_LineHeightStyle_Create();
+    errorCode = OH_ArkUI_LineHeightStyle_SetLineHeight(noMultiple, 40.0f);
+    float getMultiple = -1.0f;
+    errorCode = OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(noMultiple, &getMultiple);
+    EXPECT_EQ(getMultiple, 0.0f);
+
+    OH_ArkUI_LineHeightStyle_Destroy(lineHeightStyle);
+    OH_ArkUI_LineHeightStyle_Destroy(getResult);
+    OH_ArkUI_LineHeightStyle_Destroy(noMultiple);
+    OH_ArkUI_SpanStyle_Destroy(spanStyle);
+}
+
+/**
+ * @tc.name: ParagraphStyleSetLeadingMarginPixelMap001
+ * @tc.desc: Test OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap null check for pixelmap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, ParagraphStyleSetLeadingMarginPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test pixelmap null → PARAM_INVALID
+     * branch: pixelmap is nullptr
+     */
+    OH_ArkUI_ParagraphStyle* paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(paragraphStyle, nullptr);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_ParagraphStyle_Destroy(paragraphStyle);
+}
+
+/**
+ * @tc.name: CustomSpanCreate001
+ * @tc.desc: Test OH_ArkUI_CustomSpan_Create initializes onMeasure and onDraw to nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, CustomSpanCreate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create custom span and verify onMeasure and onDraw are nullptr
+     * branch: onMeasure initialized to nullptr, onDraw initialized to nullptr
+     */
+    OH_ArkUI_CustomSpan* customSpan = OH_ArkUI_CustomSpan_Create();
+    EXPECT_NE(customSpan, nullptr);
+    EXPECT_EQ(customSpan->onMeasure, nullptr);
+    EXPECT_EQ(customSpan->onDraw, nullptr);
+    delete customSpan;
+}
+
+/**
+ * @tc.name: DestroySpanString001
+ * @tc.desc: Test DestroySpanString with null descriptor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, DestroySpanString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call DestroySpanString with null descriptor
+     * @tc.expected: should not crash
+     */
+    OHOS::Ace::StyledStringAdapter::DestroySpanString(nullptr);
+}
+
+/**
+ * @tc.name: DestroySpanString002
+ * @tc.desc: Test DestroySpanString with descriptor that has null spanString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, DestroySpanString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create descriptor with null spanString
+     */
+    auto* descriptor = OH_ArkUI_StyledString_Descriptor_Create();
+    ASSERT_NE(descriptor, nullptr);
+    EXPECT_EQ(descriptor->spanString, nullptr);
+
+    /**
+     * @tc.steps: step2. call DestroySpanString
+     * @tc.expected: should not crash, spanString remains null
+     */
+    OHOS::Ace::StyledStringAdapter::DestroySpanString(descriptor);
+    EXPECT_EQ(descriptor->spanString, nullptr);
+
+    /**
+     * @tc.steps: step3. cleanup
+     */
+    OH_ArkUI_StyledString_Descriptor_Destroy(descriptor);
+}
+
+/**
+* @tc.name: CreateParagraphStyle011
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_SetTailIndents with positive values.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle011, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create paragraph style
+    */
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. test set tail indents with positive values
+    */
+    float tailIndents[] = { 10.0f, 20.0f, 30.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndents, 3);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(paragraphStyle->tailIndents.has_value());
+    EXPECT_EQ(paragraphStyle->tailIndents->size(), 3u);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(0), 10.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(1), 20.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(2), 30.0f);
+
+    /**
+    * @tc.steps: step3. test get tail indents
+    */
+    uint32_t writeLength = 0;
+    float buffer[3] = { 0.0f };
+    float* bufferPtr = buffer;
+    errorCode = OH_ArkUI_ParagraphStyle_GetTailIndents(paragraphStyle, &bufferPtr, 3, &writeLength);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(writeLength, 3u);
+    EXPECT_FLOAT_EQ(buffer[0], 10.0f);
+    EXPECT_FLOAT_EQ(buffer[1], 20.0f);
+    EXPECT_FLOAT_EQ(buffer[2], 30.0f);
+
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle012
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_SetTailIndents with negative values clamped to 0.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle012, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create paragraph style
+    */
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. test set tail indents with negative values
+    * @tc.expected: negative values are clamped to 0.0f
+    */
+    float tailIndentsNegative[] = { -10.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndentsNegative, 1);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(paragraphStyle->tailIndents.has_value());
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(0), 0.0f);
+
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle013
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_SetTailIndents with mixed positive and negative values.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle013, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create paragraph style
+    */
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. test set tail indents with mixed values
+    * @tc.expected: negative values are clamped to 0.0f, positive values are kept
+    */
+    float tailIndentsMixed[] = { 15.0f, -5.0f, 0.0f, -3.5f, 20.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndentsMixed, 5);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(paragraphStyle->tailIndents.has_value());
+    EXPECT_EQ(paragraphStyle->tailIndents->size(), 5u);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(0), 15.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(1), 0.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(2), 0.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(3), 0.0f);
+    EXPECT_FLOAT_EQ(paragraphStyle->tailIndents->at(4), 20.0f);
+
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle014
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_SetTailIndents with null/nullptr/size0 triggers reset.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle014, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create paragraph style
+    */
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. set positive tail indents first
+    */
+    float tailIndents[] = { 10.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndents, 1);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(paragraphStyle->tailIndents.has_value());
+
+    /**
+    * @tc.steps: step3. test set with nullptr → tail indents should be reset
+    * @tc.expected: tailIndents is nullopt
+    */
+    errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, nullptr, 1);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(paragraphStyle->tailIndents.has_value());
+
+    /**
+    * @tc.steps: step4. test set with size 0 → tail indents should be reset
+    * @tc.expected: tailIndents is nullopt
+    */
+    float tailIndentsVal[] = { 10.0f };
+    errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndentsVal, 0);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(paragraphStyle->tailIndents.has_value());
+
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle015
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_SetTailIndents with null paragraphStyle returns error.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle015, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. test set tail indents with null paragraphStyle
+    * @tc.expected: returns PARAM_INVALID error
+    */
+    float tailIndents[] = { 10.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(nullptr, tailIndents, 1);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: CreateParagraphStyle016
+* @tc.desc: Test OH_ArkUI_ParagraphStyle_GetTailIndents with null/invalid params returns error.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle016, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create paragraph style and set tail indents
+    */
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+    float tailIndents[] = { 10.0f };
+    OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndents, 1);
+
+    /**
+    * @tc.steps: step2. test get with null paragraphStyle → error
+    */
+    uint32_t writeLength = 0;
+    float buffer[1] = { 0.0f };
+    float* bufferPtr = buffer;
+    auto errorCode = OH_ArkUI_ParagraphStyle_GetTailIndents(nullptr, &bufferPtr, 1, &writeLength);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+    * @tc.steps: step3. test get with null tailIndents ptr → error
+    */
+    errorCode = OH_ArkUI_ParagraphStyle_GetTailIndents(paragraphStyle, nullptr, 1, &writeLength);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+    * @tc.steps: step4. test get with null writeLength → error
+    */
+    errorCode = OH_ArkUI_ParagraphStyle_GetTailIndents(paragraphStyle, &bufferPtr, 1, nullptr);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+    * @tc.steps: step5. test get with buffer too small → BUFFER_SIZE_ERROR
+    */
+    float smallBuffer[1] = { 0.0f };
+    float* smallBufferPtr = smallBuffer;
+    errorCode = OH_ArkUI_ParagraphStyle_GetTailIndents(paragraphStyle, &smallBufferPtr, 1, &writeLength);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle017
+* @tc.desc: Test OH_ArkUI_SpanStyle_SetParagraphStyle with negative tailIndents clamped to 0.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle017, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create span style and paragraph style
+    */
+    OH_ArkUI_SpanStyle *spanStyle = OH_ArkUI_SpanStyle_Create();
+    ASSERT_NE(spanStyle, nullptr);
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. set tail indents with negative values on paragraphStyle
+    * @tc.expected: negative values are clamped to 0.0f in paragraphStyle
+    */
+    float tailIndents[] = { -10.0f, 5.0f, -3.5f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndents, 3);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+    * @tc.steps: step3. set paragraph style to span style
+    * @tc.expected: negative tail indents are clamped to 0.0f in spanStyle
+    */
+    errorCode = OH_ArkUI_SpanStyle_SetParagraphStyle(spanStyle, paragraphStyle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(spanStyle->paragraphStyle.tailIndents.has_value());
+    EXPECT_FLOAT_EQ(spanStyle->paragraphStyle.tailIndents->at(0), 0.0f);
+    EXPECT_FLOAT_EQ(spanStyle->paragraphStyle.tailIndents->at(1), 5.0f);
+    EXPECT_FLOAT_EQ(spanStyle->paragraphStyle.tailIndents->at(2), 0.0f);
+
+    OH_ArkUI_SpanStyle_Destroy(spanStyle);
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
+}
+
+/**
+* @tc.name: CreateParagraphStyle018
+* @tc.desc: Test OH_ArkUI_SpanStyle_SetParagraphStyle with positive tailIndents preserved.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeStyledStringTest, CreateParagraphStyle018, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create span style and paragraph style
+    */
+    OH_ArkUI_SpanStyle *spanStyle = OH_ArkUI_SpanStyle_Create();
+    ASSERT_NE(spanStyle, nullptr);
+    OH_ArkUI_ParagraphStyle *paragraphStyle = OH_ArkUI_ParagraphStyle_Create();
+    ASSERT_NE(paragraphStyle, nullptr);
+
+    /**
+    * @tc.steps: step2. set tail indents with positive values on paragraphStyle
+    */
+    float tailIndents[] = { 15.0f, 25.0f };
+    auto errorCode = OH_ArkUI_ParagraphStyle_SetTailIndents(paragraphStyle, tailIndents, 2);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+    * @tc.steps: step3. set paragraph style to span style
+    * @tc.expected: positive tail indents are preserved
+    */
+    errorCode = OH_ArkUI_SpanStyle_SetParagraphStyle(spanStyle, paragraphStyle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_TRUE(spanStyle->paragraphStyle.tailIndents.has_value());
+    EXPECT_FLOAT_EQ(spanStyle->paragraphStyle.tailIndents->at(0), 15.0f);
+    EXPECT_FLOAT_EQ(spanStyle->paragraphStyle.tailIndents->at(1), 25.0f);
+
+    OH_ArkUI_SpanStyle_Destroy(spanStyle);
+    delete paragraphStyle;
+    paragraphStyle = nullptr;
 }
 } // namespace OHOS::Ace

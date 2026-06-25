@@ -34,6 +34,9 @@ enum class FloatingBarPosition {
     LEFT,
     RIGHT,
 };
+
+constexpr float FLOATING_BAR_SCALE = 1.0f;
+constexpr float FLOATING_BAR_SCALE_ENLARGED = 1.15f;
 }
 
 class TabsNode;
@@ -191,6 +194,11 @@ public:
     {
         return isFloatingBar_;
     }
+    bool LastFloatingBar() const
+    {
+        return lastFloatingBar_;
+    }
+    void SetFloatingScaleEnabled(bool isFloatingScaleEnabled);
 
 private:
     void OnAttachToFrameNode() override;
@@ -204,7 +212,7 @@ private:
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
     void FireTabChangeCallback(int32_t preIndex, int32_t nextIndex);
-    void UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
+    void UpdateBackBlurStyle(const RefPtr<FrameNode>& tabBarNode);
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     // Information on TabChange event
     struct TabChangeInfo {
@@ -261,6 +269,7 @@ private:
     int32_t floatTabBarFollowHandAnimationCount_ = 0;
     std::list<std::shared_ptr<AnimationUtils::Animation>> floatTabBarFollowHandAnimations_;
     std::optional<float> floatingBarMargin_ = 0.0f;
+    float baseFloatingScale_ = FLOATING_BAR_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -24,8 +24,9 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
-    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+void XComponentControllerNativePeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker, const Ark_ImageAnalyzerConfig* config,
+    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);
     CHECK_NULL_VOID(config);
@@ -58,7 +59,7 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
     });
     wrapAnalyzerConfigImpl = nullptr;
 }
-void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const synthetic_Callback_String_Void& callback)
+void XComponentControllerNativePeerImpl::SetOnSurfaceCreatedEvent(const OnSurfaceCreatedCb& callback)
 {
     arkOnSurfaceCreated = callback;
     onSurfaceCreatedEvent = [arkCallback = CallbackHelper(callback)]
@@ -67,7 +68,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const synthetic_Call
         arkCallback.InvokeSync(arkSurfaceId);
     };
 }
-void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback)
+void XComponentControllerNativePeerImpl::SetOnSurfaceChangedEvent(const OnSurfaceChangedCb& callback)
 {
     arkOnSurfaceChanged = callback;
     onSurfaceChangedEvent = [arkCallback = CallbackHelper(callback)]
@@ -81,7 +82,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
         arkCallback.InvokeSync(arkSurfaceId, arkSurfaceRect);
     };
 }
-void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const synthetic_Callback_String_Void& callback)
+void XComponentControllerNativePeerImpl::SetOnSurfaceDestroyedEvent(const OnSurfaceDestroyedCb& callback)
 {
     arkOnSurfaceDestroyed = callback;
     onSurfaceDestroyedEvent = [arkCallback = CallbackHelper(callback)]
@@ -90,13 +91,13 @@ void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const synthetic_Ca
         arkCallback.InvokeSync(arkSurfaceId);
     };
 }
-std::shared_ptr<drawing_CanvasPeer> XComponentControllerPeerImpl::GetCanvas()
+drawing_CanvasPeer* XComponentControllerNativePeerImpl::GetCanvas()
 {
     CHECK_NULL_RETURN(controller, nullptr);
     CHECK_NULL_RETURN(controller->LockCanvas(), nullptr);
     auto canvas = controller->LockCanvas();
-    if (!rsCanvas_ || rsCanvas_->GetCanvas() != canvas) {
-        rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
+    if (!rsCanvas_ || rsCanvas_ != reinterpret_cast<drawing_CanvasPeer*>(canvas)) {
+        rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas);
     }
     return rsCanvas_;
 }

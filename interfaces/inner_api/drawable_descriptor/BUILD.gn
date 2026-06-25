@@ -101,7 +101,7 @@ if (is_arkui_x) {
       "napi:ace_napi",
     ]
 
-    defines = []
+    defines = [ "PICTURE_DRAWABLE_ENABLED" ]
     if (current_os == "ohos") {
       external_deps += [
         "ability_runtime:app_context",

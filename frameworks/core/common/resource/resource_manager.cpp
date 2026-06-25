@@ -15,8 +15,17 @@
 
 #include "core/common/resource/resource_manager.h"
 
+#include <mutex>
+#include <utility>
+#include <vector>
+
 #include "base/log/dump_log.h"
+#include "base/log/log.h"
+#include "base/utils/resource_configuration.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
+#include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -24,74 +33,20 @@ const std::string DEFAULT_BUNDLE_NAME = "";
 const std::string DEFAULT_MODULE_NAME = "";
 } // namespace
 
+ResourceErrorInfo::ResourceErrorInfo(
+    int32_t nodeId, std::string sourceKey, std::string sourceTag, std::string nodeTag, int64_t errorTime, int32_t state)
+    : nodeId(nodeId), sourceKey(std::move(sourceKey)), sourceTag(std::move(sourceTag)), nodeTag(std::move(nodeTag)),
+      errorTime(errorTime), state(state)
+{}
+
+ResourceManager::ResourceManager() = default;
+
+ResourceManager::~ResourceManager() = default;
+
 ResourceManager& ResourceManager::GetInstance()
 {
     static ResourceManager instance;
     return instance;
-}
-
-RefPtr<ResourceAdapter> ResourceManager::GetOverrideResourceAdapterLocked(const std::string& key, int32_t instanceId)
-{
-    auto stackIter = overrideResourceAdapters_.find(instanceId);
-    if (stackIter == overrideResourceAdapters_.end() || stackIter->second.empty()) {
-        return nullptr;
-    }
-    const auto& adapters = stackIter->second.back().adapters;
-    auto adapterIter = adapters.find(key);
-    if (adapterIter == adapters.end()) {
-        return nullptr;
-    }
-    return adapterIter->second;
-}
-
-ResourceManager::ResourceAdapterMap ResourceManager::GetBaseResourceAdaptersForInstanceLocked(int32_t instanceId)
-{
-    ResourceAdapterMap adapters;
-    const auto compareId = std::to_string(instanceId);
-    for (const auto& [key, adapter] : resourceAdapters_) {
-        if (GetCacheKeyInstanceId(key) == compareId) {
-            adapters[key] = adapter;
-        }
-    }
-    for (const auto& cacheNode : cacheList_) {
-        if (GetCacheKeyInstanceId(cacheNode.cacheKey) == compareId) {
-            adapters[cacheNode.cacheKey] = cacheNode.cacheObj;
-        }
-    }
-    return adapters;
-}
-
-void ResourceManager::AddResourceAdapterLocked(const std::string& bundleName, const std::string& moduleName,
-    int32_t instanceId, RefPtr<ResourceAdapter>& resourceAdapter, bool replace)
-{
-    if (bundleName.empty() && moduleName.empty()) {
-        resourceAdapters_[std::to_string(instanceId)] = resourceAdapter;
-        return;
-    }
-    auto key = MakeCacheKey(bundleName, moduleName, instanceId);
-    if (replace) {
-        CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
-    }
-    CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, resourceAdapter, cacheList_, cache_, capacity_);
-}
-
-RefPtr<ResourceAdapter> ResourceManager::AddOverrideResourceAdapterForNewBaseLocked(
-    const std::string& key, int32_t instanceId, const RefPtr<ResourceAdapter>& resourceAdapter)
-{
-    auto stackIter = overrideResourceAdapters_.find(instanceId);
-    if (stackIter == overrideResourceAdapters_.end() || stackIter->second.empty() || !resourceAdapter) {
-        return nullptr;
-    }
-    RefPtr<ResourceAdapter> effectiveAdapter;
-    ConfigurationChange configChange { .colorModeUpdate = true };
-    for (auto& overrideRecord : stackIter->second) {
-        ResourceConfiguration config;
-        config.SetColorMode(overrideRecord.colorMode);
-        auto overrideAdapter = resourceAdapter->GetOverrideResourceAdapter(config, configChange);
-        effectiveAdapter = overrideAdapter ? overrideAdapter : resourceAdapter;
-        overrideRecord.adapters[key] = effectiveAdapter;
-    }
-    return effectiveAdapter;
 }
 
 RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject)
@@ -114,15 +69,98 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
         if (!resourceAdapter) {
             return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME, instanceId);
         }
-        std::unique_lock<std::shared_mutex> lock(mutex_);
-        AddResourceAdapterLocked(bundleName, moduleName, actualInstanceId, resourceAdapter);
-        auto key = MakeCacheKey(bundleName, moduleName, actualInstanceId);
-        auto overrideAdapter = AddOverrideResourceAdapterForNewBaseLocked(key, actualInstanceId, resourceAdapter);
-        if (overrideAdapter) {
-            return overrideAdapter;
-        }
+        AddResourceAdapter(bundleName, moduleName, actualInstanceId, resourceAdapter);
     }
     return resourceAdapter;
+}
+
+std::string ResourceManager::MakeCacheKey(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+{
+    if (bundleName.empty() && moduleName.empty()) {
+        return std::to_string(instanceId);
+    }
+    return bundleName + "." + moduleName + "." + std::to_string(instanceId);
+}
+
+void ResourceManager::AddResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+    int32_t instanceId, RefPtr<ResourceAdapter>& resourceAdapter, bool replace)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (bundleName.empty() && moduleName.empty()) {
+        resourceAdapters_[std::to_string(instanceId)] = resourceAdapter;
+    } else {
+        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        if (replace) {
+            CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+        }
+        CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ResourceAdapter>>(
+            key, resourceAdapter, cacheList_, cache_, capacity_);
+    }
+}
+
+void ResourceManager::UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+    int32_t instanceId, RefPtr<ResourceAdapter>& resourceAdapter)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto defaultKey = MakeCacheKey("", "", instanceId);
+    auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+    resourceAdapters_[key] = resourceAdapter;
+    resourceAdapters_[defaultKey] = resourceAdapter;
+}
+
+bool ResourceManager::IsResourceAdapterRecord(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+    if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+        return true;
+    }
+    return cache_.find(key) != cache_.end();
+}
+
+std::string ResourceManager::GetCacheKeyInstanceId(const std::string& key)
+{
+    std::vector<std::string> splitter;
+    StringUtils::StringSplitter(key, '.', splitter);
+    return splitter.back();
+}
+
+RefPtr<ResourceAdapter> ResourceManager::GetResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+    auto mapIter = resourceAdapters_.find(key);
+    if (mapIter != resourceAdapters_.end()) {
+        if (instanceId == -1) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resourceAdapter without UI!");
+        }
+        return mapIter->second;
+    } else if (bundleName.empty() && moduleName.empty()) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get default resourceAdapter %{public}d failed, don't get resource while UIContent not initialized yet",
+            instanceId);
+        return ResourceAdapter::Create();
+    }
+
+    auto resAdapter = CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+    if (resAdapter != nullptr) {
+        return resAdapter;
+    }
+
+    return nullptr;
+}
+
+RefPtr<ResourceAdapter> ResourceManager::GetResourceAdapter(int32_t instanceId)
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    auto key = MakeCacheKey("", "", instanceId);
+    if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+        return resourceAdapters_.at(key);
+    }
+    return nullptr;
 }
 
 void ResourceManager::RegisterMainResourceAdapter(const std::string& bundleName, const std::string& moduleName,
@@ -167,37 +205,25 @@ void ResourceManager::UpdateColorMode(
     }
 }
 
-void ResourceManager::PushOverrideColorMode(
-    const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId, ColorMode colorMode)
+void ResourceManager::RemoveResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    OverrideResourceRecord overrideRecord;
-    overrideRecord.colorMode = colorMode;
-    auto effectiveAdapters = GetBaseResourceAdaptersForInstanceLocked(instanceId);
-    ResourceConfiguration config;
-    config.SetColorMode(colorMode);
-    ConfigurationChange configChange { .colorModeUpdate = true };
-    for (const auto& [key, adapter] : effectiveAdapters) {
-        if (!adapter) {
-            continue;
-        }
-        auto overrideAdapter = adapter->GetOverrideResourceAdapter(config, configChange);
-        overrideRecord.adapters[key] = overrideAdapter ? overrideAdapter : adapter;
+    std::string key = MakeCacheKey(bundleName, moduleName, instanceId);
+    if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+        resourceAdapters_.erase(key);
     }
-    overrideResourceAdapters_[instanceId].emplace_back(std::move(overrideRecord));
+    if (!bundleName.empty() && !moduleName.empty()) {
+        CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+    }
 }
 
-void ResourceManager::PopOverrideColorMode(int32_t instanceId)
+void ResourceManager::Reset()
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    auto stackIter = overrideResourceAdapters_.find(instanceId);
-    if (stackIter == overrideResourceAdapters_.end() || stackIter->second.empty()) {
-        return;
-    }
-    stackIter->second.pop_back();
-    if (stackIter->second.empty()) {
-        overrideResourceAdapters_.erase(stackIter);
-    }
+    cacheList_.clear();
+    cache_.clear();
+    TAG_LOGI(AceLogTag::ACE_RESOURCE, "The cache of Resource has been released!");
 }
 
 void ResourceManager::DumpResLoadError()
@@ -212,11 +238,28 @@ void ResourceManager::DumpResLoadError()
 
     DumpLog::GetInstance().Print("ResourceLoadErrorTimes: " + std::to_string(resLoadErrorSize));
     for (const auto& nodeError : resourceErrorList_) {
-        DumpLog::GetInstance().Print(1, "Node: " + std::to_string(nodeError.nodeId) +
-            ", nodeTag: " + nodeError.nodeTag + ", sourceKey: " + nodeError.sourceKey +
-            ", sourceTag: " + nodeError.sourceTag +
-            ", errorCode: " + std::to_string(nodeError.state) + ", errorTime: " +
-            ConvertTimestampToStr(nodeError.errorTime));
+        DumpLog::GetInstance().Print(
+            1, "Node: " + std::to_string(nodeError.nodeId) + ", nodeTag: " + nodeError.nodeTag +
+                   ", sourceKey: " + nodeError.sourceKey + ", sourceTag: " + nodeError.sourceTag + ", errorCode: " +
+                   std::to_string(nodeError.state) + ", errorTime: " + ConvertTimestampToStr(nodeError.errorTime));
+    }
+}
+
+void ResourceManager::AddResourceLoadError(ResourceErrorInfo errorInfo)
+{
+    std::unique_lock<std::shared_mutex> lock(errorMutex_);
+    resourceErrorList_.emplace_front(errorInfo);
+    if (resourceErrorList_.size() > MAX_DUMP_LIST_SIZE) {
+        resourceErrorList_.pop_back();
+    }
+}
+
+void ResourceManager::SetResourceCacheSize(size_t cacheSize)
+{
+    capacity_.store(cacheSize);
+    while (cache_.size() > capacity_) {
+        cache_.erase(cacheList_.back().cacheKey);
+        cacheList_.pop_back();
     }
 }
 } // namespace OHOS::Ace

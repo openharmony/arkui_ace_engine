@@ -1345,6 +1345,7 @@ HWTEST_F(SelectTwoTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
 
     auto inputHub = frameNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     EXPECT_TRUE(inputHub->hoverEventActuator_);
 }
 

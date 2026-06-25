@@ -38,8 +38,8 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -64,7 +64,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -1824,7 +1824,8 @@ HWTEST_F(OverlayTestNg, DialogTest011, TestSize.Level1)
      * @tc.steps: step3. call OpenCustomDialog for contentNode.
      * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
      */
-    overlayManager->OpenCustomDialog(dialogParam, nullptr);
+    std::function<void(int32_t)> openCallbackFst = nullptr;
+    overlayManager->OpenCustomDialog(dialogParam, std::move(openCallbackFst));
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 
     /**

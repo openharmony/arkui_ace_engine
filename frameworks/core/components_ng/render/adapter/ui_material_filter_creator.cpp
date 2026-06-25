@@ -17,6 +17,7 @@
 
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_to_para.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shader_base.h"
 #include "render_service_client/core/ui_effect/filter/include/filter.h"
 #include "ui/properties/ui_material_structs.h"
 
@@ -26,14 +27,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
+const Rosen::Vector2f EMPTY_ROSEN_VECTOR2F { 0.0f, 0.0f };
+
 constexpr FrostedGlassParam Gentle_Regular_Transparency3_Light {
     .blurParams = { 12.0f, 6.0f },
     .weightsEmboss = {},
-    .weightsEdl = { 1.0f, 0.6f },
-    .bgRates = {},
-    .bgKBS = { 0.6975f, 0.2706f, 1.2f },
-    .bgPos = { 1.0f, 1.5f, 1.0f },
-    .bgNeg = { 1.2f, 1.0f, 1.0f },
+    .weightsEdl = { 1.0f, 0.7f },
+    .bgRates = { 0.2526f, -0.663f },
+    .bgKBS = { 0.9099f, 0.498f, 1.5f },
+    .bgPos = { 0.1f, 1.0f, 0.5f },
+    .bgNeg = { 1.5f, 1.5f, 2.0f },
     .refractParams = {},
     .edLightParams = { 0.83f, 0.92f },
     .edLightAngles = { 75.0f, 120.0f },
@@ -44,21 +48,21 @@ constexpr FrostedGlassParam Gentle_Regular_Transparency3_Light {
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 12.0f, 6.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.5259f, 0.07f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
     .darkModeEdLightAngles = { 75.0f, 120.0f },
     .darkModeEdLightKBS = { 1.2f, 0.294f, 1.5f },
 };
 constexpr FrostedGlassParam Gentle_Regular_Transparency3_Dark {
     .blurParams = { 12.0f, 6.0f },
     .weightsEmboss = {},
-    .weightsEdl = { 1.0f, 0.7f },
-    .bgRates = { -0.6697f, 1.582f },
-    .bgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .bgPos = { -0.1f, 0.1f, 0.2f },
-    .bgNeg = { 1.0f, 3.0f, 0.5f },
+    .weightsEdl = { 1.0f, 0.6f },
+    .bgRates = {},
+    .bgKBS = { 0.5259f, 0.07f, 1.5f },
+    .bgPos = { 1.5f, 3.0f, 1.0f },
+    .bgNeg = { 1.0f, 1.0f, 0.5f },
     .refractParams = {},
     .edLightParams = { 0.83f, 0.92f },
     .edLightAngles = { 75.0f, 120.0f },
@@ -69,80 +73,80 @@ constexpr FrostedGlassParam Gentle_Regular_Transparency3_Dark {
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 12.0f, 6.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.5259f, 0.07f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
     .darkModeEdLightAngles = { 75.0f, 120.0f },
     .darkModeEdLightKBS = { 1.2f, 0.294f, 1.5f },
 };
 constexpr FrostedGlassParam Gentle_Regular_Transparency4_Light {
-    .blurParams = { 25.0f, 1.0f },
+    .blurParams = { 20.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = {},
-    .bgKBS = { 0.6975f, 0.2706f, 1.2f },
-    .bgPos = { 1.0f, 1.5f, 1.0f },
-    .bgNeg = { 1.2f, 1.0f, 1.0f },
+    .bgKBS = { 0.2988f, 0.7059f, 1.5f },
+    .bgPos = { 2.0f, 1.5f, 1.0f },
+    .bgNeg = { 2.0f, 3.0f, 2.0f },
     .refractParams = {},
-    .darkModeBlurParams = { 25.0f, 1.0f },
+    .darkModeBlurParams = { 20.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = { -0.0056f, 0.0721f },
+    .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_Regular_Transparency4_Dark {
-    .blurParams = { 25.0f, 1.0f },
+    .blurParams = { 20.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { -0.6697f, 1.582f },
-    .bgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .bgPos = { -0.1f, 0.1f, 0.2f },
-    .bgNeg = { 1.0f, 3.0f, 0.5f },
+    .bgRates = { -0.0056f, 0.0721f },
+    .bgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .bgPos = { 1.5f, 3.0f, 1.0f },
+    .bgNeg = { 1.0f, 1.0f, 0.5f },
     .refractParams = {},
-    .darkModeBlurParams = { 25.0f, 1.0f },
+    .darkModeBlurParams = { 20.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = { -0.0056f, 0.0721f },
+    .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_Regular_Transparency5_Light {
-    .blurParams = { 50.0f, 1.0f },
+    .blurParams = { 40.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = {},
-    .bgKBS = { 0.6975f, 0.2706f, 1.2f },
-    .bgPos = { 1.0f, 1.5f, 1.0f },
-    .bgNeg = { 1.2f, 1.0f, 1.0f },
+    .bgKBS = { 0.2988f, 0.7059f, 1.5f },
+    .bgPos = { 2.0f, 1.5f, 1.0f },
+    .bgNeg = { 2.0f, 3.0f, 2.0f },
     .refractParams = {},
-    .darkModeBlurParams = { 50.0f, 1.0f },
+    .darkModeBlurParams = { 40.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = { -0.0056f, 0.0721f },
+    .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_Regular_Transparency5_Dark {
-    .blurParams = { 50.0f, 1.0f },
+    .blurParams = { 40.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { -0.6697f, 1.582f },
-    .bgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .bgPos = { -0.1f, 0.1f, 0.2f },
-    .bgNeg = { 1.0f, 3.0f, 0.5f },
+    .bgRates = { -0.0056f, 0.0721f },
+    .bgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .bgPos = { 1.5f, 3.0f, 1.0f },
+    .bgNeg = { 1.0f, 1.0f, 0.5f },
     .refractParams = {},
-    .darkModeBlurParams = { 50.0f, 1.0f },
+    .darkModeBlurParams = { 40.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { -0.6697f, 1.582f },
-    .darkModeBgKBS = { -0.2277f, 0.1419f, 1.5f },
-    .darkModeBgPos = { -0.1f, 0.1f, 0.2f },
-    .darkModeBgNeg = { 1.0f, 3.0f, 0.5f },
+    .darkModeBgRates = { -0.0056f, 0.0721f },
+    .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
+    .darkModeBgPos = { 1.5f, 3.0f, 1.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Light {
     .blurParams = { 5.0f, 20.0f },
-    .weightsEmboss = { 0.8f, 0.8f },
+    .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.7f },
     .bgRates = { 0.1789f, -0.6972f },
     .bgKBS = { 1.4384f, 0.0718f, 1.2f },
@@ -157,7 +161,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Light {
     .edLightPos = { 1.0f, 1.5f, 2.0f },
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 5.0f, 20.0f },
-    .darkModeWeightsEmboss = { 0.8f, 0.8f },
+    .darkModeWeightsEmboss = {},
     .darkModeBgRates = { 0.0023f, -0.0176f },
     .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
     .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
@@ -167,7 +171,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Light {
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Dark {
     .blurParams = { 5.0f, 20.0f },
-    .weightsEmboss = { 0.8f, 0.8f },
+    .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.6f },
     .bgRates = { 0.0023f, -0.0176f },
     .bgKBS = { 0.8414f, 0.0765f, 1.2f },
@@ -182,7 +186,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Dark {
     .edLightPos = { 1.0f, 1.5f, 2.0f },
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 5.0f, 20.0f },
-    .darkModeWeightsEmboss = { 0.8f, 0.8f },
+    .darkModeWeightsEmboss = {},
     .darkModeBgRates = { 0.0023f, -0.0176f },
     .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
     .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
@@ -191,7 +195,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency3_Dark {
     .darkModeEdLightKBS = { 1.0f, 0.2268f, 1.2f },
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Light {
-    .blurParams = { 12.0f, 1.0f },
+    .blurParams = { 10.0f, 20.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = { 0.2526f, -0.663f },
@@ -199,7 +203,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Light {
     .bgPos = { 0.1f, 1.0f, 0.5f },
     .bgNeg = { 1.5f, 1.5f, 2.0f },
     .refractParams = {},
-    .darkModeBlurParams = { 12.0f, 1.0f },
+    .darkModeBlurParams = { 10.0f, 20.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = { -0.0056f, 0.0721f },
     .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
@@ -207,7 +211,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Light {
     .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Dark {
-    .blurParams = { 12.0f, 1.0f },
+    .blurParams = { 10.0f, 20.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = { -0.0056f, 0.0721f },
@@ -215,7 +219,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Dark {
     .bgPos = { 1.5f, 3.0f, 1.0f },
     .bgNeg = { 1.0f, 1.0f, 0.5f },
     .refractParams = {},
-    .darkModeBlurParams = { 12.0f, 1.0f },
+    .darkModeBlurParams = { 10.0f, 20.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = { -0.0056f, 0.0721f },
     .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
@@ -223,7 +227,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency4_Dark {
     .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Light {
-    .blurParams = { 24.0f, 1.0f },
+    .blurParams = { 20.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = { 0.2526f, -0.663f },
@@ -231,7 +235,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Light {
     .bgPos = { 0.1f, 1.0f, 0.5f },
     .bgNeg = { 1.5f, 1.5f, 2.0f },
     .refractParams = {},
-    .darkModeBlurParams = { 24.0f, 1.0f },
+    .darkModeBlurParams = { 20.0f, 1.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = { -0.0056f, 0.0721f },
     .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
@@ -239,7 +243,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Light {
     .darkModeBgNeg = { 1.0f, 1.0f, 0.5f },
 };
 constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Dark {
-    .blurParams = { 24.0f, 1.0f },
+    .blurParams = { 20.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = { -0.0056f, 0.0721f },
@@ -247,7 +251,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Dark {
     .bgPos = { 1.5f, 3.0f, 1.0f },
     .bgNeg = { 1.0f, 1.0f, 0.5f },
     .refractParams = {},
-    .darkModeBlurParams = { 24.0f, 1.0f },
+    .darkModeBlurParams = { 20.0f, 1.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = { -0.0056f, 0.0721f },
     .darkModeBgKBS = { 0.3752f, 0.1296f, 1.5f },
@@ -256,7 +260,7 @@ constexpr FrostedGlassParam Gentle_UltraThin_Transparency5_Dark {
 };
 constexpr FrostedGlassParam Gentle_Thin_Transparency3_Light {
     .blurParams = { 12.0f, 6.0f },
-    .weightsEmboss = { 0.8f, 0.8f },
+    .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.7f },
     .bgRates = { 0.1789f, -0.6972f },
     .bgKBS = { 1.4384f, 0.0718f, 1.2f },
@@ -271,7 +275,7 @@ constexpr FrostedGlassParam Gentle_Thin_Transparency3_Light {
     .edLightPos = { 1.0f, 1.5f, 2.0f },
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 12.0f, 6.0f },
-    .darkModeWeightsEmboss = { 0.8f, 0.8f },
+    .darkModeWeightsEmboss = {},
     .darkModeBgRates = { 0.0023f, -0.0176f },
     .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
     .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
@@ -281,7 +285,7 @@ constexpr FrostedGlassParam Gentle_Thin_Transparency3_Light {
 };
 constexpr FrostedGlassParam Gentle_Thin_Transparency3_Dark {
     .blurParams = { 12.0f, 6.0f },
-    .weightsEmboss = { 0.8f, 0.8f },
+    .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.6f },
     .bgRates = { 0.0023f, -0.0176f },
     .bgKBS = { 0.8414f, 0.0765f, 1.2f },
@@ -296,7 +300,7 @@ constexpr FrostedGlassParam Gentle_Thin_Transparency3_Dark {
     .edLightPos = { 1.0f, 1.5f, 2.0f },
     .edLightNeg = { 1.7f, 3.0f, 1.0f },
     .darkModeBlurParams = { 12.0f, 6.0f },
-    .darkModeWeightsEmboss = { 0.8f, 0.8f },
+    .darkModeWeightsEmboss = {},
     .darkModeBgRates = { 0.0023f, -0.0176f },
     .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
     .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
@@ -373,7 +377,7 @@ constexpr FrostedGlassParam Gentle_UltraThick_Transparency3_Light {
     .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.4f },
     .bgRates = {},
-    .bgKBS = { 0.196f, 0.7645f, 2.3f },
+    .bgKBS = { 0.1f, 0.88f, 2.3f },
     .bgPos = { 0.8f, 0.7f, 1.0f },
     .bgNeg = { 1.0f, 1.2f, 1.0f },
     .refractParams = {},
@@ -387,9 +391,9 @@ constexpr FrostedGlassParam Gentle_UltraThick_Transparency3_Light {
     .darkModeBlurParams = { 12.0f, 1.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = {},
-    .darkModeBgKBS = { 0.31f, 0.18f, 1.6f },
-    .darkModeBgPos = { 2.3f, 4.0f, 1.0f },
-    .darkModeBgNeg = { 1.0f, 1.0f, 2.0f },
+    .darkModeBgKBS = { 0.1f, 0.12f, 1.7f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
     .darkModeEdLightAngles = { 75.0f, 120.0f },
     .darkModeEdLightKBS = { 1.2f, 0.294f, 1.5f },
 };
@@ -398,9 +402,9 @@ constexpr FrostedGlassParam Gentle_UltraThick_Transparency3_Dark {
     .weightsEmboss = {},
     .weightsEdl = { 1.0f, 0.7f },
     .bgRates = {},
-    .bgKBS = { 0.31f, 0.18f, 1.6f },
-    .bgPos = { 2.3f, 4.0f, 1.0f },
-    .bgNeg = { 1.0f, 1.0f, 2.0f },
+    .bgKBS = { 0.1f, 0.12f, 1.7f },
+    .bgPos = { 0.5f, 0.7f, 2.0f },
+    .bgNeg = { 1.0f, 1.0f, 1.0f },
     .refractParams = {},
     .edLightParams = { 0.83f, 0.92f },
     .edLightAngles = { 75.0f, 120.0f },
@@ -412,9 +416,9 @@ constexpr FrostedGlassParam Gentle_UltraThick_Transparency3_Dark {
     .darkModeBlurParams = { 12.0f, 1.0f },
     .darkModeWeightsEmboss = {},
     .darkModeBgRates = {},
-    .darkModeBgKBS = { 0.31f, 0.18f, 1.6f },
-    .darkModeBgPos = { 2.3f, 4.0f, 1.0f },
-    .darkModeBgNeg = { 1.0f, 1.0f, 2.0f },
+    .darkModeBgKBS = { 0.1f, 0.12f, 1.7f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
     .darkModeEdLightAngles = { 75.0f, 120.0f },
     .darkModeEdLightKBS = { 1.2f, 0.294f, 1.5f },
 };
@@ -422,65 +426,65 @@ constexpr FrostedGlassParam Gentle_UltraThick_Transparency4_Light {
     .blurParams = { 25.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { 0.0f, -0.418f },
-    .bgKBS = { 0.7254f, 0.68f, 1.2f },
-    .bgPos = { -0.2f, 0.2f, 1.0f },
-    .bgNeg = { -1.0f, 2.0f, 2.0f },
+    .bgRates = {},
+    .bgKBS = { 0.1f, 0.88f, 2.3f },
+    .bgPos = { 0.8f, 0.7f, 1.0f },
+    .bgNeg = { 1.0f, 1.2f, 1.0f },
     .refractParams = {},
     .darkModeBlurParams = { 25.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { 0.5722f, -1.207f },
-    .darkModeBgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .darkModeBgPos = { 3.0f, 5.0f, 3.0f },
-    .darkModeBgNeg = { 2.0f, 2.0f, 1.0f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.1f, 0.12f, 2.0f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
 };
 constexpr FrostedGlassParam Gentle_UltraThick_Transparency4_Dark {
     .blurParams = { 25.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { 0.5722f, -1.207f },
-    .bgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .bgPos = { 3.0f, 5.0f, 3.0f },
-    .bgNeg = { 2.0f, 2.0f, 1.0f },
+    .bgRates = {},
+    .bgKBS = { 0.1f, 0.12f, 2.0f },
+    .bgPos = { 0.5f, 0.7f, 2.0f },
+    .bgNeg = { 1.0f, 1.0f, 1.0f },
     .refractParams = {},
     .darkModeBlurParams = { 25.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { 0.5722f, -1.207f },
-    .darkModeBgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .darkModeBgPos = { 3.0f, 5.0f, 3.0f },
-    .darkModeBgNeg = { 2.0f, 2.0f, 1.0f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.1f, 0.12f, 2.0f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
 };
 constexpr FrostedGlassParam Gentle_UltraThick_Transparency5_Light {
     .blurParams = { 50.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { 0.0f, -0.418f },
-    .bgKBS = { 0.7254f, 0.68f, 1.2f },
-    .bgPos = { -0.2f, 0.2f, 1.0f },
-    .bgNeg = { -1.0f, 2.0f, 2.0f },
+    .bgRates = {},
+    .bgKBS = { 0.1f, 0.88f, 2.3f },
+    .bgPos = { 0.8f, 0.7f, 1.0f },
+    .bgNeg = { 1.0f, 1.2f, 1.0f },
     .refractParams = {},
     .darkModeBlurParams = { 50.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { 0.5722f, -1.207f },
-    .darkModeBgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .darkModeBgPos = { 3.0f, 5.0f, 3.0f },
-    .darkModeBgNeg = { 2.0f, 2.0f, 1.0f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.1f, 0.12f, 2.0f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
 };
 constexpr FrostedGlassParam Gentle_UltraThick_Transparency5_Dark {
     .blurParams = { 50.0f, 1.0f },
     .weightsEmboss = {},
     .weightsEdl = {},
-    .bgRates = { 0.5722f, -1.207f },
-    .bgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .bgPos = { 3.0f, 5.0f, 3.0f },
-    .bgNeg = { 2.0f, 2.0f, 1.0f },
+    .bgRates = {},
+    .bgKBS = { 0.1f, 0.12f, 2.0f },
+    .bgPos = { 0.5f, 0.7f, 2.0f },
+    .bgNeg = { 1.0f, 1.0f, 1.0f },
     .refractParams = {},
     .darkModeBlurParams = { 50.0f, 1.0f },
     .darkModeWeightsEmboss = {},
-    .darkModeBgRates = { 0.5722f, -1.207f },
-    .darkModeBgKBS = { 0.9025f, 0.0706f, 1.4f },
-    .darkModeBgPos = { 3.0f, 5.0f, 3.0f },
-    .darkModeBgNeg = { 2.0f, 2.0f, 1.0f },
+    .darkModeBgRates = {},
+    .darkModeBgKBS = { 0.1f, 0.12f, 2.0f },
+    .darkModeBgPos = { 0.5f, 0.7f, 2.0f },
+    .darkModeBgNeg = { 1.0f, 1.0f, 1.0f },
 };
 constexpr FrostedGlassParam Gentle_Thick_Transparency3_Light {
     .blurParams = { 12.0f, 1.0f },
@@ -537,7 +541,7 @@ constexpr FrostedGlassParam Gentle_Thick_Transparency4_Light {
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = {},
-    .bgKBS = { 0.196f, 0.7645f, 2.3f },
+    .bgKBS = { 0.196f, 0.8f, 2.3f },
     .bgPos = { 0.8f, 0.7f, 1.0f },
     .bgNeg = { 1.0f, 1.2f, 1.0f },
     .refractParams = {},
@@ -569,7 +573,7 @@ constexpr FrostedGlassParam Gentle_Thick_Transparency5_Light {
     .weightsEmboss = {},
     .weightsEdl = {},
     .bgRates = {},
-    .bgKBS = { 0.196f, 0.7645f, 2.3f },
+    .bgKBS = { 0.196f, 0.8f, 2.3f },
     .bgPos = { 0.8f, 0.7f, 1.0f },
     .bgNeg = { 1.0f, 1.2f, 1.0f },
     .refractParams = {},
@@ -740,10 +744,63 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
     auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
     CHECK_NULL_RETURN(glassFilter, nullptr);
     auto& materialColor = params.materialColor;
+    if (materialColor.GetAlpha() > 0) {
+        glassFilter->Setter<Rosen::FrostedGlassWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        glassFilter->Setter<Rosen::FrostedGlassDarkModeWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+    }
     Rosen::Vector4f rsColor { materialColor.GetRed() / 255.0f, materialColor.GetGreen() / 255.0f,
         materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
     glassFilter->Setter<Rosen::FrostedGlassMaterialColorTag>(rsColor);
     return filter;
+#endif
+}
+
+std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMaterialECFilter(
+    const ImmersiveMaterialConfig& params)
+{
+    int32_t style = static_cast<int32_t>(params.key.style);
+    ImmersiveMaterialConfig newConfig = params;
+    newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
+
+    std::shared_ptr<Rosen::RSNGFilterBase> filter;
+    if (!MaterialUtils::GetUiMaterialFilterEC(newConfig, filter)) {
+        auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
+        if (iter == MATERIAL_PARAM_MAP.end()) {
+            return nullptr;
+        }
+        filter = RosenEffectConverter::ConvertToFrostedGlassFilterEC(*(iter->second), newConfig.dipScale);
+    }
+    return filter;
+}
+std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(
+    const ImmersiveMaterialConfig& params)
+{
+    int32_t style = static_cast<int32_t>(params.key.style);
+    ImmersiveMaterialConfig newConfig = params;
+    newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
+
+    std::shared_ptr<Rosen::RSNGShaderBase> shader;
+    if (!MaterialUtils::GetUiMaterialShaderECSub(newConfig, shader)) {
+        auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
+        if (iter == MATERIAL_PARAM_MAP.end()) {
+            return nullptr;
+        }
+        shader = RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(*(iter->second), newConfig.dipScale);
+    }
+#if defined(CROSS_PLATFORM)
+    return shader;
+#else
+    auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(shader);
+    CHECK_NULL_RETURN(glassEffect, nullptr);
+    auto& materialColor = newConfig.materialColor;
+    if (materialColor.GetAlpha() > 0) {
+        glassEffect->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
+        // no darkmode param till now
+    }
+    Rosen::Vector4f rsColor { materialColor.GetRed() / 255.0f, materialColor.GetGreen() / 255.0f,
+        materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
+    glassEffect->Setter<Rosen::FrostedGlassEffectMaterialColorTag>(rsColor);
+    return shader;
 #endif
 }
 

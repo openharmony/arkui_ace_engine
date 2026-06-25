@@ -23,7 +23,8 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/text_enums.h"
@@ -31,6 +32,7 @@
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/overlay/level_mode.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/event/ace_event_handler.h"
@@ -917,6 +919,16 @@ public:
         return effectOption_;
     }
 
+    void SetLevelMode(LevelMode levelMode)
+    {
+        levelMode_ = levelMode;
+    }
+
+    LevelMode GetLevelMode() const
+    {
+        return levelMode_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -973,6 +985,7 @@ private:
     RefPtr<UiMaterial> systemMaterial_ = nullptr;
     std::optional<BlurStyleOption> blurStyleOption_;
     std::optional<EffectOption> effectOption_;
+    LevelMode levelMode_ = LevelMode::OVERLAY;
     // Used in NG mode
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.

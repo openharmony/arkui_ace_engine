@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelNG : public OHOS::Ace::RichEditorModel {
@@ -216,6 +217,7 @@ public:
         std::function<bool(const NG::StyledStringChangeValue&)>&& func);
     static void SetOnStyledStringDidChange(FrameNode* frameNode,
         std::function<void(const NG::StyledStringChangeValue&)>&& func);
+    static void SetKeyboardAppearanceConfig(FrameNode* frameNode, NG::KeyboardAppearanceConfig config);
 
 private:
     void SetDraggable(bool draggable);

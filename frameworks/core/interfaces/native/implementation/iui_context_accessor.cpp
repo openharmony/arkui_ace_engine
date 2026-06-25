@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
+#include "core/interfaces/native/implementation/raw_input_event_wrapper_peer.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -181,7 +182,7 @@ MouseInfo CreateMonitorMouseInfo(const MouseEvent& event)
 
 Ark_RawInputEventWrapper CreateArkRawInputEventWrapper(const RawInputEventWrapper& wrapper)
 {
-    Ark_Union_MouseEvent_TouchEventProxy_KeyEvent event {};
+    RawInputEventUnion event {};
 
     if (wrapper.IsMouseEvent()) {
         event.selector = 0;
@@ -220,9 +221,7 @@ Ark_RawInputEventWrapper CreateArkRawInputEventWrapper(const RawInputEventWrappe
         }
     }
 
-    auto* accessor = GetRawInputEventWrapperAccessor();
-    CHECK_NULL_RETURN(accessor, nullptr);
-    return accessor->construct(&event);
+    return CreateRawInputEventWrapperPeer(&event);
 }
 
 void HandleOnTouchEvent(WeakPtr<ScrollControllerBase> scroller, const TouchEventInfo& info)

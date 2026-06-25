@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 class SpanString;
 class CalcDimensionRect;
+class Decoration;
 }
 
 namespace OHOS::Ace::Framework {

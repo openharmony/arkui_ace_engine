@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -1214,13 +1215,17 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
     if (transition.duration + transition.delay == longestAnimationDuration) {
         finish = BuildTransitionFinishCallback(isEnter, false, std::move(transition.onTransitionEnd));
     } else {
-        finish = [onTransitionEnd = std::move(transition.onTransitionEnd), weak = WeakClaim(this)]() {
-            auto node = weak.Upgrade();
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        finish = [onTransitionEnd = std::move(transition.onTransitionEnd),
+            weakNavNode = WeakPtr<NavigationGroupNode>(navigationNode)]() {
             if (onTransitionEnd) {
                 onTransitionEnd();
             }
-            CHECK_NULL_VOID(node);
-            node->OnFinishOneTransitionAnimation();
+            auto navNode = weakNavNode.Upgrade();
+            CHECK_NULL_VOID(navNode);
+            auto navPattern = navNode->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(navPattern);
+            navPattern->OnFinishOneTransitionAnimation();
         };
     }
     OnStartOneTransitionAnimation();
@@ -1251,6 +1256,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
             auto destinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(destinationPattern);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s transition finish", destinationPattern->GetName().c_str());
+            navDestination->GetRenderContext()->SetLayerMark(false);
             // do extraOption first
             if (extraOption) {
                 extraOption();
@@ -1296,23 +1302,30 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 navDestination->ContentChangeReport();
             }
         };
-    auto finisWrapper = [onFinish = std::move(finish), weak = WeakClaim(this)]() {
-        auto node = weak.Upgrade();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    auto finisWrapper = [onFinish = std::move(finish),
+        weakNavNode = WeakPtr<NavigationGroupNode>(navigationNode)]() {
         if (onFinish) {
             onFinish();
         }
-        CHECK_NULL_VOID(node);
-        node->OnFinishOneTransitionAnimation();
+        auto navNode = weakNavNode.Upgrade();
+        CHECK_NULL_VOID(navNode);
+        auto navPattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navPattern);
+        navPattern->OnFinishOneTransitionAnimation();
     };
     return finisWrapper;
 }
 
 std::function<void()> NavDestinationGroupNode::BuildEmptyFinishCallback()
 {
-    auto finish = [weak = WeakClaim(this)]() {
-        auto node = weak.Upgrade();
-        CHECK_NULL_VOID(node);
-        node->OnFinishOneTransitionAnimation();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    auto finish = [weakNavNode = WeakPtr<NavigationGroupNode>(navigationNode)]() {
+        auto navNode = weakNavNode.Upgrade();
+        CHECK_NULL_VOID(navNode);
+        auto navPattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navPattern);
+        navPattern->OnFinishOneTransitionAnimation();
     };
     return finish;
 }

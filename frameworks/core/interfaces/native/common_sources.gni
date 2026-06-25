@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,6 @@ common_sources = [
   "implementation/canvas_renderer_peer_impl.cpp",
   "implementation/canvas_rendering_context2d_peer_impl.cpp",
   "implementation/custom_dialog_controller_peer_impl.cpp",
-  "implementation/date_picker_dialog_extender.cpp",
   "implementation/dialog_common.cpp",
   "implementation/drawing_rendering_context_peer_impl.cpp",
   "implementation/global_scope_accessor.cpp",
@@ -26,22 +25,24 @@ common_sources = [
   "implementation/image_bitmap_peer_impl.cpp",
   "implementation/image_common_methods.cpp",
   "implementation/matrix2d_peer_impl.cpp",
-  "implementation/navigation_context.cpp",
   "implementation/nav_destination_scrollable_processor_static.cpp",
+  "implementation/navigation_context.cpp",
   "implementation/offscreen_canvas_peer.cpp",
   "implementation/offscreen_canvas_rendering_context2d_peer_impl.cpp",
   "implementation/scroller_peer_impl.cpp",
   "implementation/search_modifier_impl.cpp",
   "implementation/text_field_modifier.cpp",
-  "implementation/text_picker_dialog_extender.cpp",
-  "implementation/video_controller_peer_impl.cpp",
   "implementation/ui_extension_proxy_peer.cpp",
+  "implementation/video_controller_async_accessor.cpp",
+  "implementation/video_controller_async_peer_impl.cpp",
+  "implementation/video_controller_peer_impl.cpp",
   "implementation/web_modifier_callbacks.cpp",
   "implementation/x_component_controller_peer_impl.cpp",
   "utility/accessor_utils.cpp",
   "utility/callback_helper.cpp",
   "utility/converter_enums.cpp",
   "utility/peer_utils.cpp",
+  "utility/preview_placeholder.cpp",
   "utility/reverse_converter.cpp",
   "utility/reverse_converter_enums.cpp",
   "utility/validators.cpp",

@@ -17,6 +17,8 @@
 
 #include "compatible/components/text_field/text_field_component.h"
 #include "compatible/components/video/texture_component.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
@@ -77,6 +79,14 @@ constexpr int32_t TRANSITION_NAME_LENGTH = 4;
 // prefix id of TweenComponent, for differentiation from id of ComposedComponent
 constexpr char COMPONENT_PREFIX[] = "FrontendTween";
 constexpr char TRANSITION_COMPONENT_PREFIX[] = "FrontendTransition";
+
+void NoopBackendEvent()
+{
+}
+
+void NoopTouchBackendEvent(const TouchEventInfo&)
+{
+}
 
 } // namespace
 
@@ -1960,8 +1970,8 @@ void DOMNode::PrepareTouchEvent(EventMarker& eventMarker, uint32_t type)
     auto weak = AceType::WeakClaim(this);
     if (eventMarker.IsEmpty()) {
         eventMarker = BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().GetAvailableMarker();
-        BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().BindBackendEvent(
-            eventMarker, [](const TouchEventInfo&) {});
+        BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().BindBackendEvent(eventMarker,
+            NoopTouchBackendEvent);
     }
     eventMarker.SetPreFunction([weak, type]() {
         auto domNode = weak.Upgrade();
@@ -1982,31 +1992,30 @@ void DOMNode::PrepareMouseHoverEvent()
         return;
     }
     auto weak = AceType::WeakClaim(this);
+    const auto makePreHook = [weak](bool value) {
+        return [weak, value]() {
+            auto domNode = weak.Upgrade();
+            if (!domNode) {
+                return;
+            }
+            domNode->OnHover(value);
+        };
+    };
     if (mouseEvent.mouseHover.eventMarker.IsEmpty()) {
         mouseEvent.mouseHover.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         mouseEvent.mouseHover.isRefreshed = true;
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHover.eventMarker, []() {});
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHover.eventMarker,
+            NoopBackendEvent);
     }
-    mouseEvent.mouseHover.eventMarker.SetPreFunction([weak]() {
-        auto domNode = weak.Upgrade();
-        if (!domNode) {
-            return;
-        }
-        domNode->OnHover(true);
-    });
+    mouseEvent.mouseHover.eventMarker.SetPreFunction(makePreHook(true));
 
     if (mouseEvent.mouseHoverExit.eventMarker.IsEmpty()) {
         mouseEvent.mouseHoverExit.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         mouseEvent.mouseHoverExit.isRefreshed = true;
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHoverExit.eventMarker, []() {});
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(mouseEvent.mouseHoverExit.eventMarker,
+            NoopBackendEvent);
     }
-    mouseEvent.mouseHoverExit.eventMarker.SetPreFunction([weak]() {
-        auto domNode = weak.Upgrade();
-        if (!domNode) {
-            return;
-        }
-        domNode->OnHover(false);
-    });
+    mouseEvent.mouseHoverExit.eventMarker.SetPreFunction(makePreHook(false));
 }
 
 void DOMNode::PrepareFocusableEventId()
@@ -2020,33 +2029,32 @@ void DOMNode::PrepareFocusableEventId()
     }
 
     auto weak = AceType::WeakClaim(this);
+    const auto makePreHook = [weak](bool value) {
+        return [weak, value]() {
+            auto domNode = weak.Upgrade();
+            if (!domNode) {
+                return;
+            }
+            domNode->OnFocus(value);
+        };
+    };
     if (focusEvent.focus.eventMarker.IsEmpty()) {
         focusEvent.focus.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         focusEvent.focus.isRefreshed = true;
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.focus.eventMarker, []() {});
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.focus.eventMarker,
+            NoopBackendEvent);
     }
 
-    focusEvent.focus.eventMarker.SetPreFunction([weak]() {
-        auto domNode = weak.Upgrade();
-        if (!domNode) {
-            return;
-        }
-        domNode->OnFocus(true);
-    });
+    focusEvent.focus.eventMarker.SetPreFunction(makePreHook(true));
 
     if (focusEvent.blur.eventMarker.IsEmpty()) {
         focusEvent.blur.eventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         focusEvent.blur.isRefreshed = true;
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.blur.eventMarker, []() {});
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusEvent.blur.eventMarker,
+            NoopBackendEvent);
     }
 
-    focusEvent.blur.eventMarker.SetPreFunction([weak]() {
-        auto domNode = weak.Upgrade();
-        if (!domNode) {
-            return;
-        }
-        domNode->OnFocus(false);
-    });
+    focusEvent.blur.eventMarker.SetPreFunction(makePreHook(false));
 }
 
 void DOMNode::UpdateTouchEventComponent()

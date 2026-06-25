@@ -73,7 +73,7 @@ void JSLocalStorage::GetShared(const JSCallbackInfo& info)
     }
     auto it = storages_.find(currentInstance);
     if (it == storages_.end()) {
-        LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
+        LOGD("LocalStorage with ID %{public}d not found!", currentInstance);
         return;
     }
     info.SetReturnValue(it->second);

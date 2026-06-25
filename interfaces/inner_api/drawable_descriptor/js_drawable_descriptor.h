@@ -46,12 +46,14 @@ private:
     static napi_value InitLayeredDrawable(napi_env env);
     static napi_value InitAnimatedDrawable(napi_env env);
     static napi_value InitPixelMapDrawable(napi_env env);
+    static napi_value InitPictureDrawable(napi_env env);
     static napi_value InitAnimationStopMode(napi_env env, napi_value exports);
     static void ParseAnimationOptions(napi_env env, napi_value napiOptions, AnimationOptions& options);
     static napi_value DrawableConstructor(napi_env env, napi_callback_info info);
     static napi_value AnimatedConstructor(napi_env env, napi_callback_info info);
     static napi_value PixelMapConstructor(napi_env env, napi_callback_info info);
     static napi_value LayeredConstructor(napi_env env, napi_callback_info info);
+    static napi_value PictureConstructor(napi_env env, napi_callback_info info);
     static void ParseLayeredArgs(
         napi_env env, size_t argc, napi_value argv[], LayeredDrawableDescriptor* layeredDrawable);
     static void ParsePixelMapConstructorArg(napi_env env, void* drawable, napi_value arg);
@@ -65,6 +67,10 @@ private:
     static void LoadExecute(napi_env env, void* data);
     static void LoadComplete(napi_env env, napi_status status, void* data);
     static napi_value LoadSync(napi_env env, napi_callback_info info);
+
+    // release methods
+    static napi_value Release(napi_env env, napi_callback_info info);
+    static napi_value IsReleased(napi_env env, napi_callback_info info);
 
     // animated drawable descriptor methods
     static napi_value GetAnimationController(napi_env env, napi_callback_info info);
@@ -81,20 +87,32 @@ private:
     static napi_value GetMaskClipPath(napi_env env, napi_callback_info info);
     static napi_value SetBlendMode(napi_env env, napi_callback_info info);
 
+    // picture drawable descriptor methods
+    struct HdrCompositionOptions {
+        int32_t x = 0;
+        int32_t y = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+    };
+    static napi_value SetHdrComposition(napi_env env, napi_callback_info info);
+    static void ParseHdrCompositionOptions(napi_env env, napi_value napiOptions, HdrCompositionOptions& options);
+    static napi_value Invalidate(napi_env env, napi_callback_info info);
+
     static thread_local napi_ref baseConstructor_;
     static thread_local napi_ref layeredConstructor_;
-    static thread_local napi_ref animatedConstructor_;
     static thread_local napi_ref pixelMapConstructor_;
 
     static std::vector<napi_property_descriptor> GetBaseDrawableDescriptor(napi_env env);
     static std::vector<napi_property_descriptor> GetLayeredDrawableDescriptor(napi_env env);
     static std::vector<napi_property_descriptor> GetAnimatedDrawableDescriptor(napi_env env);
     static std::vector<napi_property_descriptor> GetPixelMapDrawableDescriptor(napi_env env);
+    static std::vector<napi_property_descriptor> GetPictureDrawableDescriptor(napi_env env);
 
     static napi_value CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info);
     static napi_value CreatLayeredDrawable(napi_env env, void* native);
     static napi_value CreatAnimatedDrawable(napi_env env, void* native);
     static napi_value CreatPixelMapDrawable(napi_env env, void* native);
+    static napi_value CreatPictureDrawable(napi_env env, void* native);
     static void TransferToNewDrawable(napi_env env, napi_value result, DrawableDescriptor* drawable);
 };
 } // namespace Napi

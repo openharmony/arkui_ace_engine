@@ -15,6 +15,9 @@
 
 #include "ui_sa_service.h"
 
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <sys/time.h>
 
@@ -35,7 +38,15 @@ const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
-constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
+constexpr size_t GET_VISIBLE_INTERACTION_INFO_INDEX = 1;
+constexpr size_t GET_VISIBLE_ACCESSIBILITY_INFO_INDEX = 2;
+constexpr size_t GET_VISIBLE_CACHE_NODES_INDEX = 3;
+constexpr size_t GET_VISIBLE_WITH_WEB_INDEX = 4;
+constexpr size_t GET_VISIBLE_WITH_UI_EXTENSION_INDEX = 5;
+constexpr size_t GET_VISIBLE_RECT_CULLING_INDEX = 6;
+constexpr size_t GET_VISIBLE_MIN_OPACITY_INDEX = 7;
+constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG = GET_VISIBLE_WITH_UI_EXTENSION_INDEX + 1;
+constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG = GET_VISIBLE_MIN_OPACITY_INDEX + 1;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
@@ -43,6 +54,9 @@ constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 6;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
+constexpr int32_t GET_SPECIFIED_CONTENT_OFFSETS_PARAMS = 3;
+constexpr int32_t HIGHLIGHT_SPECIFIED_CONTENT_PARAMS = 3;
+constexpr double PERCENT_VALUE = 100.0;
 
 std::string GetCurrentTimestampStr()
 {
@@ -84,6 +98,34 @@ uint32_t ParseComponentChangeEventMask(std::vector<std::string> params)
     return mask;
 }
 
+bool StringToDouble(const std::string& value, double& result)
+{
+    errno = 0;
+    char* parseEnd = nullptr;
+    double parseResult = std::strtod(value.c_str(), &parseEnd);
+    if (parseEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    }
+    if (std::strcmp(parseEnd, "%") == 0) {
+        result = parseResult / PERCENT_VALUE;
+        return true;
+    }
+    if (std::strcmp(parseEnd, "") == 0) {
+        result = parseResult;
+        return true;
+    }
+    return false;
+}
+
+float ParseMinOpacityParam(const std::string& param)
+{
+    double minOpacity = 0.0;
+    if (!StringToDouble(param, minOpacity)) {
+        return 0.0f;
+    }
+    return static_cast<float>(minOpacity);
+}
+
 ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& params, bool toFile)
 {
     ContentChangeConfig config;
@@ -104,6 +146,21 @@ ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& par
     config.reportDelayTime = std::atoi(params[6].c_str());  // 6 : reportDelayTime
 
     return config;
+}
+
+std::string UnescapeContent(const std::string& param)
+{
+    std::string result;
+    result.reserve(param.size());
+    for (size_t i = 0; i < param.size(); i++) {
+        if (param[i] == '\\' && i + 1 < param.size() && param[i + 1] == 'w') {
+            result += ' ';
+            i++;
+        } else {
+            result += param[i];
+        }
+    }
+    return result;
 }
 } // namespace
 
@@ -126,6 +183,10 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
     { "RegisterTextChangeEventCallback", &UiSaService::HandleRegisterTextChangeEventCallback },
     { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
+    { "RegisterSelectTextEventCallback", &UiSaService::HandleRegisterSelectTextEventCallback },
+    { "UnregisterSelectTextEventCallback", &UiSaService::HandleUnregisterSelectTextEventCallback },
+    { "GetSpecifiedContentOffsets", &UiSaService::HandleGetSpecifiedContentOffsets },
+    { "HighlightSpecifiedContent", &UiSaService::HandleHighlightSpecifiedContent },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -236,10 +297,20 @@ void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service,
             LOGI("[GetVisibleInspectorTree] tree is saved to %{public}s", filePath.c_str());
         }
     };
-    if (params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
-        service->GetVisibleInspectorTree(
-            visibleInspectorTreeCallBack, { params[1] == "true", params[2] == "true", params[3] == "true",
-                                              params[4] == "true", params[5] == "true" });
+    if (params.size() >= SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG) {
+        service->GetVisibleInspectorTree(visibleInspectorTreeCallBack,
+            { params[GET_VISIBLE_INTERACTION_INFO_INDEX] == "true",
+                params[GET_VISIBLE_ACCESSIBILITY_INFO_INDEX] == "true",
+                params[GET_VISIBLE_CACHE_NODES_INDEX] == "true", params[GET_VISIBLE_WITH_WEB_INDEX] == "true",
+                params[GET_VISIBLE_WITH_UI_EXTENSION_INDEX] == "true",
+                params[GET_VISIBLE_RECT_CULLING_INDEX] == "true",
+                ParseMinOpacityParam(params[GET_VISIBLE_MIN_OPACITY_INDEX]) });
+    } else if (params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
+        service->GetVisibleInspectorTree(visibleInspectorTreeCallBack,
+            { params[GET_VISIBLE_INTERACTION_INFO_INDEX] == "true",
+                params[GET_VISIBLE_ACCESSIBILITY_INFO_INDEX] == "true",
+                params[GET_VISIBLE_CACHE_NODES_INDEX] == "true", params[GET_VISIBLE_WITH_WEB_INDEX] == "true",
+                params[GET_VISIBLE_WITH_UI_EXTENSION_INDEX] == "true" });
     } else {
         service->GetVisibleInspectorTree(visibleInspectorTreeCallBack);
     }
@@ -432,25 +503,43 @@ void UiSaService::HandleUnregisterTextChangeEventCallback(
     LOGI("[TextChangeEvent] call UnregisterTextChangeEventCallback");
 }
 
+void UiSaService::HandleRegisterSelectTextEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    auto eventCallback = [](std::string data) {
+        LOGI("[SelectTextEventCallback] data = %{public}s", data.c_str());
+    };
+    service->RegisterSelectTextEventCallback(eventCallback);
+}
+
+void UiSaService::HandleUnregisterSelectTextEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    service->UnregisterSelectTextEventCallback();
+    LOGI("[SelectTextEvent] call UnregisterSelectTextEventCallback");
+}
+
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     if (params.size() >= EXE_APP_AI_FUNCTION_PARAMS) {
         std::string funcName = params[1];
         std::string paramsJson = params[2];
-        auto finishCallback = [](uint32_t result) {
+        int32_t nodeId = params.size() > EXE_APP_AI_FUNCTION_PARAMS ? std::atoi(params[3].c_str()) : -1;
+        auto finishCallback = [](uint32_t result, const std::string& data) {
             std::map<uint32_t, std::string> resultMap = {
                 { 0, "AI_CALL_SUCCESS" },
                 { 1, "AI_CALLER_INVALID" },
                 { 2, "AI_CALL_FUNCNAME_INVALID" },
                 { 3, "AI_CALL_NODE_INVALID" },
                 { 4, "AI_CALL_ENV_INVALID" },
+                { 5, "AI_CALL_NODE_AMBIGUOUS" },
             };
-            LOGI("[ExeAppAIFunction] finishCallback result=%{public}d(%{public}s)", result,
-                (resultMap.count(result) ? resultMap[result] : "").c_str());
+            LOGI("[ExeAppAIFunction] finishCallback result=%{public}d(%{public}s), data=%{public}s", result,
+                (resultMap.count(result) ? resultMap[result] : "").c_str(), data.c_str());
         };
-        service->ExeAppAIFunction(funcName, paramsJson, finishCallback);
-        LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s", funcName.c_str(),
-            paramsJson.c_str());
+        service->ExeAppAIFunction(funcName, paramsJson, nullptr, nodeId, finishCallback);
+        LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s, nodeId=%{public}d",
+            funcName.c_str(), paramsJson.c_str(), nodeId);
     }
 }
 
@@ -492,6 +581,37 @@ void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::v
         LOGI("[GetStateMgmtInfo] call GetStateMgmtInfo componentName=%{public}s, propertyName=%{public}s, "
              "jsonPath=%{public}s, onlyVisible=%{public}d",
             componentName.c_str(), propertyName.c_str(), jsonPath.c_str(), onlyVisible);
+    }
+}
+void UiSaService::HandleGetSpecifiedContentOffsets(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= GET_SPECIFIED_CONTENT_OFFSETS_PARAMS) {
+        int32_t id = std::atoi(params[1].c_str());
+        std::string content = UnescapeContent(params[2]);
+        auto finishCallback = [](std::vector<std::pair<float, float>> offsets) {
+            LOGI("[GetSpecifiedContentOffsets] offsets.size=%{public}zu", offsets.size());
+            for (const auto& offset : offsets) {
+                LOGI("[GetSpecifiedContentOffsets] offset=(%{public}f, %{public}f)", offset.first, offset.second);
+            }
+        };
+        service->GetSpecifiedContentOffsets(id, content, finishCallback);
+        LOGI("[GetSpecifiedContentOffsets] call GetSpecifiedContentOffsets id=%{public}d, content=%{public}s",
+            id, content.c_str());
+    }
+}
+
+void UiSaService::HandleHighlightSpecifiedContent(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= HIGHLIGHT_SPECIFIED_CONTENT_PARAMS) {
+        int32_t id = std::atoi(params[1].c_str());
+        std::string content = UnescapeContent(params[2]);
+        std::vector<std::string> nodeIds;
+        std::string configs;
+        service->HighlightSpecifiedContent(id, content, nodeIds, configs);
+        LOGI("[HighlightSpecifiedContent] call HighlightSpecifiedContent id=%{public}d, content=%{public}s",
+            id, content.c_str());
     }
 }
 } // namespace OHOS::Ace

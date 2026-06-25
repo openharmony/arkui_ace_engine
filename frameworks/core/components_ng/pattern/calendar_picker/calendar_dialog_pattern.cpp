@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 
+#include "core/components/calendar/calendar_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/common/container.h"
@@ -51,8 +54,8 @@ constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
-constexpr uint32_t MIN_MONTH = 1;
-constexpr uint32_t MIN_DAY = 1;
+constexpr int32_t MIN_MONTH = 1;
+constexpr int32_t MIN_DAY = 1;
 } // namespace
 
 FocusPattern CalendarDialogPattern::GetFocusPattern() const
@@ -772,7 +775,11 @@ bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
     hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childSize = static_cast<int32_t>(host->GetChildren().size()) - 1;
+    auto childrenSize = host->GetChildren().size();
+    if (childrenSize <= 1) {
+        return false;
+    }
+    auto childSize = static_cast<int32_t>(childrenSize) - 1;
     if (event.IsShiftWith(KeyCode::KEY_TAB)) {
         focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + childSize - 1) % childSize;
     } else {

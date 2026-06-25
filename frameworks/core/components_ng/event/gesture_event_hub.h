@@ -29,9 +29,9 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/event/gesture_event_hub_types.h"
+#include "core/components_ng/event/gesture_types.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
-#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
@@ -194,6 +194,8 @@ public:
     void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
     // Set by JS FrameNode.
     void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    void AddMaterialInteractionEvent(const RefPtr<TouchEventImpl>& touchEvent);
+    void RemoveMaterialInteractionEvent();
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
@@ -233,6 +235,8 @@ public:
         GestureCollectIntervention intervention, GestureCollectInterventionContext& context);
     void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
+    void SetInnerNodeGestureRecognizerJudge(bool flag);
+    bool IsInnerNodeGestureRecognizerJudgeSet() const;
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
     void SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc);
     TouchTestDoneCallback GetOnTouchTestDoneCallbackForInner() const;
@@ -287,13 +291,13 @@ public:
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     bool ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
     bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
@@ -384,7 +388,7 @@ public:
     void SetMonopolizeEvents(bool monopolizeEvents);
     virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
         const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
-        int32_t originalId, const RefPtr<TargetComponent>& targetComponent);
+        int32_t originalId);
     void CleanExternalRecognizers();
     void CleanInnerRecognizer();
     void CleanNodeRecognizer();
@@ -448,9 +452,13 @@ public:
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
     void DragNodeDetachFromParent();
 private:
+    void RegisterBasicRecognizers(
+        const std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t touchId);
+
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
     void UpdateModifierGestureHierarchy();
@@ -517,12 +525,12 @@ private:
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
     void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId, int32_t originalId,
-        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        const RefPtr<FrameNode>& host,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& parallelIndex, bool needRebuildForCurrent = false);
 
     void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId, int32_t originalId,
-        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
+        const RefPtr<FrameNode>& host, GesturePriority priority,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& exclusiveIndex, bool needRebuildForCurrent = false);
 
@@ -596,6 +604,7 @@ private:
     ShouldRecognizerParallelWithFunc shouldRecognizerParallelWithFunc_;
     OnGestureCollectInterceptFunc onGestureCollectInterceptFunc_;
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
+    bool isInnerNodeGestureRecognizerJudgeSet_ = false;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     // the value from show parameter of context menu, which is controlled by caller manually

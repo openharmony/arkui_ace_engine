@@ -16,12 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 
+namespace OHOS::Ace {
+class DialogTheme;
+class PickerTheme;
+}
+
 namespace OHOS::Ace::NG {
+
+class FrameNode;
+class TextPickerPattern;
 
 class ACE_EXPORT TextPickerLayoutAlgorithm : public LinearLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextPickerLayoutAlgorithm, LinearLayoutAlgorithm);

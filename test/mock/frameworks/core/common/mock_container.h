@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -152,6 +153,9 @@ public:
         const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
 
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
+        const std::optional<std::string>& msdpType = std::nullopt) override;
+
     ResourceConfiguration GetResourceConfiguration() const override
     {
         return ResourceConfiguration();
@@ -166,6 +170,8 @@ public:
 
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override {}
     void TerminateUIExtensionInner(int32_t code) override {}
+    void GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+        EventPositionInfo& originalPos) override {}
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));

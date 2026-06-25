@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"

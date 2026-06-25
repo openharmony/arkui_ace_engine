@@ -23,18 +23,17 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
-#include "core/animation/scheduler.h"
 #include "core/components/declaration/common/attribute.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/pipeline/pipeline_base.h"
-#include "frameworks/core/components/transform/click_spring_effect.h"
 #include "base/geometry/calc_dimension.h"
 
 namespace OHOS::Ace {
 
+class Decoration;
 using OnSetAttributeFunc = std::function<void()>;
 using OnSetStyleFinishedFunc = std::function<void()>;
 using CachePseudoClassStyleFunc = std::function<void(std::pair<std::string, std::string>)>;
@@ -157,10 +156,7 @@ public:
         return backDecoration_;
     }
 
-    void SetBackDecoration(const RefPtr<Decoration>& backDecoration)
-    {
-        backDecoration_ = backDecoration;
-    }
+    ACE_FORCE_EXPORT void SetBackDecoration(const RefPtr<Decoration>& backDecoration);
 
     const RefPtr<Decoration>& GetFrontDecoration() const
     {

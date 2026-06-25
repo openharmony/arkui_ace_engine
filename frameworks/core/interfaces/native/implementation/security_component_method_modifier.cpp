@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/accessibility/static/accessibility_static_utils.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_static.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -387,7 +390,10 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(minSize);
-    auto fontSize = Converter::OptConvert<Dimension>(*minSize);
+    std::optional<Dimension> fontSize;
+    if (minSize->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(minSize->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
@@ -398,7 +404,10 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(maxSize);
-    auto fontSize = Converter::OptConvert<Dimension>(*maxSize);
+    std::optional<Dimension> fontSize;
+    if (maxSize->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(maxSize->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
@@ -423,6 +432,75 @@ void SetFocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CommonMethodModifier::SetFocusBoxImpl(node, style);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* enabled)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(enabled);
+    TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+}
+void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
+                                     const Opt_String* nextId)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<std::string>(nextId);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
+}
+void SetAccessibilityDefaultFocusImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* focus)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(focus);
+    bool isFocus = false;
+    auto convValue = Converter::OptConvertPtr<bool>(focus);
+    if (convValue) {
+        isFocus = *convValue;
+    }
+    ViewAbstractModelStatic::SetAccessibilityDefaultFocus(frameNode, isFocus);
+}
+void SetAccessibilityRoleImpl(Ark_NativePointer node,
+                              const Opt_SecurityComponentRoleType* role)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string defaultRole;
+    auto tag = frameNode->GetTag();
+    if (tag == V2::PASTE_BUTTON_ETS_TAG) {
+        defaultRole = AccessibilityStaticUtils::GetRoleByType(AccessibilityRoleType::ROLE_NONE);
+    } else if (tag == V2::SAVE_BUTTON_ETS_TAG) {
+        defaultRole = AccessibilityStaticUtils::GetRoleByType(AccessibilityRoleType::BUTTON);
+    }
+    auto convValue = Converter::OptConvertPtr<Ark_SecurityComponentRoleType>(role);
+    if (!convValue) {
+        ViewAbstractModelNG::SetAccessibilityRole(frameNode, defaultRole, true);
+        return;
+    }
+    auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
+    auto convRole = AccessibilityStaticUtils::GetRoleByType(roleType);
+    if (convRole.empty() ||
+        (roleType != AccessibilityRoleType::ROLE_NONE && roleType != AccessibilityRoleType::BUTTON)) {
+        ViewAbstractModelNG::SetAccessibilityRole(frameNode, defaultRole, true);
+        return;
+    }
+    ViewAbstractModelNG::SetAccessibilityRole(frameNode, convRole, false);
+}
+void SetAccessibilityDescriptionImpl(Ark_NativePointer node,
+                                     const Opt_Union_String_Resource* description)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<std::string>(description);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
@@ -464,6 +542,11 @@ const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethod
         SecurityComponentMethodModifier::SetHeightAdaptivePolicyImpl,
         SecurityComponentMethodModifier::SetEnabledImpl,
         SecurityComponentMethodModifier::SetFocusBoxImpl,
+        SecurityComponentMethodModifier::SetFallbackLineSpacingImpl,
+        SecurityComponentMethodModifier::SetAccessibilityNextFocusIdImpl,
+        SecurityComponentMethodModifier::SetAccessibilityDefaultFocusImpl,
+        SecurityComponentMethodModifier::SetAccessibilityRoleImpl,
+        SecurityComponentMethodModifier::SetAccessibilityDescriptionImpl,
     };
     return &ArkUISecurityComponentMethodModifierImpl;
 }

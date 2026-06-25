@@ -14,19 +14,17 @@
  */
 
 #include "core/components_ng/pattern/custom/custom_node.h"
-
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/custom/custom_node_base.h"
-#include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline/base/element_register.h"
-
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
+}
+
+void CustomNode::OnAttachToMainTree(bool recursive)
+{
+    UINode::OnAttachToMainTree(recursive);
 }
 
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
@@ -119,5 +117,85 @@ bool CustomNode::FireOnCleanup()
 {
     return false;
 }
+
+ReusableMemOptStrategy CustomNode::GetMemOptStrategy()
+{
+    return ReusableMemOptStrategy::DEFAULT;
+}
+
+void CustomNode::OnWindowHide()
+{
+}
+
+void CustomNode::OnNotifyMemoryLevel(int32_t level)
+{
+}
+
+void CustomNode::RegisterWindowStateChangedCallback()
+{
+}
+
+void CustomNode::UnregisterWindowStateChangedCallback()
+{
+}
+
+void CustomNode::RegisterMemoryLevelChangedCallback()
+{
+}
+
+void CustomNode::UnregisterMemoryLevelChangedCallback()
+{
+}
+
+bool CustomNode::CheckParentFrameNodeVisibility()
+{
+    return true;
+}
+
+void CustomNode::ScheduleCleanCacheTask()
+{
+}
+
+void CustomNode::CancelScheduledCleanCacheTask()
+{
+}
+
+void CustomNode::TryExecuteScheduledCacheTask()
+{
+}
+
+void CustomNode::CleanCache(bool syncClean, bool clearAll)
+{
+}
+
+void CustomNode::CleanCacheOnIdle(int32_t remainingTimeMs)
+{
+}
+
+void CustomNode::SetParentVisibility(bool visibility)
+{
+}
+
+bool CustomNode::GetParentVisibility()
+{
+    return true;
+}
+
+void CustomNode::StartMemOpt()
+{
+}
+
+void CustomNode::FinishMemOpt()
+{
+}
+
+void CustomNode::PostMemOptTask()
+{
+}
+
+void CustomNode::PostIdleTask()
+{
+}
+
 
 } // namespace OHOS::Ace::NG

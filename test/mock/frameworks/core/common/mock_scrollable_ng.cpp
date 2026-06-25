@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
-Scrollable::~Scrollable() = default;
-
-void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
+Scrollable::~Scrollable() {}
+Scrollable::Scrollable() = default;
 
 bool Scrollable::Idle() const
 {
@@ -36,35 +36,29 @@ void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {}
 
-void Scrollable::UpdateScrollSnapStartOffset(double offset)
-{}
+void Scrollable::UpdateScrollSnapStartOffset(double offset) {}
 
-void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
-{}
+void Scrollable::UpdateScrollSnapEndWithOffset(double offset) {}
 
-void Scrollable::SetAxis(Axis axis)
-{}
+void Scrollable::SetAxis(Axis axis) {}
 
 bool Scrollable::IsSpringStopped() const
 {
     return true;
 }
 
-void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity) {}
-void Scrollable::StartScrollAnimation(float, float) {}
-
 RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
 {
-    return AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, nullptr);
+    return nullptr;
 }
 
 RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
 {
-    return AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, nullptr);
+    return nullptr;
 }
 
 RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
 {
-    return AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, nullptr);
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

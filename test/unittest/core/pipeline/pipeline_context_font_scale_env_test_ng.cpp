@@ -71,7 +71,7 @@ HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv002, TestSize.Level1)
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetEnvProperty(ENV_KEY_FONT_SCALE, 2.5);
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(2.5));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
@@ -104,7 +104,7 @@ HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetEnvProperty(ENV_KEY_FONT_SCALE, 1.5);
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(1.5));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
@@ -137,7 +137,7 @@ HWTEST_F(PipelineContextTestNg, OnModifyDoneNoReadFontScale001, TestSize.Level1)
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetEnvProperty(ENV_KEY_FONT_SCALE, 3.0);
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(3.0));
     withEnvNode->AddChild(frameNode);
 
     auto pattern = frameNode->GetPattern<TestablePattern>();
@@ -203,7 +203,7 @@ HWTEST_F(PipelineContextTestNg, GetFontScaleFromEnvWithEnvValue001, TestSize.Lev
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetEnvProperty(ENV_KEY_FONT_SCALE, 2.0);
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(2.0));
     withEnvNode->AddChild(frameNode);
 
     pattern->ReadFontScaleFromEnv();

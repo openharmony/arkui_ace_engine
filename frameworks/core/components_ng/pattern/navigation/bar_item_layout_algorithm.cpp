@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"

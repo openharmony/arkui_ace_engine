@@ -15,7 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
 
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
 #include "core/components/common/properties/color.h"
 
 struct CanvasGradientPeer {

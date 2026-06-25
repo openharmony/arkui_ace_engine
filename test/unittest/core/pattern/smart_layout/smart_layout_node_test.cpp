@@ -775,15 +775,6 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest031, TestSize.Level1)
     childInfos.push_back(info2);
 
     rootNode->CreateChildrenFromInfos(childInfos);
-
-    // Sync children data so positions and sizes are available
-    rootNode->SyncData();
-    for (const auto& child : rootNode->GetChildren()) {
-        if (child != nullptr) {
-            child->SyncData();
-        }
-    }
-
     auto boundingBox = rootNode->GetChildrenBoundingBox();
 
     // minX=5, minY=20, width=85 (5 to 10+80=90), height=120 (20 to 100+40=140, but max(60,40) depends)
@@ -879,6 +870,36 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest034, TestSize.Level1)
     // When avoidSafeArea=true but firstChild=false, blank child height is still 0
     EXPECT_EQ(childNode->GetSize().width.value, 50.0);
     EXPECT_EQ(childNode->GetSize().height.value, 0.0);
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest035
+ * @tc.desc: Test SetAvoidSafeArea and GetAvoidSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest035, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    EXPECT_FALSE(rootNode->context_.avoidSafeArea);
+
+    rootNode->SetAvoidSafeArea(true);
+    EXPECT_TRUE(rootNode->context_.avoidSafeArea);
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest036
+ * @tc.desc: Test CalculateChildSpaces clamps negative values to zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest036, TestSize.Level1)
+{
+    // Child overlaps parent bottom: offsetY+height > parentSize.Height()
+    ChildLayoutInfo info = {1, 80.0, 120.0, -5.0, 250.0, false};
+    SmartLayoutSize parentSize(200.0, 300.0);
+    auto node = SmartLayoutNode::CreateRootNode();
+    auto spaces = node->CalculateChildSpaces(info, nullptr, nullptr, SmartLayoutType::COLUMN, parentSize);
+    EXPECT_EQ(spaces.left, 0.0);
+    EXPECT_EQ(spaces.bottom, 0.0);
 }
 
 } // namespace OHOS::Ace::NG

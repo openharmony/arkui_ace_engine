@@ -52,7 +52,6 @@ void RemoveFromNodeControllerMap(EcmaVM* vm, int32_t nodeId)
     }
 }
 
-
 void AddToNodeControllerMap(EcmaVM* vm, int32_t nodeId, const Framework::JSRef<Framework::JSObject>& object)
 {
     auto global = JSNApi::GetGlobalObject(vm);
@@ -92,6 +91,56 @@ NodeContainerModel* NodeContainerModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+struct NodeContainerJsFunctionCallback {
+    RefPtr<JsFunction> func;
+    JsiExecutionContext execCtx;
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute();
+    }
+
+    void operator()(int32_t containerId) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        JSRef<JSVal> nodeContainerIndex = JSRef<JSVal>::Make(ToJSValue(containerId));
+        func->ExecuteJS(1, &nodeContainerIndex);
+    }
+};
+
+struct NodeContainerTouchCallback {
+    RefPtr<JsTouchFunction> func;
+    WeakPtr<NG::FrameNode> node;
+    JsiExecutionContext execCtx;
+
+    void operator()(TouchEventInfo& info) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(execCtx.vm_, info);
+    }
+};
+
+struct NodeContainerResizeCallback {
+    RefPtr<JsFunction> func;
+    JsiExecutionContext execCtx;
+
+    void operator()(const NG::SizeF& size) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> obj = objectTemplate->NewInstance();
+        obj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(size.Width()));
+        obj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(size.Height()));
+        JSRef<JSVal> param = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &param);
+    }
+};
+} // namespace
 
 void JSNodeContainer::BindFunc(const JSCallbackInfo& info, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -268,13 +317,9 @@ void JSNodeContainer::SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutio
     CHECK_NULL_VOID(showCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsAppearFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback));
-    auto onAppear = [func = std::move(jsAppearFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    nodeContainerModelInstance->SetOnAppear(onAppear);
+    auto onAppear = NodeContainerJsFunctionCallback {
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback)), execCtx };
+    nodeContainerModelInstance->SetOnAppear(std::move(onAppear));
 }
 
 void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -283,13 +328,9 @@ void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecu
     CHECK_NULL_VOID(dismissCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsDisappearFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback));
-    auto onDisappear = [func = std::move(jsDisappearFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    nodeContainerModelInstance->SetOnDisAppear(onDisappear);
+    auto onDisappear = NodeContainerJsFunctionCallback {
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback)), execCtx };
+    nodeContainerModelInstance->SetOnDisAppear(std::move(onDisappear));
 }
 
 void JSNodeContainer::SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -298,13 +339,9 @@ void JSNodeContainer::SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutio
     CHECK_NULL_VOID(showCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsAttachFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback));
-    auto onAttach = [func = std::move(jsAttachFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    nodeContainerModelInstance->SetOnAttach(onAttach);
+    auto onAttach = NodeContainerJsFunctionCallback {
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback)), execCtx };
+    nodeContainerModelInstance->SetOnAttach(std::move(onAttach));
 }
 
 void JSNodeContainer::SetOnDetachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -313,13 +350,9 @@ void JSNodeContainer::SetOnDetachFunc(const JSRef<JSObject>& object, JsiExecutio
     CHECK_NULL_VOID(dismissCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsDetachFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback));
-    auto onDetach = [func = std::move(jsDetachFunc), execCtx]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute();
-    };
-    nodeContainerModelInstance->SetOnDetach(onDetach);
+    auto onDetach = NodeContainerJsFunctionCallback {
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback)), execCtx };
+    nodeContainerModelInstance->SetOnDetach(std::move(onDetach));
 }
 
 void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -328,14 +361,9 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
     CHECK_NULL_VOID(onTouchEventCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsTouchFunction> jsOnTouchFunc =
-        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onTouchEventCallback));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(execCtx.vm_, info);
-    };
+    auto onTouch = NodeContainerTouchCallback {
+        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onTouchEventCallback)),
+        AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()), execCtx };
     nodeContainerModelInstance->SetOnTouchEvent(std::move(onTouch));
 }
 
@@ -345,18 +373,8 @@ void JSNodeContainer::SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutio
     CHECK_NULL_VOID(aboutToResize->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsAboutToResizeFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(aboutToResize));
-    auto onResize = [func = std::move(jsAboutToResizeFunc), execCtx](const NG::SizeF& size) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-        objectTemplate->SetInternalFieldCount(1);
-        JSRef<JSObject> obj = objectTemplate->NewInstance();
-        obj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(size.Width()));
-        obj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(size.Height()));
-        JSRef<JSVal> param = JSRef<JSVal>::Cast(obj);
-        func->ExecuteJS(1, &param);
-    };
+    auto onResize = NodeContainerResizeCallback {
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(aboutToResize)), execCtx };
     nodeContainerModelInstance->SetOnResize(onResize);
 }
 
@@ -366,13 +384,10 @@ void JSNodeContainer::SetOnWillBindFunc(const JSRef<JSObject>& object, JsiExecut
     CHECK_NULL_VOID(onWillBindCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsOnWillBindFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onWillBindCallback));
-    auto onWillBind = [execCtx, func = std::move(jsOnWillBindFunc)](int32_t containerId) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSRef<JSVal> nodeContainerIndex = JSRef<JSVal>::Make(ToJSValue(containerId));
-        func->ExecuteJS(1, &nodeContainerIndex);
-    };
+    auto onWillBind =
+        NodeContainerJsFunctionCallback { AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object),
+                                                JSRef<JSFunc>::Cast(onWillBindCallback)),
+            execCtx };
     nodeContainerModelInstance->SetOnWillBind(std::move(onWillBind));
 }
 
@@ -382,13 +397,10 @@ void JSNodeContainer::SetOnWillUnbindFunc(const JSRef<JSObject>& object, JsiExec
     CHECK_NULL_VOID(onWillUnbindCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsOnWillUnbindFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onWillUnbindCallback));
-    auto onWillUnbind = [execCtx, func = std::move(jsOnWillUnbindFunc)](int32_t containerId) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSRef<JSVal> nodeContainerIndex = JSRef<JSVal>::Make(ToJSValue(containerId));
-        func->ExecuteJS(1, &nodeContainerIndex);
-    };
+    auto onWillUnbind =
+        NodeContainerJsFunctionCallback { AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object),
+                                                JSRef<JSFunc>::Cast(onWillUnbindCallback)),
+            execCtx };
     nodeContainerModelInstance->SetOnWillUnbind(std::move(onWillUnbind));
 }
 
@@ -398,13 +410,10 @@ void JSNodeContainer::SetOnBindFunc(const JSRef<JSObject>& object, JsiExecutionC
     CHECK_NULL_VOID(onBindCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsOnBindFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onBindCallback));
-    auto onBind = [execCtx, func = std::move(jsOnBindFunc)](int32_t containerId) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSRef<JSVal> nodeContainerIndex = JSRef<JSVal>::Make(ToJSValue(containerId));
-        func->ExecuteJS(1, &nodeContainerIndex);
-    };
+    auto onBind =
+        NodeContainerJsFunctionCallback { AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object),
+                                                JSRef<JSFunc>::Cast(onBindCallback)),
+            execCtx };
     nodeContainerModelInstance->SetOnBind(std::move(onBind));
 }
 
@@ -414,13 +423,10 @@ void JSNodeContainer::SetOnUnbindFunc(const JSRef<JSObject>& object, JsiExecutio
     CHECK_NULL_VOID(onUnbindCallback->IsFunction());
     NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
     CHECK_NULL_VOID(nodeContainerModelInstance);
-    RefPtr<JsFunction> jsOnUnbindFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onUnbindCallback));
-    auto onUnbind = [execCtx, func = std::move(jsOnUnbindFunc)](int32_t containerId) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        JSRef<JSVal> nodeContainerIndex = JSRef<JSVal>::Make(ToJSValue(containerId));
-        func->ExecuteJS(1, &nodeContainerIndex);
-    };
+    auto onUnbind =
+        NodeContainerJsFunctionCallback { AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object),
+                                                JSRef<JSFunc>::Cast(onUnbindCallback)),
+            execCtx };
     nodeContainerModelInstance->SetOnUnbind(std::move(onUnbind));
 }
 

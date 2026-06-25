@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,7 +40,7 @@ RefPtr<RepeatVirtualScroll2CacheItem> RepeatVirtualScroll2CacheItem::MakeCacheIt
 }
 
 RepeatVirtualScroll2Caches::RepeatVirtualScroll2Caches(
-    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index)
+    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index)
     : onGetRid4Index_(onGetRid4Index)
 {}
 
@@ -66,6 +67,84 @@ GetFrameChildResult RepeatVirtualScroll2Caches::GetFrameChild(IndexType index, b
                : std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::NO_NODE, nullptr);
 }
 
+bool RepeatVirtualScroll2Caches::RestoreL2CacheByIndex(IndexType index, int64_t deadline)
+{
+    if (l1Rid4Index_.find(index) != l1Rid4Index_.end()) {
+        restoringRid_ = 0;
+        return true;
+    }
+
+    if (restoringRid_) {
+        return BuildL2CacheByRid(restoringRid_, deadline);
+    }
+
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    auto* viewStack = NG::ViewStackProcessor::GetInstance();
+
+    const std::pair<RIDType, uint32_t> result =
+        onGetRid4Index_(index, AnimationUtils::IsImplicitAnimationOpen(), true);
+    if (result.second != OnGetRid4IndexResult::CREATED_NEW_NODE) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT, "CallOnGetRid4Index(index %{public}d: Node creation skiped.",
+            static_cast<int32_t>(index));
+        return true;
+    }
+
+    RefPtr<UINode> node4Index = viewStack->Finish();
+    if (node4Index == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT,
+            "CallOnGetRid4Index(index %{public}d: New Node creation failed. No node on ViewStackProcessor. "
+            "Internal error!", static_cast<int32_t>(index));
+        return true;
+    }
+    const RIDType rid = result.first;
+    if (rid == 0) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "CallOnGetRid4Index(index %{public}d: Node creation failed. Invalid rid. "
+            "Internal error!", static_cast<int32_t>(index));
+        return true;
+    }
+    cacheItem4Rid_[rid] = RepeatVirtualScroll2CacheItem::MakeCacheItem(node4Index, false);
+
+    TAG_LOGI(AceLogTag::ACE_REPEAT,
+        "RepeatCache.RestoreL2CacheByIndex index[%{public}d] rid[%{public}d] node %{public}s",
+        index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+    ACE_SCOPED_TRACE("RepeatCache.RestoreL2CacheByIndex index[%d] rid[%d] node %s",
+        index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+
+    return BuildL2CacheByRid(rid, deadline);
+}
+
+bool RepeatVirtualScroll2Caches::BuildL2CacheByRid(RIDType rid, int64_t deadline)
+{
+    restoringRid_ = 0;
+    for (const auto iter : l1Rid4Index_) {
+        if (iter.second == rid) {
+            return true;
+        }
+    }
+    OptCacheItem cacheItemOpt = GetCacheItem4RID(rid);
+    if (!cacheItemOpt.has_value() || cacheItemOpt.value()->node_ == nullptr) {
+        return true;
+    }
+    auto node = cacheItemOpt.value()->node_;
+    auto context = node->GetContext();
+    CHECK_NULL_RETURN(context, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, false, true));
+    context->SetPredictNode(frameNode);
+    if (!node->RenderCustomChild(deadline)) {
+        context->ResetPredictNode();
+        restoringRid_ = rid;
+        return false;
+    }
+    node->Build(nullptr);
+    context->ResetPredictNode();
+    node->SetJSViewActive(false);
+    return true;
+}
+
+int32_t RepeatVirtualScroll2Caches::GetL1Size()
+{
+    return static_cast<int32_t>(l1Rid4Index_.size());
+}
 /**
  * Function called from TS:
  * purge UINode with given id
@@ -200,7 +279,8 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     auto* viewStack = NG::ViewStackProcessor::GetInstance();
 
-    const std::pair<RIDType, uint32_t> result = onGetRid4Index_(index, AnimationUtils::IsImplicitAnimationOpen());
+    const std::pair<RIDType, uint32_t> result =
+        onGetRid4Index_(index, AnimationUtils::IsImplicitAnimationOpen(), false);
     if (result.second == OnGetRid4IndexResult::CREATED_NEW_NODE) {
         // case: new node was created successfully
         // get it from ViewStackProcessor
@@ -440,6 +520,24 @@ std::string RepeatVirtualScroll2Caches::DumpL1Rid4Index() const
     return result;
 }
 
+std::string RepeatVirtualScroll2Caches::GetL2ItemsDump()
+{
+    std::string cachedNodes;
+    ForEachCacheItem([&](RIDType rid, const CacheItem& cacheItem) {
+        CHECK_EQUAL_VOID(cacheItem->isL1_, true);
+        CHECK_NULL_VOID(cacheItem->node_);
+        cachedNodes.append("[")
+            .append(cacheItem->node_->GetTag())
+            .append(",")
+            .append(std::to_string(cacheItem->node_->GetId()))
+            .append(",")
+            .append(std::to_string(cacheItem->node_->GetAccessibilityId()))
+            .append("],");
+    });
+    cachedNodes = std::string("[").append(cachedNodes).append("]");
+    return cachedNodes;
+}
+
 void RepeatVirtualScroll2Caches::UpdateIsL1(const CacheItem& cacheItem, bool isL1, bool shouldTriggerRecycleOrReuse)
 {
     cacheItem->isL1_ = isL1;
@@ -460,6 +558,51 @@ void RepeatVirtualScroll2Caches::UpdateIsL1(const CacheItem& cacheItem, bool isL
         }
         child->OnRecycle();
     }
+}
+
+void RepeatVirtualScroll2Caches::SetEnableSyncLoad(bool value)
+{
+    enableSyncLoad_ = value;
+}
+
+void RepeatVirtualScroll2Caches::SetIsSyncLoad(bool value)
+{
+    isSyncLoad_ = value;
+    if (isSyncLoad_) {
+        syncLoadCache_.clear();
+    }
+}
+
+void RepeatVirtualScroll2Caches::ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children,
+    int32_t start, int32_t end)
+{
+    if (enableSyncLoad_ || isSyncLoad_) {
+        return;
+    }
+    for (auto index = start + static_cast<int32_t>(children.size()); index <= end; index++) {
+        auto it = syncLoadCache_.find(index);
+        if (it != syncLoadCache_.end()) {
+            auto node = it->second.Upgrade();
+            CHECK_NULL_VOID(node);
+            children.push_back(node);
+        } else {
+            return;
+        }
+    }
+}
+
+void RepeatVirtualScroll2Caches::OrganizeSyncLoadCache()
+{
+    CHECK_EQUAL_VOID(enableSyncLoad_, true);
+    syncLoadCache_.clear();
+    ForEachL1Node([&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void {
+        syncLoadCache_.try_emplace(index, AceType::WeakClaim(AceType::RawPtr(node)));
+    });
+}
+
+bool RepeatVirtualScroll2Caches::CheckIsSyncLoad()
+{
+    return enableSyncLoad_ || isSyncLoad_;
 }
 
 } // namespace OHOS::Ace::NG

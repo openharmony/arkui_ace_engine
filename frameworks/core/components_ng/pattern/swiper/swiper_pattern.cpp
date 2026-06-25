@@ -1750,17 +1750,34 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 
 void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paddingSize = geometryNode->GetPaddingSize();
+    auto swiperWidth = paddingSize.Width();
+    auto swiperHeight = paddingSize.Height();
+
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto curPageName = pipeline->GetCurrentPageName();
-    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto width = pipeline->GetRootWidth();
+    auto height = pipeline->GetRootHeight();
+    if (width <= 0.0f || height <= 0.0f) {
+        return;
+    }
+
+    constexpr float half = 0.5f;
+    if (half * width > swiperWidth || half * height > swiperHeight) {
+        return;
+    }
+
     CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
-    if (pipeline->GetTaihangOptimizer()->CheckSwiperPathValid(bundleName, curPageName) && !isInAutoPlay_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    auto curPageName = pipeline->GetCurrentPageName();
+    if (pipeline->GetTaihangOptimizer()->CheckSwiperPageValid(curPageName) && !isInAutoPlay_) {
         RefPtr<NG::UINode> curUINode = host;
         std::string path = curUINode->GetPath();
         std::unordered_map<std::string, std::string> payload;
+        payload["window_id"] = std::to_string(pipeline->GetWindowId());
         payload["path"] = path;
         payload["currentIndex"] = std::to_string(currentIndex);
         payload["componentType"] = std::to_string(COMPONENT_SWIPER);
@@ -4436,8 +4453,8 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     };
     AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
     propertyUpdateCallback();
-    bool isSyncSuc = AnimationUtils::CloseImplicitCancelAnimation();
-    if (!isSyncSuc) {
+    auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
+    if (status == CancelAnimationStatus::TASK_EXECUTION_FAILURE) {
         EventReport::ReportScrollableErrorEvent(
             "Swiper", ScrollableErrorType::STOP_ANIMATION_TIMEOUT, "Swiper stop propertyAni sync failed");
         ACE_SCOPED_TRACE("Swiper stop propertyAni sync failed");
@@ -4445,6 +4462,9 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         // sync cancel animation failed, need to wait for the animation to finish completely
         syncCancelAniIsFailed_ = true;
         propertyAnimationIsRunning_ = true;
+        return;
+    } else if (status == CancelAnimationStatus::NODE_EXCEPTION) {
+        AnimationUtils::Animate(option, propertyUpdateCallback);
         return;
     }
     PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
@@ -6014,6 +6034,7 @@ void SwiperPattern::OnWindowHide()
     }
 
     StopSpringAnimationAndFlushImmediately();
+    CleanPreMakeNode();
 }
 
 void SwiperPattern::ArrowHover(bool isHover, SwiperHoverFlag flag)
@@ -8377,6 +8398,11 @@ void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
     if (level != MEMORY_LEVEL_CRITICAL) {
         return;
     }
+    CleanPreMakeNode();
+}
+
+void SwiperPattern::CleanPreMakeNode()
+{
     if (premakeItems_.empty()) {
         return;
     }
@@ -8396,5 +8422,6 @@ void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
             childNode->DetachFromMainTreeByPreMakeFlag();
         }
     }
+    premakeItems_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -707,7 +707,12 @@ class PersistenceV2Impl extends StorageHelper {
     try {
       if (json.startsWith(DataCoder.FORMAT_TAG)) {
         const parsedValue = DataCoder.parse(json) as T;
-        parsedValueString = JSONCoder.stringify(parsedValue);
+        try {
+          parsedValueString = JSONCoder.stringifyCircular(parsedValue);
+        } catch(err) {
+          stateMgmtConsole.applicationWarn(`For PersistenceV2 '${key}' key has error, ` +
+        `error type: Stringify Error, message: ${err?.message}`);
+        }
         // Adding ref for persistence
         ObserveV2.getObserve().startRecordDependencies(this, id);
         newObservedValue = DataCoder.restoreTo(observedValue, parsedValue, defaultSubCreator) as T;

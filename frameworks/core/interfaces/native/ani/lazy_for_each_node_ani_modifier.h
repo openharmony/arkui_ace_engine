@@ -25,6 +25,7 @@ ani_long ConstructLazyForEachNode(ani_int id, ani_boolean isRepeat)
 {
     auto node = AceType::MakeRefPtr<ArkoalaLazyNode>(id, isRepeat);
     CHECK_NULL_RETURN(node, 0);
+    node->RegisterArkoalaLazyNode();
     node->IncRefCount();
     return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }

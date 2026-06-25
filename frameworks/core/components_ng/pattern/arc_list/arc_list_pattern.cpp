@@ -45,6 +45,7 @@ constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
 constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
+const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
 } // namespace
 
 ArcListPattern::ArcListPattern()
@@ -424,7 +425,7 @@ bool ArcListPattern::GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo)
     if (!wrapper) {
         return false;
     }
-    if (wrapper->GetHostTag() != V2::ARC_LIST_ITEM_ETS_TAG) {
+    if (wrapper->GetHostTag() != ARC_LIST_ITEM_ETS_TAG) {
         return false;
     }
     auto geometryNode = wrapper->GetGeometryNode();

@@ -33,7 +33,6 @@ enum class InstanceIdGenReason : uint32_t {
     SINGLETON,
     FOREGROUND,
     UNDEFINED,
-    LOCAL,
 };
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
@@ -62,7 +61,6 @@ public:
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
     using ContainerScopeLogCallback = void (*)(ContainerScopeLogLevel level, const char* message);
 #endif
-    using CheckRunOnUIThreadFunc = bool (*)(int32_t, bool);
     template<typename T>
     explicit ContainerScope(T) = delete;
 
@@ -80,8 +78,8 @@ public:
     static int32_t SingletonId();
     static int32_t RecentActiveId();
     static int32_t RecentForegroundId();
-    static int32_t SafelyId(bool checkThread = true);
-    static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason(bool checkThread = true);
+    static int32_t SafelyId();
+    static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason();
 
     // Convert InstanceIdGenReason enum to human-readable description
     static const std::string ReasonToDescription(InstanceIdGenReason reason);
@@ -98,8 +96,21 @@ public:
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);
-    static void RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc);
     static void CheckIdChange(int32_t id);
+
+    // Isolated thread management for dc/card scenarios.
+    // In these scenarios, each thread maintains its own local container set to avoid
+    // cross-thread instance ID confusion. Base query functions (ContainerCount, SingletonId,
+    // RecentActiveId, RecentForegroundId, DefaultId) check isIsolatedThread_ internally
+    // and return thread-local values when true.
+    static void MarkIsolatedThread();
+    // Query whether current thread is marked as isolated (dc/card scenario).
+    // Returns true only after MarkIsolatedThread() has been called on this thread.
+    // Used by UINode and PipelineContext at construction to snapshot their IsolatedThread identity.
+    static bool IsIsolatedThread();
+    static void AddLocal(int32_t id);
+    static void RemoveLocal(int32_t id);
+    static void ResetIsolatedThread();
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
     static uint64_t PushCurrent(int32_t id, const char* fileId, int32_t line, int32_t sourceType);

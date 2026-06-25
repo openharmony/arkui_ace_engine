@@ -289,7 +289,7 @@ HWTEST_F(CommonMethodModifierTest19, accessibilityNextFocusIdTestDefaultValues, 
 */
 HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityNextFocusIdTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityNextFocusId, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityNextFocusId0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
@@ -300,7 +300,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityNextFocusIdTestVal
         {Converter::ArkValue<Opt_String>("id1"), "id1"}, {Converter::ArkValue<Opt_String>("id2"), "id2"}};
 
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityNextFocusId(node_, &inputValue);
+        modifier_->setAccessibilityNextFocusId0(node_, &inputValue);
         EXPECT_EQ(accessibilityProperty->GetAccessibilityNextFocusInspectorKey(), expectedValue);
     }
 }

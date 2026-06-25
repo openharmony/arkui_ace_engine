@@ -28,6 +28,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
@@ -232,6 +233,15 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     RegisterAccessibilityClickAction();
     MenuView::RegisterAccessibilityChildActionNotify(host);
+}
+
+void CustomMenuItemPattern::OnModifyDone()
+{
+    MenuItemPattern::OnModifyDone();
+    if (GetSubBuilder() && !onClickEvent_) {
+        RegisterOnClick();
+        RegisterOnHover();
+    }
 }
 
 void MenuItemPattern::OnAttachToMainTree()
@@ -880,7 +890,9 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         CHECK_NULL_VOID(pattern);
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
-            AddStackSubMenuHeader(frameNode);
+            if (!IsCustomMenuItem()) {
+                AddStackSubMenuHeader(frameNode);
+            }
             pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
             pattern->SetIsEmbedded();
@@ -1541,18 +1553,34 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
-    // recognize gesture as click if touch up position is close to last touch down position
+    // Treat the gesture as a click iff the finger stays inside the item bounds during the whole touch
+    // sequence (down/move/up). This mirrors ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu closes" share the same hit criterion, instead of the old down->up straight-line distance check
+    // which is stricter than onClick and caused the menu not to close on an in-bounds swipe before lift-up.
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
+        movedOutOfRegion_ = false;
+    } else if (touchType == TouchType::MOVE) {
+        // mirror ClickRecognizer: once the finger leaves the item bounds, it is no longer a click
+        if (!movedOutOfRegion_ &&
+            !MenuPattern::IsOffsetInNodeBounds(GetHost(), touches.front().GetLocalLocation())) {
+            movedOutOfRegion_ = true;
+        }
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = touches.front().GetLocalLocation();
-        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+        bool isClick = lastTouchOffset_ && !movedOutOfRegion_ &&
+            MenuPattern::IsOffsetInNodeBounds(GetHost(), touchUpOffset);
+        if (isClick) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
             }
-            CloseMenu();
+            // if subBuilder is set, OnClick will handle ShowSubMenu; otherwise close menu
+            if (GetSubBuilder() == nullptr) {
+                CloseMenu();
+            }
         }
         lastTouchOffset_.reset();
+        movedOutOfRegion_ = false;
     }
 }
 
@@ -1891,8 +1919,21 @@ bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
-        focusHub->OnClick(event);
-        CloseMenu();
+        if (GetSubBuilder() != nullptr && expandingMode_ != SubMenuExpandingMode::EMBEDDED) {
+            OnClick();
+        } else {
+            focusHub->OnClick(event);
+            CloseMenu();
+        }
+        return true;
+    }
+    if (GetSubBuilder() != nullptr && event.code == KeyCode::KEY_DPAD_RIGHT && !IsSubMenuShowed()) {
+        auto theme = GetCurrentSelectTheme();
+        CHECK_NULL_RETURN(theme, false);
+        SetBgBlendColor(theme->GetHoverColor());
+        PlayBgColorAnimation();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        ShowSubMenu(ShowSubMenuType::KEY_DPAD_RIGHT);
         return true;
     }
     return false;
@@ -2026,13 +2067,13 @@ void MenuItemPattern::UpdateSymbolColorList(RefPtr<TextLayoutProperty>& props, c
 }
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
-    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    auto itemProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    if (selectIcon->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         selectIcon->SetThemeScopeId(host->GetThemeScopeId());
     }
     auto symbol = itemProperty->GetSelectSymbol();
@@ -3740,7 +3781,7 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
         return false;
     }
     auto menuTheme = host->GetTheme<SelectTheme>(true);

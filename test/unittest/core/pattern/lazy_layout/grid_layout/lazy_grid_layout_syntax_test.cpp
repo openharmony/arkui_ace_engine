@@ -21,9 +21,8 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -59,22 +58,25 @@ private:
 };
 
 void LazyGridLayoutSyntaxTest::CreateRepeatVirtualScrollNode(
-    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index)
+    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& onGetRid4Index)
 {
     RepeatVirtualScroll2ModelNG repeatModel;
     auto onActiveRange = [](int32_t start, int32_t end, int32_t cacheStart,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     auto onRecycleItems = [](int32_t start, int32_t end) {};
     repeatModel.Create(
         itemNumber,
         itemNumber,
+        0,
         onGetRid4Index,
         onRecycleItems,
         onActiveRange,
         nullptr,
         onPurge,
+        onPurgeAll,
         onUpdateDirty);
 }
 
@@ -169,7 +171,7 @@ HWTEST_F(LazyGridLayoutSyntaxTest, RepeatVirtualScrollTest001, TestSize.Level1)
     CreateWaterFlow();
     CreateLazyGridLayout();
     CreateRepeatVirtualScrollNode(30,
-        [](uint32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+        [](uint32_t index, bool inAnimation, bool isRestoreCache) -> std::pair<uint32_t, uint32_t> {
             StackModelNG stackModel;
             stackModel.Create();
             ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));

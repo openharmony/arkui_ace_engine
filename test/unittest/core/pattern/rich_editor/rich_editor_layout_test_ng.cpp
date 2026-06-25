@@ -88,10 +88,16 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper001, TestSize.Level2)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     DirtySwapConfig config;
     config.skipMeasure = true;
+    /**
+     * @tc.steps1: test OnDirtyLayoutWrapperSwap when had focus
+     */
     auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
     focusHub->currentFocus_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
+    /**
+     * @tc.steps2: test OnDirtyLayoutWrapperSwap when has inited
+     */
     richEditorPattern->isRichEditorInit_ = true;
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = 2;
@@ -1091,7 +1097,6 @@ HWTEST_F(RichEditorLayoutTestNg, AddImageToParagraphTest001, TestSize.Level2)
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 0;
     layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
@@ -1142,8 +1147,7 @@ HWTEST_F(RichEditorLayoutTestNg, AddPlaceHolderToParagraphTest001, TestSize.Leve
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 3;
-    layoutAlgorithm->preParagraphsPlaceholderCount_ = 7;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
      * @tc.steps: step3. Prepare test parameters
@@ -1237,8 +1241,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Le
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 2;
-    layoutAlgorithm->preParagraphsPlaceholderCount_ = 8;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
      * @tc.steps: step3. Prepare test parameters without onDraw

@@ -111,6 +111,7 @@ void SymbolModelNG::SetSymbolGlyphType(SymbolType value)
 void SymbolModelNG::SetFontSize(const CalcDimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE);
 }
 
 void SymbolModelNG::SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy)
@@ -228,9 +229,11 @@ void SymbolModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     if (!value.IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, frameNode);
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void SymbolModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
@@ -404,5 +407,31 @@ void SymbolModelNG::ResetShaderStyle()
 void SymbolModelNG::ResetShaderStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, frameNode);
+}
+
+void SymbolModelNG::SetIsFontColorResource(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IsFontColorResource, flag, frameNode);
+}
+
+bool SymbolModelNG::GetIsFontColorResource(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto property = frameNode->GetLayoutProperty<NG::TextLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    return property->GetIsFontColorResource().value_or(false);
+}
+
+std::vector<RefPtr<ResourceObject>> SymbolModelNG::GetFontColorResource(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto property = frameNode->GetLayoutProperty<NG::TextLayoutProperty>();
+    CHECK_NULL_RETURN(property, {});
+    return property->GetFontColorResource().value_or(std::vector<RefPtr<ResourceObject>>());
+}
+
+void SymbolModelNG::SetFontColorResource(FrameNode* frameNode, const std::vector<RefPtr<ResourceObject>>& resource)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontColorResource, resource, frameNode);
 }
 } // namespace OHOS::Ace::NG

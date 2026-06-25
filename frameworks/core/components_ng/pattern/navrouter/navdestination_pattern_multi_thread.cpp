@@ -17,6 +17,7 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 void NavDestinationPattern::OnAttachToFrameNodeMultiThread()
@@ -46,7 +47,10 @@ void NavDestinationPattern::OnAttachToMainTreeMultiThread()
 
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->AddRecyclePageNode(host);
+    }
 }
 
 void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
@@ -69,7 +73,10 @@ void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->RemoveRecyclePageNode(id);
+    }
     NavDestinationPatternBase::RemoveOnTouchEvent(AceType::RawPtr(host));
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,39 +13,77 @@
  * limitations under the License.
  */
 
-function copyImageAnimatorModifierWithKey(obj) {
-  let _a;
-  let _b;
-  let newObj = { ...obj };
-  if (obj.convertImageFrames !== undefined) {
-    newObj.convertImageFrames = (_a = obj) === null || _a === void 0 ? void 0 : _a.convertImageFrames;
-    newObj.isEqual = (_b = obj) === null || _b === void 0 ? void 0 : _b.isEqual;
+class LazyArkImageAnimatorComponent extends ArkComponent {
+  static module: ImageAnimatorComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkImageAnimatorComponent.module === undefined) {
+      LazyArkImageAnimatorComponent.module = globalThis.requireNapi('arkui.components.arkimageanimator');
+    }
+
+    this.lazyComponent = LazyArkImageAnimatorComponent.module.createComponent(nativePtr, classType);
   }
-  newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
-  newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
-  newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
-  return newObj;
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  images(value: Array<ImageFrameInfo>): this {
+    this.lazyComponent.images(value);
+    return this;
+  }
+
+  state(value: AnimationStatus): this {
+    this.lazyComponent.state(value);
+    return this;
+  }
+
+  duration(value: number): this {
+    this.lazyComponent.duration(value);
+    return this;
+  }
+
+  reverse(value: boolean): this {
+    this.lazyComponent.reverse(value);
+    return this;
+  }
+
+  fixedSize(value: boolean): this {
+    this.lazyComponent.fixedSize(value);
+    return this;
+  }
+
+  preDecode(value: number): this {
+    throw new Error('preDecode function not supported in attributeModifier scenario.');
+  }
+
+  fillMode(value: FillMode): this {
+    this.lazyComponent.fillMode(value);
+    return this;
+  }
+
+  iterations(value: number): this {
+    this.lazyComponent.iterations(value);
+    return this;
+  }
+
+  monitorInvisibleArea(value: boolean): this {
+    this.lazyComponent.monitorInvisibleArea(value);
+    return this;
+  }
 }
 
-function mergeImageAnimatorMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
-  newMap: Map<Symbol, AttributeModifierWithKey>): Map<Symbol, AttributeModifierWithKey> {
-  newMap.forEach((value, key) => {
-    stageMap.set(key, copyImageAnimatorModifierWithKey(value));
-  });
-
-  return stageMap;
-}
-class ImageAnimatorModifier extends ArkImageAnimatorComponent implements AttributeModifier<ImageAnimatorAttribute> {
+class ImageAnimatorModifier extends LazyArkImageAnimatorComponent implements AttributeModifier<ImageAnimatorAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: ImageAnimatorAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    // @ts-ignore
-    let component: ArkComponent = instance as ArkComponent;
-    mergeImageAnimatorMaps(component._modifiersWithKeys, this._modifiersWithKeys);
+    ModifierUtils.applyAndMergeModifier<ImageAnimatorAttribute, ArkImageAnimatorComponent, ArkComponent>(instance, this);
   }
 }

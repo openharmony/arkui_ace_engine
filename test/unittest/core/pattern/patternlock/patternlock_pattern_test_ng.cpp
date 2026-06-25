@@ -555,6 +555,8 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest014, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
 
     pattern_->InitMouseEvent();
+    inputEventHub->CreateHoverEventActuator();
+    inputEventHub->CreateMouseEventActuator();
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     ASSERT_FALSE(inputEventHub->mouseEventActuator_->inputEvents_.empty());
     /**
@@ -937,5 +939,55 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest022, TestSize.Level1)
     EXPECT_TRUE(layoutProperty->GetActiveColorSetByUser());
     EXPECT_TRUE(layoutProperty->GetRegularColorSetByUser());
     EXPECT_TRUE(layoutProperty->GetActiveCircleColorSetByUser());
+}
+
+/**
+ * @tc.name: PatternLockPatternTest023
+ * @tc.desc: Test full touch cycle: DOWN sets fingerId, UP resets it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest023, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
+
+    /**
+     * @tc.steps: step1. send DOWN event with fingerId=0.
+     * @tc.expected: fingerId_ is set to 0.
+     */
+    float offsetX = 2.0f;
+    float offsetY = 2.0f;
+    Offset offset(offsetX, offsetY);
+    TouchLocationInfo locationDown(0);
+    locationDown.SetLocalLocation(offset);
+    locationDown.SetTouchType(TouchType::DOWN);
+    TouchEventInfo touchDown("onTouchDown");
+    touchDown.AddChangedTouchLocationInfo(std::move(locationDown));
+    pattern_->HandleTouchEvent(touchDown);
+    EXPECT_EQ(pattern_->fingerId_, 0);
+
+    /**
+     * @tc.steps: step2. send UP event with same fingerId.
+     * @tc.expected: fingerId_ is reset to -1.
+     */
+    TouchLocationInfo locationUp(0);
+    locationUp.SetLocalLocation(offset);
+    locationUp.SetTouchType(TouchType::UP);
+    TouchEventInfo touchUp("onTouchUp");
+    touchUp.AddChangedTouchLocationInfo(std::move(locationUp));
+    pattern_->HandleTouchEvent(touchUp);
+    EXPECT_EQ(pattern_->fingerId_, -1);
+
+    /**
+     * @tc.steps: step3. send DOWN with a different fingerId=1.
+     * @tc.expected: new fingerId is accepted since previous was reset.
+     */
+    TouchLocationInfo locationDown2(1);
+    locationDown2.SetLocalLocation(offset);
+    locationDown2.SetTouchType(TouchType::DOWN);
+    TouchEventInfo touchDown2("onTouchDown2");
+    touchDown2.AddChangedTouchLocationInfo(std::move(locationDown2));
+    pattern_->HandleTouchEvent(touchDown2);
+    EXPECT_EQ(pattern_->fingerId_, 1);
 }
 }

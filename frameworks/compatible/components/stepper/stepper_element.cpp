@@ -152,6 +152,9 @@ void StepperElement::HandleOnButtonFocus(bool focus, bool isLeft)
 
 bool StepperElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
+    if (itLastFocusNode_ == focusNodes_.end()) {
+        return false;
+    }
     if (*itLastFocusNode_ == leftFocusNode_) {
         if (reverse) {
             return RequestCurrentItemFocus();

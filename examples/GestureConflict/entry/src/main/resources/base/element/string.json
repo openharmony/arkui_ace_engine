@@ -1,0 +1,72 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "Drag_instructions",
+      "value": "包括上下两层组件，上层组件绑定长按手势，下层组件绑定拖拽。其中上层组件下半区域绑定手势拦截，使该区域响应下层拖拽手势。"
+    },
+    {
+      "name": "Allow_dragging_prompt",
+      "value": "Drag 下半区蓝色区域，Image响应"
+    },
+    {
+      "name": "Stop_dragging_prompt",
+      "value": "LongPressGesture 长按上半区 红色区域，红色区域响应"
+    },
+    {
+      "name": "Playback_progress",
+      "value": "播放进度"
+    },
+    {
+      "name": "Play_full_screen",
+      "value": "全屏播放"
+    },
+    {
+      "name": "Exit_play_full_screen",
+      "value": "取消全屏播放"
+    },
+    {
+      "name": "stop_playing",
+      "value": "暂停播放"
+    },
+    {
+      "name": "Continue_playing",
+      "value": "继续播放"
+    },
+    {
+      "name": "Cancel_FastForwarding",
+      "value": "取消快进"
+    },
+    {
+      "name": "Start_FastForwarding",
+      "value": "开始快进"
+    },
+    {
+      "name": "Start_adjusting_brightness",
+      "value": "开始调整 亮度"
+    },
+    {
+      "name": "Reduce_brightness",
+      "value": "降低亮度"
+    },
+    {
+      "name": "Increase_brightness",
+      "value": "提高亮度"
+    },
+    {
+      "name": "Adjust_schedule",
+      "value": "开始调整 进度"
+    }
+  ]
+}

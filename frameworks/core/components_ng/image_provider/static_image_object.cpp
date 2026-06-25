@@ -71,7 +71,9 @@ void StaticImageObject::MakeCanvasImage(
             .sync = syncLoad,
             .imageQuality = ctx->GetImageQuality(),
             .isHdrDecoderNeed = ctx->GetIsHdrDecoderNeed(),
-            .photoDecodeFormat = ctx->GetPhotoDecodeFormat() });
+            .photoDecodeFormat = ctx->GetPhotoDecodeFormat(),
+            .imageDfxConfig = ctx->GetImageDfxConfig(),
+            .ctxWp = ctxWp });
 }
 
 RefPtr<ImageObject> StaticImageObject::Clone()

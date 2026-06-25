@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
+#include "base/geometry/shape.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
@@ -233,12 +234,14 @@ void GetRSColorSpaceByGradientColors(
     rsColorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType);
 }
 
-float GetHDRMaxByGradientColors(const std::vector<GradientColor>& gradientColors)
+float GetHDRMaxByGradientColors(const std::vector<GradientColor>& gradientColors, bool& hasHDR)
 {
+    hasHDR = false;
     float hdrMax = COLOR_HEAD_ROOM_DEFAULT_VALUE;
     for (size_t index = 0; index < gradientColors.size(); index++) {
         Color color = gradientColors[index].GetColor();
         if (color.GetHeadRoomColor().has_value()) {
+            hasHDR = true;
             auto colorWithHeadRoom = color.GetHeadRoomColor().value();
             hdrMax = std::max(hdrMax, colorWithHeadRoom.headRoom);
         }
@@ -301,9 +304,9 @@ std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
 #endif
 }
 
-#ifdef ENABLE_ROSEN_BACKEND
 void ApplyHDRHeadRoom(const WeakPtr<FrameNode>& host, float hdrMax)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!GreatNotEqual(hdrMax, COLOR_HEAD_ROOM_DEFAULT_VALUE)) {
         return;
     }
@@ -315,8 +318,8 @@ void ApplyHDRHeadRoom(const WeakPtr<FrameNode>& host, float hdrMax)
     CHECK_NULL_VOID(rosenRenderContext);
     LOGD("Slider SetHDRColorHeadRoom, hdr: %{public}f", hdrMax);
     rosenRenderContext->SetHDRColorHeadRoom(hdrMax);
-}
 #endif
+}
 
 void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
@@ -345,11 +348,10 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     brush.SetAntiAlias(true);
     std::shared_ptr<RSColorSpace> rsColorSpace = nullptr;
     GetRSColorSpaceByGradientColors(gradientColors, rsColorSpace);
-    float hdrMax = GetHDRMaxByGradientColors(gradientColors);
-    if (GreatNotEqual(hdrMax, COLOR_HEAD_ROOM_DEFAULT_VALUE)) {
-#ifdef ENABLE_ROSEN_BACKEND
+    bool hasHDR = false;
+    float hdrMax = GetHDRMaxByGradientColors(gradientColors, hasHDR);
+    if (hasHDR) {
         ApplyHDRHeadRoom(host_, hdrMax);
-#endif
         std::vector<RSUIColor> rsUIColors;
         GetUIColorsByGradientColors(gradientColors, rsUIColors);
         brush.SetShaderEffect(reverse_ ?

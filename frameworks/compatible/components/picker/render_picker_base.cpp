@@ -21,7 +21,8 @@
 #include "compatible/components/picker/picker_time_component.h"
 
 #include "base/log/event_report.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 namespace OHOS::Ace {
 

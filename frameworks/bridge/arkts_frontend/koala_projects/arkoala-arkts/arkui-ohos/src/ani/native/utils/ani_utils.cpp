@@ -236,6 +236,15 @@ std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::stri
     return result_string;
 }
 
+std::optional<ani_int> AniUtils::StdStringToANIInt(ani_env *env, std::string str)
+{
+    ani_int arg_int{};
+    CHECK_NULL_RETURN(env, arg_int);
+    int32_t intValue = std::stoi(str);
+    arg_int = static_cast<ani_int>(intValue);
+    return arg_int;
+}
+
 // Do not use this function directly to create a BusinessError object.
 static ani_object WrapBusinessError(ani_env* env, const char *msg)
 {

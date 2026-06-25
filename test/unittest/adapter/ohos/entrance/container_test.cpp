@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #define private public
 #define protected public
 #include "test/mock/frameworks/core/common/mock_container.h"

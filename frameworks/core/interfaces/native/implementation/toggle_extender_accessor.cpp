@@ -12,38 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ui/base/utils/utils.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/toggle/toggle_model_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ToggleExtenderAccessor {
-Ark_NativePointer ConstructButtonImpl(Ark_Int32 id,
-                                      Ark_Int32 flags)
-{
-    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::BUTTON);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-Ark_NativePointer ConstructCheckboxImpl(Ark_Int32 id,
-                                        Ark_Int32 flags)
-{
-    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::CHECKBOX);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // ToggleExtenderAccessor
 const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor()
 {
-    static const GENERATED_ArkUIToggleExtenderAccessor ToggleExtenderAccessorImpl {
-        ToggleExtenderAccessor::ConstructButtonImpl,
-        ToggleExtenderAccessor::ConstructCheckboxImpl,
-    };
-    return &ToggleExtenderAccessorImpl;
+    static const GENERATED_ArkUIToggleExtenderAccessor* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Toggle");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find toggle dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIToggleExtenderAccessor*>(
+            module->GetCustomModifier("extenderAccessor"));
+    }
+    return cachedModifier;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

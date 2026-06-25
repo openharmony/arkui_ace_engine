@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "list_layout_property.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -25,14 +26,36 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/interfaces/native/node/node_arc_list_modifier.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
+#define SCROLLABLE_LIST_ATTRIBUTE "Scrollable.ListAttribute."
+
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
+namespace {
+RefPtr<Pattern> CreateArcListPattern()
+{
+    auto* mod = NodeModifier::GetArcListCustomModifier();
+    if (!mod) {
+        LOGE("CreateArcListPattern: mod is null");
+        return nullptr;
+    }
+    if (!mod->createArcListPattern) {
+        LOGE("CreateArcListPattern: createArcListPattern func ptr is null");
+        return nullptr;
+    }
+    auto pattern = mod->createArcListPattern();
+    if (!pattern) {
+        LOGE("CreateArcListPattern: createArcListPattern() returned null");
+    }
+    return pattern;
+}
+} // namespace
 
 void ListModelNG::Create(bool isCreateArc)
 {
@@ -45,7 +68,7 @@ void ListModelNG::Create(bool isCreateArc)
         frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
-            tag, nodeId, []() { return AceType::MakeRefPtr<ArcListPattern>(); });
+            tag, nodeId, []() { return CreateArcListPattern(); });
     }
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -72,7 +95,7 @@ RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId, bool isCreateArc)
     if (!isCreateArc) {
         frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
     } else {
-        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcListPattern>());
+        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, CreateArcListPattern());
     }
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
@@ -189,12 +212,17 @@ void ListModelNG::SetScrollBarWidth(const std::string& value)
 
 void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void ListModelNG::SetEditMode(bool editMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetEditMode", editMode);
 }
 
 void ListModelNG::SetDivider(const V2::ItemDivider& divider)
@@ -213,11 +241,13 @@ void ListModelNG::SetDividerColorByUser(bool isByUser)
 
 void ListModelNG::SetChainAnimation(bool enableChainAnimation)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetChainAnimation", enableChainAnimation);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
 }
 
 void ListModelNG::SetChainAnimationOptions(const ChainAnimationOptions& options)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetChainAnimationOptions", 1);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(options.minSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MIN_SPACE, frameNode);
@@ -287,6 +317,10 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 
 void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     int32_t count = cachedCount;
     if (SystemProperties::IsWhiteBlockEnabled()) {
         count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
@@ -297,6 +331,11 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 
 void ListModelNG::SetCacheRange(NG::CacheRange cacheRange, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetCacheRange", 1);
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, cacheRange);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
@@ -316,6 +355,9 @@ void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
 
 void ListModelNG::SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetScrollSnapAlign",
+        static_cast<int32_t>(scrollSnapAlign) + static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_NONE),
+        static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_END));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
@@ -331,6 +373,11 @@ void ListModelNG::SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign)
 
 void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -340,6 +387,7 @@ void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 
 void ListModelNG::SetMultiSelectable(bool selectable)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetMultiSelectable", selectable);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -360,11 +408,13 @@ int32_t ListModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void ListModelNG::SetScrollEnabled(bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
 void ListModelNG::SetFriction(double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetFriction", 1);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -399,6 +449,7 @@ void ListModelNG::SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrap
 
 void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetMaintainVisibleContentPosition", enabled);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -408,16 +459,19 @@ void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
 
 void ListModelNG::SetStackFromEnd(bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetStackFromEnd", enabled);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled);
 }
 
 void ListModelNG::SetSyncLoad(bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetSyncLoad", enabled);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled);
 }
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -463,6 +517,7 @@ void ListModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 
 void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -472,6 +527,7 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
 
 void ListModelNG::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -480,6 +536,8 @@ void ListModelNG::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& on
 
 void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScrollVisibleContentChange",
+        onScrollVisibleContentChange ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -523,6 +581,7 @@ void ListModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 
 void ListModelNG::SetOnItemMove(OnItemMoveEvent&& onItemMove)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemMove", onItemMove ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -534,6 +593,7 @@ void ListModelNG::SetOnItemMove(OnItemMoveEvent&& onItemMove)
 
 void ListModelNG::SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragStart", onItemDragStart ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -556,6 +616,7 @@ void ListModelNG::SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart)
 
 void ListModelNG::SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragEnter", onItemDragEnter ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -567,6 +628,7 @@ void ListModelNG::SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter)
 
 void ListModelNG::SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragLeave", onItemDragLeave ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -578,6 +640,7 @@ void ListModelNG::SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave)
 
 void ListModelNG::SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragMove", onItemDragMove ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -619,10 +682,12 @@ void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
 void ListModelNG::SetEditMode(FrameNode* frameNode, bool editMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetEditMode", editMode);
 }
 
 void ListModelNG::SetMultiSelectable(FrameNode* frameNode, bool selectable)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetMultiSelectable", selectable);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(selectable);
@@ -630,6 +695,7 @@ void ListModelNG::SetMultiSelectable(FrameNode* frameNode, bool selectable)
 
 void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetChainAnimation", chainAnimation);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation, frameNode);
 }
 
@@ -644,6 +710,10 @@ void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 
 void ListModelNG::SetShowCached(FrameNode* frameNode, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show, frameNode);
 }
 
@@ -666,6 +736,7 @@ bool ListModelNG::GetShowCached(FrameNode* frameNode)
 
 void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetCacheRange", 1);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -686,9 +757,10 @@ CacheRange ListModelNG::GetCacheRange(FrameNode* frameNode)
     return value;
 }
 
-void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
+void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enable)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetScrollEnabled", enable);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enable, frameNode);
 }
 
 void ListModelNG::SetSticky(FrameNode* frameNode, int32_t stickyStyle)
@@ -699,6 +771,10 @@ void ListModelNG::SetSticky(FrameNode* frameNode, int32_t stickyStyle)
 
 void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(
         frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, edge);
 }
@@ -724,6 +800,7 @@ float ListModelNG::GetListFriction(FrameNode* frameNode)
 
 void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetFriction", 1);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -832,6 +909,7 @@ void ListModelNG::SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed)
 
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetMaintainVisibleContentPosition", enabled);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -849,6 +927,11 @@ bool ListModelNG::GetListMaintainVisibleContentPosition(FrameNode* frameNode)
 
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetListNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1048,6 +1131,7 @@ int32_t ListModelNG::GetEdgeEffect(FrameNode* frameNode)
 
 void ListModelNG::SetListStackFromEnd(FrameNode* frameNode, bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetStackFromEnd", enabled);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled, frameNode);
 }
 
@@ -1060,6 +1144,7 @@ bool ListModelNG::GetListStackFromEnd(FrameNode* frameNode)
 
 void ListModelNG::SetListSyncLoad(FrameNode* frameNode, bool enabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetSyncLoad", enabled);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled, frameNode);
 }
 
@@ -1072,12 +1157,24 @@ bool ListModelNG::GetListSyncLoad(FrameNode* frameNode)
 
 void ListModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetEditModeOptions",
+        (editModeOptions.enableGatherSelectedItemsAnimation ? 4 : 0) + // 4 : bit2
+            (editModeOptions.useDefaultMultiSelectStyle ? 2 : 0) + // 2 : bit1
+            (editModeOptions.enableFingerMultiSelect ? 1 : 0) + // 1 : bit0
+            static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_000),
+        static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_111));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetEditModeOptions(frameNode, editModeOptions);
 }
 
 void ListModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetEditModeOptions",
+        (editModeOptions.enableGatherSelectedItemsAnimation ? 4 : 0) + // 4 : bit2
+            (editModeOptions.useDefaultMultiSelectStyle ? 2 : 0) + // 2 : bit1
+            (editModeOptions.enableFingerMultiSelect ? 1 : 0) + // 1 : bit0
+            static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_000),
+        static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_111));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1129,6 +1226,23 @@ void ListModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::functi
     pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
+void ListModelNG::SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
+void ListModelNG::SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -1143,6 +1257,9 @@ EffectEdge ListModelNG::GetEffectEdge(FrameNode* frameNode)
 
 void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_LIST_ATTRIBUTE "SetScrollSnapAlign",
+        static_cast<int32_t>(scrollSnapAlign) + static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_NONE),
+        static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_END));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
 }
 
@@ -1187,6 +1304,7 @@ void ListModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divide
 
 void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetChainAnimationOptions", 1);
     CHECK_NULL_VOID(frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(options.minSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MIN_SPACE, frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(options.maxSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MAX_SPACE, frameNode);
@@ -1205,14 +1323,22 @@ DisplayMode ListModelNG::GetDisplayMode() const
 void ListModelNG::SetHeader(const RefPtr<FrameNode>& headerNode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ListModelNG::SetHeader(frameNode, headerNode.GetRawPtr());
+}
+
+void ListModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
+{
+    CHECK_NULL_VOID(headerNode);
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->AddHeader(headerNode);
+    auto* mod = NodeModifier::GetArcListCustomModifier();
+    CHECK_NULL_VOID(mod);
+    CHECK_NULL_VOID(mod->addHeader);
+    mod->addHeader(frameNode, headerNode);
 }
 
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1271,6 +1397,7 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
 
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(FrameNode* node)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetListChildrenMainSize", 1);
     auto frameNode = node ? node : ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -1280,6 +1407,7 @@ RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(FrameN
 
 void ListModelNG::SetListChildrenMainSize(FrameNode* frameNode, RefPtr<ListChildrenMainSize>& childrenSize)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetListChildrenMainSize", 1);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1289,6 +1417,7 @@ void ListModelNG::SetListChildrenMainSize(FrameNode* frameNode, RefPtr<ListChild
 void ListModelNG::SetListChildrenMainSize(
     FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetListChildrenMainSize", 1);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1316,15 +1445,6 @@ int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
     return value;
 }
 
-void ListModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
-{
-    CHECK_NULL_VOID(headerNode);
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->AddHeader(AceType::Claim<FrameNode>(headerNode));
-}
-
 #ifdef SUPPORT_DIGITAL_CROWN
 void ListModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 {
@@ -1335,18 +1455,20 @@ void ListModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 void ListModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetDigitalCrownSensitivity(sensitivity);
+    auto* mod = NodeModifier::GetArcListCustomModifier();
+    CHECK_NULL_VOID(mod);
+    CHECK_NULL_VOID(mod->setDigitalCrownSensitivity);
+    mod->setDigitalCrownSensitivity(frameNode, sensitivity);
 }
 
 CrownSensitivity ListModelNG::GetDigitalCrownSensitivity(FrameNode* frameNode)
 {
     CrownSensitivity sensitivity = CrownSensitivity::MEDIUM;
     CHECK_NULL_RETURN(frameNode, sensitivity);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_RETURN(pattern, sensitivity);
-    return pattern->GetDigitalCrownSensitivity();
+    auto* mod = NodeModifier::GetArcListCustomModifier();
+    CHECK_NULL_RETURN(mod, sensitivity);
+    CHECK_NULL_RETURN(mod->getDigitalCrownSensitivity, sensitivity);
+    return mod->getDigitalCrownSensitivity(frameNode);
 }
 #endif
 
@@ -1369,6 +1491,8 @@ void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase>
 void ListModelNG::SetOnScrollVisibleContentChange(
     FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnScrollVisibleContentChange",
+        onScrollVisibleContentChange ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1377,6 +1501,7 @@ void ListModelNG::SetOnScrollVisibleContentChange(
 
 void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemMove", onItemMove ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1387,6 +1512,7 @@ void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMo
 
 void ListModelNG::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragStart", onItemDragStart ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1408,6 +1534,7 @@ void ListModelNG::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&&
 
 void ListModelNG::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragEnter", onItemDragEnter ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1418,6 +1545,7 @@ void ListModelNG::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&&
 
 void ListModelNG::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragLeave", onItemDragLeave ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1428,6 +1556,7 @@ void ListModelNG::SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&&
 
 void ListModelNG::SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "SetOnItemDragMove", onItemDragMove ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);

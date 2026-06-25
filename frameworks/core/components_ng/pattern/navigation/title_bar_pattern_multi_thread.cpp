@@ -15,6 +15,7 @@
 
 #include "ui/base/utils/utils.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
@@ -43,6 +44,7 @@ void TitleBarPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateIsBackgroundDark();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -59,6 +61,8 @@ void TitleBarPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UnregisterColorPicker();
+    UnregisterTransparencyListener();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 

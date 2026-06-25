@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+
+#include "base/log/ace_performance_check.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 
@@ -28,7 +30,9 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -48,6 +52,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "base/log/ace_checker.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
@@ -58,12 +63,8 @@
 #endif
 namespace OHOS::Ace::NG {
 
-constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
-constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
-constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
 constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
-constexpr Dimension DEFAULT_DRAG_BAR_HOT_ZONE = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 constexpr int32_t PAGE_NODES = 1000;
@@ -76,10 +77,14 @@ constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
 constexpr int32_t SECOND_ZINDEX_VALUE = 2;
 constexpr int32_t INVALID_ANIMATION_ID = -1;
 constexpr int32_t FULL_CIRCLE_ANGLE = 360;
+constexpr int32_t FORCESPLIT_DRAG_DIVIDER_ZINDEX = 4;
+constexpr int32_t FORCESPLIT_DRAGBAR_ZINDEX = 5;
+constexpr int32_t FORCESPLIT_DRAGBAR_ITEM_ZINDEX = 6;
 
 namespace {
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+static const auto DIVIDER_DRAG_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
 
 int32_t ConvertDisplayOrientationToRotationAngle(DisplayOrientation ori)
 {
@@ -404,47 +409,6 @@ RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
     }
 }
 
-void NavigationPattern::DoAnimation(NavigationMode usrNavigationMode)
-{
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    layoutProperty->UpdateNavigationMode(navigationMode_);
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    AnimationOption option = AnimationOption();
-    option.SetDuration(NAVIMODE_CHANGE_ANIMATION_DURATION);
-    option.SetCurve(Curves::FRICTION);
-    option.SetFillMode(FillMode::FORWARDS);
-    AnimationOption optionAlpha = AnimationOption();
-    optionAlpha.SetCurve(Curves::SHARP);
-    optionAlpha.SetFillMode(FillMode::FORWARDS);
-    auto renderContext = GetTitleBarRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    std::function<void()> finishCallback = [optionAlpha, renderContext, hostNode]() {
-        renderContext->OpacityAnimation(optionAlpha, 0, 1);
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    context->OpenImplicitAnimation(option, option.GetCurve(), finishCallback);
-    layoutProperty->UpdateNavigationMode(usrNavigationMode);
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    context->FlushUITasks();
-    if (usrNavigationMode == NavigationMode::STACK || navigationMode_ == NavigationMode::SPLIT) {
-        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
-        renderContext->OpacityAnimation(optionAlpha, 1, 0);
-    } else if (usrNavigationMode == NavigationMode::SPLIT || navigationMode_ == NavigationMode::STACK) {
-        optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
-        renderContext->OpacityAnimation(optionAlpha, 0, 1);
-    }
-    context->CloseImplicitAnimation();
-    navigationMode_ = usrNavigationMode;
-}
-
 void NavigationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -560,8 +524,41 @@ void NavigationPattern::ClearDragBarEvent()
     hostNode->SetDragBarNode(nullptr);
 }
 
+void NavigationPattern::ClearForceSplitDragBarEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+
+    // clear drag bar touch and pan event
+    if (touchEvent_) {
+        dragGestureHub->RemoveTouchEvent(touchEvent_);
+        touchEvent_.Reset();
+    }
+    if (forceSplitDragEvent_) {
+        dragGestureHub->RemovePanEvent(forceSplitDragEvent_);
+        forceSplitDragEvent_.Reset();
+    }
+
+    hostNode->RemoveChild(dragBarNode);
+    hostNode->MarkNeedSyncRenderTree();
+}
+
 void NavigationPattern::BuildDragBar()
 {
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    if (GetIsTargetForceSplitNav() && !navMgr->IsDividerDisabled()) {
+        OnForceSplitIsDraggableChange(forceSplitMgr->IsSplitDraggable());
+        return;
+    }
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
@@ -856,7 +853,7 @@ void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
      * When developers provide a valid style to systemBarStyle, we should set the style to window;
      * when 'undefined' was provided, we should restore the style.
      */
-    if (currStyle_.value() != nullptr) {
+    if (currStyle_.has_value() && currStyle_.value() != nullptr) {
         windowManager->SetSystemBarStyle(currStyle_.value());
     } else {
         TryRestoreSystemBarStyle(windowManager);
@@ -1430,6 +1427,10 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[index];
         RefPtr<UINode> uiNode = nullptr;
         int32_t arrayIndex = index - removeSize;
+        if (navigationStack_->IsAutoCleaned(arrayIndex)) {
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            continue;
+        }
         if (navigationStack_->IsFromRecovery(arrayIndex)) {
             if (navigationStack_->GetRecoveredDestinationMode(arrayIndex) ==
                 static_cast<int32_t>(NavDestinationMode::STANDARD)) {
@@ -1536,6 +1537,118 @@ void NavigationPattern::UpdateNavPathList()
     navigationStack_->UpdatePreTopInfo();
 }
 
+int32_t NavigationPattern::GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const
+{
+    if (stackSize <= 0 || config_.stackSizeLimit <= 0) {
+        return 0;
+    }
+    return std::max(0, std::min(lastStandardIndex, stackSize - config_.stackSizeLimit));
+}
+
+bool NavigationPattern::NeedRestoreOrAutoClean(
+    const NavPathList& navPathList, int32_t restoreStartIndex, int32_t cleanMinIndex) const
+{
+    int32_t stackSize = static_cast<int32_t>(navPathList.size());
+    CHECK_NULL_RETURN(navigationStack_, false);
+    for (int32_t index = restoreStartIndex; index < stackSize; ++index) {
+        if (navigationStack_->IsAutoCleaned(index)) {
+            // need restore navDestination from autoClean
+            return true;
+        }
+    }
+    if (config_.stackSizeLimit > 0 && config_.stackSizeLimit < stackSize) {
+        return true;
+    }
+    for (int32_t index = 0; index < cleanMinIndex; ++index) {
+        if (navPathList[index].second) {
+            // need process autoClean
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationPattern::RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    if (stackIndex < 0) {
+        stackIndex = index;
+    }
+    if (index < 0 || index >= static_cast<int32_t>(navPathList.size()) ||
+        !navigationStack_->IsAutoCleaned(stackIndex)) {
+        return false;
+    }
+    if (!navPathList[index].second && !GenerateUINodeByIndex(stackIndex, navPathList[index].second)) {
+        return false;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+    CHECK_NULL_RETURN(navDestination, false);
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    eventHub->FireOnRestoreState(navigationStack_->GetAutoCleanedState(stackIndex));
+    navigationStack_->ClearAutoCleanedState(stackIndex);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    if (pattern) {
+        pattern->SetPendingToClean(false);
+    }
+    return true;
+}
+
+bool NavigationPattern::ProcessAutoCleanAndRestore(int32_t lastStandardIndex)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
+    int32_t stackSize = static_cast<int32_t>(navPathList.size());
+    int32_t cleanMinIndex = GetAutoCleanRestoreMinIndex(lastStandardIndex, stackSize);
+    int32_t restoreStartIndex = std::max(0, lastStandardIndex);
+    if (!NeedRestoreOrAutoClean(navPathList, restoreStartIndex, cleanMinIndex)) {
+        return false;
+    }
+
+    bool changed = false;
+    // handle restore from auto clean
+    for (int32_t index = restoreStartIndex; index < stackSize; ++index) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        if (navigationStack_->IsAutoCleaned(index) && !navDestination) {
+            changed = RestoreAutoCleanedDestination(navPathList, index) || changed;
+            continue;
+        }
+        auto pattern = navDestination ? navDestination->GetPattern<NavDestinationPattern>() : nullptr;
+        if (pattern && pattern->GetPendingToClean()) {
+            pattern->SetPendingToClean(false);
+        }
+    }
+
+    RefPtr<UINode> remainDestination = nullptr;
+    if (preTopNavPath_.has_value()) {
+        remainDestination = NavigationGroupNode::GetNavDestinationNode(preTopNavPath_->second);
+    }
+    for (int32_t index = cleanMinIndex - 1; index >= 0; --index) {
+        if (!navPathList[index].second) {
+            continue;
+        }
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        if (!navDestination) {
+            continue;
+        }
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        if (navDestination == remainDestination || navDestination->IsOnAnimation()) {
+            pattern->SetPendingToClean(true);
+            continue;
+        }
+        pattern->SetPendingToClean(false);
+        navPathList[index].second = nullptr;
+        navigationStack_->MarkAutoCleanedFlag(pattern->GetNavDestinationId(), navDestination->CanRecovery());
+        changed = true;
+    }
+    navigationStack_->SetNavPathList(navPathList);
+    return changed;
+}
+
 void NavigationPattern::RefreshNavDestination()
 {
     isChanged_ = false;
@@ -1578,11 +1691,13 @@ void NavigationPattern::RefreshNavDestination()
 #endif
 
     /* if first navDestination is removed, the new one will be refreshed */
-    if (!navPathList.empty()) {
+    for (const auto& path : navPathList) {
         auto firstNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(navPathList.front().second));
-        CHECK_NULL_VOID(firstNavDesNode);
-        firstNavDesNode->MarkModifyDone();
+            NavigationGroupNode::GetNavDestinationNode(path.second));
+        if (firstNavDesNode) {
+            firstNavDesNode->MarkModifyDone();
+            break;
+        }
     }
 
     std::string navDestinationName = newTopNavPath.has_value() ? newTopNavPath->first : "";
@@ -3172,7 +3287,13 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
         navigationStack_->SetFromRecovery(index, false);
         auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        CHECK_NULL_CONTINUE(navdestination);
         navdestination->SetNeedAppearFromRecovery(true);
+        auto eventHub = navdestination->GetEventHub<NavDestinationEventHub>();
+        if (eventHub) {
+            eventHub->FireOnRestoreState(navigationStack_->GetAutoCleanedState(index));
+        }
+        navigationStack_->ClearAutoCleanedState(index);
     }
     return removeSize;
 }
@@ -3216,13 +3337,7 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
         CHECK_NULL_VOID(pattern);
         pattern->OnStartOneTransitionAnimation();
     };
-    auto onFinish = [weakPattern = WeakClaim(this)]() {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnFinishOneTransitionAnimation();
-    };
     navDestinationNode->SetOnStartTransitionAnimationCallback(std::move(onStart));
-    navDestinationNode->SetOnFinishTransitionAnimationCallback(std::move(onFinish));
     // set navigation id
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
@@ -3251,8 +3366,20 @@ void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& input
     inputHub->AddOnHoverEvent(hoverEvent_);
 }
 
+void NavigationPattern::UpdateRealNavBarWidth()
+{
+    auto navBarNode = GetNavBarNodeOrHomeDestination();
+    CHECK_NULL_VOID(navBarNode);
+    auto geoNode = navBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
+    realNavBarWidth_ = geoNode->GetFrameSize().Width();
+}
+
 void NavigationPattern::HandleDragStart()
 {
+    if (NearEqual(realNavBarWidth_, DEFAULT_NAV_BAR_WIDTH.ConvertToPx())) {
+        UpdateRealNavBarWidth();
+    }
     preNavBarWidth_ = realNavBarWidth_;
     if (!isDividerDraggable_) {
         return;
@@ -3322,6 +3449,294 @@ void NavigationPattern::HandleDragEnd()
     }
     isInDividerDrag_ = false;
     SetMouseStyle(MouseFormat::DEFAULT);
+}
+
+void NavigationPattern::HandleForceSplitDragStart()
+{
+    if (!IsForceSplitSuccess()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag start failed: force split is not active");
+        return;
+    }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsSplitDraggable() || forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag start failed: drag is disabled for current mode");
+        return;
+    }
+    forceSplitMgr->SetIsForceSplitDragging(true);
+    OnForceSplitDragStart();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag started");
+}
+
+void NavigationPattern::HandleForceSplitDragUpdate(float xOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitDragging()) {
+        return;
+    }
+
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    float frameWidth = geometryNode->GetFrameSize().Width();
+    if (NearEqual(frameWidth, 0.0f)) {
+        return;
+    }
+    float startRatio = forceSplitMgr->GetSplitRatio();
+    float newRatio = startRatio;
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        newRatio += xOffset / frameWidth;
+    } else {
+        newRatio -= xOffset / frameWidth;
+    }
+    newRatio = std::clamp(newRatio, MIN_SPLIT_DRAG_RATIO, MAX_SPLIT_DRAG_RATIO);
+    forceSplitMgr->SetTemporarySplitRatio(newRatio);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    UpdateForceSplitScaleAndTranslateByRatio(newRatio);
+}
+
+void NavigationPattern::UpdateForceSplitScaleAndTranslateByRatio(float ratio)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    float frameWidth = geometryNode->GetFrameSize().Width();
+    if (LessOrEqual(frameWidth, 0.0f) ||
+        LessOrEqual(primaryPartitionWidth_, 0.0f) ||
+        LessOrEqual(secondaryPartitionWidth_, 0.0f)) {
+        return;
+    }
+    float dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    float newSecondaryWidth = (frameWidth - dividerWidth) * ratio;
+    float newPrimaryWidth = frameWidth - dividerWidth - newSecondaryWidth;
+    constexpr float minScale = MIN_SPLIT_DRAG_RATIO / MAX_SPLIT_RATIO;
+    constexpr float maxScale = MAX_SPLIT_DRAG_RATIO / MIN_SPLIT_RATIO;
+    float primaryScale = std::clamp(newPrimaryWidth / primaryPartitionWidth_, minScale, maxScale);
+    float secondaryScale = std::clamp(newSecondaryWidth / secondaryPartitionWidth_, minScale, maxScale);
+    float primaryTranslateX = (newPrimaryWidth - primaryPartitionWidth_) / 2.0f;
+    float secondaryTranslateX = (newPrimaryWidth + newSecondaryWidth / 2.0f) -
+        (primaryPartitionWidth_ + secondaryPartitionWidth_ / 2.0f);
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        secondaryTranslateX = (newSecondaryWidth - secondaryPartitionWidth_) / 2.0f;
+        primaryTranslateX = (newSecondaryWidth + newPrimaryWidth / 2.0f) -
+            (secondaryPartitionWidth_ + primaryPartitionWidth_ / 2.0f);
+    }
+    UpdateForceSplitScaleAndTranslate(primaryScale, primaryTranslateX, secondaryScale, secondaryTranslateX);
+}
+
+void NavigationPattern::UpdateForceSplitScaleAndTranslate(
+    float primaryScale, float primaryTranslateX, float secondaryScale, float secondaryTranslateX)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarOrHomeDest = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
+    if (navBarOrHomeDest) {
+        auto renderContext = navBarOrHomeDest->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateTransformScale({primaryScale, 1.0f});
+            renderContext->UpdateTransformTranslate({primaryTranslateX, 0.0f, 0.0f});
+        }
+    }
+    auto primaryContent = AceType::DynamicCast<FrameNode>(hostNode->GetPrimaryContentNode());
+    if (primaryContent) {
+        auto renderContext = primaryContent->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateTransformScale({primaryScale, 1.0f});
+            renderContext->UpdateTransformTranslate({primaryTranslateX, 0.0f, 0.0f});
+        }
+    }
+    auto navigationContent = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (navigationContent) {
+        auto renderContext = navigationContent->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateTransformScale({secondaryScale, 1.0f});
+            renderContext->UpdateTransformTranslate({secondaryTranslateX, 0.0f, 0.0f});
+        }
+    }
+    auto relatedOrPh = AceType::DynamicCast<FrameNode>(hostNode->GetRelatedPageOrForceSplitPlaceholder());
+    if (relatedOrPh) {
+        auto renderContext = relatedOrPh->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateTransformScale({secondaryScale, 1.0f});
+            renderContext->UpdateTransformTranslate({secondaryTranslateX, 0.0f, 0.0f});
+        }
+    }
+}
+
+void NavigationPattern::HandleForceSplitDragEnd(bool isDragCanceled)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag end: not in drag state");
+        return;
+    }
+    float tempRatio = 0.0f;
+    float finalRatio = 0.0f;
+    bool needSnapAnimation = false;
+    if (isDragCanceled) {
+        finalRatio = forceSplitMgr->GetSplitRatio();
+    } else {
+        tempRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
+            forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
+        finalRatio = forceSplitMgr->FindNearestSnapRatio(tempRatio);
+        needSnapAnimation = !NearEqual(tempRatio, finalRatio);
+    }
+    if (!needSnapAnimation) {
+        forceSplitMgr->ClearTemporarySplitRatio();
+        OnForceSplitDragEnd();
+        forceSplitMgr->SetDragStoppedRatio(finalRatio);
+        forceSplitMgr->SetIsForceSplitDragging(false);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Force split drag end: snap directly to %{public}f (already at snap point)", finalRatio);
+        return;
+    }
+
+    PlayForceSplitSnapAnimation(forceSplitMgr->GetForceSplitMode(), tempRatio, finalRatio);
+}
+
+void NavigationPattern::OnForceSplitDragStart()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    hostNode->UpdateMaskNodeVisibility(true, VisibleType::VISIBLE);
+    hostNode->UpdateMaskNodeVisibility(false, VisibleType::VISIBLE);
+    UpdateForceSplitDragZIndex(true);
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto detailPageRatio = forceSplitMgr->GetSplitRatio();
+    forceSplitDividerWidth_ = navMgr->IsDividerDisabled() ? 0.0f : static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    secondaryPartitionWidth_ = (frameSize.Width() - forceSplitDividerWidth_) * detailPageRatio;
+    primaryPartitionWidth_ = frameSize.Width() - secondaryPartitionWidth_ - forceSplitDividerWidth_;
+}
+
+void NavigationPattern::UpdateForceSplitDragZIndex(bool isDragging)
+{
+    auto divider = GetDividerNode();
+    do {
+        CHECK_NULL_BREAK(divider);
+        auto renderContext = divider->GetRenderContext();
+        CHECK_NULL_BREAK(renderContext);
+        if (isDragging) {
+            renderContext->UpdateZIndex(FORCESPLIT_DRAG_DIVIDER_ZINDEX);
+        } else {
+            renderContext->UpdateZIndex(ZINDEX_DEFAULT_VALUE);
+            renderContext->ResetZIndex();
+        }
+    } while (false);
+    auto dragBar = GetDragBarNode();
+    do {
+        CHECK_NULL_BREAK(dragBar);
+        auto renderContext = dragBar->GetRenderContext();
+        CHECK_NULL_BREAK(renderContext);
+        renderContext->UpdateZIndex(isDragging ? FORCESPLIT_DRAGBAR_ZINDEX : 1);
+    } while (false);
+    do {
+        CHECK_NULL_BREAK(dragBar);
+        const auto& children = dragBar->GetChildren();
+        if (children.empty()) {
+            break;
+        }
+        auto dragBarItem = AceType::DynamicCast<FrameNode>(children.front());
+        CHECK_NULL_BREAK(dragBarItem);
+        auto renderContext = dragBarItem->GetRenderContext();
+        CHECK_NULL_BREAK(renderContext);
+        renderContext->UpdateZIndex(isDragging ? FORCESPLIT_DRAGBAR_ITEM_ZINDEX : SECOND_ZINDEX_VALUE);
+    } while (false);
+}
+
+void NavigationPattern::OnForceSplitDragEnd()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    UpdateForceSplitScaleAndTranslate(1.0f, 0.0f, 1.0f, 0.0f);
+    hostNode->UpdateMaskNodeVisibility(true, VisibleType::GONE);
+    hostNode->UpdateMaskNodeVisibility(false, VisibleType::GONE);
+    UpdateForceSplitDragZIndex(false);
+}
+
+void NavigationPattern::CreateForceSplitMaskNodes()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto leftMaskNode = hostNode->GetOrCreateMaskNode(true);
+    if (leftMaskNode) {
+        hostNode->UpdateMaskNodeVisibility(true, VisibleType::GONE);
+        leftMaskNode->MountToParent(hostNode);
+    }
+    auto rightMaskNode = hostNode->GetOrCreateMaskNode(false);
+    if (rightMaskNode) {
+        hostNode->UpdateMaskNodeVisibility(false, VisibleType::GONE);
+        rightMaskNode->MountToParent(hostNode);
+    }
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::InitForceSplitDragEvent()
+{
+    if (forceSplitDragEvent_) {
+        return;
+    }
+
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag start triggered");
+        pattern->HandleForceSplitDragStart();
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag update triggered");
+        pattern->HandleForceSplitDragUpdate(static_cast<float>(info.GetOffsetX()));
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag end triggered");
+        pattern->HandleForceSplitDragEnd();
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag cancel triggered");
+        pattern->HandleForceSplitDragEnd(true);
+    };
+
+    forceSplitDragEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    dragGestureHub->AddPanEvent(forceSplitDragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
+    InitTouchEvent(dragGestureHub);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag event initialized on dragBar node");
 }
 
 void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -3618,6 +4033,12 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    if (preTopNavDestination) {
+        preTopNavDestination->GetRenderContext()->SetLayerMark(true);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->GetRenderContext()->SetLayerMark(true);
+    }
     ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     if (navigationTransition.interactive) {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE,
@@ -3626,6 +4047,14 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
                                   weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                   weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                   isPopPage, proxyId]() {
+            auto preDestination = weakPreNavDestination.Upgrade();
+            auto topDestination = weakNewNavDestination.Upgrade();
+            if (preDestination) {
+                preDestination->GetRenderContext()->SetLayerMark(false);
+            }
+            if (topDestination) {
+                topDestination->GetRenderContext()->SetLayerMark(false);
+            }
             auto pattern = weakNavigation.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto proxy = pattern->GetProxyById(proxyId);
@@ -3638,8 +4067,6 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation is finish: %{public}d", proxy->GetIsSuccess());
             pattern->isFinishInteractiveAnimation_ = true;
-            auto preDestination = weakPreNavDestination.Upgrade();
-            auto topDestination = weakNewNavDestination.Upgrade();
             proxy->SetIsFinished(true);
             // this flag will be update in cancelTransition or finishTransition
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
@@ -3921,9 +4348,8 @@ void NavigationPattern::UpdateDividerBackgroundColor()
     auto pipelineContext = navigationGroupNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetForceSplitManager();
-    if (manager != nullptr && manager->IsForceSplitEnable(false)) {
-        std::pair<std::optional<Color>, std::optional<Color>> splitColor =
-            manager->GetSplitDividerColor();
+    if (manager && manager->IsForceSplitEnable(false) && GetIsTargetForceSplitNav()) {
+        auto splitColor = manager->GetSplitDividerColor();
         if (pipelineContext->GetColorMode() == ColorMode::LIGHT) {
             dividerColor = splitColor.first.value_or(defaultColor);
         }
@@ -4524,8 +4950,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
-    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation",
-        fromComponentName, toComponentName);
+    PageTransitionReport(fromNavDestinationName, toNavDestinationName, fromComponentName, toComponentName);
     UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
@@ -4760,11 +5185,25 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
 {
     auto allNavdestinationInfo = JsonUtil::CreateArray(true);
     const auto& navdestinationNodes = GetAllNavDestinationNodes();
-    for (auto iter : navdestinationNodes) {
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    int32_t lastStandardIndex = hostNode ? hostNode->GetLastStandardIndex() : -1;
+    for (int32_t index = 0; index < static_cast<int32_t>(navdestinationNodes.size()); ++index) {
+        auto iter = navdestinationNodes[index];
         auto navdestinationInfo = JsonUtil::Create(true);
         auto navdestinationNode =
             AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(iter.second));
         if (!navdestinationNode) {
+            if (!navigationStack_ || !navigationStack_->IsAutoCleaned(index) ||
+                !navigationStack_->GetAutoCleanedCanRecovery(index)) {
+                continue;
+            }
+            auto mode = index > lastStandardIndex ? static_cast<int32_t>(NavDestinationMode::DIALOG) :
+                static_cast<int32_t>(NavDestinationMode::STANDARD);
+            navdestinationInfo->Put("name", iter.first.c_str());
+            navdestinationInfo->Put("param", navigationStack_->GetSerializedParamSafely(index).c_str());
+            navdestinationInfo->Put("mode", mode);
+            navdestinationInfo->Put("state", navigationStack_->GetAutoCleanedState(index).c_str());
+            allNavdestinationInfo->Put(navdestinationInfo);
             continue;
         }
         if (!navdestinationNode->CanRecovery()) {
@@ -4784,6 +5223,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
         navdestinationInfo->Put("name", name.c_str());
         navdestinationInfo->Put("param", param.c_str());
         navdestinationInfo->Put("mode", mode);
+        navdestinationInfo->Put("state", navigationStack_ ? navigationStack_->GetAutoCleanedState(index).c_str() : "");
         allNavdestinationInfo->Put(navdestinationInfo);
     }
     return allNavdestinationInfo;
@@ -4842,6 +5282,24 @@ void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth,
     if (depth >= PAGE_DEPTH) {
         EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
+}
+
+void NavigationPattern::PageTransitionReport(const std::string& fromNavDestinationName,
+    const std::string& toNavDestinationName, const std::string& fromComponentName,
+    const std::string& toComponentName)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = fromNavDestinationName;
+    pageTransitionInfo.toPage = toNavDestinationName;
+    pageTransitionInfo.mode = "navigation";
+    pageTransitionInfo.fromComponentName = fromComponentName;
+    pageTransitionInfo.toComponentName = toComponentName;
+    uint32_t windowId = 0;
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        windowId = context->GetWindowId();
+    }
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
 }
 
 bool NavigationPattern::IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node)
@@ -4943,6 +5401,28 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         AbortAnimation(hostNode);
         CloseLongPressDialog();
     }
+}
+
+void NavigationPattern::AbortForceSplitDragging()
+{
+    if (!GetIsTargetForceSplitNav()) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (forceSplitMgr->IsRouterForceSplit()) {
+        return;
+    }
+    if (forceSplitSnapAnimation_) {
+        forceSplitSnapAnimationAborted_ = true;
+        AnimationUtils::StopAnimation(forceSplitSnapAnimation_);
+        forceSplitSnapAnimation_.reset();
+        return;
+    }
+    HandleTouchUp();
+    HandleForceSplitDragEnd(true);
 }
 
 void NavigationPattern::OnWindowHide()
@@ -5090,6 +5570,12 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         auto proxy = pattern->GetProxyById(proxyId);
         auto preDestination = weakPreNavDestination.Upgrade();
         auto topDestination = weakNewNavDestination.Upgrade();
+        if (preDestination) {
+            preDestination->GetRenderContext()->SetLayerMark(false);
+        }
+        if (topDestination) {
+            topDestination->GetRenderContext()->SetLayerMark(false);
+        }
         // disable render group for text node after the custom animation
         if (isPopPage && preDestination) {
             preDestination->ReleaseTextNodeList();
@@ -5353,6 +5839,36 @@ void NavigationPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
+bool NavigationPattern::UpdateForceSplitDividerColor(const RefPtr<FrameNode>& dividerNode)
+{
+    CHECK_NULL_RETURN(dividerNode, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (!GetIsTargetForceSplitNav() || !forceSplitMgr->IsForceSplitEnable(false)) {
+        return false;
+    }
+    auto colorMode = host->GetLocalColorMode();
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = context->GetColorMode();
+    }
+    auto splitColor = forceSplitMgr->GetSplitDividerColor();
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_RETURN(dividerRenderContext, false);
+    if (colorMode == ColorMode::LIGHT && splitColor.first.has_value()) {
+        dividerRenderContext->UpdateBackgroundColor(splitColor.first.value());
+        return true;
+    }
+    if (colorMode == ColorMode::DARK && splitColor.second.has_value()) {
+        dividerRenderContext->UpdateBackgroundColor(splitColor.second.value());
+        return true;
+    }
+    return false;
+}
+
 void NavigationPattern::HandleTouchDown()
 {
     auto dragBarNode = GetDragBarNode();
@@ -5363,6 +5879,9 @@ void NavigationPattern::HandleTouchDown()
 
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
+    if (UpdateForceSplitDividerColor(dividerNode)) {
+        return;
+    }
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
     auto theme = NavigationGetTheme();
@@ -5388,11 +5907,16 @@ void NavigationPattern::HandleTouchUp()
     CHECK_NULL_VOID(theme);
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
+    if (UpdateForceSplitDividerColor(dividerNode)) {
+        return;
+    }
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-    dividerNode->GetRenderContext()->UpdateLinearGradient(gradient);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerRenderContext->UpdateLinearGradient(gradient);
+    dividerRenderContext->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 
 void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
@@ -5937,6 +6461,31 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
 {
     ShowOrRestoreSystemBarIfNeeded();
     SetRequestedOrientationIfNeeded();
+    HandleAllPendingToClean();
+}
+
+void NavigationPattern::HandleAllPendingToClean()
+{
+    if (pendingToCleanCount_ == 0) {
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    int32_t index = static_cast<int32_t>(contentNode->GetChildren().size());
+    for (; index > 0; index--) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(contentNode->GetChildAtIndex(index));
+        CHECK_NULL_CONTINUE(navDestination);
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        if (!pattern->GetPendingToClean()) {
+            continue;
+        }
+        navDestination->CleanContent();
+        contentNode->RemoveChild(navDestination, true);
+        contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void NavigationPattern::SetRequestedOrientationIfNeeded()
@@ -6353,6 +6902,43 @@ void NavigationPattern::RegisterForceSplitListener(PipelineContext* context, int
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     mgr->AddForceSplitStateListener(nodeId, std::move(listener));
+    auto isDraggableListener = [weakPattern = WeakClaim(this)](bool isDraggable) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->GetIsTargetForceSplitNav()) {
+            return;
+        }
+        auto context = pattern->GetContext();
+        CHECK_NULL_VOID(context);
+        auto navMgr = context->GetNavigationManager();
+        CHECK_NULL_VOID(navMgr);
+        if (navMgr->IsDividerDisabled()) {
+            return;
+        }
+        pattern->OnForceSplitIsDraggableChange(isDraggable);
+    };
+    mgr->AddIsDraggableChangeListener(nodeId, std::move(isDraggableListener));
+}
+
+void NavigationPattern::OnForceSplitIsDraggableChange(bool isDraggable)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (!isDraggable || !IsForceSplitSuccess()) {
+        if (GetDragBarNode()) {
+            ClearForceSplitDragBarEvent();
+        }
+        AbortForceSplitDragging();
+        return;
+    }
+    auto dragBarNode = hostNode->GetDragBarNode();
+    if (!dragBarNode) {
+        CreateDragBarNode(hostNode);
+        dragBarNode = hostNode->GetDragBarNode();
+    }
+    hostNode->AddChild(dragBarNode);
+    CreateForceSplitMaskNodes();
+    InitForceSplitDragEvent();
 }
 
 void NavigationPattern::UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId)
@@ -6361,6 +6947,7 @@ void NavigationPattern::UnregisterForceSplitListener(PipelineContext* context, i
     auto mgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(mgr);
     mgr->RemoveForceSplitStateListener(nodeId);
+    mgr->RemoveIsDraggableChangeListener(nodeId);
 }
 
 bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
@@ -6369,20 +6956,19 @@ bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
 {
     CHECK_NULL_RETURN(preTopDest, false);
     CHECK_NULL_RETURN(curTopDest, false);
+    if (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        // In both navigation mode and displace mode, treat dialog destinations as transPages
+        // by default even when developers do not configure them explicitly. This prevents
+        // dialog push/pop from being misidentified as secondary-push-primary transitions.
+        return false;
+    }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_RETURN(forceSplitMgr, false);
-    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
-        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
-            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
-        // In navigation displace mode, treat dialog destinations as transPages by default even
-        // when developers do not configure them explicitly. This prevents dialog push/pop from
-        // being misidentified as secondary-push-primary transitions.
-        return false;
-    }
     auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(preTopPattern, false);
     auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();
@@ -6465,10 +7051,12 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
         }
         allDestNodes.push_back(destNode);
     }
+    int32_t topNodeIndex = static_cast<int32_t>(allDestNodes.size()) - 1;
     for (int32_t idx = 0; idx < static_cast<int32_t>(allDestNodes.size()); ++idx) {
         auto destNode = allDestNodes[idx];
         auto columnType = destNode->GetColumnType();
-        if (columnType == ForceSplitPageColumnType::NONE) {
+        if (columnType == ForceSplitPageColumnType::NONE ||
+            (hasHomePage && idx == topNodeIndex && idx != homePageIndex)) {
             destNode->SetColumnType(ForceSplitPageColumnType::SECONDARY);
             columnType = ForceSplitPageColumnType::SECONDARY;
         }
@@ -6554,7 +7142,7 @@ void NavigationPattern::AdjustNodeForStackDisplayReconfigure()
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
     }
-    navContentProperty->UpdateVisibility(secondaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
 
     primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
     UpdatePlaceholderOrRelatedPageVisible(false);
@@ -7007,6 +7595,7 @@ void NavigationPattern::TryForceSplitIfNeeded()
     forceSplitSuccess_ = forceSplitSuccess;
     forceSplitUseNavBar_ = forceSplitUseNavBar;
     context->SetIsCurrentInForceSplitMode(forceSplitSuccess_);
+    OnForceSplitIsDraggableChange(forceSplitMgr->IsSplitDraggable());
     AdjustNodeForLayout();
 }
 
@@ -7916,5 +8505,74 @@ std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode
     }
     TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
     return "";
+}
+
+void NavigationPattern::PlayForceSplitSnapAnimation(ForceSplitMode mode, float fromRatio, float toRatio)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationOption option;
+    option.SetCurve(DIVIDER_DRAG_ANIMATION_CURVE);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "Start ForceSplit DragAnimation from %{public}f to %{public}f", fromRatio, toRatio);
+    forceSplitSnapAnimationAborted_ = false;
+    forceSplitSnapAnimation_ = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), toRatio]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnForceSplitSnapAnimationEnd(toRatio);
+        },
+        [weakPattern = WeakClaim(this), toRatio, mode]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnForceSplitSnapAnimationFinish(mode, toRatio);
+        }, nullptr, host->GetContextRefPtr());
+}
+
+void NavigationPattern::OnForceSplitSnapAnimationEnd(float toRatio)
+{
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->SetTemporarySplitRatio(toRatio);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    context->FlushUITasks();
+    UpdateForceSplitScaleAndTranslateByRatio(toRatio);
+}
+
+void NavigationPattern::OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->ClearTemporarySplitRatio();
+    auto curMode = forceSplitMgr->GetForceSplitMode();
+    if (forceSplitSnapAnimationAborted_ || curMode != mode) {
+        forceSplitSnapAnimationAborted_ = false;
+        finalRatio = forceSplitMgr->GetSplitRatio();
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplit DragAnimation abort, finalRatio:%{public}f", finalRatio);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplit DragAnimation finish, finalRatio:%{public}f", finalRatio);
+    }
+    OnForceSplitDragEnd();
+    forceSplitMgr->SetDragStoppedRatio(finalRatio);
+    forceSplitMgr->SetIsForceSplitDragging(false);
+    forceSplitSnapAnimation_.reset();
+}
+
+void NavigationPattern::SetNavigationConfiguration(const NavigationConfiguration& config)
+{
+    if (!configInitialed_) {
+        config_ = config;
+        configInitialed_ = true;
+        return;
+    }
+    // once initialed, only allow reset stackSizeLimit
+    if (config.stackSizeLimit <= 0) {
+        config_.stackSizeLimit = config.stackSizeLimit;
+    }
 }
 } // namespace OHOS::Ace::NG

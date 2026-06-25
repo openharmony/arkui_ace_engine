@@ -29,9 +29,9 @@
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
 type CustomEnvValue = any;
+type SystemEnvUpdateValue = string | number | undefined;
 type CustomEnvMeta = {
-  varToKey: Record<string, string>;
-  keyToVars: Record<string, string[]>;
+  varToKey: Record<string, number>;
 };
 type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
   anonymousMonitorFunc: (mon: IMonitor) => void;
@@ -42,6 +42,11 @@ enum PrebuildPhase {
   BuildPrebuildCmd = 1,
   ExecutePrebuildCmd = 2,
   PrebuildDone = 3,
+}
+
+enum ReusableMemOptStrategy {
+  DEFAULT = 0,
+  ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 }
 
 //API Version 18
@@ -57,6 +62,7 @@ declare class MutableBuilder<Args extends Object[]> {
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
+  protected __notifyDecoratedWatch__Internal(_varName: string): void {}
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
   protected get isReusable_(): boolean {
@@ -145,11 +151,11 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
   protected __isEntryValue__Internal = false;
-  protected __isCustomEnvConstructionFinalized__Internal = false;
   protected readonly ___reusePool?: __ReusePool_Internal__;
   protected static preRenderingPool_: __ReusePool_Internal__ | undefined;
   protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
   public isPreRendered: boolean = false;
+  private __customComponentContext__Internal?: CustomComponentContext;
   public __isGlobalPoolActive : boolean = false;
   static preRenderCounter: number = 0;
 
@@ -162,6 +168,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   static getCurrentPreRenderPool(): __ReusePool_Internal__ | undefined {
     return PUV2ViewBase.preRenderingPool_;
   }
+
+  protected __reusableMemOptStrategy__Internal: number = 0;
+
+  protected __hasStartMemOpt__Internal: boolean = false;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -199,7 +209,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
     this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
-    this.__hasCustomEnvValue__ = this.__hasCustomEnvValue__ || !!(this as Record<string, unknown>)[CUSTOM_ENV_DECO_META];
     // Read the prototype flag set by @Active/@Inactive decorators
     const hasActiveOrInactiveDecorators: string = '__hasActiveOrInactiveDecorators__Internal';
     this.__needToActiveOrInactiveLifecycle__Internal = this[hasActiveOrInactiveDecorators] === true;
@@ -217,6 +226,12 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
 
     this.preRenderedChildren_.delete(reuseId);
+
+    const newId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    preRenderedChild.updateId(newId);
+    preRenderedChild.setParent(this as unknown as IView);
+    this.addChild(preRenderedChild as unknown as IView);
+
     preRenderedChild.isPreRendered = false;
     PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
     return true;
@@ -397,6 +412,43 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.setIsV2(isV2);
   }
 
+  public __setReusableMemOptStrategy__Internal(reusableMemOptStrategy: ReusableMemOptStrategy): void {
+    let val: number = 0;
+    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
+      val = 1;
+    }
+    this.__reusableMemOptStrategy__Internal = val;
+    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(val);
+  }
+
+  public __getReusableMemOptStrategy__Internal(): number {
+    return this.__reusableMemOptStrategy__Internal;
+  }
+
+  public __setHasStartMemOpt__Internal(hasStartMemOpt: boolean): void {
+    this.__hasStartMemOpt__Internal = hasStartMemOpt;
+  }
+
+  public __startMemOpt__Internal(): void {
+    if (this.__hasStartMemOpt__Internal) {
+      return;
+    }
+    this.__hasStartMemOpt__Internal = true;
+    this.nativeViewPartialUpdate.startMemOpt();
+  }
+
+  public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean { return true; }
+
+  /**
+   * @function __requestProgressiveRelease__Internal
+   * @description
+   * Requests progressive release from C++ side by posting an idle task.
+   * This is called from RecycleManager when it has nodes to release.
+   */
+  public __requestProgressiveRelease__Internal(): void {
+    this.nativeViewPartialUpdate.requestProgressiveRelease();
+  }
+
   public getDialogController(): object {
     return this.nativeViewPartialUpdate.getDialogController();
   }
@@ -405,13 +457,13 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
   }
 
-  public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
-    return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
-  }
-
-  public findCustomValueByKey(key: string): CustomEnvValue {
+  public findCustomValueByKey(key: number): CustomEnvValue {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     return this.nativeViewPartialUpdate.findCustomValueByKey(key);
+  }
+
+  public findEnvValueByKey(key: string): CustomEnvValue {
+    return this.nativeViewPartialUpdate.findEnvValueByKey(key);
   }
 
   // Callback handler when instanceId changes in backend
@@ -420,7 +472,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     this.dirtDescendantElementIds_.clear();
   }
 
-  protected __onCustomEnvValueUpdate__Internal(envKey: string): void {
+  protected __onCustomEnvValueUpdate__Internal(envKey: number, updatedEnvValue?: CustomEnvValue): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no @CustomEnv property registered`);
     let needUpdated: boolean = false;
     this.__getCustomEnvPropertyNameToKey__Internal()
@@ -429,11 +481,42 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no matching @CustomEnv property`);
           return;
         }
+        const storeProp = ObserveV2.OB_PREFIX + varName;
+        if (updatedEnvValue === undefined) {
+          return;
+        }
+        this[storeProp] = updatedEnvValue;
         ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
         needUpdated = true;
       });
     if (needUpdated) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update for key ${envKey}`);
+      ObserveV2.getObserve().updateDirty2(false);
+    }
+  }
+
+  protected __onEnvValueUpdate__Internal(envKey: string, updatedEnvValue?: SystemEnvUpdateValue): void {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: env update ignored for key ${envKey}, no @Env property registered`);
+    let needUpdated: boolean = false;
+    this.__getEnvPropertyNameToKey__Internal()
+      .forEach(([varName, declaredEnvKey]) => {
+        if (!EnvV2.isDirectQuerySystemEnvKey(declaredEnvKey)) {
+          return;
+        }
+        if (envKey && declaredEnvKey !== envKey) {
+          return;
+        }
+        const storeProp = ObserveV2.ENV_PREFIX + varName;
+        if (updatedEnvValue === undefined) {
+          return;
+        }
+        this[storeProp] = updatedEnvValue;
+        ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
+        needUpdated = true;
+      });
+    if (needUpdated) {
       ObserveV2.getObserve().updateDirty2(false);
     }
   }
@@ -674,14 +757,17 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // loop the [varName, key][]
     this.__getEnvPropertyNameToKey__Internal()
       .forEach(([varName, envKey]) => {
-        const updatedInstanceEnvValue = newInstanceId ?
-          EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
-          EnvV2.findEnvRecursively(envKey, this, this.__latestInstanceId__Internal);
+        const updatedInstanceEnvValue = EnvV2.isDirectQuerySystemEnvKey(envKey) ?
+          this.findEnvValueByKey(envKey) :
+          (newInstanceId ?
+            EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
+            EnvV2.findEnvRecursively(envKey as keyof EnvTypeMap, this, this.__latestInstanceId__Internal));
         const storeProp = ObserveV2.ENV_PREFIX + varName;
         if (updatedInstanceEnvValue !== this[storeProp]) {
           stateMgmtConsole.debug(`findAllEnvPropertiesInView ${this.debugInfo__()} @Env(${envKey}) ${varName} find EnvValue in parent, value is different, reset the local value`);
           this[storeProp] = updatedInstanceEnvValue;
           ObserveV2.getObserve().fireChange(this, varName);
+          this.__notifyDecoratedWatch__Internal(varName);
           needUpdated = true;
         }
       })
@@ -694,7 +780,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected __hasEnvValue__: boolean = false;
-  protected __hasCustomEnvValue__: boolean = false;
 
   get __hasEnv__Internal(): boolean {
     if (this[EnvV2.ENV_DECO_META]) {
@@ -703,7 +788,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.__hasEnvValue__;
   }
 
-  public __getEnvPropertyNameToKey__Internal(): [string, keyof EnvTypeMap][] {
+  public __getEnvPropertyNameToKey__Internal(): [string, string][] {
     // there is no env in current view
     const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
     if (!meta || !(typeof meta === 'object')) {
@@ -712,7 +797,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return Object.entries(meta.varToKey);
   }
 
-  public __getCustomEnvPropertyNameToKey__Internal(): [string, string][] {
+  public __getCustomEnvPropertyNameToKey__Internal(): [string, number][] {
     const meta = this[CUSTOM_ENV_DECO_META] as CustomEnvMeta | undefined;
     if (!meta || !(typeof meta === 'object')) {
       return [];
@@ -826,12 +911,38 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    * Returns the current reuse pool for this component
    * API exposed to the application
    * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
-  */
+   */
   getReusePool(): IReusePool | undefined {
-    if(this.___reusePool) {
-      return this.___reusePool;
+    const pool = this.___reusePool ?? this.getReusePoolInternal();
+    if (!pool) {
+      return undefined;
     }
-    return this.getReusePoolInternal();
+    // Pass `this` (the calling component) into the pool so preRender() can
+    // bind the builder to it — no .bind(this) needed by the app.
+    pool.setCallerContext(this);
+    return pool;
+  }
+
+  /**
+   * @function __getCustomComponentContext__Internal
+   * @description
+   * Returns a per-instance ICustomComponentContext that captures `this` in a
+   * closure. Called by UIUtils.getCustomComponentContext(). Returning a
+   * dedicated context object (rather than the component itself) isolates the
+   * framework API from any same-named methods an app component may define.
+   * Built once per component instance.
+   * @returns {ICustomComponentContext} The custom component context.
+  */
+  __getCustomComponentContext__Internal(): CustomComponentContext {
+    // Build once; the closure permanently captures `this` (thizz).
+    if (!this.__customComponentContext__Internal) {
+      this.__customComponentContext__Internal = ((thizz: PUV2ViewBase): CustomComponentContext => ({
+        getReusePool(): IReusePool | undefined {
+          return PUV2ViewBase.prototype.getReusePool.call(thizz);
+        }
+      }))(this);
+    }
+    return this.__customComponentContext__Internal;
   }
 
   /**
@@ -1139,10 +1250,25 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         case 'RecyclePool':
           DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
+        case '-h':
+          view.printDFXHeader('JS DFX Dump Help', command);
+          DumpLog.print(0, this.__debugInfoDumpHelp__Internal());
+          break;
         default:
-          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\nRun with -h to see supported commands.\n`);
       }
     });
+  }
+
+  private __debugInfoDumpHelp__Internal(): string {
+    const fmt = (entries: Array<[string, string]>): string => {
+      const width = Math.max(...entries.map((e: [string, string]) => e[0].length));
+      return entries
+        .map(([k, v]: [string, string]) => `  ${k.padEnd(width)}  ${v}`)
+        .join('\n');
+    };
+    return `\nJS DFX Dump Commands:\n${fmt(stateMgmtDFX.DUMP_HELP_COMMANDS)}` +
+           `\n\nModifiers:\n${fmt(stateMgmtDFX.DUMP_HELP_MODIFIERS)}\n`;
   }
 
   private printDFXHeader(header: string, command: DFXCommand): void {

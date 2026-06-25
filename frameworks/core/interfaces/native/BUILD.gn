@@ -34,6 +34,9 @@ template("ace_core_interfaces_native_node") {
       "node/alphabet_indexer_modifier.cpp",
       "node/atomic_service_modifier.cpp",
       "node/badge_modifier.cpp",
+      "node/node_arc_list_item_modifier.cpp",
+      "node/node_arc_list_modifier.cpp",
+      "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
@@ -67,8 +70,10 @@ template("ace_core_interfaces_native_node") {
       "node/marquee_modifier.cpp",
       "node/menu_item_group_modifier.cpp",
       "node/martix_modifier.cpp",
+      "node/material_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
+      "node/native_material_util.cpp",
       "node/nav_destination_modifier.cpp",
       "node/nav_router_modifier.cpp",
       "node/navigation_modifier.cpp",
@@ -96,7 +101,6 @@ template("ace_core_interfaces_native_node") {
       "node/node_list_item_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_loading_progress_modifier.cpp",
-      "node/node_loading_progress_modifier_multi_thread.cpp",
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
@@ -131,6 +135,7 @@ template("ace_core_interfaces_native_node") {
       "node/row_split_modifier.cpp",
       "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
+      "node/selection_container_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
       "node/shape_modifier.cpp",
@@ -182,7 +187,6 @@ template("ace_core_interfaces_native_node") {
         "ani/node_adapter_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/paste_button_ani_modifier.cpp",
-        "ani/rich_editor_ani_modifier.cpp",
         "ani/save_button_ani_modifier.cpp",
         "ani/security_component_ani_method.cpp",
         "ani/shape_ani_modifier.cpp",
@@ -195,9 +199,11 @@ template("ace_core_interfaces_native_node") {
         "ani/visual_effect_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
+        "ani/with_env_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
         "ani/parallelize_ui_ani_modifier.cpp",
+        "ani/dynamiclayout_ani_modifier.cpp",
       ]
 
       sources += [ "drawable/drawable_modifier.cpp" ]
@@ -221,6 +227,8 @@ template("ace_core_interfaces_native_node") {
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
           "ani/image_ani_modifier.cpp",
+          "ani/with_env_ani_modifier.cpp",
+          "ani/dynamiclayout_ani_modifier.cpp",
         ]
       }
 
@@ -299,6 +307,8 @@ template("ace_core_interfaces_native_node") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
       "runtime_core:ani",
+      "egl:libEGL",
+      "opengles:libGLES"
     ]
 
     if (current_os == "ohos") {
@@ -332,6 +342,11 @@ template("ace_core_interfaces_native_node") {
         "ability_base:ability_base_want",
         "ability_base:want",
       ]
+    }
+
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
     cflags_cc = []

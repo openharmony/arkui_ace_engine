@@ -170,6 +170,7 @@ template("ace_core_source_set") {
       "common/key_event_manager.cpp",
       "common/multi_thread_build_manager.cpp",
       "common/platform_bridge.cpp",
+      "common/platform_res_register.cpp",
       "common/premake_scope.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/pattern_resource_manager.cpp",
@@ -189,6 +190,7 @@ template("ace_core_source_set") {
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/visual_effect/transparency_utils.cpp",
+      "common/visual_effect/component_material_interaction.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -231,6 +233,7 @@ template("ace_core_source_set") {
 
       # declarative
       "gestures/gesture_group.cpp",
+      "gestures/gesture_event.cpp",
       "gestures/long_press_gesture.cpp",
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
@@ -295,6 +298,7 @@ template("ace_core_source_set") {
       "drawable/drawable_descriptor_info.cpp",
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
+      "drawable/picture_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
 
       # list
@@ -430,6 +434,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/menu:ace_core_components_menu_$platform",
       "$ace_root/frameworks/core/components/mouse_listener:ace_core_components_mouse_listener_$platform",
       "$ace_root/frameworks/core/components/navigation_bar:ace_core_components_navigation_bar_$platform",
+      "$ace_root/frameworks/core/components/swiper:ace_core_components_swiper_$platform",
+      "$ace_root/frameworks/core/components/tab_bar:ace_core_components_tab_bar_$platform",
       "$ace_root/frameworks/core/components/navigator:ace_core_components_navigator_$platform",
       "$ace_root/frameworks/core/components/option:ace_core_components_option_$platform",
       "$ace_root/frameworks/core/components/overlay:ace_core_components_overlay_$platform",
@@ -689,6 +695,11 @@ template("ace_core_source_set") {
       external_deps += [ "ffrt:libffrt" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
@@ -779,6 +790,7 @@ template("ace_core_ng_source_set") {
       "common/key_event_manager.cpp",
       "common/multi_thread_build_manager.cpp",
       "common/platform_bridge.cpp",
+      "common/platform_res_register.cpp",
       "common/premake_scope.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/pattern_resource_manager.cpp",
@@ -798,6 +810,7 @@ template("ace_core_ng_source_set") {
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
       "common/visual_effect/transparency_utils.cpp",
+      "common/visual_effect/component_material_interaction.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -836,6 +849,7 @@ template("ace_core_ng_source_set") {
 
       # declarative gestures
       "gestures/gesture_group.cpp",
+      "gestures/gesture_event.cpp",
       "gestures/long_press_gesture.cpp",
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
@@ -913,6 +927,9 @@ template("ace_core_ng_source_set") {
       "components/common/painter/rosen_svg_painter.cpp",
       "components/dialog/dialog_theme.cpp",
       "components/font/constants_converter.cpp",
+      "components/navigation_bar/navigation_bar_theme.cpp",
+      "components/swiper/swiper_indicator_theme.cpp",
+      "components/tab_bar/tab_theme.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
       "components/font/rosen_font_collection.cpp",
@@ -933,6 +950,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
       "components/toggle/toggle_theme.cpp",
+      "components/text/text_theme.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -963,6 +981,7 @@ template("ace_core_ng_source_set") {
       "drawable/drawable_descriptor_info.cpp",
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
+      "drawable/picture_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
@@ -1221,6 +1240,11 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_platform_font) && config.use_platform_font) {
       defines += [ "USE_PLATFORM_FONT" ]
       sources += [ "common/font/font_platform_proxy.cpp" ]
+    }
+
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
     cflags_cc = []

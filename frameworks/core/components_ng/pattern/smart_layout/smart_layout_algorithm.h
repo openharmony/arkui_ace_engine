@@ -37,8 +37,9 @@ public:
     /**
      * @brief Perform smart layout (auto-detect layout direction from container type)
      * @param layoutWrapper Layout wrapper containing children to layout
+     * @return true if smart layout executed, solved and applied successfully
      */
-    void PerformSmartLayout(LayoutWrapper* layoutWrapper);
+    bool PerformSmartLayout(LayoutWrapper* layoutWrapper);
 
 private:
     /**
@@ -51,9 +52,10 @@ private:
     /**
      * @brief Execute layout with specified type
      * @param layoutWrapper Layout wrapper
-     * @param layoutType Column or Row layout type
+     * @param layoutType Column, Row or GENERAL (bounding-box based, e.g. Flex-wrap) layout type
+     * @return true if layout solved and results applied successfully
      */
-    void ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType);
+    bool ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType);
 
     /**
      * @brief Initialize layout context with parent info
@@ -71,8 +73,9 @@ private:
     /**
      * @brief Apply solved layout results to children
      * @param layoutWrapper Layout wrapper
+     * @return true if results were applied to at least one child node
      */
-    void ApplyLayoutResults(LayoutWrapper* layoutWrapper);
+    bool ApplyLayoutResults(LayoutWrapper* layoutWrapper);
 
     /**
      * @brief Collect child layout info from layout wrapper

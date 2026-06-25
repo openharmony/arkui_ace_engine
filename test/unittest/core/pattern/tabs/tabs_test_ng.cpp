@@ -25,8 +25,15 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/focus_animation/focus_animation_theme.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/common/font_manager.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,6 +60,9 @@ RefPtr<Theme> GetTheme(ThemeType type)
         tabTheme->tabBarFocusedColor_ = Color::GRAY;
         tabTheme->activeIndicatorColor_ = Color::RED;
         return tabTheme;
+    } else if (type == FocusAnimationTheme::TypeId()) {
+        auto focusTheme = AceType::MakeRefPtr<FocusAnimationTheme>();
+        return focusTheme;
     } else {
         return AceType::MakeRefPtr<DialogTheme>();
     }
@@ -934,6 +944,1107 @@ HWTEST_F(TabsTestNg, GetTargetIndexTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabContentModelStaticSetShallowBuilder001
+ * @tc.desc: Test SetShallowBuilder with null frameNode, null pattern, and valid node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetShallowBuilder001, TestSize.Level1)
+{
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>([]() -> RefPtr<UINode> { return nullptr; });
+
+    TabContentModelStatic::SetShallowBuilder(nullptr, shallowBuilder);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetShallowBuilder(AceType::RawPtr(basicNode), shallowBuilder);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::SetShallowBuilder(AceType::RawPtr(tabContentNode), shallowBuilder);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->shallowBuilder_, nullptr);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetIndicator001
+ * @tc.desc: Test SetIndicator with null frameNode, null pattern, with value and without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetIndicator001, TestSize.Level1)
+{
+    TabContentModelStatic::SetIndicator(nullptr, IndicatorStyle());
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetIndicator(AceType::RawPtr(basicNode), IndicatorStyle());
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    IndicatorStyle indicator;
+    indicator.color = Color::RED;
+    indicator.height = 10.0_vp;
+    TabContentModelStatic::SetIndicator(AceType::RawPtr(tabContentNode), indicator);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetIndicatorStyle().color, Color::RED);
+
+    TabContentModelStatic::SetIndicator(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetDrawableIndicatorConfig001
+ * @tc.desc: Test SetDrawableIndicatorConfig with null and valid frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetDrawableIndicatorConfig001, TestSize.Level1)
+{
+    ImageInfoConfig config;
+    TabContentModelStatic::SetDrawableIndicatorConfig(nullptr, config);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetDrawableIndicatorConfig(AceType::RawPtr(basicNode), config);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::SetDrawableIndicatorConfig(AceType::RawPtr(tabContentNode), config);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetIndicatorColorByUser001
+ * @tc.desc: Test SetIndicatorColorByUser with true and false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetIndicatorColorByUser001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetIndicatorColorByUser(AceType::RawPtr(tabContentNode), true);
+    auto layoutProp = tabContentNode->GetLayoutProperty<TabContentLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_TRUE(layoutProp->GetIndicatorColorSetByUserValue(false));
+
+    TabContentModelStatic::SetIndicatorColorByUser(AceType::RawPtr(tabContentNode), false);
+    EXPECT_FALSE(layoutProp->GetIndicatorColorSetByUserValue(true));
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetDrawableIndicatorFlag001
+ * @tc.desc: Test SetDrawableIndicatorFlag with null and valid frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetDrawableIndicatorFlag001, TestSize.Level1)
+{
+    TabContentModelStatic::SetDrawableIndicatorFlag(nullptr, true);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetDrawableIndicatorFlag(AceType::RawPtr(basicNode), true);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::SetDrawableIndicatorFlag(AceType::RawPtr(tabContentNode), true);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->IsDrawableIndicator());
+
+    TabContentModelStatic::SetDrawableIndicatorFlag(AceType::RawPtr(tabContentNode), false);
+    EXPECT_FALSE(pattern->IsDrawableIndicator());
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetLabelStyle001
+ * @tc.desc: Test SetLabelStyle with null, with value, without value, isSubTabStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetLabelStyle001, TestSize.Level1)
+{
+    TabContentModelStatic::SetLabelStyle(nullptr, LabelStyle(), false);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetLabelStyle(AceType::RawPtr(basicNode), LabelStyle(), false);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    LabelStyle labelStyle;
+    labelStyle.fontSize = 20.0_fp;
+    labelStyle.fontWeight = FontWeight::BOLD;
+    TabContentModelStatic::SetLabelStyle(AceType::RawPtr(tabContentNode), labelStyle, true);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetLabelStyle().fontSize.value(), 20.0_fp);
+
+    TabContentModelStatic::SetLabelStyle(AceType::RawPtr(tabContentNode), std::nullopt, false);
+    EXPECT_TRUE(true);
+
+    TabContentModelStatic::SetLabelStyle(AceType::RawPtr(tabContentNode), std::nullopt, true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticCompleteParameters001
+ * @tc.desc: Test CompleteParameters with null, all fields present, fields missing, version branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticCompleteParameters001, TestSize.Level1)
+{
+    LabelStyle emptyStyle;
+    auto result = TabContentModelStatic::CompleteParameters(nullptr, emptyStyle, false);
+    EXPECT_FALSE(result.fontSize.has_value());
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    LabelStyle labelStyle;
+    result = TabContentModelStatic::CompleteParameters(AceType::RawPtr(tabContentNode), labelStyle, false);
+    EXPECT_EQ(result.maxLines.value(), 1);
+    EXPECT_EQ(result.fontStyle.value(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(result.heightAdaptivePolicy.value(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(result.textOverflow.value(), TextOverflow::ELLIPSIS);
+
+    result = TabContentModelStatic::CompleteParameters(AceType::RawPtr(tabContentNode), labelStyle, true);
+    EXPECT_TRUE(result.fontSize.has_value());
+    EXPECT_TRUE(result.fontWeight.has_value());
+}
+
+/**
+ * @tc.name: TabContentModelStaticCompleteParameters002
+ * @tc.desc: Test CompleteParameters with API version branches and all fields pre-set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticCompleteParameters002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    LabelStyle labelStyle;
+    auto result = TabContentModelStatic::CompleteParameters(AceType::RawPtr(tabContentNode), labelStyle, false);
+    EXPECT_TRUE(result.fontSize.has_value());
+    EXPECT_TRUE(result.fontWeight.has_value());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    LabelStyle labelStyle2;
+    result = TabContentModelStatic::CompleteParameters(AceType::RawPtr(tabContentNode), labelStyle2, false);
+    EXPECT_FALSE(result.fontSize.has_value());
+    EXPECT_TRUE(result.fontWeight.has_value());
+
+    LabelStyle fullStyle;
+    fullStyle.maxLines = 3;
+    fullStyle.minFontSize = 10.0_fp;
+    fullStyle.maxFontSize = 20.0_fp;
+    fullStyle.fontSize = 16.0_fp;
+    fullStyle.fontWeight = FontWeight::W500;
+    fullStyle.fontStyle = Ace::FontStyle::ITALIC;
+    fullStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
+    fullStyle.textOverflow = TextOverflow::CLIP;
+    result = TabContentModelStatic::CompleteParameters(AceType::RawPtr(tabContentNode), fullStyle, false);
+    EXPECT_EQ(result.maxLines.value(), 3);
+    EXPECT_EQ(result.fontSize.value(), 16.0_fp);
+    EXPECT_EQ(result.fontWeight.value(), FontWeight::W500);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetSelectedMode001
+ * @tc.desc: Test SetSelectedMode with null, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetSelectedMode001, TestSize.Level1)
+{
+    TabContentModelStatic::SetSelectedMode(nullptr, SelectedMode::BOARD);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetSelectedMode(AceType::RawPtr(basicNode), SelectedMode::BOARD);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetSelectedMode(AceType::RawPtr(tabContentNode), SelectedMode::BOARD);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetSelectedMode(), SelectedMode::BOARD);
+
+    TabContentModelStatic::SetSelectedMode(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_EQ(pattern->GetSelectedMode(), SelectedMode::INDICATOR);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetBoard001
+ * @tc.desc: Test SetBoard with null, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetBoard001, TestSize.Level1)
+{
+    TabContentModelStatic::SetBoard(nullptr, BoardStyle());
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetBoard(AceType::RawPtr(basicNode), BoardStyle());
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    BoardStyle boardStyle;
+    boardStyle.borderRadius = 10.0_vp;
+    TabContentModelStatic::SetBoard(AceType::RawPtr(tabContentNode), boardStyle);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetBoardStyle().borderRadius, 10.0_vp);
+
+    TabContentModelStatic::SetBoard(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetPadding001
+ * @tc.desc: Test SetPadding with null, with value, without value, isSubTabStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetPadding001, TestSize.Level1)
+{
+    TabContentModelStatic::SetPadding(nullptr, PaddingProperty(), false);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetPadding(AceType::RawPtr(basicNode), PaddingProperty(), false);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    PaddingProperty padding;
+    padding.top = CalcLength(10.0_vp);
+    padding.bottom = CalcLength(10.0_vp);
+    padding.left = CalcLength(20.0_vp);
+    padding.right = CalcLength(20.0_vp);
+    TabContentModelStatic::SetPadding(AceType::RawPtr(tabContentNode), padding, true);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->GetPadding().top.has_value());
+
+    TabContentModelStatic::SetPadding(AceType::RawPtr(tabContentNode), std::nullopt, false);
+    EXPECT_TRUE(true);
+
+    TabContentModelStatic::SetPadding(AceType::RawPtr(tabContentNode), std::nullopt, true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticCompletePaddingProperty001
+ * @tc.desc: Test CompletePaddingProperty with null, fields present, fields missing, isSubTabStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticCompletePaddingProperty001, TestSize.Level1)
+{
+    PaddingProperty emptyPadding;
+    auto result = TabContentModelStatic::CompletePaddingProperty(nullptr, emptyPadding, false);
+    EXPECT_FALSE(result.top.has_value());
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    PaddingProperty padding;
+    result = TabContentModelStatic::CompletePaddingProperty(AceType::RawPtr(tabContentNode), padding, true);
+    EXPECT_TRUE(result.top.has_value());
+    EXPECT_TRUE(result.bottom.has_value());
+    EXPECT_TRUE(result.left.has_value());
+    EXPECT_TRUE(result.right.has_value());
+
+    PaddingProperty padding2;
+    result = TabContentModelStatic::CompletePaddingProperty(AceType::RawPtr(tabContentNode), padding2, false);
+    EXPECT_TRUE(result.top.has_value());
+    EXPECT_TRUE(result.left.has_value());
+
+    PaddingProperty fullPadding;
+    fullPadding.top = CalcLength(5.0_vp);
+    fullPadding.bottom = CalcLength(5.0_vp);
+    fullPadding.left = CalcLength(5.0_vp);
+    fullPadding.right = CalcLength(5.0_vp);
+    result = TabContentModelStatic::CompletePaddingProperty(AceType::RawPtr(tabContentNode), fullPadding, true);
+    EXPECT_EQ(result.top.value(), CalcLength(5.0_vp));
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetUseLocalizedPadding001
+ * @tc.desc: Test SetUseLocalizedPadding with null, null pattern, valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetUseLocalizedPadding001, TestSize.Level1)
+{
+    TabContentModelStatic::SetUseLocalizedPadding(nullptr, true);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetUseLocalizedPadding(AceType::RawPtr(basicNode), true);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetUseLocalizedPadding(AceType::RawPtr(tabContentNode), true);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->GetUseLocalizedPadding());
+
+    TabContentModelStatic::SetUseLocalizedPadding(AceType::RawPtr(tabContentNode), false);
+    EXPECT_FALSE(pattern->GetUseLocalizedPadding());
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetId001
+ * @tc.desc: Test SetId with null, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetId001, TestSize.Level1)
+{
+    TabContentModelStatic::SetId(nullptr, "test_id");
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetId(AceType::RawPtr(basicNode), "test_id");
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetId(AceType::RawPtr(tabContentNode), "my_id");
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetId(), "my_id");
+
+    TabContentModelStatic::SetId(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_EQ(pattern->GetId(), "");
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetTabBarStyle001
+ * @tc.desc: Test SetTabBarStyle with null, null pattern, valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetTabBarStyle001, TestSize.Level1)
+{
+    TabContentModelStatic::SetTabBarStyle(nullptr, TabBarStyle::SUBTABBATSTYLE);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetTabBarStyle(AceType::RawPtr(basicNode), TabBarStyle::SUBTABBATSTYLE);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetTabBarStyle(AceType::RawPtr(tabContentNode), TabBarStyle::BOTTOMTABBATSTYLE);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetTabBarStyle(), TabBarStyle::BOTTOMTABBATSTYLE);
+
+    TabContentModelStatic::SetTabBarStyle(AceType::RawPtr(tabContentNode), TabBarStyle::SUBTABBATSTYLE);
+    EXPECT_EQ(pattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetTabBar002
+ * @tc.desc: Test SetTabBar with builder function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetTabBar002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::NOSTYLE);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    bool builderCalled = false;
+    auto builder = [&builderCalled]() { builderCalled = true; };
+    TabContentModelStatic::SetTabBar(
+        AceType::RawPtr(tabContentNode), "text", "icon", std::move(builder));
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetTabBarWithContent001
+ * @tc.desc: Test SetTabBarWithContent with null, null tabBarNode, valid tabBarNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetTabBarWithContent001, TestSize.Level1)
+{
+    TabContentModelStatic::SetTabBarWithContent(nullptr, nullptr);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetTabBarWithContent(AceType::RawPtr(basicNode), nullptr);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    auto contentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    TabContentModelStatic::SetTabBarWithContent(AceType::RawPtr(tabContentNode), AceType::RawPtr(contentNode));
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(true);
+
+    TabContentModelStatic::SetTabBarWithContent(AceType::RawPtr(tabContentNode), nullptr);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetCustomStyleNode001
+ * @tc.desc: Test SetCustomStyleNode with null, null pattern, valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetCustomStyleNode001, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetCustomStyleNode(nullptr, customNode);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetCustomStyleNode(AceType::RawPtr(basicNode), customNode);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::SetCustomStyleNode(AceType::RawPtr(tabContentNode), customNode);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetLayoutMode001
+ * @tc.desc: Test SetLayoutMode with null, null pattern, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetLayoutMode001, TestSize.Level1)
+{
+    TabContentModelStatic::SetLayoutMode(nullptr, LayoutMode::HORIZONTAL);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetLayoutMode(AceType::RawPtr(basicNode), LayoutMode::HORIZONTAL);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetLayoutMode(AceType::RawPtr(tabContentNode), LayoutMode::HORIZONTAL);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().layoutMode, LayoutMode::HORIZONTAL);
+
+    TabContentModelStatic::SetLayoutMode(AceType::RawPtr(tabContentNode), LayoutMode::VERTICAL);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().layoutMode, LayoutMode::VERTICAL);
+
+    TabContentModelStatic::SetLayoutMode(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().layoutMode, LayoutMode::VERTICAL);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetVerticalAlign001
+ * @tc.desc: Test SetVerticalAlign with null, null pattern, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetVerticalAlign001, TestSize.Level1)
+{
+    TabContentModelStatic::SetVerticalAlign(nullptr, FlexAlign::FLEX_START);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetVerticalAlign(AceType::RawPtr(basicNode), FlexAlign::FLEX_START);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetVerticalAlign(AceType::RawPtr(tabContentNode), FlexAlign::FLEX_START);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().verticalAlign, FlexAlign::FLEX_START);
+
+    TabContentModelStatic::SetVerticalAlign(AceType::RawPtr(tabContentNode), FlexAlign::FLEX_END);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().verticalAlign, FlexAlign::FLEX_END);
+
+    TabContentModelStatic::SetVerticalAlign(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_EQ(pattern->GetBottomTabBarStyle().verticalAlign, FlexAlign::CENTER);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetSymmetricExtensible001
+ * @tc.desc: Test SetSymmetricExtensible with null, null pattern, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetSymmetricExtensible001, TestSize.Level1)
+{
+    TabContentModelStatic::SetSymmetricExtensible(nullptr, true);
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetSymmetricExtensible(AceType::RawPtr(basicNode), true);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    TabContentModelStatic::SetSymmetricExtensible(AceType::RawPtr(tabContentNode), true);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->GetBottomTabBarStyle().symmetricExtensible);
+
+    TabContentModelStatic::SetSymmetricExtensible(AceType::RawPtr(tabContentNode), false);
+    EXPECT_FALSE(pattern->GetBottomTabBarStyle().symmetricExtensible);
+
+    TabContentModelStatic::SetSymmetricExtensible(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_FALSE(pattern->GetBottomTabBarStyle().symmetricExtensible);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetIconStyle001
+ * @tc.desc: Test SetIconStyle with null, null pattern, with value, without value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetIconStyle001, TestSize.Level1)
+{
+    TabContentModelStatic::SetIconStyle(nullptr, IconStyle());
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetIconStyle(AceType::RawPtr(basicNode), IconStyle());
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::RED;
+    iconStyle.unselectedColor = Color::BLUE;
+    TabContentModelStatic::SetIconStyle(AceType::RawPtr(tabContentNode), iconStyle);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->GetIconStyle().selectedColor.has_value());
+
+    TabContentModelStatic::SetIconStyle(AceType::RawPtr(tabContentNode), std::nullopt);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetOnWillShow001
+ * @tc.desc: Test SetOnWillShow with null, null eventHub, valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetOnWillShow001, TestSize.Level1)
+{
+    TabContentModelStatic::SetOnWillShow(nullptr, []() {});
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetOnWillShow(AceType::RawPtr(basicNode), []() {});
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    bool called = false;
+    TabContentModelStatic::SetOnWillShow(AceType::RawPtr(tabContentNode), [&called]() { called = true; });
+    auto eventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireWillShowEvent();
+    EXPECT_TRUE(called);
+}
+
+/**
+ * @tc.name: TabContentModelStaticSetOnWillHide001
+ * @tc.desc: Test SetOnWillHide with null, null eventHub, valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticSetOnWillHide001, TestSize.Level1)
+{
+    TabContentModelStatic::SetOnWillHide(nullptr, []() {});
+
+    auto basicNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    TabContentModelStatic::SetOnWillHide(AceType::RawPtr(basicNode), []() {});
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    bool called = false;
+    TabContentModelStatic::SetOnWillHide(AceType::RawPtr(tabContentNode), [&called]() { called = true; });
+    auto eventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireWillHideEvent();
+    EXPECT_TRUE(called);
+}
+
+/**
+ * @tc.name: TabContentModelStaticCreateFrameNode001
+ * @tc.desc: Test CreateFrameNode normal creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticCreateFrameNode001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = TabContentModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(frameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto layoutProp = tabContentNode->GetLayoutProperty<TabContentLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_FALSE(layoutProp->GetTextValue("").empty());
+}
+
+/**
+ * @tc.name: TabContentModelStaticUpdateLabelStyle001
+ * @tc.desc: Test UpdateLabelStyle with null and various LabelStyle fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticUpdateLabelStyle001, TestSize.Level1)
+{
+    TabContentModelStatic::UpdateLabelStyle(LabelStyle(), nullptr);
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    LabelStyle labelStyle;
+    labelStyle.fontSize = 16.0_fp;
+    labelStyle.fontWeight = FontWeight::BOLD;
+    labelStyle.fontStyle = Ace::FontStyle::ITALIC;
+    labelStyle.fontFamily = std::vector<std::string>{ "Arial" };
+    labelStyle.textOverflow = TextOverflow::MARQUEE;
+    labelStyle.maxLines = 2;
+    labelStyle.minFontSize = 10.0_fp;
+    labelStyle.maxFontSize = 20.0_fp;
+    labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
+
+    TabContentModelStatic::UpdateLabelStyle(labelStyle, textLayoutProperty);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension()), 16.0_fp);
+    EXPECT_EQ(textLayoutProperty->GetFontWeightValue(FontWeight::NORMAL), FontWeight::BOLD);
+    EXPECT_EQ(textLayoutProperty->GetItalicFontStyleValue(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
+    EXPECT_TRUE(textLayoutProperty->HasMaxLines());
+    EXPECT_EQ(textLayoutProperty->GetMaxLinesValue(0), 2);
+}
+
+/**
+ * @tc.name: TabContentModelStaticUpdateLabelStyle002
+ * @tc.desc: Test UpdateLabelStyle with empty LabelStyle (no fields set)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticUpdateLabelStyle002, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    LabelStyle emptyStyle;
+    TabContentModelStatic::UpdateLabelStyle(emptyStyle, textLayoutProperty);
+    EXPECT_FALSE(textLayoutProperty->HasFontSize());
+
+    LabelStyle overflowEllipsis;
+    overflowEllipsis.textOverflow = TextOverflow::ELLIPSIS;
+    TabContentModelStatic::UpdateLabelStyle(overflowEllipsis, textLayoutProperty);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflowValue(TextOverflow::NONE), TextOverflow::ELLIPSIS);
+}
+
+/**
+ * @tc.name: TabContentModelStaticUpdateDefaultSymbol001
+ * @tc.desc: Test UpdateDefaultSymbol normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticUpdateDefaultSymbol001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabTheme = tabContentNode->GetTheme<TabTheme>(true);
+    ASSERT_NE(tabTheme, nullptr);
+
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty, nullptr);
+
+    TabContentModelStatic::UpdateDefaultSymbol(tabTheme, symbolProperty);
+    EXPECT_TRUE(symbolProperty->HasFontSize());
+}
+
+/**
+ * @tc.name: TabContentModelStaticUpdateSymbolEffect001
+ * @tc.desc: Test UpdateSymbolEffect with isActive true and false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticUpdateSymbolEffect001, TestSize.Level1)
+{
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty, nullptr);
+
+    TabContentModelStatic::UpdateSymbolEffect(symbolProperty, true);
+    EXPECT_TRUE(symbolProperty->HasSymbolEffectOptions());
+
+    auto symbolNode2 = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto symbolProperty2 = symbolNode2->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty2, nullptr);
+
+    TabContentModelStatic::UpdateSymbolEffect(symbolProperty2, false);
+    EXPECT_TRUE(symbolProperty2->HasSymbolEffectOptions());
+}
+
+/**
+ * @tc.name: TabContentModelStaticFindTabsNode001
+ * @tc.desc: Test FindTabsNode with null, found TabsNode, not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticFindTabsNode001, TestSize.Level1)
+{
+    auto result = TabContentModelStatic::FindTabsNode(nullptr);
+    EXPECT_EQ(result, nullptr);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+
+    result = TabContentModelStatic::FindTabsNode(tabContentNode);
+    ASSERT_NE(result, nullptr);
+
+    auto orphanNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+    result = TabContentModelStatic::FindTabsNode(orphanNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: TabContentModelStaticInitTabText001
+ * @tc.desc: Test InitTabText with API version branches and null checks
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticInitTabText001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    TabContentModelStatic::InitTabText(nullptr);
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+}
+
+/**
+ * @tc.name: TabContentModelStaticInitTabText002
+ * @tc.desc: Test InitTabText with fontManager fallbackLineSpacingStyleOptimizeFlag true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticInitTabText002, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->GetOrCreateTextLineStyle();
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    fontManager->fallbackLineSpacingStyleOptimizeFlag_ = true;
+    pipeline->fontManager_ = fontManager;
+
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+
+    fontManager->fallbackLineSpacingStyleOptimizeFlag_ = false;
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem001
+ * @tc.desc: Test AddTabBarItem with null and update=true without TabBarItemId
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem001, TestSize.Level1)
+{
+    TabContentModelStatic::AddTabBarItem(nullptr, 0, false);
+
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    tabContentNode->ResetTabBarItemId();
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem002
+ * @tc.desc: Test AddTabBarItem with BOTTOMTABBATSTYLE and HORIZONTAL layoutMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetLayoutMode(LayoutMode::HORIZONTAL);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem003
+ * @tc.desc: Test AddTabBarItem with SUBTABBATSTYLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem004
+ * @tc.desc: Test AddTabBarItem with builder content (HasBuilder)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem005
+ * @tc.desc: Test AddTabBarItem with RTL and useLocalizedPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem005, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    auto pattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetUseLocalizedPadding(true);
+    tabBarLayoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem006
+ * @tc.desc: Test AddTabBarItem with symbol icon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem006, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContent();
+    auto tabContentModelNG = TabContentModelNG();
+    TabBarSymbol symbol;
+    symbol.onApply = [](WeakPtr<FrameNode> node, const std::string& status) {};
+    symbol.selectedFlag = true;
+    tabContentModelNG.SetTabBar("text", IMAGE_SRC_URL, symbol, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabContent();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem007
+ * @tc.desc: Test AddTabBarItem with NOSTYLE empty tab bar (no builder, no content, no icon, no text)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem007, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContent();
+    auto tabContentModelNG = TabContentModelNG();
+    tabContentModelNG.SetTabBar(std::nullopt, std::nullopt, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabContent();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TabContentModelStaticAddTabBarItem008
+ * @tc.desc: Test AddTabBarItem with HasContent (tab bar with content node)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelStaticAddTabBarItem008, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContent();
+    auto contentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto tabContentModelNG = TabContentModelNG();
+    tabContentModelNG.SetTabBarWithContent(AceType::Claim(AceType::RawPtr(contentNode)));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabContent();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentNode, nullptr);
+    TabContentModelStatic::AddTabBarItem(tabContentNode, 0, false);
+    EXPECT_TRUE(true);
+}
+
+/**
  * @tc.name: OnInjectionEventTest001
  * @tc.desc: test OnInjectionEvent
  * @tc.type: FUNC
@@ -1073,5 +2184,406 @@ HWTEST_F(TabsTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     dividerRenderProperty->propDividerColor_ = Color::RED;
     tabsPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(dividerRenderProperty->propDividerColor_, Color::RED);
+}
+
+/**
+ * @tc.name: SetUseNewMaterial001
+ * @tc.desc: test SetUseNewMaterial and IsNewMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetUseNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+    tabBarPattern_->SetUseNewMaterial(true);
+    EXPECT_TRUE(tabBarPattern_->IsNewMaterial());
+    tabBarPattern_->SetUseNewMaterial(false);
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: HandleTouchDownNewMaterial001
+ * @tc.desc: test HandleTouchDown with useNewMaterial_ true, PlayPressAnimation should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchDownNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto colorBefore = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+
+    tabBarPattern_->HandleTouchDown(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorBefore, colorAfter);
+}
+
+/**
+ * @tc.name: HandleTouchUpNewMaterial001
+ * @tc.desc: test HandleTouchUp with useNewMaterial_ true, PlayPressAnimation should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto colorBefore = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+
+    tabBarPattern_->HandleTouchUp(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorBefore, colorAfter);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo001
+ * @tc.desc: test HandleTouchUpAndClickTo when useNewMaterial_ is false, HandleClick should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::UP);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_EQ(clickIndex, -1);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo002
+ * @tc.desc: test HandleTouchUpAndClickTo when touch type is not UP, HandleClick should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::DOWN);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_EQ(clickIndex, -1);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo003
+ * @tc.desc: test HandleTouchUpAndClickTo with useNewMaterial_ true and TouchType::UP, should trigger HandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::UP);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_NE(clickIndex, -1);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex001
+ * @tc.desc: test GetSelectChildIndex with offset within first child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto host = tabBarPattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(0.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex002
+ * @tc.desc: test GetSelectChildIndex with offset before first child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(-100.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex003
+ * @tc.desc: test GetSelectChildIndex with offset after last child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(10000.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex004
+ * @tc.desc: test GetSelectChildIndex with offset in the middle region
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto host = tabBarPattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(TABS_WIDTH / 2.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: ApplySystemMaterial001
+ * @tc.desc: test ApplySystemMaterial with no BarFloatingStyle set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ApplySystemMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    layoutProperty_->ResetBarFloatingStyle();
+    pattern_->ApplySystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: ApplySystemMaterial002
+ * @tc.desc: test ApplySystemMaterial with BarFloatingStyle but no systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ApplySystemMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    BarFloatingStyleParameters style;
+    layoutProperty_->UpdateBarFloatingStyle(style);
+    pattern_->ApplySystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: ResetSystemMaterial001
+ * @tc.desc: test ResetSystemMaterial sets useNewMaterial_ to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ResetSystemMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    EXPECT_TRUE(tabBarPattern_->IsNewMaterial());
+
+    pattern_->ResetSystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: TabBarItemFocusPatternNewMaterial001
+ * @tc.desc: test TabBarItemPattern GetFocusPattern with useNewMaterial_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemFocusPatternNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    auto focusPattern = tabBarItemPattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), FocusType::SCOPE);
+    const auto& paintParams = focusPattern.GetFocusPaintParams();
+    ASSERT_TRUE(paintParams != nullptr);
+    EXPECT_TRUE(paintParams->HasPaintColor());
+    EXPECT_TRUE(paintParams->HasPaintWidth());
+}
+
+/**
+ * @tc.name: TabBarItemFocusPatternNewMaterial002
+ * @tc.desc: test TabBarItemPattern GetFocusPattern with useNewMaterial_ false (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemFocusPatternNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    auto focusPattern = tabBarItemPattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), FocusType::SCOPE);
+    const auto& paintParams = focusPattern.GetFocusPaintParams();
+    ASSERT_TRUE(paintParams != nullptr);
+    EXPECT_TRUE(paintParams->HasPaintColor());
+    EXPECT_TRUE(paintParams->HasPaintWidth());
+}
+
+/**
+ * @tc.name: HandleTouchDownNewMaterial002
+ * @tc.desc: test HandleTouchDown with useNewMaterial_ false, PlayPressAnimation should be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchDownNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    tabBarPattern_->HandleTouchDown(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorAfter, Color::GREEN);
+}
+
+/**
+ * @tc.name: HandleTouchUpNewMaterial002
+ * @tc.desc: test HandleTouchUp with useNewMaterial_ false, PlayPressAnimation should be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    tabBarPattern_->HandleTouchUp(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorAfter, Color::TRANSPARENT);
 }
 } // namespace OHOS::Ace::NG

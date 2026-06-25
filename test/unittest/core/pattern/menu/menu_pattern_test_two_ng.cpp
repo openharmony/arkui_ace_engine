@@ -214,6 +214,19 @@ void MenuPatternTwoTestNg::CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWra
     menuWrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
 }
 
+namespace {
+RefPtr<FrameNode> CreateMenuNodeForAnimationTest(int32_t targetId, const std::string& tag, MenuType type)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [targetId, tag, type]() { return AceType::MakeRefPtr<MenuPattern>(targetId, tag, type); });
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(menuNode->GetRenderContext());
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdatePaintRect(RectF(100.0f, 200.0f, 240.0f, 180.0f));
+    return menuNode;
+}
+} // namespace
+
 /**
  * @tc.name: MenuPatternTest083
  * @tc.desc: Test MenuPattern::IsMenuScrollable.
@@ -724,5 +737,348 @@ HWTEST_F(MenuPatternTwoTestNg, NeedHoldTargetOffsetTest, TestSize.Level1)
      */
     targetRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     EXPECT_FALSE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+}
+
+/**
+ * @tc.name: MenuPatternShowMenuAppearAnimation001
+ * @tc.desc: Test ShowMenuAppearAnimation resets menu flags for extension menu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternShowMenuAppearAnimation001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isMenuShow_ = true;
+    menuPattern->isExtensionMenuShow_ = true;
+    menuPattern->previewMode_ = MenuPreviewMode::NONE;
+    menuPattern->SetEndOffset(OffsetF(10.0f, 20.0f));
+
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    menuPattern->ShowMenuAppearAnimation();
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+
+    EXPECT_FALSE(menuPattern->isMenuShow_);
+    EXPECT_FALSE(menuPattern->isExtensionMenuShow_);
+}
+
+/**
+ * @tc.name: MenuPatternShowMenuAppearAnimation002
+ * @tc.desc: Test ShowMenuAppearAnimation for normal menu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternShowMenuAppearAnimation002, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isMenuShow_ = true;
+    menuPattern->previewMode_ = MenuPreviewMode::NONE;
+
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    menuPattern->ShowMenuAppearAnimation();
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+
+    EXPECT_FALSE(menuPattern->isMenuShow_);
+}
+
+/**
+ * @tc.name: MenuPatternShowMenuAppearMaterialAnimation001
+ * @tc.desc: Test ShowMenuAppearMaterialAnimation for normal menu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternShowMenuAppearMaterialAnimation001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    menuPattern->ShowMenuAppearMaterialAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: MenuPatternShowMenuAppearMaterialAnimation002
+ * @tc.desc: Test ShowMenuAppearMaterialAnimation for extension menu old entrance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternShowMenuAppearMaterialAnimation002, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(
+        TARGET_ID, V2::TEXT_ETS_TAG, MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetEndOffset(OffsetF(30.0f, 40.0f));
+    menuPattern->SetTargetSize(SizeF(120.0f, 60.0f));
+    menuPattern->SetTargetOffset(OffsetF(10.0f, 10.0f));
+
+    menuPattern->ShowMenuAppearMaterialAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: MenuPatternEndOffsetAndState001
+ * @tc.desc: Test old state setters and getters around menu animation path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternEndOffsetAndState001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(
+        TARGET_ID, V2::TEXT_ETS_TAG, MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    OffsetF endOffset(123.0f, 456.0f);
+    menuPattern->SetEndOffset(endOffset);
+    menuPattern->SetSelectOverlayExtensionMenuShow();
+    menuPattern->SetDisappearAnimation(false);
+    menuPattern->SetSubMenuShow(true);
+    menuPattern->SetMenuShow();
+
+    EXPECT_EQ(menuPattern->GetEndOffset(), endOffset);
+    EXPECT_TRUE(menuPattern->GetDisappearAnimation() == false);
+    EXPECT_TRUE(menuPattern->isSubMenuShow_);
+    EXPECT_TRUE(menuPattern->isMenuShow_);
+    EXPECT_TRUE(menuPattern->isExtensionMenuShow_);
+}
+
+/**
+ * @tc.name: MenuPatternPreviewState001
+ * @tc.desc: Test preview state setters used by old animation path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternPreviewState001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    RectF previewRect(1.0f, 2.0f, 3.0f, 4.0f);
+    SizeF previewSize(11.0f, 22.0f);
+    OffsetF previewOffset(33.0f, 44.0f);
+    menuPattern->SetPreviewRect(previewRect);
+    menuPattern->SetPreviewIdealSize(previewSize);
+    menuPattern->SetPreviewOriginOffset(previewOffset);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    menuPattern->SetPreviewBeforeAnimationScale(0.8f);
+    menuPattern->SetPreviewAfterAnimationScale(1.1f);
+
+    EXPECT_EQ(menuPattern->GetPreviewRect(), previewRect);
+    EXPECT_EQ(menuPattern->GetPreviewIdealSize(), previewSize);
+    EXPECT_EQ(menuPattern->GetPreviewOriginOffset(), previewOffset);
+    EXPECT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), 0.8f);
+    EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), 1.1f);
+}
+
+/**
+ * @tc.name: MenuPatternTargetState001
+ * @tc.desc: Test target size and offset state used by old menu layout logic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTargetState001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    SizeF targetSize(55.0f, 66.0f);
+    OffsetF targetOffset(77.0f, 88.0f);
+    menuPattern->SetTargetSize(targetSize);
+    menuPattern->SetTargetOffset(targetOffset);
+    menuPattern->SetOriginOffset(OffsetF(9.0f, 10.0f));
+    menuPattern->SetHasLaid(true);
+
+    EXPECT_EQ(menuPattern->GetTargetSize(), targetSize);
+    EXPECT_EQ(menuPattern->GetTargetOffset(), targetOffset);
+    EXPECT_TRUE(menuPattern->HasLaid());
+}
+
+/**
+ * @tc.name: MenuPatternShowMenuAppearAnimation003
+ * @tc.desc: Test ShowMenuAppearAnimation when menu show flag is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternShowMenuAppearAnimation003, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isMenuShow_ = false;
+    menuPattern->isExtensionMenuShow_ = true;
+
+    menuPattern->ShowMenuAppearAnimation();
+
+    EXPECT_FALSE(menuPattern->isMenuShow_);
+    EXPECT_TRUE(menuPattern->isExtensionMenuShow_);
+}
+
+/**
+ * @tc.name: MenuPatternFirstShowState001
+ * @tc.desc: Test first show state setter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternFirstShowState001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(TARGET_ID, V2::TEXT_ETS_TAG, MenuType::MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetFirstShow();
+    EXPECT_TRUE(menuPattern->GetIsFirstShow());
+}
+
+/**
+ * @tc.name: MenuPatternPlayExtensionMenuDistortAnimation001
+ * @tc.desc: Test PlayExtensionMenuDistortAnimation forwards host and menu position to callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternPlayExtensionMenuDistortAnimation001, TestSize.Level1)
+{
+    auto menuNode = CreateMenuNodeForAnimationTest(
+        TARGET_ID, V2::TEXT_ETS_TAG, MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    RefPtr<FrameNode> callbackHost;
+    OffsetF callbackOffset;
+    menuPattern->SetBeforeExtensionMenuDistortAnimationCallback(
+        [&callbackHost, &callbackOffset](const RefPtr<FrameNode>& host, const OffsetF& menuPosition) {
+            callbackHost = host;
+            callbackOffset = menuPosition;
+        });
+
+    OffsetF menuPosition(23.0f, 45.0f);
+    menuPattern->PlayExtensionMenuDistortAnimation(menuPosition);
+
+    EXPECT_EQ(callbackHost, menuNode);
+    EXPECT_EQ(callbackOffset, menuPosition);
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_IsOffsetInNodeBounds001
+ * @tc.desc: Test MenuPattern::IsOffsetInNodeBounds region hit criterion used by touch-up-to-dismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_IsOffsetInNodeBounds001, TestSize.Level1)
+{
+    auto host = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(host, nullptr);
+    host->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    // inside the frame bounds -> click candidate (mirrors ClickRecognizer::IsPointInRegion)
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(0.0, 0.0)));
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, 50.0)));
+    EXPECT_TRUE(MenuPattern::IsOffsetInNodeBounds(host, Offset(100.0, 100.0)));
+    // outside the frame bounds -> not a click
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(-1.0, 50.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, -1.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(100.1, 50.0)));
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(host, Offset(50.0, 100.1)));
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_IsOffsetInNodeBoundsNullHost001
+ * @tc.desc: Test MenuPattern::IsOffsetInNodeBounds returns false when host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_IsOffsetInNodeBoundsNullHost001, TestSize.Level1)
+{
+    RefPtr<FrameNode> nullHost;
+    EXPECT_FALSE(MenuPattern::IsOffsetInNodeBounds(nullHost, Offset(10.0, 10.0)));
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_OnTouchEventRegionInBounds001
+ * @tc.desc: Test MenuPattern::OnTouchEvent keeps a click when the finger stays inside the menu bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_OnTouchEventRegionInBounds001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_TRUE(menuPattern->needHideAfterTouch_);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    // DOWN inside bounds records the start and resets the out-of-region flag
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(menuPattern->lastTouchOffset_.has_value());
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
+
+    // MOVE inside bounds keeps it a click candidate
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(40.0, 40.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
+
+    // UP inside bounds -> isClick path runs (HideMenu), state is reset
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(60.0, 60.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->lastTouchOffset_.has_value());
+}
+
+/**
+ * @tc.name: MenuPatternTwoTestNg_OnTouchEventRegionMoveOut001
+ * @tc.desc: Test MenuPattern::OnTouchEvent drops the click once the finger leaves the bounds on MOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTwoTestNg, MenuPatternTwoTestNg_OnTouchEventRegionMoveOut001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+
+    // MOVE out of bounds marks the gesture as no longer a click
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(200.0, 200.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_TRUE(menuPattern->movedOutOfRegion_);
+
+    // UP -> isClick is false (HideMenu skipped), state still resets
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    menuPattern->OnTouchEvent(info);
+    EXPECT_FALSE(menuPattern->movedOutOfRegion_);
 }
 } // namespace OHOS::Ace::NG

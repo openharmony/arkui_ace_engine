@@ -68,5 +68,6 @@ void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper
     modifier->SetIsDragShadowNeeded(info_.isDragShadowNeeded);
     modifier->SetIsFirstHandleAnimated(info_.isFirstHandleAnimation);
     modifier->SetIsSecondHandleAnimated(info_.isSecondHandleAnimation);
+    modifier->SetDragScaleXY(info_.scaleXY);
 }
 } // namespace OHOS::Ace::NG

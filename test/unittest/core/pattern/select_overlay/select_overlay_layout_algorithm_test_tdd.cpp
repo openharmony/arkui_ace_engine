@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -644,6 +645,86 @@ HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, AdjustToInfo003, TestSize.Level1)
         AceType::RawPtr(layoutWrapper), menuOffset, menuRect, windowOffset, info);
     EXPECT_TRUE(result);
     EXPECT_FLOAT_EQ(menuOffset.GetX(), 200.0f);
+}
+
+/**
+ * @tc.name: SelectOverlayLayoutAlgorithmSyncSelectMenuPaintRect001
+ * @tc.desc: Test SyncSelectMenuPaintRectToExtensionMenu updates extension menu paint rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, SyncSelectMenuPaintRectToExtensionMenu001, TestSize.Level1)
+{
+    auto info = CreateDefaultInfo();
+    auto algorithm = CreateLayoutAlgorithm(info);
+    auto host = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(host, nullptr);
+    host->CreateToolBar();
+    ASSERT_NE(host->selectMenu_, nullptr);
+    ASSERT_NE(host->backButton_, nullptr);
+
+    auto parentWrapper = CreateLayoutWrapper(host);
+    auto menuWrapper = CreateLayoutWrapper(host->selectMenu_);
+    auto backButtonWrapper = CreateLayoutWrapper(host->backButton_);
+    auto extensionMenu = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(1, "", MenuType::SELECT_OVERLAY_EXTENSION_MENU); });
+    ASSERT_NE(extensionMenu, nullptr);
+    auto extensionWrapper = CreateLayoutWrapper(extensionMenu);
+    parentWrapper->AppendChild(menuWrapper);
+    parentWrapper->AppendChild(backButtonWrapper);
+    parentWrapper->AppendChild(extensionWrapper);
+
+    RectF testRect(10.0f, 20.0f, 160.0f, 48.0f);
+    auto menuRenderContext = host->selectMenu_->GetRenderContext();
+    ASSERT_NE(menuRenderContext, nullptr);
+    menuRenderContext->UpdatePaintRect(testRect);
+
+    algorithm->SyncSelectMenuPaintRectToExtensionMenu(menuWrapper, AceType::RawPtr(parentWrapper));
+
+    auto extensionMenuPattern = extensionMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(extensionMenuPattern, nullptr);
+    EXPECT_EQ(extensionMenuPattern->GetSelectMenuPaintRect(), testRect);
+}
+
+/**
+ * @tc.name: SelectOverlayLayoutAlgorithmSyncSelectMenuPaintRect002
+ * @tc.desc: Test SyncSelectMenuPaintRectToExtensionMenu skips zero-size rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, SyncSelectMenuPaintRectToExtensionMenu002, TestSize.Level1)
+{
+    auto info = CreateDefaultInfo();
+    auto algorithm = CreateLayoutAlgorithm(info);
+    auto host = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(host, nullptr);
+    host->CreateToolBar();
+    ASSERT_NE(host->selectMenu_, nullptr);
+    ASSERT_NE(host->backButton_, nullptr);
+
+    auto parentWrapper = CreateLayoutWrapper(host);
+    auto menuWrapper = CreateLayoutWrapper(host->selectMenu_);
+    auto backButtonWrapper = CreateLayoutWrapper(host->backButton_);
+    auto extensionMenu = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(1, "", MenuType::SELECT_OVERLAY_EXTENSION_MENU); });
+    ASSERT_NE(extensionMenu, nullptr);
+    auto extensionWrapper = CreateLayoutWrapper(extensionMenu);
+    parentWrapper->AppendChild(menuWrapper);
+    parentWrapper->AppendChild(backButtonWrapper);
+    parentWrapper->AppendChild(extensionWrapper);
+
+    auto extensionMenuPattern = extensionMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(extensionMenuPattern, nullptr);
+    RectF originalRect(1.0f, 2.0f, 3.0f, 4.0f);
+    extensionMenuPattern->SetSelectMenuPaintRect(originalRect);
+
+    auto menuRenderContext = host->selectMenu_->GetRenderContext();
+    ASSERT_NE(menuRenderContext, nullptr);
+    menuRenderContext->UpdatePaintRect(RectF(10.0f, 20.0f, 0.0f, 48.0f));
+
+    algorithm->SyncSelectMenuPaintRectToExtensionMenu(menuWrapper, AceType::RawPtr(parentWrapper));
+
+    EXPECT_EQ(extensionMenuPattern->GetSelectMenuPaintRect(), originalRect);
 }
 
 } // namespace OHOS::Ace::NG

@@ -158,8 +158,11 @@ public:
         return checkNode->GetAccessibilityId() == isRootTypeId_;
     }
 
-    bool CheckIsReadable(const std::shared_ptr<FocusRulesCheckNode>& checkNode)
+    bool CheckIsReadable(
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode, Accessibility::FocusRuleType focusRuleType) override
     {
+        lastFocusRuleType_ = focusRuleType;
+        checkIsReadableCount_++;
         CHECK_NULL_RETURN(checkNode, false);
         return checkNode->GetAccessibilityId() == isReadableId_;
     }
@@ -178,6 +181,8 @@ public:
     bool updateElementInfoResult_ = true;
     int64_t isRootTypeId_ = -1;
     int64_t isReadableId_ = -1;
+    Accessibility::FocusRuleType lastFocusRuleType_ = Accessibility::FocusRuleType::DEFAULT;
+    int32_t checkIsReadableCount_ = 0;
 };
 
 /**
@@ -1034,5 +1039,74 @@ HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest
     EXPECT_TRUE(result);
     ASSERT_NE(targetNode, nullptr);
     EXPECT_EQ(frameNode->GetAccessibilityId(), targetNode->GetAccessibilityId());
+}
+
+/**
+ * @tc.name: NeedChangeToReadableNodeThroughAncestorTest002
+ * @tc.desc: NeedChangeToReadableNodeThroughAncestor passes FocusRuleType to readable check.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+
+    MockFocusStrategyOsal strategy(jsAccessibilityManager);
+    strategy.isReadableId_ = frameNode->GetAccessibilityId();
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
+
+    auto result = strategy.NeedChangeToReadableNodeThroughAncestor(
+        checkNode, targetNode, Accessibility::FocusRuleType::FOCUS_BY_TITLE);
+
+    EXPECT_TRUE(result);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(frameNode->GetAccessibilityId(), targetNode->GetAccessibilityId());
+    EXPECT_EQ(strategy.lastFocusRuleType_, Accessibility::FocusRuleType::FOCUS_BY_TITLE);
+    EXPECT_EQ(strategy.checkIsReadableCount_, 2);
+}
+
+/**
+ * @tc.name: NeedChangeToReadableNodeThroughAncestorTest003
+ * @tc.desc: NeedChangeToReadableNodeThroughAncestor uses DEFAULT when FocusRuleType is omitted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest003, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = CreatFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    frameNode->AddChild(frameNode1);
+    frameNode1->MountToParent(frameNode);
+
+    MockFocusStrategyOsal strategy(jsAccessibilityManager);
+    strategy.isReadableId_ = frameNode1->GetAccessibilityId();
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode1, frameNode1->GetAccessibilityId());
+
+    auto result = strategy.NeedChangeToReadableNodeThroughAncestor(checkNode, targetNode);
+
+    EXPECT_TRUE(result);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(frameNode1->GetAccessibilityId(), targetNode->GetAccessibilityId());
+    EXPECT_EQ(strategy.lastFocusRuleType_, Accessibility::FocusRuleType::DEFAULT);
+    EXPECT_EQ(strategy.checkIsReadableCount_, 1);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ constexpr double SIZE_DIVIDE = 2.0;
 constexpr int32_t DIGIT_X_REVERSE = 23;
 constexpr int32_t DIGIT_Y_REVERSE = 24;
 constexpr int32_t DEFAULT_MOUSE_PROCESS_TOUCH_ID = 0;
+constexpr int64_t US_TO_MS = 1000;
 
 // Force value for mouse to touch event conversion
 constexpr float MOUSE_TO_TOUCH_FORCE = 3.0f;
@@ -483,10 +484,22 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return event;
 }
 
+bool IsTouchTypeUnknownUpdate(int32_t orgAction)
+{
+    switch (orgAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_SWIPE_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
+            return false;
+        default:
+            return true;
+    }
+}
+
 void SetTouchEventType(int32_t orgAction, TouchEvent& event)
 {
     auto touchType = ConvertTouchEventType(orgAction);
-    if (touchType == TouchType::UNKNOWN) {
+    if (touchType == TouchType::UNKNOWN && IsTouchTypeUnknownUpdate(orgAction)) {
         TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
         return;
     }
@@ -578,6 +591,7 @@ void ConvertMouseEvent(
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
+    events.isStylusMouseMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_STYLUS_MOUSE_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
     events.deviceId = pointerEvent->GetDeviceId();
@@ -1321,4 +1335,40 @@ bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, i
 
     return true;
 }
+
+int64_t GetPointerDownTimeDiffMs(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId0, int32_t fingerId1)
+{
+    if (!pointerEvent) {
+        return -1;
+    }
+    int64_t downTime0 = 0;
+    int64_t downTime1 = 0;
+    bool found0 = false;
+    bool found1 = false;
+    auto pointerItems = pointerEvent->GetAllPointerItems();
+    for (const auto& item : pointerItems) {
+        int32_t id = item.GetPointerId();
+        if (id == fingerId0) {
+            downTime0 = item.GetDownTime();
+            found0 = true;
+        } else if (id == fingerId1) {
+            downTime1 = item.GetDownTime();
+            found1 = true;
+        }
+    }
+    if (!found0 || !found1) {
+        return -1;
+    }
+    int64_t diff = downTime0 > downTime1 ? (downTime0 - downTime1) : (downTime1 - downTime0);
+    return diff / US_TO_MS;
+}
 } // namespace OHOS::Ace::Platform
+
+namespace OHOS::Ace {
+int64_t GetPointerDownTimeDiffMs(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId0, int32_t fingerId1)
+{
+    return Platform::GetPointerDownTimeDiffMs(pointerEvent, fingerId0, fingerId1);
+}
+} // namespace OHOS::Ace

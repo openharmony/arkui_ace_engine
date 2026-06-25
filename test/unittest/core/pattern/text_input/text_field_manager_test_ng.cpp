@@ -127,6 +127,21 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_RemoveTextFieldInfo003, Test
 }
 
 /**
+ * @tc.name: TextFieldManagerNG_GetSessionId001
+ * @tc.desc: test GetSessionId with null host and valid host
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_GetSessionId001, TestSize.Level1)
+{
+    TextFieldManagerNG manager;
+    EXPECT_EQ(manager.GetSessionId(nullptr), -1);
+    auto node = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(node, nullptr);
+    manager.GetSessionId(node);
+}
+
+/**
  * @tc.name: TextFieldManagerNG_SetAttachInput001
  * @tc.desc: test SetAttachInput
  * @tc.type: FUNC
@@ -2577,5 +2592,4 @@ HWTEST_F(TextFieldManagerTestNG, ClearMSDPAutoFillTypes001, TestSize.Level0)
     EXPECT_FALSE(textFieldManager.GetMSDPAutoFillType(10).has_value());
     EXPECT_FALSE(textFieldManager.GetMSDPAutoFillType(11).has_value());
 }
-
 } // namespace OHOS::Ace::NG

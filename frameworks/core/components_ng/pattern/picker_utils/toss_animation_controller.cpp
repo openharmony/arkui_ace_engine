@@ -18,6 +18,7 @@
 
 #include <sys/time.h>
 
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -269,6 +269,8 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     } else {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColorNoBg());
     }
+
+    textLayoutProperty->UpdatePunctuationOverflow(true);
 }
 
 void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
@@ -1320,5 +1322,10 @@ void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, std::uint32_t value
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolSourceInfo,
         SymbolSourceInfo(value), frameNode);
+}
+
+void SecurityComponentModelNG::SetFallbackLineSpacing(const bool& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FallbackLineSpacing, value);
 }
 } // namespace OHOS::Ace::NG

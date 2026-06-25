@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IDecoratedV1Variable, IVariableOwner, WatchFuncType } from '../decorator';
+import { IDecoratedV1Variable, IDecoratedMutableVariable, IVariableOwner, WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
+import { StateDecoratedVariable } from './decoratorState';
 
 /**
  * implementation of V1 @Link
@@ -34,8 +35,8 @@ import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
  * manage dependencies of the @link: LinkDecoratedVariable does not use its meta
  */
 export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements ILinkDecoratedVariable<T> {
-    private readonly sourceGet_: () => T;
-    private readonly sourceSet_?: (newValue: T) => void;
+    private sourceGet_: () => T;
+    private sourceSet_?: (newValue: T) => void;
 
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
@@ -101,6 +102,51 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         }
     }
 
+    // Add a private setter for closures, then:
+ public resetOnReuse(newSource: IDecoratedV1Variable<T>): void {
+    const oldValue = this.sourceGet_();
+    const oldSource = this.source_;
+
+    const oldWatchId = this.getMyTriggerFromSourceWatchId();
+    if (oldSource && oldWatchId !== -1) {
+        (oldSource as DecoratedV1VariableBase<T>).removeWatch(oldWatchId);
+    }
+
+    const realSource = (newSource instanceof LinkDecoratedVariable)
+        ? (newSource as LinkDecoratedVariable<T>).getSource()
+        : newSource;
+
+    this.source_ = realSource;
+    const readable = realSource as Object as IDecoratedMutableVariable<T>;
+    this.sourceGet_ = (): T => { return readable.get(); };
+    this.sourceSet_ = (v: T): void => { readable.set(v); };
+
+    const newWatchId = realSource.registerWatchToSource(this);
+    this.setMyTriggerFromSourceWatchId(newWatchId);
+
+    const newValue = this.sourceGet_();
+    this.unregisterWatchFromObservedObjectChanges(oldValue);
+    this.registerWatchForObservedObjectChanges(newValue);
+    this.updateObservedObjectRegistration(oldValue, newValue);
+
+    // === KEY FIX ===
+    // The koalaui memo scopes that read this @Link during the previous parent's
+    // tenure recorded dependency edges against `oldSource`'s meta. After this
+    // closure swap, those scopes still subscribe to oldSource. We need to
+    // invalidate them so they re-run, at which point Link.get() will pass
+    // through to the new source and addRef against newSource's meta — migrating
+    // the edges naturally.
+    //
+    // Fire oldSource's backing meta to mark all existing subscribers dirty.
+    if (oldSource && (oldSource as Object) instanceof StateDecoratedVariable) {
+        const oldStateSource = oldSource as StateDecoratedVariable<T>;
+        // fireChange triggers all dependent memo scopes to invalidate
+        oldStateSource.fireChange();
+        console.log(`GlobalReuse: Link.resetOnReuse FIRED oldSource meta to invalidate memo scopes`);
+    }
+
+    console.log(`GlobalReuse: Link.resetOnReuse EXIT varName=${this.varName} oldVal=${oldValue} newVal=${newValue}`);
+}
     private source_: IDecoratedV1Variable<T>;
 
     public getSource(): IDecoratedV1Variable<T> {

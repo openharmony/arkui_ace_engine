@@ -57,6 +57,7 @@ void ShapeModelStatic::SetFill(FrameNode* frameNode, const std::optional<Color>&
 void ShapeModelStatic::SetStrokeDashOffset(FrameNode* frameNode, const std::optional<Ace::Dimension>& dashOffset)
 {
     if (dashOffset) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(dashOffset.value(), LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, frameNode);
@@ -114,6 +115,7 @@ void ShapeModelStatic::SetStrokeOpacity(FrameNode* frameNode, const std::optiona
 void ShapeModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<Ace::Dimension>& strokeWidth)
 {
     if (strokeWidth) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth.value(), LpxAttribute::LPX_SHAPE_STROKE_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, frameNode);
@@ -134,6 +136,10 @@ void ShapeModelStatic::SetViewPort(FrameNode* frameNode,
     shapeViewBox.SetTop(dimTop.value_or(defaultVal));
     shapeViewBox.SetWidth(dimWidth.value_or(defaultVal));
     shapeViewBox.SetHeight(dimHeight.value_or(defaultVal));
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimLeft.value_or(defaultVal), LpxAttribute::LPX_SHAPE_LEFT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimTop.value_or(defaultVal), LpxAttribute::LPX_SHAPE_TOP, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimWidth.value_or(defaultVal), LpxAttribute::LPX_WIDTH, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimHeight.value_or(defaultVal), LpxAttribute::LPX_HEIGHT, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 

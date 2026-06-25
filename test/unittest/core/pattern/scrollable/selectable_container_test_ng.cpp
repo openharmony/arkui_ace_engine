@@ -680,4 +680,194 @@ HWTEST_F(SelectableContainerTestNg, BoxSelectTest001, TestSize.Level1)
     selectablePattern->HandleDragStart(info);
     EXPECT_EQ(selectablePattern->mouseStartOffset_, OffsetF(45, 40));
 }
+
+/**
+ * @tc.name: TryEnterEditModeForSwipeSelect001
+ * @tc.desc: Test TryEnterEditModeForSwipeSelect returns early when edit mode already enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, TryEnterEditModeForSwipeSelect001, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    selectablePattern->SetEnableEditMode(true);
+    selectablePattern->ResetEditModeChanged();
+
+    bool eventFired = false;
+    selectablePattern->SetEnableEditModeChangeEvent([&eventFired](bool) { eventFired = true; });
+
+    selectablePattern->TryEnterEditModeForSwipeSelect();
+
+    EXPECT_TRUE(selectablePattern->GetEnableEditMode());
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+    EXPECT_FALSE(eventFired);
+}
+
+/**
+ * @tc.name: TryEnterEditModeForSwipeSelect002
+ * @tc.desc: Test TryEnterEditModeForSwipeSelect sets editModeChanged when default multi-select style disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, TryEnterEditModeForSwipeSelect002, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    EditModeOptions options;
+    options.useDefaultMultiSelectStyle = false;
+    selectablePattern->SetEditModeOptions(options);
+
+    bool eventFired = false;
+    bool eventValue = false;
+    selectablePattern->SetEnableEditModeChangeEvent([&eventFired, &eventValue](bool enable) {
+        eventFired = true;
+        eventValue = enable;
+    });
+
+    EXPECT_CALL(*selectablePattern, ApplyEditModeToVisibleItems).Times(0);
+
+    selectablePattern->TryEnterEditModeForSwipeSelect();
+
+    EXPECT_TRUE(selectablePattern->GetEnableEditMode());
+    EXPECT_TRUE(selectablePattern->IsEditModeChanged());
+    EXPECT_TRUE(eventFired);
+    EXPECT_TRUE(eventValue);
+}
+
+/**
+ * @tc.name: TryEnterEditModeForSwipeSelect003
+ * @tc.desc: Test TryEnterEditModeForSwipeSelect calls ApplyEditModeToVisibleItems when default style enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, TryEnterEditModeForSwipeSelect003, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    EditModeOptions options;
+    options.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(options);
+
+    bool eventFired = false;
+    bool eventValue = false;
+    selectablePattern->SetEnableEditModeChangeEvent([&eventFired, &eventValue](bool enable) {
+        eventFired = true;
+        eventValue = enable;
+    });
+
+    EXPECT_CALL(*selectablePattern, ApplyEditModeToVisibleItems).Times(1);
+
+    selectablePattern->TryEnterEditModeForSwipeSelect();
+
+    EXPECT_TRUE(selectablePattern->GetEnableEditMode());
+    EXPECT_TRUE(selectablePattern->IsEditModeChanged());
+    EXPECT_TRUE(eventFired);
+    EXPECT_TRUE(eventValue);
+}
+/**
+ * @tc.name: SetEditModeOptionsUseDefaultMultiSelectStyleChanged001
+ * @tc.desc: Test SetEditModeOptions sets editModeChanged when useDefaultMultiSelectStyle changes from true to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, SetEditModeOptionsUseDefaultMultiSelectStyleChanged001, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    EditModeOptions initialOptions;
+    initialOptions.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(initialOptions);
+    selectablePattern->ResetEditModeChanged();
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+
+    EditModeOptions newOptions;
+    newOptions.useDefaultMultiSelectStyle = false;
+    selectablePattern->SetEditModeOptions(newOptions);
+
+    EXPECT_TRUE(selectablePattern->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: SetEditModeOptionsUseDefaultMultiSelectStyleChanged002
+ * @tc.desc: Test SetEditModeOptions sets editModeChanged when useDefaultMultiSelectStyle changes from false to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, SetEditModeOptionsUseDefaultMultiSelectStyleChanged002, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    EditModeOptions initialOptions;
+    initialOptions.useDefaultMultiSelectStyle = false;
+    selectablePattern->SetEditModeOptions(initialOptions);
+    selectablePattern->ResetEditModeChanged();
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+
+    EditModeOptions newOptions;
+    newOptions.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(newOptions);
+
+    EXPECT_TRUE(selectablePattern->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: SetEditModeOptionsUseDefaultMultiSelectStyleChanged003
+ * @tc.desc: Test SetEditModeOptions does not set editModeChanged when useDefaultMultiSelectStyle unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, SetEditModeOptionsUseDefaultMultiSelectStyleChanged003, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    EditModeOptions initialOptions;
+    initialOptions.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(initialOptions);
+    selectablePattern->ResetEditModeChanged();
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+
+    EditModeOptions sameOptions;
+    sameOptions.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(sameOptions);
+
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: SetEditModeOptionsUseDefaultMultiSelectStyleChanged004
+ * @tc.desc: Test changing useDefaultMultiSelectStyle while editMode enabled triggers IsDefaultMultiSelectStyleEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableContainerTestNg, SetEditModeOptionsUseDefaultMultiSelectStyleChanged004, TestSize.Level1)
+{
+    auto selectablePattern = AceType::MakeRefPtr<FullyMockedSelectableContainer>();
+    auto selectableNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto selectableNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, selectableNodeId, selectablePattern);
+
+    selectablePattern->SetEnableEditMode(true);
+    selectablePattern->ResetEditModeChanged();
+
+    EditModeOptions initialOptions;
+    initialOptions.useDefaultMultiSelectStyle = false;
+    selectablePattern->SetEditModeOptions(initialOptions);
+    EXPECT_FALSE(selectablePattern->IsDefaultMultiSelectStyleEnabled());
+
+    EditModeOptions newOptions;
+    newOptions.useDefaultMultiSelectStyle = true;
+    selectablePattern->SetEditModeOptions(newOptions);
+
+    EXPECT_TRUE(selectablePattern->IsEditModeChanged());
+    EXPECT_TRUE(selectablePattern->IsDefaultMultiSelectStyleEnabled());
+
+    selectablePattern->ResetEditModeChanged();
+    EXPECT_FALSE(selectablePattern->IsEditModeChanged());
+}
+
 } // namespace OHOS::Ace::NG

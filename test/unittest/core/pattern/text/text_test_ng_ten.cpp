@@ -47,8 +47,8 @@ HWTEST_F(TextTestNgTen, InitKeyEvent_HandleKey, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set spanStringTouchInitialized_ to false
-     * and Set the pressedCodes of KeyEvent to { KEY_CTRL_LEFT, KEY_C }
+     * @tc.steps: step2. Set spanStringTouchInitialized_ to false.
+     * and Set the pressedCodes of KeyEvent to { KEY_CTRL_LEFT, KEY_C }.
      */
     pattern->keyEventInitialized_ = false;
     KeyEvent keyEvent;
@@ -56,8 +56,8 @@ HWTEST_F(TextTestNgTen, InitKeyEvent_HandleKey, TestSize.Level1)
     keyEvent.pressedCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C };
 
     /**
-     * @tc.steps: step3. Calling the InitKeyEvent and onKey function
-     * @tc.expected: The spanStringTouchInitialized_ of pattern from false to true
+     * @tc.steps: step3. Calling the InitKeyEvent and onKey function.
+     * @tc.expected: The spanStringTouchInitialized_ of pattern from false to true.
      * and the result return true
      */
     pattern->InitKeyEvent();
@@ -69,8 +69,8 @@ HWTEST_F(TextTestNgTen, InitKeyEvent_HandleKey, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitUrlTouchEvent_TouchTask
- * @tc.desc: Test TextPattern InitUrlTouchEvent
+ * @tc.name: InitUrlTouchEvent_TouchTask.
+ * @tc.desc: Test TextPattern InitUrlTouchEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgTen, InitUrlTouchEvent_TouchTask, TestSize.Level1)
@@ -87,7 +87,7 @@ HWTEST_F(TextTestNgTen, InitUrlTouchEvent_TouchTask, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set urlTouchEventInitialized_ to false
+     * @tc.steps: step2. Set urlTouchEventInitialized_ to false.
      */
     pattern->urlTouchEventInitialized_ = false;
     RefPtr<TextOverlayModifier> overlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
@@ -99,7 +99,7 @@ HWTEST_F(TextTestNgTen, InitUrlTouchEvent_TouchTask, TestSize.Level1)
     pattern->status_ = Status::FLOATING;
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
 
@@ -363,7 +363,7 @@ HWTEST_F(TextTestNgTen, BetweenSelectedPosition_HasRenderTransform, TestSize.Lev
     frameNode->renderContext_->UpdateMotionPath(motionPathOption);
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
     pattern->selectOverlay_->hasTransform_ = true;
@@ -406,7 +406,7 @@ HWTEST_F(TextTestNgTen, BeforeCreateLayoutWrapper_HasSpanOnHoverEvent, TestSize.
     pattern->spanMouseEventInitialized_ = false;
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
     pattern->spans_.clear();

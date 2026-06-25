@@ -414,6 +414,7 @@ void TextFieldModelNG::SetPlaceholderFont(const Font& value)
     if (value.fontSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value());
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE);
     if (value.fontStyle) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value());
     }
@@ -460,6 +461,7 @@ void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
     if (value.caretWidth.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value());
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.caretWidth.value_or(Dimension()), LpxAttribute::LPX_CARET_WIDTH);
 }
 
 void TextFieldModelNG::SetCaretPosition(const int32_t& value)
@@ -539,6 +541,7 @@ void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE);
 }
 void TextFieldModelNG::SetFontWeight(FontWeight value)
 {
@@ -1010,11 +1013,13 @@ void TextFieldModelNG::SetEnableAutoFillAnimation(bool enableAutoFillAnimation)
 void TextFieldModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE);
 }
 
 void TextFieldModelNG::SetAdaptMaxFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE);
 }
 
 void TextFieldModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
@@ -1030,15 +1035,18 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
+    ACE_CHECK_LPX_ATTRIBUTE(iconSize, LpxAttribute::LPX_CANCEL_ICON_SIZE);
 }
 void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
@@ -1100,6 +1108,7 @@ void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING);
 }
 
 Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
@@ -1113,6 +1122,7 @@ Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT);
 }
 
 void TextFieldModelNG::SetHalfLeading(bool value)
@@ -1132,6 +1142,7 @@ void TextFieldModelNG::SetHorizontalScrolling(bool value)
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING);
 }
 
 void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
@@ -1227,6 +1238,7 @@ void TextFieldModelNG::SetTextOverflow(Ace::TextOverflow value)
 void TextFieldModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT);
 }
 
 void TextFieldModelNG::SetTextDirection(TextDirection value)
@@ -1278,6 +1290,7 @@ TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT, frameNode);
 }
 
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
@@ -1567,6 +1580,7 @@ void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& val
     if (value.caretWidth.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value(), frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.caretWidth.value_or(Dimension()), LpxAttribute::LPX_CARET_WIDTH, frameNode);
 }
 
 void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& value)
@@ -1645,6 +1659,8 @@ void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& valu
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value(), frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        value.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, frameNode);
     if (value.fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
@@ -1664,6 +1680,7 @@ void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
@@ -1861,6 +1878,7 @@ void TextFieldModelNG::SetIsShowVoiceButton(FrameNode* frameNode, bool isShowBut
 void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(iconSize, LpxAttribute::LPX_CANCEL_ICON_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc)
@@ -2226,11 +2244,13 @@ float TextFieldModelNG::GetLineThicknessScale(FrameNode* frameNode)
 void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING, frameNode);
 }
 
 void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT, frameNode);
 }
 
 void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
@@ -2243,6 +2263,7 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING, frameNode);
 }
 
 float TextFieldModelNG::GetLineSpacing(FrameNode* frameNode)
@@ -2839,6 +2860,7 @@ void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPre
 void TextFieldModelNG::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 Dimension TextFieldModelNG::GetStrokeWidth(FrameNode* frameNode)
@@ -2868,6 +2890,7 @@ void TextFieldModelNG::ResetStrokeColor()
 void TextFieldModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void TextFieldModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
@@ -3039,6 +3062,26 @@ bool TextFieldModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, CompressLeadingPunctuation, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetPunctuationOverflow(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PunctuationOverflow, enabled);
+}
+
+void TextFieldModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PunctuationOverflow, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetPunctuationOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PunctuationOverflow, value, frameNode, value);
     return value;
 }
 

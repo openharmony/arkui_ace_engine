@@ -132,7 +132,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertColorForMaterial(value));
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
                             const Opt_arkui_component_units_Font* value)
@@ -167,7 +167,7 @@ void SetFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    TextFieldModelStatic::SetTextColor(frameNode, Converter::OptConvertColorForMaterial(value));
 }
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Length* value)
@@ -916,6 +916,14 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetPunctuationOverflowImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetPunctuationOverflow(frameNode, convValue);
+}
 void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                      const Opt_SelectedDragPreviewStyle* value)
 {
@@ -1196,6 +1204,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAreaAttributeModifier::SetStrokeJoinStyleImpl,
         TextAreaAttributeModifier::SetShaderStyleImpl,
+        TextAreaAttributeModifier::SetPunctuationOverflowImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetMaxLinesImpl,

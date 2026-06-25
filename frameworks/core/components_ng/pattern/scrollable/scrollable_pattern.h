@@ -421,13 +421,7 @@ public:
 
     void SetMaxFlingVelocity(double max);
 
-    double GetMaxFlingVelocity() const
-    {
-        CHECK_NULL_RETURN(scrollableEvent_, 0.0);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_RETURN(scrollable, 0.0);
-        return scrollable->GetMaxFlingVelocity();
-    }
+    double GetMaxFlingVelocity() const;
 
     virtual void StopAnimate();
     bool AnimateRunning() const
@@ -510,8 +504,7 @@ public:
     {
         auto canOverScroll =
             (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
-                (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ ||
-                    source == SCROLL_FROM_BAR_OVER_DRAG));
+                (!ScrollableIdle() || animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -520,11 +513,11 @@ public:
     }
     bool CanOverScrollStart(int32_t source)
     {
-        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::END;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) || animateOverScrollStart_;
     }
     bool CanOverScrollEnd(int32_t source)
     {
-        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::START;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) || animateOverScrollEnd_;
     }
     void SetCanStayOverScroll(bool canStayOverScroll)
     {
@@ -780,6 +773,11 @@ public:
     }
 
     void InitScrollBarGestureEvent();
+    void RegisterScrollBarInputEvents(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<InputEventHub>& inputHub);
+    void InitScrollBarCallbacks();
+    void SetInBarRegionCallback();
+    void SetBarCollectTargetCallback();
+    void SetInBarRectRegionCallback();
 
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent();
@@ -876,7 +874,7 @@ public:
 #endif
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
@@ -1023,6 +1021,11 @@ public:
 
     void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
+    bool EnableCachePredictNodes() const override
+    {
+        return true;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -1066,7 +1069,8 @@ protected:
     RefPtr<ScrollableController> positionController_;
 
     bool scrollStop_ = false;
-    bool animateOverScroll_ = false;
+    bool animateOverScrollStart_ = false;
+    bool animateOverScrollEnd_ = false;
     bool animateCanOverScroll_ = false;
 
     // for onReachStart of the first layout
@@ -1168,6 +1172,8 @@ private:
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
+    void OnTouchTestDoneHandlePreventRecognizer(
+        const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers, bool isHitTestBlock);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
     bool IsInComponent(PointF point);
@@ -1220,6 +1226,7 @@ private:
     void SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
+    void SetIsRefreshScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollEndRec(const RefPtr<Scrollable>& scrollable);
     void SetScrollEndCallback(const RefPtr<Scrollable>& scrollable);

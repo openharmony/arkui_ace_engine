@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
@@ -44,7 +45,7 @@ constexpr float DEFAULT_ALIGN_DIALOG = 3.0;
 constexpr float SHADOW_NONE = 6.0;
 constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
 // default FontWeight::MEDIUM
-constexpr float DIALOG_TITLE_TEXT_FONT_WEIGHT = 13.0;
+constexpr float DIALOG_TITLE_TEXT_FONT_WEIGHT = 9.0;
 } // namespace
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built

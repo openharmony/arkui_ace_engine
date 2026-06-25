@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
 
 #include "base/utils/multi_thread.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
@@ -132,6 +133,14 @@ void MenuItemModelStatic::SetSelectedChangeEvent(FrameNode* frameNode, std::func
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
+}
+
+void MenuItemModelStatic::SetSubBuilder(FrameNode* frameNode, std::function<void()>&& subBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSubBuilder(std::move(subBuilder));
 }
 
 void MenuItemModelStatic::SetSelected(FrameNode* frameNode, const std::optional<bool>& isSelected)

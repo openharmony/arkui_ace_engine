@@ -24,6 +24,8 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double HALF = 0.5;
+    // Upper bound for stroke-dasharray entries; prevents oversized allocations from malformed SVG input.
+    constexpr size_t MAX_LINE_DASH_SIZE = 1024;
 
     RSCMSMatrixType ToRSCMSMatrixType(ColorSpace colorSpace)
     {
@@ -42,8 +44,9 @@ namespace {
         auto matrixType = ToRSCMSMatrixType(color.GetColorSpace());
         if (color.GetHeadRoomColor().has_value()) {
             auto colorFloat = color.GetHeadRoomColor().value();
+            auto blendedAlpha = std::clamp(colorFloat.alpha * static_cast<float>(opacity), 0.0f, 1.0f);
             auto uiColor = RSUIColor(
-                colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+                colorFloat.red, colorFloat.green, colorFloat.blue, blendedAlpha, colorFloat.headRoom);
             brush.SetUIColor(uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType));
         } else if (color.GetColorSpace() == ColorSpace::SRGB) {
             brush.SetColor(color.BlendOpacity(opacity).GetValue());
@@ -688,7 +691,7 @@ void SvgGraphic::SetPenStyle(RSPen& rsPen)
     rsPen.SetMiterLimit(static_cast<RSScalar>(attributes_.strokeState.GetMiterLimit()));
     rsPen.SetAntiAlias(true);
     auto lineDashState = attributes_.strokeState.GetLineDash().lineDash;
-    if (lineDashState.empty()) {
+    if (lineDashState.empty() || lineDashState.size() > MAX_LINE_DASH_SIZE) {
         return;
     }
 
@@ -750,6 +753,10 @@ void SvgGraphic::UpdateLineDash()
     const auto& strokeState = attributes_.strokeState;
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
+        if (lineDashState.size() > MAX_LINE_DASH_SIZE) {
+            LOGW("line dash size is too long, size:%{public}zu", lineDashState.size());
+            return;
+        }
         if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             RSScalar intervals[lineDashState.size()];
             for (size_t i = 0; i < lineDashState.size(); ++i) {

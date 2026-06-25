@@ -58,9 +58,15 @@ NG::OffsetF MyGetCaretPosition()
  */
 HWTEST_F(TextFieldPatternFuncTest, MagnifierController_UpdateMagnifierEdgeY, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create pipeline
+     */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
 
+    /**
+     * @tc.steps: step2. create textinput
+     */
     auto rootUINode = pipeline->GetRootElement();
     ASSERT_NE(rootUINode, nullptr);
     auto searchNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_ETS_TAG,
@@ -241,6 +247,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
  */
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc083, TestSize.Level1)
 {
+    /*
+     * @tc.step1: create textinput.
+     */
     CreateTextField();
     auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(
@@ -253,6 +262,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc083, TestSize.Level1)
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
     Offset menuOffset(-1.0f, 100);
+    /*
+     * @tc.step2: set click position.
+     */
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
     EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);

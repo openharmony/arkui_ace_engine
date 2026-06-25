@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/pattern.h"
 
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 int32_t Pattern::OnRecvCommand(const std::string& command)
@@ -62,7 +65,7 @@ RefPtr<LayoutAlgorithm> Pattern::CreateLayoutAlgorithm()
 
 RefPtr<EventHub> Pattern::CreateEventHub()
 {
-    return nullptr;
+    return MakeRefPtr<EventHub>();
 }
 
 void Pattern::ReadFontScaleFromEnv()
@@ -75,4 +78,110 @@ RefPtr<VerticalOverflowHandler> Pattern::GetOrCreateVerticalOverflowHandler(cons
 {
     return nullptr;
 }
+
+void Pattern::PropagateForegroundColorToChildren() {}
+
+void Pattern::UpdateChildRenderContext(
+    const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+{}
+
+std::optional<SizeF> Pattern::GetHostFrameSize() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetMarginFrameSize();
+}
+
+std::optional<OffsetF> Pattern::GetHostFrameOffset() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetFrameOffset();
+}
+
+std::optional<OffsetF> Pattern::GetHostFrameGlobalOffset() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetFrameOffset() + frameNode->GetGeometryNode()->GetParentGlobalOffset();
+}
+
+std::optional<SizeF> Pattern::GetHostContentSize() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
+    if (!content) {
+        return std::nullopt;
+    }
+    return content->GetRect().GetSize();
+}
+
+int32_t Pattern::GetHostInstanceId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
+    return host->GetInstanceId();
+}
+
+PipelineContext* Pattern::GetContext() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetContext();
+}
+
+RenderContext* Pattern::GetRenderContext() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetRenderContext().GetRawPtr();
+}
+
+void Pattern::MarkDirty(PropertyChangeFlag flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
+}
+
+bool Pattern::IsNeedAdjustByAspectRatio()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(host, false);
+    return layoutProperty->HasAspectRatio();
+}
+
+int32_t Pattern::GetThemeScopeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return host->GetThemeScopeId();
+}
+
+bool Pattern::HandleTextBoxComponentCommand(
+    const std::string& command, std::string& cmd, std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+{
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), false);
+    cmd = json->GetString("cmd");
+    CHECK_NULL_RETURN(!cmd.empty(), false);
+    params = json->GetValue("params");
+    CHECK_NULL_RETURN(params && params->IsObject(), false);
+    return true;
+}
+
+void Pattern::AttachToFrameNode(const WeakPtr<FrameNode>&) {}
+RefPtr<FrameNode> Pattern::GetHost() const { return nullptr; }
+
 } // namespace OHOS::Ace::NG

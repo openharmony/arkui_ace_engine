@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -35,6 +34,49 @@ class ShapeRect;
 namespace OHOS::Ace::NG {
 class FrameNode;
 
+enum class ScrollableErrorCode {
+    SUCCESS = 0,
+    CLIP_CONTENT_CONTENT_ONLY,
+    CLIP_CONTENT_BOUNDARY,
+    CLIP_CONTENT_SAFE_AREA,
+    CLIP_CONTENT_CUSTOM,
+    CLIP_CONTENT_DEFAULT,
+    CACHE_COUNT_SHOW,
+    CACHE_COUNT_FALSE,
+    SCROLL_SNAP_ALIGN_NONE,
+    SCROLL_SNAP_ALIGN_START,
+    SCROLL_SNAP_ALIGN_CENTER,
+    SCROLL_SNAP_ALIGN_END,
+    EFFECT_EDGE_START,
+    EFFECT_EDGE_END,
+    EFFECT_EDGE_ALL,
+    EDIT_MODE_OPTIONS_000,
+    EDIT_MODE_OPTIONS_001,
+    EDIT_MODE_OPTIONS_010,
+    EDIT_MODE_OPTIONS_011,
+    EDIT_MODE_OPTIONS_100,
+    EDIT_MODE_OPTIONS_101,
+    EDIT_MODE_OPTIONS_110,
+    EDIT_MODE_OPTIONS_111,
+    NESTED_SCROLL_SELF_ONLY_SELF_ONLY,
+    NESTED_SCROLL_SELF_ONLY_SELF_FIRST,
+    NESTED_SCROLL_SELF_ONLY_PARENT_FIRST,
+    NESTED_SCROLL_SELF_ONLY_PARALLEL,
+    NESTED_SCROLL_SELF_FIRST_SELF_ONLY,
+    NESTED_SCROLL_SELF_FIRST_SELF_FIRST,
+    NESTED_SCROLL_SELF_FIRST_PARENT_FIRST,
+    NESTED_SCROLL_SELF_FIRST_PARALLEL,
+    NESTED_SCROLL_PARENT_FIRST_SELF_ONLY,
+    NESTED_SCROLL_PARENT_FIRST_SELF_FIRST,
+    NESTED_SCROLL_PARENT_FIRST_PARENT_FIRST,
+    NESTED_SCROLL_PARENT_FIRST_PARALLEL,
+    NESTED_SCROLL_PARALLEL_SELF_ONLY,
+    NESTED_SCROLL_PARALLEL_SELF_FIRST,
+    NESTED_SCROLL_PARALLEL_PARENT_FIRST,
+    NESTED_SCROLL_PARALLEL_PARALLEL,
+    END,
+};
+
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
 class ACE_FORCE_EXPORT ScrollableModelNG {
 public:
@@ -42,6 +84,8 @@ public:
 
     static void SetScrollBarMode(DisplayMode value);
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
+    static void SetScrollBarHeight(const std::string& value);
+    static void SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetScrollBarColor(const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(const std::string& value);
@@ -105,6 +149,7 @@ public:
 #endif
 
     static void ResetScrollBarWidth(FrameNode* frameNode);
+    static void ResetScrollBarHeight(FrameNode* frameNode);
     static void ResetScrollBarColor(FrameNode* frameNode);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
@@ -116,6 +161,7 @@ public:
     static void ResetBackToTop(FrameNode* frameNode);
     static void ResetBackToTopMultiThread(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
+    static float GetScrollBarHeight(FrameNode* frameNode);
     static void SetEnableScrollWithMouse(bool enableScrollWithMouse);
     static void SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse);
     static void ResetEnableScrollWithMouse(FrameNode* frameNode);
@@ -140,6 +186,7 @@ public:
     static void CreateWithResourceObjContentEndOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjScrollBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust);
     static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
     static void ResetAutoAdjustScrollBarMargin(FrameNode* frameNode);

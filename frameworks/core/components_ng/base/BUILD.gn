@@ -25,6 +25,7 @@ build_component_ng("base_ng") {
     "inspector_filter.cpp",
     "interop/view_stack_processor_interop.cpp",
     "xbar_proxy_wrapper.cpp",
+    "mixed_mount_registry.cpp",
     "modifier.cpp",
     "node_render_status_monitor.cpp",
     "observer_handler.cpp",
@@ -74,5 +75,9 @@ build_component_ng("base_ng") {
     sources += vendor_configs.ace_engine_advanced_navigation_circle_mode
   } else {
     sources += [ "navigation_register.cpp" ]
+  }
+
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
   }
 }

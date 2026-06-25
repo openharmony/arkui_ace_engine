@@ -33,6 +33,7 @@
 #include "base/memory/ace_type.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/feature_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
@@ -79,6 +80,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+std::atomic<bool> XComponentPattern::compensationAngleFlag_{false};
+std::mutex XComponentPattern::angleMtx_;
+std::string XComponentPattern::compensationAngleFromFeatureManager_ = "";
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
@@ -93,6 +97,7 @@ constexpr char FULL[] = "1";
 constexpr char MAIN[] = "2";
 constexpr char SUB[] = "3";
 constexpr char COORDINATION[] = "4";
+constexpr char ANGLE_KEY[] = "logic_device";
 #endif
 
 #if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
@@ -128,8 +133,9 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight,
     bool isTypedNode)
-    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight),
-      isTypedNode_(isTypedNode)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), isTypedNode_(isTypedNode),
+      initSize_(initWidth, initHeight)
+      
 {
     SetLibraryName(libraryname);
     if (!isTypedNode_) {
@@ -170,6 +176,22 @@ void XComponentPattern::InitXComponent()
             LoadNative();
         }
     }
+}
+
+std::string XComponentPattern::GetLeakType()
+{
+    auto xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    if (id_.has_value() && !id_.value().empty()) {
+        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + id_.value();
+    }
+    std::string defaultLeakType = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, defaultLeakType);
+    auto inspectorKey = host->GetInspectorId().value_or("");
+    if (!inspectorKey.empty()) {
+        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + inspectorKey;
+    }
+    return defaultLeakType;
 }
 
 void XComponentPattern::InitSurface()
@@ -323,22 +345,19 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
-    if (type_ == XComponentType::SURFACE) {
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-        auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(
-            (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
-    }
+    CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     SendStatisticEvent(host, statisticEventTypes_);
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
-    ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
+    auto leakType = GetLeakType();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree, leaktype: %{public}s",
+        GetId().c_str(), leakType.c_str());
+    ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree, leaktype: %s", GetId().c_str(), leakType.c_str());
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
+    }
+    if (type_ == XComponentType::SURFACE) {
+        applyBackGroundColor();
     }
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -352,6 +371,7 @@ void XComponentPattern::OnAttachToMainTree()
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId());
     CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->UpdateBufferTypeLeak(leakType);
     auto customNode = host->GetParentCustomNode();
     CHECK_NULL_VOID(customNode);
     auto pipelineContext = host->GetContextRefPtr();
@@ -384,6 +404,17 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
+    uint64_t uniqueId = 0;
+    std::string surfaceName;
+    if (renderSurface_) {
+        uniqueId = renderSurface_->GetUniqueIdNum();
+        surfaceName = renderSurface_->GetPSurfaceName();
+    }
+    auto customNode = host->GetParentCustomNode();
+    std::string viewName = customNode ? customNode->GetJSViewName() : "";
+    auto pipelineContext = host->GetContextRefPtr();
+    auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
+    PerfMonitor::GetPerfMonitor()->ReportComponentDetach(uniqueId, surfaceName, viewName, bundleName, getpid());
     host->UnregisterNodeChangeListener();
 }
 
@@ -410,30 +441,63 @@ Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
         default: return Rosen::ScreenRotation::INVALID_SCREEN_ROTATION;
     }
 }
+
+std::string XComponentPattern::GetCompensationAngleFromFeatureManager()
+{
+    if (compensationAngleFlag_.load(std::memory_order_acquire)) {
+        return compensationAngleFromFeatureManager_;
+    }
+    std::lock_guard<std::mutex> lock(angleMtx_);
+    if (compensationAngleFlag_.load(std::memory_order_relaxed)) {
+        return compensationAngleFromFeatureManager_;
+    }
+    if (SystemProperties::IsSensorCorrectionEnabled()) {
+        LOGI("Sensor Correction is Enabled");
+        std::string featureManagerAngleConfig;
+        auto featureResult = FeatureManager::GetInstance().GetFeatureParam(ANGLE_KEY, featureManagerAngleConfig);
+        if (featureResult == FeatureManager::SUCCESS) {
+            compensationAngleFromFeatureManager_ = featureManagerAngleConfig;
+            LOGI("featureManagerAngleConfig is %{public}s", compensationAngleFromFeatureManager_.c_str());
+        }
+    } else {
+        LOGI("Sensor Correction is not Enabled");
+        // can return when the feature manager is enable.
+    }
+    compensationAngleFlag_.store(true, std::memory_order_release);
+    return compensationAngleFromFeatureManager_;
+}
  
 std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
 {
-    if (angleConfigJson == "") {
+    std::string tempAngleConfigJson = angleConfigJson;
+    std::string compensationAngleFromFeatureManager = XComponentPattern::GetCompensationAngleFromFeatureManager();
+    if (!compensationAngleFromFeatureManager.empty()) {
+        tempAngleConfigJson = compensationAngleFromFeatureManager;
+    }
+    if (tempAngleConfigJson.empty()) {
         LOGE("UIContent set compensation angle empty");
         return nullptr;
     }
-    auto jsonConfig = JsonUtil::ParseJsonString(angleConfigJson);
+    auto jsonConfig = JsonUtil::ParseJsonString(tempAngleConfigJson);
     if (jsonConfig == nullptr) {
-        LOGE("UIContent set compensasion angle %{public}s is invalid", angleConfigJson.c_str());
+        LOGE("UIContent set compensasion angle %{public}s is invalid", tempAngleConfigJson.c_str());
         return nullptr;
     }
     auto angleConfig = jsonConfig->GetObject(X_COMPONENT_COMPENSATION_ANGLE);
     if (angleConfig == nullptr) {
-        LOGE("UIContent can not get angle info from %{public}s", angleConfigJson.c_str());
+        LOGE("UIContent can not get angle info from %{public}s", tempAngleConfigJson.c_str());
         return nullptr;
     }
     auto result = angleConfig->ToString();
     LOGI("get angle info: %{public}s", result.c_str());
+    if (result.empty()) {
+        return nullptr;
+    }
     return JsonUtil::ParseJsonString(result);
 }
  
-void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
-    const std::string& xcomponentId)
+void XComponentPattern::SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext,
+    FoldDisplayMode foldDisplayMode, const std::string& xcomponentId)
 {
 #ifndef CROSS_PLATFORM
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
@@ -452,7 +516,7 @@ void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDi
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT,
             "XComponent[%{public}s]'s can not get rotation FoldDisplayMode %{public}s angleConfig %{public}s",
             xcomponentId.c_str(), displyMode.c_str(), angleConfigJson->ToString().c_str());
-        return;
+        rotation = Rosen::ScreenRotation::ROTATION_0;
     }
     TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s set rotation %{public}d",
         xcomponentId.c_str(), rotationInt);
@@ -645,6 +709,11 @@ void XComponentPattern::OnModifyDone()
     if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
         return;
     }
+    applyBackGroundColor();
+}
+
+void XComponentPattern::applyBackGroundColor()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -732,6 +801,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromFrameNode", GetId().c_str());
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -2192,12 +2262,12 @@ void XComponentPattern::HandleSurfaceCreated()
 
 void XComponentPattern::HandleSurfaceDestroyed(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->ReleaseSurfaceBuffers();
-    renderSurface_->UnregisterSurface();
     CHECK_NULL_VOID(xcomponentController_);
     OnSurfaceDestroyed(frameNode);
     xcomponentController_->SetSurfaceId("");
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->ReleaseSurfaceBuffers();
+    renderSurface_->UnregisterSurface();
 }
 
 void XComponentPattern::NativeSurfaceShow()

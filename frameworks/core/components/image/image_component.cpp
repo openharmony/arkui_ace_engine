@@ -15,6 +15,7 @@
 
 #include "core/components/image/image_component.h"
 
+#include "core/components/common/properties/background_image.h"
 #include "core/components/image/image_element.h"
 
 namespace OHOS::Ace {

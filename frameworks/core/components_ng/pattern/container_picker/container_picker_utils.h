@@ -36,6 +36,7 @@ namespace {
 const Dimension PICKER_DEFAULT_HEIGHT = 200.0_vp;
 const Dimension PICKER_HEIGHT_BEFORE_ROTATE = 280.0_vp;
 const Dimension PICKER_ITEM_HEIGHT = 40.0_vp;
+const Dimension PICKER_MAX_ITEM_HEIGHT = 64.0_vp;
 const Dimension FIRST_ADJACENT_ITEM_HEIGHT = 36.3_vp;
 const Dimension SECOND_ADJACENT_ITEM_HEIGHT = 24.9_vp;
 const Dimension THIRD_ADJACENT_ITEM_HEIGHT = 11.4_vp;
@@ -84,22 +85,19 @@ public:
         if (count < kMinCount || count > kMaxCount) {
             return DEFAULT_DISPLAYED_ITEM_COUNT;
         }
-        if ((count & 1) == 0) {
+        if (count % kMinCount == 0) {
             count = std::min(kMaxCount, count + 1);
         }
         return count;
     }
 
-    static Dimension ClampPickerItemHeight(const Dimension& in)
+    static Dimension ValidatePickerItemHeight(const Dimension& in)
     {
-        const float defaultVp = 40.0f;
-        const float minVp = defaultVp;
-        const float maxVp = 64.0f;
-        const float vp = static_cast<float>(in.ConvertToVp());
-        if (vp < minVp || vp > maxVp) {
-            return Dimension(defaultVp, DimensionUnit::VP);
+        if (in < PICKER_ITEM_HEIGHT || in > PICKER_MAX_ITEM_HEIGHT) {
+            return PICKER_ITEM_HEIGHT;
+        } else {
+            return in;
         }
-        return Dimension(vp, DimensionUnit::VP);
     }
 
     static int32_t GetLoopIndex(int32_t originalIndex, int32_t totalItemCount)

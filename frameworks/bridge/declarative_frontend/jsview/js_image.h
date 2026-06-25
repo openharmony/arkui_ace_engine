@@ -32,6 +32,7 @@ class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
+    static void CreateImageSpan(const JSCallbackInfo& info);
     static void CheckIsCard(std::string& src, const JSRef<JSVal>& jsValue);
     static bool CheckResetImage(const bool& srcValid, const JSCallbackInfo& info);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
@@ -85,6 +86,7 @@ public:
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
     static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
+    static void ResolveImageSource(const JSRef<JSVal>& imageInfo, ImageInfoConfig& config);
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(ImageColorFilter* obj);
     static bool ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType);

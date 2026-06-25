@@ -1571,7 +1571,7 @@ void ParseAndSetMenuBlurStyleOption(EcmaVM* vm, ArkUINodeHandle nativeNode, Loca
     blurStyleOptionArgs.adaptiveColor = adaptiveColor;
     blurStyleOptionArgs.scale = scale;
     blurStyleOptionArgs.blurValues = blurOption.grayscale.data();
-    blurStyleOptionArgs.blurValuesSize = blurOption.grayscale.size();
+    blurStyleOptionArgs.blurValuesSize = static_cast<ArkUI_Int32>(blurOption.grayscale.size());
     blurStyleOptionArgs.policy = policy;
     blurStyleOptionArgs.isValidColor = isValidColor;
     blurStyleOptionArgs.inactiveColor = inactiveColor.GetValue();

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARTICLE_PROPERTY_ANIMATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARTICLE_PROPERTY_ANIMATION_H
 #include <string>
+#include <unordered_map>
 
 #include "core/animation/curve.h"
 #include "core/common/resource/resource_object.h"

@@ -17,6 +17,7 @@
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/depth_component/depth_component_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,13 +36,16 @@ RefPtr<FrameNode> DepthComponentModel::CreateFrameNode(
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::DEPTH_COMPONENT_ETS_TAG, nodeId, []() {
         return AceType::MakeRefPtr<DepthComponentPattern>();
     });
-    auto pattern = frameNode->GetPattern<DepthComponentPattern>();
-    if (pattern) {
-        if (background.IsValid()) {
-            pattern->SetBackgroundSource(background);
-        }
-    }
+    SetBackgroundSource(AceType::RawPtr(frameNode), background);
     return frameNode;
+}
+
+void DepthComponentModel::SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    depthPattern->SetBackgroundSource(background);
 }
 
 void DepthComponentModel::SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace)
@@ -59,6 +63,21 @@ void DepthComponentModel::SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSp
     depthPattern->SetDepthSpace(depthSpace);
 }
 
+void DepthComponentModel::SetRender3DScale(float render3DScale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRender3DScale(frameNode, render3DScale);
+}
+
+void DepthComponentModel::SetRender3DScale(FrameNode* frameNode, float render3DScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    depthPattern->SetRender3DScale(render3DScale);
+}
+
 void DepthComponentModel::SetDepthMap(const ImageSourceInfo& depthMap)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -72,6 +91,25 @@ void DepthComponentModel::SetDepthMap(FrameNode* frameNode, const ImageSourceInf
     auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
     CHECK_NULL_VOID(depthPattern);
     depthPattern->SetDepthMap(depthMap);
+}
+
+void DepthComponentModel::SetDepthMap(const ImageSourceInfo& depthMap, DepthMapErrorCallback&& callback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetDepthMap(frameNode, depthMap, std::move(callback));
+}
+
+void DepthComponentModel::SetDepthMap(
+    FrameNode* frameNode, const ImageSourceInfo& depthMap, DepthMapErrorCallback&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    depthPattern->SetDepthMap(depthMap);
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDepthMapError(std::move(callback));
 }
 
 void DepthComponentModel::SetCamera(const OHOS::Ace::DepthCameraParams& camera)
@@ -100,31 +138,38 @@ void DepthComponentModel::SetLight(FrameNode* frameNode, const OHOS::Ace::DepthL
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DepthComponentLayoutProperty, LightParams, light, frameNode);
 }
 
-void DepthComponentModel::SetBackgroundOffset(const OHOS::Ace::DepthBackgroundOffset& offset)
+void DepthComponentModel::SetOnComplete(
+    std::function<void(const DepthComponentCompleteEvent&)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundOffset(frameNode, offset);
+    SetOnComplete(frameNode, std::move(callback));
 }
 
-void DepthComponentModel::SetBackgroundOffset(
-    FrameNode* frameNode, const OHOS::Ace::DepthBackgroundOffset& offset)
+void DepthComponentModel::SetOnComplete(FrameNode* frameNode,
+    std::function<void(const DepthComponentCompleteEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DepthComponentLayoutProperty, BackgroundOffset, offset, frameNode);
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(callback));
 }
 
-void DepthComponentModel::SetBackgroundScale(const std::optional<NG::VectorF>& scale)
+void DepthComponentModel::SetOnError(
+    std::function<void(const DepthComponentErrorEvent&)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundScale(frameNode, scale);
+    SetOnError(frameNode, std::move(callback));
 }
 
-void DepthComponentModel::SetBackgroundScale(FrameNode* frameNode, const std::optional<NG::VectorF>& scale)
+void DepthComponentModel::SetOnError(FrameNode* frameNode,
+    std::function<void(const DepthComponentErrorEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DepthComponentLayoutProperty, BackgroundScale, scale, frameNode);
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG

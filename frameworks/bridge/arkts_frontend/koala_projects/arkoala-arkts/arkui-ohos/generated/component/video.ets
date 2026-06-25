@@ -126,6 +126,103 @@ export class VideoController implements MaterializedBase {
         ArkUIGeneratedNativeModule._VideoController_reset(this.peer!.ptr)
     }
 }
+export class VideoControllerAsyncInternal {
+    public static fromPtr(ptr: KPointer): VideoControllerAsync {
+        return new VideoControllerAsync(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class VideoControllerAsync implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, VideoControllerAsync.getFinalizer())
+    }
+    constructor() {
+        this(MaterializedBaseTag.NOP, VideoControllerAsync.construct())
+    }
+    static construct(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._VideoControllerAsync_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._VideoControllerAsync_getFinalizer()
+    }
+    public start(): Promise<void> {
+        return this.start_serialize()
+    }
+    public pause(): Promise<void> {
+        return this.pause_serialize()
+    }
+    public stop(): Promise<void> {
+        return this.stop_serialize()
+    }
+    public requestFullscreen(value: boolean): void {
+        const value_casted = value as (boolean)
+        this.requestFullscreen_serialize(value_casted)
+        return
+    }
+    public exitFullscreen(): void {
+        this.exitFullscreen_serialize()
+        return
+    }
+    public setCurrentTime(value: double, seekMode?: SeekMode): void {
+        const value_casted = value as (double)
+        const seekMode_casted = seekMode as (SeekMode | undefined)
+        this.setCurrentTime_serialize(value_casted, seekMode_casted)
+        return
+    }
+    public reset(): Promise<void> {
+        return this.reset_serialize()
+    }
+    private start_serialize(): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._VideoControllerAsync_start(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private pause_serialize(): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._VideoControllerAsync_pause(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private stop_serialize(): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._VideoControllerAsync_stop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private requestFullscreen_serialize(value: boolean): void {
+        ArkUIGeneratedNativeModule._VideoControllerAsync_requestFullscreen(this.peer!.ptr, value ? true : false)
+    }
+    private exitFullscreen_serialize(): void {
+        ArkUIGeneratedNativeModule._VideoControllerAsync_exitFullscreen(this.peer!.ptr)
+    }
+    private setCurrentTime_serialize(value: double, seekMode?: SeekMode): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (seekMode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const seekModeTmpValue = (seekMode as SeekMode)
+            thisSerializer.writeInt32(seekModeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._VideoControllerAsync_setCurrentTime(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private reset_serialize(): Promise<void> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._VideoControllerAsync_reset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+}
 export class ArkVideoPeer extends ArkCommonMethodPeer {
     videoAttributeSet?: VideoModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -419,6 +516,7 @@ export interface VideoOptions {
     currentProgressRate?: double | string | PlaybackSpeed;
     previewUri?: string | PixelMap | global_resource_Resource;
     controller?: VideoController;
+    controllerAsync?: VideoControllerAsync;
     imageAIOptions?: ImageAIOptions;
     posterOptions?: PosterOptions;
 }
@@ -686,6 +784,17 @@ export class VideoController_serializer {
         return VideoControllerInternal.fromPtr(ptr)
     }
 }
+export class VideoControllerAsync_serializer {
+    public static write(buffer: SerializerBase, value: VideoControllerAsync): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): VideoControllerAsync {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return VideoControllerAsyncInternal.fromPtr(ptr)
+    }
+}
 export class PosterOptions_serializer {
     public static write(buffer: SerializerBase, value: PosterOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -791,6 +900,14 @@ export class VideoOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForControllerAsync = value.controllerAsync
+        if (valueHolderForControllerAsync !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerAsyncTmpValue = valueHolderForControllerAsync!
+            VideoControllerAsync_serializer.write(valueSerializer, valueHolderForControllerAsyncTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForImageAIOptions = value.imageAIOptions
         if (valueHolderForImageAIOptions !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -865,6 +982,12 @@ export class VideoOptions_serializer {
             controllerTmpBuf = (VideoController_serializer.read(valueDeserializer) as VideoController)
         }
         const controllerTmpResult: VideoController | undefined = controllerTmpBuf
+        const controllerAsyncTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let controllerAsyncTmpBuf: VideoControllerAsync | undefined = undefined
+        if ((controllerAsyncTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerAsyncTmpBuf = (VideoControllerAsync_serializer.read(valueDeserializer) as VideoControllerAsync)
+        }
+        const controllerAsyncTmpResult: VideoControllerAsync | undefined = controllerAsyncTmpBuf
         const imageAIOptionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let imageAIOptionsTmpBuf: ImageAIOptions | undefined = undefined
         if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -877,7 +1000,7 @@ export class VideoOptions_serializer {
             posterOptionsTmpBuf = PosterOptions_serializer.read(valueDeserializer)
         }
         const posterOptionsTmpResult: PosterOptions | undefined = posterOptionsTmpBuf
-        let value: VideoOptions = ({src: srcTmpResult, currentProgressRate: currentProgressRateTmpResult, previewUri: previewUriTmpResult, controller: controllerTmpResult, imageAIOptions: imageAIOptionsTmpResult, posterOptions: posterOptionsTmpResult} as VideoOptions)
+        let value: VideoOptions = ({src: srcTmpResult, currentProgressRate: currentProgressRateTmpResult, previewUri: previewUriTmpResult, controller: controllerTmpResult, controllerAsync: controllerAsyncTmpResult, imageAIOptions: imageAIOptionsTmpResult, posterOptions: posterOptionsTmpResult} as VideoOptions)
         return value
     }
 }

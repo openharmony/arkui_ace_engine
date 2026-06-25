@@ -18,7 +18,7 @@
 #include "base/input_manager/input_manager.h"
 #include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 #include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
@@ -908,18 +908,6 @@ RefPtr<GestureSnapshot> TouchEventTarget::Dump() const
     return info;
 }
 
-void TouchEventTarget::SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
-{
-    if (!targetComponent_) {
-        targetComponent_ = targetComponent;
-    }
-}
-
-RefPtr<NG::TargetComponent> TouchEventTarget::GetTargetComponent()
-{
-    return targetComponent_;
-}
-
 void TouchEventTarget::SetIsPostEventResult(bool isPostEventResult)
 {
     isPostEventResult_ = isPostEventResult;
@@ -928,6 +916,16 @@ void TouchEventTarget::SetIsPostEventResult(bool isPostEventResult)
 bool TouchEventTarget::IsPostEventResult() const
 {
     return isPostEventResult_;
+}
+
+void TouchEventTarget::SetIsPostTouchEventResult(bool isPostTouchEventResult)
+{
+    isPostTouchEventResult_ = isPostTouchEventResult;
+}
+
+bool TouchEventTarget::IsPostTouchEventResult() const
+{
+    return isPostTouchEventResult_;
 }
 
 void TouchEventInfo::AddTouchLocationInfo(TouchLocationInfo&& info)
@@ -1017,6 +1015,24 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
     }
     touchEvent.time = timeStamp_;
     return touchEvent;
+}
+
+size_t TouchEventInfo::GetApproximateSize() const
+{
+    constexpr size_t TOUCH_COUNT = 5;
+    constexpr size_t HISTORY_COUNT = 5;
+    constexpr size_t LIST_NODE = sizeof(void*) * 2;
+
+    constexpr size_t touchNodeSize = sizeof(TouchLocationInfo) + LIST_NODE;
+    constexpr size_t touchesSize = TOUCH_COUNT * touchNodeSize * 2; // covers touches_ and changedTouches_
+    constexpr size_t historyTouchesSize = HISTORY_COUNT * touchNodeSize;
+
+    constexpr size_t sharedPtrNodeSize = sizeof(std::shared_ptr<MMI::PointerEvent>) + LIST_NODE;
+    static const size_t historyEventsSize =
+        HISTORY_COUNT * (sharedPtrNodeSize + InputManager::GetApproximatePointerEventSize());
+
+    return sizeof(*this) + GetApproximateBaseEventSize() + touchesSize + historyTouchesSize +
+           InputManager::GetApproximatePointerEventSize() + historyEventsSize;
 }
 
 const std::string& NativeEmbeadTouchInfo::GetEmbedId() const

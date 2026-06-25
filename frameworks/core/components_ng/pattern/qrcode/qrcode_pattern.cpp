@@ -214,7 +214,7 @@ bool QRCodePattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || themeScopeId <= 0) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || themeScopeId <= 0) {
         return false;
     }
     bool result = false;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 
+#include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,6 +47,9 @@ const OffsetT<Dimension> POINT_C_EXPAND = OffsetT<Dimension>(32.0_vp, 15.0_vp); 
 const OffsetT<Dimension> POINT_R_EXPAND = OffsetT<Dimension>(47.0_vp, 9.0_vp);  // Right Point position.
 
 } // namespace
+
+DragBarPattern::DragBarPattern() = default;
+DragBarPattern::~DragBarPattern() = default;
 
 void DragBarPattern::OnModifyDone()
 {

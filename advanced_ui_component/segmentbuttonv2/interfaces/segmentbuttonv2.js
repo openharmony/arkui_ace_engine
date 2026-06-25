@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,51 +43,52 @@ const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
 const SMALLEST_MIN_FONT_SCALE = 0;
 const LARGEST_MIN_FONT_SCALE = 1;
+const COLOR_RESOURCE_TYPE = 10001;
 const tabSimpleTheme = {
   buttonBackgroundColor: {
-    id: -1,
+    id: 125834832,
     type: 10001,
     params: ['sys.color.segment_button_v2_tab_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonBorderRadius: {
-    id: -1,
+    id: 125834845,
     type: 10002,
     params: ['sys.float.segment_button_v2_background_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonMinHeight: {
-    id: -1,
+    id: 125834839,
     type: 10002,
     params: ['sys.float.segment_button_v2_singleline_background_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   hybridButtonMinHeight: {
-    id: -1,
+    id: 125834841,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_background_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonPadding: {
-    id: -1,
+    id: 125830920,
     type: 10002,
     params: ['sys.float.padding_level1'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedBackgroundColor: {
-    id: -1,
+    id: 125834833,
     type: 10001,
     params: ['sys.color.segment_button_v2_tab_selected_item_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBorderRadius: {
-    id: -1,
+    id: 125834844,
     type: 10002,
     params: ['sys.float.segment_button_v2_selected_corner_radius'],
     bundleName: '__harDefaultBundleName__',
@@ -95,28 +96,28 @@ const tabSimpleTheme = {
   },
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: {
-    id: -1,
+    id: 125829682,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   adaptiveItemFontSize: {
-    id: -1,
+    id: 125830974,
     type: 10002,
     params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedFontColor: {
-    id: -1,
+    id: 125830982,
     type: 10001,
     params: ['sys.color.font_primary'],
     bundleName: '__harDefaultBundleName__',
@@ -126,14 +127,14 @@ const tabSimpleTheme = {
   itemSelectedFontWeight: FontWeight.Medium,
   itemIconSize: 24,
   itemIconFillColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedIconFillColor: {
-    id: -1,
+    id: 125830982,
     type: 10001,
     params: ['sys.color.font_primary'],
     bundleName: '__harDefaultBundleName__',
@@ -141,28 +142,28 @@ const tabSimpleTheme = {
   },
   itemSymbolFontSize: 20,
   itemSymbolFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedSymbolFontColor: {
-    id: -1,
+    id: 125830982,
     type: 10001,
     params: ['sys.color.font_primary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemMinHeight: {
-    id: -1,
+    id: 125834838,
     type: 10002,
     params: ['sys.float.segment_button_v2_singleline_selected_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   hybridItemMinHeight: {
-    id: -1,
+    id: 125834840,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_selected_height'],
     bundleName: '__harDefaultBundleName__',
@@ -170,28 +171,28 @@ const tabSimpleTheme = {
   },
   itemPadding: {
     top: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     bottom: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     start: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
@@ -207,49 +208,49 @@ const tabSimpleTheme = {
 };
 const capsuleSimpleTheme = {
   buttonBackgroundColor: {
-    id: -1,
+    id: 125834832,
     type: 10001,
     params: ['sys.color.segment_button_v2_tab_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonBorderRadius: {
-    id: -1,
+    id: 125834845,
     type: 10002,
     params: ['sys.float.segment_button_v2_background_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonMinHeight: {
-    id: -1,
+    id: 125834839,
     type: 10002,
     params: ['sys.float.segment_button_v2_singleline_background_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   hybridButtonMinHeight: {
-    id: -1,
+    id: 125834841,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_background_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonPadding: {
-    id: -1,
+    id: 125830920,
     type: 10002,
     params: ['sys.float.padding_level1'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedBackgroundColor: {
-    id: -1,
+    id: 125831009,
     type: 10001,
     params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBorderRadius: {
-    id: -1,
+    id: 125834844,
     type: 10002,
     params: ['sys.float.segment_button_v2_selected_corner_radius'],
     bundleName: '__harDefaultBundleName__',
@@ -257,28 +258,28 @@ const capsuleSimpleTheme = {
   },
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: {
-    id: -1,
+    id: 125829682,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   adaptiveItemFontSize: {
-    id: -1,
+    id: 125830974,
     type: 10002,
     params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedFontColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
@@ -288,14 +289,14 @@ const capsuleSimpleTheme = {
   itemSelectedFontWeight: FontWeight.Medium,
   itemIconSize: 24,
   itemIconFillColor: {
-    id: -1,
+    id: 125830992,
     type: 10001,
     params: ['sys.color.icon_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedIconFillColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
@@ -303,28 +304,28 @@ const capsuleSimpleTheme = {
   },
   itemSymbolFontSize: 20,
   itemSymbolFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedSymbolFontColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemMinHeight: {
-    id: -1,
+    id: 125834838,
     type: 10002,
     params: ['sys.float.segment_button_v2_singleline_selected_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   hybridItemMinHeight: {
-    id: -1,
+    id: 125834840,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_selected_height'],
     bundleName: '__harDefaultBundleName__',
@@ -332,28 +333,28 @@ const capsuleSimpleTheme = {
   },
   itemPadding: {
     top: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     bottom: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     start: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
@@ -637,7 +638,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
               undefined,
               elmtId,
               () => {},
-              { page: 'library/src/main/ets/components/MainPage.ets', line: 299, col: 5 }
+              { page: 'library/src/main/ets/components/SegmentButtonV2.ets', line: 303, col: 5 }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
@@ -1087,7 +1088,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               undefined,
               elmtId,
               () => {},
-              { page: 'library/src/main/ets/components/MainPage.ets', line: 415, col: 5 }
+              { page: 'library/src/main/ets/components/SegmentButtonV2.ets', line: 419, col: 5 }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
@@ -1334,6 +1335,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
         Flex.direction(this.languageDirection);
         Flex.focusScopeId(this.focusGroupId, true);
         Flex.padding(this.getButtonPadding());
+        Flex.accessibilityLevel('no');
         globalThis.Gesture.create(GesturePriority.High);
         GestureGroup.create(GestureMode.Parallel);
         LongPressGesture.create({ repeat: false, duration: 200 });
@@ -1345,7 +1347,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -1389,7 +1391,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -1403,7 +1405,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (this.isPressing) {
             this.dragWithPress = true;
           }
-          this.panStartGlobalX = finger.globalX;
+          this.panStartGlobalX = finger.localX;
           this.panStartIndex = index;
           if (this.isBackgroundSystemMaterialEnabled() && this.isDragging) {
             this.backplatePosition = {
@@ -1440,21 +1442,21 @@ class SimpleSegmentButtonV2 extends ViewV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect.position.x;
+            let nowX = finger.localX - this.panStartGlobalX + this.selectedItemRect.position.x;
             let startX = this.itemRects[0].position.x;
             let endX = this.itemRects[this.items.length - 1].position.x;
             if (this.isRTL()) {
-                startX = this.itemRects[this.items.length - 1].position.x;
-                endX = this.itemRects[0].position.x;
+              startX = this.itemRects[this.items.length - 1].position.x;
+              endX = this.itemRects[0].position.x;
             }
             nowX = Math.max(startX, nowX);
             nowX = Math.min(endX, nowX);
             this.backplatePosition = {
-                x: nowX,
-                y: this.backplatePosition.y
+              x: nowX,
+              y: this.backplatePosition.y,
             };
           } else {
-            const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+            const index = this.getIndexByPosition(finger.localX, finger.localY);
             this.updateSelectedIndex(index);
           }
         });
@@ -1462,7 +1464,6 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!this.isItemEnabled(this.panStartIndex)) {
             return;
           }
-          // handle mouse wheel scroll event
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
             const deltaIndex = offset < 0 ? 1 : -1;
@@ -1470,7 +1471,6 @@ class SimpleSegmentButtonV2 extends ViewV2 {
             this.isMouseWheelScroll = false;
             return;
           }
-          // handle drag event
           if (this.isDragging) {
             if (this.isBackgroundSystemMaterialEnabled()) {
               const finger = event.fingerList.find(Boolean);
@@ -1518,7 +1518,6 @@ class SimpleSegmentButtonV2 extends ViewV2 {
             this.dragWithPress = false;
             return;
           }
-          // handle swipe event
           if (!this.isItemEnabled(this.normalizedSelectedIndex)) {
             return;
           }
@@ -1526,7 +1525,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let deltaIndex = finger.localX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
             deltaIndex = -deltaIndex;
           }
@@ -1600,7 +1599,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
                 this.onItemClicked?.(repeatItem.index);
                 this.backplatePosition = {
                   x: this.selectedItemRect?.position.x,
-                  y: this.selectedItemRect?.position.y
+                  y: this.selectedItemRect?.position.y,
                 };
                 this.updateSelectedIndex(repeatItem.index);
               });
@@ -1664,7 +1663,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
                       undefined,
                       elmtId,
                       () => {},
-                      { page: 'library/src/main/ets/components/MainPage.ets', line: 599, col: 13 }
+                      { page: 'library/src/main/ets/components/SegmentButtonV2.ets', line: 603, col: 13 }
                     );
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
@@ -1999,7 +1998,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     let info = uiMaterial.getMaterialInfo();
     if (info.state === uiMaterial.MaterialState.ENABLE && !inputMaterial) {
       return new uiMaterial.ImmersiveMaterial({
-        style: uiMaterial.ImmersiveStyle.THIN
+        style: uiMaterial.ImmersiveStyle.THIN,
       });
     } else if (info.state === uiMaterial.MaterialState.DISABLE) {
       return undefined;
@@ -2228,12 +2227,12 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     }
     return -1;
   }
-  isPointOnRect(globalX, globalY, rect) {
+  isPointOnRect(localX, localY, rect) {
     return (
-      globalX >= rect.globalPosition.x &&
-      globalX <= rect.globalPosition.x + rect.size.width &&
-      globalY >= rect.globalPosition.y &&
-      globalY <= rect.globalPosition.y + rect.size.height
+      localX >= rect.position.x &&
+      localX <= rect.position.x + rect.size.width &&
+      localY >= rect.position.y &&
+      localY <= rect.position.y + rect.size.height
     );
   }
   updateSelectedIndex(selectedIndex) {
@@ -2543,7 +2542,7 @@ const multiplyCapsuleTheme = {
     moduleName: '__harDefaultModuleName__',
   },
   adaptiveItemFontSize: {
-    id: -1,
+    id: 125830974,
     type: 10002,
     params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
@@ -2834,7 +2833,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     undefined,
                     elmtId,
                     () => {},
-                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1366, col: 13 }
+                    { page: 'library/src/main/ets/components/SegmentButtonV2.ets', line: 1382, col: 13 }
                   );
                   ViewV2.create(componentCall);
                   let paramsLambda = () => {
@@ -3300,9 +3299,15 @@ class SegmentButtonV2ItemContent extends ViewV2 {
   }
   getItemSymbolFillColor() {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor);
+    }
+    return this.theme.itemSymbolFontColor;
   }
   getSymbolFontSize() {
     if (
@@ -3363,15 +3368,28 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     }
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
+  getColorMetricsResourceColor(colorMetrics) {
+    const resourceId = Reflect.get(colorMetrics, 'resourceId_');
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context = this.getUIContext().getHostContext();
+      return {
+        id: resourceId,
+        type: COLOR_RESOURCE_TYPE,
+        bundleName: context?.abilityInfo?.bundleName ?? '',
+        moduleName: context?.abilityInfo?.moduleName ?? '',
+      };
+    }
+    return colorMetrics.color;
+  }
   getItemFontColor() {
     if (this.selected) {
       if (this.itemSelectedFontColor) {
-        return this.itemSelectedFontColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedFontColor);
       }
       return this.theme.itemSelectedFontColor;
     }
     if (this.itemFontColor) {
-      return this.itemFontColor.color;
+      return this.getColorMetricsResourceColor(this.itemFontColor);
     }
     return this.theme.itemFontColor;
   }
@@ -3410,12 +3428,12 @@ class SegmentButtonV2ItemContent extends ViewV2 {
   getItemIconFillColor() {
     if (this.selected) {
       if (this.itemSelectedIconFillColor) {
-        return this.itemSelectedIconFillColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedIconFillColor);
       }
       return this.theme.itemSelectedIconFillColor;
     }
     if (this.itemIconFillColor) {
-      return this.itemIconFillColor.color;
+      return this.getColorMetricsResourceColor(this.itemIconFillColor);
     }
     return this.theme.itemIconFillColor;
   }
@@ -3549,7 +3567,6 @@ function parseNumericResource(context, resource) {
   try {
     return resourceManager.getNumber(resource);
   } catch (err) {
-    // todo log err
     return undefined;
   }
 }

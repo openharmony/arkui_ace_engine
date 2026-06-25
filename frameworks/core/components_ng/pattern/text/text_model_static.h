@@ -67,6 +67,7 @@ public:
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetPunctuationOverflow(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
@@ -91,6 +92,8 @@ public:
     static void SetContentTransition(FrameNode* frameNode, const std::optional<TextEffectStrategy> value,
         const std::optional<TextFlipDirection> direction, const std::optional<bool> enableBlur);
     static void SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetIncrementalUpdatePolicy(FrameNode* frameNode, const std::optional<IncrementalUpdatePolicy>& value);
+    static void SetTailIndents(FrameNode* frameNode, const std::optional<TailIndents>& value);
 };
 } // namespace OHOS::Ace::NG
 

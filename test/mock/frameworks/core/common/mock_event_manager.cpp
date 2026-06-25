@@ -1,17 +1,29 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-#include "core/common/event_manager.h"
 
 #include <algorithm>
 #include <chrono>
+
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "base/mousestyle/mouse_style.h"
+#include "core/common/event_manager.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/event/focus_axis_event.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -69,6 +81,7 @@ EventT GetInterpolatedEvent(
 
 class CoastingAxisEventGenerator : public AceType {
     DECLARE_ACE_TYPE(CoastingAxisEventGenerator, AceType);
+
 public:
     CoastingAxisEventGenerator() = default;
     ~CoastingAxisEventGenerator() override = default;
@@ -121,7 +134,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     (void)needAppend;
 }
 
-void EventManager::TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
+void EventManager::TouchTest(
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     (void)event;
     (void)frameNode;
@@ -164,7 +178,8 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
     (void)touchEvents;
 }
 
-void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
+void EventManager::MouseTest(
+    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     (void)event;
     (void)frameNode;
@@ -179,7 +194,8 @@ void EventManager::AccessibilityHoverTest(
     (void)touchRestrict;
 }
 
-void EventManager::PenHoverTest(const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
+void EventManager::PenHoverTest(
+    const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     (void)event;
     (void)frameNode;
@@ -245,16 +261,16 @@ void EventManager::ClearResults()
     axisTouchTestResults_.clear();
 }
 
-void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint, const RefPtr<NG::SelectOverlayManager>& selectOverlayManager,
-    const NG::OffsetF& rootOffset)
+void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
+    const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     (void)touchPoint;
     (void)selectOverlayManager;
     (void)rootOffset;
 }
 
-bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
-    const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample)
+bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current,
+    uint64_t nanoTimeStamp, TouchEvent& resample)
 {
     (void)history;
     (void)nanoTimeStamp;
@@ -265,8 +281,8 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     return true;
 }
 
-bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
-    const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
+bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current,
+    uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
     if (history.empty() && current.empty()) {
         return false;
@@ -291,8 +307,8 @@ TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, 
     return result;
 }
 
-DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPointerEvent>& history,
-    const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp)
+DragPointerEvent EventManager::GetResamplePointerEvent(
+    const std::vector<DragPointerEvent>& history, const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp)
 {
     return GetInterpolatedEvent(history, current, nanoTimeStamp);
 }
@@ -427,6 +443,8 @@ bool EventManager::HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, 
     }
 }
 
+void EventManager::DoMouseActionRelease() {}
+
 void EventManager::NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) const
 {
     (void)event;
@@ -470,20 +488,33 @@ const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() co
     return smartGestureManager_;
 }
 
-void EventManager::ClearSmartGestureSelected()
-{}
+void EventManager::ClearSmartGestureSelected() {}
 
 void EventManager::ResetSmartGestureManager()
 {
     smartGestureManager_.Reset();
 }
 
-void EventManager::FlushCursorStyleRequests()
-{}
+void EventManager::FlushCursorStyleRequests() {}
 
 MouseFormat EventManager::GetCurrentMouseStyle()
 {
     return MouseFormat::DEFAULT;
 }
 
+void EventManager::UnregisterTouchpadInteractionListenerInner(int id) {}
+
+void EventManager::AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& node) {}
+
+void EventManager::AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& node) {}
+
+void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
+{
+    (void)touchEvent;
+}
+
+void EventManager::AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener)
+{}
+
+void EventManager::AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer) {}
 } // namespace OHOS::Ace

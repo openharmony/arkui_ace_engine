@@ -512,6 +512,20 @@ bool JSRichEditor::ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, s
     return true;
 }
 
+void JSRichEditor::SetRichEditorKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm && info.Length() > 1);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(info[1]->IsObject());
+
+    NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    NG::RichEditorModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
 ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -934,8 +948,6 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     int32_t spanIndex = 0;
     if (richEditorController) {
         spanIndex = richEditorController->AddTextSpan(options);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "rich editor controller error");
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
@@ -1096,16 +1108,18 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
     }
     SpanOptionBase options;
     {
-        if (!funcValue->IsFunction()) {
-            return;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
+        CHECK_NULL_VOID(funcValue->IsFunction());
+        auto controller = controllerWeak_.Upgrade();
+        auto richEditorBaseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+        auto pattern = richEditorBaseController ? richEditorBaseController->GetPattern().Upgrade() : nullptr;
+        auto hostFrameNode = pattern ? pattern->GetHost() : nullptr;
+        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
+        BindBuilderToHostNode(builderFunc, hostFrameNode, funcValue);
         CHECK_NULL_VOID(builderFunc);
         ViewStackModel::GetInstance()->NewScope();
         builderFunc->Execute();
         auto customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
         CHECK_NULL_VOID(customNode);
-        auto controller = controllerWeak_.Upgrade();
         auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
         int32_t spanIndex = 0;
         if (richEditorController) {
@@ -1114,6 +1128,19 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
         }
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
     }
+}
+
+void JSRichEditorController::BindBuilderToHostNode(RefPtr<JsFunction>& builderFunc,
+    const RefPtr<NG::FrameNode>& hostNode, const JSRef<JSVal>& funcValue)
+{
+    CHECK_NULL_VOID(hostNode);
+    NG::PipelineContext::SetCallBackNode(AceType::WeakClaim(Referenced::RawPtr(hostNode)));
+    auto parentCustomNode = hostNode->GetParentCustomNode();
+    CHECK_NULL_VOID(parentCustomNode);
+    auto thisObjTmp = parentCustomNode->FireThisFunc();
+    CHECK_NULL_VOID(thisObjTmp);
+    JSRef<JSObject> thisObj = *(reinterpret_cast<JSRef<JSObject>*>(thisObjTmp));
+    builderFunc = AceType::MakeRefPtr<JsFunction>(thisObj, JSRef<JSFunc>::Cast(funcValue));
 }
 
 void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)
@@ -1339,13 +1366,16 @@ void ParseShaderStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraph
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
-    auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
-    JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    if (shaderStyleObj->IsObject()) {
+        auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
+        JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    }
     style.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        style.SetOptGradient(GradientConvert::ToGradient(gradientShaderStyle.value()));
+        style.SetOptGradient(gradientShaderStyle.value());
     }
-    if (style.colorShaderStyle.has_value()) {
+    if (style.colorShaderStyle.has_value() && shaderStyleObj->IsObject()) {
+        auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
         auto colorObj = jsObject->GetProperty("color");
         if (colorObj->IsObject()) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);

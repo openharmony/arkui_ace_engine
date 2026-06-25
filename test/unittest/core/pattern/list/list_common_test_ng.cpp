@@ -14,6 +14,9 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -96,10 +99,10 @@ public:
         int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
     void MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
         int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
-    AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys);
+    AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys, int32_t forEachIndex = 0);
     AssertionResult VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys);
     AssertionResult VerifyRepeatItemsOrder(std::list<std::string> expectKeys);
-    RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
+    RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex, int32_t forEachIndex = 0);
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
     ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter(int32_t count = 0, int32_t index = 0);
@@ -510,9 +513,9 @@ void ListCommonTestNg::CreateRepeatList(int32_t itemNumber, int32_t lanes, std::
     repeatModelNG.FinishRender(removedElmtId);
 }
 
-AssertionResult ListCommonTestNg::VerifyForEachItemsOrder(std::list<std::string> expectKeys)
+AssertionResult ListCommonTestNg::VerifyForEachItemsOrder(std::list<std::string> expectKeys, int32_t forEachIndex)
 {
-    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(forEachIndex));
     auto& children = forEachNode->ModifyChildren();
     std::string childrenKeysStr;
     std::string expectKeysStr;
@@ -559,9 +562,9 @@ AssertionResult ListCommonTestNg::VerifyRepeatItemsOrder(std::list<std::string> 
     return IsEqual(childrenKeysStr, expectKeysStr);
 }
 
-RefPtr<ListItemDragManager> ListCommonTestNg::GetForEachItemDragManager(int32_t itemIndex)
+RefPtr<ListItemDragManager> ListCommonTestNg::GetForEachItemDragManager(int32_t itemIndex, int32_t forEachIndex)
 {
-    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(forEachIndex));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(itemIndex));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
@@ -2604,6 +2607,1138 @@ HWTEST_F(ListCommonTestNg, ForEachDrag014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ForEachDrag015
+ * @tc.desc: A top-right boundary drag does not reorder a single-row vertical LTR list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag015, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(frameRect.Width() * 0.51f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag016
+ * @tc.desc: A bottom-left boundary drag does not reorder a single-row vertical LTR list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag016, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag017
+ * @tc.desc: A top-left boundary drag does not reorder a single-row vertical RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag017, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag018
+ * @tc.desc: A bottom-right boundary drag does not reorder a single-row vertical RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag018, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(frameRect.Width() * 0.51f);
+    info.SetOffsetY(frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag019
+ * @tc.desc: A bottom-left boundary drag does not reorder a single-column horizontal LTR list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag019, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag020
+ * @tc.desc: A top-right boundary drag does not reorder a single-column horizontal LTR list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag020, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(frameRect.Width() * 0.51f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag021
+ * @tc.desc: A bottom-right boundary drag does not reorder a single-column horizontal RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag021, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(frameRect.Width() * 0.51f);
+    info.SetOffsetY(frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag022
+ * @tc.desc: A top-left boundary drag does not reorder a single-column horizontal RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag022, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent, Axis::HORIZONTAL);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag023
+ * @tc.desc: A far top-right drag does not reorder an underfilled single-row list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag023, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 4, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(frameRect.Width() * 2.0f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag024
+ * @tc.desc: A far bottom-left drag does not reorder an underfilled single-row list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag024, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 4, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 2.0f);
+    info.SetOffsetY(frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag025
+ * @tc.desc: A valid cross-axis drag still reorders adjacent items in a single-row list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag025, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    const auto frameRect = host->GetGeometryNode()->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(0.0f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 1);
+}
+
+/**
+ * @tc.name: ForEachDrag026
+ * @tc.desc: A top-left oblique drag still reorders adjacent items in a single-row list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag026, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 3, onMoveEvent);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    auto host = dragManager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    const auto frameRect = geometry->GetMarginFrameRect();
+    info.SetOffsetX(-frameRect.Width() * 0.51f);
+    info.SetOffsetY(-frameRect.Height() * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 1);
+}
+
+/**
+ * @tc.name: ForEachDrag027
+ * @tc.desc: Drag the last ForEach item to the first one when two ListItems precede the ForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag027, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    const float offsetX = targetRect.GetX() - dragRect.GetX();
+    const float offsetY = targetRect.GetY() - dragRect.GetY();
+    info.SetOffsetX(offsetX);
+    info.SetOffsetY(offsetY);
+    info.SetGlobalPoint(Point(offsetX, offsetY));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag028
+ * @tc.desc: Drag the second ForEach item to the first one with one preceding item and two lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag028, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 1;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItems(1);
+    CreateForEach(2, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(1, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 1);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag029
+ * @tc.desc: Drag across two columns with two preceding items and four lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag029, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(4);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX() - dragRect.GetX(), targetRect.Width()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag030
+ * @tc.desc: A diagonal drag swaps only after both offsets pass half of the item size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag030, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    const float targetOffsetX = targetRect.GetX() - dragRect.GetX();
+    const float targetOffsetY = targetRect.GetY() - dragRect.GetY();
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetOffsetX * 0.49f);
+    info.SetOffsetY(targetOffsetY * 0.49f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }, forEachIndex));
+
+    info.SetOffsetX(targetOffsetX * 0.51f);
+    info.SetOffsetY(targetOffsetY * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag031
+ * @tc.desc: Passing only the main-axis threshold does not swap a diagonal item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag031, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    const float targetOffsetX = targetRect.GetX() - dragRect.GetX();
+    const float targetOffsetY = targetRect.GetY() - dragRect.GetY();
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetOffsetX * 0.49f);
+    info.SetOffsetY(targetOffsetY * 0.75f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }, forEachIndex));
+
+    info.SetOffsetX(targetOffsetX * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag032
+ * @tc.desc: Drag across rows with two preceding items in a vertical RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag032, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(LessNotEqual(targetRect.GetX(), dragRect.GetX()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag033
+ * @tc.desc: Drag across columns with two preceding items in a horizontal LTR list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag033, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetX(), dragRect.GetX()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetY(), dragRect.GetY()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag034
+ * @tc.desc: Drag across columns with two preceding items in a horizontal RTL list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag034, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetY(), dragRect.GetY()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag035
+ * @tc.desc: Drag two ForEach items diagonally in a horizontal list with two lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag035, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 1;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(1);
+    CreateForEach(2, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(1, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetX(), dragRect.GetX()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetY(), dragRect.GetY()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 1);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag036
+ * @tc.desc: Drag two ForEach items across three columns with three preceding items and four lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag036, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 3;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(4);
+    CreateListItems(3);
+    CreateForEach(2, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(1, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX() - dragRect.GetX(), targetRect.Width() * 2.0f));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 1);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag037
+ * @tc.desc: Drag two ForEach items diagonally in a vertical RTL list with two lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag037, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 1;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItems(1);
+    CreateForEach(2, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(1, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(LessNotEqual(targetRect.GetX(), dragRect.GetX()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 1);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag038
+ * @tc.desc: Drag the first ForEach item to the last one when two ListItems precede the ForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag038, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(2, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(0, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(LessNotEqual(targetRect.GetX(), dragRect.GetX()));
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetRect.GetX() - dragRect.GetX());
+    info.SetOffsetY(targetRect.GetY() - dragRect.GetY());
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 0);
+    EXPECT_EQ(actualTo, 2);
+}
+
+/**
+ * @tc.name: ForEachDrag039
+ * @tc.desc: Passing only the cross-axis threshold does not swap a diagonal item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag039, TestSize.Level1)
+{
+    constexpr int32_t forEachIndex = 2;
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    model.SetLanes(3);
+    CreateListItems(2);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    auto targetManager = GetForEachItemDragManager(0, forEachIndex);
+    auto dragManager = GetForEachItemDragManager(2, forEachIndex);
+    ASSERT_NE(targetManager, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    auto targetHost = targetManager->GetHost();
+    auto dragHost = dragManager->GetHost();
+    ASSERT_NE(targetHost, nullptr);
+    ASSERT_NE(dragHost, nullptr);
+    auto targetGeometry = targetHost->GetGeometryNode();
+    auto dragGeometry = dragHost->GetGeometryNode();
+    ASSERT_NE(targetGeometry, nullptr);
+    ASSERT_NE(dragGeometry, nullptr);
+    const auto targetRect = targetGeometry->GetMarginFrameRect();
+    const auto dragRect = dragGeometry->GetMarginFrameRect();
+    EXPECT_TRUE(LessNotEqual(targetRect.GetY(), dragRect.GetY()));
+    EXPECT_TRUE(GreatNotEqual(targetRect.GetX(), dragRect.GetX()));
+    const float targetOffsetX = targetRect.GetX() - dragRect.GetX();
+    const float targetOffsetY = targetRect.GetY() - dragRect.GetY();
+
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(targetOffsetX * 0.75f);
+    info.SetOffsetY(targetOffsetY * 0.49f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }, forEachIndex));
+
+    info.SetOffsetY(targetOffsetY * 0.51f);
+    info.SetGlobalPoint(Point(info.GetOffsetX(), info.GetOffsetY()));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }, forEachIndex));
+
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
  * @tc.name: LazyForEachDrag001
  * @tc.desc: Drag big delta to change order
  * @tc.type: FUNC
@@ -2943,6 +4078,95 @@ HWTEST_F(ListCommonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_FALSE(secondGroupRender->GetBackgroundColor().has_value());
     EXPECT_FALSE(secondGroupItemRender->GetBackgroundColor().has_value());
     // reset theme
+    listItemTheme->defaultColor_ = Color::WHITE;
+    listItemTheme->itemDefaultColor_ = Color::WHITE;
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate when developer has set custom background color.
+ *           Verify that theme color overrides developer-set color for CARD style,
+ *           and NONE style remains unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create test list with CARD and NONE style groups
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get CARD style group and item, set developer custom colors
+     * @tc.expected: Background colors are set to developer values (BLUE for group, GREEN for item)
+     */
+    auto firstGroup = GetChildFrameNode(frameNode_, 0);
+    auto firstGroupRender = firstGroup->GetRenderContext();
+    auto firstGroupPattern = firstGroup->GetPattern<ListItemGroupPattern>();
+    auto firstGroupLayoutProperty = firstGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    auto firstGroupItem = GetChildFrameNode(firstGroup, 0);
+    auto firstGroupItemRender = firstGroupItem->GetRenderContext();
+    auto firstGroupItemPattern = firstGroupItem->GetPattern<ListItemPattern>();
+    auto firstGroupItemLayoutProperty = firstGroupItem->GetLayoutProperty<ListItemLayoutProperty>();
+
+    // Set developer custom colors
+    firstGroupRender->UpdateBackgroundColor(Color::BLUE);
+    firstGroupLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+    firstGroupItemRender->UpdateBackgroundColor(Color::GREEN);
+    firstGroupItemLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::BLUE);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::GREEN);
+
+    /**
+     * @tc.steps: step3. Get NONE style group and item, set developer custom colors
+     * @tc.expected: Background colors are set to developer values (GRAY for group, BLACK for item)
+     */
+    auto secondGroup = GetChildFrameNode(frameNode_, 1);
+    auto secondGroupRender = secondGroup->GetRenderContext();
+    auto secondGroupPattern = secondGroup->GetPattern<ListItemGroupPattern>();
+    auto secondGroupLayoutProperty = secondGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    auto secondGroupItem = GetChildFrameNode(secondGroup, 0);
+    auto secondGroupItemRender = secondGroupItem->GetRenderContext();
+    auto secondGroupItemPattern = secondGroupItem->GetPattern<ListItemPattern>();
+    auto secondGroupItemLayoutProperty = secondGroupItem->GetLayoutProperty<ListItemLayoutProperty>();
+
+    // Set developer custom colors
+    secondGroupRender->UpdateBackgroundColor(Color::GRAY);
+    secondGroupLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+    secondGroupItemRender->UpdateBackgroundColor(Color::BLACK);
+    secondGroupItemLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    EXPECT_EQ(secondGroupRender->GetBackgroundColor(), Color::GRAY);
+    EXPECT_EQ(secondGroupItemRender->GetBackgroundColor(), Color::BLACK);
+
+    /**
+     * @tc.steps: step4. Set theme color to RED and call OnColorConfigurationUpdate
+     * @tc.expected: CARD style colors are overridden by theme color (RED), NONE style remain unchanged
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    listItemTheme->defaultColor_ = Color::RED;
+    listItemTheme->itemDefaultColor_ = Color::RED;
+
+    firstGroupPattern->OnColorConfigurationUpdate();
+    firstGroupItemPattern->OnColorConfigurationUpdate();
+    secondGroupPattern->OnColorConfigurationUpdate();
+    secondGroupItemPattern->OnColorConfigurationUpdate();
+
+    // Verify CARD style: developer colors overridden by theme
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::RED);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::RED);
+
+    // Verify NONE style: developer colors unchanged (method returns early for NONE style)
+    EXPECT_EQ(secondGroupRender->GetBackgroundColor(), Color::GRAY);
+    EXPECT_EQ(secondGroupItemRender->GetBackgroundColor(), Color::BLACK);
+
+    /**
+     * @tc.steps: step5. Reset theme color to WHITE
+     */
     listItemTheme->defaultColor_ = Color::WHITE;
     listItemTheme->itemDefaultColor_ = Color::WHITE;
 }
@@ -4276,10 +5500,12 @@ HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t, bool) { return std::make_pair(0, 0); },
+        0,
+        [](int32_t, bool, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
+        []() {},
         []() {},
         []() {}
     );
@@ -4527,10 +5753,12 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t, bool) { return std::make_pair(0, 0); },
+        0,
+        [](int32_t, bool, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
+        []() {},
         []() {},
         []() {}
     );

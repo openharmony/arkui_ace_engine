@@ -32,7 +32,10 @@ ace_unittest("flex_test_ng") {
     sources = []
     sources = [ "flex_test_core.cpp" ]
   } else {
-    sources += [ "flex_test_core.cpp" ]
+    sources += [
+      "flex_match_parent_test_ng.cpp",
+      "flex_test_core.cpp",
+    ]
   }
 }
 

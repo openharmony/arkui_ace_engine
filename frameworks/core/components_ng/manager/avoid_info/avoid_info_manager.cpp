@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

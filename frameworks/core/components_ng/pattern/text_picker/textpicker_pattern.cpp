@@ -24,7 +24,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -64,12 +65,28 @@ constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 const Dimension PICKER_BUTTON_PADDING = 6.0_vp;
 } // namespace
 
+RefPtr<EventHub> TextPickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<TextPickerEventHub>();
+}
+
 void TextPickerPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void TextPickerPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
@@ -404,6 +421,20 @@ void TextPickerPattern::UpdateFocusButtonState()
 
         UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
     }
+}
+
+FocusPattern TextPickerPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
 }
 
 const RefPtr<FrameNode> TextPickerPattern::GetFocusButtonNode() const
@@ -2261,6 +2292,20 @@ void TextPickerPattern::BeforeCreateLayoutWrapper()
     if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
         layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
+}
+
+void TextPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto frameNodes = GetColumnNodes();
+    for (auto& it : frameNodes) {
+        auto columnNode = it.second;
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        if (columnPattern) {
+            columnPattern->FlushCurrentOptions(false, false, false, false);
+        }
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 

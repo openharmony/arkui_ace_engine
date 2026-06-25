@@ -27,9 +27,12 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_accessibility_property.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -91,6 +94,10 @@ const std::string ZERO = "0";
 const std::string SPACE = " ";
 const Dimension FONT_SIZE_VALUE_DIMENSION = Dimension(20.1, DimensionUnit::PX);
 const std::vector<std::string> FONT_FAMILY_CURSIVE = { "cursive" };
+const int32_t TEST_WINDOW_WIDTH = 720;
+const int32_t TEST_WINDOW_HEIGHT = 1280;
+const int32_t TEST_WINDOW_WIDTH_LANDSCAPE = 1280;
+const int32_t TEST_WINDOW_HEIGHT_LANDSCAPE = 720;
 void InitDatePickerSettingData(DatePickerSettingData& settingData)
 {
     settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
@@ -2676,4 +2683,113 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level0)
     frameSize = layoutWrapper.geometryNode_->GetFrameSize();
     EXPECT_EQ(frameSize, TEST_FRAME_LANDSCAPE);
 }
+
+/**
+ * @tc.name: DatePickerPatternOnWindowSizeChanged001
+ * @tc.desc: Test DatePickerPattern OnWindowSizeChanged when fullscreen state changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternOnWindowSizeChanged001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(yearColumnNode, nullptr);
+    yearColumnNode->MarkModifyDone();
+    auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(yearColumnPattern, nullptr);
+
+    datePickerPattern->SetColumn(yearColumnNode);
+
+    datePickerPattern->isWindowFullscreen_ = false;
+    datePickerPattern->OnWindowSizeChanged(TEST_WINDOW_WIDTH_LANDSCAPE, TEST_WINDOW_HEIGHT_LANDSCAPE,
+        WindowSizeChangeReason::SPLIT_TO_FULL);
+
+    EXPECT_TRUE(datePickerPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnWindowSizeChanged002
+ * @tc.desc: Test DatePickerPattern OnWindowSizeChanged when fullscreen state remains the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternOnWindowSizeChanged002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(yearColumnNode, nullptr);
+    yearColumnNode->MarkModifyDone();
+    auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(yearColumnPattern, nullptr);
+
+    datePickerPattern->SetColumn(yearColumnNode);
+
+    datePickerPattern->isWindowFullscreen_ = false;
+    datePickerPattern->OnWindowSizeChanged(TEST_WINDOW_WIDTH, TEST_WINDOW_HEIGHT,
+        WindowSizeChangeReason::UNDEFINED);
+
+    EXPECT_FALSE(datePickerPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: DatePickerPatternOnWindowSizeChanged003
+ * @tc.desc: Test DatePickerPattern OnWindowSizeChanged with fullscreen to split transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternOnWindowSizeChanged003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(yearColumnNode, nullptr);
+    yearColumnNode->MarkModifyDone();
+    auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(yearColumnPattern, nullptr);
+
+    datePickerPattern->SetColumn(yearColumnNode);
+
+    datePickerPattern->isWindowFullscreen_ = true;
+    datePickerPattern->OnWindowSizeChanged(TEST_WINDOW_WIDTH_LANDSCAPE, TEST_WINDOW_HEIGHT_LANDSCAPE,
+        WindowSizeChangeReason::FULL_TO_SPLIT);
+
+    EXPECT_FALSE(datePickerPattern->isWindowFullscreen_);
+}
+
 } // namespace OHOS::Ace::NG

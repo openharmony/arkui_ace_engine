@@ -131,7 +131,11 @@ bool FocusManager::RearrangeViewStack()
         if (std::find(focusViewStack_.begin(), focusViewStack_.end(), curFocusViewWeak) != focusViewStack_.end()) {
             focusViewStack_.remove(curFocusViewWeak);
         }
-        lastFocusView_ = focusViewStack_.back();
+        if (focusViewStack_.empty()) {
+            lastFocusView_ = nullptr;
+        } else {
+            lastFocusView_ = focusViewStack_.back();
+        }
         return true;
     }
     if (focusViewStackState_ == FocusViewStackState::CLOSE) {
@@ -457,7 +461,7 @@ void FocusManager::ArrangeModalFocusViewStack()
     CHECK_NULL_VOID(frameNode);
     auto focusPattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(focusPattern);
-    if (!focusPattern->GetModalFlag()) { // GetIsFixFocus()
+    if (!focusPattern->GetIsModalFixFocus()) {
         return;
     }
     for (RefPtr<UINode> node = focusRef->GetFrameNode(); node; node = node->GetParent()) {
@@ -594,13 +598,8 @@ void FocusManager::WindowFocus(bool isFocus)
         }
     } else {
         auto container = Container::Current();
-        if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "Request default focus on current focus view: %{public}s/%{public}d",
-                curFocusView->GetFrameName().c_str(),
-                curFocusView->GetFrameId());
-            curFocusView->SetIsViewRootScopeFocused(false);
-            curFocusView->RequestDefaultFocus();
+        if (container) {
+            HandleContainer(curFocusView, container);
         }
     }
 
@@ -750,5 +749,30 @@ bool FocusManager::ExtendOrActivateFocus(const RefPtr<FocusView>& curFocusView, 
     }
     auto isActive = SetIsFocusActive(true, reason);
     return isExtend || isActive;
+}
+
+void FocusManager::HandleContainer(const RefPtr<FocusView>& curFocusView, const RefPtr<Container>& container)
+{
+    if (container->IsDynamicRender()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request default focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(),
+            curFocusView->GetFrameId());
+        curFocusView->SetIsViewRootScopeFocused(false);
+        curFocusView->RequestDefaultFocus();
+    }
+    if (container->IsUIExtensionWindow()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request default focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(),
+            curFocusView->GetFrameId());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (GetIsFocusActive())
+                curFocusView->SetIsViewRootScopeFocused(false);
+        } else {
+            curFocusView->SetIsViewRootScopeFocused(false);
+        }
+        curFocusView->RequestDefaultFocus();
+    }
 }
 } // namespace OHOS::Ace::NG

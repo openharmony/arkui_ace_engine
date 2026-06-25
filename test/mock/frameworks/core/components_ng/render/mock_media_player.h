@@ -49,12 +49,16 @@ public:
     MOCK_METHOD0(PrepareAsync, int32_t());
     MOCK_METHOD0(Pause, int32_t());
     MOCK_METHOD1(GetDuration, int32_t(int32_t&));
+    MOCK_METHOD0(Play, int32_t());
     MOCK_METHOD0(Prepare, int32_t());
     MOCK_METHOD0(Stop, int32_t());
     MOCK_METHOD2(Seek, int32_t(int32_t, SeekMode));
+    MOCK_METHOD1(SetLooping, int32_t(bool));
+    MOCK_METHOD2(SetMediaMuted, void(int32_t, bool));
     MOCK_METHOD2(SetVolume, void(float, float));
     MOCK_METHOD1(SetRenderFirstFrame, int32_t(bool));
     MOCK_METHOD1(SetRenderSurface, void(const RefPtr<RenderSurface>& renderSurface));
+    MOCK_METHOD3(SetPlaybackRate, int32_t(float, int32_t&, std::string&));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H

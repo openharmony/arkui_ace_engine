@@ -26,6 +26,8 @@ struct ParamConfig {
     bool cacheNodes = true;
     bool withWeb = false;
     bool withUIExtension = false;
+    bool rectCulling = false;
+    float minOpacity = 0.0f; // ignore nodes whose final opacity are less than minOpacity
 };
 
 struct InteractionParamConfig {

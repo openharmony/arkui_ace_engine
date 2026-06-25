@@ -22,6 +22,7 @@ namespace {
 constexpr uint8_t UINT32_LEFT_SHIFT_24 = 24;
 constexpr uint8_t UINT32_LEFT_SHIFT_16 = 16;
 constexpr uint8_t UINT32_LEFT_SHIFT_8 = 8;
+constexpr float COLOR_FLOAT_TO_UINT8_SCALE = 255.0f;
 } // namespace
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color)
 {
@@ -40,6 +41,32 @@ ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color)
         (static_cast<uint32_t>(std::clamp<int16_t>(color.GetRed(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_16) |
         (static_cast<uint32_t>(std::clamp<int16_t>(color.GetGreen(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_8) |
         (static_cast<uint32_t>(std::clamp<int16_t>(color.GetBlue(), 0, UINT8_MAX))));
+}
+
+ACE_FORCE_EXPORT std::shared_ptr<RSColorSpace> GetProgressColorSpace(const Color& color)
+{
+    if (color.GetColorSpace() == ColorSpace::BT2020) {
+        return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020);
+    }
+    if (color.GetColorSpace() == ColorSpace::DISPLAY_P3) {
+        return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
+    }
+    return RSColorSpace::CreateSRGB();
+}
+
+ACE_FORCE_EXPORT RSUIColor ToRSUIColor(const LinearColor& linearColor, const Color& color)
+{
+    auto colorWithHeadRoom = color.GetHeadRoomColor();
+    if (colorWithHeadRoom.has_value()) {
+        const auto& hdrColor = colorWithHeadRoom.value();
+        return RSUIColor(hdrColor.red, hdrColor.green, hdrColor.blue, hdrColor.alpha, hdrColor.headRoom);
+    }
+
+    return RSUIColor(
+        static_cast<float>(std::clamp<int16_t>(linearColor.GetRed(), 0, UINT8_MAX)) / COLOR_FLOAT_TO_UINT8_SCALE,
+        static_cast<float>(std::clamp<int16_t>(linearColor.GetGreen(), 0, UINT8_MAX)) / COLOR_FLOAT_TO_UINT8_SCALE,
+        static_cast<float>(std::clamp<int16_t>(linearColor.GetBlue(), 0, UINT8_MAX)) / COLOR_FLOAT_TO_UINT8_SCALE,
+        static_cast<float>(std::clamp<int16_t>(linearColor.GetAlpha(), 0, UINT8_MAX)) / COLOR_FLOAT_TO_UINT8_SCALE);
 }
 
 RSRect ToRSRect(const NG::RectF& rect)

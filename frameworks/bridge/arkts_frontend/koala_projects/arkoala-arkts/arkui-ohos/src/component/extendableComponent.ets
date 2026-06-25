@@ -18,6 +18,7 @@ import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { CustomComponentLifecycle, CustomDelegate } from './customComponent';
 import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
+import { ArkCustomComponentRootPeer } from './staticComponents';
 import { SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
@@ -36,7 +37,7 @@ import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateM
 import { CustomComponentContextImpl } from './customComponent.ets';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ExtendableComponentDFX } from './extendableComponentDFX';
-
+import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
         throw new Error("TBD");
@@ -59,6 +60,10 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
+    findCustomValueByKey(key: int32): Any | undefined;
+    findWritableSystemEnvValueByKey(key: string): Any | undefined;
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void;
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void;
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
@@ -69,12 +74,13 @@ export interface IExtendableComponent {
     __getParentNode__Internal(): PeerNode | undefined;
     getInstance(): ExtendableComponent;
     getCanUpdateStateVars(): boolean;
+    __updateUIContext__Internal(newContext: UIContext): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private activeCount_: number = 1;
-
+    public ___reusePool: GlobalReusePool | undefined = undefined;
     // Lifecycle management
     @JSONStringifyIgnore
     private __lifecycle__Internal?: CustomComponentLifecycle;
@@ -89,6 +95,30 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.__lifecycle__Internal!;
     }
 
+    /**
+    * Walks up the parent chain from this component looking for the nearest
+    * ancestor whose ___reusePool accepts the given class and is still active.
+    * Used by PeerNode.reuse/recycle to route reusable instances to the correct shared pool.
+    * Returns undefined if no matching pool is found.
+    */
+    public __getReusePoolForClass__Internal(classKey: string, skipPool?: GlobalReusePool): GlobalReusePool | undefined {
+        // Fast path: no pool anywhere in the chain we can see
+        if (this.___reusePool === undefined && this.parent_ === undefined) {
+            return undefined;
+        }
+	    console.log(`GlobalReuse: WALK start from=${Class.of(this).getName()} classKey=${classKey}`);
+        let current: ExtendableComponent | undefined = this;
+        while (current !== undefined) {
+            const pool = current!.___reusePool;
+            if (pool !== undefined && pool!.acceptsComponent(classKey) && pool!.isActive() && pool !== skipPool) {
+                return pool;
+            }
+            current = current!.parent_;
+        }
+        return undefined;
+    }
+
+
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
     private providedVarsV2_: Map<string, IProviderDecoratedVariable<object>> = new Map<string, IProviderDecoratedVariable<object>>();
@@ -102,6 +132,12 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
     private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
     private envInstanceId: int32 | undefined;
+    protected memopt_: int32 = 0;
+    private readonlyEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
+    private readonlyEnvUnregisterFuncs_: Map<string, () => void> = new Map<string, () => void>();
+    private customEnvCallbackMap_: Map<int32, Set<(key: int32, value: Any) => void>> = new Map<int32, Set<(key: int32, value: Any) => void>>();
+    private systemEnvCallbacksMap_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
+    private hasRegisteredWritableEnvCallback_: boolean = false;
 
     private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
     private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
@@ -121,6 +157,79 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.useSharedStorage_ = useSharedStorage;
         this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
+    }
+
+    __findWritableSystemEnvValueByKey__Internal(key: string): Any {
+        return this.findWritableSystemEnvValueByKey(key);
+    }
+
+    __addSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): void {
+        let callbackSet = this.systemEnvCallbacksMap_.get(key);
+        if (callbackSet === undefined) {
+            callbackSet = new Set<(value: Any) => void>();
+            this.systemEnvCallbacksMap_.set(key, callbackSet);
+        }
+        callbackSet.add(callback);
+    }
+
+    __registerWritableEnvUpdateCallback__Internal(callback: (key: string, value: Any) => void): void {
+        this.registerOnSystemEnvUpdateCallback(callback);
+        this.hasRegisteredWritableEnvCallback_ = true;
+    }
+
+    __removeSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): boolean {
+        const callbackSet = this.systemEnvCallbacksMap_.get(key);
+        if (callbackSet !== undefined) {
+            callbackSet.delete(callback);
+            if (callbackSet.size === 0) {
+                this.systemEnvCallbacksMap_.delete(key);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    __getSystemEnvValueCallbacks__Internal(key: string): Set<(value: Any) => void> | undefined  {
+        return this.systemEnvCallbacksMap_.get(key);
+    }
+
+    __getSystemEnvCallbacksMap__Internal(): Map<string, Set<(value: Any) => void>>  {
+        return this.systemEnvCallbacksMap_;
+    }
+
+    __getHasRegisteredWritableEnvCallback__Internal(): boolean  {
+        return this.hasRegisteredWritableEnvCallback_;
+    }
+
+    __updateCustomEnvVarValue__Internal(internalId: int32, callback: (key: int32, value: Any) => void): void {
+        if (!this.customEnvCallbackMap_.has(internalId)) {
+            this.customEnvCallbackMap_.set(internalId, new Set<(key: int32, value: Any) => void>());
+        }
+        this.customEnvCallbackMap_.get(internalId)!.add(callback);
+    }
+
+    __getCustomEnvCallbackMap__Internal(): Map<int32, Set<(key: int32, value: Any) => void>> {
+        return this.customEnvCallbackMap_;
+    }
+
+    __removeCustomEnvCallback__Internal(internalId: int32, callback: (key: int32, value: Any) => void): boolean {
+        const callbackSubMap = this.customEnvCallbackMap_.get(internalId);
+        if (callbackSubMap !== undefined) {
+            callbackSubMap.delete(callback);
+            if (callbackSubMap.size === 0) {
+                this.customEnvCallbackMap_.delete(internalId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    __findCustomEnvValueByKey__Internal(key: int32): Any {
+        return this.findCustomValueByKey(key);
+    }
+
+    __registerCustomEnvUpdateCallback__Internal(callback: (key: int32, value: Any) => void): void {
+        this.registerOnCustomEnvUpdateCallback(callback);
     }
 
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
@@ -156,7 +265,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         }
     }
 
-    __switchHasBeenRecycle_Ineternal(recycle: boolean): void {
+    __switchHasBeenRecycle_Internal(recycle: boolean): void {
         this.hasBeenRecycled_ = recycle;
     }
     __aboutToRecycle_Internal(): void {
@@ -201,6 +310,14 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
 
     __getChildrenWeakRefMap__Internal(): Map<int32, WeakRef<ExtendableComponent>> {
         return this.childrenWeakRefMap_;
+    }
+
+    __clearReusePool__Internal(): void {
+        this.__getPeerNode__Internal()?.clearReusePool();
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.__clearReusePool__Internal();
+        });
     }
 
     __getActive__Internal(): number {
@@ -314,9 +431,64 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.envInstanceId;
     }
 
-    setEnvInstance(newInstanceId: int32 | undefined) {
+    setEnvInstance(newInstanceId: int32 | undefined): void {
         this.envInstanceId = newInstanceId;
     }
+
+    __updateFreeRootUIContext__Internal(oldContext: UIContext, newContext: UIContext): void {
+        const peer = this.__getPeerNode__Internal();
+        if (peer instanceof ArkCustomComponentRootPeer) {
+            peer.updateFreeRootUIContext(oldContext, newContext);
+        }
+    }
+
+    __propagateInstanceSwitch__Internal(newInstanceId: int32, newContext: UIContext): void {
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            if (child) {
+                const childOldContext = child.getUIContext();
+                const childDelegate = child.__getIExtendableDelegate__Internal();
+                if (childDelegate) {
+                    childDelegate.__updateUIContext__Internal(newContext);
+                }
+                child.__updateFreeRootUIContext__Internal(childOldContext, newContext);
+                child.__propagateInstanceSwitch__Internal(newInstanceId, newContext);
+            }
+        });
+    }
+
+    __getIExtendableDelegate__Internal(): IExtendableComponent | undefined {
+        return this.delegate_;
+    }
+
+    __setReadonlyEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void {
+        this.readonlyEnvDispatchFuncs_.set(envKey, dispatchFunc);
+    }
+ 
+    __getAndClearReadonlyEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined {
+        const dispatchFunc = this.readonlyEnvDispatchFuncs_.get(envKey);
+        this.readonlyEnvDispatchFuncs_.delete(envKey);
+        return dispatchFunc;
+    }
+ 
+    __getReadonlyEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void> {
+        return this.readonlyEnvDispatchFuncs_;
+    }
+
+    __setReadonlyEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void {
+        this.readonlyEnvUnregisterFuncs_.set(envKey, unregisterFunc);
+    }
+
+    __getReadonlyEnvUnregisterFuncs__Internal(): Map<string, () => void> {
+        return this.readonlyEnvUnregisterFuncs_;
+    }
+ 
+    __clearAllEnvRegistrations__Internal(): void {
+        this.customEnvCallbackMap_.clear();
+        this.systemEnvCallbacksMap_.clear();
+        this.readonlyEnvDispatchFuncs_.clear();
+        this.readonlyEnvUnregisterFuncs_.clear();
+    }    
 
     __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {
         if (this.delegate_ instanceof CustomDelegate) {
@@ -349,6 +521,18 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo();
     }
+    findCustomValueByKey(key: int32): Any | undefined {
+        return this.delegate_!.findCustomValueByKey(key);
+    }
+    findWritableSystemEnvValueByKey(key: string): Any | undefined {
+        return this.delegate_!.findWritableSystemEnvValueByKey(key);
+    }
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void {
+        this.delegate_!.registerOnCustomEnvUpdateCallback(callback);
+    }
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void {
+        this.delegate_!.registerOnSystemEnvUpdateCallback(callback);
+    }
 
     getDialogController(): promptAction.DialogController | undefined {
         return this.delegate_!.getDialogController();
@@ -356,6 +540,22 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
 
     __getLocalStorage__Internal(): LocalStorage {
         return this.__localStorage__Internal;
+    }
+
+    public ClearParentReusePool() {
+        let parentCom = this.parent_;
+        while (parentCom !== undefined) {
+            const parentPeer = parentCom.__getPeerNode__Internal();
+            if (parentPeer !== undefined) {
+                parentPeer.clearReusePool();
+                return;
+            }
+            parentCom = parentCom.parent_;
+        }
+    }
+
+    public __getMemOpt__Internal(): int32 {
+        return this.memopt_;
     }
 
     public get __localStorage__Internal(): LocalStorage {
@@ -384,6 +584,17 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     
     __getPeerNode__Internal(): PeerNode | undefined {
         return this.delegate_?.getPeerNode();
+    }
+
+    /**
+     * Reports whether this component's backing peer node is in the process of
+     * being disposed (or already disposed). Used by GlobalReusePool to decide
+     * whether the pool's owner is being torn down — in which case recycled
+     * children must disappear rather than be pooled.
+     */
+    __isPeerNodeDisposing__Internal(): boolean {
+        const peer = this.__getPeerNode__Internal();
+        return peer !== undefined ? (peer!.disposed || peer!.disposing) : false;
     }
 
     public __onDumpInspector__Internal(): string {

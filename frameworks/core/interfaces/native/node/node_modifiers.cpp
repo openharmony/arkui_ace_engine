@@ -45,6 +45,7 @@
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/interfaces/native/node/material_modifier.h"
 #include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -64,6 +65,9 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_arc_list_item_modifier.h"
+#include "core/interfaces/native/node/node_arc_list_modifier.h"
+#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_indicator_modifier.h"
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
@@ -106,6 +110,7 @@
 #include "core/interfaces/native/node/row_split_modifier.h"
 #include "core/interfaces/native/node/scrollable_modifier.h"
 #include "core/interfaces/native/node/scroller_modifier.h"
+#include "core/interfaces/native/node/selection_container_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
@@ -320,6 +325,11 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
         .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
         .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
+        .getMaterialModifier = NodeModifier::GetMaterialModifier,
+        .getSelectionContainerModifier = NodeModifier::GetSelectionContainerModifier,
+        .getArcListModifier = NodeModifier::GetArcListModifier,
+        .getArcListItemModifier = NodeModifier::GetArcListItemModifier,
+        .getArcScrollBarModifier = NodeModifier::GetArcScrollBarModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

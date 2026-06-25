@@ -16,11 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_RESOURCE_ADAPTER_H
 
-#include "base/image/pixel_map.h"
-#include "base/utils/resource_configuration.h"
-#include "core/common/resource/resource_configuration.h"
-#include "core/components/theme/theme_style.h"
+#include <cstdint>
+#include <iosfwd>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
+
+namespace OHOS::Media {
+class PixelMap;
+}
+
 namespace OHOS::Ace {
+
+class ResourceConfiguration;
+class ResourceInfo;
+struct ConfigurationChange;
+class ThemeStyle;
 
 struct RawfileDescription {
     // the rawfile fd

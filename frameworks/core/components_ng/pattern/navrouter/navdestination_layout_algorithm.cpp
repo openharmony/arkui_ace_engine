@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::unordered_set<std::string> EMBEDDED_NODE_TAG = { V2::SHEET_WRAPPER_TAG, V2::ALERT_DIALOG_ETS_TAG,
-    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG, V2::ORDER_OVERLAY_ETS_TAG };
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG, V2::ORDER_OVERLAY_ETS_TAG, V2::POPUP_ETS_TAG };
 
 float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, const SizeF& size,
@@ -348,19 +348,6 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     navDestinationPattern->MarkSafeAreaPaddingChangedWithCheckTitleBar(titleBarHeight);
     navDestinationPattern->SetTitleBarHeight(titleBarHeight);
 
-    auto maskUINode = hostNode->GetTitleBarMaskNode();
-    if (maskUINode && navDestinationPattern->IsScrollEffectEnabled()) {
-        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
-        if (maskIndex >= 0) {
-            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
-            if (maskWrapper) {
-                auto maskConstraint = navDestinationLayoutProperty->CreateChildConstraint();
-                maskConstraint.selfIdealSize = OptionalSizeF(size.Width(), titleBarHeight);
-                maskWrapper->Measure(maskConstraint);
-            }
-        }
-    }
-
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titleBarHeight, true);
     float toolBarHeight =
         NavigationLayoutUtil::MeasureToolBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
@@ -412,20 +399,6 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, decorBarHeight);
     auto resetTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
-
-    auto maskUINode = hostNode->GetTitleBarMaskNode();
-    if (maskUINode && navDestinationPattern && navDestinationPattern->IsScrollEffectEnabled()) {
-        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
-        if (maskIndex >= 0) {
-            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
-            if (maskWrapper && maskWrapper->GetGeometryNode()) {
-                auto maskGeometryNode = maskWrapper->GetGeometryNode();
-                float maskOffsetY = navDestinationPattern->GetTitleBarOffsetY();
-                maskGeometryNode->SetMarginFrameOffset(OffsetF(0.0f, maskOffsetY));
-                maskWrapper->Layout();
-            }
-        }
-    }
 
     float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(
         layoutWrapper, hostNode, navDestinationLayoutProperty, true);

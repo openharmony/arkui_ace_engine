@@ -20,9 +20,12 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/common/resource/resource_object.h"
 namespace OHOS::Ace {
@@ -42,6 +45,9 @@ struct TextPickerDialog {
     std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
+    RefPtr<UiMaterial> systemMaterial;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
 };
 struct TextPickerDialogEvent {
     std::function<void()> onDidAppear;

@@ -22,11 +22,10 @@
 namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> TextFieldGestureEventHub::PackInnerRecognizer(const Offset& offset,
-    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId, int32_t originalId,
-    const RefPtr<TargetComponent>& targetComponent)
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId, int32_t originalId)
 {
     auto recognizer =
-        GestureEventHub::PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
+        GestureEventHub::PackInnerRecognizer(offset, innerRecognizers, touchId, originalId);
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizersList;
     innerRecognizersList.push_back(recognizer);
     AddScrollGestureRecognizer(innerRecognizersList);
@@ -38,7 +37,6 @@ RefPtr<NGGestureRecognizer> TextFieldGestureEventHub::PackInnerRecognizer(const 
     exclusiveRecognizer->BeginReferee(touchId, originalId, true);
     auto host = GetFrameNode();
     exclusiveRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-    exclusiveRecognizer->SetTargetComponent(targetComponent);
     return exclusiveRecognizer;
 }
 

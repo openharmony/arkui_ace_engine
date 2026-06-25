@@ -511,6 +511,7 @@ HWTEST_F(RadioTwoTestNg, RadioPatternTest025, TestSize.Level1)
      */
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
+    inputHub->CreateHoverEventActuator();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
     ASSERT_NE(hoverEventActuator, nullptr);
     auto mouseEvents = hoverEventActuator->inputEvents_;

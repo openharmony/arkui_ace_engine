@@ -16,6 +16,7 @@
 
 #include "core/components/theme/resource_adapter.h"
 #include <map>
+#include <mutex>
 
 namespace OHOS::Ace {
 namespace {

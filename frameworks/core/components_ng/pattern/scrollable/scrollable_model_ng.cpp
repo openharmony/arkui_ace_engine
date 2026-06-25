@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -28,8 +29,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+#define SCROLLABLE_SCROLLABLE_ATTRIBUTE "Scrollable.ScrollableAttribute."
+ 
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(effectEdge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
@@ -54,6 +62,41 @@ void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, const std::option
         auto defaultValue = pattern->GetDefaultScrollBarDisplayMode();
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, defaultValue, frameNode);
     }
+}
+
+void ScrollableModelNG::SetScrollBarHeight(const std::string& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarHeight, StringUtils::StringToDimensionWithUnit(value));
+}
+
+void ScrollableModelNG::SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarHeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarHeight, PROPERTY_UPDATE_RENDER, frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        if (!scrollBar->GetUseInnerScrollBar()) {
+            return;
+        }
+        scrollBar->SetScrollBarHeight(scrollBarTheme->GetScrollBarHeight());
+        scrollBar->FlushBarWidth();
+    }
+}
+
+void ScrollableModelNG::ResetScrollBarHeight(FrameNode* frameNode)
+{
+    SetScrollBarHeight(frameNode, std::nullopt);
 }
 
 void ScrollableModelNG::SetScrollBarColor(const std::string& value)
@@ -115,6 +158,7 @@ void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optio
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
@@ -309,6 +353,7 @@ void ScrollableModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFram
 
 void ScrollableModelNG::SetFadingEdge(bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetFadingEdge", fadingEdge);
     ACE_CHECK_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength);
@@ -316,6 +361,7 @@ void ScrollableModelNG::SetFadingEdge(bool fadingEdge, const Dimension& fadingEd
 
 void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetFadingEdge", fadingEdge);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength, frameNode);
@@ -324,6 +370,10 @@ void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, con
 void ScrollableModelNG::SetEdgeEffect(
     FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(effectEdge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
@@ -409,7 +459,10 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
-    ContentClip contentClip = std::make_pair(mode, shape);
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
+        static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
+    ContentClip contentClip(mode, shape);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -433,7 +486,10 @@ ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
-    ContentClip contentClip = std::make_pair(mode, rect);
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
+        static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
+    ContentClip contentClip(mode, rect);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
@@ -446,7 +502,7 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
+    paintProperty->UpdateContentClip(ContentClip(paintProperty->GetDefaultContentClip(), nullptr));
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContentClip(std::nullopt);
@@ -498,6 +554,7 @@ void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<do
 
 void ScrollableModelNG::SetBackToTop(bool backToTop)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetBackToTop", backToTop);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     SetBackToTop(frameNode, backToTop);
@@ -512,6 +569,7 @@ void ScrollableModelNG::ResetBackToTop()
 
 void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetBackToTop", backToTop);
     // call SetBackToTopMultiThread by multi thread
     FREE_NODE_CHECK(frameNode, SetBackToTop, frameNode, backToTop);
     CHECK_NULL_VOID(frameNode);
@@ -537,6 +595,14 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetBackToTop();
+}
+
+float ScrollableModelNG::GetScrollBarHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, 0.0f);
+    return static_cast<float>(paintProperty->GetBarHeight().ConvertToVp());
 }
 
 void ScrollableModelNG::SetEnableScrollWithMouse(bool enableScrollWithMouse)
@@ -644,6 +710,33 @@ void ScrollableModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode
         auto scrollBar = pattern->GetScrollBar();
         CHECK_NULL_VOID(scrollBar);
         scrollBar->SetForegroundColor(color);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ScrollableModelNG::CreateWithResourceObjScrollBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "ScrollableScrollBarHeight";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension scrollBarHeight;
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, scrollBarHeight, false) ||
+            LessNotEqual(scrollBarHeight.Value(), 0.0) || scrollBarHeight.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+            CHECK_NULL_VOID(theme);
+            scrollBarHeight = theme->GetScrollBarHeight();
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            ScrollablePaintProperty, ScrollBarHeight, static_cast<Dimension>(scrollBarHeight), node);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

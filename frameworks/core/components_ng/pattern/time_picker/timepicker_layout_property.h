@@ -17,16 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_LAYOUT_PROPERTY_H
 
 #include <string>
-#include <vector>
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "base/i18n/time_format.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
-#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

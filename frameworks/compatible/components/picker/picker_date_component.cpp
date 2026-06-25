@@ -15,6 +15,9 @@
 
 #include "compatible/components/picker/picker_date_component.h"
 
+#include "core/components_ng/pattern/date_picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+
 namespace OHOS::Ace {
 
 // all date should in  solar range [1900.1.31, 2100.12.31] and lunar range [1900.1.1, 2100.12.1]

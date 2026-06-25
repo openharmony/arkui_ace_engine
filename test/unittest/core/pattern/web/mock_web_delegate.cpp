@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_util.h"
 #include "arkweb_utils.h"
 
 namespace OHOS::Ace {
@@ -629,6 +630,9 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio) {}
 void WebDelegate::ratioStrToFloat(const std::string& str) {}
 void WebDelegate::ratioStrToFloatV2(const std::string& str) {}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun() {}
+void WebDelegate::UpdateWebLtpoInfo() {}
+void WebDelegate::UnRegisterDisplayInfoChange() {}
+void WebDelegate::RegisterDisplayInfoChange() {}
 void WebDelegate::SetPartitionPoints(std::vector<float>& partition) {}
 void WebDelegate::RegisterAvoidAreaChangeListener(int32_t) {}
 class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
@@ -1523,9 +1527,20 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+void WebDelegate::UpdateFullScreenVideoOverlayEnable(bool) {}
+void WebDelegate::OnFullScreenVideoOverlayEnter(const char*) {}
+void WebDelegate::OnVideoStatusChanged(const int action, const std::map<std::string, std::string>& param) {}
+void WebDelegate::SetVideoSurface(std::string) {}
+void WebDelegate::RequestMediaControl(int32_t, std::string) {}
 
 std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebCommandActionManager()
 {
     return nullptr;
 }
+
+void WebDelegate::UpdateTouchEventFeatureDetectionEnabled() {}
+
+void FullScreenVideoOverlayHandlerOhos::SetVideoSurface(std::string surfaceId) {}
+
+void FullScreenVideoOverlayHandlerOhos::RequestMediaControl(int32_t action, std::string param) {}
 } // namespace OHOS::Ace

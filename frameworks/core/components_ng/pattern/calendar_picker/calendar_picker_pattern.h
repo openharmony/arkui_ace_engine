@@ -19,7 +19,6 @@
 #include <optional>
 
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
@@ -54,10 +53,7 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<CalendarPickerEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {

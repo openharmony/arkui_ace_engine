@@ -13,54 +13,63 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_test_ng") {
-  module_name = "TextSet-Text"
-  type = "new"
-  sources = [
-    "paragraph_manager_test_ng.cpp",
-    "preview_menu_controller_test_ng.cpp",
-    "text_arkoala_test.cpp",
-    "text_base.cpp",
-    "text_pattern_test_ng.cpp",
-    "text_pattern_test_ng_two.cpp",
-    "text_test_ng.cpp",
-    "text_testeight_ng.cpp",
-    "text_testeleven_ng.cpp",
-    "text_testfive_ng.cpp",
-    "text_testfour_ng.cpp",
-    "text_testnine_ng.cpp",
-    "text_testseven_ng.cpp",
-    "text_testsix_ng.cpp",
-    "text_testten_ng.cpp",
-    "text_testthirteen_ng.cpp",
-    "text_testthree_ng.cpp",
-    "text_testtwelve_ng.cpp",
-    "typed_text_test_ng.cpp",
-  ]
+test_sources = [
+  "paragraph_manager_test_ng.cpp",
+  "preview_menu_controller_test_ng.cpp",
+  "text_arkoala_test.cpp",
+  "text_base.cpp",
+  "text_nullptr_ng.cpp",
+  "text_pattern_test_ng.cpp",
+  "text_pattern_test_ng_two.cpp",
+  "text_test_core.cpp",
+  "text_test_min.cpp",
+  "text_test_ng.cpp",
+  "text_testeight_ng.cpp",
+  "text_testeleven_ng.cpp",
+  "text_testfive_ng.cpp",
+  "text_testfour_ng.cpp",
+  "text_testnine_ng.cpp",
+  "text_testseven_ng.cpp",
+  "text_testsix_ng.cpp",
+  "text_testten_ng.cpp",
+  "text_testthirteen_ng.cpp",
+  "text_testthree_ng.cpp",
+  "text_testtwelve_ng.cpp",
+  "typed_text_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "text_test_min.cpp",
-      "text_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "text_test_min.cpp",
-      "text_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("text_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-Text"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
   }
+} else {
+  ace_unittest("text_test_ng") {
+    module_name = "TextSet-Text"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources -= [
+        "text_test_core.cpp",
+        "text_test_min.cpp",
+      ]
+    }
 
-  defines = [ "ENABLE_ROSEN_BACKEND" ]
-  cflags = [ "-fno-access-control" ]
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+    cflags = [ "-fno-access-control" ]
+  }
 }
 
 ace_unittest("text_test_ng_addition") {
   module_name = "TextSet-Text"
   type = "new"
   sources = [
+    "paragraph_cache_test_ng.cpp",
     "text_base.cpp",
     "text_pattern_multi_thread_test_ng.cpp",
+    "text_scroll_bar_2d_test.cpp",
     "text_test_ng_eight.cpp",
     "text_test_ng_eleven.cpp",
     "text_test_ng_five.cpp",
@@ -72,7 +81,6 @@ ace_unittest("text_test_ng_addition") {
     "text_test_ng_ten.cpp",
     "text_test_ng_three.cpp",
     "text_test_ng_two.cpp",
-    "text_scroll_bar_2d_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
@@ -90,7 +98,10 @@ ace_unittest("span_test_ng") {
   module_name = "TextSet-Span"
   type = "new"
   sources = [
+    "lru_cache_test_ng.cpp",
     "span_accessibility_test_ng.cpp",
+    "span_group_hash_calculator_test_ng.cpp",
+    "span_node_test_ng.cpp",
     "span_string_test_ng.cpp",
     "span_string_test_three_ng.cpp",
     "span_string_test_two_ng.cpp",

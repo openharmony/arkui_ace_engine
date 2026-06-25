@@ -77,7 +77,31 @@ void CustomNodeBase::FireDidBuild()
     }
 }
 
-void CustomNodeBase::FireRecycleRenderFunc()
+void CustomNodeBase::FireRecycleRenderFunc() {}
+
+const ExtraInfo& CustomNodeBase::GetExtraInfo() const
 {
+    static ExtraInfo empty;
+    return empty;
 }
+
+bool CustomNodeBase::HasExtraInfo()
+{
+    return false;
+}
+
+bool CustomNodeBase::GetIsV2()
+{
+    return false;
+}
+
+void CustomNodeBase::FireClearAllRecycleFunc() {}
+
+void CustomNodeBase::FireNodeUpdateFunc(ElementIdType id) {}
+
+bool CustomNodeBase::FireHasNodeUpdateFunc(ElementIdType id)
+{
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

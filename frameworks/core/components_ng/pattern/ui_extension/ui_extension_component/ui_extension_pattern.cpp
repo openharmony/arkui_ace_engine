@@ -678,6 +678,7 @@ void UIExtensionPattern::OnConnect()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
     if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
@@ -1311,6 +1312,7 @@ void UIExtensionPattern::HandleFocusEvent()
 
     canFocusSendToUIExtension_ = true;
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
 }
 
@@ -1322,6 +1324,7 @@ void UIExtensionPattern::HandleBlurEvent()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
 }
 
@@ -2144,6 +2147,8 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
     params.push_back(config.cacheNodes ? "1" : "0");
     params.push_back(config.withWeb ? "1" : "0");
     params.push_back(config.withUIExtension ? "1" : "0");
+    params.push_back(config.rectCulling ? "1" : "0");
+    params.push_back(std::to_string(config.minOpacity));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!container->IsUIExtensionWindow()) {

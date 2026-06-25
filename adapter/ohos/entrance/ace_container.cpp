@@ -33,7 +33,9 @@
 #include "wm_common.h"
 #include "form_ashmem.h"
 #include "pointer_event.h"
+#include "configuration.h"
 
+#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -83,6 +85,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_luminance_sampling_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -306,7 +309,8 @@ void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const Ref
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false,
+    bool isDynamicUIContent = false)
 {
     std::string bundleName = "";
     std::string moduleName = "";
@@ -331,7 +335,9 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    if (context && context->GetResourceManager()) {
+    // Avoid temporary dark-mode updates on the main thread affecting DC components.
+    // DC creates its own resource manager instead of using the one from the host context.
+    if (context && context->GetResourceManager() && !isDynamicUIContent) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
         resourceAdapter->SetBundleName(bundleName);
         resourceAdapter->SetModuleName(moduleName);
@@ -400,6 +406,17 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         return true;
     };
     navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
+    auto registerCallback = [](const RefPtr<NG::FrameNode>& node, int32_t samplingInterval,
+        int32_t brightThreshold, int32_t darkThreshold, NG::ColorPickerCallback&& callback) {
+        NG::LuminanceSamplingHelper::SetSamplingOptions(node, samplingInterval,
+            brightThreshold, darkThreshold, std::nullopt);
+        NG::LuminanceSamplingHelper::RegisterSamplingCallback(node, std::move(callback));
+    };
+    navMgr->SetRegisterColorPickerCallback(std::move(registerCallback));
+    auto unregisterCallback = [](const RefPtr<NG::FrameNode>& node) {
+        NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(node);
+    };
+    navMgr->SetUnregisterColorPickerCallback(std::move(unregisterCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -1749,6 +1766,20 @@ OHOS::AbilityRuntime::Context* AceContainer::GetRuntimeContext(int32_t instanceI
     return container->GetRuntimeContextInner().lock().get();
 }
 
+float AceContainer::GetFontWeightScaleFromConfig(int32_t instanceId)
+{
+    auto runtimeContext = GetRuntimeContext(instanceId);
+    CHECK_NULL_RETURN(runtimeContext, 1.0f);
+    auto configuration = runtimeContext->GetConfiguration();
+    CHECK_NULL_RETURN(configuration, 1.0f);
+    auto fontWeightScaleStr = configuration->GetItem(
+        OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (fontWeightScaleStr.empty()) {
+        return 1.0f;
+    }
+    return StringUtils::StringToFloat(fontWeightScaleStr);
+}
+
 UIContentErrorCode AceContainer::RunPage(
     int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter)
 {
@@ -1769,7 +1800,17 @@ UIContentErrorCode AceContainer::RunPage(
 
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     // The page fault occurs when an SO is loaded due to componentization.
-    DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad(); // Manually triggered PageFault here.To be modifier
+    auto context = aceContainer->GetPipelineContext();
+    if (context && context->GetTaskExecutor()) {
+        context->GetTaskExecutor()->PostTask(
+            []() {
+                // Manually triggered PageFault here.To be modifier
+                DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad();
+            },
+            TaskExecutor::TaskType::UI, "ArkUITriggerPageFaultForPreLoad");
+    } else {
+        LOGW("Failed to get context or task executor, cannot trigger page fault for preload.");
+    }
 #endif
     if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter && isStageModel &&
         !CheckUrlValid(content, container->GetHapPath())) {
@@ -1793,15 +1834,14 @@ UIContentErrorCode AceContainer::RunPage(
     return front->RunPage(content, params);
 }
 
-bool AceContainer::RunDynamicPage(
-    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+bool AceContainer::RunDynamicPage(int32_t instanceId, const DynamicOptions& options)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    front->RunDynamicPage(content, params, entryPoint);
+    front->RunDynamicPage(options);
     return true;
 }
 
@@ -3007,11 +3047,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
-                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock(),
+                                    isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
 
         if (SystemProperties::GetResourceDecoupling()) {
-            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
+            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo,
+                false, isDynamicUIContent);
         } else {
             ThemeConstants::InitDeviceType();
             auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -3982,8 +4024,9 @@ void AceContainer::UpdateResource()
         if (pipelineContext_->IsFormRender()) {
             ReleaseResourceAdapter();
         }
-        InitResourceAndThemeManager(
-            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
+        bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo,
+            true, isDynamicUIContent);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -5251,5 +5294,15 @@ void AceContainer::TerminateUIExtensionInner(int32_t code)
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelfInner(code);
+}
+
+void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+    EventPositionInfo& originalPos)
+{
+    Rosen::EventPositionInfo winEventPositionInfo {eventPositionInfo.displayX, eventPositionInfo.displayY};
+    Rosen::EventPositionInfo winOriginalPos {eventPositionInfo.displayX, eventPositionInfo.displayY};
+    uiWindow_->GetEventOriginalPosition(winEventPositionInfo, winOriginalPos);
+    originalPos.displayX = winOriginalPos.displayX;
+    originalPos.displayY = winOriginalPos.displayY;
 }
 } // namespace OHOS::Ace::Platform

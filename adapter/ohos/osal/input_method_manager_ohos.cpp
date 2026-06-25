@@ -28,6 +28,19 @@
 #endif
 
 namespace OHOS::Ace {
+namespace {
+bool IsTextInputComponentTag(const std::string& tag)
+{
+    return tag == V2::SEARCH_ETS_TAG || tag == V2::TEXTAREA_ETS_TAG || tag == V2::TEXTINPUT_ETS_TAG;
+}
+
+bool IsNotTextEditingTag(const std::string& tag)
+{
+    return tag != V2::TEXTINPUT_ETS_TAG || tag != V2::TEXTAREA_ETS_TAG ||
+        tag != V2::RICH_EDITOR_ETS_TAG || tag != V2::SEARCH_ETS_TAG;
+}
+} // namespace
+
 std::unique_ptr<InputMethodManager> InputMethodManager::instance_ = nullptr;
 std::mutex InputMethodManager::mtx_;
 
@@ -46,16 +59,17 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 {
     auto container = Container::Current();
     if (container && container->IsKeyboard()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in IME");
         return;
     }
     bool isDynamicComponent = container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "current focus node: (%{public}s/%{public}d). isDynamic: %{public}d",
-        curFocusNode->GetTag().c_str(), curFocusNode->GetId(), isDynamicComponent);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus:%{public}s/%{public}d",
+        curFocusNode->GetTag().c_str(), curFocusNode->GetId());
     if (!isDynamicComponent) {
         ManageFocusNode(curFocusNode, focusReason);
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "dyn: true");
     auto containerHandler = container->GetContainerHandler();
     if (!containerHandler) {
         return;
@@ -81,18 +95,28 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
     bool saveKeyboard)
 {
     if (!curFocusNode) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CurFocusNode Not Exist");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no curFocusNode");
         return;
     }
-    bool lastFocusNodeExist = curFocusNode_.Upgrade() ? true : false;
-    if (lastFocusNodeExist) {
+    bool lastFocusNodeExist = false;
+    lastTextInputSessionId_ = -1;
+    preTag = "";
+    if (curFocusNode_.Upgrade()) {
+        lastFocusNodeExist = true;
         preTag = curFocusNode_.Upgrade()->GetTag();
-    } else {
-        preTag = "";
+        if (IsTextInputComponentTag(preTag)) {
+            auto lastFocusNode = curFocusNode_.Upgrade();
+            auto context = lastFocusNode->GetContext();
+            if (context) {
+                auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(context->GetTextFieldManager());
+                lastTextInputSessionId_ = manager ? manager->GetSessionId(lastFocusNode) : -1;
+            }
+        }
     }
+
     if (lastFocusNodeExist && isLastFocusUIExtension_ && lastFocusNodeId_ != curFocusNode->GetId()) {
         curFocusNode_ = curFocusNode;
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UEC switch focus");
         auto pattern = curFocusNode->GetPattern();
 #ifdef WINDOW_SCENE_SUPPORTED
         auto needCloseKeyboard = !(curFocusNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG
@@ -105,9 +129,7 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
-    if (preTag != V2::WEB_ETS_TAG &&
-        (curFocusNode->GetTag() != V2::TEXTINPUT_ETS_TAG || curFocusNode->GetTag() != V2::TEXTAREA_ETS_TAG ||
-            curFocusNode->GetTag() != V2::RICH_EDITOR_ETS_TAG || curFocusNode->GetTag() != V2::SEARCH_ETS_TAG)) {
+    if (preTag != V2::WEB_ETS_TAG && IsNotTextEditingTag(curFocusNode->GetTag())) {
         CloseCustomKeyboard(true);
     }
 
@@ -120,7 +142,7 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
     if (saveKeyboard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "No Need To Close Keyboard");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "saveKB, skip");
         return;
     }
 
@@ -146,7 +168,7 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
     }
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value())) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Window focus first, ready to hide keyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB focus");
         windowFocus_.reset();
         NG::WindowSceneHelper::IsWindowSceneCloseKeyboard(curFocusNode);
         return;
@@ -154,7 +176,7 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
         curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) not need to process.",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "%{public}s/%{public}d skip",
             curFocusNode->GetTag().c_str(), curFocusNode->GetId());
         return;
     }
@@ -169,7 +191,7 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode)
 {
     if (curFocusNode && curFocusNode->GetTag() == V2::SCREEN_ETS_TAG && lastKeep_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is screen and last node want to save keyboard Ignore");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is Screen, skip");
         lastKeep_ = false;
         return;
     }
@@ -180,10 +202,10 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
         windowFocus_.reset();
         auto callback = pipeline->GetWindowFocusCallback();
         if (callback) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Trigger Window Focus Callback");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "WinFocusCB");
             callback();
         } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Trigger ArkWindow Focus Callback");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ArkWinFocusCB");
             if (!pipeline->NeedSoftKeyboard()) {
                 HideKeyboardAcrossProcesses();
             }
@@ -193,7 +215,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
         curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) not need process.",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "%{public}s/%{public}d skip",
             curFocusNode->GetTag().c_str(), curFocusNode->GetId());
         return;
     }
@@ -222,7 +244,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     if (pipeline) {
         auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
         if (manager && manager->GetLastRequestKeyboardId() == currentFocusNode->GetId()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Last RequestKeyboard node is current focus node, So keep");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Refocused, keep KB");
             return true;
         }
     }
@@ -257,18 +279,24 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Shown Or Attached, Need to close keyboard");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "IME shown, hide kb");
     if (disableNeedToRequestKeyboard) {
         textFieldManager->SetNeedToRequestKeyboard(false);
     }
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "IMC null");
         return;
     }
-    inputMethod->Close();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    if (lastTextInputSessionId_ != -1) {
+        inputMethod->Close(lastTextInputSessionId_);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "KBClosed, sid=%{public}d", lastTextInputSessionId_);
+    } else {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "KBClosed");
+    }
 #endif
 }
 
@@ -278,11 +306,11 @@ void InputMethodManager::CloseKeyboardInPipelineDestroy()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "IMC null");
         return;
     }
     inputMethod->Close();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "pipe destroy, KBClosed");
 #endif
 }
 
@@ -295,7 +323,7 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
     ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[id:%d]", focusNode->GetId());
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "%{public}s/%{public}d notNeedKB",
             focusNode->GetTag().c_str(), focusNode->GetId());
         CloseKeyboard();
     }
@@ -308,7 +336,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "IMC null");
         return;
     }
     
@@ -328,7 +356,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
         inputMethod->RequestHideInput(systemWindowId, false, displayId);
     }
     inputMethod->Close();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "cross-process KBClosed");
 #endif
 }
 
@@ -338,18 +366,18 @@ void InputMethodManager::CloseKeyboardInProcess()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
+        TAG_LOGW(AceLogTag::ACE_KEYBOARD, "IMC null");
         return;
     }
     inputMethod->Close();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Successfully.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "in-process KBClosed");
 #endif
 }
 
 void InputMethodManager::ProcessModalPageScene()
 {
     bool lastFocusNodeExist = curFocusNode_.Upgrade() ? true : false;
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ModalLostFocus");
     if (lastFocusNodeExist && isLastFocusUIExtension_) {
         HideKeyboardAcrossProcesses();
     } else {

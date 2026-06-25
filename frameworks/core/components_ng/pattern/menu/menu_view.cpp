@@ -52,6 +52,8 @@
 #include "core/components/button/button_theme.h"
 #include "frameworks/base/utils/measure_util.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/theme/shadow_theme.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -1106,6 +1108,12 @@ void SetBackgroundEffect(const RefPtr<FrameNode>& host, const EffectOption &effe
 
 void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(menuNode);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    if (paintProperty && paintProperty->GetIsUserSetMaterial().value_or(false)) {
+        return;
+    }
+
     if (menuParam.backgroundBlurStyleOption.has_value()) {
         BlurStyleOption backgroundBlurStyleOption = menuParam.backgroundBlurStyleOption.value();
         SetBackgroundBlurStyle(menuNode, backgroundBlurStyleOption);
@@ -1149,20 +1157,111 @@ MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
 void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(menuNode);
-    bool isSetMenuSystemMaterial = false;
-    auto renderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
-        renderContext->UpdateBackBlurStyle(std::nullopt);
-        isSetMenuSystemMaterial = true;
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
-    } else if (renderContext->GetSystemMaterial()) {
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), nullptr);
-        UpdateMenuBackgroundStyle(menuNode, menuParam);
-    }
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    bool wasUserSetMaterial = paintProperty->GetIsUserSetMaterial().value_or(false);
+    bool isSetMenuSystemMaterial = false;
+
+    if (!MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
+        // Clear SystemMaterial when transitioning from having material to no material
+        if (wasUserSetMaterial) {
+            auto renderContext = menuNode->GetRenderContext();
+            if (renderContext) {
+                ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), nullptr);
+                renderContext->SetSDFShape(nullptr);
+            }
+        }
+        paintProperty->UpdateIsUserSetMaterial(isSetMenuSystemMaterial);
+        return;
+    }
+
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+
+    // Reset SDF shape when material type changes
+    if (wasUserSetMaterial) {
+        auto previousMaterial = renderContext->GetSystemMaterial();
+        MaterialType previousMaterialType = MaterialType::NONE;
+        if (previousMaterial) {
+            auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(previousMaterial));
+            if (typeOpt.has_value()) {
+                previousMaterialType = typeOpt.value();
+            }
+        }
+        MaterialType currentMaterialType = MaterialType::NONE;
+        auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(menuParam.systemMaterial));
+        if (typeOpt.has_value()) {
+            currentMaterialType = typeOpt.value();
+        }
+        if (previousMaterialType != currentMaterialType) {
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), nullptr);
+            renderContext->SetSDFShape(nullptr);
+        }
+    }
+
+    // Handle low-end devices with IMMERSIVE material
+    if (ShouldHandleLowEndImmersiveMaterial(menuParam.systemMaterial)) {
+        isSetMenuSystemMaterial =
+            HandleLowEndImmersiveMaterialForMenu(menuNode, menuParam.systemMaterial, renderContext);
+    } else {
+        isSetMenuSystemMaterial = ApplySystemMaterialForMenu(menuNode, menuParam.systemMaterial, renderContext);
+    }
     paintProperty->UpdateIsUserSetMaterial(isSetMenuSystemMaterial);
+}
+
+bool MenuView::ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial)
+{
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+    auto materialType = static_cast<Ace::MaterialType>(systemMaterial->GetType());
+    return materialType == Ace::MaterialType::IMMERSIVE;
+}
+
+bool MenuView::HandleLowEndImmersiveMaterialForMenu(const RefPtr<FrameNode>& menuNode,
+    const RefPtr<UiMaterial>& systemMaterial, const RefPtr<RenderContext>& renderContext)
+{
+    auto pipelineContext = menuNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
+
+    SetLowEndImmersiveBackgroundForMenu(renderContext, themeConstants);
+    SetLowEndImmersiveShadowForMenu(menuNode, systemMaterial, renderContext, pipelineContext);
+    return true;
+}
+
+void MenuView::SetLowEndImmersiveBackgroundForMenu(
+    const RefPtr<RenderContext>& renderContext, const RefPtr<ThemeConstants>& themeConstants)
+{
+    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
+    auto backgroundColor = themeConstants->GetColor(resId);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void MenuView::SetLowEndImmersiveShadowForMenu(const RefPtr<FrameNode>& menuNode,
+    const RefPtr<UiMaterial>& systemMaterial, const RefPtr<RenderContext>& renderContext,
+    const RefPtr<PipelineContext>& pipelineContext)
+{
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    if (!immersiveOptions || !immersiveOptions->applyShadow) {
+        return;
+    }
+
+    auto dipScale = pipelineContext->GetDipScale();
+    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
+    renderContext->UpdateBackShadow(shadow);
+}
+
+bool MenuView::ApplySystemMaterialForMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<UiMaterial>& systemMaterial,
+    const RefPtr<RenderContext>& renderContext)
+{
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(systemMaterial));
+    return true;
 }
 
 void MenuView::ShowMenuTargetScaleToOrigin(
@@ -1412,7 +1511,7 @@ int32_t MenuView::UpdateNodeThemeScopeId(
     const RefPtr<FrameNode> &node, int32_t targetId, const std::string& targetTag, bool isColorModeFollowTarget)
 {
     CHECK_NULL_RETURN(node, 0);
-    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !isColorModeFollowTarget) {
+    if (!node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !isColorModeFollowTarget) {
         return 0;
     }
     auto targetNode = FrameNode::GetFrameNodeOnly(targetTag, targetId);
@@ -1460,6 +1559,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, menuParam.isColorModeFollowTarget);
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     ReloadMenuParam(menuNode, menuParam);
+    SetMenuSystemMaterial(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1501,7 +1601,6 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetMenuParam(menuParam);
     UpdateMenuLayoutProperty(menuNode, menuParam);
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    SetMenuSystemMaterial(menuNode, menuParam);
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
@@ -1535,6 +1634,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 
     // set up option menu items
     ReloadMenuParam(menuNode, menuParam);
+    SetMenuSystemMaterial(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1577,7 +1677,6 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetMenuParam(menuParam);
     UpdateMenuLayoutProperty(menuNode, menuParam);
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    SetMenuSystemMaterial(menuNode, menuParam);
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
@@ -1726,6 +1825,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
+    SetMenuSystemMaterial(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
@@ -1894,7 +1994,6 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
     }
-    SetMenuSystemMaterial(menuNode, menuParam);
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -2023,6 +2122,12 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 void MenuView::UpdateMenuBorderEffect(
     const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(menuNode);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    if (paintProperty && paintProperty->GetIsUserSetMaterial().value_or(false)) {
+        return;
+    }
+
     CHECK_NULL_VOID(wrapperNode);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -2094,6 +2199,12 @@ void MenuView::UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, 
 
 void MenuView::UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(menuNode);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    if (paintProperty && paintProperty->GetIsUserSetMaterial().value_or(false)) {
+        return;
+    }
+
     if (!menuParam.effectOption.has_value()) {
         return;
     }
@@ -2114,6 +2225,12 @@ void MenuView::UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const M
 
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(menuNode);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    if (paintProperty && paintProperty->GetIsUserSetMaterial().value_or(false)) {
+        return;
+    }
+
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         menuNodeRenderContext->IsUniRenderEnabled()) {
@@ -2311,7 +2428,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
 static void NodeThemeScopeIdUpdate(
     const RefPtr<FrameNode>& node, int32_t themeScopeId, bool isColorModeFollowTarget = true)
 {
-    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
     if (isColorModeFollowTarget) {

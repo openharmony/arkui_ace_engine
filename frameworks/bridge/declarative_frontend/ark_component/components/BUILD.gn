@@ -42,10 +42,15 @@ template("arkui_components_abc") {
     part_name = ace_engine_part
   }
 }
-arkui_components_modules = ["containerreader",]
+
+arkui_components_modules = [
+  "containerreader",
+  "selectioncontainer",
+]
 
 arkui_modules = [
   "dynamiclayout",
+  "lazydynamiclayout",
   "flowitem",
   "sidebarcontainer",
   "checkbox",
@@ -96,11 +101,23 @@ foreach(item, arkui_modules) {
 # Special components (directly referenced from ark_direct_component)
 # TODO: Unify arkui_modules and special_components arrays in future refactoring
 special_components = [
+  "arkimagespan",
   "arkgauge",
+  "arkbadge",
   "arkdatapanel",
   "arktextclock",
+  "arkloadingprogress",
+  "arkprogress",
+  "arktexttimer",
   "arkpatternlock",
+  "arksymbolspan",
   "arkcounter",
+  "arktoggle",
+  "arkimageanimator",
+  "arkdatepicker",
+  "arklazygridlayout",
+  "arkrefresh",
+  "arktextpicker",
 ]
 
 if (qrcodegen_support) {

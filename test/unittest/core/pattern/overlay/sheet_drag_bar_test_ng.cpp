@@ -25,7 +25,9 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
 
 using namespace testing;
 using namespace testing::ext;

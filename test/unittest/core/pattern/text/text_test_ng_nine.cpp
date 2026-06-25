@@ -705,7 +705,7 @@ HWTEST_F(TextTestNgNine, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
     EXPECT_TRUE(pattern->textSelector_.IsValid());
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
     pattern->pManager_->Reset();
 }
@@ -1059,7 +1059,7 @@ HWTEST_F(TextTestNgNine, CloseSelectionMenu001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     pattern->ShowSelectOverlay();
 
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     auto isClosed = !pattern->selectOverlay_->SelectOverlayIsOn();
     EXPECT_FALSE(isClosed);
     textController = pattern->GetTextController();
@@ -1126,6 +1126,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange002, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
+    inputHub->CreateMouseEventActuator();
     EXPECT_TRUE(!inputHub->mouseEventActuator_->inputEvents_.empty());
     EXPECT_TRUE(!gestureEventHub->touchEventActuator_->touchEvents_.empty());
 
@@ -1177,7 +1178,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange003, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1235,7 +1236,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange004, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1293,7 +1294,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange005, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1458,6 +1459,9 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
  */
 HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create a Text node and initialize the controller used by selection menu.
+     */
     auto textFrameNode =
         FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
@@ -1466,7 +1470,10 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
     pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     auto textController = pattern->GetTextController();
     textController->CloseSelectionMenu();
-    
+
+    /**
+     * @tc.steps: step2. Prepare preview menu builder and appear/disappear callbacks.
+     */
     int32_t callBack1 = 0;
     int32_t callBack2 = 0;
     int32_t callBack3 = 0;
@@ -1483,10 +1490,20 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
         return;
     };
     SelectMenuParam menuParam;
+
+    /**
+     * @tc.steps: step3. Bind preview menu for TEXT span type.
+     * @tc.expected: step3. OneStepDragController is created, but no image or placeholder drag param is created.
+     */
     pattern->BindPreviewMenu(TextSpanType::TEXT, buildFunc,
         { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->imageDragParam_));
     EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->placeholderDragParam_));
+
+    /**
+     * @tc.steps: step4. Bind preview menu for IMAGE span type.
+     * @tc.expected: step4. Image drag param is created and placeholder drag param remains empty.
+     */
     pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
         { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
@@ -1532,6 +1549,43 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OneStepDragParamSetEnableEventResponse001
+ * @tc.desc: test one_step_drag_controller.cpp SetEnableEventResponse function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, OneStepDragParamSetEnableEventResponse001, TestSize.Level1)
+{
+    Builder builder = []() {};
+    SelectMenuParam menuParam;
+    ImageOneStepDragParam imageDragParam(builder, menuParam);
+
+    std::list<WeakPtr<ImageSpanNode>> invalidImageNodes;
+    invalidImageNodes.emplace_back(WeakPtr<ImageSpanNode>());
+    imageDragParam.SetEnableEventResponse(0, 1, invalidImageNodes);
+    EXPECT_TRUE(invalidImageNodes.empty());
+
+    auto imageNode = CreateImageSpanNode({});
+    ASSERT_NE(imageNode, nullptr);
+    auto imageSpanItem = imageNode->GetSpanItem();
+    ASSERT_NE(imageSpanItem, nullptr);
+    imageSpanItem->rangeStart = -1;
+    imageSpanItem->position = 6;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes { AceType::WeakClaim(AceType::RawPtr(imageNode)) };
+
+    imageDragParam.SetEnableEventResponse(-1, -1, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    imageDragParam.SetEnableEventResponse(5, 6, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMNONE);
+
+    imageDragParam.SetEnableEventResponse(0, 5, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    imageDragParam.SetEnableEventResponse(6, 11, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+}
+
+/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC
@@ -1559,5 +1613,298 @@ HWTEST_F(TextTestNgNine, ShowAIEntityMenu, TestSize.Level1)
      * @tc.expected: ShowAIEntityMenu result is true.
      */
     EXPECT_TRUE(pattern->ShowAIEntityMenu(aiSpan, nullptr, nullptr));
+}
+
+/**
+ * @tc.name: SetTailIndents001
+ * @tc.desc: test text_model_ng.cpp SetTailIndents function with single value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with single value.
+     * @tc.expected: the tailIndents will have one element.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(20.5, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 20.5f);
+}
+
+/**
+ * @tc.name: SetTailIndents002
+ * @tc.desc: test text_model_ng.cpp SetTailIndents function with array values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with array values.
+     * @tc.expected: the tailIndents will have three elements.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(10.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(30.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 3);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 10.0f);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(1).ConvertToVp(), 20.0f);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(2).ConvertToVp(), 30.0f);
+}
+
+/**
+ * @tc.name: SetTailIndents003
+ * @tc.desc: test text_model_ng.cpp SetTailIndents function with frameNode parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with frameNode parameter.
+     * @tc.expected: the tailIndents will be set correctly.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(15.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    TextModelNG::SetTailIndents(frameNode, tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 15.0f);
+}
+
+/**
+ * @tc.name: SetTailIndents004
+ * @tc.desc: test text_model_ng.cpp SetTailIndents function with empty array
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with empty array.
+     * @tc.expected: the tailIndents HasValue() will return false.
+     */
+    NG::TailIndents tailIndents;
+    tailIndents.indentsArray = NG::TailIndentsArray();
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    EXPECT_FALSE(tailIndentsValue->HasValue());
+}
+
+/**
+ * @tc.name: SetTailIndents005
+ * @tc.desc: test SetTailIndents with negative dimension value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with negative dimension value.
+     * @tc.expected: the negative value is stored in the property.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(-10.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_TRUE(tailIndentsValue->indentsArray->at(0).IsNegative());
+}
+
+/**
+ * @tc.name: SetTailIndents006
+ * @tc.desc: test SetTailIndents with percent dimension value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with percent dimension value.
+     * @tc.expected: the percent value is stored in the property.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(0.5, DimensionUnit::PERCENT));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_EQ(tailIndentsValue->indentsArray->at(0).Unit(), DimensionUnit::PERCENT);
+}
+
+/**
+ * @tc.name: SetTailIndents007
+ * @tc.desc: test SetTailIndents with mixed array containing positive, negative, and percent values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with mixed array.
+     * @tc.expected: all values are stored in the property including negative and percent.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(-5.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(0.3, DimensionUnit::PERCENT));
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 4);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 20.0f);
+    EXPECT_TRUE(tailIndentsValue->indentsArray->at(1).IsNegative());
+    EXPECT_EQ(tailIndentsValue->indentsArray->at(2).Unit(), DimensionUnit::PERCENT);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(3).ConvertToVp(), 0.0f);
+}
+
+/**
+ * @tc.name: SetTailIndents008
+ * @tc.desc: test SetTailIndents with zero dimension value (not negative, should be kept)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with zero dimension value.
+     * @tc.expected: zero value is stored and not considered negative.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_FALSE(tailIndentsValue->indentsArray->at(0).IsNegative());
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -106,6 +106,22 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HyperlinkModelNGTextProperty002
+ * @tc.desc: Verify hyperlink PunctuationOverflow default value is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty002, TestSize.Level1)
+{
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+}
+
+/**
  * @tc.name: HyperlinkDrag001
  * @tc.desc: Test Hyperlink drag with src change.
  * @tc.type: FUNC

@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "core/components/common/properties/text_style.h"
 #include "core/components/indexer/indexer_item_component.h"
-
 #include "core/components/indexer/indexer_component.h"
 #include "core/components/indexer/render_indexer_item.h"
 #include "core/components/transform/transform_component.h"

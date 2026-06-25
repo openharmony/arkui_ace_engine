@@ -40,7 +40,7 @@ struct EditModeOptions {
     bool enableFingerMultiSelect = true;
 };
 
-class SelectableContainerPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT SelectableContainerPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(SelectableContainerPattern, ScrollablePattern);
 
 public:
@@ -72,7 +72,13 @@ public:
     virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() = 0;
     void SetEditModeOptions(const EditModeOptions& editModeOptions)
     {
+        bool useDefaultMultiSelectStyleChanged =
+            (editModeOptions_.useDefaultMultiSelectStyle != editModeOptions.useDefaultMultiSelectStyle);
         editModeOptions_ = editModeOptions;
+        OnEditModeOptionsChanged();
+        if (useDefaultMultiSelectStyleChanged) {
+            editModeChanged_ = true;
+        }
     }
 
     EditModeOptions GetEditModeOptions() const
@@ -81,6 +87,7 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void OnDetachFromMainTree() override;
 
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -147,6 +154,10 @@ public:
     {
         return { GetItemAtPosition(offsetX, offsetY), -1 };
     }
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const
+    {
+        return GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    }
     virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const
     {
         return { index, -1 };
@@ -177,12 +188,24 @@ public:
     }
     void SwipeSelectAutoScroll(const PointF& globalPoint);
     void StopSwipeSelectAutoScroll();
+    void UpdateSwipeSelectStateKeyForAutoScroll(float offsetPct);
 
     virtual void ApplyEditModeToVisibleItems();
     virtual void RemoveEditModeFromItems();
 
 protected:
+    virtual void OnEnableEditModeChanged(bool enable);
+    virtual void OnEditModeOptionsChanged();
+    virtual bool NeedBackPressHandler() const;
+    virtual bool HandleBackPress();
+    void UpdateBackPressCallback();
+    void RemoveBackPressCallback();
+    bool ExitSwipeSelectModeOnBackPressed();
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
+    void RecordSwipeOriginalStatesInRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange);
+    void ApplySwipeSelectionForFirstRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange, bool isSelected);
+    void ApplySwipeSelectionForDeltaRange(
+        const SwipeSelectStateKey& rangeStartKey, const SwipeSelectStateKey& rangeEndKey, bool isSelected);
     struct ItemSelectedStatus {
         std::function<void(bool)> onSelected;
         std::function<void(bool)> selectChangeEvent;
@@ -206,6 +229,14 @@ protected:
     void UninitMouseEvent();
     void DrawSelectedZone(const RectF& selectedZone);
     void ClearSelectedZone();
+    bool IsEditModeChanged() const
+    {
+        return editModeChanged_;
+    }
+    void ResetEditModeChanged()
+    {
+        editModeChanged_ = false;
+    }
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
@@ -213,6 +244,7 @@ protected:
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
     RefPtr<PanEvent> swipeSelectPanEvent_;
+    bool hasBackPressHandlerRegistered_ = false;
 
 private:
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -246,6 +278,7 @@ private:
 
     EditModeOptions editModeOptions_;
     bool enableEditMode_ = false;
+    bool editModeChanged_ = false;
     std::function<void(bool)> enableEditModeChangeEvent_;
     std::function<void(bool)> enableEditModeBindingEvent_;
     enum class SwipeSelectState { INACTIVE, SELECTING, DESELECTING };
@@ -253,6 +286,10 @@ private:
     SwipeSelectStateKey swipeStartStateKey_;
     SwipeSelectStateKey swipeCurrentStateKey_;
     std::map<SwipeSelectStateKey, bool> swipeOriginalStates_;
+    SwipeSelectStateKey swipePrevRangeStartKey_;
+    SwipeSelectStateKey swipePrevRangeEndKey_;
+    float lastSwipeSelectLocalX_ = -1.0f;
+    static constexpr float SWIPE_SELECT_EDGE_MARGIN_PX = 2.0f;
 };
 } // namespace OHOS::Ace::NG
 

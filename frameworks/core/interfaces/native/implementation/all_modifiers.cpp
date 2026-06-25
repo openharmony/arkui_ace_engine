@@ -102,6 +102,7 @@ const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
 const GENERATED_ArkUIDepthComponentModifier* GetDepthComponentModifier();
+const GENERATED_ArkUIDistortionComponentModifier* GetDistortionComponentModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier();
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
@@ -283,6 +284,7 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 const GENERATED_ArkUIIMEClientAccessor* GetIMEClientAccessor();
+const GENERATED_ArkUIImmersiveHelperAccessor* GetImmersiveHelperAccessor();
 const GENERATED_ArkUIIndicatorAccessor* GetIndicatorAccessor();
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor();
@@ -293,7 +295,9 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor();
+const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* GetLazyColumnLayoutExtenderAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
+const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayoutExtenderAccessor();
 const GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
 const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor();
@@ -412,14 +416,15 @@ const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventAccessor();
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor();
 const GENERATED_ArkUIVerifyPinHandlerAccessor* GetVerifyPinHandlerAccessor();
 const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor();
+const GENERATED_ArkUIVideoControllerAsyncAccessor* GetVideoControllerAsyncAccessor();
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor();
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor();
 const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAccessor();
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor();
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor();
 const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor();
-const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor();
 const GENERATED_ArkUIXComponentControllerExtenderAccessor* GetXComponentControllerExtenderAccessor();
+const GENERATED_ArkUIXComponentControllerNativeAccessor* GetXComponentControllerNativeAccessor();
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
@@ -447,6 +452,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetDataPanelModifier,
         GetDatePickerModifier,
         GetDepthComponentModifier,
+        GetDistortionComponentModifier,
         GetDividerModifier,
         GetEffectComponentModifier,
         GetEllipseModifier,
@@ -634,6 +640,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetImageAttachmentAccessor,
         GetImageBitmapAccessor,
         GetIMEClientAccessor,
+        GetImmersiveHelperAccessor,
         GetIndicatorAccessor,
         GetIndicatorComponentControllerAccessor,
         GetIUIContextAccessor,
@@ -644,7 +651,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLayoutManagerAccessor,
         GetLayoutPolicyAccessor,
         GetLazyBuildAccessor,
+        GetLazyColumnLayoutExtenderAccessor,
         GetLazyForEachOpsAccessor,
+        GetLazyWaterFlowLayoutExtenderAccessor,
         GetLeadingMarginSpanAccessor,
         GetLetterSpacingStyleAccessor,
         GetLevelOrderExtenderAccessor,
@@ -763,14 +772,15 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUrlStyleAccessor,
         GetVerifyPinHandlerAccessor,
         GetVideoControllerAccessor,
+        GetVideoControllerAsyncAccessor,
         GetWebContextMenuParamAccessor,
         GetWebContextMenuResultAccessor,
         GetWebKeyboardControllerAccessor,
         GetWebResourceErrorAccessor,
         GetWebResourceRequestAccessor,
         GetWebResourceResponseAccessor,
-        GetXComponentControllerAccessor,
         GetXComponentControllerExtenderAccessor,
+        GetXComponentControllerNativeAccessor,
         GetGlobalScopeAccessor,
     };
     return &accessorsImpl;

@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_STATIC_H
 
 #include "base/memory/referenced.h"
-#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -36,6 +35,7 @@ class FrameNode;
 class ACE_FORCE_EXPORT ScrollableModelStatic {
 public:
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
+    static void SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void UpdateScrollBarColorWithTheme(FrameNode* frameNode);

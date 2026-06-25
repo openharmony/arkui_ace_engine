@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IncrementalNode, Disposable } from '@koalaui/runtime'
+import { IncrementalNode, Disposable, scheduleCallback, callScheduledCallbacks } from '@koalaui/runtime'
 import { int32, KoalaCallsiteKey } from '@koalaui/common'
 import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
@@ -93,7 +93,14 @@ export class LazyNodePeer extends PeerNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        console.log(`GlobalReuse: SyntaxNodeBase.recycle disposing=${this.disposing} hasParent=${this.parent !== undefined}`);
         if (this.disposing) { // do not recycle if repeat is disposed
+            // When this container is disposing, try to delegate to the parent
+            // so that reusable children can still be recycled to an ancestor's
+            // GlobalReusePool instead of being destroyed.
+            if (this.parent !== undefined) {
+                return this.parent!.recycle(reuseKey, child, id);
+            }
             return false
         }
         if (!this._reusePool) {
@@ -104,6 +111,21 @@ export class LazyNodePeer extends PeerNode {
         }
         this._reusePool!.get(reuseKey)!.put(child)
         return true
+    }
+
+    public override clearReusePool(): void {
+        if (!this._reusePool) {
+            return
+        }
+
+        this._reusePool!.forEach((pool: ReusablePool) => {
+            scheduleCallback(() => {
+                pool!.dispose()
+            })
+        })
+        this._reusePool!.clear()
+        this._reusePool = undefined
+        callScheduledCallbacks()
     }
 }
 

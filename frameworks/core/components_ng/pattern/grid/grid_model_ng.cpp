@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -32,6 +33,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+#define SCROLLABLE_GRID_ATTRIBUTE "Scrollable.GridAttribute."
 namespace {
     constexpr Dimension DEFAULT_SCROLL_BAR_WIDTH = 4.0_vp;
     constexpr Color DEFAULT_SCROLL_BAR_COLOR = Color(0x66182431);
@@ -168,6 +171,10 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     int32_t count = value;
     if (SystemProperties::IsWhiteBlockEnabled()) {
         count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
@@ -178,6 +185,7 @@ void GridModelNG::SetCachedCount(int32_t value, bool show)
 
 void GridModelNG::SetEditable(bool value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetEditMode", value);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, value);
 }
 
@@ -208,6 +216,7 @@ void GridModelNG::SetCellLength(int32_t value)
 
 void GridModelNG::SetMultiSelectable(bool value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetMultiSelectable", value);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -228,11 +237,20 @@ void GridModelNG::SetSupportDragAnimation(bool value) {}
 
 void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -242,11 +260,13 @@ void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 
 void GridModelNG::SetScrollEnabled(bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
 void GridModelNG::SetFriction(double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetFriction", 1);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -305,6 +325,7 @@ void GridModelNG::SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value)
 
 void GridModelNG::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragStart", value ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -327,6 +348,7 @@ void GridModelNG::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int
 
 void GridModelNG::SetOnItemDragEnter(ItemDragEnterFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragEnter", value ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -338,6 +360,7 @@ void GridModelNG::SetOnItemDragEnter(ItemDragEnterFunc&& value)
 
 void GridModelNG::SetOnItemDragMove(ItemDragMoveFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragMove", value ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -349,6 +372,7 @@ void GridModelNG::SetOnItemDragMove(ItemDragMoveFunc&& value)
 
 void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragLeave", value ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -371,6 +395,7 @@ void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
 
 void GridModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -407,6 +432,7 @@ void GridModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 
 void GridModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
@@ -442,6 +468,7 @@ RefPtr<FrameNode> GridModelNG::CreateFrameNode(int32_t nodeId)
 
 void GridModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -560,11 +587,16 @@ void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 
 void GridModelNG::SetShowCached(FrameNode* frameNode, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show, frameNode);
 }
 
 void GridModelNG::SetEditable(FrameNode* frameNode, bool editMode)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetEditMode", editMode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode, frameNode);
 }
 
@@ -578,6 +610,7 @@ bool GridModelNG::GetEditable(FrameNode* frameNode)
 
 void GridModelNG::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetMultiSelectable", multiSelectable);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(multiSelectable);
@@ -660,12 +693,21 @@ void GridModelNG::SetEdgeEffect(
     FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
     EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(frameNode,
         edgeEffect.value_or(GetEdgeEffect(frameNode)), alwaysEnabled.value_or(GetAlwaysEnabled(frameNode)), edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
@@ -684,6 +726,7 @@ NestedScrollOptions GridModelNG::GetNestedScroll(FrameNode* frameNode)
 
 void GridModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
 }
 
@@ -697,6 +740,7 @@ bool GridModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetFriction", 1);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     std::optional<double> friction = value;
@@ -903,6 +947,7 @@ void GridModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 
 void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragStart", value ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -938,6 +983,7 @@ void GridModelNG::SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc
 
 void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragEnter", value ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -948,6 +994,7 @@ void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& v
 
 void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragMove", value ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -958,6 +1005,7 @@ void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& val
 
 void GridModelNG::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnItemDragLeave", value ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -978,6 +1026,7 @@ void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
 
 void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1005,11 +1054,13 @@ void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
 
 void GridModelNG::SetSyncLoad(bool syncLoad)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetSyncLoad", syncLoad);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);
 }
 
 void GridModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_GRID_ATTRIBUTE "SetSyncLoad", syncLoad);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad, frameNode);
 }
 
@@ -1023,12 +1074,24 @@ bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
 
 void GridModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetEditModeOptions",
+        (editModeOptions.enableGatherSelectedItemsAnimation ? 4 : 0) + // 4 : bit2
+            (editModeOptions.useDefaultMultiSelectStyle ? 2 : 0) + // 2 : bit1
+            (editModeOptions.enableFingerMultiSelect ? 1 : 0) + // 1 : bit0
+            static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_000),
+        static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_111));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetEditModeOptions(frameNode, editModeOptions);
 }
 
 void GridModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_GRID_ATTRIBUTE "SetEditModeOptions",
+        (editModeOptions.enableGatherSelectedItemsAnimation ? 4 : 0) + // 4 : bit2
+            (editModeOptions.useDefaultMultiSelectStyle ? 2 : 0) + // 2 : bit1
+            (editModeOptions.enableFingerMultiSelect ? 1 : 0) + // 1 : bit0
+            static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_000),
+        static_cast<int32_t>(ScrollableErrorCode::EDIT_MODE_OPTIONS_111));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);

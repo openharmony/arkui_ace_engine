@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,10 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-    const ArkUIToggleModifier* GetToggleModifier();
-    const CJUIToggleModifier* GetCJUIToggleModifier();
-    void SetOnToggleChange(ArkUINodeHandle node, void* extraParam);
-
-    void ResetOnToggleChange(ArkUINodeHandle node);
+const ArkUIToggleModifier* GetToggleModifier();
+const CJUIToggleModifier* GetCJUIToggleModifier();
+void SetOnToggleChange(ArkUINodeHandle node, void* extraParam);
+void ResetOnToggleChange(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TOGGLE_MODIFIER_H

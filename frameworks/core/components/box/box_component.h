@@ -20,13 +20,12 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/state_attributes.h"
-#include "core/gestures/gesture_group.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
+class Decoration;
 
 using OnHoverCallback = std::function<void(bool, HoverInfo& info)>;
 using OnHoverMoveCallback = std::function<void(HoverInfo& info)>;
@@ -55,23 +54,9 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    RefPtr<Decoration> GetBackDecoration() const
-    {
-        return backDecoration_;
-    }
-
-    RefPtr<Decoration> GetFrontDecoration() const
-    {
-        return frontDecoration_;
-    }
-
-    const Color& GetColor() const
-    {
-        if (backDecoration_) {
-            return backDecoration_->GetBackgroundColor();
-        }
-        return Color::TRANSPARENT;
-    }
+    RefPtr<Decoration> GetBackDecoration() const;
+    RefPtr<Decoration> GetFrontDecoration() const;
+    const Color& GetColor() const;
 
     bool GetDecorationUpdateFlag() const
     {
@@ -83,33 +68,12 @@ public:
         return animationType_;
     }
 
-    void SetBackDecoration(const RefPtr<Decoration>& decoration)
-    {
-        backDecoration_ = decoration;
-        SetDecorationUpdateFlag(true);
-    }
+    void SetBackDecoration(const RefPtr<Decoration>& decoration);
+    void SetFrontDecoration(const RefPtr<Decoration>& decoration);
 
-    void SetFrontDecoration(const RefPtr<Decoration>& decoration)
-    {
-        frontDecoration_ = decoration;
-        SetDecorationUpdateFlag(true);
-    }
+    void SetColor(const Color& color, const AnimationOption& option = AnimationOption());
 
-    void SetColor(const Color& color, const AnimationOption& option = AnimationOption())
-    {
-        if (!backDecoration_) {
-            backDecoration_ = AceType::MakeRefPtr<Decoration>();
-        }
-        backDecoration_->SetBackgroundColor(color, option);
-    }
-
-    void SetColor(const AnimatableColor& color)
-    {
-        if (!backDecoration_) {
-            backDecoration_ = AceType::MakeRefPtr<Decoration>();
-        }
-        backDecoration_->SetBackgroundColor(color);
-    }
+    void SetColor(const AnimatableColor& color);
 
     void SetDecorationUpdateFlag(bool flag)
     {

@@ -469,6 +469,12 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
     auto leftMoveRate = longPointLeftCenterMoveRate_;
     auto rightMoveRate = longPointRightCenterMoveRate_;
 
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE && !isDraggingIndicator_) {
+        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
+        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
+    }
+
     auto targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ - 1 : currentSelectedIndex_ + 1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
         targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ + 1 : currentSelectedIndex_ - 1;
@@ -518,6 +524,11 @@ void OverlengthDotIndicatorModifier::UpdateUnselectedCenterXOnDrag()
     auto moveRate = blackPointCenterMoveRate_;
     if (currentOverlongType_ != targetOverlongType_ || currentSelectedIndex_ == targetSelectedIndex_) {
         moveRate = GetMoveRateOnAllMove();
+    }
+
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE && !isDraggingIndicator_) {
+        moveRate = 1.0f - moveRate;
     }
 
     for (size_t i = 0; i < animationEndIndicatorWidth_.size(); i++) {
@@ -1189,7 +1200,7 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
     auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
     if (currentSelectedIndex_ == rightThirdIndicatorIndex &&
         currentOverlongType_ == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT &&
-        targetPageIndex > SECOND_POINT_INDEX) {
+        targetPageIndex >= rightThirdIndicatorIndex) {
         step = 0;
     } else if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
         if (targetPageIndex > SECOND_POINT_INDEX) {

@@ -65,6 +65,9 @@ struct AccessibilityActionOptions {
     int32_t scrollStep = 1;
 };
 
+constexpr size_t ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES = 128;
+constexpr size_t ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT = 16;
+
 struct AccessibilityCustomAction {
     std::string actionName;
     std::function<void()> customActionCallback;
@@ -113,6 +116,48 @@ using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF
 class UINode;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
+
+class CustomAccessibilityProperty : public virtual AceType {
+    DECLARE_ACE_TYPE(CustomAccessibilityProperty, AceType);
+
+public:
+    CustomAccessibilityProperty() = default;
+    ~CustomAccessibilityProperty() override = default;
+
+    void SetAccessibilityText(const std::string& text);
+    const std::string& GetAccessibilityText() const;
+
+    void SetAccessibilityLevel(const std::string& level);
+    const std::string& GetAccessibilityLevel() const;
+
+    void SetAccessibilityGroup(bool group);
+    bool GetAccessibilityGroup() const;
+
+    void SetRole(const std::string& role);
+    const std::string& GetRole() const;
+
+    void SetCheckable(bool checkable);
+    bool GetCheckable() const;
+
+    void SetChecked(bool checked);
+    bool GetChecked() const;
+
+    void SetEnabled(bool enabled);
+    bool GetEnabled() const;
+
+    void SetSelected(bool selected);
+    bool GetSelected() const;
+
+private:
+    std::string accessibilityText_;
+    std::string accessibilityLevel_;
+    bool accessibilityGroup_ = false;
+    std::string role_;
+    bool checkable_ = false;
+    bool checked_ = false;
+    bool isEnable_ = true;
+    bool isSelected_ = false;
+};
 
 class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
                                                public AccessibilityPropertyInnerFunction,
@@ -216,10 +261,7 @@ public:
         return AccessibilityValue();
     }
 
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
+    void SetHost(const WeakPtr<FrameNode>& host);
 
     virtual std::string GetHintText() const
     {
@@ -273,157 +315,49 @@ public:
 
     virtual float GetScrollOffSet() const;
 
-    void AddSupportAction(AceAction action)
-    {
-        supportActions_ |= (1UL << static_cast<uint32_t>(action));
-    }
+    void AddSupportAction(AceAction action);
 
     std::unordered_set<AceAction> GetSupportAction() const;
 
     void ResetSupportAction();
 
-    void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl)
-    {
-        actionSetTextImpl_ = actionSetTextImpl;
-    }
+    void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl);
 
-    bool ActActionSetText(const std::string& text)
-    {
-        if (actionSetTextImpl_) {
-            actionSetTextImpl_(text);
-            return true;
-        }
-        return false;
-    }
+    bool ActActionSetText(const std::string& text);
 
-    void SetActionSetSelection(const ActionSetSelectionImpl& actionSetSelection)
-    {
-        actionSetSelectionImpl_ = actionSetSelection;
-    }
+    void SetActionSetSelection(const ActionSetSelectionImpl& actionSetSelection);
 
-    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false)
-    {
-        if (actionSetSelectionImpl_) {
-            actionSetSelectionImpl_(start, end, isForward);
-            return true;
-        }
-        return false;
-    }
+    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false);
 
-    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl)
-    {
-        actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
-    }
+    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl);
 
-    bool ActActionSetIndex(int32_t index)
-    {
-        if (actionSetCursorIndexImpl_) {
-            actionSetCursorIndexImpl_(index);
-            return true;
-        }
-        return false;
-    }
+    bool ActActionSetIndex(int32_t index);
 
-    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
-    {
-        actionExecSubComponentImpl_ = actionExecSubComponentImpl;
-    }
+    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl);
 
-    bool ActActionExecSubComponent(int32_t spanId)
-    {
-        if (actionExecSubComponentImpl_) {
-            return actionExecSubComponentImpl_(spanId);
-        }
-        return false;
-    }
+    bool ActActionExecSubComponent(int32_t spanId);
 
-    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl)
-    {
-        actionGetCursorIndexImpl_ = actionGetCursorIndexImpl;
-    }
+    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl);
 
-    int32_t ActActionGetIndex()
-    {
-        if (actionGetCursorIndexImpl_) {
-            return actionGetCursorIndexImpl_();
-        }
-        return -1;
-    }
+    int32_t ActActionGetIndex();
 
-    void SetActionMoveText(const ActionMoveTextImpl& actionMoveText)
-    {
-        actionMoveTextImpl_ = actionMoveText;
-    }
+    void SetActionMoveText(const ActionMoveTextImpl& actionMoveText);
 
-    bool ActActionMoveText(int32_t moveUnit, bool forward)
-    {
-        if (actionMoveTextImpl_) {
-            actionMoveTextImpl_(moveUnit, forward);
-            return true;
-        }
-        return false;
-    }
+    bool ActActionMoveText(int32_t moveUnit, bool forward);
 
-    void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl)
-    {
-        actionScrollForwardImpl_ = actionScrollForwardImpl;
-    }
+    void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl);
 
-    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl)
-    {
-        actionScrollForwardWithParamImpl_ = actionScrollForwardImpl;
-    }
+    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl);
 
-    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
-    {
-        if (actionScrollForwardWithParamImpl_ == nullptr) {
-            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
-        }
+    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT);
 
-        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollForwardImpl_)) {
-            actionScrollForwardImpl_();
-            return true;
-        }
+    void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl);
 
-        if (actionScrollForwardWithParamImpl_) {
-            actionScrollForwardWithParamImpl_(scrollType);
-            return true;
-        }
-        return false;
-    }
+    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl);
 
-    void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl)
-    {
-        actionScrollBackwardImpl_ = actionScrollBackwardImpl;
-    }
+    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT);
 
-    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl)
-    {
-        actionScrollBackwardWithParamImpl_ = actionScrollBackwardImpl;
-    }
-
-    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
-    {
-        if (actionScrollBackwardWithParamImpl_ == nullptr) {
-            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
-        }
-
-        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollBackwardImpl_)) {
-            actionScrollBackwardImpl_();
-            return true;
-        }
-
-        if (actionScrollBackwardWithParamImpl_) {
-            actionScrollBackwardWithParamImpl_(scrollType);
-            return true;
-        }
-        return false;
-    }
-
-    void SetActionCopy(const ActionCopyImpl& actionCopyImpl)
-    {
-        actionCopyImpl_ = actionCopyImpl;
-    }
+    void SetActionCopy(const ActionCopyImpl& actionCopyImpl);
 
     bool ActActionCopy();
 
@@ -538,19 +472,9 @@ public:
 
     // true means self and descendants will consume hover, do not search brothers
     // false means self and descendants no need to be hovered, should search brothers
-    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl)
-    {
-        accessibilityHoverConsumeCheckImpl_ = accessibilityHoverConsumeCheckImpl;
-    }
+    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl);
 
-    bool IsAccessibilityHoverConsume(const NG::PointF& point) const
-    {
-        if (!accessibilityHoverConsumeCheckImpl_) {
-            return true;
-        }
-
-        return accessibilityHoverConsumeCheckImpl_(point);
-    }
+    bool IsAccessibilityHoverConsume(const NG::PointF& point) const;
 
     class Level {
     public:
@@ -724,6 +648,24 @@ public:
         return NOT_SUPPORT;
     }
 
+    RefPtr<CustomAccessibilityProperty> CreateCustomAccessibilityProperty();
+    RefPtr<CustomAccessibilityProperty> GetCustomAccessibilityProperty() const;
+    void SetCustomAccessibilityProperty(const RefPtr<CustomAccessibilityProperty>& property);
+    void SetVirtualNodeTreeRoot(const RefPtr<CustomAccessibilityProperty>& root)
+    {
+        virtualNodeTreeRoot_ = root;
+    }
+
+    const RefPtr<CustomAccessibilityProperty>& GetVirtualNodeTreeRoot() const
+    {
+        return virtualNodeTreeRoot_;
+    }
+
+    bool HasVirtualNodeTreeRoot() const
+    {
+        return virtualNodeTreeRoot_ != nullptr;
+    }
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(const PointF& parentPoint, const RefPtr<FrameNode>& node,
@@ -853,6 +795,9 @@ protected:
     std::optional<bool> isHeaderOrFooter_;
     std::optional<AccessibilityActionOptions> accessibilityActionOptions_;
     std::optional<std::vector<AccessibilityCustomAction>> accessibilityCustomActions_;
+
+    RefPtr<CustomAccessibilityProperty> customAccessibilityProperty_;
+    RefPtr<CustomAccessibilityProperty> virtualNodeTreeRoot_;
 };
 } // namespace OHOS::Ace::NG
 

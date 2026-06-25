@@ -22,7 +22,6 @@
 
 #include "base/utils/system_properties.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -697,6 +696,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     ASSERT_NE(lastMenuItemNode, nullptr);
     auto inputEventHub = lastMenuItemNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputEventHub, nullptr);
+    inputEventHub->CreateHoverEventActuator();
     ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     for (const auto& hoverCallback : inputEventHub->hoverEventActuator_->inputEvents_) {

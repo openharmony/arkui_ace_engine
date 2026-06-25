@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ import { SizeT } from '@ohos.arkui.node';
 import { i18n } from '@kit.LocalizationKit';
 import util from '@ohos.util';
 import uiMaterial from '@ohos.arkui.uiMaterial';
-import { EnvironmentCallback } from '@kit.AbilityKit';
+import { EnvironmentCallback, common } from '@kit.AbilityKit';
 import deviceInfo from '@ohos.deviceInfo';
 
 export interface SegmentButtonV2ItemOptions {
@@ -92,6 +92,7 @@ const SMALLEST_MAX_FONT_SCALE: number = 1;
 const LARGEST_MAX_FONT_SCALE: number = 2;
 const SMALLEST_MIN_FONT_SCALE: number = 0;
 const LARGEST_MIN_FONT_SCALE: number = 1;
+const COLOR_RESOURCE_TYPE: number = 10001;
 
 const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBackgroundColor: $r('sys.color.segment_button_v2_tab_button_background'),
@@ -700,6 +701,7 @@ struct SimpleSegmentButtonV2 {
     .direction(this.languageDirection)
     .focusScopeId(this.focusGroupId, true)
     .padding(this.getButtonPadding())
+    .accessibilityLevel('no')
     .priorityGesture(GestureGroup(GestureMode.Parallel,
       LongPressGesture({ repeat: false, duration: 200 })
         .onAction((event: GestureEvent) => {
@@ -710,7 +712,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -753,7 +755,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -767,7 +769,7 @@ struct SimpleSegmentButtonV2 {
           if (this.isPressing) {
             this.dragWithPress = true;
           }
-          this.panStartGlobalX = finger.globalX;
+          this.panStartGlobalX = finger.localX;
           this.panStartIndex = index;
 
           if (this.isBackgroundSystemMaterialEnabled() && this.isDragging) {
@@ -799,7 +801,7 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
+            let nowX = finger.localX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
             let startX = this.itemRects[0]!.position.x as number;
             let endX = this.itemRects[this.items.length - 1]!.position.x as number;
             if (this.isRTL()) {
@@ -814,7 +816,7 @@ struct SimpleSegmentButtonV2 {
               y: this.backplatePosition!.y
             }
           } else {
-            const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+            const index = this.getIndexByPosition(finger.localX, finger.localY);
             this.updateSelectedIndex(index);
           }
         })
@@ -883,7 +885,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let deltaIndex = finger.localX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
             deltaIndex = -deltaIndex;
           }
@@ -1181,9 +1183,9 @@ struct SimpleSegmentButtonV2 {
     return -1;
   }
 
-  private isPointOnRect(globalX: number, globalY: number, rect: SegmentButtonV2ItemRect): boolean {
-    return globalX >= rect.globalPosition.x && globalX <= rect.globalPosition.x + rect.size.width &&
-      globalY >= rect.globalPosition.y && globalY <= rect.globalPosition.y + rect.size.height;
+  private isPointOnRect(localX: number, localY: number, rect: SegmentButtonV2ItemRect): boolean {
+    return localX >= rect.position.x && localX <= rect.position.x + rect.size.width &&
+      localY >= rect.position.y && localY <= rect.position.y + rect.size.height;
   }
 
   private updateSelectedIndex(selectedIndex: number) {
@@ -1684,9 +1686,15 @@ struct SegmentButtonV2ItemContent {
 
   getItemSymbolFillColor(): ResourceColor {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor);
+    }
+    return this.theme.itemSymbolFontColor;
   }
 
   private getSymbolFontSize(): Dimension {
@@ -1755,15 +1763,28 @@ struct SegmentButtonV2ItemContent {
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
 
+  private getColorMetricsResourceColor(colorMetrics: ColorMetrics): ResourceColor {
+    const resourceId: number = Reflect.get(colorMetrics, 'resourceId_');
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context: common.Context = this.getUIContext().getHostContext() as common.Context;
+      return {
+        id: resourceId, type: COLOR_RESOURCE_TYPE,
+        bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
+        moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
+      } as Resource;
+    }
+    return colorMetrics.color;
+  }
+
   private getItemFontColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedFontColor) {
-        return this.itemSelectedFontColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedFontColor);
       }
       return this.theme.itemSelectedFontColor;
     }
     if (this.itemFontColor) {
-      return this.itemFontColor.color;
+      return this.getColorMetricsResourceColor(this.itemFontColor);
     }
     return this.theme.itemFontColor;
   }
@@ -1800,12 +1821,12 @@ struct SegmentButtonV2ItemContent {
   private getItemIconFillColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedIconFillColor) {
-        return this.itemSelectedIconFillColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedIconFillColor);
       }
       return this.theme.itemSelectedIconFillColor;
     }
     if (this.itemIconFillColor) {
-      return this.itemIconFillColor.color;
+      return this.getColorMetricsResourceColor(this.itemIconFillColor);
     }
     return this.theme.itemIconFillColor;
   }

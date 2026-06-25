@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_ATTRACTION_EFFECT_H
 
 #include "base/geometry/calc_dimension.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 struct AttractionEffect {

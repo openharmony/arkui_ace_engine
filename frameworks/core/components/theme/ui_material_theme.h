@@ -39,11 +39,15 @@ public:
     UiMaterialTheme() = default;
     ~UiMaterialTheme() override = default;
     std::optional<UiMaterialParam> GetUiMaterialParam(MaterialType type, NG::PipelineContext* pipeline);
+    std::optional<UiMaterialParam> GetUiMaterialParam(MaterialType type, const RefPtr<NG::FrameNode>& node);
     void SetInstanceId(int32_t instanceId);
 
 private:
     bool ParseUiMaterialParam(MaterialType type, NG::PipelineContext* pipeline, ColorMode colorMode,
         UiMaterialParam& result);
+    bool ParseUiMaterialParam(
+        MaterialType type, const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, UiMaterialParam& result);
+    bool GetThemeColor(const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, int32_t resId, Color& color);
     uint32_t GetKeyOfUiMaterial(MaterialType type, ColorMode colorMode);
     int32_t instanceId_ = -1;
     std::unordered_map<uint32_t, UiMaterialParam> materialParams_;

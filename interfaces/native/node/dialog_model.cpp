@@ -17,6 +17,7 @@
 #include "node_model.h"
 
 #include "base/error/error_code.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #include "base/utils/utils.h"
 
@@ -202,7 +203,11 @@ ArkUI_NativeDialogHandle Create()
 void Dispose(ArkUI_NativeDialogHandle handle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
+        return;
+    }
+    if (!handle) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
         return;
     }
     impl->getDialogAPI()->dispose(handle->controller);
@@ -213,154 +218,238 @@ void Dispose(ArkUI_NativeDialogHandle handle)
 int32_t SetContent(ArkUI_NativeDialogHandle handle, ArkUI_NodeHandle content)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle || !content) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setContent(handle->controller, content->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(content, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "content is null");
+    auto result = impl->getDialogAPI()->setContent(handle->controller, content->uiNodeHandle);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t RemoveContent(ArkUI_NativeDialogHandle handle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->removeContent(handle->controller);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->removeContent(handle->controller);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetContentAlignment(ArkUI_NativeDialogHandle handle, int32_t alignment, float offsetX, float offsetY)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setContentAlignment(handle->controller,
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setContentAlignment(handle->controller,
         alignment, offsetX, offsetY);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t ResetContentAlignment(ArkUI_NativeDialogHandle handle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->resetContentAlignment(handle->controller);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->resetContentAlignment(handle->controller);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetModalMode(ArkUI_NativeDialogHandle handle, bool isModal)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setModalMode(handle->controller, isModal);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setModalMode(handle->controller, isModal);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetAutoCancel(ArkUI_NativeDialogHandle handle, bool autoCancel)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setAutoCancel(handle->controller, autoCancel);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setAutoCancel(handle->controller, autoCancel);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetMask(ArkUI_NativeDialogHandle handle, uint32_t maskColor, const ArkUI_Rect* maskRect)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (maskRect) {
         ArkUIRect rect = { maskRect->x, maskRect->y, maskRect->width, maskRect->height };
-        return impl->getDialogAPI()->setMask(handle->controller, maskColor, &rect);
+        auto result = impl->getDialogAPI()->setMask(handle->controller, maskColor, &rect);
+        if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+            SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+        }
+        return result;
     } else {
-        return impl->getDialogAPI()->setMask(handle->controller, maskColor, nullptr);
+        auto result = impl->getDialogAPI()->setMask(handle->controller, maskColor, nullptr);
+        if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+            SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+        }
+        return result;
     }
 }
 
 int32_t SetBackgroundColor(ArkUI_NativeDialogHandle handle, uint32_t backgroundColor)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBackgroundColor(handle->controller, backgroundColor);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setBackgroundColor(handle->controller, backgroundColor);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetCornerRadius(ArkUI_NativeDialogHandle handle, float topLeft, float topRight,
     float bottomLeft, float bottomRight)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setCornerRadius(handle->controller,
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setCornerRadius(handle->controller,
         topLeft, topRight, bottomLeft, bottomRight);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetGridColumnCount(ArkUI_NativeDialogHandle handle, int32_t gridCount)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setGridColumnCount(handle->controller, gridCount);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setGridColumnCount(handle->controller, gridCount);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t EnableCustomStyle(ArkUI_NativeDialogHandle handle, bool enableCustomStyle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->enableCustomStyle(handle->controller, enableCustomStyle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->enableCustomStyle(handle->controller, enableCustomStyle);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t EnableCustomAnimation(ArkUI_NativeDialogHandle handle, bool enableCustomAnimation)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->enableCustomAnimation(handle->controller, enableCustomAnimation);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->enableCustomAnimation(handle->controller, enableCustomAnimation);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->show(handle->controller, showInSubWindow);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->show(handle->controller, showInSubWindow);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t Close(ArkUI_NativeDialogHandle handle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->close(handle->controller);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->close(handle->controller);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t RegisterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnWillDismiss(handle->controller, eventHandler);
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->registerOnWillDismiss(handle->controller, eventHandler);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t RegisterOnWillDismissWithUserData(
     ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->registerOnWillDismissWithUserData(handle->controller, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -371,13 +460,15 @@ int32_t SetKeyboardAvoidDistance(
     if (!impl) {
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (unit < ARKUI_LENGTH_METRIC_UNIT_DEFAULT || unit > ARKUI_LENGTH_METRIC_UNIT_FP) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "unit is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->setKeyboardAvoidDistance(handle->controller, distance, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -387,14 +478,17 @@ int32_t SetLevelMode(ArkUI_NativeDialogHandle handle, ArkUI_LevelMode levelMode)
     if (!impl) {
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (static_cast<int32_t>(levelMode) < static_cast<int32_t>(ARKUI_LEVEL_MODE_OVERLAY) ||
         static_cast<int32_t>(levelMode) > static_cast<int32_t>(ARKUI_LEVEL_MODE_EMBEDDED)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "levelMode is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setLevelMode(handle->controller, static_cast<int32_t>(levelMode));
+    auto result = impl->getDialogAPI()->setLevelMode(handle->controller, static_cast<int32_t>(levelMode));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetLevelUniqueId(ArkUI_NativeDialogHandle handle, int32_t uniqueId)
@@ -404,9 +498,14 @@ int32_t SetLevelUniqueId(ArkUI_NativeDialogHandle handle, int32_t uniqueId)
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
     if (!handle || uniqueId < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null or uniqueId is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setLevelUniqueId(handle->controller, uniqueId);
+    auto result = impl->getDialogAPI()->setLevelUniqueId(handle->controller, uniqueId);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode immersiveMode)
@@ -415,14 +514,17 @@ int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode im
     if (!impl) {
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (static_cast<int32_t>(immersiveMode) < static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_DEFAULT) ||
         static_cast<int32_t>(immersiveMode) > static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_EXTEND)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "immersiveMode is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setImmersiveMode(handle->controller, static_cast<int32_t>(immersiveMode));
+    auto result = impl->getDialogAPI()->setImmersiveMode(handle->controller, static_cast<int32_t>(immersiveMode));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetLevelOrder(ArkUI_NativeDialogHandle handle, double levelOrder)
@@ -431,52 +533,71 @@ int32_t SetLevelOrder(ArkUI_NativeDialogHandle handle, double levelOrder)
     if (!impl) {
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (levelOrder < LEVEL_ORDER_MIN || levelOrder > LEVEL_ORDER_MAX) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "levelOrder is out of range");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setLevelOrder(handle->controller, levelOrder);
+    auto result = impl->getDialogAPI()->setLevelOrder(handle->controller, levelOrder);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t RegisterOnWillAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->registerOnWillAppear(handle->controller, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t RegisterOnDidAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->registerOnDidAppear(handle->controller, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t RegisterOnWillDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->registerOnWillDisappear(handle->controller, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->registerOnDidDisappear(handle->controller, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -487,13 +608,16 @@ int32_t SetBorderWidth(
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (unit < ARKUI_LENGTH_METRIC_UNIT_DEFAULT || unit > ARKUI_LENGTH_METRIC_UNIT_FP) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "unit is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBorderWidth(handle->controller, top, right, bottom, left, unit);
+    auto result = impl->getDialogAPI()->setBorderWidth(handle->controller, top, right, bottom, left, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t SetBorderColor(ArkUI_NativeDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
@@ -502,10 +626,12 @@ int32_t SetBorderColor(ArkUI_NativeDialogHandle handle, uint32_t top, uint32_t r
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setBorderColor(handle->controller, top, right, bottom, left);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
-    return impl->getDialogAPI()->setBorderColor(handle->controller, top, right, bottom, left);
+    return result;
 }
 
 int32_t SetBorderStyle(ArkUI_NativeDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
@@ -514,10 +640,12 @@ int32_t SetBorderStyle(ArkUI_NativeDialogHandle handle, int32_t top, int32_t rig
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setBorderStyle(handle->controller, top, right, bottom, left);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
-    return impl->getDialogAPI()->setBorderStyle(handle->controller, top, right, bottom, left);
+    return result;
 }
 
 int32_t SetWidth(ArkUI_NativeDialogHandle handle, float width, ArkUI_LengthMetricUnit unit)
@@ -526,13 +654,15 @@ int32_t SetWidth(ArkUI_NativeDialogHandle handle, float width, ArkUI_LengthMetri
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (unit < ARKUI_LENGTH_METRIC_UNIT_DEFAULT || unit > ARKUI_LENGTH_METRIC_UNIT_FP) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "unit is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->setWidth(handle->controller, width, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -542,13 +672,15 @@ int32_t SetHeight(ArkUI_NativeDialogHandle handle, float height, ArkUI_LengthMet
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     if (unit < ARKUI_LENGTH_METRIC_UNIT_DEFAULT || unit > ARKUI_LENGTH_METRIC_UNIT_FP) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "unit is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->setHeight(handle->controller, height, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -558,29 +690,32 @@ int32_t SetShadow(ArkUI_NativeDialogHandle handle, ArkUI_ShadowStyle shadow)
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->setShadow(handle->controller, shadow);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t SetCustomShadow(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* customShadow)
 {
+    CHECK_NULL_RETURN_WITH_MESSAGE(customShadow, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "customShadow is null");
     if (customShadow->size == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow size is 0");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     ArkUIInt32orFloat32 shadows[ALLOW_SIZE_7] = { 0, { .i32 = NUM_2 }, 0, 0, { .i32 = 0 }, { .u32 = 0 }, { .i32 = 0 } };
     int length = customShadow->size;
     if (length > NUM_0) {
         if (LessNotEqual(customShadow->value[NUM_0].f32, 0.0f)) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow radius is less than 0");
             return ARKUI_ERROR_CODE_PARAM_INVALID;
         }
         shadows[NUM_0].f32 = customShadow->value[NUM_0].f32; // radius
@@ -593,6 +728,7 @@ int32_t SetCustomShadow(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeIt
     }
     if (length > NUM_4) {
         if (!InRegion(NUM_0, NUM_1, customShadow->value[NUM_4].i32)) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow colorStrategy is invalid");
             return ARKUI_ERROR_CODE_PARAM_INVALID;
         }
         shadows[NUM_4].i32 = customShadow->value[NUM_4].i32;
@@ -600,6 +736,7 @@ int32_t SetCustomShadow(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeIt
     if (length > NUM_5) {
         if (customShadow->value[NUM_1].i32) {
             if (!InRegion(NUM_0, NUM_2, customShadow->value[NUM_5].i32)) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow shadowColorStrategy is invalid");
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
             shadows[NUM_1].i32 = COLOR_STRATEGY_STYLE;
@@ -613,6 +750,9 @@ int32_t SetCustomShadow(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeIt
         shadows[NUM_6].i32 = customShadow->value[NUM_6].i32;
     }
     int result = impl->getDialogAPI()->setCustomShadow(handle->controller, shadows, ALLOW_SIZE_7);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -622,10 +762,11 @@ int32_t SetBackgroundBlurStyle(ArkUI_NativeDialogHandle handle, ArkUI_BlurStyle 
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->setBackgroundBlurStyle(handle->controller, blurStyle);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -635,10 +776,11 @@ int32_t SetKeyboardAvoidMode(ArkUI_NativeDialogHandle handle, ArkUI_KeyboardAvoi
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->setKeyboardAvoidMode(handle->controller, keyboardAvoidMode);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -648,10 +790,11 @@ int32_t EnableHoverMode(ArkUI_NativeDialogHandle handle, bool enableHoverMode)
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->enableHoverMode(handle->controller, enableHoverMode);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -661,10 +804,11 @@ int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaTyp
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
     int result = impl->getDialogAPI()->setHoverModeArea(handle->controller, hoverModeAreaType);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
@@ -674,21 +818,27 @@ int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
     if (!impl) {
         return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
     }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    auto result = impl->getDialogAPI()->setFocusable(handle->controller, focusable);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
-    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
+    return result;
 }
 
 int32_t SetBackgroundBlurStyleOptions(
     ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* backgroundBlurStyleOptions)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(backgroundBlurStyleOptions, ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "backgroundBlurStyleOptions is null");
     auto size = backgroundBlurStyleOptions->size;
     if (size < REQUIRED_ONE_PARAM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundBlurStyleOptions size is less than 1");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t colorMode = ParseColorMode(backgroundBlurStyleOptions, BLURSTYLE_COLOR_MODE);
@@ -713,17 +863,24 @@ int32_t SetBackgroundBlurStyleOptions(
     uintArray[NUM_2] = inactiveColor;
     int result = impl->getDialogAPI()->setBackgroundBlurStyleOptions(
         handle->controller, &intArray, scale, &uintArray, isValidColor);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t SetBackgroundEffect(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* backgroundEffect)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle) {
+    if (!impl) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(backgroundEffect, ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "backgroundEffect is null");
     auto size = backgroundEffect->size;
     if (size < REQUIRED_ONE_PARAM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundEffect size is less than 1");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     float radius = ParseRadius(backgroundEffect, EFFECT_RADIUS);
@@ -754,6 +911,9 @@ int32_t SetBackgroundEffect(ArkUI_NativeDialogHandle handle, const ArkUI_Attribu
     boolArray[NUM_1] = isValidColor;
     int result =
         impl->getDialogAPI()->setBackgroundEffect(handle->controller, &floatArray, &intArray, &uintArray, &boolArray);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 } // namespace OHOS::Ace::NG::DialogModel
@@ -765,6 +925,7 @@ extern "C" {
 void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return;
     }
     event->BlockDismiss = shouldBlockDismiss;
@@ -773,6 +934,7 @@ void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent*
 void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
     return event->userData;
@@ -781,6 +943,7 @@ void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event)
 int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return -1;
     }
     return event->reason;
@@ -790,15 +953,27 @@ int32_t OH_ArkUI_CustomDialog_GetState(ArkUI_NativeDialogHandle handle, ArkUI_Di
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     int32_t tem = 1;
-    if (!impl || !handle || !dialogState) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(handle, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "handle is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(dialogState, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "dialogState is null");
     *dialogState = static_cast<ArkUI_DialogState>(tem);
     int32_t result = impl->getDialogAPI()->getState(handle->controller, &tem);
     if (result == ARKUI_ERROR_CODE_NO_ERROR) {
         *dialogState = static_cast<ArkUI_DialogState>(tem);
     }
     return result;
+}
+
+int32_t OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterial(
+    ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMaterialHandle material)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setSystemMaterial(handle->controller, material);
 }
 
 #ifdef __cplusplus

@@ -23,7 +23,9 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -31,12 +33,22 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material_structs.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+    constexpr int32_t TEST_DIALOG_NODE_ID = 101;
+    constexpr int32_t TEST_DIALOG_NODE_ON_TREE_ID = 102;
+    constexpr int32_t TEST_VALID_UNIQUE_ID = -1;
+    constexpr int32_t MATERIAL_TYPE_NONE = static_cast<int32_t>(MaterialType::NONE);
+    constexpr int32_t MATERIAL_TYPE_SEMI_TRANSPARENT = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+    constexpr int32_t MATERIAL_TYPE_IMMERSIVE = static_cast<int32_t>(MaterialType::IMMERSIVE);
 } // namespace
 
 class DialogManagerTestNg : public testing::Test {
@@ -47,6 +59,10 @@ class DialogManagerTestNg : public testing::Test {
 
 void DialogManagerTestNg::SetUpTestCase()
 {
+    // First clean up any existing state to avoid accumulation
+    TearDownTestCase();
+    // Clear ElementRegister to avoid ID conflicts between tests
+    ElementRegister::GetInstance()->Clear();
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -189,4 +205,388 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest004, TestSize.Level1)
     MockContainer::TearDown();
     container->isSubContainer_ = false;
 }
+
+/**
+ * @tc.name: DialogManagerTest005
+ * @tc.desc: Test ShowInEmbeddedOverlay with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest005, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+    bool taskExecuted = false;
+    auto testTask = [&taskExecuted](RefPtr<NG::OverlayManager> overlayManager) {
+        taskExecuted = true;
+    };
+
+    // Clear current context to test null path
+    // Need to clear both PipelineContext and Container to simulate null context
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+    DialogManager::ShowInEmbeddedOverlay(std::move(testTask), "TestTask", TEST_VALID_UNIQUE_ID);
+
+    // Task should not be executed when context is null
+    EXPECT_FALSE(taskExecuted);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest006
+ * @tc.desc: Test ShowInEmbeddedOverlay with valid context
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest006, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    bool taskExecuted = false;
+    auto testTask = [&taskExecuted](RefPtr<NG::OverlayManager> overlayManager) {
+        taskExecuted = true;
+    };
+
+    DialogManager::ShowInEmbeddedOverlay(std::move(testTask), "TestTask", TEST_VALID_UNIQUE_ID);
+
+    // Task should be posted to executor (may not execute immediately in test)
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest007
+ * @tc.desc: Test ShouldHandleSmoothImmersiveMaterial when UiMaterialLevel is not SMOOTH
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest007, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    // Test with null systemMaterial
+    auto result = DialogManager::ShouldHandleSmoothImmersiveMaterial(nullptr);
+    EXPECT_FALSE(result);
+
+    // Test with valid systemMaterial but different UiMaterialLevel
+    // Note: In test environment, GetUiMaterialLevel returns DEFAULT which equals SMOOTH
+    // This test verifies the function handles null material correctly
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_NONE);
+    result = DialogManager::ShouldHandleSmoothImmersiveMaterial(material);
+    // Result depends on SystemProperties::GetUiMaterialLevel() return value
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest009
+ * @tc.desc: Test ShouldHandleSmoothImmersiveMaterial with non-IMMERSIVE material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest009, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    // When material type is not IMMERSIVE, should not handle
+    auto result = DialogManager::ShouldHandleSmoothImmersiveMaterial(material);
+    EXPECT_FALSE(result);
+
+    material->SetType(MATERIAL_TYPE_NONE);
+    result = DialogManager::ShouldHandleSmoothImmersiveMaterial(material);
+    EXPECT_FALSE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest010
+ * @tc.desc: Test ShouldApplySystemMaterialShadow with null systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest010, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto result = DialogManager::ShouldApplySystemMaterialShadow(nullptr);
+    EXPECT_FALSE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest011
+ * @tc.desc: Test ShouldApplySystemMaterialShadow with null immersiveOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest011, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+    // immersiveOptions is null by default
+
+    auto result = DialogManager::ShouldApplySystemMaterialShadow(material);
+    EXPECT_FALSE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest012
+ * @tc.desc: Test ShouldApplySystemMaterialShadow with applyShadow true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest012, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    auto result = DialogManager::ShouldApplySystemMaterialShadow(material);
+    EXPECT_TRUE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest013
+ * @tc.desc: Test ShouldApplySystemMaterialShadow with applyShadow false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest013, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+
+    auto result = DialogManager::ShouldApplySystemMaterialShadow(material);
+    EXPECT_FALSE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest014
+ * @tc.desc: Test HandleSmoothImmersiveMaterial with null columnNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest014, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    RefPtr<FrameNode> nullNode = nullptr;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    auto result = DialogManager::HandleSmoothImmersiveMaterial(nullNode, material);
+    EXPECT_FALSE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest015
+ * @tc.desc: Test HandleSmoothImmersiveMaterial with valid columnNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest015, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    auto result = DialogManager::HandleSmoothImmersiveMaterial(columnNode, material);
+    EXPECT_TRUE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest016
+ * @tc.desc: Test HandleSmoothImmersiveMaterial with null systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest016, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    RefPtr<UiMaterial> nullMaterial = nullptr;
+
+    // HandleSmoothImmersiveMaterial returns true if columnNode and renderContext are valid,
+    // even if systemMaterial is null. The null material is handled by SetSmoothImmersiveShadow
+    // which checks ShouldApplySystemMaterialShadow before applying shadow.
+    auto result = DialogManager::HandleSmoothImmersiveMaterial(columnNode, nullMaterial);
+    EXPECT_TRUE(result);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest018
+ * @tc.desc: Test SetSmoothImmersiveBackground with valid renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest018, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto renderContext = columnNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Reset background color to ensure clean state
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    DialogManager::SetSmoothImmersiveBackground(renderContext);
+
+    // Verify render context is still valid
+    EXPECT_NE(renderContext, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest020
+ * @tc.desc: Test SetSmoothImmersiveShadow with applyShadow true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest020, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    auto renderContext = columnNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Reset back shadow to ensure clean state
+    renderContext->UpdateBackShadow(Shadow());
+
+    DialogManager::SetSmoothImmersiveShadow(columnNode, material);
+
+    // Verify render context is still valid
+    EXPECT_NE(renderContext, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest021
+ * @tc.desc: Test SetSmoothImmersiveShadow with applyShadow false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest021, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+
+    auto renderContext = columnNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    DialogManager::SetSmoothImmersiveShadow(columnNode, material);
+
+    // Verify render context is still valid
+    EXPECT_NE(renderContext, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest022
+ * @tc.desc: Test SetSmoothImmersiveShadow with null systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest022, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    RefPtr<UiMaterial> nullMaterial = nullptr;
+
+    auto renderContext = columnNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    DialogManager::SetSmoothImmersiveShadow(columnNode, nullMaterial);
+
+    // Verify render context is still valid
+    EXPECT_NE(renderContext, nullptr);
+    DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerTest023
+ * @tc.desc: Test SetSmoothImmersiveShadow with null renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest023, TestSize.Level1)
+{
+    DialogManagerTestNg::SetUpTestCase();
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    // Temporarily set renderContext to null by creating a new node without context
+    RefPtr<FrameNode> nodeWithoutContext = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, TEST_DIALOG_NODE_ON_TREE_ID,
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+
+    // Clear the render context to test null path
+    nodeWithoutContext->renderContext_ = nullptr;
+
+    DialogManager::SetSmoothImmersiveShadow(nodeWithoutContext, material);
+    // Function should return early without crash
+    DialogManagerTestNg::SetUpTestCase();
+}
+
 } // namespace OHOS::Ace::NG

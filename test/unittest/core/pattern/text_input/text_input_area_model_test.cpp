@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
+#include "core/components_ng/pattern/text/span/image_span_view_static.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;
@@ -2267,6 +2267,100 @@ HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), true);
     layoutProperty->UpdateCompressLeadingPunctuation(false);
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflow001
+ * @tc.desc: test TextInputArea set PunctuationOverflow value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetPunctuationOverflow001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetPunctuationOverflow(true);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), true);
+    layoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), false);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflow002
+ * @tc.desc: test TextInputArea FrameNode set PunctuationOverflow value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetPunctuationOverflow002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetPunctuationOverflow(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), true);
+    EXPECT_EQ(TextFieldModelNG::GetPunctuationOverflow(frameNode), true);
+    layoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), false);
+    EXPECT_EQ(TextFieldModelNG::GetPunctuationOverflow(frameNode), false);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflow003
+ * @tc.desc: test TextInput set PunctuationOverflow value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetPunctuationOverflow003, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetPunctuationOverflow(true);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), true);
+    layoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), false);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflow004
+ * @tc.desc: test TextInput FrameNode set PunctuationOverflow value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetPunctuationOverflow004, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetPunctuationOverflow(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), true);
+    EXPECT_EQ(TextFieldModelNG::GetPunctuationOverflow(frameNode), true);
+    layoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(layoutProperty->GetPunctuationOverflow(), false);
+    EXPECT_EQ(TextFieldModelNG::GetPunctuationOverflow(frameNode), false);
+}
+
+/**
+ * @tc.name: GetPunctuationOverflow001
+ * @tc.desc: test GetPunctuationOverflow with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetPunctuationOverflow001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(TextFieldModelNG::GetPunctuationOverflow(nullptr), false);
 }
 
 /**

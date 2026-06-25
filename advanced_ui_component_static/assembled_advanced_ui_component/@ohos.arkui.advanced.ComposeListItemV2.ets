@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -23,7 +23,7 @@ import {
   HoverEvent, CommonMethod
 } from '@ohos.arkui.component'
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Local, Monitor, IMonitor, Param } from '@ohos.arkui.stateManagement'
+import { Local, Monitor, IMonitor, Param, ObservedV2, Trace } from '@ohos.arkui.stateManagement'
 import { Theme } from '@ohos.arkui.theme';
 import hilog from '@ohos.hilog'
 import { MeasureUtils } from '@ohos.arkui.UIContext';
@@ -63,50 +63,192 @@ enum ItemHeight {
   FIFTH_HEIGHT = 96
 }
 
-export class OperateItemV2 {
-  public icon?: OperateIconV2;
-  public subIcon?: OperateIconV2;
-  public button?: OperateButtonV2;
-  public toggle?: OperateCheckV2;
-  public checkbox?: OperateCheckV2;
-  public radio?: OperateCheckV2;
-  public image?: ResourceStr;
-  public symbolStyle?: SymbolGlyphModifier;
-  public text?: ResourceStr;
-  public arrow?: OperateIconV2;
+export type OnActionCallback = () => void;
+
+export type OnChangeCallback = (value: boolean) => void;
+
+export interface OperateIconV2Options {
+  value?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  action?: OnActionCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
-export class ContentItemV2 {
-  public iconStyle?: IconTypeV2;
-  public icon?: ResourceStr;
-  public symbolStyle?: SymbolGlyphModifier;
-  public primaryText?: ResourceStr;
-  public secondaryText?: ResourceStr;
-  public description?: ResourceStr;
-}
-
+@ObservedV2
 export class OperateIconV2 {
+  @Trace
   public value?: ResourceStr;
+  @Trace
   public symbolStyle?: SymbolGlyphModifier;
-  public action?: () => void;
+  @Trace
+  public action?: OnActionCallback;
+  @Trace
   public accessibilityText?: ResourceStr;
+  @Trace
   public accessibilityDescription?: ResourceStr;
+  @Trace
   public accessibilityLevel?: string;
+
+  constructor(options?: OperateIconV2Options) {
+    if (options) {
+      this.value = options.value;
+      this.symbolStyle = options.symbolStyle;
+      this.action = options.action;
+      this.accessibilityText = options.accessibilityText;
+      this.accessibilityDescription = options.accessibilityDescription;
+      this.accessibilityLevel = options.accessibilityLevel;
+    }
+  }
 }
 
-export class OperateButtonV2 {
-  public text?: ResourceStr;
-  public accessibilityText?: ResourceStr;
-  public accessibilityDescription?: ResourceStr;
-  public accessibilityLevel?: string;
+export interface OperateCheckV2Options {
+  isCheck?: boolean;
+  onChange?: OnChangeCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
+@ObservedV2
 export class OperateCheckV2 {
+  @Trace
   public isCheck?: boolean;
-  public onChange?: (value: boolean) => void;
+  @Trace
+  public onChange?: OnChangeCallback;
+  @Trace
   public accessibilityText?: ResourceStr;
+  @Trace
   public accessibilityDescription?: ResourceStr;
+  @Trace
   public accessibilityLevel?: string;
+
+  constructor(options?: OperateCheckV2Options) {
+    if (options) {
+      this.isCheck = options.isCheck;
+      this.onChange = options.onChange;
+      this.accessibilityText = options.accessibilityText;
+      this.accessibilityDescription = options.accessibilityDescription;
+      this.accessibilityLevel = options.accessibilityLevel;
+    }
+  }
+}
+
+export interface OperateButtonV2Options {
+  text?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+@ObservedV2
+export class OperateButtonV2 {
+  @Trace
+  public text?: ResourceStr;
+  @Trace
+  public accessibilityText?: ResourceStr;
+  @Trace
+  public accessibilityDescription?: ResourceStr;
+  @Trace
+  public accessibilityLevel?: string;
+
+  constructor(options?: OperateButtonV2Options) {
+    if (options) {
+      this.text = options.text;
+      this.accessibilityText = options.accessibilityText;
+      this.accessibilityDescription = options.accessibilityDescription;
+      this.accessibilityLevel = options.accessibilityLevel;
+    }
+  }
+}
+
+export interface ContentItemV2Options {
+  iconStyle?: IconTypeV2;
+  icon?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  primaryText?: ResourceStr;
+  secondaryText?: ResourceStr;
+  description?: ResourceStr;
+}
+
+@ObservedV2
+export class ContentItemV2 {
+  @Trace
+  public iconStyle?: IconTypeV2;
+  @Trace
+  public icon?: ResourceStr;
+  @Trace
+  public symbolStyle?: SymbolGlyphModifier;
+  @Trace
+  public primaryText?: ResourceStr;
+  @Trace
+  public secondaryText?: ResourceStr;
+  @Trace
+  public description?: ResourceStr;
+
+  constructor(options?: ContentItemV2Options) {
+    if (options) {
+      this.iconStyle = options.iconStyle;
+      this.icon = options.icon;
+      this.symbolStyle = options.symbolStyle;
+      this.primaryText = options.primaryText;
+      this.secondaryText = options.secondaryText;
+      this.description = options.description;
+    }
+  }
+}
+
+export interface OperateItemV2Options {
+  icon?: OperateIconV2;
+  subIcon?: OperateIconV2;
+  button?: OperateButtonV2;
+  toggle?: OperateCheckV2;
+  checkbox?: OperateCheckV2;
+  radio?: OperateCheckV2;
+  image?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  text?: ResourceStr;
+  arrow?: OperateIconV2;
+}
+
+@ObservedV2
+export class OperateItemV2 {
+  @Trace
+  public icon?: OperateIconV2;
+  @Trace
+  public subIcon?: OperateIconV2;
+  @Trace
+  public button?: OperateButtonV2;
+  @Trace
+  public toggle?: OperateCheckV2;
+  @Trace
+  public checkbox?: OperateCheckV2;
+  @Trace
+  public radio?: OperateCheckV2;
+  @Trace
+  public image?: ResourceStr;
+  @Trace
+  public symbolStyle?: SymbolGlyphModifier;
+  @Trace
+  public text?: ResourceStr;
+  @Trace
+  public arrow?: OperateIconV2;
+
+  constructor(options?: OperateItemV2Options) {
+    if (options) {
+      this.icon = options.icon;
+      this.subIcon = options.subIcon;
+      this.button = options.button;
+      this.toggle = options.toggle;
+      this.checkbox = options.checkbox;
+      this.radio = options.radio;
+      this.image = options.image;
+      this.symbolStyle = options.symbolStyle;
+      this.text = options.text;
+      this.arrow = options.arrow;
+    }
+  }
 }
 
 const TEXT_MAX_LINE: int = 1;
@@ -162,7 +304,6 @@ const ICON_SIZE_MAP: Map<number, number> = new Map<number, number>([
   [IconTypeV2.LONGITUDINAL, LONGITUDINAL_SIZE],
   [IconTypeV2.VERTICAL, VERTICAL_SIZE]
 ])
-// Does it support events such as focus, hover, press, etc. for the sub components of list
 const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
   LengthMetrics.resource($r('sys.float.composeListItem_focus_dynamic_effect')).value !== 1;
 const RECOVER_ITEM_SCALE: number = 1.0;
@@ -234,7 +375,7 @@ export class EnvironmentCallbackEntry implements EnvironmentCallback {
   }
 }
 
-  @ComponentV2
+@ComponentV2
 struct ContentItemStructV2 {
   @Param iconStyle: IconTypeV2 | undefined = undefined;
   @Param icon: ResourceStr | undefined = undefined;
@@ -317,7 +458,6 @@ struct ContentItemStructV2 {
   }
 
   aboutToAppear(): void {
-    // Do nothing - onPropChange is triggered by @Monitor decorator automatically
   }
 
   @Builder
@@ -477,12 +617,12 @@ interface CreateIconParam {
   icon?: OperateIconV2;
 }
 
-class OperateItemStructController {
-  public changeRadioState = (): void => {
+export class OperateItemStructController {
+  public changeRadioState: () => void = (): void => {
   };
-  public changeCheckboxState = (): void => {
+  public changeCheckboxState: () => void = (): void => {
   };
-  public changeSwitchState = (): void => {
+  public changeSwitchState: () => void = (): void => {
   };
 }
 
@@ -511,7 +651,6 @@ struct OperateItemStructV2 {
   @Param parentCanHover: boolean = false;
   @Param parentIsActive: boolean = false;
   @Param parentFrontColor?: ResourceColor = undefined;
-  // V2: @Param is readonly, use @Local to track local modifications
   @Local localParentCanFocus: boolean = false;
   @Local localParentCanHover: boolean = false;
   @Local localParentFrontColor: ResourceColor | undefined = undefined;
@@ -604,11 +743,8 @@ struct OperateItemStructV2 {
       maxLines: TEXT_MAX_LINE
     })
     .onFocus(() => {
-      // @Param is readonly in V2, cannot assign to parentCanFocus
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
-      // @Param is readonly in V2, cannot assign to parentCanHover/parentFrontColor
-      // Note: V2 migration - these parent communication signals are removed
     })
     .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
     .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
@@ -651,10 +787,8 @@ struct OperateItemStructV2 {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
-      // @Param is readonly in V2
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
-      // @Param is readonly in V2, cannot assign to parentCanHover/parentFrontColor
     })
     .onClick(param.icon?.action)
     .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
@@ -748,7 +882,6 @@ struct OperateItemStructV2 {
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
-      // @Param is readonly in V2
     })
     .stateEffect(this.arrow?.action !== undefined)
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
@@ -756,7 +889,6 @@ struct OperateItemStructV2 {
       if (this.arrow?.action === undefined) {
         return;
       }
-      // @Param is readonly in V2, cannot assign to parentCanHover/parentFrontColor
     })
     .onClick(this.arrow?.action)
     .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
@@ -786,12 +918,10 @@ struct OperateItemStructV2 {
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
-        // @Param is readonly in V2
       })
       .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
       .flexShrink(0)
       .onHover((isHover: boolean, event: HoverEvent) => {
-        // @Param is readonly in V2
       })
       .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
       .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
@@ -818,12 +948,10 @@ struct OperateItemStructV2 {
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
-        // @Param is readonly in V2
       })
       .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
       .flexShrink(0)
       .onHover((isHover: boolean, event: HoverEvent) => {
-        // @Param is readonly in V2
       })
       .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
       .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
@@ -855,10 +983,8 @@ struct OperateItemStructV2 {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
     .onFocus(() => {
-      // @Param is readonly in V2
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
-      // @Param is readonly in V2
     })
   }
 
@@ -920,7 +1046,7 @@ struct OperateItemStructV2 {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-.maxLines(Double.toInt(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value))
+            .maxLines(Double.toInt(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value))
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -970,7 +1096,6 @@ struct OperateItemStructV2 {
     .constraintSize({ minHeight: TEXT_ARROW_HEIGHT })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
-      // @Param is readonly in V2
     })
     .padding({
       top: 0,
@@ -984,7 +1109,6 @@ struct OperateItemStructV2 {
       if (this.arrow?.action === undefined) {
         return;
       }
-      // @Param is readonly in V2
     })
     .onClick(this.arrow?.action)
     .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
@@ -1037,14 +1161,6 @@ struct OperateItemStructV2 {
   }
 }
 
-/**
- * Obtain accessible text
- *
- * @param resource initial resource
- * @param selected select state
- * @returns string
- */
-
 function getAccessibilityText(resource: ResourceStr): string {
   try {
     let resourceString: string = '';
@@ -1067,14 +1183,7 @@ function getAccessibilityText(resource: ResourceStr): string {
 }
 
 
-/**
- * Obtain accessible level
- *
- * @param resource
- * @param selected
- * @returns string
- */
-function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: OnChangeCallback): string {
   if (accessibilityLevel) {
     return accessibilityLevel;
   }
@@ -1084,14 +1193,7 @@ function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (
   return ACCESSIBILITY_LEVEL_NO;
 }
 
-/**
- * Obtain accessible level
- *
- * @param resource
- * @param selected
- * @returns string
- */
-function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: OnActionCallback): string {
   if (accessibilityLevel) {
     return accessibilityLevel;
   }
@@ -1171,9 +1273,10 @@ export struct ComposeListItemV2 {
             Int.toDouble(ItemHeight.SECOND_HEIGHT) : systemIconLineHeight;
       }
     } else if (this.contentItemV2?.description === undefined) {
-      let iconStyle: IconTypeV2 = (this.contentItemV2?.iconStyle as IconTypeV2);
+      let iconStyle: undefined|IconTypeV2 = this.contentItemV2?.iconStyle;
       if (this.contentItemV2?.icon === undefined ||
-        (this.contentItemV2?.icon !== undefined && iconStyle <= IconTypeV2.SYSTEM_ICON)) {
+        (this.contentItemV2?.icon !== undefined && iconStyle!
+          && (iconStyle as IconTypeV2) <= IconTypeV2.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
         if (iconStyle === IconTypeV2.HEAD_SCULPTURE) {
@@ -1394,7 +1497,7 @@ export struct ComposeListItemV2 {
     }
   }
 
-  build() {
+  build(): void {
     Stack() {
       Flex(this.getFlexOptions()) {
         if (this.contentItemV2 === null) {
@@ -1440,7 +1543,6 @@ export struct ComposeListItemV2 {
               rightWidth: this.calculatedRightWidth(),
               parentDirection: this.containerDirection,
               isFocus: this.isFocus
-              // Note: controller is not passed from parent in V2, it's initialized in aboutToAppear
             })
           }
           .flexShrink(0)

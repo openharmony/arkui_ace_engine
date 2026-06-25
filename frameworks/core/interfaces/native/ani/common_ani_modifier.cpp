@@ -49,7 +49,7 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
-#include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -1191,7 +1191,7 @@ void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
-    auto currnetId = ContainerScope::CurrentIdWithReason(false);
+    auto currnetId = ContainerScope::CurrentIdWithReason();
     instnace.push_back(GetMainInstanceId(currnetId.first));
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
@@ -1211,6 +1211,33 @@ ani_long GetPageRootNodeInStatic()
 void DumpLogPrintImpl(int32_t depth, const char* content)
 {
     DumpLog::GetInstance().Print(depth, std::string(content));
+}
+
+void FireArkUIObjectLifecycleCallbackImpl(ani_long nodePtr, const std::string& className, void* data)
+{
+    CHECK_NULL_VOID(nodePtr);
+    RefPtr<NG::FrameNode> frameNode;
+    if (className == "RenderNode") {
+        auto* renderNodePeer = reinterpret_cast<RenderNodePeer*>(nodePtr);
+        CHECK_NULL_VOID(renderNodePeer);
+        frameNode = renderNodePeer->GetFrameNode();
+    } else {
+        auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(nodePtr);
+        CHECK_NULL_VOID(frameNodePeer);
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+        if (!frameNode && className == "BuilderNode") {
+            auto mockNode = FrameNodePeer::GetMockFrameNodeByPeer(frameNodePeer);
+            CHECK_NULL_VOID(mockNode);
+            auto* context = mockNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->FireArkUIObjectLifecycleCallback(data);
+            return;
+        }
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto* context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->FireArkUIObjectLifecycleCallback(data);
 }
 
 const ArkUIAniCommonModifier* GetCommonAniModifier()
@@ -1304,6 +1331,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
         .isEasySplit = OHOS::Ace::NG::IsEasySplit,
         .dumpLogPrint = OHOS::Ace::NG::DumpLogPrintImpl,
+        .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
     };
     return &impl;
 }

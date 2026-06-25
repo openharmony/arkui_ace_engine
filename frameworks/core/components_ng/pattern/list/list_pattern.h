@@ -266,6 +266,9 @@ public:
         multiSelectable_ = multiSelectable;
     }
     void UpdateBackPressCloseSwipeActionCallback();
+    bool NeedBackPressHandler() const override;
+    bool HandleBackPress() override;
+    bool CloseSwipeActionOnBackPressed();
     void SetBackPressCloseSwipeAction(bool closeSwipeAction)
     {
         closeSwipeActionByBackPress_ = closeSwipeAction;
@@ -275,7 +278,7 @@ public:
         return closeSwipeActionByBackPress_;
     }
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
-    WeakPtr<ListItemPattern> GetSwiperItem();
+    WeakPtr<ListItemPattern> GetSwiperItem() const;
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem);
     bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem);
     bool CanReplaceSwiperItem();
@@ -353,10 +356,12 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
     bool NeedJudgeWithHotZone() override;
+    bool NeedReserveEditModeCheckBoxSpaceForList();
     int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
     bool IsInEditModeHotZone(const PointF& point) const override;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const override;
     SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const override;
     RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const override;
     RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const override;
@@ -365,6 +370,7 @@ public:
         std::vector<SwipeSelectStateKey>& keys) const override;
     void ApplyEditModeToVisibleItems() override;
     void RemoveEditModeFromItems() override;
+    void ApplyEditModeToCachedItems(bool enabled) override;
 
     void SetItemState(ItemState itemState, int32_t id)
     {
@@ -506,7 +512,6 @@ public:
 
 protected:
     void OnModifyDone() override;
-    void OnDetachFromMainTree() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     virtual void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex);
@@ -533,7 +538,8 @@ protected:
     bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
     std::optional<ScrollingConfig> CreateScrollingConfig(
         SmartGestureDirection direction, double distance) const;
-    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const;
+    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos,
+        bool isForceLayoutTarget = false) const;
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -553,7 +559,7 @@ protected:
     bool smooth_ = false;
 
     std::optional<int32_t> jumpIndex_;
-    std::optional<int32_t> targetIndex_;
+    mutable std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -701,7 +707,7 @@ private:
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
-    std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
+    mutable std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
     std::optional<ListScrollTarget> scrollTarget_;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
@@ -724,7 +730,6 @@ private:
     WeakPtr<ListItemPattern> swiperItem_;
     bool canReplaceSwiperItem_ = true;
     bool closeSwipeActionByBackPress_ = true;
-    bool hasBackPressHandlerRegistered_ = false;
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;

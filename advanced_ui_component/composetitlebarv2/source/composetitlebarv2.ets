@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,13 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import hilog from '@ohos.hilog';
 import promptAction from '@ohos.promptAction';
 
-export interface ComposeTitleBarV2MenuItemOptions {
+type OnActionCallback = () => void;
+
+export interface ComposeTitleBarV2MenuItemParams {
   value: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
-  action?: () => void;
+  action?: OnActionCallback;
   label?: ResourceStr;
   accessibilityText?: ResourceStr;
   accessibilityLevel?: string;
@@ -38,9 +40,9 @@ export class ComposeTitleBarV2MenuItem {
   @Trace
   public symbolStyle?: SymbolGlyphModifier;
   @Trace
-  public isEnabled?: boolean = true;
+  public isEnabled?: boolean = false;
   @Trace
-  public action?: () => void;
+  public action?: OnActionCallback;
   @Trace
   public label?: ResourceStr;
   @Trace
@@ -50,15 +52,21 @@ export class ComposeTitleBarV2MenuItem {
   @Trace
   public accessibilityDescription?: ResourceStr;
 
-  constructor(options: ComposeTitleBarV2MenuItemOptions) {
-    this.value = options.value;
-    this.symbolStyle = options.symbolStyle;
-    this.isEnabled = options.isEnabled ?? true;
-    this.action = options.action;
-    this.label = options.label;
-    this.accessibilityText = options.accessibilityText;
-    this.accessibilityLevel = options.accessibilityLevel ?? 'auto';
-    this.accessibilityDescription = options.accessibilityDescription;
+  constructor(params?: ComposeTitleBarV2MenuItemParams) {
+    if (params) {
+      this.value = params.value;
+      this.symbolStyle = params.symbolStyle;
+      this.isEnabled = params.isEnabled ?? false;
+      this.action = params.action;
+      this.label = params.label;
+      this.accessibilityText = params.accessibilityText;
+      this.accessibilityLevel = params.accessibilityLevel ?? 'auto';
+      this.accessibilityDescription = params.accessibilityDescription;
+    } else {
+      this.value = '';
+      this.isEnabled = false;
+      this.accessibilityLevel = 'auto';
+    }
   }
 }
 
@@ -104,15 +112,15 @@ class ButtonGestureModifier implements GestureModifier {
 }
 
 @ComponentV2
-struct ComposeTitleBarV2 {
+export struct ComposeTitleBarV2 {
   @Param
   item?: ComposeTitleBarV2MenuItem = undefined;
   @Param
   title: ResourceStr = '';
   @Param
-  subtitle: ResourceStr = '';
+  subtitle?: ResourceStr = '';
   @Param
-  menuItems?: ComposeTitleBarV2MenuItem[] = [];
+  menuItems?: Array<ComposeTitleBarV2MenuItem> = [];
   @Local
   titleMaxWidth: number = 0;
   @Local
@@ -242,7 +250,7 @@ struct ComposeTitleBarV2 {
 @ComponentV2
 struct CollapsibleMenuSectionV2 {
   @Param
-  menuItems?: ComposeTitleBarV2MenuItem[] = [];
+  menuItems?: Array<ComposeTitleBarV2MenuItem> = [];
   @Param
   item: ComposeTitleBarV2MenuItem = new ComposeTitleBarV2MenuItem({
     value: PUBLIC_MORE,
@@ -479,6 +487,18 @@ struct CollapsibleMenuSectionV2 {
             })
             .onClick(() => this.isPopupShown = true)
             .gestureModifier(this.getItemGestureModifier())
+            .bindPopup(this.isPopupShown, {
+              builder: this.popupBuilder,
+              placement: Placement.Bottom,
+              popupColor: Color.White,
+              enableArrow: false,
+              onStateChange: (e: PopupStateChangeParam) => {
+                this.isPopupShown = e.isVisible;
+                if (!e.isVisible) {
+                  this.isMoreIconOnClick = false;
+                }
+              }
+            })
           }
         }
       }
@@ -578,7 +598,7 @@ struct CollapsibleMenuSectionV2 {
 @ComponentV2
 struct ImageMenuItemV2 {
   @Param
-  item: ComposeTitleBarV2MenuItem = new ComposeTitleBarV2MenuItem({ value: '' });
+  item: ComposeTitleBarV2MenuItem = new ComposeTitleBarV2MenuItem();
   @Param
   index: number = 0;
   @Param
@@ -1073,5 +1093,3 @@ struct ImageMenuItemV2 {
     }
   }
 }
-
-export { ComposeTitleBarV2 }

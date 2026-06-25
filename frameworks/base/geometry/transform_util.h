@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/quaternion.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {

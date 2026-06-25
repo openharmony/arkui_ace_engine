@@ -48,6 +48,11 @@ enum class LazyForEachCustomComponentFreezeMode {
     ENABLED = 2,
 };
 
+enum class LazyForEachMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
     int32_t changeCount = 0;
@@ -266,6 +271,11 @@ public:
         enablePreBuild_ = enable;
     }
 
+    void CleanCache(bool syncClean);
+    void RestoreCache();
+    int32_t ReduceCacheCount(int32_t count);
+    void ProcessNodesForCleanCache(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+
     std::string DumpHashKey();
     void DumpInfo();
 
@@ -279,6 +289,11 @@ public:
         return LazyForEachReleaseStrategy::BATCH;
     }
 
+    virtual LazyForEachMemOptStrategy GetLazyForEachMemOptStrategy() const
+    {
+        return LazyForEachMemOptStrategy::DEFAULT;
+    }
+
     void UpdateThemeScopeUpdate(int32_t themeScopeId);
 
     /*
@@ -289,6 +304,10 @@ public:
     void RemovingExpiringItem(int64_t deadline);
 
     std::map<int32_t, RefPtr<UINode>> removingNodeList_;
+
+    void SetEnableSyncLoad(bool value);
+    void SetIsSyncLoad(bool value);
+    void ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children);
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -349,6 +368,14 @@ private:
     bool isLoop_ = false;
     bool useNewInterface_ = false;
     bool enablePreBuild_ = true;
+    bool reduceCache_ = false;
+
+    std::unordered_map<int32_t, WeakPtr<UINode>> syncLoadCache_;
+    bool enableSyncLoad_ = true;
+    bool isSyncLoad_ = true;
+    int32_t activeRangeStart_ = -1;
+    int32_t activeRangeEnd_ = -1;
+    void RecordActiveRange(int32_t start, int32_t end);
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

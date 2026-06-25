@@ -374,6 +374,7 @@ private:
     bool SetSourceForMediaPlayer();
     void UpdateLooping();
     void UpdateSpeed();
+    void HandleSetPlaybackRateResult(double progress, int32_t errorCode, std::string& errorMsg);
     void UpdateMuted();
     void PrepareSurface();
 
@@ -423,8 +424,8 @@ private:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
-    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 #endif
+    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(const PlaybackStatus& status);
@@ -452,6 +453,12 @@ private:
     void ReportChangeEventOnUIThread(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
     void ReportCommandResultOnUIThread(
         const std::string& event, const std::string& result, const std::string& reason = "");
+
+    std::string GetDumpInfo();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;

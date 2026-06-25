@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -28,12 +29,12 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -994,7 +995,11 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value_or(
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+
+    auto textNode = textLayoutProperty->GetHost();
     if (textPickerLayoutProperty->HasDisappearFontSize()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDisappearFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDisappearFontSize().value());
         textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
         textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
@@ -1011,9 +1016,13 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
     
     if (textPickerLayoutProperty->GetDisappearMinFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDisappearMinFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDisappearMinFontSize().value());
     }
     if (textPickerLayoutProperty->GetDisappearMaxFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDisappearMaxFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDisappearMaxFontSize().value());
     }
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -1033,7 +1042,11 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     textLayoutProperty->UpdateTextColor(
         textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+
+    auto textNode = textLayoutProperty->GetHost();
     if (textPickerLayoutProperty->HasFontSize()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
         textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
         textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
@@ -1051,9 +1064,13 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
     
     if (textPickerLayoutProperty->GetMinFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetMinFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetMinFontSize().value());
     }
     if (textPickerLayoutProperty->GetMaxFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetMaxFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetMaxFontSize().value());
     }
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -1083,7 +1100,10 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
             pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     }
 
+    auto textNode = textLayoutProperty->GetHost();
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetSelectedFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
         textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
         textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
@@ -1100,9 +1120,13 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
 
     if (textPickerLayoutProperty->GetSelectedMinFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetSelectedMinFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetSelectedMinFontSize().value());
     }
     if (textPickerLayoutProperty->GetSelectedMaxFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetSelectedMaxFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetSelectedMaxFontSize().value());
     }
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -1126,8 +1150,15 @@ void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayou
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     auto textStyle = theme->GetTextStyle();
-    textLayoutProperty->UpdateFontSize(
-        textPickerLayoutProperty->GetDefaultFontSize().value_or(textStyle.GetFontSize()));
+
+    auto textNode = textLayoutProperty->GetHost();
+    if (textPickerLayoutProperty->GetDefaultFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDefaultFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
+        textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDefaultFontSize().value());
+    } else {
+        textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
+    }
     textLayoutProperty->UpdateFontWeight(
         textPickerLayoutProperty->GetDefaultWeight().value_or(textStyle.GetFontWeight()));
     textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDefaultColor().value_or(textStyle.GetTextColor()));
@@ -1135,8 +1166,16 @@ void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayou
         textPickerLayoutProperty->GetDefaultFontFamily().value_or(textStyle.GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetDefaultFontStyle().value_or(textStyle.GetFontStyle()));
-    textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDefaultMinFontSize().value_or(Dimension()));
-    textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+    if (textPickerLayoutProperty->GetDefaultMinFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDefaultMinFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textNode);
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDefaultMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetDefaultMaxFontSize().has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(textPickerLayoutProperty->GetDefaultMaxFontSize().value(),
+            LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textNode);
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDefaultMaxFontSize().value());
+    }
     if (textPickerLayoutProperty->GetDefaultTextOverflow().has_value() &&
         textPickerLayoutProperty->GetDefaultTextOverflow().value() != TextOverflow::MARQUEE) {
         textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetDefaultTextOverflow().value());
@@ -1182,7 +1221,12 @@ void TextPickerColumnPattern::AddAnimationTextProperties(
         bool isLandscape = static_cast<int32_t>(GetShowOptionCount()) ==
                            (OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
         SetOptionShiftDistanceByIndex(currentIndex, isLandscape);
-        properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+
+        if (textLayoutProperty->GetFontSize().value().Unit() == DimensionUnit::LPX) {
+            properties.fontSize = textLayoutProperty->GetFontSize().value();
+        } else {
+            properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+        }
     }
     if (textLayoutProperty->HasTextColor()) {
         properties.currentColor = textLayoutProperty->GetTextColor().value();
@@ -1359,10 +1403,20 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
 Dimension TextPickerColumnPattern::LinearFontSize(
     const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
+    Dimension start = startFontSize;
+    Dimension end = endFontSize;
+    if (start.Unit() == DimensionUnit::LPX) {
+        start = Dimension(start.ConvertToPx());
+    }
+
+    if (end.Unit() == DimensionUnit::LPX) {
+        end = Dimension(end.ConvertToPx());
+    }
+
     if (percent > FONT_SIZE_PERCENT) {
-        return startFontSize + (endFontSize - startFontSize);
+        return start + (end - start);
     } else {
-        return startFontSize + (endFontSize - startFontSize) * std::abs(percent);
+        return start + (end - start) * std::abs(percent);
     }
 }
 

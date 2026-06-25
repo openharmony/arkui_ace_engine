@@ -147,6 +147,24 @@ class MenuItemOnChangeModifier extends ModifierWithKey<(selected: boolean) => vo
   }
 }
 
+class SubMenuBuilderModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('subMenuBuilder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetSubMenuBuilder(node);
+    } else {
+      getUINativeModule().menuitem.setSubMenuBuilder(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -177,6 +195,10 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   }
   labelFontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, LabelFontColorModifier.identity, LabelFontColorModifier, value);
+    return this;
+  }
+  subMenuBuilder(value: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, SubMenuBuilderModifier.identity, SubMenuBuilderModifier, value);
     return this;
   }
 }

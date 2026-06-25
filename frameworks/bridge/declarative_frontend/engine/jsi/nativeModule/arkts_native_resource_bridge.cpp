@@ -75,13 +75,8 @@ ArkUINativeModuleValue ResourceBridge::UpdateColorMode(ArkUIRuntimeCallInfo* run
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
         UpdateColorModeForThemeConstants(colorModeValue);
 #else
-        ResourceManager::GetInstance().PushOverrideColorMode(
+        ResourceManager::GetInstance().UpdateColorMode(
             pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), colorModeValue);
-        auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(
-            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId());
-        if (resourceAdapter) {
-            pipeline->UpdateThemeManager(resourceAdapter);
-        }
 #endif
         pipeline->SetLocalColorMode(colorModeValue);
     }
@@ -97,16 +92,12 @@ ArkUINativeModuleValue ResourceBridge::Restore(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(pipeline, panda::JSValueRef::Undefined(vm));
     pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto colorModeValue = pipeline->GetColorMode();
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else
-    ResourceManager::GetInstance().PopOverrideColorMode(pipeline->GetInstanceId());
-    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(
-        pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId());
-    if (resourceAdapter) {
-        pipeline->UpdateThemeManager(resourceAdapter);
-    }
+    ResourceManager::GetInstance().UpdateColorMode(
+        pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), colorModeValue);
 #endif
     return panda::JSValueRef::Undefined(vm);
 }

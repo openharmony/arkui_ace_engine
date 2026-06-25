@@ -175,6 +175,33 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
     }
 }
 
+bool ViewFunctions::ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isProgressive, bool shouldCollect)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, true)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteReleaseRecyclePool");
+    enum {
+        PARAM_REMAINING_TIME_MS = 0,
+        PARAM_IS_PROGRESSIVE = 1,
+        PARAM_SHOULD_COLLECT = 2,
+        PARAM_LENGTH = 3
+    };
+    auto func = jsReleaseRecyclePoolFunc_.Lock();
+    if (!func->IsEmpty()) {
+        JSRef<JSVal> params[PARAM_LENGTH];
+        params[PARAM_REMAINING_TIME_MS] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(remainingTimeMs)));
+        params[PARAM_IS_PROGRESSIVE] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(isProgressive)));
+        params[PARAM_SHOULD_COLLECT] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(shouldCollect)));
+        auto result = func->Call(jsObject_.Lock(), PARAM_LENGTH, params);
+        if (result->IsBoolean()) {
+            return result->ToBoolean();
+        }
+        return true;
+    } else {
+        LOGE("the release recycle pool func is null");
+        return true;
+    }
+}
+
 void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
@@ -335,6 +362,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleSelf");
         if (jsRecycleFunc->IsFunction()) {
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
+        }
+
+        JSRef<JSVal> jsReleaseRecyclePoolFunc = jsObject->GetProperty("__releaseRecyclePool__Internal");
+        if (jsReleaseRecyclePoolFunc->IsFunction()) {
+            jsReleaseRecyclePoolFunc_ = JSRef<JSFunc>::Cast(jsReleaseRecyclePoolFunc);
         }
 
         JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");

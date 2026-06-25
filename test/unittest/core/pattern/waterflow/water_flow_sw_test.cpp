@@ -20,7 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
@@ -1058,5 +1058,74 @@ HWTEST_F(WaterFlowSWTest, OnScrollIndexDeleteCacheClear, TestSize.Level1)
     // Verify layout info is updated correctly
     EXPECT_GE(info_->startIndex_, 10);
     EXPECT_LE(info_->endIndex_, 94);
+}
+
+/**
+ * @tc.name: BackToTopFallback001
+ * @tc.desc: In SW mode, when a backToTop animation reaches its numeric endpoint but stops short of the real
+ *           top, OnAnimateStop should re-align to index 0 via a precise jump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, BackToTopFallback001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    // scroll down so the list is no longer at the top
+    UpdateCurrentOffset(-1000.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_NE(info_->startIndex_, 0);
+
+    // reproduce the SW failure: the estimated totalOffset_ has settled near the top endpoint while the real
+    // layout is still scrolled down (startIndex_ > 0). On a real device totalOffset_ stops near-but-not-exactly
+    // 0 (e.g. ~0.94), so the fallback must NOT gate on totalOffset_ being exactly at finalPosition_.
+    info_->totalOffset_ = 0.94f; // numerically ~top, but startIndex_ still > 0
+    pattern_->SetScrollSource(SCROLL_FROM_STATUSBAR);
+    pattern_->SetScrollAbort(false);
+    ASSERT_GT(info_->startIndex_, 0);
+    ASSERT_FALSE(pattern_->IsAtTop());
+
+    pattern_->OnAnimateStop();
+    // fallback queues a precise jump to index 0
+    EXPECT_EQ(info_->jumpIndex_, 0);
+
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_TRUE(pattern_->IsAtTop());
+}
+
+/**
+ * @tc.name: BackToTopFallback002
+ * @tc.desc: An interrupted animation (scrollAbort) must not trigger the SW backToTop fallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, BackToTopFallback002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    UpdateCurrentOffset(-1000.0f);
+    FlushUITasks();
+    ASSERT_FALSE(pattern_->IsAtTop());
+    const int32_t startBefore = info_->startIndex_;
+    ASSERT_GT(startBefore, 0);
+
+    // same endpoint state as the positive case; the only difference is scrollAbort below
+    info_->totalOffset_ = 0.94f;
+    pattern_->SetScrollSource(SCROLL_FROM_STATUSBAR);
+    pattern_->SetScrollAbort(true); // animation was interrupted
+
+    pattern_->OnAnimateStop();
+    // no fallback jump should be queued
+    EXPECT_EQ(info_->jumpIndex_, WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX);
+
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, startBefore);
+    EXPECT_FALSE(pattern_->IsAtTop());
 }
 } // namespace OHOS::Ace::NG

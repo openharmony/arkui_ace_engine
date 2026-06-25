@@ -755,7 +755,6 @@ export class d1 extends ViewPU {
         v1 -= this.buttonHeight;
         v1 -= this.theme.h2.padding.top.value;
         v1 -= (this.theme.button.e2.bottom.value / 2);
-        v1 -= this.theme.title.margin.bottom.value;
         v1 -= (this.theme.h2.padding.bottom.value -
             (this.theme.button.e2.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(v1 + 1)) {

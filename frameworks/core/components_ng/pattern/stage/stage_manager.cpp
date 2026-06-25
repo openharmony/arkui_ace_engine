@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
+
+#include "base/log/ace_performance_check.h"
 #include "core/common/container.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -139,13 +141,12 @@ void StageManager::PageChangeCloseKeyboard()
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
         auto container = Container::Current();
         if (!container) {
             return;
         }
         if (!container->IsSceneBoardWindow()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChangeCloseKB");
             InputMethodManager::GetInstance()->CloseKeyboard(false);
         }
     }
@@ -665,7 +666,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
-    ResSchedReport::GetInstance().HandlePageTransition(srcFullPath, destFullPath, "Router");
+    PageTransitionReport(srcFullPath, destFullPath);
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -799,5 +800,21 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     auto info = pattern->GetPageInfo();
     CHECK_NULL_RETURN(info, "");
     return info->GetPagePath();
+}
+
+void StageManager::PageTransitionReport(const std::string& srcFullPath, const std::string& destFullPath)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = srcFullPath;
+    pageTransitionInfo.toPage = destFullPath;
+    pageTransitionInfo.mode = "Router";
+    pageTransitionInfo.fromComponentName = "";
+    pageTransitionInfo.toComponentName = "";
+    uint32_t windowId = 0;
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        windowId = context->GetWindowId();
+    }
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
 }
 } // namespace OHOS::Ace::NG

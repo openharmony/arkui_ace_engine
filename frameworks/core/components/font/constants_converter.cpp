@@ -957,6 +957,13 @@ float GetVariableFontWeight(FontWeight fontWeight)
     return (static_cast<int32_t>(ConvertTxtFontWeight(fontWeight)) + 1) * DEFAULT_MULTIPLE;
 }
 
+void SetFontWeightVariations(Rosen::TextStyle& txtStyle, float fontWeightScale, const TextStyle& textStyle)
+{
+    auto fontWeightValue = GetVariableFontWeight(textStyle.GetFontWeight());
+    fontWeightValue = fontWeightValue * fontWeightScale;
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+}
+
 std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow)
 {
     if (shadow.IsDefault()) {

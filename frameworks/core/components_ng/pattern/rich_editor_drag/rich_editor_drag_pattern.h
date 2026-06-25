@@ -78,8 +78,11 @@ public:
 
 protected:
     OffsetF ConvertToGlobalOffset(const OffsetF& localOffset, const OffsetF& parentGlobalOffset) override;
-    void SetDragNodeScale(const RefPtr<RenderContext>& dragContext);
+    void SetDragNodeScale(const RefPtr<RenderContext>& dragContext, const RefPtr<FrameNode>& hostNode);
     void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes) override;
+    TextDragData CreateTextDragData(const RectF& textRect, const OffsetF& localDragOffset,
+        const OffsetF& globalDragOffset, const RectF& leftHandler, const RectF& rightHandler) override;
+    void AdjustHandlers(const RectF& contentRect, RectF& leftHandler, RectF& rightHandler) override;
     std::shared_ptr<TextDragInfo> info_;
 
 private:

@@ -61,6 +61,7 @@ public:
     void ResetGradientShaderStyle() override;
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
@@ -92,10 +93,11 @@ public:
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetHalfLeading(bool halfLeading) override;
-    void SetEnableHapticFeedback(bool state) override {};
+    void SetEnableHapticFeedback(bool state, bool flagByUser) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
     void SetLineThicknessScale(float value) override {};
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override {};
+    void SetTailIndents(const NG::TailIndents& value) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

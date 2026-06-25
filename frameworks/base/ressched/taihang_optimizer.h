@@ -18,7 +18,7 @@
 #include <atomic>
 #include <shared_mutex>
 #include <unordered_map>
-#include <vector>
+#include <unordered_set>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
@@ -32,17 +32,18 @@ public:
     bool IsInited();
     void SetEnable(bool value);
     bool IsEnable();
-    bool CheckSwiperPathValid(const std::string& bundleName, const std::string& pageNames);
+    bool CheckSwiperPageValid(const std::string& pageNames);
     void ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index);
 private:
     TaihangOptimizer(const TaihangOptimizer&) = delete;
     TaihangOptimizer& operator=(const TaihangOptimizer&) = delete;
+    void ParseReplyPages(const std::unordered_map<std::string, std::string>& reply);
     std::atomic_bool enable_ = false;
     bool isInited_ = false;
     std::shared_mutex processWhiteListMutex_;
-    std::unordered_map<std::string, std::vector<std::string>> bundleNameToPages_;
+    std::unordered_set<std::string> pageNameSet_;
 };
 } // end namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_TAIHANG_OPTIMIZER_H

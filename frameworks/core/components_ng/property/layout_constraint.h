@@ -40,6 +40,8 @@ struct ViewPosReference {
     float viewExtStart;
     float viewExtEnd;
     float referencePos;
+    float stickyInsetStart;
+    float stickyInsetEnd;
     ReferenceEdge referenceEdge;
     Axis axis;
     std::optional<int64_t> deadline;

@@ -17,6 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -3155,6 +3157,80 @@ HWTEST_F(ListPatternTestNg, IsScrollAble006, TestSize.Level1)
 
     auto result = pattern_->IsScrollAble(SmartGestureDirection::BACKWARD);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalculateScrollingDistanceToIndex001
+ * @tc.desc: Test when index exists and is not group, calculate target position correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CalculateScrollingDistanceToIndex001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+
+    float targetPos = 0.0f;
+    auto result = pattern_->CalculateScrollingDistanceToIndex(0, ScrollAlign::START, targetPos, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalculateScrollingDistanceToIndex002
+ * @tc.desc: Test when index not exists and isSmartGesture=true with full environment,
+ *           verify targetIndex_ and isLayoutListForFocus_ are set to trigger layout generation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CalculateScrollingDistanceToIndex002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    pattern_->itemPosition_.clear();
+    pattern_->itemPosition_[0] = { 0, 0.0f, 100.0f, false };
+    pattern_->targetIndex_.reset();
+    pattern_->isLayoutListForFocus_.reset();
+
+    float targetPos = 0.0f;
+    auto result = pattern_->CalculateScrollingDistanceToIndex(8, ScrollAlign::START, targetPos, false);
+    EXPECT_FALSE(result);
+    result = pattern_->CalculateScrollingDistanceToIndex(8, ScrollAlign::START, targetPos, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalculateScrollingDistanceToIndex003
+ * @tc.desc: Test different ScrollAlign values when index exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CalculateScrollingDistanceToIndex003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+
+    float targetPos = 0.0f;
+
+    auto result1 = pattern_->CalculateScrollingDistanceToIndex(0, ScrollAlign::START, targetPos, false);
+    EXPECT_TRUE(result1);
+
+    auto result2 = pattern_->CalculateScrollingDistanceToIndex(0, ScrollAlign::CENTER, targetPos, false);
+    EXPECT_TRUE(result2);
+
+    auto result3 = pattern_->CalculateScrollingDistanceToIndex(0, ScrollAlign::END, targetPos, false);
+    EXPECT_TRUE(result3);
+
+    auto result4 = pattern_->CalculateScrollingDistanceToIndex(0, ScrollAlign::AUTO, targetPos, false);
+    EXPECT_TRUE(result4);
 }
 
 } // namespace OHOS::Ace::NG

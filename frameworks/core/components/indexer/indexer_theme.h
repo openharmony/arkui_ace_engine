@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_attributes.h"

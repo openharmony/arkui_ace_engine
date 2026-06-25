@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "compatible/components/picker/picker_option_component.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -58,7 +59,6 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
     auto theme = option->GetTheme();
     if (!theme) {
         LOGE("option theme is null.");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
 

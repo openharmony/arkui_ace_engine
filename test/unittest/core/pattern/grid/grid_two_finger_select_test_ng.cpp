@@ -485,6 +485,72 @@ HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffThreeFingerReject001,
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 }
 
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffFingerTooFarReject001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(0.0, 0.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(500.0, 500.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffFingerNearContinue001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(100.0, 100.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(120.0, 120.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
 // ============================================================
 // OnModifyDone init/uninit cycle with two-finger select
 // ============================================================
@@ -553,6 +619,388 @@ HWTEST_F(GridTwoFingerSelectTestNg, SetEnableEditModeBindingEventReset001, TestS
 
     pattern_->SetEnableEditMode(true);
     EXPECT_EQ(bindingCount, 0);
+}
+
+// ============================================================
+// IsTwoFingerSelectAllowed — rawPointerEvent null path
+// ============================================================
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerNullRawEventAllowed001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(100.0, 100.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(120.0, 120.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+    ASSERT_FALSE(event->GetRawInputEvent());
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerNullEvent001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto result = callback(gestureInfo, nullptr);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerOneFingerReject001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = CreatePanGestureEvent(1, InputEventType::TOUCH_SCREEN);
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerThreeFingerReject001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = CreatePanGestureEvent(3, InputEventType::TOUCH_SCREEN);
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerTooFarReject001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(0.0, 0.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(500.0, 500.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeTwoFingerCloseDistanceAllowed001, TestSize.Level0)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(100.0, 100.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(110.0, 110.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+// ============================================================
+// HandleSwipeSelectUpdate two-finger midpoint
+// ============================================================
+
+namespace {
+constexpr float TF_HALF_ITEM = 50.0f;
+constexpr float TF_CLOSE_DIST = 10.0f;
+
+static FingerInfo MakeFinger(int32_t id, const Offset& global, const Offset& local)
+{
+    FingerInfo finger;
+    finger.fingerId_ = id;
+    finger.globalLocation_ = global;
+    finger.localLocation_ = local;
+    return finger;
+}
+
+static GestureEvent CreateSingleFingerGestureEvent(float globalX, float globalY)
+{
+    GestureEvent info;
+    info.SetGlobalLocation(Offset(globalX, globalY));
+    info.SetLocalLocation(Offset(globalX, globalY));
+    info.SetRawGlobalLocation(Offset(globalX, globalY));
+    return info;
+}
+
+static GestureEvent CreateTwoFingerGestureEvent(const FingerInfo& f0, const FingerInfo& f1)
+{
+    GestureEvent info;
+    info.SetGlobalLocation(f0.globalLocation_);
+    info.SetLocalLocation(f0.localLocation_);
+    std::list<FingerInfo> fingers = { f0, f1 };
+    info.SetFingerList(fingers);
+    return info;
+}
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, SwipeSelectUpdateTwoFingerMidpointForward001, TestSize.Level0)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+
+    pattern_->enableEditMode_ = true;
+    pattern_->multiSelectable_ = false;
+
+    GestureEvent startInfo = CreateSingleFingerGestureEvent(TF_HALF_ITEM, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_NE(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
+
+    GestureEvent updateInfo = CreateTwoFingerGestureEvent(
+        MakeFinger(0, Offset(TF_HALF_ITEM, TF_HALF_ITEM), Offset(TF_HALF_ITEM, TF_HALF_ITEM)),
+        MakeFinger(1, Offset(TF_HALF_ITEM + TF_CLOSE_DIST, 150.0f), Offset(TF_HALF_ITEM + TF_CLOSE_DIST, 150.0f)));
+    pattern_->HandleSwipeSelectUpdate(updateInfo);
+
+    EXPECT_GT(pattern_->swipeCurrentStateKey_.index, pattern_->swipeStartStateKey_.index);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, SwipeSelectUpdateSingleFingerNoMidpoint001, TestSize.Level0)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+
+    pattern_->enableEditMode_ = true;
+    pattern_->multiSelectable_ = false;
+
+    GestureEvent startInfo = CreateSingleFingerGestureEvent(TF_HALF_ITEM, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
+
+    GestureEvent updateInfo = CreateSingleFingerGestureEvent(150.0f, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectUpdate(updateInfo);
+
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, 1);
+}
+
+// ============================================================
+// UpdateSwipeSelection range unchanged early return
+// ============================================================
+
+HWTEST_F(GridTwoFingerSelectTestNg, UpdateSwipeSelectionRangeUnchangedSkips001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->enableEditMode_ = true;
+    pattern_->multiSelectable_ = false;
+
+    GestureEvent startInfo = CreateSingleFingerGestureEvent(TF_HALF_ITEM, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
+
+    GestureEvent updateInfo = CreateSingleFingerGestureEvent(150.0f, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectUpdate(updateInfo);
+    ASSERT_EQ(pattern_->swipeCurrentStateKey_.index, 1);
+    ASSERT_TRUE(pattern_->swipePrevRangeStartKey_.IsValid());
+    ASSERT_TRUE(pattern_->swipePrevRangeEndKey_.IsValid());
+
+    auto prevStart = pattern_->swipePrevRangeStartKey_;
+    auto prevEnd = pattern_->swipePrevRangeEndKey_;
+
+    pattern_->UpdateSwipeSelection();
+
+    EXPECT_EQ(pattern_->swipePrevRangeStartKey_, prevStart);
+    EXPECT_EQ(pattern_->swipePrevRangeEndKey_, prevEnd);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, UpdateSwipeSelectionRangeChangedProceeds001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->enableEditMode_ = true;
+    pattern_->multiSelectable_ = false;
+
+    GestureEvent startInfo = CreateSingleFingerGestureEvent(TF_HALF_ITEM, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
+
+    GestureEvent updateInfo1 = CreateSingleFingerGestureEvent(150.0f, TF_HALF_ITEM);
+    pattern_->HandleSwipeSelectUpdate(updateInfo1);
+    ASSERT_EQ(pattern_->swipeCurrentStateKey_.index, 1);
+
+    GestureEvent updateInfo2 = CreateSingleFingerGestureEvent(TF_HALF_ITEM, 250.0f);
+    pattern_->HandleSwipeSelectUpdate(updateInfo2);
+    EXPECT_NE(pattern_->swipeCurrentStateKey_.index, 1);
+}
+
+// ============================================================
+// UninitMouseEvent clears judge callback when no swipe select
+// ============================================================
+
+HWTEST_F(GridTwoFingerSelectTestNg, UninitMouseClearsJudgeWhenNoSwipe001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->multiSelectable_ = true;
+    pattern_->InitMouseEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->UninitMouseEvent();
+    EXPECT_EQ(GetGestureJudgeCallback(pattern_), nullptr);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, UninitMouseKeepsJudgeWhenSwipeActive001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->multiSelectable_ = true;
+    pattern_->InitMouseEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->UninitMouseEvent();
+    EXPECT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+}
+
+// ============================================================
+// UninitSwipeSelectEvent clears judge callback when no mouse init
+// ============================================================
+
+HWTEST_F(GridTwoFingerSelectTestNg, UninitSwipeClearsJudgeWhenNoMouse001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->UninitSwipeSelectEvent();
+    EXPECT_EQ(GetGestureJudgeCallback(pattern_), nullptr);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, UninitSwipeKeepsJudgeWhenMouseActive001, TestSize.Level0)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->multiSelectable_ = true;
+    pattern_->InitMouseEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
+
+    pattern_->UninitSwipeSelectEvent();
+    EXPECT_NE(GetGestureJudgeCallback(pattern_), nullptr);
 }
 
 } // namespace OHOS::Ace::NG

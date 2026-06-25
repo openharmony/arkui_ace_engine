@@ -163,6 +163,104 @@ static void DefaultPermissionClipboard(ani_vm* vm, void* peer, std::function<voi
     HILOGI("Call defaultPermissionClipboard done");
 }
 
+static bool CreateHandlerAniObject(ani_env* env, void* handlerPeer, ani_object& handlerObj)
+{
+    ani_class handlerCls;
+    if (env->FindClass("@ohos.web.fullScreenVideoOverlay.FullScreenVideoOverlayHandlerInner", &handlerCls) != ANI_OK) {
+        HILOGE("FindClass fail: FullScreenVideoOverlayHandlerInner");
+        return false;
+    }
+    ani_method handlerCtor;
+    if (env->Class_FindMethod(handlerCls, "<ctor>", ":", &handlerCtor) != ANI_OK) {
+        HILOGE("Class_FindMethod fail, <ctor> in FullScreenVideoOverlayHandlerInner");
+        return false;
+    }
+    if (env->Object_New(handlerCls, handlerCtor, &handlerObj) != ANI_OK) {
+        HILOGE("Object_New fail: FullScreenVideoOverlayHandlerInner");
+        return false;
+    }
+    ani_long ptr = reinterpret_cast<ani_long>(handlerPeer);
+    ani_method bindNativePtrMethod;
+    if (env->Class_FindMethod(handlerCls, "bindNativePtr", "l:", &bindNativePtrMethod) == ANI_OK) {
+        env->Object_CallMethod_Void(handlerObj, bindNativePtrMethod, ptr);
+    }
+    return true;
+}
+
+static bool CreateMediaInfoAniString(ani_env* env, void* mediaInfoPeer, ani_string& mediaInfoAniStr)
+{
+    auto* mediaInfoStr = static_cast<std::string*>(mediaInfoPeer);
+    if (env->String_NewUTF8(mediaInfoStr->c_str(), mediaInfoStr->size(), &mediaInfoAniStr) != ANI_OK) {
+        HILOGE("String_NewUTF8 fail for mediaInfo");
+        return false;
+    }
+    return true;
+}
+
+static bool CallFullScreenVideoOverlayDialog(
+    ani_env* env, ani_object handlerObj, ani_string mediaInfoAniStr)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.web.fullScreenVideoOverlay.FullScreenVideoOverlayDialog", &cls) != ANI_OK) {
+        HILOGE("FindClass fail: FullScreenVideoOverlayDialog");
+        return false;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", ":", &ctor) != ANI_OK) {
+        HILOGE("Class_FindMethod fail, <ctor> in FullScreenVideoOverlayDialog");
+        return false;
+    }
+    ani_object obj;
+    if (env->Object_New(cls, ctor, &obj) != ANI_OK) {
+        HILOGE("Object_New fail: FullScreenVideoOverlayDialog");
+        return false;
+    }
+    ani_method method;
+    if (env->Class_FindMethod(cls, "defaultOnFullScreenVideoOverlayEnter",
+        "C{@ohos.web.fullScreenVideoOverlay.FullScreenVideoOverlayHandlerInner}C{std.core.String}:", &method) !=
+        ANI_OK) {
+        HILOGE("Class_FindMethod fail, defaultOnFullScreenVideoOverlayEnter");
+        return false;
+    }
+    if (env->Object_CallMethod_Void(obj, method,
+        static_cast<ani_ref>(handlerObj), static_cast<ani_ref>(mediaInfoAniStr)) != ANI_OK) {
+        HILOGE("Call defaultOnFullScreenVideoOverlayEnter fail");
+        return false;
+    }
+    return true;
+}
+
+static void DefaultOnFullScreenVideoOverlayEnter(
+    ani_vm* vm, void* handlerPeer, void* mediaInfoPeer, std::function<void(void*)> release)
+{
+    HILOGI("Call defaultOnFullScreenVideoOverlayEnter start");
+    ani_env* env = GetAniEnv(vm);
+    if (!env) {
+        HILOGE("DefaultOnFullScreenVideoOverlayEnter callback env is nullptr");
+        release(handlerPeer);
+        release(mediaInfoPeer);
+        return;
+    }
+
+    ani_object handlerObj;
+    if (!CreateHandlerAniObject(env, handlerPeer, handlerObj)) {
+        release(handlerPeer);
+        release(mediaInfoPeer);
+        return;
+    }
+
+    ani_string mediaInfoAniStr;
+    if (!CreateMediaInfoAniString(env, mediaInfoPeer, mediaInfoAniStr)) {
+        release(mediaInfoPeer);
+        return;
+    }
+
+    CallFullScreenVideoOverlayDialog(env, handlerObj, mediaInfoAniStr);
+
+    release(mediaInfoPeer);
+    HILOGI("Call defaultOnFullScreenVideoOverlayEnter done");
+}
+
 static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
     WebviewControllerPeer* webviewControllerPeer)
 {
@@ -208,6 +306,12 @@ static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
     webviewControllerPeer->setWebDetachFunc = std::move(setWebDetachFunc);
     webviewControllerPeer->defaultOnShowFileSelectorFunc = std::move(defaultOnShowFileSelectorFunc);
     webviewControllerPeer->defaultPermissionClipboardFunc = std::move(defaultPermissionClipboardFunc);
+    auto defaultOnFullScreenVideoOverlayEnterFunc =
+        [vm](void* handlerPeer, void* mediaInfoPeer, std::function<void(void*)> release) {
+        DefaultOnFullScreenVideoOverlayEnter(vm, handlerPeer, mediaInfoPeer, std::move(release));
+    };
+    webviewControllerPeer->defaultOnFullScreenVideoOverlayEnterFunc =
+        std::move(defaultOnFullScreenVideoOverlayEnterFunc);
 }
 
 static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,

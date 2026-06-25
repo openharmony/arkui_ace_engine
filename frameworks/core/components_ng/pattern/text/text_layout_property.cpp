@@ -69,6 +69,20 @@ std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIS
 }
 } // namespace
 
+std::string TextLayoutProperty::GetTailIndentInJson() const
+{
+    CHECK_NULL_RETURN(HasTailIndents(), "");
+    auto tailIndentsValue = GetTailIndents();
+    CHECK_NULL_RETURN(tailIndentsValue.has_value() && tailIndentsValue->indentsArray.has_value(), "");
+    auto jsonTailIndentsArr = JsonUtil::CreateArray(true);
+    for (const auto& dim : tailIndentsValue->indentsArray.value()) {
+        auto dimJson = JsonUtil::Create(true);
+        dimJson->Put("dimension", dim.ToString().c_str());
+        jsonTailIndentsArr->Put(dimJson);
+    }
+    return jsonTailIndentsArr->ToString();
+}
+
 std::string TextLayoutProperty::GetCopyOptionString() const
 {
     std::string copyOptionString = "CopyOptions.None";
@@ -274,6 +288,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         GetOrphanCharOptimization().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("compressLeadingPunctuation",
         GetCompressLeadingPunctuation().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("punctuationOverflow",
+        GetPunctuationOverflow().value_or(false) ? "true" : "false", filter);
     if (HasLineHeightMultiply()) {
         json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(), filter);
     }
@@ -292,6 +308,12 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     }
     json->PutExtAttr("selectedDragPreviewStyle",
         GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
+    json->PutExtAttr("incrementalUpdatePolicy", V2::ConvertWrapIncrementalUpdatePolicyToString(
+        GetIncrementalUpdatePolicy().value_or(IncrementalUpdatePolicy::NONE)).c_str(), filter);
+    auto tailIndentJsonStr = GetTailIndentInJson();
+    if (!tailIndentJsonStr.empty()) {
+        json->PutExtAttr("tailIndents", tailIndentJsonStr.c_str(), filter);
+    }
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -41,6 +41,7 @@ class NWebAccessibilityNodeInfo;
 namespace OHOS::Ace::NG {
     class TransitionalNodeInfo;
     struct WindowSceneInfo;
+    class VirtualAccessibilityNode;
 }
 
 namespace OHOS::Accessibility {
@@ -436,6 +437,21 @@ public:
         AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
+    void NotifyAccessibilityFocusDetachOrInvisible(const RefPtr<NG::FrameNode>& focusNode);
+    bool SendRequestFocusToCandidate(const RefPtr<NG::FrameNode>& candidateNode);
+    RefPtr<NG::FrameNode> FindCandidateByFocusMove(const RefPtr<NG::FrameNode>& focusNode, int32_t direction);
+    bool IsDetachFocusCacheClearEvent(AccessibilityEventType eventType) const;
+    void ClearDetachFocusFallbackCache(int32_t instanceId);
+    void CacheDetachFocusFallbackCandidates(
+        int32_t instanceId, int64_t focusNodeId, const std::vector<int64_t>& candidateIds);
+    struct DetachFocusFallbackData {
+        int64_t focusNodeId = -1;
+        std::vector<int64_t> candidateIds;
+    };
+    DetachFocusFallbackData GetAndClearDetachFocusFallbackCandidates(int32_t instanceId);
+    std::vector<int64_t> QueryDetachFocusFallbackCandidates(
+        const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::PipelineContext>& context, size_t maxCount);
+    void HandleDetachFocusFallbackCallback(int32_t instanceId);
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
@@ -521,6 +537,20 @@ public:
     void GetCursorPosition(const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
 
+    void UpdateAccessibilityElementInfoForVirtualNode(
+        const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo,
+        int64_t parentAccessibilityId);
+
+    void AddVirtualNodeChildrenToInfos(
+        std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const CommonProperty& commonProperty,
+        int64_t virtualNodeAccessibilityId);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -560,6 +590,15 @@ private:
         void SetBelongTreeId(const int32_t treeId) override;
         void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+
+        void UpdateCustomAccessibilityProperty(
+            const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void AddAccessibilityVirtualNode(
+            const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void RemoveAccessibilityVirtualNode(const int64_t elementId,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -605,6 +644,15 @@ private:
         void SetBelongTreeId(const int32_t treeId) override;
         void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
             const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+
+        void UpdateCustomAccessibilityProperty(
+            const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void AddAccessibilityVirtualNode(
+            const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+        void RemoveAccessibilityVirtualNode(const int64_t elementId,
+            const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -759,6 +807,8 @@ private:
     void DumpInjectActionTest(const std::vector<std::string>& params);
     void DumpExecuteActionTest(const std::vector<std::string>& params);
     void DumpCustomActionTest(const std::vector<std::string>& params);
+    void DumpSetComponentTypeTest(const std::vector<std::string>& params);
+    void DumpClearComponentTypeTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);
@@ -939,6 +989,12 @@ private:
     // Check if current pipeline context is form render
     bool IsFormRender();
 
+    bool SearchAccessibilityVirtualNode(int64_t elementId,
+        std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
+    bool GetAllVirtualNodeElementId(std::list<AccessibilityElementInfo>& infos,
+        const CommonProperty& commonProperty,
+        const RefPtr<NG::FrameNode>& containerNode, AccessibilityElementInfo& parentNodeInfo);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
@@ -972,6 +1028,8 @@ private:
     std::optional<std::string> pageMode_ = std::nullopt;
     std::queue<AccessibilityEvent> eventQueue_;
     std::vector<AccessibilityEvent> cacheEventVec_;
+    std::mutex detachFocusFallbackCacheMutex_;
+    std::unordered_map<int32_t, DetachFocusFallbackData> detachFocusFallbackCache_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;

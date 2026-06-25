@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -715,5 +715,8 @@ ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];
 
 // LazyVWaterFlowLayout
 ACE_EXPORT extern const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[];
+
+// selection container
+ACE_EXPORT extern const char SELECTION_CONTAINER_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

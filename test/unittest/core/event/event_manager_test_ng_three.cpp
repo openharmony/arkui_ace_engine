@@ -25,6 +25,24 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace OHOS::Ace {
+
+// Define RectCallback and RectCallbackListImpl for test access
+// These structures are defined in event_manager.cpp and are not exposed in the header
+struct RectCallback {
+    ~RectCallback() = default;
+    std::function<void(std::vector<Rect>&)> rectGetCallback;
+    std::function<void()> touchCallback;
+    std::function<void()> mouseCallback;
+};
+
+struct RectCallbackListImpl {
+    std::vector<RectCallback> callbacks;
+};
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 RefPtr<FrameNode> CreateFrameNodeGroup(int32_t targetId, size_t childCount)
@@ -246,12 +264,13 @@ HWTEST_F(EventManagerTestNg, EventManagerTest067, TestSize.Level2)
     eventManager->AddRectCallback(
         [rectGetCallback](std::vector<Rect>& rectList) -> void { rectGetCallback(rectList); },
         nullptr, mouseCallback);
-
+    ASSERT_NE(eventManager->rectCallbackListImpl_, nullptr);
     /**
      * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
      * @tc.expected: one callback processed for touch
      */
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 1);
 
     /**
      * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
@@ -259,6 +278,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest067, TestSize.Level2)
      */
     point.SetSourceType(SourceType::MOUSE);
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 0);
 }
 
 /**

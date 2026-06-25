@@ -1301,6 +1301,8 @@ HWTEST_F(RichEditorSpanTest, GetReplacedSpan001, TestSize.Level0)
     paragraphStyle.textAlign = TextAlign::END;
     paragraphStyle.leadingMargin = std::make_optional<NG::LeadingMargin>();
     paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    NG::Gradient gradient;
+    paragraphStyle.SetOptGradient(gradient);
     richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
     std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
     int32_t innerPosition = 0;

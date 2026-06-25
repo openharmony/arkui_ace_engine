@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "interfaces/native/drag_and_drop.h"
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
@@ -80,6 +81,8 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
     CHECK_NULL_RETURN_WITH_MESSAGE(dragEvent, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_DragEvent_GetDragSource", "dragEvent is null");
     if (static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragEvent_GetDragSource", "strlen(dragEvent->bundleName) >= length");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);
@@ -830,6 +833,7 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event)
 int32_t OH_ArkUI_DragEvent_StartDataLoading(
     ArkUI_DragEvent* event, OH_UdmfGetDataParams *options, char* key, unsigned int keyLen)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("NativeDragAndDrop.DragEvent.StartDataLoading", 1);
     if (!event || !options || !key || !keyLen || keyLen < UDMF_KEY_BUFFER_LEN) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -876,6 +880,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_
 
 int32_t OH_ArkUI_CancelDataLoading(ArkUI_ContextHandle uiContent, const char* key)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("NativeDragAndDrop.DragEvent.CancelDataLoading", 1);
     if (!uiContent || !key) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }

@@ -22,7 +22,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components_ng/pattern/depth_component/depth_component_event_hub.h"
-#include "core/components_ng/pattern/depth_component/depth_component_pattern.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
@@ -31,18 +30,27 @@ class ACE_EXPORT DepthComponentModel {
 public:
     static void Create(const OHOS::Ace::DepthBackgroundSource& background);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const OHOS::Ace::DepthBackgroundSource& background);
+    static void SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background);
     static void SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace);
     static void SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSpaceType depthSpace);
+    static void SetRender3DScale(float render3DScale);
+    static void SetRender3DScale(FrameNode* frameNode, float render3DScale);
     static void SetDepthMap(const ImageSourceInfo& depthMap);
     static void SetDepthMap(FrameNode* frameNode, const ImageSourceInfo& depthMap);
+    using DepthMapErrorCallback = std::function<void(int32_t errorCode, const std::string& errorMessage)>;
+    static void SetDepthMap(const ImageSourceInfo& depthMap, DepthMapErrorCallback&& callback);
+    static void SetDepthMap(FrameNode* frameNode, const ImageSourceInfo& depthMap, DepthMapErrorCallback&& callback);
     static void SetCamera(const OHOS::Ace::DepthCameraParams& camera);
     static void SetCamera(FrameNode* frameNode, const OHOS::Ace::DepthCameraParams& camera);
     static void SetLight(const OHOS::Ace::DepthLightParams& light);
     static void SetLight(FrameNode* frameNode, const OHOS::Ace::DepthLightParams& light);
-    static void SetBackgroundOffset(const OHOS::Ace::DepthBackgroundOffset& offset);
-    static void SetBackgroundOffset(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundOffset& offset);
-    static void SetBackgroundScale(const std::optional<NG::VectorF>& scale);
-    static void SetBackgroundScale(FrameNode* frameNode, const std::optional<NG::VectorF>& scale);
+
+    static void SetOnComplete(std::function<void(const DepthComponentCompleteEvent&)>&& callback);
+    static void SetOnComplete(FrameNode* frameNode,
+        std::function<void(const DepthComponentCompleteEvent&)>&& callback);
+    static void SetOnError(std::function<void(const DepthComponentErrorEvent&)>&& callback);
+    static void SetOnError(FrameNode* frameNode,
+        std::function<void(const DepthComponentErrorEvent&)>&& callback);
 };
 
 }; // namespace OHOS::Ace::NG

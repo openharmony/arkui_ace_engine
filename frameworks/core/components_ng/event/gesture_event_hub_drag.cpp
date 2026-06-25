@@ -1260,7 +1260,13 @@ bool GestureEventHub::TryStartSystemDrag(DragStartContext& ctx, int32_t windowId
     float screenX = 0.0f;
     float screenY = 0.0f;
     ResolveDragScreenPosition(ctx, screenX, screenY);
-    auto dragData = CreateDragData(ctx, arkExtraInfoJson->ToString(), windowId, screenX, screenY);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    EventPositionInfo eventPositionInfo {screenX, screenY};
+    EventPositionInfo originalPos {screenX, screenY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
+    auto dragData =
+        CreateDragData(ctx, arkExtraInfoJson->ToString(), windowId, originalPos.displayX, originalPos.displayY);
     ReportDragStartData(ctx, dragData);
     ctx.dragDropManager->GetGatherPixelMap(dragData, ctx.scale, ctx.width, ctx.height);
     ACE_BENCH_MARK_TRACE("onDragStart_end");
@@ -2132,10 +2138,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     data.gatherNode = gatherNode;
     // create textNode
     DragAnimationHelper::CreateTextNode(data);
-    auto gatherNodeOffset = isExpandDisplay
-            ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
-            : positionToWindow;
-    DragEventActuator::UpdateGatherAnimatePosition(gatherNode, gatherNodeOffset);
 
     // mount node
     auto subWindowOverlayManager = subWindow->GetOverlayManager();
@@ -2147,6 +2149,10 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // update position
     UpdateNodePositionBeforeStartAnimation(frameNode, data);
+    auto gatherNodeOffset = isExpandDisplay
+        ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
+        : positionToWindow;
+    DragEventActuator::UpdateGatherAnimatePosition(gatherNode, gatherNodeOffset);
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(data.textNode);

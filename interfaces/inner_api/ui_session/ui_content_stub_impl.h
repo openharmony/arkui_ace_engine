@@ -25,6 +25,8 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
 public:
+    using IUiContentService::ExeAppAIFunction;
+
     int32_t Connect(const EventCallback& eventCallback,
         std::shared_ptr<AppExecFwk::EventHandler> eventHandler = nullptr) override
     {
@@ -87,8 +89,8 @@ public:
         const std::function<void(std::string, int32_t, bool)>& eventCallback,
         InteractionParamConfig config = InteractionParamConfig()) override;
     int32_t ExeAppAIFunction(
-        const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
-        override;
+        const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
+        const std::function<void(uint32_t, std::string)>& finishCallback) override;
     int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
         [[maybe_unused]] const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     int32_t UnregisterContentChangeCallback() override;

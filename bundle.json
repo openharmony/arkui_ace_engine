@@ -125,7 +125,9 @@
                 "request",
                 "qrcodegen",
                 "sdk",
-                "screenlock_mgr"
+                "screenlock_mgr",
+                "video_processing_engine",
+                "egl"
             ],
             "third_party": []
         },
@@ -285,7 +287,75 @@
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
                 "//foundation/arkui/ace_engine/test/benchmark:benchmark"
-            ]
+            ],
+            "conditions": {
+                "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/build:libace": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/native:ace_ndk": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/build:libace_compatible": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/inner_api:copy_arkui_ets": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/inner_api/drawable:drawable_inner_ani": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/test/unittest:unittest": {
+                    "compile_mode": ["cross", "host", "target"]
+                },
+                "//foundation/arkui/ace_engine/test/benchmark:benchmark": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/services:services_target": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.para.dac": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.timepicker.ogg": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg": {
+                    "compile_mode": ["cross"]
+                },
+                "//foundation/arkui/ace_engine/interfaces/ets:ace_ani_package": {
+                    "compile_mode": ["cross"]
+                }
+            }
         }
     }
 }

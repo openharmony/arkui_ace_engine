@@ -20,6 +20,7 @@
 
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/common/attribute.h"
+#include "core/components/declaration/common/common_background_style.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
@@ -27,6 +28,7 @@
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
+#include "core/components/declaration/text/text_specialized_style.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"

@@ -78,6 +78,7 @@ struct TestProperty {
     std::optional<ImageFit> objectFit;
     std::optional<RefPtr<VideoControllerV2>> videoController;
 };
+
 namespace {
 constexpr double VIDEO_PROGRESS_RATE = 1.0;
 constexpr bool MUTED_VALUE = false;
@@ -85,6 +86,7 @@ constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
 constexpr bool SHOW_FIRST_FRAME = false;
+
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -106,6 +108,7 @@ const std::string VIDEO_STOP_EVENT = "stop";
 const std::string JSON_VALUE_FALSE = "false";
 const std::string JSON_VALUE_TRUE = "true";
 const std::string JSON_VALUE_COVER = "ImageFit.Cover";
+
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -116,6 +119,7 @@ constexpr float SCREEN_WIDTH_MEDIUM = 1000.0f;
 constexpr float SCREEN_HEIGHT_MEDIUM = 2000.0f;
 constexpr float SCREEN_WIDTH_LARGE = 1500.0f;
 constexpr float SCREEN_HEIGHT_LARGE = 2500.0f;
+
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const SizeF SCREEN_SIZE_SMALL(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
 const SizeF SCREEN_SIZE_MEDIUM(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
@@ -124,6 +128,7 @@ const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
+
 constexpr uint32_t VIDEO_CHILDREN_NUM = 3;
 constexpr uint32_t DURATION = 100;
 constexpr uint32_t CURRENT_TIME = 100;
@@ -165,6 +170,7 @@ void VideoTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
+
 void VideoTestNg::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();

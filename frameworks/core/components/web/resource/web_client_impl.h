@@ -407,6 +407,8 @@ public:
     void OnCameraCaptureStateChanged(int originalState, int new_state) override;
     void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
     void OnMediaCastEnter() override;
+    void OnFullScreenOverlayEnter(const char* mediaInfo) override;
+    void OnVideoStatusChanged(const int action, const std::map<std::string, std::string> &param) override;
     void OnInputMethodAttached() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

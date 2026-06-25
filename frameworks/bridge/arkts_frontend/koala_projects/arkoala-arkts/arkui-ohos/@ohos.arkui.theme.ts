@@ -69,6 +69,9 @@ export interface Colors {
     interactiveActive: ResourceColor;
     interactiveSelect: ResourceColor;
     interactiveClick: ResourceColor;
+    primary?: ResourceColor;
+    onPrimary?: ResourceColor;
+    container?: ResourceColor;
 }
 
 export type CustomColors = Partial<Colors>;

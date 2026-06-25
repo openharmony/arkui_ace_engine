@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,73 +13,29 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LazyGridLayoutAttributeModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = LazyGridLayoutModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-void SetRowsGapImpl(Ark_NativePointer node,
-                    const Opt_LengthMetrics* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue =  Converter::OptConvert<Dimension>(*value);
-    if (convValue && convValue->Value() < 0.0f) {
-        convValue = Dimension(0.0f, convValue->Unit());
-    }
-    LazyGridLayoutModelStatic::SetRowGap(frameNode, convValue);
-}
-void SetColumnsGapImpl(Ark_NativePointer node,
-                       const Opt_LengthMetrics* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue =  Converter::OptConvert<Dimension>(*value);
-    if (convValue && convValue->Value() < 0.0f) {
-        convValue = Dimension(0.0f, convValue->Unit());
-    }
-    LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
-}
-void SetOnVisibleIndexesChangeImpl(Ark_NativePointer node, const Opt_OnVisibleIndexesChangeCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, nullptr);
-        return;
-    }
-    auto onVisibleIndexesChange = [arkCallback = CallbackHelper(*optValue)](const int32_t start, const int32_t end) {
-        auto arkStart = Converter::ArkValue<Ark_Int32>(start);
-        auto arkEnd = Converter::ArkValue<Ark_Int32>(end);
-        arkCallback.Invoke(arkStart, arkEnd);
-    };
-    LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, std::move(onVisibleIndexesChange));
-}
-} // LazyGridLayoutAttributeModifier
+struct LazyGridLayoutCombinedStaticModifiers {
+    const void* attributeModifier;
+    const void* vGridModifier;
+};
+
 const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeModifier()
 {
-    static const GENERATED_ArkUILazyGridLayoutAttributeModifier ArkUILazyGridLayoutAttributeModifierImpl {
-        LazyGridLayoutAttributeModifier::ConstructImpl,
-        LazyGridLayoutAttributeModifier::SetRowsGapImpl,
-        LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
-        LazyGridLayoutAttributeModifier::SetOnVisibleIndexesChangeImpl,
-    };
-    return &ArkUILazyGridLayoutAttributeModifierImpl;
+    static const GENERATED_ArkUILazyGridLayoutAttributeModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LazyVGridLayout");
+        CHECK_NULL_RETURN(module, nullptr);
+        auto* combined = reinterpret_cast<const LazyGridLayoutCombinedStaticModifiers*>(module->GetStaticModifier());
+        CHECK_NULL_RETURN(combined, nullptr);
+        cachedModifier =
+            reinterpret_cast<const GENERATED_ArkUILazyGridLayoutAttributeModifier*>(combined->attributeModifier);
+    }
+    return cachedModifier;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

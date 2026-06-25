@@ -1282,6 +1282,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     bool isNeedSyncTransaction = reason == Rosen::SizeChangeReason::ROTATION ||
         reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
+    if (!parentSession && isNeedSyncTransaction) {
+        session_->UpdateSizeChangeReason(Rosen::SizeChangeReason::UNDEFINED);
+    }
     if (!rsUIDirector) {
         if (isNeedSyncTransaction) {
             if (transaction_.lock()) {

@@ -17,6 +17,7 @@
 
 #include "compatible/components/list_v2/list_component.h"
 #include "compatible/components/list_v2/list_item_component.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/image/image_component.h"
 #include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/scroll/scroll_component.h"

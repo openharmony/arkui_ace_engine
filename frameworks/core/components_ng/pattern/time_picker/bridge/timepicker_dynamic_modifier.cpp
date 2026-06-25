@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"

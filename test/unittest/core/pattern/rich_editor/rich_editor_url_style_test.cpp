@@ -985,6 +985,214 @@ HWTEST_F(RichEditorUrlStyleTest, MountImageNodeWithPixelMap001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: MountImageNodeNullImageItem001
+ * @tc.desc: test MountImageNode function with null imageItem to cover CHECK_NULL_VOID(imageItem) branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodeNullImageItem001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Call MountImageNode with null imageItem, should early return
+    RefPtr<ImageSpanItem> nullImageItem = nullptr;
+    richEditorPattern->MountImageNode(nullImageItem);
+
+    // Verify that no image node was added
+    EXPECT_TRUE(richEditorPattern->imageNodes.empty());
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+}
+
+/**
+ * @tc.name: MountImageNodeNullHost001
+ * @tc.desc: test MountImageNode function with null contentPattern_ (host null) to cover CHECK_NULL_VOID(host) branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodeNullHost001, TestSize.Level0)
+{
+    // Create a standalone pattern without a host node (contentPattern_ is null)
+    auto standalonePattern = AceType::MakeRefPtr<RichEditorPattern>();
+    ASSERT_NE(standalonePattern, nullptr);
+
+    // contentPattern_ is null by default for a standalone pattern, so GetContentHost() returns nullptr
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    // Call MountImageNode, should early return due to null host
+    standalonePattern->MountImageNode(imageItem);
+
+    // Verify that no image node was added
+    EXPECT_TRUE(standalonePattern->imageNodes.empty());
+    EXPECT_TRUE(standalonePattern->placeholderImageNodes_.empty());
+}
+
+/**
+ * @tc.name: MountImageNodeWithImageAttribute001
+ * @tc.desc: test MountImageNode function with imageAttribute option (syncLoad=true, supportSvg2=true)
+ *           to cover the else-if branch for imageAttribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodeWithImageAttribute001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Create an ImageSpanItem with imageAttribute (syncLoad=true, supportSvg2=true)
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    ImageSpanAttribute attr;
+    attr.syncLoad = true;
+    attr.supportSvg2 = true;
+    options.imageAttribute = attr;
+
+    imageItem->options = options;
+    richEditorPattern->spans_.push_front(imageItem);
+
+    richEditorPattern->MountImageNode(imageItem);
+
+    // Verify that the imageNode was added to imageNodes (not placeholder since spans_ is not empty)
+    EXPECT_FALSE(richEditorPattern->imageNodes.empty());
+}
+
+/**
+ * @tc.name: MountImageNodeWithImageAttribute002
+ * @tc.desc: test MountImageNode function with imageAttribute option (syncLoad=false, supportSvg2=false)
+ *           to cover the default values branch for imageAttribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodeWithImageAttribute002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Create an ImageSpanItem with imageAttribute (syncLoad=false, supportSvg2=false)
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    ImageSpanAttribute attr;
+    attr.syncLoad = false;
+    attr.supportSvg2 = false;
+    options.imageAttribute = attr;
+
+    imageItem->options = options;
+    richEditorPattern->spans_.push_front(imageItem);
+
+    richEditorPattern->MountImageNode(imageItem);
+
+    // Verify that the imageNode was added
+    EXPECT_FALSE(richEditorPattern->imageNodes.empty());
+}
+
+/**
+ * @tc.name: MountImageNodeNoImageOption001
+ * @tc.desc: test MountImageNode function with no imagePixelMap and no imageAttribute option
+ *           to cover the branch where neither option is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodeNoImageOption001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Create an ImageSpanItem with no imagePixelMap and no imageAttribute
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    imageItem->options = options;
+    richEditorPattern->spans_.push_front(imageItem);
+
+    richEditorPattern->MountImageNode(imageItem);
+
+    // Verify that the imageNode was added
+    EXPECT_FALSE(richEditorPattern->imageNodes.empty());
+}
+
+/**
+ * @tc.name: MountImageNodePlaceholder001
+ * @tc.desc: test MountImageNode function when spans_ is empty and styledPlaceholder_ is set
+ *           to cover the placeholder branch (placeholderImageNodes_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodePlaceholder001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Clear spans_ to make it empty
+    richEditorPattern->spans_.clear();
+
+    // Set styledPlaceholder_ so isPlaceholder becomes true
+    auto placeholderString = AceType::MakeRefPtr<SpanString>(u"placeholder");
+    ASSERT_NE(placeholderString, nullptr);
+    richEditorPattern->styledPlaceholder_ = placeholderString;
+
+    // Create an ImageSpanItem with imagePixelMap option
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    imageItem->options = options;
+
+    richEditorPattern->MountImageNode(imageItem);
+
+    // Verify that the imageNode was added to placeholderImageNodes_ (not imageNodes)
+    EXPECT_FALSE(richEditorPattern->placeholderImageNodes_.empty());
+    EXPECT_TRUE(richEditorPattern->imageNodes.empty());
+}
+
+/**
+ * @tc.name: MountImageNodePlaceholder002
+ * @tc.desc: test MountImageNode function when spans_ is empty but styledPlaceholder_ is null
+ *           to cover the non-placeholder branch when spans_ is empty but no placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, MountImageNodePlaceholder002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Clear spans_ to make it empty
+    richEditorPattern->spans_.clear();
+
+    // styledPlaceholder_ is null by default, so isPlaceholder is false
+    richEditorPattern->styledPlaceholder_ = nullptr;
+
+    // Create an ImageSpanItem
+    auto imageItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(imageItem, nullptr);
+
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    imageItem->options = options;
+
+    richEditorPattern->MountImageNode(imageItem);
+
+    // Verify that the imageNode was added to imageNodes (not placeholderImageNodes_)
+    EXPECT_FALSE(richEditorPattern->imageNodes.empty());
+    EXPECT_TRUE(richEditorPattern->placeholderImageNodes_.empty());
+}
+
+/**
  * @tc.name: SetImageLayoutPropertyWithColorFilterMatrix001
  * @tc.desc: Test SetImageLayoutProperty function with colorFilterMatrix option to cover the branch
  * @tc.type: FUNC

@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "base/utils/measure_util.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -60,6 +61,23 @@ bool NeedAvoidContainerModal(
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_RETURN(avoidInfoMgr, false);
     return avoidInfoMgr->NeedAvoidContainerModal() && titleBarNode && titleBarNode->NeedAvoidContainerModal();
+}
+
+float GetScrollEffectMaskHeight(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize)
+{
+    CHECK_NULL_RETURN(titleBarNode, titleBarSize.Height());
+    float maskHeight = titleBarSize.Height();
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, maskHeight);
+    auto scrollEffectOpt = titleBarPattern->GetTitleBarOptions().bgOptions.scrollEffectOptions;
+    if (scrollEffectOpt.has_value()) {
+        if (scrollEffectOpt->scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
+            auto extraHeight =
+                static_cast<float>(Dimension(GRADUAL_BLUR_MASK_EXTRA_HEIGHT_VP, DimensionUnit::VP).ConvertToPx());
+            maskHeight = titleBarSize.Height() + extraHeight;
+        }
+    }
+    return maskHeight;
 }
 } // namespace
 
@@ -521,6 +539,38 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
     menuWrapper->Measure(constraint);
 }
 
+void TitleBarLayoutAlgorithm::MeasureMask(
+    LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern && titleBarPattern->IsScrollEffectEnabled());
+
+    auto titleBarLayoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto maskConstraint = titleBarLayoutProperty->CreateChildConstraint();
+    float maskHeight = GetScrollEffectMaskHeight(titleBarNode, titleBarSize);
+    maskConstraint.selfIdealSize = OptionalSizeF(titleBarSize.Width(), maskHeight);
+    RefPtr<UINode> effectNodes[] = { titleBarPattern->GetTitleBarMaskBlurNode(),
+        titleBarPattern->GetTitleBarMaskNode() };
+    for (const auto& effectNode : effectNodes) {
+        auto maskNode = AceType::DynamicCast<FrameNode>(effectNode);
+        if (!maskNode) {
+            continue;
+        }
+        auto maskIndex = titleBarNode->GetChildIndexById(maskNode->GetId());
+        if (maskIndex < 0) {
+            continue;
+        }
+        auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+        if (!maskWrapper) {
+            continue;
+        }
+        maskWrapper->Measure(maskConstraint);
+    }
+}
+
 void TitleBarLayoutAlgorithm::ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
     RefPtr<GeometryNode>& geometryNode, const RefPtr<LayoutWrapper>& backButtonWrapper, float titleBarHeight)
 {
@@ -597,6 +647,32 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
 
     ShowBackButtonLayout(layoutWrapper, geometryNode, backButtonWrapper,
         titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT).ConvertToPx());
+}
+
+void TitleBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern && titleBarPattern->IsScrollEffectEnabled());
+
+    RefPtr<UINode> effectNodes[] = { titleBarPattern->GetTitleBarMaskBlurNode(),
+        titleBarPattern->GetTitleBarMaskNode() };
+    for (const auto& effectNode : effectNodes) {
+        auto maskNode = AceType::DynamicCast<FrameNode>(effectNode);
+        if (!maskNode) {
+            continue;
+        }
+        auto maskIndex = titleBarNode->GetChildIndexById(maskNode->GetId());
+        if (maskIndex < 0) {
+            continue;
+        }
+        auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+        if (!maskWrapper) {
+            continue;
+        }
+        maskWrapper->Layout();
+    }
 }
 
 float TitleBarLayoutAlgorithm::GetFullModeTitleOffsetY(float titleHeight, float subtitleHeight,
@@ -1157,6 +1233,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     titlePattern->SetCurrentTitleBarHeight(size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    MeasureMask(layoutWrapper, titleBarNode, size);
 }
 
 void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -1172,6 +1249,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    LayoutMask(layoutWrapper, titleBarNode);
     LayoutBackButton(layoutWrapper, titleBarNode, layoutProperty);
 
     float subtitleHeight = 0.0f;

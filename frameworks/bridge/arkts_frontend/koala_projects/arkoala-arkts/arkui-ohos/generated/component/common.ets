@@ -23,8 +23,8 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
-import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
-import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
+import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityNextFocusParams, AccessibilityNextFocusParams_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer, AccessibilityCustomAction, AccessibilityCustomAction_serializer } from './units'
+import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, EdgeLightPosition } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -34,7 +34,7 @@ import { StyledString, StyledStringInternal, StyledString_serializer, ImageAttac
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 import { ResizableOptions_serializer, ResizableOptions } from './image'
-import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_HdrBrightnessBlender_serializer, uiEffect_HdrDarkenBlender_serializer, uiEffect_BrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
+import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_HdrBrightnessBlender_serializer, uiEffect_BrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from './focus'
 import { matrix4_Matrix4Transit_serializer } from './../framework/ohos.matrix4'
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from './../framework/ohos.arkui.shape'
@@ -62,6 +62,7 @@ import { ImageModifier } from 'arkui.ImageModifier'
 import { UIContext as ohos_arkui_UIContext_UIContext } from '@ohos.arkui.UIContext'
 import { BuildOptions } from 'arkui.BuilderNode'
 import { AvoidanceMode } from './select'
+import { LevelMode, default as promptAction } from '@ohos.promptAction'
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -2015,29 +2016,6 @@ export class RawInputEventWrapper implements MaterializedBase {
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, RawInputEventWrapper.getFinalizer())
     }
-    constructor(event: MouseEvent | TouchEvent | KeyEvent) {
-        this(MaterializedBaseTag.NOP, RawInputEventWrapper.construct(event))
-    }
-    static construct(event: MouseEvent | TouchEvent | KeyEvent): KPointer {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (event instanceof MouseEvent) {
-            thisSerializer.writeInt8((0).toByte())
-            const eventForIdx0 = event as MouseEvent
-            MouseEvent_serializer.write(thisSerializer, eventForIdx0)
-        } else if (event instanceof TouchEvent) {
-            thisSerializer.writeInt8((1).toByte())
-            const eventForIdx1 = event as TouchEvent
-            const eventForIdx1Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventForIdx1)
-            TouchEventProxy_serializer.write(thisSerializer, eventForIdx1Transformed)
-        } else if (event instanceof KeyEvent) {
-            thisSerializer.writeInt8((2).toByte())
-            const eventForIdx2 = event as KeyEvent
-            KeyEvent_serializer.write(thisSerializer, eventForIdx2)
-        }
-        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_construct(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RawInputEventWrapper_getFinalizer()
     }
@@ -3328,9 +3306,18 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
 }
 export class ArkCommonMethodPeer extends PeerNode {
     commonMethodAttributeSet?: CommonMethodModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+    // instructive change start
+    // REASON: there is possibly bug in panda and vendor tests can not be launched with joined constructor declaration
+    public constructor(peerPtr: KPointer, id: int32) {
+        this(peerPtr, id, '', 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string) {
+        this(peerPtr, id, name, 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string, flags: int32) {
         super(peerPtr, id, name, flags)
     }
+    // instructive change end
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCommonMethodPeer {
         const peerId = PeerNode.nextId()
         const _peerPtr = ArkUIGeneratedNativeModule._CommonMethod_construct(peerId, flags)
@@ -4643,7 +4630,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setUseUnionEffectAttribute(value: boolean | undefined): void {
+    setUseUnionEffect0Attribute(value: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4652,7 +4639,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderGroupAttribute(value: boolean | undefined): void {
@@ -4757,6 +4744,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setTransform3D(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEdgeLightAttribute(value: EdgeLightParams | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            EdgeLightParams_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setEdgeLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAppearAttribute(value: (() => void) | undefined): void {
@@ -5440,7 +5439,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityNextFocusId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityNextFocusId0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityNextFocusId1Attribute(nextId: string, nextFocusParams: AccessibilityNextFocusParams | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (nextFocusParams !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            AccessibilityNextFocusParams_serializer.write(thisSerializer, nextFocusParams!)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityNextFocusId1(this.peer.ptr, nextId, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityDefaultFocusAttribute(value: boolean | undefined): void {
@@ -5849,10 +5859,38 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAccessibilityCustomActionsAttribute(value: Array<AccessibilityCustomAction> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: AccessibilityCustomAction = valueTmpValue[valueTmpValueCounterI]
+                AccessibilityCustomAction_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityCustomActions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSmartGestureShortcutAttribute(value: SmartGestureShortcutOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         SmartGestureShortcutOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._CommonMethod_setSmartGestureShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setDoubleSidedAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDoubleSided(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -6273,6 +6311,25 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setUseUnionEffect1Attribute(value: boolean | undefined, options?: GravityCenterOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            GravityCenterOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackdropBlurAttribute(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (radius !== undefined) {
@@ -6479,10 +6536,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                     thisSerializer.writeInt8((1).toByte())
                     const effectTmpValueForIdx1ForIdx1 = effectTmpValueForIdx1 as uiEffect.HdrBrightnessBlender
                     uiEffect_HdrBrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1ForIdx1)
-                } else if (effectTmpValueForIdx1 instanceof uiEffect.HdrDarkenBlender) {
-                    thisSerializer.writeInt8((2).toByte())
-                    const effectTmpValueForIdx1ForIdx2 = effectTmpValueForIdx1 as uiEffect.HdrDarkenBlender
-                    uiEffect_HdrDarkenBlender_serializer.write(thisSerializer, effectTmpValueForIdx1ForIdx2)
                 } else if (effectTmpValueForIdx1 instanceof uiEffect.BrightnessBlender) {
                     thisSerializer.writeInt8((0).toByte())
                     const effectTmpValueForIdx1ForIdx0 = effectTmpValueForIdx1 as uiEffect.BrightnessBlender
@@ -6702,7 +6755,53 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenuWithResponseAttribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenuByResponseTypeAttribute(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (responseType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTypeTmpValue = (responseType as ResponseType)
+            thisSerializer.writeInt32(responseTypeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuByResponseType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuWithResponse0Attribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6719,7 +6818,47 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuWithResponse1Attribute(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilderT<ResponseType>) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilderT<ResponseType>
+                const contentTmpValueForIdx0Transformed: CustomNodeBuilderT<ResponseType> = extractors.transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(contentTmpValueForIdx0)
+                thisSerializer.holdAndWriteCallback(contentTmpValueForIdx0Transformed)
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContextMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
@@ -6754,6 +6893,60 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuByIsShowAttribute(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (isShow !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isShowTmpValue = isShow!
+            if (isShowTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShowTmpValueForIdx0 = isShowTmpValue as boolean
+                thisSerializer.writeBoolean(isShowTmpValueForIdx0)
+            } else if (isShowTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShowTmpValueForIdx1 = isShowTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuByIsShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContentCover0Attribute(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): void {
@@ -7647,6 +7840,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setBackToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setScrollBarHeightAttribute(value: arkui_Graphics_LengthMetrics | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEdgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (edgeEffect !== undefined) {
@@ -7912,6 +8117,17 @@ export interface sharedTransitionOptions {
 export interface GeometryTransitionOptions {
     follow?: boolean;
     hierarchyStrategy?: TransitionHierarchyStrategy;
+}
+export interface GravityCenterOptions {
+    gravityCenter?: boolean;
+    gravityIntensity?: double;
+}
+export interface EdgeLightParams {
+    position: EdgeLightPosition;
+    length: Length;
+    intensity?: double;
+    color?: ResourceColor;
+    thickness?: Length;
 }
 export interface LinearGradientOptions {
     angle?: double | string;
@@ -8401,6 +8617,8 @@ export interface SheetOptions extends BindOptions {
     showInSubWindow?: boolean;
     placement?: Placement;
     placementOnTarget?: boolean;
+    edgeLightMode?: EdgeLightMode;
+    enableBlurSnapshot?: boolean;
 }
 export interface StateStyles {
     normal?: CustomStyles;
@@ -8465,6 +8683,7 @@ export interface PopupCommonOptions {
     systemMaterial?: SystemUiMaterial;
     backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
     backgroundEffect?: BackgroundEffectOptions;
+    levelMode?: LevelMode;
     onDidDisappear?: VoidCallback;
     onWillDisappear?: VoidCallback;
     onWillAppear?: VoidCallback;
@@ -8522,6 +8741,7 @@ export interface PopupOptions {
     systemMaterial?: SystemUiMaterial;
     backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
     backgroundEffect?: BackgroundEffectOptions;
+    levelMode?: LevelMode;
     onWillDisappear?: VoidCallback;
     onDidAppear?: VoidCallback;
     onWillAppear?: VoidCallback;
@@ -8561,6 +8781,7 @@ export interface CustomPopupOptions {
     systemMaterial?: SystemUiMaterial;
     backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
     backgroundEffect?: BackgroundEffectOptions;
+    levelMode?: LevelMode;
     onDidAppear?: VoidCallback;
     onWillDisappear?: VoidCallback;
     onDidDisappear?: VoidCallback;
@@ -8594,6 +8815,15 @@ export enum HapticFeedbackMode {
 export enum MenuKeyboardAvoidMode {
     NONE = 0,
     TRANSLATE_AND_RESIZE = 1
+}
+export enum MenuGridPosition {
+    TOP = 0,
+    BOTTOM = 1
+}
+export interface MenuGridStyleOptions {
+    count?: int32;
+    horizontalSize?: int32;
+    position?: MenuGridPosition;
 }
 export interface ContextMenuOptions {
     offset?: Position;
@@ -8634,7 +8864,9 @@ export interface ContextMenuOptions {
     systemMaterial?: SystemUiMaterial;
     scrollBar?: BarState;
     maxHeight?: arkui_Graphics_LengthMetrics;
-    uiMaterialAnimationMode?: UIMaterialAnimationMode;
+    distortionMode?: DistortionMode;
+    edgeLightMode?: EdgeLightMode;
+    gridStyle?: MenuGridStyleOptions;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -9722,6 +9954,30 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method useUnionEffect')
     }
+    useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useUnionEffect(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method useUnionEffect can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method useUnionEffect')
+    }
+    edgeLight(value: EdgeLightParams | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.edgeLight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method edgeLight can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method edgeLight')
+    }
     renderGroup(value: boolean | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10430,6 +10686,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method accessibilityNextFocusId')
     }
+    accessibilityNextFocusId(nextId: string, nextFocusParams: AccessibilityNextFocusParams | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityNextFocusId(nextId, nextFocusParams));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method accessibilityNextFocusId can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method accessibilityNextFocusId')
+    }
     accessibilityDefaultFocus(value: boolean | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10826,6 +11094,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method accessibilityActionOptions')
     }
+    accessibilityCustomActions(value: Array<AccessibilityCustomAction> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityCustomActions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method accessibilityCustomActions can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method accessibilityCustomActions')
+    }
     smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10837,6 +11117,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method smartGestureShortcut')
+    }
+    doubleSided(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.doubleSided(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method doubleSided can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method doubleSided')
     }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -11294,10 +11586,34 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method bindContextMenu')
     }
+    bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuByResponseType(content, responseType, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuByResponseType can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuByResponseType')
+    }
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
             (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponse(content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuWithResponse can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuWithResponse')
+    }
+    bindContextMenuWithResponseArray(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponseArray(content, options));
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
@@ -11317,6 +11633,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method bindContextMenu')
+    }
+    bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuByIsShow(isShow, content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuByIsShow can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuByIsShow')
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -11918,6 +12246,20 @@ export interface ScrollableCommonMethod extends CommonMethod {
         }
         throw new Error('Unimplemented method backToTop')
     }
+    scrollBarHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarHeight(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarHeight' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method scrollBarHeight')
+    }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -12481,7 +12823,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public useUnionEffect(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
-        this.getPeer()?.setUseUnionEffectAttribute(value_casted)
+        this.getPeer()?.setUseUnionEffect0Attribute(value_casted)
+        return this
+    }
+    public useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        const value_casted = value as (boolean | undefined)
+        const options_casted = options as (GravityCenterOptions | undefined)
+        this.getPeer()?.setUseUnionEffect1Attribute(value_casted, options_casted)
+        return this
+    }
+    public edgeLight(value: EdgeLightParams | undefined): this {
+        const value_casted = value as (EdgeLightParams | undefined)
+        this.getPeer()?.setEdgeLightAttribute(value_casted)
         return this
     }
     public renderGroup(value: boolean | undefined): this {
@@ -12778,6 +13131,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setAccessibilityNextFocusIdAttribute(value_casted)
         return this
     }
+    public accessibilityNextFocusId(nextId: string, nextFocusParams: AccessibilityNextFocusParams | undefined): this {
+        this.getPeer()?.setAccessibilityNextFocusId1Attribute(nextId, nextFocusParams)
+        return this
+    }
     public accessibilityDefaultFocus(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setAccessibilityDefaultFocusAttribute(value_casted)
@@ -12942,9 +13299,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
         return this
     }
+    public accessibilityCustomActions(value: Array<AccessibilityCustomAction> | undefined): this {
+        this.getPeer()?.setAccessibilityCustomActionsAttribute(value)
+        return this
+    }
     public smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const value_casted = value as (SmartGestureShortcutOptions)
         this.getPeer()?.setSmartGestureShortcutAttribute(value_casted)
+        return this
+    }
+    public doubleSided(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setDoubleSidedAttribute(value_casted)
         return this
     }
     public customProperty(name: string, value: CustomProperty): this {
@@ -13170,10 +13536,23 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setBindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
         return this
     }
+    public bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        const content_casted = content as (CustomBuilder | Array<MenuElement> | undefined)
+        const responseType_casted = responseType as (ResponseType | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuByResponseTypeAttribute(content_casted, responseType_casted, options_casted)
+        return this
+    }
     public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         const content_casted = content as (CustomBuilderT<ResponseType> | undefined)
         const options_casted = options as (ContextMenuOptions | undefined)
-        this.getPeer()?.setBindContextMenuWithResponseAttribute(content_casted, options_casted)
+        this.getPeer()?.setBindContextMenuWithResponse0Attribute(content_casted, options_casted)
+        return this
+    }
+    public bindContextMenuWithResponseArray(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const content_casted = content as (CustomBuilderT<ResponseType> | Array<MenuElement> | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuWithResponse1Attribute(content_casted, options_casted)
         return this
     }
     public bindContextMenu(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
@@ -13181,6 +13560,13 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         const content_casted = content as (CustomBuilder | undefined)
         const options_casted = options as (ContextMenuOptions | undefined)
         this.getPeer()?.setBindContextMenu1Attribute(isShow_casted, content_casted, options_casted)
+        return this
+    }
+    public bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const isShow_casted = isShow as (boolean | Bindable<boolean> | undefined)
+        const content_casted = content as (CustomBuilder | Array<MenuElement> | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuByIsShowAttribute(isShow_casted, content_casted, options_casted)
         return this
     }
     public bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -13475,6 +13861,11 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public backToTop(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setBackToTopAttribute(value_casted)
+        return this
+    }
+    public scrollBarHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        this.getPeer()?.setScrollBarHeightAttribute(value_casted)
         return this
     }
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
@@ -15093,6 +15484,44 @@ export class GeometryTransitionOptions_serializer {
         return value
     }
 }
+export class GravityCenterOptions_serializer {
+    public static write(buffer: SerializerBase, value: GravityCenterOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForGravityCenter = value.gravityCenter
+        if (valueHolderForGravityCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGravityCenterTmpValue = valueHolderForGravityCenter!
+            valueSerializer.writeBoolean(valueHolderForGravityCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGravityIntensity = value.gravityIntensity
+        if (valueHolderForGravityIntensity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGravityIntensityTmpValue = valueHolderForGravityIntensity!
+            valueSerializer.writeFloat64(valueHolderForGravityIntensityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): GravityCenterOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const gravityCenterTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gravityCenterTmpBuf: boolean | undefined = undefined
+        if ((gravityCenterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gravityCenterTmpBuf = valueDeserializer.readBoolean()
+        }
+        const gravityCenterTmpResult: boolean | undefined = gravityCenterTmpBuf
+        const gravityIntensityTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gravityIntensityTmpBuf: double | undefined = undefined
+        if ((gravityIntensityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gravityIntensityTmpBuf = valueDeserializer.readFloat64()
+        }
+        const gravityIntensityTmpResult: double | undefined = gravityIntensityTmpBuf
+        let value: GravityCenterOptions = ({gravityCenter: gravityCenterTmpResult, gravityIntensity: gravityIntensityTmpResult} as GravityCenterOptions)
+        return value
+    }
+}
 export class HistoricalPoint_serializer {
     public static write(buffer: SerializerBase, value: HistoricalPoint): void {
         let valueSerializer: SerializerBase = buffer
@@ -15514,6 +15943,58 @@ export class LocalizedVerticalAlignParam_serializer {
         const anchorTmpResult: string = (valueDeserializer.readString() as string)
         const alignTmpResult: VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
         let value: LocalizedVerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as LocalizedVerticalAlignParam)
+        return value
+    }
+}
+export class MenuGridStyleOptions_serializer {
+    public static write(buffer: SerializerBase, value: MenuGridStyleOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForCount = value.count
+        if (valueHolderForCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCountTmpValue = valueHolderForCount!
+            valueSerializer.writeInt32(valueHolderForCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHorizontalSize = value.horizontalSize
+        if (valueHolderForHorizontalSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHorizontalSizeTmpValue = valueHolderForHorizontalSize!
+            valueSerializer.writeInt32(valueHolderForHorizontalSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue = (valueHolderForPosition as MenuGridPosition)
+            valueSerializer.writeInt32(valueHolderForPositionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MenuGridStyleOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const countTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let countTmpBuf: int32 | undefined = undefined
+        if ((countTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            countTmpBuf = valueDeserializer.readInt32()
+        }
+        const countTmpResult: int32 | undefined = countTmpBuf
+        const horizontalSizeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let horizontalSizeTmpBuf: int32 | undefined = undefined
+        if ((horizontalSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            horizontalSizeTmpBuf = valueDeserializer.readInt32()
+        }
+        const horizontalSizeTmpResult: int32 | undefined = horizontalSizeTmpBuf
+        const positionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionTmpBuf: MenuGridPosition | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpBuf = MenuGridPosition.fromValue(valueDeserializer.readInt32())
+        }
+        const positionTmpResult: MenuGridPosition | undefined = positionTmpBuf
+        let value: MenuGridStyleOptions = ({count: countTmpResult, horizontalSize: horizontalSizeTmpResult, position: positionTmpResult} as MenuGridStyleOptions)
         return value
     }
 }
@@ -19287,6 +19768,139 @@ export class DividerStyle_serializer {
         return value
     }
 }
+export class EdgeLightParams_serializer {
+    public static write(buffer: SerializerBase, value: EdgeLightParams): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForPosition = value.position
+        valueSerializer.writeInt32(valueHolderForPosition.valueOf())
+        const valueHolderForLength = value.length
+        if (valueHolderForLength instanceof string) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForLengthForIdx0 = valueHolderForLength as string
+            valueSerializer.writeString(valueHolderForLengthForIdx0)
+        } else if (valueHolderForLength instanceof double) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForLengthForIdx1 = valueHolderForLength as double
+            valueSerializer.writeFloat64(valueHolderForLengthForIdx1)
+        } else if (valueHolderForLength instanceof arkui_component_units_Resource) {
+            valueSerializer.writeInt8((2).toByte())
+            const valueHolderForLengthForIdx2 = valueHolderForLength as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForLengthForIdx2)
+        }
+        const valueHolderForIntensity = value.intensity
+        if (valueHolderForIntensity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIntensityTmpValue = valueHolderForIntensity!
+            valueSerializer.writeFloat64(valueHolderForIntensityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColor = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForThickness = value.thickness
+        if (valueHolderForThickness !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForThicknessTmpValue = valueHolderForThickness!
+            if (valueHolderForThicknessTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForThicknessTmpValueForIdx0 = valueHolderForThicknessTmpValue as string
+                valueSerializer.writeString(valueHolderForThicknessTmpValueForIdx0)
+            } else if (valueHolderForThicknessTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForThicknessTmpValueForIdx1 = valueHolderForThicknessTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForThicknessTmpValueForIdx1)
+            } else if (valueHolderForThicknessTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForThicknessTmpValueForIdx2 = valueHolderForThicknessTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForThicknessTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EdgeLightParams {
+        let valueDeserializer: DeserializerBase = buffer
+        const positionTmpResult: EdgeLightPosition = EdgeLightPosition.fromValue(valueDeserializer.readInt32())
+        const lengthTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let lengthTmpBuf: string | double | arkui_component_units_Resource | undefined
+        if (lengthTmpBufUnionSelector == (0).toByte()) {
+            lengthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (lengthTmpBufUnionSelector == (1).toByte()) {
+            lengthTmpBuf = valueDeserializer.readFloat64()
+        } else if (lengthTmpBufUnionSelector == (2).toByte()) {
+            lengthTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error('One of the branches for lengthTmpBuf has to be chosen through deserialisation.')
+        }
+        const lengthTmpResult: Length = (lengthTmpBuf as string | double | arkui_component_units_Resource)
+        const intensityTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let intensityTmpBuf: double | undefined = undefined
+        if ((intensityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            intensityTmpBuf = valueDeserializer.readFloat64()
+        }
+        const intensityTmpResult: double | undefined = intensityTmpBuf
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        const thicknessTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let thicknessTmpBuf: Length | undefined = undefined
+        if ((thicknessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const thicknessTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let thicknessTmpBufOpt: string | double | arkui_component_units_Resource | undefined
+            if (thicknessTmpBufOptUnionSelector == (0).toByte()) {
+                thicknessTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (thicknessTmpBufOptUnionSelector == (1).toByte()) {
+                thicknessTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (thicknessTmpBufOptUnionSelector == (2).toByte()) {
+                thicknessTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for thicknessTmpBufOpt has to be chosen through deserialisation.')
+            }
+            thicknessTmpBuf = (thicknessTmpBufOpt as string | double | arkui_component_units_Resource)
+        }
+        const thicknessTmpResult: Length | undefined = thicknessTmpBuf
+        let value: EdgeLightParams = ({position: positionTmpResult, length: lengthTmpResult, intensity: intensityTmpResult, color: colorTmpResult, thickness: thicknessTmpResult} as EdgeLightParams)
+        return value
+    }
+}
 export class PixelStretchEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: PixelStretchEffectOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -20943,11 +21557,27 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForUiMaterialAnimationMode = value.uiMaterialAnimationMode
-        if (valueHolderForUiMaterialAnimationMode !== undefined) {
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForUiMaterialAnimationModeTmpValue = (valueHolderForUiMaterialAnimationMode as UIMaterialAnimationMode)
-            valueSerializer.writeInt32(valueHolderForUiMaterialAnimationModeTmpValue.valueOf())
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGridStyle = value.gridStyle
+        if (valueHolderForGridStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGridStyleTmpValue = valueHolderForGridStyle!
+            MenuGridStyleOptions_serializer.write(valueSerializer, valueHolderForGridStyleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -21427,13 +22057,25 @@ export class ContextMenuOptions_serializer {
             maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
-        const uiMaterialAnimationModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let uiMaterialAnimationModeTmpBuf: UIMaterialAnimationMode | undefined = undefined
-        if ((uiMaterialAnimationModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            uiMaterialAnimationModeTmpBuf = UIMaterialAnimationMode.fromValue(valueDeserializer.readInt32())
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
         }
-        const uiMaterialAnimationModeTmpResult: UIMaterialAnimationMode | undefined = uiMaterialAnimationModeTmpBuf
-        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, uiMaterialAnimationMode: uiMaterialAnimationModeTmpResult} as ContextMenuOptions)
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        const gridStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gridStyleTmpBuf: MenuGridStyleOptions | undefined = undefined
+        if ((gridStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gridStyleTmpBuf = MenuGridStyleOptions_serializer.read(valueDeserializer)
+        }
+        const gridStyleTmpResult: MenuGridStyleOptions | undefined = gridStyleTmpBuf
+        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult, gridStyle: gridStyleTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -21834,6 +22476,14 @@ export class CustomPopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForLevelMode = value.levelMode
+        if (valueHolderForLevelMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelModeTmpValue = (valueHolderForLevelMode as LevelMode)
+            valueSerializer.writeInt32(valueHolderForLevelModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnDidAppear = value.onDidAppear
         if (valueHolderForOnDidAppear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -22231,6 +22881,12 @@ export class CustomPopupOptions_serializer {
             backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const levelModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let levelModeTmpBuf: LevelMode | undefined = undefined
+        if ((levelModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelModeTmpBuf = LevelMode.fromValue(valueDeserializer.readInt32())
+        }
+        const levelModeTmpResult: LevelMode | undefined = levelModeTmpBuf
         const onDidAppearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onDidAppearTmpBuf: VoidCallback | undefined = undefined
         if ((onDidAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -22307,7 +22963,7 @@ export class CustomPopupOptions_serializer {
             onWillAppearTmpBuf = onWillAppearTmpBufOptClosure
         }
         const onWillAppearTmpResult: VoidCallback | undefined = onWillAppearTmpBuf
-        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
+        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, levelMode: levelModeTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
         return value
     }
 }
@@ -22806,11 +23462,27 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForUiMaterialAnimationMode = value.uiMaterialAnimationMode
-        if (valueHolderForUiMaterialAnimationMode !== undefined) {
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForUiMaterialAnimationModeTmpValue = (valueHolderForUiMaterialAnimationMode as UIMaterialAnimationMode)
-            valueSerializer.writeInt32(valueHolderForUiMaterialAnimationModeTmpValue.valueOf())
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGridStyle = value.gridStyle
+        if (valueHolderForGridStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGridStyleTmpValue = valueHolderForGridStyle!
+            MenuGridStyleOptions_serializer.write(valueSerializer, valueHolderForGridStyleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23314,12 +23986,24 @@ export class MenuOptions_serializer {
             maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
-        const uiMaterialAnimationModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let uiMaterialAnimationModeTmpBuf: UIMaterialAnimationMode | undefined = undefined
-        if ((uiMaterialAnimationModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            uiMaterialAnimationModeTmpBuf = UIMaterialAnimationMode.fromValue(valueDeserializer.readInt32())
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
         }
-        const uiMaterialAnimationModeTmpResult: UIMaterialAnimationMode | undefined = uiMaterialAnimationModeTmpBuf
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        const gridStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gridStyleTmpBuf: MenuGridStyleOptions | undefined = undefined
+        if ((gridStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gridStyleTmpBuf = MenuGridStyleOptions_serializer.read(valueDeserializer)
+        }
+        const gridStyleTmpResult: MenuGridStyleOptions | undefined = gridStyleTmpBuf
         const titleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let titleTmpBuf: ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -23341,7 +24025,7 @@ export class MenuOptions_serializer {
             showInSubWindowTmpBuf = valueDeserializer.readBoolean()
         }
         const showInSubWindowTmpResult: boolean | undefined = showInSubWindowTmpBuf
-        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, uiMaterialAnimationMode: uiMaterialAnimationModeTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
+        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
         return value
     }
 }
@@ -24124,6 +24808,14 @@ export class PopupCommonOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForLevelMode = value.levelMode
+        if (valueHolderForLevelMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelModeTmpValue = (valueHolderForLevelMode as LevelMode)
+            valueSerializer.writeInt32(valueHolderForLevelModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnDidDisappear = value.onDidDisappear
         if (valueHolderForOnDidDisappear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -24501,6 +25193,12 @@ export class PopupCommonOptions_serializer {
             backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const levelModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let levelModeTmpBuf: LevelMode | undefined = undefined
+        if ((levelModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelModeTmpBuf = LevelMode.fromValue(valueDeserializer.readInt32())
+        }
+        const levelModeTmpResult: LevelMode | undefined = levelModeTmpBuf
         const onDidDisappearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onDidDisappearTmpBuf: VoidCallback | undefined = undefined
         if ((onDidDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -24577,7 +25275,7 @@ export class PopupCommonOptions_serializer {
             onDidAppearTmpBuf = onDidAppearTmpBufOptClosure
         }
         const onDidAppearTmpResult: VoidCallback | undefined = onDidAppearTmpBuf
-        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
+        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, levelMode: levelModeTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
         return value
     }
 }
@@ -25334,6 +26032,22 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableBlurSnapshot = value.enableBlurSnapshot
+        if (valueHolderForEnableBlurSnapshot !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableBlurSnapshotTmpValue = valueHolderForEnableBlurSnapshot!
+            valueSerializer.writeBoolean(valueHolderForEnableBlurSnapshotTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SheetOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -26080,7 +26794,19 @@ export class SheetOptions_serializer {
             placementOnTargetTmpBuf = valueDeserializer.readBoolean()
         }
         const placementOnTargetTmpResult: boolean | undefined = placementOnTargetTmpBuf
-        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult} as SheetOptions)
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        const enableBlurSnapshotTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableBlurSnapshotTmpBuf: boolean | undefined = undefined
+        if ((enableBlurSnapshotTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableBlurSnapshotTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableBlurSnapshotTmpResult: boolean | undefined = enableBlurSnapshotTmpBuf
+        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult, enableBlurSnapshot: enableBlurSnapshotTmpResult} as SheetOptions)
         return value
     }
 }
@@ -26497,6 +27223,14 @@ export class PopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForLevelMode = value.levelMode
+        if (valueHolderForLevelMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLevelModeTmpValue = (valueHolderForLevelMode as LevelMode)
+            valueSerializer.writeInt32(valueHolderForLevelModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnWillDisappear = value.onWillDisappear
         if (valueHolderForOnWillDisappear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -26893,6 +27627,12 @@ export class PopupOptions_serializer {
             backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const levelModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let levelModeTmpBuf: LevelMode | undefined = undefined
+        if ((levelModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelModeTmpBuf = LevelMode.fromValue(valueDeserializer.readInt32())
+        }
+        const levelModeTmpResult: LevelMode | undefined = levelModeTmpBuf
         const onWillDisappearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onWillDisappearTmpBuf: VoidCallback | undefined = undefined
         if ((onWillDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -26969,7 +27709,7 @@ export class PopupOptions_serializer {
             onDidDisappearTmpBuf = onDidDisappearTmpBufOptClosure
         }
         const onDidDisappearTmpResult: VoidCallback | undefined = onDidDisappearTmpBuf
-        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
+        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, levelMode: levelModeTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
         return value
     }
 }

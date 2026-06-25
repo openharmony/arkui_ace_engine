@@ -43,6 +43,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_types.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
@@ -1522,7 +1523,7 @@ panda::Local<panda::JSValueRef> HookXComponentSetAnalyzerConfig(panda::JsiRuntim
         return panda::JSValueRef::Undefined(vm);
     }
     auto peerPointer = static_cast<int64_t>(peerValueRef->ToNumber(vm)->Value());
-    auto* peer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(peerPointer);
+    auto* peer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerNativePeerImpl*>(peerPointer);
     CHECK_NULL_RETURN(peer, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
     if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {

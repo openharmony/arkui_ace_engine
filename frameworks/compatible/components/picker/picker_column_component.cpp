@@ -15,6 +15,7 @@
 
 #include "compatible/components/picker/picker_column_component.h"
 
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "compatible/components/picker/picker_column_element.h"
 #include "compatible/components/picker/picker_option_component.h"
 #include "compatible/components/picker/render_picker_column.h"
@@ -28,6 +29,11 @@ namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 
 } // namespace
+
+void PickerColumnComponent::SetTheme(const RefPtr<PickerTheme>& value)
+{
+    theme_ = value;
+}
 
 RefPtr<RenderNode> PickerColumnComponent::CreateRenderNode()
 {

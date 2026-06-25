@@ -48,11 +48,10 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -63,6 +62,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
@@ -159,6 +159,7 @@ enum TransitionEffectType {
     TRANSITION_EFFECT_ROTATE,
     TRANSITION_EFFECT_MOVE,
     TRANSITION_EFFECT_ASYMMETRIC,
+    TRANSITION_EFFECT_IDENTITY,
 };
 
 struct GestureCollectTouchRecognizerHandle {
@@ -1294,6 +1295,32 @@ void SetWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI
     ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
 }
 
+void SetDimensionLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
+    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, isWidth);
+}
+
+void ResetDimensionLayoutPolicy(ArkUINodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
+}
+
+ArkUI_Int32 GetDimensionLayoutPolicy(ArkUINodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, isWidth);
+    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return ERROR_INT_CODE;
+    }
+    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+}
+
 void ResetWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1304,17 +1331,12 @@ void ResetWidth(ArkUINodeHandle node)
 
 void SetWidthLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
-    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, true);
+    SetDimensionLayoutPolicy(node, layoutPolicy, true);
 }
 
 void ResetWidthLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
+    ResetDimensionLayoutPolicy(node, true);
 }
 
 void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* heightResPtr)
@@ -1346,10 +1368,7 @@ void ResetHeight(ArkUINodeHandle node)
 
 void SetHeightLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
-    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, false);
+    SetDimensionLayoutPolicy(node, layoutPolicy, false);
 }
 
 void AllowForceDark(ArkUINodeHandle node, ArkUI_Bool forceDarkAllowed)
@@ -1375,9 +1394,7 @@ ArkUI_Bool GetAllowForceDark(ArkUINodeHandle node)
 
 void ResetHeightLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, false);
+    ResetDimensionLayoutPolicy(node, false);
 }
 
 void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
@@ -3402,6 +3419,22 @@ void SetBackgroundImagePixelMapByPixelMapPtr(ArkUINodeHandle node, void* pixelMa
     CHECK_NULL_VOID(frameNode);
     RefPtr<PixelMap> pixelmap = PixelMap::CreatePixelMap(pixelMapPtr);
     ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelmap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
+void SetBackgroundImageDrawableDescriptor(ArkUINodeHandle node, void* newDrawableDescriptor, ArkUI_Int32 repeatIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableAddr);
+    auto pixelMap = drawableAddr->GetPixelMap();
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelMap });
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
@@ -8245,13 +8278,7 @@ ArkUI_Float32 GetWidth(ArkUINodeHandle node, ArkUI_Int32 unit)
 
 ArkUI_Int32 GetWidthLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, true);
-    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
-        return ERROR_INT_CODE;
-    }
-    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+    return GetDimensionLayoutPolicy(node, true);
 }
 
 ArkUI_Float32 GetHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
@@ -8263,13 +8290,7 @@ ArkUI_Float32 GetHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
 
 ArkUI_Int32 GetHeightLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, false);
-    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
-        return ERROR_INT_CODE;
-    }
-    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+    return GetDimensionLayoutPolicy(node, false);
 }
 
 ArkUI_Uint32 GetBackgroundColor(ArkUINodeHandle node)
@@ -8958,6 +8979,11 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
                 disappearEffect = ParseTransition(option->disappear);
             }
             transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_IDENTITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedIdentityEffect>();
             break;
         }
     }
@@ -9941,7 +9967,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         eventReceiver(nodeHandle, isOn);
     };
     if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
-        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto toggleModifier = GetArkUINodeModifiers()->getToggleModifier();
+        CHECK_NULL_VOID(toggleModifier);
+        toggleModifier->setToggleOnChange(node, reinterpret_cast<void*>(&onChange));
     } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
         auto checkboxModifier = GetArkUINodeModifiers()->getCheckboxModifier();
         CHECK_NULL_VOID(checkboxModifier);
@@ -10239,6 +10267,34 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetUseUnion(frameNode, false);
+}
+
+void SetMaterialShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMaterialShadow(frameNode);
+}
+
+void ResetMaterialShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaterialShadow(frameNode);
+}
+
+void SetDoubleSided(ArkUINodeHandle node, bool doubleSided)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, doubleSided);
+}
+ 
+void ResetDoubleSided(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, true);
 }
 
 ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
@@ -10849,8 +10905,8 @@ void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
@@ -11746,6 +11802,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getForegroundBlurStyle = GetForegroundBlurStyle,
         .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
         .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setBackgroundImageDrawableDescriptor = SetBackgroundImageDrawableDescriptor,
         .setLayoutRect = SetLayoutRect,
         .getLayoutRect = GetLayoutRect,
         .resetLayoutRect = ResetLayoutRect,
@@ -11898,7 +11955,11 @@ const ArkUICommonModifier* GetCommonModifier()
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
+        .setMaterialShadow = SetMaterialShadow,
+        .resetMaterialShadow = ResetMaterialShadow,
         .getCurrentLocation = GetCurrentLocation,
+        .setDoubleSided = SetDoubleSided,
+        .resetDoubleSided = ResetDoubleSided
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -12268,6 +12329,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getForegroundBlurStyle = GetForegroundBlurStyle,
         .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
         .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setBackgroundImageDrawableDescriptor = SetBackgroundImageDrawableDescriptor,
         .setLayoutRect = SetLayoutRect,
         .getLayoutRect = GetLayoutRect,
         .resetLayoutRect = ResetLayoutRect,
@@ -13336,8 +13398,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);

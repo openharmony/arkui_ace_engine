@@ -45,10 +45,11 @@ constexpr int32_t CROWN_EVENT_NUN_THRESH_MIN = 5;
 constexpr int64_t CROWN_VIBRATOR_INTERVAL_TIME = 30 * 1000 * 1000;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #endif
+
 } // namespace
 
 std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
-    const RefPtr<FrameNode>& parentFrameNode, float rawMoveOffset)
+    const RefPtr<FrameNode>& parentFrameNode, float moveOffset)
 {
     CHECK_NULL_RETURN(parentFrameNode, std::nullopt);
     auto scrollPattern = parentFrameNode->GetPattern<ScrollPattern>();
@@ -58,8 +59,14 @@ std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
     }
     if (scrollPattern->GetSnapOffsets().empty()) {
         scrollPattern->CaleSnapOffsets(parentFrameNode);
+    };
+    auto snapDirection = SnapDirection::NONE;
+    if (GreatNotEqual(moveOffset, 0.0f)) {
+        snapDirection = SnapDirection::FORWARD;
+    } else if (LessNotEqual(moveOffset, 0.0f)) {
+        snapDirection = SnapDirection::BACKWARD;
     }
-    return scrollPattern->CalcPredictSnapOffset(rawMoveOffset);
+    return scrollPattern->CalcPredictSnapOffset(moveOffset, 0.0f, 0.0f, snapDirection);
 }
 
 void ScrollPattern::OnModifyDone()
@@ -176,9 +183,15 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
-    FireOnReachStart(eventHub->GetOnReachStart(), eventHub->GetJSFrameNodeOnReachStart());
-    FireOnReachEnd(eventHub->GetOnReachEnd(), eventHub->GetJSFrameNodeOnReachEnd());
-    OnScrollStop(eventHub->GetOnScrollStop(), eventHub->GetJSFrameNodeOnScrollStop());
+    auto onReachStart = eventHub->GetOnReachStart();
+    auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
+    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    auto onJSFrameNodeReachEnd = eventHub->GetJSFrameNodeOnReachEnd();
+    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
+    auto onScrollStop = eventHub->GetOnScrollStop();
+    auto onJSFrameNodeScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
+    OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
     if (!(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled() && IsAccessibilityFocusScroll())) {
         ScrollSnapTrigger();
     }
@@ -1170,16 +1183,22 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     return predictSnapOffset;
 }
 
-std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection)
+std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(
+    float delta, SnapDirection snapDirection)
 {
     std::optional<float> predictSnapOffset;
     int32_t start = 0;
     int32_t end = static_cast<int32_t>(snapOffsets_.size()) - 1;
     int32_t mid = 0;
     auto targetOffset = currentOffset_ + delta;
-    if (LessOrEqual(targetOffset, snapOffsets_[end]) && snapDirection == SnapDirection::BACKWARD) {
-        predictSnapOffset = -scrollableDistance_ - currentOffset_;
-        return predictSnapOffset;
+    if (LessOrEqual(targetOffset, snapOffsets_[end])) {
+        if (snapDirection == SnapDirection::BACKWARD) {
+            predictSnapOffset = -scrollableDistance_ - currentOffset_;
+            return predictSnapOffset;
+        } else if (snapDirection == SnapDirection::FORWARD && !NearEqual(targetOffset,  snapOffsets_[end])) {
+            predictSnapOffset = snapOffsets_[end] - currentOffset_;
+            return predictSnapOffset;
+        }
     } else if (GreatOrEqual(targetOffset, snapOffsets_[start]) && snapDirection == SnapDirection::FORWARD) {
         predictSnapOffset = -currentOffset_;
         return predictSnapOffset;

@@ -15,6 +15,7 @@
 
 #include "compatible/components/picker/render_picker_column.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 #include "base/log/event_report.h"
 
@@ -38,7 +39,6 @@ void RenderPickerColumn::Update(const RefPtr<Component>& component)
     auto theme = column->GetTheme();
     if (!theme) {
         LOGE("theme of component is null.");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
 

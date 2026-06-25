@@ -590,10 +590,10 @@ void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFu
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
-    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
-    targetComponent->SetInnerNodeGestureRecognizerJudge(true);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    gestureHub->SetInnerNodeGestureRecognizerJudge(true);
 }
 
 void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
@@ -602,10 +602,10 @@ void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
-    targetComponent->SetOnGestureRecognizerJudgeBegin(nullptr);
-    targetComponent->SetInnerNodeGestureRecognizerJudge(false);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(nullptr);
+    gestureHub->SetInnerNodeGestureRecognizerJudge(false);
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
@@ -1071,7 +1071,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
-    UpdateTabBarOverlap(tabsLayoutProperty);
+    UpdateBackBlurStyle(tabBarNode);
     UpdateBgMaskNode();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1079,6 +1079,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
 bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
@@ -1102,25 +1103,12 @@ bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
-void TabsPattern::UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty)
+void TabsPattern::UpdateBackBlurStyle(const RefPtr<FrameNode>& tabBarNode)
 {
-    CHECK_NULL_VOID(tabsLayoutProperty);
-    if (!tabsLayoutProperty->HasBarOverlap()) {
-        return;
-    }
-    bool barOverlap = tabsLayoutProperty->GetBarOverlapValue();
-    BlurStyleOption styleOption;
-    if (barOverlap) {
-        styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
     auto target = tabBarNode->GetRenderContext();
-    if (target) {
+    CHECK_NULL_VOID(target);
+    if (target->GetBackBlurStyle().has_value()) {
+        BlurStyleOption styleOption = target->GetBackBlurStyle().value();
         target->UpdateBackBlurStyle(styleOption);
     }
 }
@@ -1229,7 +1217,9 @@ void TabsPattern::InitFloatingBar()
         if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
             ResetTabBarFollowHandPosition();
         }
-        ResetSystemMaterial();
+        if (lastFloatingBar_) {
+            ResetSystemMaterial();
+        }
     }
     if (isFloatingBar_ != lastFloatingBar_) {
         tabsNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1383,7 +1373,7 @@ void TabsPattern::ResetTabBarFollowHandPosition()
     auto renderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     floatingBarPosition_ = FloatingBarPosition::CENTER;
-    renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }
 
@@ -1424,7 +1414,7 @@ void TabsPattern::HandleOnTouchScaleAnimation()
     auto translateX = GetTranslateX();
     auto tabBarRenderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
-    tabBarRenderContext->UpdateTransformScale({ 1.15f, 0.85f });
+    tabBarRenderContext->UpdateTransformScale({ baseFloatingScale_ * 1.15f, baseFloatingScale_ * 0.85f });
     tabBarRenderContext->UpdateTransformTranslate({ translateX, 0.0f, 0.0f });
 }
 
@@ -1436,7 +1426,7 @@ void TabsPattern::HandleOnTouchDelayScaleAnimation()
     CHECK_NULL_VOID(tabBar);
     auto tabBarRenderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
-    tabBarRenderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    tabBarRenderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
 }
 
 void TabsPattern::OnFollowHandAnimationFinish()
@@ -1458,7 +1448,7 @@ void TabsPattern::InitTabBarTransformAttributeIfNeeded()
     auto renderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (!renderContext->HasTransformScale()) {
-        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+        renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
     }
     if (!renderContext->HasTransformTranslate()) {
         renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -1533,6 +1523,7 @@ void TabsPattern::ApplySystemMaterial()
     if (uiMaterial) {
         tabBarPattern->SetUseNewMaterial(true);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), uiMaterial.GetRawPtr());
     } else {
         tabBarPattern->SetUseNewMaterial(false);
@@ -1550,5 +1541,21 @@ void TabsPattern::ResetSystemMaterial()
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetUseNewMaterial(false);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+}
+
+void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
+{
+    baseFloatingScale_ = isFloatingScaleEnabled ? FLOATING_BAR_SCALE_ENLARGED : FLOATING_BAR_SCALE;
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasTransformScale() && !isFloatingScaleEnabled) {
+        return;
+    }
+    renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
 }
 } // namespace OHOS::Ace::NG

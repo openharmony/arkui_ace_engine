@@ -22,7 +22,8 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_date.h"
+#include "core/components_ng/pattern/date_picker/picker_text_style.h"
 #include "ui/base/referenced.h"
 
 namespace OHOS::Ace::NG {

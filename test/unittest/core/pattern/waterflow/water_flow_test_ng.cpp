@@ -987,7 +987,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 
     // enable overScroll
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
-    pattern_->animateOverScroll_ = true;
+    pattern_->animateOverScrollStart_ = true;
     pattern_->layoutInfo_->startIndex_ = 0;
     // total offset = ITEM_MAIN_SIZE
     pattern_->layoutInfo_->UpdateOffset(WATER_FLOW_HEIGHT);
@@ -1884,6 +1884,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      * @tc.expected: function ProvideRestoreInfo is called.
      */
     pattern_->layoutInfo_->startIndex_ = 1;
+    pattern_->layoutInfo_->reportStartIndex_ = 1;
     pattern_->layoutInfo_->storedOffset_ = 1.0f;
     std::string ret = pattern_->ProvideRestoreInfo();
 

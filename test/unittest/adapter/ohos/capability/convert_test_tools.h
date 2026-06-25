@@ -33,7 +33,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
 #include "html_to_span.h"
 #include "span_to_html.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"

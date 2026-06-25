@@ -18,8 +18,22 @@
 #include <sstream>
 
 #include "core/text/html_utils.h"
+#include "base/log/log_wrapper.h"
+#ifndef ACE_UNITTEST
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/text/text_theme.h"
+#include "text/font.h"
+#include "text/text_blob.h"
+#include "draw/brush.h"
+#include "draw/canvas.h"
+#include "utils/point.h"
+#include "draw/color.h"
+#endif
 
 namespace OHOS::Ace {
+namespace {
+const Dimension LIST_INDENT_PER_LEVEL_VP = Dimension(32.0, DimensionUnit::VP);
+}
 constexpr double SMALL_FONT_SIZE_RATIO = 0.8;
 constexpr int ONE_PARAM = 1;
 constexpr int TWO_PARAM = 2;
@@ -50,6 +64,14 @@ bool IsHeadingTag(const std::string& element)
 bool EndsWithLineBreak(const std::string& content)
 {
     return !content.empty() && content.back() == '\n';
+}
+
+void EnsureLineBreak(std::string& allContent, size_t& childPos)
+{
+    if (!EndsWithLineBreak(allContent)) {
+        allContent += "\n";
+        childPos++;
+    }
 }
 
 void ToLowerCase(std::string& str)
@@ -1092,6 +1114,174 @@ void HtmlToSpan::ToAnchorSpan(xmlNodePtr node, size_t len, size_t& pos, std::vec
     spanInfos.emplace_back(std::move(info));
 }
 
+void HtmlToSpan::ToUnorderedListSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+    std::vector<SpanInfo>& spanInfos)
+{
+    listDepth_++;
+    isOrderedStack_.push_back(false);
+
+    childPos = pos;
+    ParseHtmlToSpanInfo(node->children, childPos, allContent, spanInfos, true);
+    pos = childPos;
+    
+    isOrderedStack_.pop_back();
+    listDepth_--;
+}
+
+void HtmlToSpan::ToOrderedListSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+    std::vector<SpanInfo>& spanInfos)
+{
+    listDepth_++;
+    isOrderedStack_.push_back(true);
+    orderedListCounters_.push_back(1); // Push initial counter value 1 for this nesting level
+
+    childPos = pos;
+    ParseHtmlToSpanInfo(node->children, childPos, allContent, spanInfos, true);
+
+    pos = childPos;
+    
+    orderedListCounters_.pop_back();
+    isOrderedStack_.pop_back();
+    listDepth_--;
+}
+
+#ifndef ACE_UNITTEST
+using RSFont = Rosen::Drawing::Font;
+void HtmlToSpan::DrawListItemMarker(const NG::DrawingContext& context,
+    std::shared_ptr<Rosen::Drawing::TextBlob> textBlob, const Offset& offset, const Color& textColor)
+{
+    auto& canvas = context.canvas;
+    canvas.Save();
+    RSBrush brush;
+    brush.SetColor(textColor.GetValue());
+    canvas.AttachBrush(brush);
+    canvas.DrawTextBlob(textBlob.get(), offset.GetX(), offset.GetY());
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+
+double HtmlToSpan::CalculateBaselineY(double top, double bottom, double textHeight, double ascent)
+{
+    double lineHeight = bottom - top;
+    double textCenterY = top + lineHeight / 2.0;
+    return textCenterY - textHeight / 2.0 - ascent;
+}
+
+Offset HtmlToSpan::CalculateTextOffset(const RSFont& font, const std::string& leadingText,
+    const Rosen::Drawing::FontMetrics& metrics, const NG::LeadingMarginSpanOptions& options)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, Offset(0, 0));
+    double dipScale = pipeline->GetDipScale();
+
+    double textWidth = font.MeasureText(leadingText.c_str(), leadingText.length(), Rosen::Drawing::TextEncoding::UTF8);
+    double textHeight = metrics.fDescent - metrics.fAscent;
+
+    double singleIndentPx = LIST_INDENT_PER_LEVEL_VP.ConvertToPx(dipScale);
+    double textX = options.x - singleIndentPx / 2.0 - textWidth / 2.0;
+    double baselineY = CalculateBaselineY(options.top, options.bottom, textHeight, metrics.fAscent);
+    return Offset(textX, baselineY);
+}
+
+std::pair<double, Color> HtmlToSpan::GetDefaultTextSizeAndColor()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    std::pair<double, Color> defaultRet = { NG::TEXT_DEFAULT_FONT_SIZE.ConvertToPx(1.0), Color(DEFAULT_TEXT_COLOR) };
+    CHECK_NULL_RETURN(pipeline, defaultRet);
+    double dipScale = pipeline->GetDipScale();
+    double fontScale = pipeline->GetFontScale() * dipScale;
+
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, defaultRet);
+    double defaultFontSize = theme->GetTextStyle().GetFontSize().ConvertToPx(fontScale);
+    Color defaultTextColor = theme->GetTextStyle().GetTextColor();
+    return { defaultFontSize, defaultTextColor };
+}
+
+void HtmlToSpan::DrawLeadingMargin(NG::DrawingContext& context, const NG::LeadingMarginSpanOptions& options,
+    int32_t indentLevel, bool isOrdered, int32_t itemNumber)
+{
+    CHECK_NULL_VOID(options.first);
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto [defaultFontSize, defaultTextColor] = GetDefaultTextSizeAndColor();
+    std::string leadingText = isOrdered ? std::to_string(itemNumber) + "." : "\xE2\x80\xA2";
+
+    RSFont font;
+    Rosen::Drawing::FontMetrics metrics;
+    font.SetSize(defaultFontSize);
+    font.GetMetrics(&metrics);
+    auto textOffset = CalculateTextOffset(font, leadingText, metrics, options);
+
+    auto textBlob = Rosen::Drawing::TextBlob::MakeFromString(leadingText.c_str(), font,
+        Rosen::Drawing::TextEncoding::UTF8);
+    CHECK_NULL_VOID(textBlob);
+    // Clip canvas to leadingMargin area to prevent content exceeding the margin width
+    auto& canvas = context.canvas;
+    canvas.Save();
+    Rosen::Drawing::Rect clipRect(0.0f, options.top, options.x, options.bottom);
+    canvas.ClipRect(clipRect, Rosen::Drawing::ClipOp::INTERSECT);
+    DrawListItemMarker(context, textBlob, textOffset, defaultTextColor);
+    canvas.Restore();
+}
+#endif
+
+void HtmlToSpan::ToListItemSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+    std::vector<SpanInfo>& spanInfos)
+{
+    int32_t itemNumber = 1;
+    bool isOrdered = !isOrderedStack_.empty() && isOrderedStack_.back();
+    if (isOrdered && !orderedListCounters_.empty()) {
+        itemNumber = orderedListCounters_.back();
+        orderedListCounters_.back()++;
+    } else if (isOrdered && orderedListCounters_.empty()) {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "HtmlToSpan: ordered list state inconsistent, "
+            "isOrdered=true but no counter, fallback to unordered");
+        isOrdered = false;
+    }
+
+    size_t startPos = pos;
+    childPos = pos;
+    ParseHtmlToSpanInfo(node->children, childPos, allContent, spanInfos, true);
+    size_t endPos = childPos;
+
+    // When <li> has no content (e.g. <li></li>), endPos equals startPos, insert a newline.
+    if (endPos == startPos) {
+        allContent += "\n";
+        endPos++;
+        childPos = endPos;
+    }
+
+    SpanInfo spanInfo;
+    spanInfo.type = HtmlType::LIST_ITEM;
+    spanInfo.start = startPos;
+    spanInfo.end = endPos;
+
+    // When <li> is not wrapped by <ul>/<ol>, do not draw leadingMargin marker
+    if (listDepth_ > 0) {
+        int32_t indentLevel = listDepth_;
+        Dimension indentWidth = LIST_INDENT_PER_LEVEL_VP * indentLevel;
+
+        NG::DrawableLeadingMargin drawable;
+        drawable.size = NG::LeadingMarginSize(indentWidth, Dimension(0.0));
+        drawable.getLeadingMarginFunc_ = [indentWidth]() -> CalcDimension { return CalcDimension(indentWidth); };
+        drawable.onDraw_ = [indentLevel, isOrdered, itemNumber](
+            NG::DrawingContext& context, NG::LeadingMarginSpanOptions options) -> void {
+#ifndef ACE_UNITTEST
+            DrawLeadingMargin(context, options, indentLevel, isOrdered, itemNumber);
+#endif
+        };
+
+        SpanParagraphStyle paragraphStyle;
+        paragraphStyle.drawableLeadingMargin = std::make_optional<NG::DrawableLeadingMargin>(drawable);
+        spanInfo.values.push_back(paragraphStyle);
+    }
+    spanInfos.push_back(spanInfo);
+
+    pos = endPos;
+    childPos = endPos;
+}
+
 void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles, ImageSpanOptions& option)
 {
     option.imageAttribute = std::make_optional<ImageSpanAttribute>();
@@ -1126,13 +1316,12 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     spanInfos.emplace_back(std::move(info));
 }
 
-void HtmlToSpan::ToSpan(
-    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
-    bool isNeedLoadPixelMap)
+size_t HtmlToSpan::AccumulateNodeContent(xmlNodePtr curNode, size_t& pos, std::string& allContent)
 {
     std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     bool isHeading = (curNode->type == XML_ELEMENT_NODE && IsHeadingTag(htmlTag));
-    if (isHeading && !allContent.empty() && !EndsWithLineBreak(allContent)) {
+    bool isNestedList = (curNode->type == XML_ELEMENT_NODE && (htmlTag == "ul" || htmlTag == "ol"));
+    if ((isHeading || isNestedList) && !allContent.empty() && !EndsWithLineBreak(allContent)) {
         allContent += "\n";
         pos++;
     }
@@ -1143,22 +1332,50 @@ void HtmlToSpan::ToSpan(
         allContent += curNodeContent;
         curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
+    return curNodeLen;
+}
 
+void HtmlToSpan::HandlePTag(xmlNodePtr curNode, size_t& pos, size_t& childPos,
+    std::string& allContent, std::vector<SpanInfo>& spanInfos)
+{
+    if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+        xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+        if (!EndsWithLineBreak(allContent)) {
+            allContent += "\n";
+            childPos++;
+        }
+        ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+    }
+}
+
+void HtmlToSpan::ToSpan(
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+    bool isNeedLoadPixelMap)
+{
+    size_t curNodeLen = AccumulateNodeContent(curNode, pos, allContent);
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     size_t childPos = pos + curNodeLen;
+
     bool isSmall = (curNode->type == XML_ELEMENT_NODE && htmlTag == "small");
+    bool isListTag = (curNode->type == XML_ELEMENT_NODE && (htmlTag == "ul" || htmlTag == "ol" || htmlTag == "li"));
     if (isSmall) {
         smallDepth_++;
     }
-    ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
+    if (!isListTag) {
+        ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos, isNeedLoadPixelMap);
+    }
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
-                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
-                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
-                allContent += "\n";
-                childPos++;
-                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
-            }
+            HandlePTag(curNode, pos, childPos, allContent, spanInfos);
+        } else if (htmlTag == "ul") {
+            ToUnorderedListSpan(curNode, pos, childPos, allContent, spanInfos);
+            EnsureLineBreak(allContent, childPos);
+        } else if (htmlTag == "ol") {
+            ToOrderedListSpan(curNode, pos, childPos, allContent, spanInfos);
+            EnsureLineBreak(allContent, childPos);
+        } else if (htmlTag == "li") {
+            ToListItemSpan(curNode, pos, childPos, allContent, spanInfos);
+            EnsureLineBreak(allContent, childPos);
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
@@ -1167,12 +1384,9 @@ void HtmlToSpan::ToSpan(
         } else if (htmlTag == "br") {
             allContent += "\n";
             childPos++;
-        } else if (isHeading) {
+        } else if (IsHeadingTag(htmlTag)) {
             ToHeadingSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
-            if (!EndsWithLineBreak(allContent)) {
-                allContent += "\n";
-                childPos++;
-            }
+            EnsureLineBreak(allContent, childPos);
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
@@ -1341,6 +1555,8 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     for (int32_t i = static_cast<int32_t>(spanInfos.size()) - 1; i >= 0; --i) {
         auto info = spanInfos[i];
         if (info.type == HtmlType::PARAGRAPH) {
+            AddSpans(info, mutableSpan);
+        } else if (info.type == HtmlType::LIST_ITEM) {
             AddSpans(info, mutableSpan);
         } else if (info.type != HtmlType::IMAGE) {
             AddSpans(info, mutableSpan);

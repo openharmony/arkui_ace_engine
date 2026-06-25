@@ -82,6 +82,7 @@ public:
     void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetMediaPlayGestureAccess(bool isNeedGestureAccess) override;
+    void SetEnableFullscreenVideoOverlay(bool enable) override;
     void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) override;
     void SetOnErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnHttpErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -226,6 +227,8 @@ public:
     void SetWebNativeMessageConnectFunction(
         std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetWebNativeMessageDisconnectFunction(
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
+    void SetOnFullScreenVideoOverlayEnterFunction(
         std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
@@ -448,6 +451,7 @@ public:
     static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy);
     static void SetInputMethodAttachedId(
         FrameNode* frameNode, std::function<void()>&& jsCallback);
+    static void SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

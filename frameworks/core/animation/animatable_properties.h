@@ -20,8 +20,8 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/property_animatable_helper.h"
 #include "core/animation/property_animation.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace {

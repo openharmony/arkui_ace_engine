@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,11 @@ export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
+ 	releasePeerPtr(): void {
+        if (this.peer) {
+ 	        this.peer!.ptr = nullptr;
+        }
+ 	}
 }
 
 export enum ExpandMode {
@@ -182,7 +187,8 @@ export enum UIState {
     PRESSED = 1 << 0,
     FOCUSED = 1 << 1,
     DISABLED = 1 << 2,
-    SELECTED = 1 << 3
+    SELECTED = 1 << 3,
+    HOVERED = 1 << 4,
 }
 export type UIStatesChangeHandler = (node: FrameNode, currentUIStates: int) => void;
 export class FrameNodeFinalizationRegisterProxy {
@@ -256,6 +262,9 @@ export class FrameNode implements MaterializedBase {
         }
         return this._gestureEvent as UIGestureEvent;
     }
+    constructor(uiContext: UIContext) {
+        this(uiContext, undefined, undefined, undefined);
+    }
     constructor(uiContext: UIContext, options?: FrameNodeOptions) {
         this(uiContext, options, undefined, undefined);
     }
@@ -315,7 +324,7 @@ export class FrameNode implements MaterializedBase {
     static getFinalizer(): KPointer {
         return FrameNodeExtender.getDestroy();
     }
-    public isWeakNode(): boolean {
+    public isMinimized(): boolean {
         return false;
     }
     public isModifiable(): boolean {
@@ -537,8 +546,13 @@ export class FrameNode implements MaterializedBase {
         }
         if (this.peer?.ptr) {
             ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
+            const weakRef: WeakRef<FrameNode> = new WeakRef<FrameNode>(this)
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                weakRef as object,
+                'FrameNode', this.getNodeType(), this.peer!.ptr!);
             this.peer?.close();
         }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this.nodePtr_ = undefined;
         this.renderNode_?.dispose();
         this.isDisposed_ = true;
@@ -1037,7 +1051,7 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.applyAttributesFinish(this);
     }
 }
-class ImmutableFrameNode extends FrameNode {
+export class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
         super(uiContext, undefined, type, ptr);
     }
@@ -1075,6 +1089,19 @@ class ImmutableFrameNode extends FrameNode {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
+    get commonAttribute(): CommonMethod {
+ 	    ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr);
+ 	    if (this._commonAttribute === undefined) {
+ 	        let baseNode = new ArkBaseNode();
+
+ 	        const retval = FrameNodeExtender.getFrameNodePtr(this)
+ 	        let peer = new ArkFrameNodePeer(retval, this._nodeId!.toInt(), "FrameNode", 0);
+ 	        peer.releasePeerPtr();
+ 	        baseNode.setPeer(peer);
+ 	        this._commonAttribute = baseNode as CommonAttribute;
+ 	    }
+ 	    return this._commonAttribute!;
+ 	}
 }
 
 export class ProxyFrameNode extends ImmutableFrameNode {
@@ -1145,7 +1172,7 @@ export class BuilderRootWeakFrameNode<T> extends BuilderRootFrameNode<T> {
     getType(): string {
         return 'BuilderRootWeakFrameNode';
     }
-    public isWeakNode(): boolean {
+    public isMinimized(): boolean {
         return true;
     }
     public getRenderNode(): RenderNode | null {
@@ -1421,15 +1448,15 @@ export class FrameNodeUtils {
             let frameNode = isWeak
                 ? new BuilderRootWeakFrameNode<T>(uiContext, 'BuilderRootWeakFrameNode', ptr)
                 : new BuilderRootFrameNode<T>(uiContext, 'BuilderRootFrameNode', ptr);
-            frameNode._nodeId = nodeId;
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
+            (frameNode! as FrameNode)._nodeId = nodeId;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, (frameNode! as FrameNode));
             return frameNode;
         }
         return null;
     }
 }
 
-abstract class TypedFrameNode<T> extends FrameNode {
+export abstract class TypedFrameNode<T> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";

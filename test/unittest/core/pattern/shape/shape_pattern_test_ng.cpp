@@ -963,4 +963,53 @@ HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest002, TestSize.Level0)
     uint64_t traceId = GetLastTraceId();
     EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
 }
+
+/**
+ * @tc.name: ShapeLpxAttribute001
+ * @tc.desc: Test SetStrokeWidth with LPX unit registers/unregisters LPX_SHAPE_STROKE_WIDTH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapePatternTestNg, ShapeLpxAttribute001, TestSize.Level1)
+{
+    ResetLastTraceId();
+    CircleModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ShapeAbstractModelNG shapeModel;
+    shapeModel.SetStrokeWidth(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    shapeModel.SetStrokeWidth(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ShapeLpxAttribute002
+ * @tc.desc: Test SetStrokeDashOffset with LPX unit registers/unregisters LPX_SHAPE_STROKE_DASH_OFFSET.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapePatternTestNg, ShapeLpxAttribute002, TestSize.Level1)
+{
+    ResetLastTraceId();
+    CircleModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ShapeAbstractModelNG shapeModel;
+    shapeModel.SetStrokeDashOffset(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    shapeModel.SetStrokeDashOffset(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG

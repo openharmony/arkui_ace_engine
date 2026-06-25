@@ -17,14 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_THEME_H
 
 #include "core/components/theme/theme.h"
-#include "core/components/theme/theme_constants.h"
+
+namespace OHOS::Ace {
+class ThemeConstants;
+}
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEFAULT_VELOCITY_COEFFICIENT = 1.0;
-constexpr float DEFAULT_STIFFNESS = 328.0f;
-constexpr float DEFAULT_DAMPING = 34.0f;
-} // namespace
 
 class SwiperTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperTheme, Theme);
@@ -35,33 +33,10 @@ public:
         Builder() = default;
         ~Builder() = default;
 
-        RefPtr<SwiperTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
-        {
-            RefPtr<SwiperTheme> theme = AceType::MakeRefPtr<SwiperTheme>();
-            if (!themeConstants) {
-                return theme;
-            }
-            ParsePattern(themeConstants, theme);
-            return theme;
-        }
+        RefPtr<SwiperTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const;
 
     private:
-        void ParsePattern(const RefPtr<ThemeConstants>& themeStyle, const RefPtr<SwiperTheme>& theme) const
-        {
-            if (!themeStyle) {
-                return;
-            }
-            auto pattern = themeStyle->GetPatternByName(THEME_PATTERN_SWIPER);
-            if (!pattern) {
-                return;
-            }
-            theme->touchPadVelocityCoefficient_ =
-                pattern->GetAttr<double>("swiper_velocity_coefficient_touch_pad", DEFAULT_VELOCITY_COEFFICIENT);
-            theme->animationCurveStiffness_ =
-                pattern->GetAttr<double>("swiper_fling_animation_stiffness", DEFAULT_STIFFNESS);
-            theme->animationCurveDamping_ =
-                pattern->GetAttr<double>("swiper_fling_animation_damping", DEFAULT_DAMPING);
-        }
+        void ParsePattern(const RefPtr<ThemeConstants>& themeStyle, const RefPtr<SwiperTheme>& theme) const;
     };
 
     SwiperTheme() = default;
@@ -83,9 +58,9 @@ public:
     }
 
 private:
-    double touchPadVelocityCoefficient_ = DEFAULT_VELOCITY_COEFFICIENT;
-    double animationCurveStiffness_ = DEFAULT_STIFFNESS;
-    double animationCurveDamping_ = DEFAULT_DAMPING;
+    double touchPadVelocityCoefficient_ = 1.0;
+    double animationCurveStiffness_ = 328.0;
+    double animationCurveDamping_ = 34.0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class InputEvent;
 class TouchEventImpl;
-class SelectableItemPattern : public virtual Pattern {
+class ACE_FORCE_EXPORT SelectableItemPattern : public virtual Pattern {
     DECLARE_ACE_TYPE(SelectableItemPattern, Pattern);
 
 public:

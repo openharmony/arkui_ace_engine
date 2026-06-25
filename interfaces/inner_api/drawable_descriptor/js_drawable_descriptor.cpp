@@ -19,12 +19,14 @@
 
 #ifndef PREVIEW
 #include "pixel_map_napi.h"
+#include "picture_napi.h"
 #else
 #include "image_source_preview.h"
 #endif
 
 #include "drawable_bridge.h"
 #include "drawable_descriptor.h"
+#include "base/error/error_code.h"
 
 #include "drawable_log.h"
 
@@ -36,6 +38,7 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+constexpr char PICTURE_DRAWABLE_DESCRIPTOR_NAME[] = "PictureDrawableDescriptor";
 
 constexpr int32_t PARAMS_NUM_ONE = 1;
 constexpr int32_t PARAMS_NUM_TWO = 2;
@@ -45,6 +48,7 @@ constexpr int32_t BACKGROUND_INDEX = 1;
 constexpr int32_t MASK_INDEX = 2;
 constexpr uint32_t ANIMATED_TYPE = 2;
 constexpr uint32_t PIXELMAP_TYPE = 3;
+constexpr uint32_t PICTURE_TYPE = 4;
 constexpr int32_t MAX_ARG_NUM = 10;
 
 struct LoadAsyncContext {
@@ -99,11 +103,25 @@ void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
         result.clear();
     }
 }
+
+bool CheckReleased(napi_env env, void* native, napi_escapable_handle_scope scope)
+{
+    if (native == nullptr) {
+        HILOGW("CheckReleased: native is nullptr, throwing 111002");
+        napi_throw_error(env, std::to_string(ERROR_CODE_DRAWABLE_RELEASED).c_str(),
+            "The native memory referenced by the drawableDescriptor has been released.");
+        if (scope != nullptr) {
+            napi_close_escapable_handle_scope(env, scope);
+        }
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 thread_local napi_ref JsDrawableDescriptor::baseConstructor_;
 thread_local napi_ref JsDrawableDescriptor::layeredConstructor_;
-thread_local napi_ref JsDrawableDescriptor::animatedConstructor_;
 thread_local napi_ref JsDrawableDescriptor::pixelMapConstructor_;
 
 napi_value JsDrawableDescriptor::ToNapi(
@@ -281,6 +299,30 @@ napi_value JsDrawableDescriptor::CreatPixelMapDrawable(napi_env env, void* nativ
     return cons;
 }
 
+napi_value JsDrawableDescriptor::CreatPictureDrawable(napi_env env, void* native)
+{
+    if (native == nullptr) {
+        return nullptr;
+    }
+    napi_value cons = nullptr;
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        return nullptr;
+    }
+    modifier->increaseRef(native);
+    auto napi_status = napi_wrap(env, cons, native, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        modifier->decreaseRef(native);
+        return nullptr;
+    }
+    auto pictureDes = GetPictureDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_properties(env, cons, pictureDes.size(), pictureDes.data()));
+    return cons;
+}
+
 napi_value JsDrawableDescriptor::CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info)
 {
     size_t argc = MAX_ARG_NUM;
@@ -320,6 +362,10 @@ napi_value JsDrawableDescriptor::CreateDrawableDescriptorTransfer(napi_env env, 
             cons = CreatPixelMapDrawable(env, drawable);
             break;
         }
+        case DrawableDescriptor::DrawableType::PICTURE: {
+            cons = CreatPictureDrawable(env, drawable);
+            break;
+        }
         default:
             break;
     }
@@ -334,6 +380,9 @@ napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -354,6 +403,9 @@ napi_value JsDrawableDescriptor::GetBackground(napi_env env, napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -374,6 +426,9 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -451,6 +506,9 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
@@ -565,13 +623,16 @@ napi_value JsDrawableDescriptor::Load(napi_env env, napi_callback_info info)
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
     GetStringFromNapiValue(env, typeName, type);
     napi_value result;
     napi_get_undefined(env, &result);
-    if (type != ANIMATED_DRAWABLE_DESCRIPTOR_NAME && type != PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+    if (type == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
         napi_escape_handle(env, scope, result, &result);
         napi_close_escapable_handle_scope(env, scope);
         return result;
@@ -607,12 +668,15 @@ napi_value JsDrawableDescriptor::LoadSync(napi_env env, napi_callback_info info)
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
     GetStringFromNapiValue(env, typeName, type);
     napi_value result = nullptr;
-    if (type == ANIMATED_DRAWABLE_DESCRIPTOR_NAME || type == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+    if (type != LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
         int32_t width = 0;
         int32_t height = 0;
         int32_t errorCode = 0;
@@ -657,6 +721,10 @@ napi_value JsDrawableDescriptor::GetAnimationController(napi_env env, napi_callb
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (native == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
     std::string id {};
     if (argc == 1) {
         GetStringFromNapiValue(env, argv[0], id);
@@ -825,8 +893,73 @@ napi_value JsDrawableDescriptor::GetStatus(napi_env env, napi_callback_info info
     return result;
 }
 
+napi_value JsDrawableDescriptor::Release(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    // Check _released flag to prevent repeated release
+    napi_value internalReleased;
+    status = napi_get_named_property(env, thisVar, "_released", &internalReleased);
+    if (status == napi_ok) {
+        bool released = false;
+        napi_get_value_bool(env, internalReleased, &released);
+        if (released) {
+            HILOGW("JsDrawableDescriptor::Release already released, skip");
+            napi_close_escapable_handle_scope(env, scope);
+            return nullptr;
+        }
+    }
+
+    // Unbind JS ↔ native: napi_remove_wrap detaches the native pointer,
+    // subsequent napi_unwrap will return nullptr
+    void* native = nullptr;
+    if (napi_remove_wrap(env, thisVar, &native) != napi_ok || native == nullptr) {
+        HILOGE("JsDrawableDescriptor::Release napi_remove_wrap failed");
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    // Mark released on JS object
+    napi_value trueValue;
+    napi_get_boolean(env, true, &trueValue);
+    napi_set_named_property(env, thisVar, "_released", trueValue);
+
+    napi_close_escapable_handle_scope(env, scope);
+    HILOGI("JsDrawableDescriptor::Release done");
+    return nullptr;
+}
+
+napi_value JsDrawableDescriptor::IsReleased(napi_env env, napi_callback_info info)
+{
+    napi_value thisVar = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+
+    // Check _released flag on JS object
+    napi_value internalReleased;
+    bool isReleased = false;
+    napi_status status = napi_get_named_property(env, thisVar, "_released", &internalReleased);
+    if (status == napi_ok) {
+        napi_get_value_bool(env, internalReleased, &isReleased);
+    }
+
+    napi_value result = nullptr;
+    napi_get_boolean(env, isReleased, &result);
+    return result;
+}
+
 void JsDrawableDescriptor::Destructor(napi_env /* env */, void* nativeObject, void* /* finalize */)
 {
+    if (nativeObject == nullptr) {
+        return;
+    }
     auto* field = reinterpret_cast<DrawableDescriptor*>(nativeObject);
     delete field;
 }
@@ -1105,6 +1238,133 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     return thisVar;
 }
 
+napi_value JsDrawableDescriptor::PictureConstructor(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    size_t argc = PARAMS_NUM_ONE;
+    napi_value argv[PARAMS_NUM_ONE] = { nullptr };
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    auto* drawable = modifier->createDrawableDescriptorByType(PICTURE_TYPE);
+    if (argc > 0 && argv[0] != nullptr) {
+#ifdef PICTURE_DRAWABLE_ENABLED
+        auto picture = Media::PictureNapi::GetPicture(env, argv[0]);
+        if (picture) {
+            modifier->setPicture(drawable, &picture);
+        }
+#endif
+    }
+    modifier->increaseRef(drawable);
+    auto napi_status = napi_wrap(env, thisVar, drawable, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        modifier->decreaseRef(drawable);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_escape_handle(env, scope, thisVar, &thisVar);
+    napi_close_escapable_handle_scope(env, scope);
+    return thisVar;
+}
+
+void JsDrawableDescriptor::ParseHdrCompositionOptions(
+    napi_env env, napi_value napiOptions, HdrCompositionOptions& options)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiOptions, &valueType);
+    if (valueType != napi_object) {
+        HILOGI("invalid argument for setHdrComposition, expected object");
+        return;
+    }
+    napi_value napiRect = nullptr;
+    napi_get_named_property(env, napiOptions, "rect", &napiRect);
+    napi_typeof(env, napiRect, &valueType);
+    if (valueType != napi_object) {
+        HILOGI("invalid rect in HdrCompositionConfig");
+        return;
+    }
+    napi_value napiX = nullptr;
+    napi_value napiY = nullptr;
+    napi_value napiWidth = nullptr;
+    napi_value napiHeight = nullptr;
+    napi_get_named_property(env, napiRect, "x", &napiX);
+    napi_get_named_property(env, napiRect, "y", &napiY);
+    napi_get_named_property(env, napiRect, "width", &napiWidth);
+    napi_get_named_property(env, napiRect, "height", &napiHeight);
+    options.x = ParseDimensionToPx(reinterpret_cast<void*>(napiX));
+    options.y = ParseDimensionToPx(reinterpret_cast<void*>(napiY));
+    options.width = ParseDimensionToPx(reinterpret_cast<void*>(napiWidth));
+    options.height = ParseDimensionToPx(reinterpret_cast<void*>(napiHeight));
+}
+
+napi_value JsDrawableDescriptor::SetHdrComposition(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    size_t argc = PARAMS_NUM_ONE;
+    napi_value argv[PARAMS_NUM_ONE] = { nullptr };
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    void* native = nullptr;
+    napi_unwrap(env, thisVar, &native);
+    if (native == nullptr || argc < 1 || argv[0] == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    HdrCompositionOptions options;
+    ParseHdrCompositionOptions(env, argv[0], options);
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    modifier->setHdrComposition(native, options.x, options.y, options.width, options.height);
+    napi_close_escapable_handle_scope(env, scope);
+    return nullptr;
+}
+
+napi_value JsDrawableDescriptor::Invalidate(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    void* native = nullptr;
+    napi_unwrap(env, thisVar, &native);
+    if (native == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    modifier->invalidate(native);
+    napi_close_escapable_handle_scope(env, scope);
+    return nullptr;
+}
+
 napi_value JsDrawableDescriptor::DrawableConstructor(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -1141,6 +1401,9 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescr
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1152,6 +1415,9 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPixelMapDrawableD
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1163,11 +1429,14 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDe
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("getForeground", GetForeground),
         DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
         DECLARE_NAPI_FUNCTION("getMask", GetMask),
         DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
         DECLARE_NAPI_FUNCTION("setBlendMode", SetBlendMode),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1179,7 +1448,25 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetAnimatedDrawableD
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
+        DECLARE_NAPI_PROPERTY("typeName", typeName)
+    };
+}
+
+std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPictureDrawableDescriptor(napi_env env)
+{
+    napi_value typeName = CreateString(env, std::string(PICTURE_DRAWABLE_DESCRIPTOR_NAME));
+    return {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+        DECLARE_NAPI_FUNCTION("load", Load),
+        DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("setHdrComposition", SetHdrComposition),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1220,7 +1507,15 @@ napi_value JsDrawableDescriptor::InitAnimatedDrawable(napi_env env)
     auto animatedDes = GetAnimatedDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_class(env, ANIMATED_DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, AnimatedConstructor,
                        nullptr, animatedDes.size(), animatedDes.data(), &cons));
-    NAPI_CALL(env, napi_create_reference(env, cons, 1, &animatedConstructor_));
+    return cons;
+}
+
+napi_value JsDrawableDescriptor::InitPictureDrawable(napi_env env)
+{
+    napi_value cons = nullptr;
+    auto pictureDes = GetPictureDrawableDescriptor(env);
+    NAPI_CALL(env, napi_define_class(env, PICTURE_DRAWABLE_DESCRIPTOR_NAME, NAPI_AUTO_LENGTH, PictureConstructor,
+                       nullptr, pictureDes.size(), pictureDes.data(), &cons));
     return cons;
 }
 
@@ -1266,6 +1561,8 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     NAPI_CALL(env, napi_set_named_property(env, exports, LAYERED_DRAWABLE_DESCRIPTOR_NAME, cons));
     cons = InitAnimatedDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, ANIMATED_DRAWABLE_DESCRIPTOR_NAME, cons));
+    cons = InitPictureDrawable(env);
+    NAPI_CALL(env, napi_set_named_property(env, exports, PICTURE_DRAWABLE_DESCRIPTOR_NAME, cons));
     InitAnimationStopMode(env, exports);
 
     napi_property_descriptor createTransferDesc[] = { DECLARE_NAPI_FUNCTION(

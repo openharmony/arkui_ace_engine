@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components/image/image_component.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 

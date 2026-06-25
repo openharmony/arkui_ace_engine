@@ -529,7 +529,8 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
 }
 
 bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
-    std::optional<Msdp::DeviceStatus::DragData>& dragData, std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
+    std::optional<Msdp::DeviceStatus::DragData>& dragData, std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos,
+    NG::PreparedInfoForDrag& data)
 {
     if (shadowInfos.empty()) {
         LOGE("AceDrag, shadowInfo array is empty");
@@ -548,14 +549,18 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("scale", data.previewScale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    EventPositionInfo eventPositionInfo {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    EventPositionInfo originalPos {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        originalPos.displayX, originalPos.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
         materialInfo.materialId };
@@ -605,7 +610,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         }
     }
     std::optional<Msdp::DeviceStatus::DragData> dragData;
-    if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
+    if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos, data)) {
         return false;
     }
     data.badgeNumber = dragData->dragNum;
@@ -761,7 +766,7 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
 }
 
 bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::DeviceStatus::DragData& dragData,
-    Msdp::DeviceStatus::ShadowInfo& shadowInfo)
+    Msdp::DeviceStatus::ShadowInfo& shadowInfo, NG::PreparedInfoForDrag& data)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(asyncCtx->pixelMap, false);
@@ -777,15 +782,19 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
         return false;
     }
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("scale", data.previewScale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto windowId = container->GetWindowId();
     auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    EventPositionInfo eventPositionInfo {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    EventPositionInfo originalPos {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        originalPos.displayX, originalPos.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
         materialInfo.materialId };
@@ -815,7 +824,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         return false;
     }
     Msdp::DeviceStatus::DragData dragData;
-    if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
+    if (!PrepareDragData(asyncCtx, dragData, shadowInfo, data)) {
         LOGE("AceDrag, prepare drag data failed!");
         return false;
     }

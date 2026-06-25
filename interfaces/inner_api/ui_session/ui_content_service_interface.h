@@ -346,7 +346,14 @@ public:
      * @return: result number
      */
     virtual int32_t ExeAppAIFunction(const std::string& funcName, const std::string& params,
-        const std::function<void(uint32_t)>& finishCallback) = 0;
+         const sptr<IRemoteObject>& remoteObj, const std::function<void(uint32_t, std::string)>& finishCallback)
+    {
+        return ExeAppAIFunction(funcName, params, remoteObj, -1, finishCallback);
+    }
+
+    virtual int32_t ExeAppAIFunction(const std::string& funcName, const std::string& params,
+         const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
+         const std::function<void(uint32_t, std::string)>& finishCallback) = 0;
 
     /**
      * @description: define register a callback on content change occur to execute interface
@@ -507,7 +514,7 @@ public:
     /**
      * @description: define ui send execute application AI function result for sa service
      */
-    virtual void SendExeAppAIFunctionResult(uint32_t result) = 0;
+    virtual void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) = 0;
 
     /**
      * @description: define send the content change to the proxy interface

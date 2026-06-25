@@ -118,9 +118,7 @@ void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->viewNode_);
     CHECK_NULL_VOID(configurationUpdateFunc);
-    auto updateNodeConfig = [updateTsConfig = CallbackHelper(*configurationUpdateFunc)]() mutable {
-        updateTsConfig.InvokeSync();
-    };
+    auto updateNodeConfig = GetSyncInvoker(*configurationUpdateFunc);
     peer->viewNode_->SetUpdateNodeConfig(std::move(updateNodeConfig));
 }
 
@@ -287,7 +285,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEevent.value1->GetEventInfo();
             CHECK_NULL_RETURN(mouseEventInfo, errValue);
-            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEventForStatic();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             result = postEventManager->PostMouseEvent(peer->realNode_, std::move(mouseEvent));
             break;
@@ -358,7 +356,7 @@ Ark_Boolean PostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_In
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEvent.value1->GetEventInfo();
             CHECK_NULL_RETURN(mouseEventInfo, errValue);
-            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEventForStatic();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             mouseEvent.isNewReferee = isNewReferee;
             result = postEventManager->PostMouseEventWithStrategy(peer->realNode_, std::move(mouseEvent));

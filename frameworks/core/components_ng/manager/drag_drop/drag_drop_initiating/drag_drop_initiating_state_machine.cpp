@@ -75,6 +75,13 @@ void DragDropInitiatingStateMachine::HandleLongPressOnActionCancel(const Gesture
     }
 }
 
+void DragDropInitiatingStateMachine::HandleLongPressOnPending()
+{
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleLongPressOnPending();
+    }
+}
+
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnAction(const GestureEvent& info)
 {
     if (DragInitStateIsNotEmpty()) {

@@ -33,6 +33,32 @@
 #include "stateMgmt/stateMgmt_module.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
+#include "with_env/with_env_module.h"
+
+namespace {
+namespace Stubs {
+ani_long ExtractorsToScenePtr([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object object)
+{
+    return 0L;
+}
+ani_long VideoSetVoidCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object callback)
+{
+    return 0L;
+}
+ani_long VideoSetErrorCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object callback)
+{
+    return 0L;
+}
+ani_long ExtractorsToWebviewWebviewControllerPtr([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object object)
+{
+    return 0L;
+}
+} // namespace Stubs
+} // namespace
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -48,6 +74,56 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array staticMethods = {
+        ani_native_function {
+            "_Extractors_ToWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(Stubs::ExtractorsToWebviewWebviewControllerPtr)
+        },
+        ani_native_function {
+            "_WithEnv_construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvConstruct)
+        },
+        ani_native_function {
+            "_WithEnv_removeSystemEnvProperty",
+            "lC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setSystemEnvProperty",
+            "lC{std.core.String}Y:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setCustomEnvProperty",
+            "liY:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_removeCustomEnvProperty",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveCustomEnvProperty)
+        },
+        ani_native_function {
+            "_CustomNode_findCustomValueByKey",
+            "li:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindCustomEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_findSystemEnvValueByKey",
+            "lC{std.core.String}:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindSystemEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnCustomEnvUpdateCallback",
+            "lC{std.core.Function2}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnSystemEnvUpdateCallback",
+            "lC{std.core.Function2}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
+        },
         ani_native_function {
             "_CustomNode_QueryNavigationInfo",
             nullptr,
@@ -202,6 +278,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_RequireArkoalaNodeId",
             "i:i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
+        },
+        ani_native_function {
+            "_Video_SetVoidCallback",
+            "lC{std.core.Function0}:",
+            reinterpret_cast<void*>(Stubs::VideoSetVoidCallback)
+        },
+        ani_native_function {
+            "_Video_SetErrorCallback",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(Stubs::VideoSetErrorCallback)
         },
         ani_native_function {
             "_PersistentStorage_Get",
@@ -382,6 +468,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ForEachNode_Construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_Extractors_ToScenePtr",
+            nullptr,
+            reinterpret_cast<void*>(Stubs::ExtractorsToScenePtr)
         },
         ani_native_function {
             "_SetCustomCallbackWithCheck",

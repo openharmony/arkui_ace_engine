@@ -52,6 +52,7 @@ ohos_shared_library("ace_ndk") {
   public_configs = [ ":ace_ndk_public_configs" ]
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/base/geometry/dimension.cpp",
     "//foundation/arkui/ace_engine/frameworks/base/log/log_wrapper.cpp",
     "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
@@ -83,6 +84,7 @@ ohos_shared_library("ace_ndk") {
     "node/native_drawable_descriptor.cpp",
     "node/native_impl.cpp",
     "node/native_interface_focus.cpp",
+    "node/native_material_impl.cpp",
     "node/native_node_ani.cpp",
     "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
@@ -109,10 +111,16 @@ ohos_shared_library("ace_ndk") {
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
   deps = []
+  defines = []
   cflags_cc = [ "-Wno-missing-braces" ]
 
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+  }
+
   if (target_os == "ohos") {
-    defines = [
+    defines += [
       "OHOS_PLATFORM",
       "USE_HILOG",
     ]
@@ -154,20 +162,72 @@ if (is_arkui_x) {
       "$ace_root/frameworks",
       "$ace_root/interfaces/native",
       "$ace_root/interfaces/inner_api/ace_kit/include",
+      "//base/global/resource_management/interfaces/inner_api/include",
+      "//foundation/graphic/graphic_2d/rosen/modules/platform/ipc_core",
+    ]
+
+    configs = [
+      "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani:ani_config",
+      "//foundation/arkui/napi:ace_napi_config",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/drawing_ndk:export_config",
+      "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config",
     ]
 
     sources = [
       "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+      "native_error_message_wrapper.cpp",
       "native_interface_xcomponent_cross_platform.cpp",
+      "native_styled_string_descriptor.cpp",
+      "node/native_node_ani.cpp",
+      "node/native_node_napi.cpp",
+      "node/node_utils.cpp",
+      "node/render_node.cpp",
+      "node/node_adapter_impl.cpp",
+      "node/native_node_extented.cpp",
+      "node/node_extened.cpp",
+      "node/gesture_impl.cpp",
+      "node/node_model.cpp",
+      "node/event_converter.cpp",
+      "node/node_model_safely.cpp",
+      "node/container_picker_option.cpp",
+      "node/textpicker_option.cpp",
+      "node/frame_information.cpp",
+      "node/dialog_option.cpp",
+      "node/dialog_model.cpp",
+      "node/swiper_option.cpp",
+      "node/node_transition_imp.cpp",
+      "node/node_visual_effect.cpp",
+      "node/grid_layout_option.cpp",
+      "node/list_option.cpp",
+      "node/waterflow_section_option.cpp",
+      "native_interface_accessibility.cpp",
+      "node/text_native_impl.cpp",
+      "node/native_impl.cpp",
+      "node/animate_impl.cpp",
+      "node/node_animate.cpp",
+      "node/style_modifier.cpp",
+      "node/node_transition.cpp",
+      "node/native_material_impl.cpp",
+      "node/progress_option.cpp",
+      "node/rich_editor_native_impl.cpp",
+      "node/node_node_relative_container.cpp",
     ]
 
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [
+      "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",
+      "//third_party/bounds_checking_function:libsec_static",
+    ]
 
     cflags_cc = [ "-Wno-missing-braces" ]
 
     print("ace_static_ndk build.")
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
+    external_deps = [
+      "c_utils:utils",
+      "napi:ace_napi",
+      "runtime_core:ani",
+    ]
   }
 }
 

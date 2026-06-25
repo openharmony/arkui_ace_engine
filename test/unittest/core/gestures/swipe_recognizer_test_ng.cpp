@@ -1177,32 +1177,27 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchCancelEventTest005, Te
 HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     * @tc.steps: step1. create and set Recognizer.
      */
     SwipeDirection swipeDirection;
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =
         AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     DimensionRect area;
     DimensionOffset origin;
     EventTarget target = {"", "", area, origin};
-    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     TouchEvent touchEvent;
     AxisEvent axisEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
-    swipeRecognizerPtr->targetComponent_ = targetComponent;
     /**
-     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.steps: step2. test HandleTouchUpEvent function.
      * @tc.expected: step2. result equals REJECT.
      */
     swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     swipeRecognizerPtr->speed_ = Dimension(-1, DimensionUnit::PX);
     swipeRecognizerPtr->fingers_ = 1;
     swipeRecognizerPtr->HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::ACCEPT);
 
     swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     swipeRecognizerPtr->deviceType_ = SourceType::MOUSE;
@@ -1351,7 +1346,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
 HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     * @tc.steps: step1. create and set Recognizer.
      */
     SwipeDirection swipeDirection;
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =
@@ -1375,7 +1370,7 @@ HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
 HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     * @tc.steps: step1. create and set Recognizer.
      */
     SwipeDirection swipeDirection;
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =

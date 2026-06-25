@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
+#include "core/common/display_info.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -362,6 +363,9 @@ public:
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
+    void ClearSheetCloseIconMaterial();
+    void SetSheetCloseIconMaterial();
+
     void ClearSheetRenderMaterial();
     void SetSheetRenderMaterial();
 
@@ -427,6 +431,8 @@ public:
     }
 
     bool IsWindowSizeChangedWithUndefinedReason(int32_t width, int32_t height, WindowSizeChangeReason type);
+
+    void ReachToBottomWhenCloseAndRotate();
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
@@ -1124,6 +1130,24 @@ public:
     {
         return needDoubleAvoidAfterLayout_;
     }
+
+    bool CheckIfUseEffectComponent(const SheetStyle& sheetStyle)
+    {
+        // Use effectComponent blur snapshot, when the following conditions are met simultaneously:
+        // 1. enableBlurSnapshot is enabled.
+        // 2. sheetType is not popup.
+        // 3. have blur or immersive material.
+        if (sheetStyle.systemMaterial &&
+            sheetStyle.systemMaterial->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            return false;
+        }
+        bool result = sheetStyle.enableBlurSnapshot.value_or(false) &&
+                      GetSheetTypeNoProcess() != SheetType::SHEET_POPUP &&
+                      (sheetStyle.backgroundBlurStyle.has_value() || sheetStyle.systemMaterial);
+        return result;
+    }
+    bool SetBlurUnderEffectComponent(const BlurStyleOption& bgBlurStyle);
+    static RefPtr<FrameNode> GetParentSkipEffectComponent(const RefPtr<FrameNode>& node);
 
     void SetSheetEdgeLightMode(const SheetStyle& sheetStyle)
     {

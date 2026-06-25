@@ -10,7 +10,1495 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "ScrollableComponent"
+    },
+    {
+      "name": "pageIndex_List",
+      "value": "列表/List"
+    },
+    {
+      "name": "pageIndex_ArcList",
+      "value": "弧形列表/ArcList"
+    },
+    {
+      "name": "pageIndex_Grid",
+      "value": "网格/Grid"
+    },
+    {
+      "name": "pageIndex_Swiper",
+      "value": "轮播/Swiper"
+    },
+    {
+      "name": "pageIndex_ArcSwiper",
+      "value": "弧形轮播/ArcSwiper"
+    },
+    {
+      "name": "pageIndex_Tabs",
+      "value": "选项卡/Tabs"
+    },
+    {
+      "name": "GridLayout_title",
+      "value": "网格开发布局"
+    },
+    {
+      "name": "GridLayout_titleRowSpacing",
+      "value": "设置行列数量占比和行间距示例"
+    },
+    {
+      "name": "GridLayout_titleChildSpan",
+      "value": "设置子组件所占行列数示例"
+    },
+    {
+      "name": "GridLayout_titleMainAxis",
+      "value": "设置主轴方向示例"
+    },
+    {
+      "name": "GridLayout_description",
+      "value": "示例设置了网格中子组件行列数量占比、行列间距和主轴方向。"
+    },
+    {
+      "name": "DataInGrid_title",
+      "value": "网格显示数据"
+    },
+    {
+      "name": "DataInGrid_titleOfficeServices",
+      "value": "办公服务网格示例"
+    },
+    {
+      "name": "DataInGrid_titleForEach",
+      "value": "办公服务网格ForEach语句示例"
+    },
+    {
+      "name": "DataInGrid_description",
+      "value": "示例采用二维布局的方式组织其内部元素，显示通用办公服务网格。"
+    },
+    {
+      "name": "ScrollableGrid_title",
+      "value": "可滚动的网格布局"
+    },
+    {
+      "name": "ScrollableGrid_titleHorizontal",
+      "value": "横向可滚动网格布局示例"
+    },
+    {
+      "name": "ScrollableGrid_description",
+      "value": "示例通过仅设置行、列数量与占比中的一个实现横向可滚动网格布局。"
+    },
+    {
+      "name": "ScrollPosition_title",
+      "value": "控制滚动位置的网格布局"
+    },
+    {
+      "name": "ScrollPosition_titleExample",
+      "value": "控制滚动位置示例"
+    },
+    {
+      "name": "ScrollPosition_description",
+      "value": "示例通过添加Scroller对象的scrollPage方法，实现滚动网格布局翻页滚动的功能。"
+    },
+    {
+      "name": "SwiperLoop_title",
+      "value": "循环播放"
+    },
+    {
+      "name": "SwiperLoop_titleTrue",
+      "value": "循环播放loop为true的示例"
+    },
+    {
+      "name": "SwiperLoop_titleFalse",
+      "value": "循环播放loop为false的示例"
+    },
+    {
+      "name": "SwiperLoop_description",
+      "value": "通过设置loop属性控制是否循环播放。"
+    },
+    {
+      "name": "SwiperAutoPlay_title",
+      "value": "自动轮播"
+    },
+    {
+      "name": "SwiperAutoPlay_titleExample",
+      "value": "自动轮播示例"
+    },
+    {
+      "name": "SwiperAutoPlay_description",
+      "value": "通过设置autoPlay属性控制是否自动轮播子组件。"
+    },
+    {
+      "name": "SwiperIndicatorStyle_title",
+      "value": "自定义导航点样式"
+    },
+    {
+      "name": "SwiperIndicatorStyle_titleDefault",
+      "value": "默认导航点样式示例"
+    },
+    {
+      "name": "SwiperIndicatorStyle_titleCustom",
+      "value": "自定义导航点样式示例"
+    },
+    {
+      "name": "SwiperIndicatorStyle_titleDefaultArrows",
+      "value": "默认箭头样式导航点样式示例"
+    },
+    {
+      "name": "SwiperIndicatorStyle_titleCustomArrows",
+      "value": "自定义箭头样式导航点样式示例"
+    },
+    {
+      "name": "SwiperIndicatorStyle_description",
+      "value": "通过indicator属性和displayArrow属性对导航点样式和导航点箭头样式进行设置。"
+    },
+    {
+      "name": "SwiperPageSwitchMethod_title",
+      "value": "页面切换方式"
+    },
+    {
+      "name": "SwiperPageSwitchMethod_titleHorizontal",
+      "value": "水平方向上轮播示例"
+    },
+    {
+      "name": "SwiperPageSwitchMethod_titleVertical",
+      "value": "垂直方向上轮播示例"
+    },
+    {
+      "name": "SwiperPageSwitchMethod_description",
+      "value": "Swiper支持手指滑动、点击导航点和通过控制器三种方式切换页面，示例展示通过控制器切换页面的方法。"
+    },
+    {
+      "name": "SwiperDirection_title",
+      "value": "轮播方向"
+    },
+    {
+      "name": "SwiperDirection_description",
+      "value": "Swiper支持水平和垂直方向上进行轮播，主要通过vertical属性控制。"
+    },
+    {
+      "name": "SwiperMultiPage_title",
+      "value": "每页显示多个子页面"
+    },
+    {
+      "name": "SwiperMultiPage_titleExample",
+      "value": "每页显示多个子页面示例"
+    },
+    {
+      "name": "SwiperMultiPage_description",
+      "value": "Swiper支持在一个页面内同时显示多个子组件，通过displayCount属性设置。"
+    },
+    {
+      "name": "SwiperCustomAnimation_title",
+      "value": "自定义切换动画"
+    },
+    {
+      "name": "SwiperCustomAnimation_titleExample",
+      "value": "自定义切换动画示例"
+    },
+    {
+      "name": "SwiperCustomAnimation_description",
+      "value": "Swiper支持通过customContentTransition设置自定义切换动画。"
+    },
+    {
+      "name": "TabsLayout_title",
+      "value": "基本布局"
+    },
+    {
+      "name": "TabsLayout_titleExample",
+      "value": "基本布局示例"
+    },
+    {
+      "name": "TabsLayout_description",
+      "value": "示例展示Tabs组件页面组成的两个部分，分别是内容页TabContent和导航页签栏TabBar。"
+    },
+    {
+      "name": "BottomTabBar_title",
+      "value": "底部导航"
+    },
+    {
+      "name": "BottomTabBar_titleExample",
+      "value": "底部导航示例"
+    },
+    {
+      "name": "homepage",
+      "value": "首页"
+    },
+    {
+      "name": "homepage_content",
+      "value": "首页的内容"
+    },
+    {
+      "name": "recommend",
+      "value": "推荐"
+    },
+    {
+      "name": "recommend_content",
+      "value": "推荐的内容"
+    },
+    {
+      "name": "discover",
+      "value": "发现"
+    },
+    {
+      "name": "discover_content",
+      "value": "发现的内容"
+    },
+    {
+      "name": "mine",
+      "value": "我的"
+    },
+    {
+      "name": "mine_content",
+      "value": "我的内容"
+    },
+    {
+      "name": "BottomTabBar_description",
+      "value": "示例展示导航页签栏TabBar在底部的情景。"
+    },
+    {
+      "name": "TopTabBar_title",
+      "value": "顶部导航"
+    },
+    {
+      "name": "TopTabBar_titleExample",
+      "value": "顶部导航示例"
+    },
+    {
+      "name": "TopTabBar_description",
+      "value": "示例展示导航页签栏TabBar在顶部的情景。"
+    },
+    {
+      "name": "SideTabBar_title",
+      "value": "侧边导航"
+    },
+    {
+      "name": "SideTabBar_titleExample",
+      "value": "侧边导航示例"
+    },
+    {
+      "name": "SideTabBar_description",
+      "value": "示例展示导航页签栏TabBar在侧边的情景。"
+    },
+    {
+      "name": "SwipeLockedTabBar_title",
+      "value": "限制导航栏的滑动切换"
+    },
+    {
+      "name": "SwipeLockedTabBar_titleExample",
+      "value": "限制导航栏的滑动切换示例"
+    },
+    {
+      "name": "SwipeLockedTabBar_description",
+      "value": "示例展示在底部导航+顶部导航组合的情况下，限制底部导航栏滑动的情景。"
+    },
+    {
+      "name": "FixedTabBar_title",
+      "value": "固定导航栏"
+    },
+    {
+      "name": "FixedTabBar_titleExample",
+      "value": "固定导航栏示例"
+    },
+    {
+      "name": "FixedTabBar_description",
+      "value": "示例展示底部导航内容分类一般固定，分类数量一般在3-5个，使用固定导航栏的情景。"
+    },
+    {
+      "name": "ScrollableTabBar_title",
+      "value": "滚动导航栏"
+    },
+    {
+      "name": "ScrollableTabBar_titleExample",
+      "value": "滚动导航栏示例"
+    },
+    {
+      "name": "Cache_count",
+      "value": "缓存数"
+    },
+    {
+      "name": "FocusOn_content",
+      "value": "关注的内容"
+    },
+    {
+      "name": "game_content",
+      "value": "游戏的内容"
+    },
+    {
+      "name": "digit_content",
+      "value": "数码的内容"
+    },
+    {
+      "name": "technology_content",
+      "value": "科技的内容"
+    },
+    {
+      "name": "sport_content",
+      "value": "体育的内容"
+    },
+    {
+      "name": "film_content",
+      "value": "影视的内容"
+    },
+    {
+      "name": "humanities_content",
+      "value": "人文的内容"
+    },
+    {
+      "name": "art_content",
+      "value": "艺术的内容"
+    },
+    {
+      "name": "nature_content",
+      "value": "自然的内容"
+    },
+    {
+      "name": "military_content",
+      "value": "军事的内容"
+    },
+    {
+      "name": "FocusOn",
+      "value": "关注"
+    },
+    {
+      "name": "game",
+      "value": "游戏"
+    },
+    {
+      "name": "digit",
+      "value": "数码"
+    },
+    {
+      "name": "technology",
+      "value": "科技"
+    },
+    {
+      "name": "sport",
+      "value": "体育"
+    },
+    {
+      "name": "film",
+      "value": "影视"
+    },
+    {
+      "name": "humanities",
+      "value": "人文"
+    },
+    {
+      "name": "art",
+      "value": "艺术"
+    },
+    {
+      "name": "nature",
+      "value": "自然"
+    },
+    {
+      "name": "military",
+      "value": "军事"
+    },
+    {
+      "name": "ScrollableTabBar_description",
+      "value": "示例展示内容分类较多，屏幕宽度无法容纳所有分类页签的情况下，需要使用可滚动的导航栏的情景。"
+    },
+    {
+      "name": "CustomTabBar_title",
+      "value": "自定义导航栏"
+    },
+    {
+      "name": "CustomTabBar_titleExample",
+      "value": "自定义导航栏示例"
+    },
+    {
+      "name": "internet_content",
+      "value": "网络的内容"
+    },
+    {
+      "name": "album_content",
+      "value": "相册的内容"
+    },
+    {
+      "name": "video_content",
+      "value": "视频的内容"
+    },
+    {
+      "name": "more_content",
+      "value": "更多的内容"
+    },
+    {
+      "name": "internet",
+      "value": "网络"
+    },
+    {
+      "name": "album",
+      "value": "相册"
+    },
+    {
+      "name": "video",
+      "value": "视频"
+    },
+    {
+      "name": "more",
+      "value": "更多"
+    },
+    {
+      "name": "CustomTabBar_description",
+      "value": "示例展示通过组合文字以及对应语义图标表示页签内容，自定义导航栏样式的情景。"
+    },
+    {
+      "name": "ContentWillChange_title",
+      "value": "切换至指定页签"
+    },
+    {
+      "name": "ContentWillChange_titleContentAndTabSync",
+      "value": "内容页和页签联动示例"
+    },
+    {
+      "name": "ContentWillChange_titleSpecifiedTab",
+      "value": "切换指定页签示例"
+    },
+    {
+      "name": "ContentWillChange_titleInterception",
+      "value": "支持开发者自定义页面切换拦截事件示例"
+    },
+    {
+      "name": "ContentWillChange_changeIndex",
+      "value": "动态修改index"
+    },
+    {
+      "name": "ContentWillChange_description",
+      "value": "示例展示使用了自定义导航栏后，自行实现页签切换逻辑。"
+    },
+    {
+      "name": "AgeFriendlyTabs_title",
+      "value": "支持适老化"
+    },
+    {
+      "name": "AgeFriendlyTabs_description",
+      "value": "示例展示在适老化大字体场景下，底部页签提供大字体弹窗显示内容。"
+    },
+    {
+      "name": "ListLayout_title",
+      "value": "列表开发布局"
+    },
+    {
+      "name": "ListLayout_titleMainAxis",
+      "value": "设置主轴方向布局"
+    },
+    {
+      "name": "ListLayout_titleCrossAxisLanes",
+      "value": "设置交叉轴布局lanes属性"
+    },
+    {
+      "name": "ListLayout_titleCrossAxisAlignment",
+      "value": "设置交叉轴布局alignListItem属性"
+    },
+    {
+      "name": "ListLayout_description",
+      "value": "展示列表主轴和交叉轴布局的各种示例。"
+    },
+    {
+      "name": "DataInList_title",
+      "value": "列表显示数据"
+    },
+    {
+      "name": "DataInList_titlePage",
+      "value": "在列表中显示数据"
+    },
+    {
+      "name": "DataInList_titleCityList",
+      "value": "城市列表示例"
+    },
+    {
+      "name": "city_beijing",
+      "value": "北京"
+    },
+    {
+      "name": "city_hangzhou",
+      "value": "杭州"
+    },
+    {
+      "name": "city_shanghai",
+      "value": "上海"
+    },
+    {
+      "name": "peopleOne",
+      "value": "小明"
+    },
+    {
+      "name": "peopleTwo",
+      "value": "小红"
+    },
+    {
+      "name": "DataInList_titleContactsList",
+      "value": "联系人列表示例"
+    },
+    {
+      "name": "DataInList_description",
+      "value": "示例模拟显示城市列表，以及图片和文字一起显示的联系人列表。"
+    },
+    {
+      "name": "ListIteration_title",
+      "value": "迭代列表内容"
+    },
+    {
+      "name": "ListIteration_titleExample",
+      "value": "迭代列表内容示例"
+    },
+    {
+      "name": "ListIteration_description",
+      "value": "示例通过数据集合动态地创建列表。"
+    },
+    {
+      "name": "CustomListStyle_title",
+      "value": "自定义列表样式"
+    },
+    {
+      "name": "CustomListStyle_titleContentSpacing",
+      "value": "设置内容间距"
+    },
+    {
+      "name": "CustomListStyle_titleDividerLines",
+      "value": "添加分隔线"
+    },
+    {
+      "name": "CustomListStyle_titleScrollbars",
+      "value": "添加滚动条"
+    },
+    {
+      "name": "CustomListStyle_titleExternalScrollbars",
+      "value": "添加外置滚动条"
+    },
+    {
+      "name": "CustomListStyle_description",
+      "value": "示例通过属性自定义设置列表的内容间距、分隔线、滚动条等样式。"
+    },
+    {
+      "name": "GroupedList_title",
+      "value": "支持分组列表"
+    },
+    {
+      "name": "GroupedList_titleExample",
+      "value": "支持分组列表示例"
+    },
+    {
+      "name": "GroupedList_description",
+      "value": "示例在列表中支持数据分组展示，可以使列表显示结构清晰，查找方便，从而提高使用效率。"
+    },
+    {
+      "name": "StickyHeaderList_title",
+      "value": "添加粘性标题"
+    },
+    {
+      "name": "StickyHeaderList_titleExample",
+      "value": "添加粘性标题示例"
+    },
+    {
+      "name": "StickyHeaderList_description",
+      "value": "粘性标题常用于定位字母列表的头部元素，有助于阐明列表中数据的表示形式和用途,帮助用户进行数据定位。"
+    },
+    {
+      "name": "ControlledScrollPositionList_title",
+      "value": "控制滚动位置"
+    },
+    {
+      "name": "ControlledScrollPositionList_titleExample",
+      "value": "控制滚动位置示例"
+    },
+    {
+      "name": "ControlledScrollPositionList_description",
+      "value": "当列表中新闻页列表项数量庞大时，可以快速滚动到列表底部或返回列表顶部。"
+    },
+    {
+      "name": "ResponsiveScrollPositionList_title",
+      "value": "响应滚动位置"
+    },
+    {
+      "name": "Sliding_Hand_Event",
+      "value": "滑动离手事件"
+    },
+    {
+      "name": "Scroll_Title",
+      "value": "Scroll"
+    },
+    {
+      "name": "ScrollModifier_Title",
+      "value": "ScrollModifier"
+    },
+    {
+      "name": "Support_Sliding_Hand_Event",
+      "value": "支持滑动离手事件"
+    },
+    {
+      "name": "Support_ScrollSnapList_Hand_Event",
+      "value": "支持List限制位滚动事件"
+    },
+    {
+      "name": "Support_ScrollSnapGrid_Hand_Event",
+      "value": "支持Grid限位滚动事件"
+    },
+    {
+      "name": "Support_ScrollSnapWaterFlow_Hand_Event",
+      "value": "支持WaterFlow限位滚动事件"
+    },
+    {
+      "name": "Support_ScrollSnapScroll_Hand_Event",
+      "value": "支持Scroll限位滚动事件"
+    },
+    {
+      "name": "Today_Hot_News",
+      "value": "今日热点新闻"
+    },
+    {
+      "name": "ResponsiveScrollPositionList_titleExample",
+      "value": "响应滚动位置示例"
+    },
+    {
+      "name": "contacts_A_one",
+      "value": "艾佳"
+    },
+    {
+      "name": "contacts_A_two",
+      "value": "安安"
+    },
+    {
+      "name": "contacts_B_one",
+      "value": "白叶"
+    },
+    {
+      "name": "contacts_B_two",
+      "value": "伯伯"
+    },
+    {
+      "name": "contacts_B_three",
+      "value": "伯明"
+    },
+    {
+      "name": "contacts_D_one",
+      "value": "大白"
+    },
+    {
+      "name": "contacts_D_two",
+      "value": "大伯"
+    },
+    {
+      "name": "contacts_D_three",
+      "value": "大明"
+    },
+    {
+      "name": "contacts_F_one",
+      "value": "帆帆"
+    },
+    {
+      "name": "contacts_F_two",
+      "value": "芳芳"
+    },
+    {
+      "name": "contacts_G_one",
+      "value": "刚刚"
+    },
+    {
+      "name": "contacts_G_two",
+      "value": "哥哥"
+    },
+    {
+      "name": "contacts_H_one",
+      "value": "花花"
+    },
+    {
+      "name": "contacts_H_two",
+      "value": "华华"
+    },
+    {
+      "name": "contacts_H_three",
+      "value": "欢欢"
+    },
+    {
+      "name": "contacts_X_one",
+      "value": "小李"
+    },
+    {
+      "name": "contacts_X_two",
+      "value": "小王"
+    },
+    {
+      "name": "contacts_X_three",
+      "value": "小张"
+    },
+    {
+      "name": "ResponsiveScrollPositionList_description",
+      "value": "在联系人列表滚动时，如果跨越了不同字母开头的分组，则侧边字母索引栏也需要更新到对应的字母位置。"
+    },
+    {
+      "name": "SwipeListItem_title",
+      "value": "响应列表项侧滑"
+    },
+    {
+      "name": "SwipeListItem_titleExample",
+      "value": "响应列表项侧滑示例"
+    },
+    {
+      "name": "SwipeListItem_description",
+      "value": "在消息列表中，给消息列表提供侧滑删除功能。"
+    },
+    {
+      "name": "TaggedListItems_title",
+      "value": "给列表项添加标记"
+    },
+    {
+      "name": "TaggedListItems_titleExample",
+      "value": "给列表项添加标记示例"
+    },
+    {
+      "name": "TaggedListItems_description",
+      "value": "在消息列表中，给消息信息右上角添加标记。"
+    },
+    {
+      "name": "AddListItem_title",
+      "value": "新增列表项"
+    },
+    {
+      "name": "AddListItem_titleExample",
+      "value": "新增列表项示例"
+    },
+    {
+      "name": "TodoItem",
+      "value": "待办"
+    },
+    {
+      "name": "AddListItem_description",
+      "value": "在示例中击添加按钮，列表项内容选择或填写的交互界面，用户点击确定后，列表中新增对应的项目。"
+    },
+    {
+      "name": "DeleteListItem_title",
+      "value": "删除列表项"
+    },
+    {
+      "name": "DeleteListItem_titleExample",
+      "value": "删除列表项示例"
+    },
+    {
+      "name": "DeleteListItem_description",
+      "value": "在示例中用户长按列表项进入删除模式，提供用户删除列表项选择的交互界面，勾选完成后点击删除按钮，列表中删除对应的项目。"
+    },
+    {
+      "name": "pageIndex_WaterFlow",
+      "value": "创建瀑布流/WaterFlow"
+    },
+    {
+      "name": "WaterFlowInfiniteScrolling_title",
+      "value": "无限滚动（到达末尾时新增数据）"
+    },
+    {
+      "name": "WaterFlowInfiniteScrolling_description",
+      "value": "在瀑布流组件到达末尾位置时触发事件回调，增加新数据。"
+    },
+    {
+      "name": "WaterFlowInfiniteScrollingEarly_title",
+      "value": "无限滚动（提前新增数据）"
+    },
+    {
+      "name": "WaterFlowInfiniteScrollingEarly_description",
+      "value": "为了实现更加流畅的无限滑动，需要调整增加新数据的时机。可以在还剩余若干个数据未遍历的情况下提前加载新数据。"
+    },
+    {
+      "name": "WaterFlowGroupingMixing_title",
+      "value": "分组混合布局"
+    },
+    {
+      "name": "WaterFlowGroupingMixing_description",
+      "value": "许多应用界面在瀑布流上方包含其他内容，这类场景可通过在Scroll或List内部嵌套WaterFlow来实现。"
+    },
+    {
+      "name": "WaterFlowDynamicSwitchover_title",
+      "value": "动态切换列数"
+    },
+    {
+      "name": "WaterFlowDynamicSwitchover_description",
+      "value": "通过动态调整瀑布流的列数，应用能够实现在列表模式与瀑布流模式间的切换，或适应屏幕宽度的变化。"
+    },
+    {
+      "name": "GridSideToSide_title",
+      "value": "控制滚动位置"
+    },
+    {
+      "name": "GridSideToSide_description",
+      "value": "与新闻列表的返回顶部场景类似，控制滚动位置功能在网格布局中也很常用，例如下图所示日历的翻页功能。"
+    },
+    {
+      "name": "GridScrollbar_title",
+      "value": "添加外置滚动条"
+    },
+    {
+      "name": "GridScrollbar_description",
+      "value": "网格组件Grid可与ScrollBar组件配合使用，为网格添加外置滚动条。"
+    },
+    {
+      "name": "ArcSwiperHorizontal_title",
+      "value": "水平方向轮播"
+    },
+    {
+      "name": "ArcSwiperHorizontal_description",
+      "value": "设置水平方向上轮播。"
+    },
+    {
+      "name": "ArcSwiperVertical_title",
+      "value": "垂直方向轮播"
+    },
+    {
+      "name": "ArcSwiperVertical_description",
+      "value": "设置垂直方向轮播，导航点设为3点钟方向。。"
+    },
+    {
+      "name": "ArcSwiperAction_title",
+      "value": "自定义切换动画"
+    },
+    {
+      "name": "ArcSwiperAction_description",
+      "value": "ArcSwiper支持设置自定义切换动画，可以在回调中对视窗内所有页面逐帧设置透明度、缩放比例、位移、渲染层级等属性，从而实现自定义切换动画效果。"
+    },
+    {
+      "name": "ArcSwiperSideSlip_title",
+      "value": "实现侧滑返回"
+    },
+    {
+      "name": "ArcSwiperSideSlip_description",
+      "value": "ArcSwiper的滑动事件会与侧滑返回冲突，可以通过手势拦截去判断ArcSwiper是否滑动到开头去拦截ArcSwiper的滑动手势，实现再次左滑返回上一页的功能。"
+    },
+    {
+      "name": "ArcSwiperStyles_title",
+      "value": "设置导航点样式"
+    },
+    {
+      "name": "ArcSwiperStyles_titleDefault",
+      "value": "导航点使用默认样式"
+    },
+    {
+      "name": "ArcSwiperStyles_titleCustomize",
+      "value": "自定义导航点样式"
+    },
+    {
+      "name": "ArcSwiperStyles_description",
+      "value": "ArcSwiper提供了默认的弧形导航点样式，导航点默认显示在ArcSwiper下方居中位置，开发者也可以通过indicator属性自定义弧形导航点的样式。"
+    },
+    {
+      "name": "ArcSwiperToggle_title",
+      "value": "控制页面切换方式"
+    },
+    {
+      "name": "ArcSwiperToggle_description",
+      "value": "以下示例展示通过控制控制器和旋转表冠翻页的方法。"
+    },
+    {
+      "name": "ArcListAcrScrollBar_title",
+      "value": "添加外置滚动条ArcScrollBar"
+    },
+    {
+      "name": "ArcListAcrScrollBar_description",
+      "value": "弧形列表ArcList可与ArcScrollBar组件配合使用，为弧形列表添加外置滚动条。"
+    },
+    {
+      "name": "ArcListArcIndexerBar_title",
+      "value": "与弧形索引条ArcAlphabetIndexer联动"
+    },
+    {
+      "name": "ArcListArcIndexerBar_description",
+      "value": "许多应用需要监测列表的滚动位置变动并作出响应，或通过调整滚动位置实现列表的快速定位。为此，需使用弧形索引条组件ArcAlphabetIndexer。"
+    },
+    {
+      "name": "arcListBuiltInScrollerBar_title",
+      "value": "添加内置滚动条"
+    },
+    {
+      "name": "arcListBuiltInScrollerBar_description",
+      "value": "当列表项的高度超过屏幕高度时，弧形列表能够沿垂直方向滚动。"
+    },
+    {
+      "name": "ArcListContents_title",
+      "value": "迭代弧形列表内容"
+    },
+    {
+      "name": "ArcListContents_description",
+      "value": "通常，应用会通过数据集合动态创建列表。采用循环渲染的方式，可以从数据源中迭代获取数据，在每次迭代过程中创建相应的组件，从而降低代码的复杂度。"
+    },
+    {
+      "name": "ArcListCrown_title",
+      "value": "响应旋转表冠"
+    },
+    {
+      "name": "ArcListCrown_description",
+      "value": "手表设备上弧形列表在获焦的情况下可对旋转表冠做出响应，用户可通过旋转表冠的操作滑动列表，浏览列表项数据。"
+    },
+    {
+      "name": "ArcListCreate_title",
+      "value": "创建弧形列表"
+    },
+    {
+      "name": "ArcListCreate_description",
+      "value": "ArcList可通过调用以下接口来创建。"
+    },
+    {
+      "name": "ArcListShow_title",
+      "value": "在弧形列表中显示数据"
+    },
+    {
+      "name": "ArcListShow_description",
+      "value": "弧形列表视图垂直展示项目集合，当列表项超出屏幕范围时，提供滚动功能，这使得它非常适合展示大型数据集合。"
+    },
+    {
+      "name": "ArcListSideSlip_title",
+      "value": "响应列表项侧滑"
+    },
+    {
+      "name": "ArcListSideSlip_description",
+      "value": "ArcListItem的swipeAction属性可用于实现列表项的左右滑动功能。"
+    },
+    {
+      "name": "ArcListStyles_head",
+      "value": "自定义弧形列表标题"
+    },
+    {
+      "name": "ArcListStyles_title",
+      "value": "自定义弧形列表样式"
+    },
+    {
+      "name": "SwiperDigitIndicatorIgnoreComponentSize_title",
+      "value": "设置数字导航点忽略导航点组件大小"
+    },
+    {
+      "name": "SwiperDigitIndicatorIgnoreComponentSize_description",
+      "value": "针对数字导航点，当导航点的bottom设为0之后，导航点的底部与Swiper的底部还会有一定间距。如果希望消除该间距，可通过调用bottom(bottom, ignoreSize)属性来进行设置。"
+    },
+    {
+      "name": "ArcListStyles_titleSpacing",
+      "value": "自定义弧形列表项间距"
+    },
+    {
+      "name": "ArcListStyles_titleScale",
+      "value": "列表项关闭自动缩放"
+    },
+    {
+      "name": "SwiperVisibleContentPosition_title",
+      "value": "保持可见内容位置不变"
+    },
+    {
+      "name": "SwiperVisibleContentPosition_description",
+      "value": "Swiper通过设置maintainVisibleContentPosition属性，可在使用LazyForEach懒加载数据时（如通过onDataAdd新增数据），保持当前可见内容位置不变，避免因数据增删导致的视图跳动。"
+    },
+    {
+      "name": "ArcListStyles_description",
+      "value": "以下示例展示自定义弧形列表样式的方法。"
+    },
+    {
+      "name": "LongList_title",
+      "value": "长列表的处理"
+    },
+    {
+      "name": "LongList_description",
+      "value": "循环渲染适用于短列表，当构建具有大量列表项的长列表时，如果直接采用循环渲染方式，会一次性加载所有的列表元素，会导致页面启动时间过长，影响用户体验。因此，推荐使用数据懒加载（LazyForEach）方式实现按需迭代加载数据，从而提升列表性能。"
+    },
+    {
+      "name": "CollapseAndExpand_title",
+      "value": "折叠与展开"
+    },
+    {
+      "name": "CollapseAndExpand_description",
+      "value": "列表项的折叠与展开用途广泛，常用于信息清单的展示、填写等应用场景。"
+    },
+    {
+      "name": "SwiperAndTabsLinkage_title",
+      "value": "Swiper与Tabs联动"
+    },
+    {
+      "name": "SwiperAndTabsLinkage_description",
+      "value": "Swiper选中的元素改变时，会通过onSelected回调事件，将元素的索引值index返回。通过调用tabsController.changeIndex(index)方法来实现Tabs页签的切换。"
+    },
+    {
+      "name": "SwiperIgnoreComponentSize_title",
+      "value": "设置圆点导航点间距和忽略导航点组件大小"
+    },
+    {
+      "name": "SwiperIgnoreComponentSize_description",
+      "value": "针对圆点导航点，可以通过DotIndicator的space属性来设置圆点导航点的间距。当导航点的bottom设为0之后，导航点的底部与Swiper的底部还会有一定间距。如果希望消除该间距，可通过调用bottom(bottom, ignoreSize)属性来进行设置。"
+    },
+    {
+      "name": "ArcLongList_title",
+      "value": "处理长列表"
+    },
+    {
+      "name": "ArcLongList_description",
+      "value": "循环渲染适用于短列表，当构建具有大量列表项的长列表时，如果直接采用循环渲染方式，会一次性加载所有的列表元素，会导致页面启动时间过长，影响用户体验。因此，推荐使用数据懒加载（LazyForEach）方式实现按需迭代加载数据，从而提升列表性能。"
+    },
+    {
+      "name": "ListChatRoom_title",
+      "value": "切换布局方向"
+    },
+    {
+      "name": "ListChatRoom_description",
+      "value": "部分业务场景需要列表底部插入数据时，自动向上滚动，把新插入的节点展示出来。"
+    },
+    {
+      "name": "SupportSlidingHand_title",
+      "value": "支持滑动离手事件"
+    },
+    {
+      "name": "LongGrid_title",
+      "value": "性能优化"
+    },
+    {
+      "name": "LongGrid_description",
+      "value": "与长列表的处理类似，循环渲染适用于数据量较小的布局场景，当构建具有大量网格项的可滚动网格布局时，推荐使用数据懒加载方式实现按需迭代加载数据，从而提升列表性能。"
+    },
+    {
+      "name": "GridCalculator_title",
+      "value": "计算器的按键布局"
+    },
+    {
+      "name": "GridCalculator_description",
+      "value": "实现不同大小的网格组成不均匀分布的网格布局场景"
+    },
+    {
+      "name": "ArcListCrown_set",
+      "value": "设置"
+    },
+    {
+      "name": "ArcListStyles_wlan",
+      "value": "WLAN"
+    },
+    {
+      "name": "ArcListStyles_open",
+      "value": "已开启"
+    },
+    {
+      "name": "ArcListStyles_blue",
+      "value": "蓝牙"
+    },
+    {
+      "name": "ArcListStyles_net",
+      "value": "移动网络"
+    },
+    {
+      "name": "ArcListStyles_connect",
+      "value": "更多连接"
+    },
+    {
+      "name": "ArcListStyles_Display",
+      "value": "显示"
+    },
+    {
+      "name": "ArcListStyles_light",
+      "value": "显示和亮度"
+    },
+    {
+      "name": "Reading",
+      "value": "读书"
+    },
+    {
+      "name": "Exercise",
+      "value": "旅游"
+    },
+    {
+      "name": "Travel",
+      "value": "旅游"
+    },
+    {
+      "name": "Listening_Music",
+      "value": "听音乐"
+    },
+    {
+      "name": "Watching_Films",
+      "value": "看电影"
+    },
+    {
+      "name": "Singing",
+      "value": "唱歌"
+    },
+    {
+      "name": "Meeting",
+      "value": "会议"
+    },
+    {
+      "name": "Voting",
+      "value": "投票"
+    },
+    {
+      "name": "Check_in",
+      "value": "签到"
+    },
+    {
+      "name": "Printing",
+      "value": "打印"
+    },
+    {
+      "name": "Live_Streaming",
+      "value": "直播"
+    },
+    {
+      "name": "Imported",
+      "value": "进口"
+    },
+    {
+      "name": "Categories",
+      "value": "分类"
+    },
+    {
+      "name": "Recharge",
+      "value": "充值"
+    },
+    {
+      "name": "Membership",
+      "value": "领卷"
+    },
+    {
+      "name": "Claim_Coupon",
+      "value": "抽奖"
+    },
+    {
+      "name": "Lottery",
+      "value": "会员"
+    },
+    {
+      "name": "Favorites",
+      "value": "收藏"
+    },
+    {
+      "name": "Points",
+      "value": "积分"
+    },
+    {
+      "name": "More",
+      "value": "更多"
+    },
+    {
+      "name": "Previous_Page",
+      "value": "上一页"
+    },
+    {
+      "name": "Next_page",
+      "value": "下一页"
+    },
+    {
+      "name": "message",
+      "value": "发送"
+    },
+    {
+      "name": "contacts",
+      "value": "联系人"
+    },
+    {
+      "name": "First_subassembly",
+      "value": "第一个子组件"
+    },
+    {
+      "name": "Second_subassembly",
+      "value": "第二个子组件"
+    },
+    {
+      "name": "Third_subassembly",
+      "value": "第三个子组件"
+    },
+    {
+      "name": "delete",
+      "value": "删除"
+    },
+    {
+      "name": "Personal_Basic_Information",
+      "value": "个人基本资料"
+    },
+    {
+      "name": "nick_name",
+      "value": "昵称"
+    },
+    {
+      "name": "avatar",
+      "value": "头像"
+    },
+    {
+      "name": "age",
+      "value": "年龄"
+    },
+    {
+      "name": "birthday",
+      "value": "生日"
+    },
+    {
+      "name": "gender",
+      "value": "性别"
+    },
+    {
+      "name": "Device_Information",
+      "value": "设备信息"
+    },
+    {
+      "name": "Application_usage_information",
+      "value": "应用使用信息"
+    },
+    {
+      "name": "data_you_voluntarily_uploaded",
+      "value": "您主动上传的数据"
+    },
+    {
+      "name": "Trading_and_asset_information",
+      "value": "交易与资产信息"
+    },
+    {
+      "name": "Other_materials",
+      "value": "其他资料"
+    },
+    {
+      "name": "say_something",
+      "value": "说点什么..."
+    },
+    {
+      "name": "welcome_live_room",
+      "value": "欢迎来到直播间"
+    },
+    {
+      "name": "system",
+      "value": "系统"
+    },
+    {
+      "name": "anchors",
+      "value": "主播"
+    },
+    {
+      "name": "hello_everyone",
+      "value": "大家好啊~"
+    },
+    {
+      "name": "new_title",
+      "value": "新闻标题"
+    },
+    {
+      "name": "new_short",
+      "value": "这是第一条短新闻，内容较少，快速滑动切换"
+    },
+    {
+      "name": "new_long",
+      "value": "这是第二条长新闻，内容较多，可以自由滑动查看完整内容。"
+    },
+    {
+      "name": "Dark_mode",
+      "value": "深色模式"
+    },
+    {
+      "name": "Light_mode",
+      "value": "浅色模式"
+    },
+    {
+      "name": "ContentWillChange_animationMode",
+      "value": "动态修改animationMode"
+    },
+    {
+      "name": "name_aha",
+      "value": "阿哈"
+    },
+    {
+      "name": "name_beibei",
+      "value": "贝贝"
+    },
+    {
+      "name": "name_caicai",
+      "value": "彩彩"
+    },
+    {
+      "name": "name_dongdong",
+      "value": "东东"
+    },
+    {
+      "name": "name_enen",
+      "value": "嗯嗯"
+    },
+    {
+      "name": "name_fangfang",
+      "value": "芳芳"
+    },
+    {
+      "name": "name_gege",
+      "value": "哥哥"
+    },
+    {
+      "name": "name_haha",
+      "value": "哈哈"
+    },
+    {
+      "name": "name_jiji",
+      "value": "吉吉"
+    },
+    {
+      "name": "name_keke",
+      "value": "可可"
+    },
+    {
+      "name": "name_lele",
+      "value": "乐乐"
+    },
+    {
+      "name": "name_meimei",
+      "value": "妹妹"
+    },
+    {
+      "name": "name_nini",
+      "value": "妮妮"
+    },
+    {
+      "name": "name_ohuo",
+      "value": "哦豁"
+    },
+    {
+      "name": "name_pangpang",
+      "value": "胖胖"
+    },
+    {
+      "name": "name_qiqi",
+      "value": "琪琪"
+    },
+    {
+      "name": "name_ranran",
+      "value": "然然"
+    },
+    {
+      "name": "name_shushu",
+      "value": "叔叔"
+    },
+    {
+      "name": "name_tiantian",
+      "value": "天天"
+    },
+    {
+      "name": "name_xiaohong",
+      "value": "小红"
+    },
+    {
+      "name": "name_xiaolan",
+      "value": "小兰"
+    },
+    {
+      "name": "name_xiaowang",
+      "value": "小王"
+    },
+    {
+      "name": "name_xiaoli",
+      "value": "小李"
+    },
+    {
+      "name": "name_xiaoming",
+      "value": "小明"
+    },
+    {
+      "name": "list_text1",
+      "value": "新闻"
+    },
+    {
+      "name": "list_text2",
+      "value": "消息"
+    },
+    {
+      "name": "swiper_text1",
+      "value": "页签 "
+    },
+    {
+      "name": "waterFlow_text1",
+      "value": "正在加载 "
+    },
+    {
+      "name": "waterFlow_text2",
+      "value": "切换列数 "
+    },
+    {
+      "name": "lazyLayout_Title",
+      "value": "懒加载布局"
+    },
+    {
+      "name": "lazyVGridLayout_title",
+      "value": "懒加载网格布局/LazyVGridLayout"
+    },
+    {
+      "name": "lazyVGridLayout_description",
+      "value": "示例设置了网格中子组件列数占比和行列间距。"
+    },
+    {
+      "name": "lazyVGridLayout_columns_equal",
+      "value": "设置多列等宽的网格示例"
+    },
+    {
+      "name": "lazyVGridLayout_columns_unequal",
+      "value": "设置多列不等宽的网格示例"
+    },
+    {
+      "name": "lazyVWaterFlowLayout_title",
+      "value": "懒加载瀑布流布局/LazyVWaterFlowLayout"
+    },
+    {
+      "name": "lazyVWaterFlowLayout_description",
+      "value": "示例设置了瀑布流中子组件列数占比和行列间距。"
+    },
+    {
+      "name": "lazyVWaterFlowLayout_columns_equal",
+      "value": "设置多列等宽的瀑布流示例"
+    },
+    {
+      "name": "lazyVWaterFlowLayout_columns_unequal",
+      "value": "设置多列不等宽的瀑布流示例"
+    },
+    {
+      "name": "lazyColumnLayout_title",
+      "value": "懒加载线性布局/LazyColumnLayout"
+    },
+    {
+      "name": "lazyColumnLayout_description",
+      "value": "示例设置了行间距和水平对齐方式。"
+    },
+    {
+      "name": "lazyColumnLayout_space_alignItemsStart",
+      "value": "设置行间距和水平起始位置对齐方式示例"
+    },
+    {
+      "name": "lazyColumnLayout_space_alignItemsCenter",
+      "value": "设置行间距和水平居中对齐方式示例"
+    },
+    {
+      "name": "list_nested_lazyLayout_title",
+      "value": "List嵌套懒加载布局容器"
+    },
+    {
+      "name": "list_nested_lazyLayout_description",
+      "value": "在List组件中嵌套多个不同的懒加载布局容器，分别为每个容器内容配置独立的列数和行列间距，实现多种布局方式的混合展示。"
+    },
+    {
+      "name": "list_nested_lazyLayout_grid",
+      "value": "网格布局"
+    },
+    {
+      "name": "list_nested_lazyLayout_waterFlow",
+      "value": "瀑布流布局"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_title",
+      "value": "LazyColumnLayout嵌套懒加载布局容器"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_description",
+      "value": "在Scroll组件中使用LazyColumnLayout作为主布局容器，其内部嵌套多个不同的懒加载布局容器，实现多种布局方式的混合展示。"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_following",
+      "value": "推荐关注"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_item",
+      "value": "列表项"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_popular",
+      "value": "热门分类"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_category",
+      "value": "分类"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_recommend",
+      "value": "为你推荐"
+    },
+    {
+      "name": "lazyColumnLayout_nested_lazyLayout_recommendation",
+      "value": "推荐内容"
     }
   ]
 }

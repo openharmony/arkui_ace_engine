@@ -20,10 +20,12 @@
 
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 
 using OHOS::Ace::NG::PasteButtonModelNG;
@@ -166,6 +168,26 @@ void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
     NG::ViewAbstract::SetOnClick(std::move(onTap), distanceThreshold);
 }
 
+void JSPasteButton::SetAccessibilityRole(const JSCallbackInfo& info)
+{
+    AccessibilityRoleType accRoleType = AccessibilityRoleType::ROLE_NONE;
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
+        ViewAbstractModel::GetInstance()->SetAccessibilityRole(roleStr, false);
+        return;
+    }
+    uint32_t roleValue = 0;
+    ParseJsInteger(info[0], roleValue);
+
+    auto secRoleType = static_cast<SecurityComponentRoleType>(roleValue);
+    if (secRoleType == SecurityComponentRoleType::BUTTON) {
+        accRoleType = AccessibilityRoleType::BUTTON;
+    }
+
+    std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
+    ViewAbstractModel::GetInstance()->SetAccessibilityRole(roleStr, false);
+}
+
 void JSPasteButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSPasteButton>::Declare("PasteButton");
@@ -209,6 +231,11 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
     JSClass<JSPasteButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSPasteButton>::StaticMethod("focusBox", &JSSecButtonBase::SetFocusBox);
+    JSClass<JSPasteButton>::StaticMethod("fallbackLineSpacing", &JSSecButtonBase::SetFallbackLineSpacing);
+    JSClass<JSPasteButton>::StaticMethod("accessibilityRole", &JSPasteButton::SetAccessibilityRole);
+    JSClass<JSPasteButton>::StaticMethod("accessibilityNextFocusId", &JSViewAbstract::JsAccessibilityNextFocusId);
+    JSClass<JSPasteButton>::StaticMethod("accessibilityDefaultFocus", &JSViewAbstract::JsAccessibilityDefaultFocus);
+    JSClass<JSPasteButton>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

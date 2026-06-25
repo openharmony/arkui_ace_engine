@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -130,6 +131,8 @@ constexpr int32_t ROTATION_180 = 180;
 constexpr int32_t ROTATION_270 = 270;
 
 constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
+
+constexpr Dimension DEFAULT_DRAG_BAR_HOT_ZONE = 12.0_vp;
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,
@@ -334,9 +337,15 @@ struct NavigationOptions {
     bool animated = true;
 };
 
+struct NavigationConfiguration {
+    int32_t stackSizeLimit = 0;
+};
+
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
     NavigationOperation operation, bool isEnter)>;
 using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
+using NavDestinationSaveStateCallback = std::function<std::string()>;
+using NavDestinationRestoreStateCallback = std::function<void(const std::string& state)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

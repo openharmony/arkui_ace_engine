@@ -310,8 +310,14 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested menu, containerId:%{public}d", containerId);
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
@@ -330,8 +336,14 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested menu, containerId:%{public}d", containerId);
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
@@ -471,8 +483,14 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup ng again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup ng in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested popup ng, containerId:%{public}d", containerId);
     }
 
     auto manager = SubwindowManager::GetInstance();
@@ -545,7 +563,11 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            return;
+        }
+        containerId = parentContainerId;
     }
     auto targetId = targetNode->GetId();
     auto manager = SubwindowManager::GetInstance();
@@ -830,6 +852,26 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
+
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
+    std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
+    auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
+    if (!subwindow) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "fail to create subwindow for dialog");
+        if (callback) {
+            callback(ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, -1);
+        }
+        return nullptr;
+    }
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
+    return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc), std::move(callback));
+}
+
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
     const RefPtr<NG::UINode>& customNode)
 {
@@ -869,6 +911,21 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_VOID(subwindow);
+    return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
+}
+
+void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng with error callback enter");
+    auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
+    if (!subwindow) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "fail to create subwindow for custom dialog");
+        if (callback) {
+            callback(ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, -1);
+        }
+        return;
+    }
     return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
 }
 

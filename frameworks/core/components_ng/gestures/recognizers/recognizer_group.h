@@ -66,6 +66,11 @@ public:
         remainChildOnResetStatus_ = true;
     }
 
+    bool IsRemainChildOnResetStatus() const
+    {
+        return remainChildOnResetStatus_;
+    }
+
     virtual void SetInnerFlag(bool value) override {
         NGGestureRecognizer::SetInnerFlag(value);
         for (auto& recognizer : recognizers_) {
@@ -116,15 +121,6 @@ public:
         }
     }
 
-    void SetChildrenTargetComponent(const RefPtr<TargetComponent>& targetComponent)
-    {
-        for (const auto& child : recognizers_) {
-            if (child) {
-                child->SetTargetComponent(targetComponent);
-            }
-        }
-    }
-
     void ForceCleanRecognizer() override
     {
         for (const auto& child : recognizers_) {
@@ -152,6 +148,17 @@ public:
             auto group = AceType::DynamicCast<RecognizerGroup>(item);
             if (group) {
                 group->SetIsPostEventResultRecursively(isPostEventResult);
+            }
+        }
+    }
+
+    void SetIsPostTouchEventResultRecursively(bool isPostTouchEventResult)
+    {
+        for (const auto& item : recognizers_) {
+            item->SetIsPostTouchEventResult(isPostTouchEventResult);
+            auto group = AceType::DynamicCast<RecognizerGroup>(item);
+            if (group) {
+                group->SetIsPostTouchEventResultRecursively(isPostTouchEventResult);
             }
         }
     }
@@ -187,7 +194,7 @@ public:
     virtual GestureMode GetGestureMode() const = 0;
 
     void SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
-        const RefPtr<NG::TargetComponent>& targetComponent, const GetEventTargetImpl& getEventTargetImpl);
+        const GetEventTargetImpl& getEventTargetImpl);
 
     void AddHittedRecognizerType(std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo);
 

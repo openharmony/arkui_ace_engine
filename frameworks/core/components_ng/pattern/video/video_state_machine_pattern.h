@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,22 +15,26 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
+#include <mutex>
+#include <queue>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_async.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/video/video_accessibility_property.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
+#include "core/components_ng/pattern/video/video_state_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
-#include "frameworks/base/geometry/rect.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -38,13 +42,19 @@ class ImageAnalyzerManager;
 namespace OHOS::Ace::NG {
 class VideoStateMachinePattern : public Pattern {
     DECLARE_ACE_TYPE(VideoStateMachinePattern, Pattern);
+    friend class VideoStateManager;
+    friend class VideoStateMachineFullScreenPattern;
+    friend class ::OHOS::Ace::VideoControllerAsync;
 
 public:
     using HiddenChangeEvent = std::function<void(bool)>;
 
     VideoStateMachinePattern() = delete;
-    explicit VideoStateMachinePattern(const RefPtr<VideoControllerV2>& videoController);
+    explicit VideoStateMachinePattern(const RefPtr<VideoControllerAsync>& videoControllerAsync);
     ~VideoStateMachinePattern() override;
+
+    void OnControllerDestroyed();
+    void SetVideoControllerAsync(const RefPtr<VideoControllerAsync>& videoControllerAsync);
 
     bool IsEnableMatchParent() override
     {
@@ -178,20 +188,13 @@ public:
 
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
-    void ResetMediaPlayer();
-    void ResetMediaPlayerOnBg();
+    void ResetMediaPlayerOnBg(VideoControllerAsync::AsyncCommandCallback callback = nullptr);
+    // Functions for the video controller.
+    void Start(VideoControllerAsync::AsyncCommandCallback callback = nullptr);
+    void Pause(VideoControllerAsync::AsyncCommandCallback callback = nullptr);
+    void Stop(VideoControllerAsync::AsyncCommandCallback callback = nullptr);
 
-    void SetIsStop(bool isStop)
-    {
-        isStop_ = isStop;
-    }
-
-    bool GetIsStop() const
-    {
-        return isStop_;
-    }
-
-    bool IsInitialState() const
+    bool IsFirstPlay() const
     {
         return isInitialState_;
     }
@@ -204,9 +207,9 @@ public:
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
         const RefPtr<RenderContext>& renderContext)
     {
-        mediaPlayer_ = AceType::Claim(AceType::RawPtr(mediaPlayer));
-        renderSurface_ = AceType::Claim(AceType::RawPtr(renderSurface));
-        renderContextForMediaPlayer_ = AceType::Claim(AceType::RawPtr(renderContext));
+        mediaPlayer_ = mediaPlayer;
+        renderSurface_ = renderSurface;
+        renderContextForMediaPlayer_ = renderContext;
     }
 
     void ResetMediaParam()
@@ -267,14 +270,6 @@ public:
         return isSeeking_;
     }
 
-    void SetIsPrepared(bool isPrepared)
-    {
-        isPrepared_ = isPrepared;
-    }
-    bool GetIsPrepared() const
-    {
-        return isPrepared_;
-    }
     static void RegisterMediaPlayerEvent(const WeakPtr<VideoStateMachinePattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
         const std::string& videoSrc, int32_t instanceId);
 
@@ -300,6 +295,10 @@ public:
     {
         return lastSetProgressRate_;
     }
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
     void SetIsProgressInjectCmd(bool isProgressInjectCmd)
     {
         isProgressInjectCmd_ = isProgressInjectCmd;
@@ -316,9 +315,6 @@ public:
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
-
-    void SetVideoController(const RefPtr<VideoControllerV2>& videoController);
-    RefPtr<VideoControllerV2> GetVideoController();
 
     void SetContentTransition(ContentTransitionType contentTransition);
 
@@ -338,6 +334,9 @@ protected:
 
     void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host);
 
+    void FullScreen();
+    void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
+
 private:
     void OnAttachToFrameNode() override;
     void OnAttachToMainTree() override;
@@ -354,42 +353,18 @@ private:
 
     // Set properties for media player.
     void PrepareMediaPlayer();
-    void SetStartImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetPausetImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetStopImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetSeekToImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetRequestFullscreenImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetExitFullscreenImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-    void SetResetImpl(
-        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
-
-    void SetMethodCall();
 
     bool SetSourceForMediaPlayer();
     void UpdateLooping();
     void UpdateSpeed();
+    void HandleSetPlaybackRateResult(double progress, int32_t errorCode, std::string& errorMsg);
     void UpdateMuted();
     void PrepareSurface();
 
     bool HasPlayer() const;
 
-    // Functions for the video controller.
-    void Start();
-    void Pause();
-    void Stop();
-    void FullScreen();
-
-    void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
-    void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
 
     void UpdatePreviewImage();
@@ -406,7 +381,6 @@ private:
     void HiddenChange(bool hidden);
 
     void UpdateFsState();
-    void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError(int32_t code, const std::string& message);
@@ -423,8 +397,8 @@ private:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
-    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 #endif
+    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(const PlaybackStatus& status);
@@ -453,7 +427,13 @@ private:
     void ReportCommandResultOnUIThread(
         const std::string& event, const std::string& result, const std::string& reason = "");
 
-    RefPtr<VideoControllerV2> videoControllerV2_;
+    std::string GetDumpInfo();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
+
+    RefPtr<VideoControllerAsync> videoControllerAsync_;
     RefPtr<FrameNode> controlBar_;
 
     GestureEventFunc playBtnCallBack_;
@@ -464,11 +444,21 @@ private:
     VideoSourceInfo videoSrcInfo_;
     bool showImagePreview_ = false;
     bool showFirstFrame_ = false;
-    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
-    bool isPlaying_ = false;
-    bool isPrepared_ = false;
+    bool isInitialState_ = true; // First play state is true. Play or seek will set it to false.
 
-    bool isStop_ = false;
+    RefPtr<VideoStateManager> stateManager_ = MakeRefPtr<VideoStateManager>(WeakClaim(this));
+
+    bool TransitionTo(VideoPlaybackState newState);
+    bool TransitionToIfAllowed(VideoPlaybackState newState, const char* caller);
+
+    // State entered callbacks for VideoStateManager
+    void OnCreatedStateEntered();
+    void OnPreparedStateEntered();
+    void OnPlayingStateEntered();
+    void OnPausedStateEntered();
+    void OnStoppedStateEntered();
+    void OnCompletedStateEntered();
+    void OnErrorStateEntered();
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -478,7 +468,6 @@ private:
 
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
-    bool isPaused_ = false;
     bool isContentSizeChanged_ = false;
     bool isSeeking_ = false;
     bool isEnableShortcutKey_ = false;
@@ -506,6 +495,21 @@ private:
     bool isProgressInjectCmd_ = false;
     double lastProgressRate_ = 0.0;
     double lastSetProgressRate_ = 1.0;
+
+    // Error info for OnErrorStateEntered callback
+    int32_t lastErrorCode_ = 0;
+    std::string lastErrorMessage_;
+
+    // Serial background task queue to ensure media operations execute in order
+    struct SerialBgTask {
+        std::string name;
+        std::function<void()> task;
+    };
+    void PostSerialBgTask(std::function<void()> task, const std::string& name = "");
+    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
+    std::mutex serialBgQueueMutex_;
+    std::queue<SerialBgTask> serialBgTaskQueue_;
+    bool isDrainingSerialBgQueue_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);
 };

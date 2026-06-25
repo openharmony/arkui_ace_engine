@@ -14,13 +14,16 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include <memory>
 
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
+#include "render/rs_gradient_blur_para.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
@@ -29,6 +32,8 @@
 #include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
+#include "render_service_client/core/ui_effect/effect/include/brightness_blender.h"
+#include "render_service_client/core/ui_effect/filter/include/filter_radius_gradient_blur_para.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_base/include/common/rs_color.h"
@@ -38,6 +43,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
+#include "ui_effect/filter/include/filter_radius_gradient_blur_para.h"
 #include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -46,11 +52,13 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/mount_policy.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -76,6 +84,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/render/adapter/transition_modifier.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -341,6 +350,10 @@ std::timed_mutex RosenRenderContext::taskMtx_;
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
 
+RosenRenderContext::RosenRenderContext()
+    : mixedRenderChildList_(std::make_unique<RosenMixedRenderChildList>())
+{}
+
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -357,6 +370,7 @@ RosenRenderContext::~RosenRenderContext()
     auto host = GetHost();
     if (host) {
         host->RemoveExtraCustomProperty("RS_NODE");
+        mixedRenderChildList_->Reset(host);
     }
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
 }
@@ -1684,17 +1698,20 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
     if (params.position.has_value()) {
         const auto& position = params.position.value();
         Rosen::SpatialEffectPara::CornerPositions corners;
-        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] =
-            Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] =
-            Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
-        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
+        bool hasCrop = params.cropOffset.has_value() && params.cropScale > 0.0f;
+        float scale = hasCrop ? (1.0f / params.cropScale) : 1.0f;
+        float offX = hasCrop ? params.cropOffset->x : 0.0f;
+        float offY = hasCrop ? params.cropOffset->y : 0.0f;
+        auto transformCorner = [scale, offX, offY](const DepthVector3& v) -> Rosen::Vector3f {
+            return { scale * (v.x - offX), scale * (v.y - offY), v.z };
+        };
+        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] = transformCorner(position.leftTop);
+        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] = transformCorner(position.rightTop);
+        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
+        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
-    } else {
-        variantPara->position = params.depth;
+    } else if (params.depth.has_value()) {
+        variantPara->position = params.depth.value();
     }
     variantPara->occlusionWeight = params.occlusionWeight;
     rsNode_->SetSpatialEffectPara(variantPara);
@@ -2609,6 +2626,22 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
         SetPivot(xPivot, yPivot, zPivot);
         NotifyHostTransformUpdated();
     }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY)
+{
+    FREE_RS_CONTEXT_CHECK(UpdateMaterialInteractionEffect, scaleX, scaleY, offsetX, offsetY);
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector2f xyTranslateValue { offsetX, offsetY };
+    Rosen::Vector2f xyScaleValue { scaleX, scaleY };
+
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyTranslateValue);
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyScaleValue);
+
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -4617,7 +4650,7 @@ void RosenRenderContext::BlendBgColor(const Color& color)
     auto blendColor =
         GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
     OHOS::Rosen::RSColor rsColor;
-    ColorToRSColor(blendColor, rsColor);
+    ColorToRSColorHDR(blendColor, rsColor);
     rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }
@@ -4923,9 +4956,13 @@ const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
     return rsNode_;
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
 {
-    ReCreateRsNodeTree(children);
+    if (self && self->GetMountPolicy() == MountPolicy::MIXED) {
+        ReCreateMixedRsNodeTree(children);
+    } else {
+        ReCreateRsNodeTree(children);
+    }
     RequestNextFrame();
 }
 
@@ -4951,6 +4988,164 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNod
         }
     }
     return rsNodes;
+}
+
+bool RosenRenderContext::IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode)
+{
+    return mixedRenderChildList_->IsFrameRenderChild(rsNode);
+}
+
+void RosenRenderContext::NotifyMixedListChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedSyncRenderTree(true);
+    RequestNextFrame();
+}
+
+int32_t RosenRenderContext::GetMixedRenderChildCount()
+{
+    return mixedRenderChildList_->GetChildCount();
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderChildAt(int32_t index)
+{
+    return mixedRenderChildList_->GetChildAt(index);
+}
+
+int32_t RosenRenderContext::GetMixedRenderChildIndexByRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode)
+{
+    return mixedRenderChildList_->GetChildIndexByRSNode(rsNode);
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderSibling(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset)
+{
+    return mixedRenderChildList_->GetSibling(rsNode, offset);
+}
+
+bool RosenRenderContext::GetMixedRenderChildInsertIndexAfterRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex)
+{
+    return mixedRenderChildList_->GetInsertIndexAfterRSNode(rsNode, mixedIndex);
+}
+
+void RosenRenderContext::InsertPureRenderChildAt(
+    const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
+{
+    if (mixedRenderChildList_->InsertPureRenderChildAt(WeakPtr<FrameNode>(GetHost()), childRSNode, index)) {
+        NotifyMixedListChanged();
+    }
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const
+{
+    CHECK_NULL_RETURN(child, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        return GetRsNodeByFrame(frameNode);
+    }
+    std::list<RefPtr<FrameNode>> frameNodes;
+    child->GenerateSelfVisibleFrameWithTransition(frameNodes);
+    if (frameNodes.empty()) {
+        return nullptr;
+    }
+    return GetRsNodeByFrame(frameNodes.front());
+}
+
+void RosenRenderContext::InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
+{
+    CHECK_NULL_VOID(child);
+    mixedRenderChildList_->RemoveFrameChild(child);
+    auto childRSNode = ResolveMixedFrameChildRSNode(child);
+    if (mixedRenderChildList_->InsertFrameChildBefore(
+        WeakPtr<FrameNode>(GetHost()), child, childRSNode, nextSibling)) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode)
+{
+    if (mixedRenderChildList_->RemovePureRenderChild(childRSNode)) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::RemoveMixedFrameChild(const RefPtr<UINode>& child)
+{
+    if (mixedRenderChildList_->RemoveFrameChild(child)) {
+        NotifyMixedListChanged();
+    }
+}
+
+bool RosenRenderContext::CanSwitchToSingleIfRenderNode()
+{
+    return mixedRenderChildList_->CanSwitchToSingleIfRenderNode();
+}
+
+void RosenRenderContext::ResetMixedRenderChildren()
+{
+    mixedRenderChildList_->Reset(GetHost());
+}
+
+void RosenRenderContext::ClearMixedPureRenderChildren()
+{
+    if (mixedRenderChildList_->ClearPureRenderChildren()) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children)
+{
+    bool changed = false;
+    RefPtr<UINode> nextSibling;
+    auto host = WeakPtr<FrameNode>(GetHost());
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto child = *iter;
+        if (child) {
+            mixedRenderChildList_->RemoveFrameChild(child);
+        }
+        auto childRSNode = ResolveMixedFrameChildRSNode(child);
+        changed |= mixedRenderChildList_->InsertFrameChildBefore(host, child, childRSNode, nextSibling);
+        nextSibling = child;
+    }
+    if (changed) {
+        NotifyMixedListChanged();
+    }
+}
+
+std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::BuildMixedTargetRSNodes(FrameNode* frameNode)
+{
+    auto addRSNodeIfAbsent = [](std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+                                 std::unordered_map<Rosen::RSNode::SharedPtr, bool>& targetNodeMap,
+                                 const std::shared_ptr<Rosen::RSNode>& rsNode) {
+        if (!rsNode) {
+            return;
+        }
+        auto result = targetNodeMap.try_emplace(rsNode, false);
+        if (result.second) {
+            targetRSNodes.emplace_back(rsNode);
+        }
+    };
+
+    auto targetRSNodes = mixedRenderChildList_->BuildTargetRSNodes(WeakPtr<FrameNode>(GetHost()));
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool> targetNodeMap;
+    for (const auto& childRSNode : targetRSNodes) {
+        if (childRSNode) {
+            targetNodeMap.try_emplace(childRSNode, false);
+        }
+    }
+    CHECK_NULL_RETURN(frameNode, targetRSNodes);
+    auto overlayNode = frameNode->GetOverlayNode();
+    if (overlayNode) {
+        auto property = overlayNode->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            addRSNodeIfAbsent(targetRSNodes, targetNodeMap, GetRsNodeByFrame(overlayNode));
+        }
+    }
+    addRSNodeIfAbsent(targetRSNodes, targetNodeMap, GetRsNodeByFrame(frameNode->GetFocusPaintNode()));
+    return targetRSNodes;
 }
 
 void RosenRenderContext::SetDrawNode()
@@ -5130,6 +5325,35 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
+    ReCreateRsNodeTreeByTargetList(nowRSNodes, childNodeMap);
+}
+
+void RosenRenderContext::ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& /*children*/)
+{
+    if (!rsNode_ || !isNeedRebuildRSTree_) {
+        return;
+    }
+    auto frameNode = GetHost();
+    if (!frameNode || frameNode->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    auto targetRSNodes = BuildMixedTargetRSNodes(AceType::RawPtr(frameNode));
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
+    for (const auto& childRSNode : targetRSNodes) {
+        if (childRSNode) {
+            childNodeMap.try_emplace(childRSNode, false);
+        }
+    }
+    ReCreateRsNodeTreeByTargetList(targetRSNodes, childNodeMap);
+}
+
+void RosenRenderContext::ReCreateRsNodeTreeByTargetList(
+    const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap)
+{
+    if (!rsNode_ || !isNeedRebuildRSTree_) {
+        return;
+    }
     std::vector<Rosen::RSNode::SharedPtr> childNodes;
     for (auto&& child : rsNode_->GetChildren()) {
         auto childSptr = child.lock();
@@ -5137,10 +5361,10 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             childNodes.emplace_back(childSptr);
         }
     }
-    if (nowRSNodes == childNodes) {
+    if (targetRSNodes == childNodes) {
         return;
     }
-    if (nowRSNodes.empty()) {
+    if (targetRSNodes.empty()) {
         rsNode_->ClearChildren();
         return;
     }
@@ -5158,9 +5382,9 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             iter->second = true;
         }
     }
-    for (size_t index = 0; index != nowRSNodes.size(); ++index) {
+    for (size_t index = 0; index != targetRSNodes.size(); ++index) {
         auto node = rsNode_->GetChildByIndex(index);
-        const auto& newNode = nowRSNodes[index];
+        const auto& newNode = targetRSNodes[index];
         if (node != newNode) {
             auto iter = childNodeMap.find(newNode);
             if (iter == childNodeMap.end()) {
@@ -5224,6 +5448,23 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
     auto rsNode = rosenRenderContext->GetRSNode();
     // no need to check nullptr since MoveChild will take care of it
     rsNode_->MoveChild(rsNode, index);
+}
+
+void RosenRenderContext::InsertMixedFrameChild(
+    FrameNode* self, const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
+{
+    if (!self || self->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    InsertFrameChildBefore(child, nextSibling);
+}
+
+void RosenRenderContext::RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child)
+{
+    if (!self || self->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    RemoveMixedFrameChild(child);
 }
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
@@ -5409,9 +5650,10 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
         rsNode_->SetShadowElevation(shadow.IsValid() ? shadow.GetElevation() : 0.0);
     } else {
         auto radius = shadow.GetBlurRadius();
-        rsNode_->SetShadowRadius(
-            (!shadow.IsValid() || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-            && NearZero(radius))) ? -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
+        auto isNeedNotConvert = !shadow.IsValid() ||
+            (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && NearZero(radius));
+        rsNode_->SetShadowRadius(isNeedNotConvert ?
+            -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
     }
     RequestNextFrame();
 }
@@ -5452,6 +5694,15 @@ void RosenRenderContext::UpdateBlender(const OHOS::Rosen::Blender* blender)
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(blender);
     rsNode_->SetBlender(blender);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ResetBlender()
+{
+    FREE_RS_CONTEXT_CHECK(ResetBlender);
+    CHECK_NULL_VOID(rsNode_);
+    auto blender = OHOS::Rosen::BrightnessBlender();
+    rsNode_->SetBlender(&blender);
     RequestNextFrame();
 }
 
@@ -7170,7 +7421,10 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (breakPointChild->RemoveImmediately()) {
         breakPointChild->OnRemoveFromParent(false);
         // remove breakPoint
-        breakPointParent->RemoveDisappearingChild(breakPointChild);
+        if (breakPointParent->RemoveDisappearingChild(breakPointChild)) {
+            // keep mixed list in sync for delayed-remove path
+            breakPointParent->OnMixedMountChildRemoved(breakPointChild);
+        }
         breakPointParent->MarkNeedSyncRenderTree();
         breakPointParent->RebuildRenderContextTree();
     }
@@ -7605,7 +7859,7 @@ void RosenRenderContext::SetShadowRadius(float radius)
     FREE_RS_CONTEXT_CHECK(SetShadowRadius, radius);
     CHECK_NULL_VOID(rsNode_);
     if (LessOrEqual(radius, 0.0f) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         rsNode_->SetShadowRadius(-1.0f);
         return;
     }
@@ -7861,6 +8115,13 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
+void RosenRenderContext::SetLayerMark(bool isLayer)
+{
+    FREE_RS_CONTEXT_CHECK(SetLayerMark, isLayer);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkLayer(isLayer);
+}
+
 int32_t RosenRenderContext::GetRotateDegree()
 {
     CHECK_NULL_RETURN(rsNode_, 0);
@@ -7955,12 +8216,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     // the drawRegion of this index has changed
     drawRegionRects_[index] = rect;
     std::shared_ptr<Rosen::RectF> result;
-    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
-        if (drawRegionRects_[index]) {
+    for (size_t idx = 0; idx < DRAW_REGION_RECT_COUNT; ++idx) {
+        if (drawRegionRects_[idx]) {
             if (result) {
-                *result = result->JoinRect(*drawRegionRects_[index]);
+                *result = result->JoinRect(*drawRegionRects_[idx]);
             } else {
-                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[idx]);
             }
         }
     }
@@ -8855,12 +9116,29 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenRenderContext::CreateFrostedGlassFil
     return RosenEffectConverter::ConvertToFrostedGlassFilter(param, dipScale);
 }
 
+void RosenRenderContext::SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetBackgroundNGFilterEC, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundNGFilter(materialFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetMaterialShaderECSub, materialFilter);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetMaterialShader(materialFilter);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::SetMaterialWithQualityLevel(
     const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
 {
     FREE_RS_CONTEXT_CHECK(SetMaterialWithQualityLevel, materialFilter, quality);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetMaterialWithQualityLevel(materialFilter, static_cast<Rosen::FilterQuality>(quality));
+    RequestNextFrame();
 }
 
 void RosenRenderContext::ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
@@ -8940,6 +9218,8 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     constexpr float MAXBLOOMINTENSITY_MAX = 19.3f;
     constexpr float INNERBORDERBLOOMWIDTH_RATIO = 0.8f;
     constexpr float OUTERBORDERBLOOMWIDTH_RATIO = 0.2f;
+    constexpr float MENU_INNERBORDERBLOOMWIDTH_RATIO = 0.1f;
+    constexpr float MENU_OUTERBORDERBLOOMWIDTH_RATIO = 0.0f;
     constexpr float COLOR_RATIO = 255.0f;
 
     auto edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
@@ -8961,10 +9241,18 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMaxBorderWidthTag>(MAXBORDERWIDTH_DEFAULT);
     // Thickness affects InnerBorderBloomWidth & OuterBorderBloomWidth.
     // InnerBorderBloomWidth has a coefficient of 0.8, OuterBorderBloomWidth has a coefficient of 0.2.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
+    if (host->GetParentFrameNode()) {
+        auto tag = host->GetParentFrameNode()->GetTag();
+        isMenuNode = isMenuNode || tag == V2::DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG ||
+                     tag == V2::ACTION_SHEET_DIALOG_ETS_TAG;
+    }
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectInnerBorderBloomWidthTag>(
-        edgeLightThicknessValue * INNERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_INNERBORDERBLOOMWIDTH_RATIO : INNERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectOuterBorderBloomWidthTag>(
-        edgeLightThicknessValue * OUTERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_OUTERBORDERBLOOMWIDTH_RATIO : OUTERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectColorTag>(
         Rosen::Vector3f(edgeLightParam->color.GetRed() / COLOR_RATIO, edgeLightParam->color.GetGreen() / COLOR_RATIO,
             edgeLightParam->color.GetBlue() / COLOR_RATIO));
@@ -9052,5 +9340,40 @@ void RosenRenderContext::ResetEdgeLightFilter()
     rsNode_->SetOverlayNGShader(nullptr);
     RequestNextFrame();
 #endif
+}
+
+void RosenRenderContext::OnDoubleSidedUpdate(bool doubleSided)
+{
+    FREE_RS_CONTEXT_CHECK(OnDoubleSidedUpdate, doubleSided);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDoubleSidedEnabled(doubleSided);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    CHECK_NULL_VOID(rsNode_);
+    FREE_RS_CONTEXT_CHECK(UpdateRadiusGradientBlur, blurPara);
+    std::shared_ptr<Rosen::RadiusGradientBlurPara> rsBlurPara = std::make_shared<Rosen::RadiusGradientBlurPara>();
+    rsBlurPara->SetBlurRadius(blurPara.blurRadius_.ConvertToPx());
+    rsBlurPara->SetFractionStops(blurPara.fractionStops_);
+    rsBlurPara->SetDirection(static_cast<Rosen::GradientDirection>(blurPara.direction_));
+
+    OHOS::Rosen::Filter compositingFilter;
+    compositingFilter.AddPara(rsBlurPara);
+    rsNode_->SetUICompositingFilter(&compositingFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ResetRadiusGradientBlur()
+{
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RadiusGradientBlurPara> rsBlurPara = std::make_shared<Rosen::RadiusGradientBlurPara>();
+    rsBlurPara->SetBlurRadius(-1.0f);
+
+    OHOS::Rosen::Filter compositingFilter;
+    compositingFilter.AddPara(rsBlurPara);
+    rsNode_->SetUICompositingFilter(&compositingFilter);
+    RequestNextFrame();
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

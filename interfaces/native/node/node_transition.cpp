@@ -94,6 +94,9 @@ ArkUITransitionEffectOption* ConvertToEffectOption(ArkUI_TransitionEffect* effec
             }
             break;
         }
+        case ARKUI_TRANSITION_EFFECT_IDENTITY: {
+            break;
+        }
     }
 
     if (effectOption->animation) {

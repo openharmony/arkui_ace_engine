@@ -411,6 +411,7 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
     ASSERT_NE(inputHub, nullptr);
 
     MouseInfo mouseInfo;
+    inputHub->CreateMouseEventActuator();
     auto mouseEventActuator = inputHub->mouseEventActuator_;
     ASSERT_NE(mouseEventActuator, nullptr);
     auto mouseInputEvents = mouseEventActuator->inputEvents_;
@@ -418,6 +419,7 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
         input->GetOnMouseEventFunc()(mouseInfo);
     }
 
+    inputHub->CreateHoverEventActuator();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
     ASSERT_NE(hoverEventActuator, nullptr);
     auto hoverInputEvents = hoverEventActuator->inputEvents_;

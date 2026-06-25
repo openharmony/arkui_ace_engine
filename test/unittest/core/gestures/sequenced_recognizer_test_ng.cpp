@@ -1864,7 +1864,7 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest045, TestSize.Level1)
      * @tc.steps: step2. create LongPressRecognizer with repeat enabled
      */
     RefPtr<LongPressRecognizer> longPressRecognizer =
-        AceType::MakeRefPtr<LongPressRecognizer>(FINGER_NUMBER, false, DURATION);
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
     longPressRecognizer->repeat_ = true;
     sequencedRecognizer->recognizers_.push_back(longPressRecognizer);
     sequencedRecognizer->currentIndex_ = 1;
@@ -1875,8 +1875,9 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest045, TestSize.Level1)
      */
     TouchEvent touchEvent;
     touchEvent.id = 0;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer->longPressFingerCountForSequence_ = 0;
     sequencedRecognizer->StopLongPressRepeatTimer(touchEvent.id);
-    // Test passes if no crash occurs
-    EXPECT_TRUE(true);
+    EXPECT_EQ(longPressRecognizer->longPressFingerCountForSequence_, -1);
 }
 } // namespace OHOS::Ace::NG

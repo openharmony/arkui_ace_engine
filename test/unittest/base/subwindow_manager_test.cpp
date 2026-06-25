@@ -15,7 +15,10 @@
 
 #include "gtest/gtest.h"
 
+#include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -23,12 +26,21 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
     const int32_t CONATINERID = 100000;
+    constexpr int32_t MAIN_CONTAINER_ID = 0;
+    constexpr int32_t SUB_CONTAINER_ID = 1000000;
+    constexpr int32_t NESTED_SUB_CONTAINER_ID = 1001000;
 } // namespace
 
 class SubwindowManagerTest : public testing::Test {
 public:
-    void SetUp() override {};
-    void TearDown() override {};
+    void SetUp() override
+    {
+        MockContainer::SetUp();
+    }
+    void TearDown() override
+    {
+        MockContainer::TearDown();
+    }
 };
 
 /**
@@ -143,5 +155,266 @@ HWTEST_F(SubwindowManagerTest, ShouldEnableDragEventForSubwindow001, TestSize.Le
     auto containerId = 1000000;
     auto isRestartDrag = false;
     ASSERT_EQ(manager->ShouldEnableDragEventForSubwindow(containerId, isRestartDrag), false);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_ParentContainerIdLookup001
+ * @tc.desc: Test GetParentContainerId returns correct values for main and sub containers
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ParentContainerIdLookup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup parent container relationship: subContainer's parent is mainContainer
+     * @tc.expected: GetParentContainerId returns correct parent id
+     */
+    manager->AddParentContainerId(SUB_CONTAINER_ID, MAIN_CONTAINER_ID);
+    EXPECT_EQ(manager->GetParentContainerId(SUB_CONTAINER_ID), MAIN_CONTAINER_ID);
+
+    /**
+     * @tc.steps: step3. Setup nested subcontainer relationship: nestedSubContainer's parent is subContainer
+     * @tc.expected: GetParentContainerId returns correct parent id for nested container
+     */
+    manager->AddParentContainerId(NESTED_SUB_CONTAINER_ID, SUB_CONTAINER_ID);
+    EXPECT_EQ(manager->GetParentContainerId(NESTED_SUB_CONTAINER_ID), SUB_CONTAINER_ID);
+
+    /**
+     * @tc.steps: step4. Test that non-existent container returns -1
+     * @tc.expected: GetParentContainerId returns -1 for unknown container
+     */
+    EXPECT_EQ(manager->GetParentContainerId(999999), -1);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_IsNestedSubwindow001
+ * @tc.desc: Test detection logic for nested subwindow (parent is also a subwindow)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, IsNestedSubwindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup: subContainer's parent is mainContainer (not a subwindow)
+     * @tc.expected: This is NOT a nested subwindow scenario (parent is main window)
+     */
+    manager->AddParentContainerId(SUB_CONTAINER_ID, MAIN_CONTAINER_ID);
+    auto parentId = manager->GetParentContainerId(SUB_CONTAINER_ID);
+    EXPECT_EQ(parentId, MAIN_CONTAINER_ID);
+    EXPECT_LT(parentId, MIN_SUBCONTAINER_ID);
+
+    /**
+     * @tc.steps: step3. Setup: nestedSubContainer's parent is subContainer (which IS a subwindow)
+     * @tc.expected: This IS a nested subwindow scenario (parent is also a subwindow)
+     */
+    manager->AddParentContainerId(NESTED_SUB_CONTAINER_ID, SUB_CONTAINER_ID);
+    parentId = manager->GetParentContainerId(NESTED_SUB_CONTAINER_ID);
+    EXPECT_EQ(parentId, SUB_CONTAINER_ID);
+    EXPECT_GE(parentId, MIN_SUBCONTAINER_ID);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_NestedSubwindowMenuBlocked001
+ * @tc.desc: Test that menu is blocked when parent container is also a subwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, NestedSubwindowMenuBlocked001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate nested subwindow scenario:
+     * - nestedSubContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is subContainer (also id >= MIN_SUBCONTAINER_ID)
+     * @tc.expected: Menu should be blocked because parent is also a subwindow
+     */
+    manager->AddParentContainerId(NESTED_SUB_CONTAINER_ID, SUB_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(NESTED_SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_TRUE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_SubwindowMenuAllowedWithMainParent001
+ * @tc.desc: Test that menu is allowed when parent container is main window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, SubwindowMenuAllowedWithMainParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate subwindow scenario with main window parent:
+     * - subContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is mainContainer (id < MIN_SUBCONTAINER_ID)
+     * @tc.expected: Menu should be allowed because parent is main window (not a subwindow)
+     */
+    manager->AddParentContainerId(SUB_CONTAINER_ID, MAIN_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_FALSE(isNestedSubwindow);
+    EXPECT_LT(parentContainerId, MIN_SUBCONTAINER_ID);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_NestedSubwindowPopupBlocked001
+ * @tc.desc: Test that popup is blocked when parent container is also a subwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, NestedSubwindowPopupBlocked001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate nested subwindow scenario for popup:
+     * - nestedSubContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is subContainer (also id >= MIN_SUBCONTAINER_ID)
+     * @tc.expected: Popup should be blocked because parent is also a subwindow
+     */
+    manager->AddParentContainerId(NESTED_SUB_CONTAINER_ID, SUB_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(NESTED_SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_TRUE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_SubwindowPopupAllowedWithMainParent001
+ * @tc.desc: Test that popup is allowed when parent container is main window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, SubwindowPopupAllowedWithMainParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate subwindow scenario with main window parent for popup:
+     * - subContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is mainContainer (id < MIN_SUBCONTAINER_ID)
+     * @tc.expected: Popup should be allowed because parent is main window
+     */
+    manager->AddParentContainerId(SUB_CONTAINER_ID, MAIN_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_FALSE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_NestedSubwindowTipsBlocked001
+ * @tc.desc: Test that tips is blocked when parent container is also a subwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, NestedSubwindowTipsBlocked001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate nested subwindow scenario for tips:
+     * - nestedSubContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is subContainer (also id >= MIN_SUBCONTAINER_ID)
+     * @tc.expected: Tips should be blocked because parent is also a subwindow
+     */
+    manager->AddParentContainerId(NESTED_SUB_CONTAINER_ID, SUB_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(NESTED_SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_TRUE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_SubwindowTipsAllowedWithMainParent001
+ * @tc.desc: Test that tips is allowed when parent container is main window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, SubwindowTipsAllowedWithMainParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate subwindow scenario with main window parent for tips:
+     * - subContainer (id >= MIN_SUBCONTAINER_ID)
+     * - parent is mainContainer (id < MIN_SUBCONTAINER_ID)
+     * @tc.expected: Tips should be allowed because parent is main window
+     */
+    manager->AddParentContainerId(SUB_CONTAINER_ID, MAIN_CONTAINER_ID);
+    auto parentContainerId = manager->GetParentContainerId(SUB_CONTAINER_ID);
+    bool isNestedSubwindow = (parentContainerId >= MIN_SUBCONTAINER_ID);
+    EXPECT_FALSE(isNestedSubwindow);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_ShowDialogNGCallbackOnError001
+ * @tc.desc: Test ShowDialogNG triggers callback with error code when subwindow creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ShowDialogNGCallbackOnError001, TestSize.Level1)
+{
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    DialogProperties dialogProps;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
+    };
+
+    auto dialogNode = manager->ShowDialogNG(dialogProps, nullptr, std::move(callback));
+    EXPECT_EQ(dialogNode, nullptr);
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_OpenCustomDialogNGCallbackOnError001
+ * @tc.desc: Test OpenCustomDialogNG triggers callback with error code when subwindow creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, OpenCustomDialogNGCallbackOnError001, TestSize.Level1)
+{
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    DialogProperties dialogProps;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
+    };
+    manager->OpenCustomDialogNG(dialogProps, std::move(callback));
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
 }
 }

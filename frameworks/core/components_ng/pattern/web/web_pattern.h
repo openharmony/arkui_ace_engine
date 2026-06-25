@@ -175,6 +175,21 @@ enum class ImageOverlayStatus {
     HOLD_CREATE  // touch hold and create overlay
 };
 
+enum class VideoPlaybackNotificationType {
+    ON_STATUS_CHANGED = 0,
+    ON_VOLUME_CHANGED,
+    ON_MUTED_CHANGED,
+    ON_PLAYBACK_RATE_CHANGED,
+    ON_DURATION_CHANGED,
+    ON_TIME_UPDATE,
+    ON_BUFFERED_END_TIME_CHANGED,
+    ON_ENDED,
+    ON_SEEKING,
+    ON_SEEK_DONE,
+    ON_ERROR,
+    ON_VIDEO_SIZE_CHANGED
+};
+
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
@@ -198,6 +213,7 @@ public:
     using OnMediaCastEnterCallback = std::function<void()>;
     using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     using OnWebNativeMessageConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnFullScreenVideoOverlayEnterCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnWebNativeMessageDisConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 
     WebPattern();
@@ -417,9 +433,19 @@ public:
         onWebNativeMessageConnectCallback_ = std::move(callback);
     }
 
+    void SetOnFullScreenVideoOverlayEnterCallback(OnFullScreenVideoOverlayEnterCallback &&callback)
+    {
+        onFullScreenVideoOverlayEnterCallback_ = std::move(callback);
+    }
+
     OnWebNativeMessageConnectCallback GetWebNativeMessageConnectCallback() const
     {
         return onWebNativeMessageConnectCallback_;
+    }
+
+    OnFullScreenVideoOverlayEnterCallback GetOnFullScreenVideoOverlayEnterCallback() const
+    {
+        return onFullScreenVideoOverlayEnterCallback_;
     }
 
     void SetWebNativeMessageDisConnectCallback(OnWebNativeMessageDisConnectCallback &&callback)
@@ -579,6 +605,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FullScreenVideoOverlay, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OnLineImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DomStorageAccessEnabled, bool);
@@ -1189,6 +1216,7 @@ private:
     void OnWebDataUpdate();
     void OnJsEnabledUpdate(bool value);
     void OnMediaPlayGestureAccessUpdate(bool value);
+    void OnFullScreenVideoOverlayUpdate(bool value);
     void OnFileAccessEnabledUpdate(bool value);
     void OnOnLineImageAccessEnabledUpdate(bool value);
     void OnDomStorageAccessEnabledUpdate(bool value);
@@ -1517,6 +1545,7 @@ private:
     SetFaviconCallback setFaviconCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     OnWebNativeMessageConnectCallback onWebNativeMessageConnectCallback_ = nullptr;
+    OnFullScreenVideoOverlayEnterCallback onFullScreenVideoOverlayEnterCallback_ = nullptr;
     OnWebNativeMessageDisConnectCallback onWebNativeMessageDisConnectCallback_ = nullptr;
     RenderMode renderMode_;
     bool backToTop_ = true;

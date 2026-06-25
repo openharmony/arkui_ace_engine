@@ -24,6 +24,7 @@
 #define protected public
 #define private public
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
@@ -1055,6 +1056,7 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
@@ -1098,6 +1100,7 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->scrollBar_->InitLongPressEvent();
@@ -1141,6 +1144,8 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
     scrollPn->InitScrollBarMouseEvent();
+    auto scrollInputHub = scrollPn->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    scrollInputHub->CreateMouseEventActuator();
     // /**
     //  * @tc.steps: step2. Test HandleMouseEvent.
     //  * @tc.expect: info's GetButton is LEFT_BUTTON.
@@ -1148,8 +1153,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents =
-        scrollPn->GetEventHub<EventHub>()->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
+    auto& inputEvents = scrollInputHub->mouseEventActuator_->inputEvents_;
     EXPECT_EQ(inputEvents.size(), 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
@@ -1176,8 +1180,12 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers on a child node (descendant of
+     *                   scrollable).
      */
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+
     auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
     baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
     std::list<FingerInfo> fingerInfos;
@@ -1186,21 +1194,21 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
     baseGestureEvent->SetFingerList(fingerInfos);
     std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
     RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
-    clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    clickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
     activeRecognizers.emplace_back(clickRecognizer);
     RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
-    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
     activeRecognizers.emplace_back(longPressRecognizer);
     RefPtr<NGGestureRecognizer> tapRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
-    tapRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    tapRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     tapRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
     activeRecognizers.emplace_back(tapRecognizer);
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
-    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     activeRecognizers.emplace_back(panRecognizer);
 
@@ -1240,8 +1248,12 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers on a child node (descendant of
+     *                   scrollable).
      */
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+
     auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
     baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
     std::list<FingerInfo> fingerInfos;
@@ -1252,7 +1264,7 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
-    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     activeRecognizers.emplace_back(panRecognizer);
 
@@ -1347,8 +1359,12 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers. PanRecognizer and LongPressRecognizer
+     *                   on a child node (descendant of scrollable), clickRecognizer on scrollable itself.
      */
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+
     auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
     baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
     std::list<FingerInfo> fingerInfos;
@@ -1359,11 +1375,11 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
-    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     activeRecognizers.emplace_back(panRecognizer);
     RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, false);
-    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    longPressRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
     longPressRecognizer->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
     activeRecognizers.emplace_back(longPressRecognizer);
     RefPtr<NGGestureRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
@@ -1385,6 +1401,160 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
     EXPECT_FALSE(panRecognizer->IsPreventBegin());
     EXPECT_TRUE(longPressRecognizer->IsPreventBegin());
     EXPECT_FALSE(clickRecognizer->IsPreventBegin());
+}
+
+/**
+ * @tc.name: OnTouchTestDone004
+ * @tc.desc: Test OnTouchTestDone with recognizer on a child node that is a descendant of the scrollable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a child node inside scrollable and initialize baseGestureEvent.
+     */
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+
+    /**
+     * @tc.steps: step2. Create recognizers attached to the child node and scrollable node itself.
+     */
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
+    RefPtr<NGGestureRecognizer> childClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    childClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
+    childClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(childClickRecognizer);
+
+    RefPtr<NGGestureRecognizer> scrollClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    scrollClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(scroll_)));
+    scrollClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(scrollClickRecognizer);
+
+    /**
+     * @tc.steps: step3. Set isHitTestBlock=true and call OnTouchTestDone.
+     * @tc.expected: Child recognizer is prevented (isChild=true, descendant), scrollable recognizer is not prevented
+     *               (isChild=false).
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_TRUE(childClickRecognizer->IsPreventBegin());
+    EXPECT_FALSE(scrollClickRecognizer->IsPreventBegin());
+}
+
+/**
+ * @tc.name: OnTouchTestDone005
+ * @tc.desc: Test OnTouchTestDone with recognizer on a non-descendant overlay node that should not be prevented
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create an overlay node (sibling of scrollable, not a descendant) and initialize
+     *                   baseGestureEvent.
+     */
+    auto overlayNode = FrameNode::CreateFrameNode("overlay", -1, AceType::MakeRefPtr<Pattern>());
+    overlayNode->MountToParent(mockScroll_);
+
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+
+    /**
+     * @tc.steps: step2. Create recognizers: one on overlay (non-descendant), one on child (descendant).
+     */
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
+    RefPtr<NGGestureRecognizer> overlayClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    overlayClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+    overlayClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(overlayClickRecognizer);
+
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+    RefPtr<NGGestureRecognizer> childClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    childClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
+    childClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(childClickRecognizer);
+
+    /**
+     * @tc.steps: step3. Set isHitTestBlock=true and call OnTouchTestDone.
+     * @tc.expected: Overlay recognizer is NOT prevented (not a descendant of scrollable), child recognizer IS
+     *               prevented (is a descendant of scrollable).
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_FALSE(overlayClickRecognizer->IsPreventBegin());
+    EXPECT_TRUE(childClickRecognizer->IsPreventBegin());
+}
+
+/**
+ * @tc.name: OnTouchTestDone006
+ * @tc.desc: Test OnTouchTestDone with recognizer on an unmounted node (no parent, not a descendant)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create an unmounted node (not in any tree) and initialize baseGestureEvent.
+     */
+    auto unmountedNode = FrameNode::CreateFrameNode("unmounted", -1, AceType::MakeRefPtr<Pattern>());
+
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+
+    /**
+     * @tc.steps: step2. Create recognizers: one on unmounted node, one on a child node (descendant).
+     */
+    std::list<WeakPtr<NGGestureRecognizer>> activeRecognizers;
+    RefPtr<NGGestureRecognizer> unmountedClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    unmountedClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(unmountedNode)));
+    unmountedClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(unmountedClickRecognizer);
+
+    auto childNode = FrameNode::CreateFrameNode("childItem", -1, AceType::MakeRefPtr<Pattern>());
+    childNode->MountToParent(scroll_);
+    RefPtr<NGGestureRecognizer> childClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    childClickRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(childNode)));
+    childClickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    activeRecognizers.emplace_back(childClickRecognizer);
+
+    /**
+     * @tc.steps: step3. Set isHitTestBlock=true and call OnTouchTestDone.
+     * @tc.expected: Unmounted node recognizer is NOT prevented (no parent chain to scrollable), child recognizer IS
+     *               prevented.
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_FALSE(unmountedClickRecognizer->IsPreventBegin());
+    EXPECT_TRUE(childClickRecognizer->IsPreventBegin());
 }
 
 /**

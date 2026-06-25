@@ -456,6 +456,11 @@ public:
         return measureDebugTraceEnable_;
     }
 
+    static bool GetSkipSecondaryMeasuredEnabled()
+    {
+        return skipSecondaryMeasuredEnable_;
+    }
+
     static bool GetSafeAreaDebugTraceEnabled()
     {
         return safeAreaDebugTraceEnable_;
@@ -784,11 +789,13 @@ public:
     }
 
     static UiMaterialLevel GetUiMaterialLevel();
+    static bool IsDeviceSystemMaterialSupported();
 
     static void ReadSystemParametersCallOnce();
 	
     static int32_t GetFormTaskPriority();
 
+    static bool IsSensorCorrectionEnabled();
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -801,6 +808,7 @@ private:
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool measureDebugTraceEnable_;
+    static bool skipSecondaryMeasuredEnable_;
     static bool safeAreaDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
@@ -908,6 +916,7 @@ private:
     static bool isOpenYuvDecode_;
 
     static std::once_flag getSysPropertiesFlag_;
+    static int32_t sensorCorrectionEnable_;
 };
 
 } // namespace OHOS::Ace

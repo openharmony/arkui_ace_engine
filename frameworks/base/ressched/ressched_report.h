@@ -51,6 +51,14 @@ struct ResEventInfo {
     SourceTool sourceTool = SourceTool::UNKNOWN;
 };
 
+struct PageTransitionInfo {
+    std::string fromPage;
+    std::string toPage;
+    std::string mode;
+    std::string fromComponentName;
+    std::string toComponentName;
+};
+
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
@@ -64,11 +72,15 @@ class ACE_EXPORT ResSchedReport final {
 public:
     ACE_FORCE_EXPORT static ResSchedReport& GetInstance();
     ACE_FORCE_EXPORT void ResSchedDataReport(const char* name,
-        const std::unordered_map<std::string, std::string>& param = {}, int64_t tid = ResDefine::INVALID_DATA);
+        const std::unordered_map<std::string, std::string>& param = {},
+        int64_t tid = ResDefine::INVALID_DATA,
+        int64_t longTid = ResDefine::INVALID_DATA);
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
     void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
+    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
+                      const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled);
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
         const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
@@ -86,8 +98,7 @@ public:
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
-    void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode,
-        const std::string& fromComponentName = {}, const std::string& toComponentName = {});
+    void HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId);
     void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
@@ -98,7 +109,10 @@ public:
 private:
     ResSchedReport();
     ~ResSchedReport() {}
-    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config);
+    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
+                         const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled = false);
+    void CollectComponentInfo(const WeakPtr<NG::FrameNode>& weakNode,
+                              std::unordered_map<std::string, std::string>& payload);
     void HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config);
     bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
         int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);

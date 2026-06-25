@@ -225,6 +225,7 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
         BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+        return;
     }
     for (const auto& child : childList) {
         if (pattern->IsImageBlockNode(child->GetHostNode())) {
@@ -232,6 +233,9 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childLayoutContraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
             child->Measure(childLayoutContraint);
         } else if (pattern->IsMaterialNode(child->GetHostNode())) {
+            auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
+            child->Measure(childLayoutContraint);
+        } else if (pattern->IsSelectedTrackNode(child->GetHostNode()) && pattern->IsNeedMeasureMaterial()) {
             auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
             child->Measure(childLayoutContraint);
         } else if (pattern->IsPrefixOrSuffixNode(child->GetHostNode())) {
@@ -279,6 +283,9 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         if (pattern->IsImageBlockNode(child->GetHostNode())) {
             CalculateBlockOffset(layoutWrapper, child);
+        } else if (pattern->IsSelectedTrackNode(child->GetHostNode()) && pattern->IsNeedMeasureMaterial()) {
+            child->Layout();
+            pattern->SetNeedMeasureMaterial(false);
         } else {
             child->Layout();
         }

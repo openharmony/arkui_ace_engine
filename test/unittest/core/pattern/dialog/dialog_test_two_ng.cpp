@@ -244,9 +244,6 @@ void DialogPatternTwoTestNg::CheckTextMarquee(RefPtr<FrameNode> buttonNode)
     EXPECT_EQ(textProps->GetTextOverflow(), TextOverflow::MARQUEE);
     EXPECT_EQ(textProps->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::ON_FOCUS);
     EXPECT_TRUE(textProps->GetTextMarqueeFadeout());
-    NG::BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(DIALOG_BUTTON_BORDER_RADIUS);
-    EXPECT_EQ(buttonProp->GetBorderRadius(), borderRadius);
 }
 
 

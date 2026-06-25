@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP
-
 #include "core/components_ng/pattern/image/image_model_static.h"
 
 #include "interfaces/native/node/resource.h"
@@ -25,12 +22,14 @@
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline/pipeline_base.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
@@ -93,8 +92,8 @@ void ImageModelStatic::SetImageRenderMode(FrameNode* frameNode, const std::optio
 
 void ImageModelStatic::SetImageMatrix(FrameNode* frameNode, const std::optional<Matrix4>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix,
-        value.value_or(Matrix4::CreateIdentity()), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ImageRenderProperty, ImageMatrix, value.value_or(Matrix4::CreateIdentity()), frameNode);
 }
 
 void ImageModelStatic::SetImageFit(FrameNode* frameNode, const std::optional<ImageFit>& value)
@@ -174,8 +173,8 @@ void ImageModelStatic::SetReloadKey(FrameNode* frameNode, const std::string& rel
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto srcInfo = layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-    srcInfo.SetReloadKey(reloadKey.empty() ? std::optional<std::string>(std::nullopt)
-                                           : std::optional<std::string>(reloadKey));
+    srcInfo.SetReloadKey(
+        reloadKey.empty() ? std::optional<std::string>(std::nullopt) : std::optional<std::string>(reloadKey));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
@@ -245,16 +244,19 @@ void ImageModelStatic::SetDrawableDescriptor(FrameNode* frameNode, DrawableDescr
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(drawableAddr);
-    auto drawableType = drawableAddr->GetDrawableType();
-    if (drawableType != DrawableType::ANIMATED) {
-        auto pixelMap = drawableAddr->GetPixelMap();
-        SetPixelMap(frameNode, pixelMap);
-    } else {
-        auto pattern = frameNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<DrawableDescriptor> drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+    auto drawableType = drawable->GetDrawableType();
+    if (drawableType == DrawableType::ANIMATED || drawableType == DrawableType::PICTURE) {
+        pattern->SetImageType(drawableType == DrawableType::ANIMATED
+            ? ImageType::ANIMATED_DRAWABLE : ImageType::PICTURE_DRAWABLE);
         pattern->UpdateDrawableDescriptor(drawable);
+    } else {
+        auto pixelMap = drawable->GetPixelMap();
+        auto srcInfo = ImageSourceInfo(pixelMap);
+        pattern->UpdateDrawableDescriptor(nullptr);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
     }
 }
 
@@ -292,4 +294,3 @@ void ImageModelStatic::ResetDraggable(FrameNode* frameNode)
     frameNode->SetCustomerDraggable(draggable);
 }
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP

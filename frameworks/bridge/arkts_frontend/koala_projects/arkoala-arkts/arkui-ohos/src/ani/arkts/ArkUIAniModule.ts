@@ -32,7 +32,7 @@ import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
-import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
 import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -51,11 +51,33 @@ import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 import { default as text } from '@ohos.graphics.text'
+import { StackLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { RowLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { ColumnLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { CustomLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { GridLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _DynamicLayout_construct(id: KInt, flags: KInt): KPointer;
+    native static _SetDynamicLayoutStackLayoutAlgorithm(ptr: KPointer, value: StackLayoutAlgorithm): void;
+    native static _SetDynamicLayoutRowLayoutAlgorithm(ptr: KPointer, value: RowLayoutAlgorithm): void;
+    native static _SetDynamicLayoutColumnLayoutAlgorithm(ptr: KPointer, value: ColumnLayoutAlgorithm): void;
+    native static _SetDynamicLayoutCustomLayoutAlgorithm(ptr: KPointer, value: CustomLayoutAlgorithm, frameNode: FrameNode): void;
+    native static _SetDynamicLayoutGridLayoutAlgorithm(ptr: KPointer, value: GridLayoutAlgorithm): void;
+    native static _WithEnv_construct(id: KInt): KPointer;
+    native static _WithEnv_removeSystemEnvProperty(ptr: KPointer, key: string): void;
+    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: Any): void;
+    native static _WithEnv_setCustomEnvProperty(ptr: KPointer, key: KInt, value: Any): void;
+    native static _WithEnv_removeCustomEnvProperty(ptr: KPointer, key: KInt): void;
+    native static _CustomNode_findCustomValueByKey(ptr: KPointer, key: KInt): Any | undefined;
+    native static _CustomNode_findSystemEnvValueByKey(ptr: KPointer, key: string): Any | undefined;
+    native static _CustomNode_registerOnCustomEnvUpdateCallback(
+        ptr: KPointer, callback: (key: KInt, value: Any) => void): void;
+    native static _CustomNode_registerOnSystemEnvUpdateCallback(
+        ptr: KPointer, callback: (key: string, value: Any) => void): void;
     native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor): KPointer;
     native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
     native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
@@ -258,6 +280,7 @@ export class ArkUIAniModule {
         resourceObjectKPointer: KPointer, options?: AnimationOptions): void
     native static _Drawable_CreateAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
         src: string, options?: AnimationOptions): void
+    native static _Drawable_CreatePictureDrawable(value: PictureDrawableDescriptor, picture: image.Picture): void
     native static _Drawable_CreatePixelMap(value: DrawableDescriptor): image.PixelMap
     native static _Drawable_CreateForeground(value: LayeredDrawableDescriptor): DrawableDescriptor
     native static _Drawable_CreateBackground(value: LayeredDrawableDescriptor): DrawableDescriptor
@@ -267,6 +290,8 @@ export class ArkUIAniModule {
     native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
     native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
     native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_SetHdrComposition(value: PictureDrawableDescriptor, config: HdrCompositionConfig): void
+    native static _Drawable_Invalidate(value: DrawableDescriptor): void
     native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor
     native static _Drawable_DestructDrawable(ptr: KPointer): void
     native static _Drawable_AnimationControllerStart(value: AnimationController): void
@@ -314,6 +339,8 @@ export class ArkUIAniModule {
 
     native static _UiMaterial_ConstructMaterial(value: uiMaterial.MaterialOptions | undefined): long
     native static _UiMaterial_DestroyMaterial(value: long): void
+    native static _UiMaterial_ConvertToECMaterial(value: long): long
+    native static _UiMaterial_ConvertToECSubMaterial(value: long): long
 
     native static _CreateViewStackProcessor(): KPointer
 
@@ -353,9 +380,6 @@ export class ArkUIAniModule {
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
 
-    // for RichEditor
-    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
-
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string, areaMode: KInt): string
     native static _PersistentStorage_Set(key: string, value: string, areaMode: KInt): void
@@ -394,6 +418,8 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _CheckThreadValid(checkUIThread: boolean, ptr: KPointer): void
+    native static _FireArkUIObjectLifecycleCallback(
+        weakRef: object, className: string, nodeType: string, nodePtr: KPointer): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
         getCallback: (name: string) => string | undefined,
         getAllCustomPropertiesCallback: () => string): void

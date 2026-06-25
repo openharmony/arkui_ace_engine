@@ -1622,40 +1622,40 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
     return (
       !isBaseOrResourceEqual(this.stageValue.message, this.value.message) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.appearingTime,
-        this.value.options.appearingTime
+        this.stageValue.options?.appearingTime,
+        this.value.options?.appearingTime
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.disappearingTime,
-        this.value.options.disappearingTime
+        this.stageValue.options?.disappearingTime,
+        this.value.options?.disappearingTime
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.appearingTimeWithContinuousOperation,
-        this.value.options.appearingTimeWithContinuousOperation
+        this.stageValue.options?.appearingTimeWithContinuousOperation,
+        this.value.options?.appearingTimeWithContinuousOperation
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.disappearingTimeWithContinuousOperation,
-        this.value.options.disappearingTimeWithContinuousOperation
+        this.stageValue.options?.disappearingTimeWithContinuousOperation,
+        this.value.options?.disappearingTimeWithContinuousOperation
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.enableArrow,
-        this.value.options.enableArrow
+        this.stageValue.options?.enableArrow,
+        this.value.options?.enableArrow
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.arrowPointPosition,
-        this.value.options.arrowPointPosition
+        this.stageValue.options?.arrowPointPosition,
+        this.value.options?.arrowPointPosition
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.arrowWidth,
-        this.value.options.arrowWidth
+        this.stageValue.options?.arrowWidth,
+        this.value.options?.arrowWidth
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.arrowHeight,
-        this.value.options.arrowHeight
+        this.stageValue.options?.arrowHeight,
+        this.value.options?.arrowHeight
       ) ||
       !isBaseOrResourceEqual(
-        this.stageValue.options.showAtAnchor,
-        this.value.options.showAtAnchor
+        this.stageValue.options?.showAtAnchor,
+        this.value.options?.showAtAnchor
       )
     );
   }
@@ -4093,6 +4093,20 @@ class ChainWeightModifier extends ModifierWithKey<ChainWeightOptions> {
   }
 }
 
+class DoubleSidedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('doubleSided');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDoubleSided(node);
+    } else {
+      getUINativeModule().common.setDoubleSided(node, this.value);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -6153,6 +6167,10 @@ class ArkComponent {
   }
   useUnionEffect(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, UseUnionEffectModifier.identity, UseUnionEffectModifier, value);
+    return this;
+  }
+  doubleSided(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, DoubleSidedModifier.identity, DoubleSidedModifier, value);
     return this;
   }
 }

@@ -17,6 +17,7 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/clip/clip_component.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/render_select.h"

@@ -31,7 +31,7 @@ HWTEST_F(FlexNewTestNG, Example, TestSize.Level0)
     CHECK_NULL_VOID(pipeline);
     pipeline->SetMinPlatformVersion(12);
 
-    /**
+    /*
     corresponding ets code:
        Flex({direction: FlexDirection.Row}){
           Text().width(100).height(50)
@@ -46,7 +46,7 @@ HWTEST_F(FlexNewTestNG, Example, TestSize.Level0)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        // // step: create child nodes
+        // step: create child nodes
         auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
@@ -561,14 +561,14 @@ HWTEST_F(FlexNewTestNG, CheckBlankAndKeepMin001, TestSize.Level0)
     EXPECT_EQ(flexSize, 300);
     /**
      * @tc.steps: step2. call CheckBlankAndKeepMin.
-     * @tc.expected: ndoe's property MinSize less than flexSize, so flexSize no change
+     * @tc.expected: node's property MinSize less than flexSize, so flexSize no change
      */
     blankFrameNode->hostNode_ = hostNode;
     flexLayoutAlgorithm->CheckBlankAndKeepMin(blankFrameNode, flexSize);
     EXPECT_EQ(flexSize, 300);
     /**
      * @tc.steps: step3. call CheckBlankAndKeepMin.
-     * @tc.expected: ndoe's property MinSize bigger than flexSize, so flexSize equal MinSize
+     * @tc.expected: node's property MinSize bigger than flexSize, so flexSize equal MinSize
      */
     auto blankProperty = blankFrameNode->GetLayoutProperty<BlankLayoutProperty>();
     ASSERT_NE(blankProperty, nullptr);
@@ -984,8 +984,33 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level0)
      */
     EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
     /**
-     * @tc.expected: size1 == OffsetF(0.0f, 0.0f)
+     * @tc.expected: offset1 == OffsetF(0.0f, 0.0f)
      */
     EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: FlexLpxAttribute001
+ * @tc.desc: Test SetMainSpace/SetCrossSpace with LPX unit registers/unregisters LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexLpxAttribute001, TestSize.Level1)
+{
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    auto frameNode = CreateFlexRow([lpxDim](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+        model.SetMainSpace(lpxDim);
+        model.SetCrossSpace(lpxDim);
+    });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    FlexModelNG::SetMainSpace(frameNode.GetRawPtr(), vpDim);
+    FlexModelNG::SetCrossSpace(frameNode.GetRawPtr(), vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

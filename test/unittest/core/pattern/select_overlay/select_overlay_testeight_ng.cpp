@@ -17,6 +17,7 @@
 #include "gtest/internal/gtest-internal.h"
 #define private public
 #define protected public
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -1533,6 +1534,116 @@ HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg002, TestS
     BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
     EXPECT_EQ(actualStyleOption.blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     EXPECT_EQ(actualStyleOption.colorMode, ThemeColorMode::DARK); // Should convert from ColorMode::DARK
+}
+
+/**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg003
+ * @tc.desc: Test UpdateSelectMenuBg uses immersive material for API26 secondary menu path
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg003, TestSize.Level1)
+{
+    auto node = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>(SelectOverlayInfo())));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto caller = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(caller, nullptr);
+    caller->themeScopeId_ = 200;
+    auto theme = AceType::MakeRefPtr<TokenTheme>(1);
+    theme->SetColorMode(ColorMode::DARK);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(200, 1);
+
+    auto renderContext = node->selectMenu_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    renderContext->UpdateBackBlurStyle(styleOption);
+
+    auto backupLevel = g_uiMaterialLevel;
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    node->UpdateSelectMenuBg(caller);
+    g_uiMaterialLevel = backupLevel;
+
+    auto systemMaterial = renderContext->GetSystemMaterial();
+    ASSERT_NE(systemMaterial, nullptr);
+    EXPECT_EQ(systemMaterial->GetType(), static_cast<int32_t>(MaterialType::IMMERSIVE));
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    ASSERT_NE(immersiveOptions, nullptr);
+    EXPECT_EQ(immersiveOptions->style, UiMaterialStyle::THICK);
+    EXPECT_EQ(immersiveOptions->colorMode, ColorMode::DARK);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg004
+ * @tc.desc: Test UpdateSelectMenuBg falls back to low-end material color when system material is smooth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg004, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->menuBackgroundColorLowEnd_ = Color::FromRGB(12, 34, 56);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>(SelectOverlayInfo())));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto renderContext = node->selectMenu_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    renderContext->UpdateBackBlurStyle(styleOption);
+
+    auto backupLevel = g_uiMaterialLevel;
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    node->UpdateSelectMenuBg(nullptr);
+    g_uiMaterialLevel = backupLevel;
+
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+    EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg005
+ * @tc.desc: TDD cover default CCM state with unsupported system material falls back to legacy menu material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg005, TestSize.Level1)
+{
+    auto node = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>(SelectOverlayInfo())));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto renderContext = node->selectMenu_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto backupLevel = g_uiMaterialLevel;
+    auto backupState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    AceApplicationInfo::GetInstance().SetUIMaterialState("default");
+
+    node->UpdateSelectMenuBg(nullptr);
+
+    g_uiMaterialLevel = backupLevel;
+    AceApplicationInfo::GetInstance().SetUIMaterialState(backupState);
+
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+    const auto& groupProperty = renderContext->GetBackground();
+    ASSERT_NE(groupProperty, nullptr);
+    BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
 }
 
 /**

@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace OHOS::Ace::NG {
 struct MenuOptionsParam {

@@ -25,6 +25,11 @@ void PerfInterfaces::RecordInputEvent(PerfActionType type, PerfSourceType source
 {
 }
 
+void PerfInterfaces::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time,
+    int32_t xPos, int32_t yPos)
+{
+}
+
 int64_t PerfInterfaces::GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     return 0;
@@ -107,6 +112,11 @@ void PerfInterfaces::SetApplicationInfo()
 }
 
 void PerfInterfaces::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+}
+
+void PerfInterfaces::ReportComponentDetach(const uint64_t& uniqueId, const std::string& surfaceName,
     const std::string& componentName, const std::string& bundleName, const int32_t pid)
 {
 }

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey<LinearIndicatorStyle> {
   constructor(value: LinearIndicatorStyle) {
     super(value);
@@ -62,22 +61,22 @@ class LinearIndicatorOnChangeModifier extends ModifierWithKey<OnLinearIndicatorC
   }
 }
 
-class ArkLinearIndicatorComponent extends ArkComponent implements CommonMethod<LinearIndicatorAttribute> {
+class ArkLinearIndicatorComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
 
-  indicatorStyle(value: LinearIndicatorStyle): LinearIndicatorAttribute {
+  indicatorStyle(value: LinearIndicatorStyle): this {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
     return this;
   }
 
-  indicatorLoop(value: boolean): LinearIndicatorAttribute {
+  indicatorLoop(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
     return this;
   }
 
-  onChange(value: OnLinearIndicatorChangeCallback): LinearIndicatorAttribute {
+  onChange(value: OnLinearIndicatorChangeCallback): this {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
     return this;
   }
@@ -85,10 +84,22 @@ class ArkLinearIndicatorComponent extends ArkComponent implements CommonMethod<L
 }
 
 // @ts-ignore
-globalThis.LinearIndicator.attributeModifier = function (modifier: ArkComponent): void {
+(globalThis as any).LinearIndicator.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkLinearIndicatorComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
+    return new (modifierJS as any).LinearIndicatorModifier(nativePtr, classType);
   });
 };
+
+
+// @ts-ignore
+if (globalThis.LinearIndicator !== undefined) {
+  (globalThis as any).LinearIndicator.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkLinearIndicatorComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
+    });
+  };
+}

@@ -17,7 +17,9 @@
 
 #include <regex>
 
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/theme/theme_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -27,6 +29,29 @@ namespace OHOS::Ace {
 
 Decoration::Decoration() = default;
 Decoration::~Decoration() = default;
+
+bool Decoration::NeedReloadImage(const RefPtr<Decoration>& lastDecoration) const
+{
+    if (!image_) {
+        return false;
+    }
+
+    if (!lastDecoration || !(lastDecoration->GetImage())) {
+        return true;
+    }
+
+    return (*image_) != (*(lastDecoration->GetImage()));
+}
+
+void Decoration::SetImage(const RefPtr<BackgroundImage>& image)
+{
+    image_ = image;
+}
+
+const RefPtr<BackgroundImage>& Decoration::GetImage() const
+{
+    return image_;
+}
 
 void Decoration::SetBorderImage(const RefPtr<BorderImage>& borderImage)
 {

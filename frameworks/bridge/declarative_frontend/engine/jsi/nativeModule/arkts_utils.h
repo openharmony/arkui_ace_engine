@@ -16,9 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 
-#include "bridge/declarative_frontend/declarative_frontend.h"
-#include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -101,6 +98,14 @@ struct LocalizedCalcDimension {
     OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> rightResObj;
     OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> topResObj;
     OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> bottomResObj;
+};
+
+struct TextBackgroundStyleParseOption {
+    Color color = Color::TRANSPARENT;
+    RefPtr<ResourceObject> colorResObj;
+    std::vector<ArkUI_Float32> radiusValues;
+    std::vector<ArkUI_Int32> radiusUnits;
+    std::shared_ptr<TextBackgroundStyle> style;
 };
 
 class ACE_FORCE_EXPORT ArkTSUtils {
@@ -234,6 +239,8 @@ public:
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
+    static void ParseJsSymbolCustomFamilyNames(
+        const EcmaVM* vm, std::vector<std::string>& familyNames, const Local<JSValueRef>& jsValue);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId,
         RefPtr<ResourceObject>& resourceObject);
@@ -399,6 +406,8 @@ public:
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
     static void SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,
         RefPtr<ResourceObject>& colorResObj, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    static void ParseJsViewTextBackgroundStyle(EcmaVM* vm, ArkUINodeHandle nativeNode,
+        const Local<JSValueRef>& styleArg, TextBackgroundStyleParseOption& option);
     static void RegisterTextBackgroundStyleResource(std::shared_ptr<TextBackgroundStyle> textBackgroundStyle,
         RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
         RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
@@ -569,7 +578,19 @@ public:
     static NG::BorderColorProperty GetBorderColor(const CommonColor& commonColor);
     static bool ParseCommonMarginOrPaddingCorner(
         EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension);
+    static void SetToggleBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void ParseToggleParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params);
+    static void SetButtonBorderRadiusByJs(
+        const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
+    static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
 
+    static bool ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj, DimensionUnit defaultUnit = DimensionUnit::FP);
+    static void ParseJsLengthMetricsToDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsBool(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool& result);
+    static RefPtr<ResourceWrapper> CreateJsResourceWrapper(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj, RefPtr<ResourceObject>& resourceObject);
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);

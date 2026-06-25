@@ -165,6 +165,8 @@ public:
             GetOrphanCharOptimization().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("compressLeadingPunctuation", std::to_string(
             GetCompressLeadingPunctuation().value_or(false)).c_str(), filter);
+        json->PutExtAttr("punctuationOverflow", std::to_string(
+            GetPunctuationOverflow().value_or(false)).c_str(), filter);
         json->PutExtAttr("textDirection",
             StringUtils::ToString(GetTextDirection().value_or(TextDirection::INHERIT)).c_str(), filter);
         json->PutExtAttr("includeFontPadding", std::to_string(
@@ -255,6 +257,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OrphanCharOptimization, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, PunctuationOverflow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_COMMON_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_FIELD_PROPERTY_ITEM_UPDATE_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);

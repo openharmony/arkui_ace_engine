@@ -47,7 +47,8 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing(),
         .propGradient = GradientConvert::ToOptNGGradient(textStyle.GetGradient()),
-        .colorShaderStyle = textStyle.GetColorShaderStyle()
+        .colorShaderStyle = textStyle.GetColorShaderStyle(),
+        .tailIndents = textStyle.GetTailIndent()
         };
 }
 
@@ -150,6 +151,9 @@ void ParagraphUtil::GetSpanParagraphStyle(
     }
     if (lineStyle->HasOrphanCharOptimization()) {
         pStyle.orphanCharOptimization = lineStyle->GetOrphanCharOptimizationValue();
+    }
+    if (lineStyle->HasTailIndents()) {
+        pStyle.tailIndents = lineStyle->GetTailIndentsValue();
     }
     // spanGroup.empty()代表ConstructParagraphSpanGroup时调用，不用于实际布局，仅用于比较段落间是否一致
     if (spanGroup.empty()) {
@@ -279,6 +283,37 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
         auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(UINT32_MAX);
         spanStringHasMaxLines |= maxlines != UINT32_MAX;
         spanGroupVec.emplace_back(std::move(spans));
+    }
+}
+
+void ParagraphUtil::ConstructParagraphSpanGroupForHash(
+    std::list<RefPtr<SpanItem>>& spans, std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
+    bool& spanStringHasMaxLines)
+{
+    // Keep hash grouping independent from layout grouping so later cache-rule changes
+    // do not accidentally affect the original paragraph construction path.
+    std::list<RefPtr<SpanItem>> spanGroup;
+    while (!spans.empty()) {
+        auto spanItem = spans.front();
+        spans.pop_front();
+        if (!spanItem) {
+            continue;
+        }
+        spanStringHasMaxLines |= spanItem->textLineStyle &&
+            spanItem->textLineStyle->GetMaxLines().value_or(UINT32_MAX) != UINT32_MAX;
+        spanItem->SetNeedRemoveNewLine(false);
+        const bool needSplit = !spanItem->content.empty() && spanItem->content.back() == u'\n' && !spans.empty();
+        if (needSplit) {
+            spanItem->SetNeedRemoveNewLine(true);
+        }
+        spanGroup.emplace_back(std::move(spanItem));
+        if (needSplit) {
+            spanGroupVec.emplace_back(std::move(spanGroup));
+            spanGroup = {};
+        }
+    }
+    if (!spanGroup.empty()) {
+        spanGroupVec.emplace_back(std::move(spanGroup));
     }
 }
 

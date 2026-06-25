@@ -19,8 +19,7 @@
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 
-#include "base/image/drawing_color_filter.h"
-#include "base/image/drawing_lattice.h"
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -42,6 +41,7 @@ class Blender;
 }
 
 namespace OHOS::Ace {
+class DrawingColorFilter;
 class UiMaterial;
 } // namespace OHOS::Ace
 
@@ -79,6 +79,7 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
 bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(
     const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows, bool needResObj = false);
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations);
 bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine = nullptr);

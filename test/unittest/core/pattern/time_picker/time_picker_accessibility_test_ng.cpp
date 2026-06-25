@@ -29,7 +29,6 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"

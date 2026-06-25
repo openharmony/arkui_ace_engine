@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/curves.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,6 +27,10 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+namespace OHOS::Ace {
+class CubicCurve;
+}
 
 namespace OHOS::Ace::NG {
 const char RATING_ETS_TAG[] = "Rating";
@@ -122,17 +127,7 @@ public:
     }
 
     void SetBoardColor(
-        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host)
-    {
-        CHECK_NULL_VOID(host);
-        if (boardColor_) {
-            AnimationOption option = AnimationOption();
-            option.SetDuration(duration);
-            option.SetCurve(curve);
-            AnimationUtils::Animate(
-                option, [&]() { boardColor_->Set(color); }, nullptr, nullptr, host->GetContextRefPtr());
-        }
-    }
+        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host);
 
     void SetFocusOrBlurColor(const Color& color)
     {
@@ -209,41 +204,7 @@ public:
         isNeedFocusStyle_ = isNeedFocusStyle;
     }
 
-    void SetHoverState(const RatingAnimationType& state, const RefPtr<FrameNode>& host)
-    {
-        if (state_ == state) {
-            return;
-        }
-        state_ = state;
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-        CHECK_NULL_VOID(ratingTheme);
-        auto hoverDuration = static_cast<int32_t>(ratingTheme->GetHoverAnimationDuration());
-        auto pressDuration = static_cast<int32_t>(ratingTheme->GetPressAnimationDuration());
-        switch (state) {
-            case RatingAnimationType::HOVER:
-                SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), hoverDuration, Curves::FRICTION, host);
-                break;
-            case RatingAnimationType::FOCUS:
-                SetBoardColor(LinearColor(ratingTheme->GetFocusColor()), hoverDuration, Curves::FRICTION, host);
-                break;
-            case RatingAnimationType::HOVERTOPRESS:
-                SetBoardColor(LinearColor(ratingTheme->GetPressColor()), pressDuration, Curves::SHARP, host);
-                break;
-            case RatingAnimationType::PRESSTOHOVER:
-                SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), pressDuration, Curves::SHARP, host);
-                break;
-            case RatingAnimationType::PRESS:
-                SetBoardColor(LinearColor(ratingTheme->GetPressColor()), hoverDuration, Curves::SHARP, host);
-                break;
-            case RatingAnimationType::NONE:
-                SetBoardColor(LinearColor(Color::TRANSPARENT), hoverDuration, Curves::FRICTION, host);
-                break;
-            default:
-                break;
-        }
-    }
+    void SetHoverState(const RatingAnimationType& state, const RefPtr<FrameNode>& host);
 
     void SetReverse(bool reverse)
     {

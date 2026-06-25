@@ -422,7 +422,7 @@ Shadow CreateDialogShadow(const T& options)
 {
     Shadow shadow;
     if (options.shadowOption.radius == SHADOW_OPTION_NONE
-        && Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        && !Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         if (options.shadowStyle == SHADOW_STYLE_NONE) {
             shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
         } else {

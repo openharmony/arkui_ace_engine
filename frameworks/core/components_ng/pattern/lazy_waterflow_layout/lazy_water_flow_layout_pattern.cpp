@@ -22,12 +22,14 @@
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
-RefPtr<LayoutAlgorithm> CreateLazyWaterFlowLayoutAlgorithm(const RefPtr<LazyWaterFlowLayoutInfo>& info);
+RefPtr<LayoutAlgorithm> CreateLazyWaterFlowLayoutAlgorithm(const RefPtr<LazyWaterFlowLayoutInfo>& info,
+    const RefPtr<FrameNode>& header, const RefPtr<FrameNode>& footer);
 void AddLazyWaterFlowPredictTask(PipelineContext* context, std::function<void(int64_t, bool)>&& task);
 
 LazyWaterFlowLayoutPattern::LazyWaterFlowLayoutPattern()
@@ -42,7 +44,16 @@ RefPtr<LayoutProperty> LazyWaterFlowLayoutPattern::CreateLayoutProperty()
 
 RefPtr<LayoutAlgorithm> LazyWaterFlowLayoutPattern::CreateLayoutAlgorithm()
 {
-    return CreateLazyWaterFlowLayoutAlgorithm(layoutInfo_);
+    return CreateLazyWaterFlowLayoutAlgorithm(layoutInfo_, GetHeaderNode(), GetFooterNode());
+}
+
+StickyStyle LazyWaterFlowLayoutPattern::GetStickyStyle() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, StickyStyle::NONE);
+    auto layoutProperty = host->GetLayoutProperty<LazyWaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, StickyStyle::NONE);
+    return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
 FocusPattern LazyWaterFlowLayoutPattern::GetFocusPattern() const
@@ -57,7 +68,6 @@ ScopeFocusAlgorithm LazyWaterFlowLayoutPattern::GetScopeFocusAlgorithm()
 
 void LazyWaterFlowLayoutPattern::OnActive()
 {
-    idleDeadlineMissCount_ = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -66,10 +76,33 @@ void LazyWaterFlowLayoutPattern::OnActive()
 void LazyWaterFlowLayoutPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     CHECK_NULL_VOID(layoutInfo_);
-    layoutInfo_->NotifyDataChange(index, count);
+    // Convert host index (which may include a header at slot 0) into item index for layoutInfo_.
+    auto itemIndex = index - (header_.Upgrade() ? 1 : 0);
+    layoutInfo_->NotifyDataChange(itemIndex, count);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+float LazyWaterFlowLayoutPattern::GetHeaderMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->headerMainSize_ : 0.0f;
+}
+
+float LazyWaterFlowLayoutPattern::GetFooterMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->footerMainSize_ : 0.0f;
+}
+
+void LazyWaterFlowLayoutPattern::OnModifyDone()
+{
+    LazyLayoutPattern::OnModifyDone();
+    SyncHeaderFooter();
+}
+
+void LazyWaterFlowLayoutPattern::BeforeCreateLayoutWrapper()
+{
+    SyncHeaderFooter(false);
 }
 
 AdjustOffset LazyWaterFlowLayoutPattern::GetAdjustOffset() const
@@ -109,14 +142,15 @@ std::pair<int32_t, int32_t> LazyWaterFlowLayoutPattern::GetVisibleIndexesRangeFo
     if (!layoutInfo_) {
         return { -1, -1 };
     }
-    if (layoutInfo_->totalItemCount_ <= 0 || layoutInfo_->startIndex_ < 0 || layoutInfo_->endIndex_ < 0) {
+    if (layoutInfo_->totalItemCount_ <= 0 || layoutInfo_->visibleStartIndex_ < 0 ||
+        layoutInfo_->visibleEndIndex_ < 0) {
         return { -1, -1 };
     }
-    if (layoutInfo_->startIndex_ >= layoutInfo_->totalItemCount_ ||
-        layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
+    if (layoutInfo_->visibleStartIndex_ >= layoutInfo_->totalItemCount_ ||
+        layoutInfo_->visibleEndIndex_ >= layoutInfo_->totalItemCount_) {
         return { -1, -1 };
     }
-    return { layoutInfo_->startIndex_, layoutInfo_->endIndex_ };
+    return { layoutInfo_->visibleStartIndex_, layoutInfo_->visibleEndIndex_ };
 }
 
 void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange()
@@ -141,7 +175,9 @@ void LazyWaterFlowLayoutPattern::OnInActive()
     if (onVisibleIndexesChange_) {
         FireOnVisibleIndexesChange({ -1, -1 });
     }
-    ResetVisibleIndexesChangeState();
+    if (layoutInfo_) {
+        layoutInfo_->deadline_.reset();
+    }
 }
 
 void LazyWaterFlowLayoutPattern::PostIdleTask()
@@ -158,22 +194,20 @@ void LazyWaterFlowLayoutPattern::PostIdleTask()
 void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
 {
     CHECK_NULL_VOID(layoutInfo_);
-    if (!layoutInfo_->NeedPredict()) {
-        idleDeadlineMissCount_ = 0;
-        return;
-    }
-    // Deadline crossed before we ran. Re-post up to MAX_IDLE_DEADLINE_MISS_COUNT times to absorb frame
-    // boundary jitter; drop after that to avoid sustained main-thread contention.
-    if (GetSysTimestamp() > deadline) {
-        ++idleDeadlineMissCount_;
-        if (idleDeadlineMissCount_ <= MAX_IDLE_DEADLINE_MISS_COUNT) {
-            PostIdleTask();
-        }
-        return;
-    }
-    idleDeadlineMissCount_ = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!host->IsActive()) {
+        layoutInfo_->deadline_.reset();
+        return;
+    }
+    if (!layoutInfo_->NeedPredict()) {
+        return;
+    }
+    // Deadline crossed: re-post unconditionally so predict eventually catches up once main thread frees.
+    if (GetSysTimestamp() > deadline) {
+        PostIdleTask();
+        return;
+    }
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -182,10 +216,119 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
     layoutInfo_->deadline_.reset();
 }
 
-void LazyWaterFlowLayoutPattern::ResetVisibleIndexesChangeState()
+void LazyWaterFlowLayoutPattern::AddHeader(const RefPtr<UINode>& header)
 {
-    hasVisibleIndexesChangeFired_ = false;
-    lastVisibleIndexesRange_ = { -2, -2 };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(header, true)) {
+        return;
+    }
+    HeaderFooterUtils::ReplaceHeaderFooter(host, header_, header, 0);
+    SyncHeaderFooter();
+}
+
+void LazyWaterFlowLayoutPattern::AddFooter(const RefPtr<UINode>& footer)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(footer, false)) {
+        return;
+    }
+    // Footer is appended on first mount; SyncHeaderFooter keeps it behind data nodes after LazyForEach updates.
+    HeaderFooterUtils::ReplaceHeaderFooter(host, footer_, footer);
+    SyncHeaderFooter();
+}
+
+bool LazyWaterFlowLayoutPattern::IsValidHeaderFooter(const RefPtr<UINode>& edge, bool isHeader) const
+{
+    CHECK_NULL_RETURN(edge, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (edge == host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects itself as header / footer");
+        return false;
+    }
+    auto peerEdge = isHeader ? footer_.Upgrade() : header_.Upgrade();
+    if (peerEdge && peerEdge == edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects duplicated header/footer edge");
+        return false;
+    }
+    auto currentEdge = isHeader ? header_.Upgrade() : footer_.Upgrade();
+    if (currentEdge == edge) {
+        return true;
+    }
+    auto parent = edge->GetParent();
+    if (parent && parent != host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects header / footer with another parent");
+        return false;
+    }
+    if (parent == host && currentEdge != edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects existing child as header / footer");
+        return false;
+    }
+    if (!HeaderFooterUtils::GetHeaderFooterFrameNode(edge)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects header / footer without frame content");
+        return false;
+    }
+    return true;
+}
+
+void LazyWaterFlowLayoutPattern::RemoveHeader()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, header_);
+}
+
+void LazyWaterFlowLayoutPattern::RemoveFooter()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, footer_);
+}
+
+RefPtr<FrameNode> LazyWaterFlowLayoutPattern::GetHeaderNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(header_);
+}
+
+RefPtr<FrameNode> LazyWaterFlowLayoutPattern::GetFooterNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(footer_);
+}
+
+void LazyWaterFlowLayoutPattern::SyncHeaderFooter(bool markDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool needMeasure = false;
+
+    // LazyForEach may append or remove data nodes after header/footer are mounted, so normalize edge positions before
+    // every wrapper creation instead of relying only on the first mount order.
+    auto header = header_.Upgrade();
+    if (header) {
+        auto headerIndex = host->GetChildIndex(header);
+        if (headerIndex > 0) {
+            header->MovePosition(0);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(header);
+    }
+
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        auto footerIndex = host->GetChildIndex(footer);
+        auto lastIndex = static_cast<int32_t>(host->GetChildren().size()) - 1;
+        if (footerIndex >= 0 && footerIndex != lastIndex) {
+            footer->MovePosition(lastIndex);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(footer);
+    }
+
+    if (needMeasure && markDirty) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void LazyWaterFlowLayoutPattern::OnAttachToMainTree()

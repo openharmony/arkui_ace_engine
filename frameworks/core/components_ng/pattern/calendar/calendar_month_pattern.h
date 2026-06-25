@@ -19,12 +19,12 @@
 #include <optional>
 
 #include "base/memory/referenced.h"
+#include "core/common/display_info.h"
 #include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -49,10 +49,7 @@ public:
         return MakeRefPtr<CalendarPaintProperty>();
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<CalendarEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {

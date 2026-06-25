@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
@@ -91,11 +92,6 @@ public:
             }
         }
 
-    }
-
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
     }
 
     void CheckTabAnimateMode()

@@ -1523,6 +1523,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
+        navPathInfo->SetProperty<std::string>("autoCleanedState", navdestinationsInfo[index].state);
         newPathArray->SetValueAt(index, navPathInfo);
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
@@ -1595,6 +1596,111 @@ int32_t JSNavigationStack::GetRecoveredDestinationMode(int32_t index)
         return INVALID_DESTINATION_MODE;
     }
     return mode->ToNumber<int32_t>();
+}
+
+bool JSNavigationStack::IsAutoCleaned(int32_t index) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto autoCleaned = pathInfo->GetProperty("autoCleaned");
+    return autoCleaned->IsBoolean() && autoCleaned->ToBoolean();
+}
+
+bool JSNavigationStack::GetAutoCleanedCanRecovery(int32_t index) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto canRecovery = pathInfo->GetProperty("canRecovery");
+    return canRecovery->IsBoolean() ? canRecovery->ToBoolean() : true;
+}
+
+void JSNavigationStack::ClearAutoCleanedState(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetPropertyObject("autoCleaned", JsiValue::Undefined());
+    pathInfo->SetPropertyObject("autoCleanedState", JsiValue::Undefined());
+    pathInfo->SetPropertyObject("canRecovery", JsiValue::Undefined());
+}
+
+std::string JSNavigationStack::GetAutoCleanedState(int32_t index) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return "";
+    }
+    auto state = pathInfo->GetProperty("autoCleanedState");
+    return state->IsString() ? state->ToString() : "";
+}
+
+void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+
+    auto navPathArray = GetJsPathArray();
+    if (navPathArray->IsEmpty()) {
+        return;
+    }
+    auto id = std::to_string(navDestinationId);
+    for (size_t i = 0; i < navPathArray->Length(); ++i) {
+        auto value = navPathArray->GetValueAt(i);
+        if (!value->IsObject()) {
+            continue;
+        }
+        auto info = JSRef<JSObject>::Cast(value);
+        auto navDestinationIdValue = info->GetProperty("navDestinationId");
+        if (navDestinationIdValue->IsString() && navDestinationIdValue->ToString() == id) {
+            info->SetProperty<bool>("autoCleaned", true);
+            info->SetProperty<bool>("canRecovery", canRecovery);
+            return;
+        }
+    }
+}
+
+void JSNavigationStack::SaveStateToJsCallback(
+    int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto saveState = [&state](JSRef<JSObject> pathInfo) {
+        pathInfo->SetProperty<std::string>("autoCleanedState", state);
+    };
+
+    auto pathInfo = GetJsPathInfo(index);
+    if (!pathInfo->IsEmpty()) {
+        auto pathName = pathInfo->GetProperty("name");
+        if (pathName->IsString() && pathName->ToString() == name) {
+            saveState(pathInfo);
+            return;
+        }
+    }
+
+    auto navPathArray = GetJsPathArray();
+    if (navPathArray->IsEmpty()) {
+        return;
+    }
+    auto id = std::to_string(navDestinationId);
+    for (size_t i = 0; i < navPathArray->Length(); ++i) {
+        auto value = navPathArray->GetValueAt(i);
+        if (!value->IsObject()) {
+            continue;
+        }
+        auto info = JSRef<JSObject>::Cast(value);
+        auto navDestinationIdValue = info->GetProperty("navDestinationId");
+        if (navDestinationIdValue->IsString() && navDestinationIdValue->ToString() == id) {
+            saveState(info);
+            return;
+        }
+    }
 }
 
 std::string JSNavigationStack::ErrorToMessage(int32_t code)

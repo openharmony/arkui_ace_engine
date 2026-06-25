@@ -16,6 +16,7 @@
 #include "base/error/error_code.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/pipeline/pipeline_base.h"
 #include "canvas_path_peer_impl.h"

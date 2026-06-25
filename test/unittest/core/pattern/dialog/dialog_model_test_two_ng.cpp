@@ -23,6 +23,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/color_inverter.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/grid_column_info.h"

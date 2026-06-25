@@ -33,11 +33,13 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -1719,6 +1721,62 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionHapticStopMaxBound001, Tes
 }
 
 /**
+ * @tc.name: GetStartIndexEmptyOptions
+ * @tc.desc: Test GetStartIndex when column options are empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, GetStartIndexEmptyOptions, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    uint32_t startIndex = 1;
+    uint32_t totalCount = 1;
+    auto options = columnPattern_->GetOptions();
+    options[columnNode_] = {};
+    columnPattern_->options_ = options;
+
+    columnPattern_->GetStartIndex(startIndex, totalCount);
+
+    EXPECT_EQ(totalCount, 0U);
+    EXPECT_EQ(startIndex, 1U);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPositionZeroTotalCount
+ * @tc.desc: Test UpdateColumnChildPosition when totalCount is zero does not access invalid max index
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionZeroTotalCount, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto rowLayout = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayout, nullptr);
+    rowLayout->UpdateCanLoop(false);
+
+    auto options = columnPattern_->GetOptions();
+    options[columnNode_] = {};
+    columnPattern_->options_ = options;
+
+    columnPattern_->SetCurrentIndex(0);
+    columnPattern_->yLast_ = PREVIOUS_Y_LAST_FOR_UPWARD_DRAG;
+    columnPattern_->yOffset_ = 0.0;
+    columnPattern_->hapticController_ = nullptr;
+
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y_FOR_UPWARD_DRAG_END);
+
+    EXPECT_DOUBLE_EQ(columnPattern_->yLast_, OFFSET_Y_FOR_UPWARD_DRAG_END);
+}
+
+/**
  * @tc.name: InitHapticControllerTest003
  * @tc.desc: When haptic feedback is disabled while a haptic controller exists, Stop should be invoked.
  * @tc.type: FUNC
@@ -2764,6 +2822,51 @@ HWTEST_F(DatePickerTestFour, ReportDialogDateChangeEvent002, TestSize.Level1)
     result = datePickerPattern->ReportDialogDateChangeEvent(
         nodeId, "DatePickerDialog", "onDateChange", validData);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AddAnimationTextPropertiesLpx001
+ * @tc.desc: Test AddAnimationTextProperties with LPX unit for fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, AddAnimationTextPropertiesLpx001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    constexpr double lpxValue = 20.0;
+    textLayoutProperty->UpdateFontSize(Dimension(lpxValue, DimensionUnit::LPX));
+
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->AddAnimationTextProperties(0, textLayoutProperty);
+
+    ASSERT_EQ(columnPattern_->animationProperties_.size(), 1);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Unit(), DimensionUnit::LPX);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Value(), lpxValue);
+}
+
+/**
+ * @tc.name: AddAnimationTextPropertiesLpx002
+ * @tc.desc: Test AddAnimationTextProperties with PX unit (non-LPX) for fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, AddAnimationTextPropertiesLpx002, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    constexpr double pxValue = 20.0;
+    textLayoutProperty->UpdateFontSize(Dimension(pxValue, DimensionUnit::PX));
+
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->AddAnimationTextProperties(0, textLayoutProperty);
+
+    ASSERT_EQ(columnPattern_->animationProperties_.size(), 1);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Unit(), DimensionUnit::PX);
 }
 
 } // namespace OHOS::Ace::NG

@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 
+#include <any>
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
@@ -40,11 +43,14 @@ public:
     ~CustomNode() override
     {
         ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
+        FinishMemOpt();
     }
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+
+    void OnAttachToMainTree(bool) override;
 
     bool IsAtomicNode() const override
     {
@@ -157,6 +163,8 @@ public:
 
     void FireCustomDisappear() override;
 
+    void FireClearParentReusePoolIfNeeded();
+
     // called for DFX
     void DumpInfo() override;
 
@@ -219,20 +227,55 @@ public:
         onCleanupFunc_ = onCleanupFunc;
     }
 
-    void SetOnCustomEnvUpdateFunc(std::function<void(const std::string&)>&& onCustomEnvUpdate)
+    void SetOnCustomEnvUpdateFunc(
+        std::function<void(const std::string&, const std::optional<std::any>&)>&& onCustomEnvUpdate)
     {
         onCustomEnvUpdateFunc_ = std::move(onCustomEnvUpdate);
     }
 
-    void FireOnCustomEnvUpdate(const std::string& key)
+    void FireOnCustomEnvUpdate(const std::string& key, const std::optional<std::any>& value = std::nullopt)
     {
         auto callback = onCustomEnvUpdateFunc_;
         if (callback) {
-            callback(key);
+            callback(key, value);
+        }
+    }
+
+    void SetOnSystemEnvUpdateFunc(
+        std::function<void(const std::string&, const std::optional<SystemEnvValue>&)>&& onSystemEnvUpdate)
+    {
+        onSystemEnvUpdateFunc_ = std::move(onSystemEnvUpdate);
+    }
+
+    void FireOnSystemEnvUpdate(const std::string& key, const std::optional<SystemEnvValue>& value = std::nullopt)
+    {
+        auto callback = onSystemEnvUpdateFunc_;
+        if (callback) {
+            callback(key, value);
         }
     }
 
     bool FireOnCleanup();
+
+    ReusableMemOptStrategy GetMemOptStrategy();
+    void OnWindowHide() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void RegisterMemoryLevelChangedCallback();
+    void UnregisterMemoryLevelChangedCallback();
+    bool CheckParentFrameNodeVisibility();
+    void ScheduleCleanCacheTask();
+    void CancelScheduledCleanCacheTask();
+    void TryExecuteScheduledCacheTask();
+    void CleanCache(bool syncClean, bool clearAll = true);
+    void CleanCacheOnIdle(int32_t remainingTimeMs);
+    void SetParentVisibility(bool visibility);
+    bool GetParentVisibility();
+    void StartMemOpt();
+    void FinishMemOpt();
+    void PostMemOptTask();
+    void PostIdleTask();
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -251,12 +294,22 @@ private:
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
     int32_t prebuildFrameRounds_ = 0;
 
+    ReusableMemOptStrategy memOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    bool pendingCleanCache_ = false;
+    bool isParentVisible_ = false;
+    bool runningMemOpt_ = false;
+    bool needCleanCacheOnIdle_ = false;
+    bool hasPreparedProgressiveRelease_ = false;
+    bool stopMemOptAfterRelease_ = true;
+    int64_t cacheTaskPostTime_ = 0;
+
     std::function<void()> onPageShowFunc_ = nullptr;
     std::function<void()> onPageHideFunc_ = nullptr;
     std::function<bool()> onBackPressFunc_ = nullptr;
     std::function<void()> pageTransitionFunc_ = nullptr;
     std::function<void()> onCleanupFunc_ = nullptr;
-    std::function<void(const std::string&)> onCustomEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&, const std::optional<std::any>&)> onCustomEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&, const std::optional<SystemEnvValue>&)> onSystemEnvUpdateFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

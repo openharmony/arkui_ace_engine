@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_STATIC_H
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CalendarPickerModelStatic {

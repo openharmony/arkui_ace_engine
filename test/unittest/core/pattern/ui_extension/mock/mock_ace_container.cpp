@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/view_data/ace_auto_fill_error.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -313,4 +314,7 @@ void AceContainer::SetIsFormRender(bool isFormRender) {}
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
 
 void AceContainer::TerminateUIExtensionInner(int32_t code) {}
+
+void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+    EventPositionInfo& originalPos) {}
 } // namespace OHOS::Ace::NG

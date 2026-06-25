@@ -245,7 +245,9 @@ private:
         RefPtr<AnimatablePropertyColor> color;
     };
     std::vector<ShadowProp> shadows_;
-    std::map<std::string, RefPtr<AnimatablePropertyFloat>> fontVariations_;
+    std::unordered_map<std::string, RefPtr<AnimatablePropertyFloat>> fontVariations_;
+    std::unordered_map<std::string, float> fontVariationMeasureValues_;
+    std::unordered_map<std::string, float> lastFontVariationMeasureValues_;
 
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;
@@ -261,9 +263,6 @@ private:
     std::optional<Dimension> lineHeight_;
     RefPtr<AnimatablePropertyFloat> lineHeightFloat_;
     float lastLineHeight_ = 0.0f;
-
-    std::map<std::string, float> fontVariationMeasureValues_;
-    std::map<std::string, float> lastFontVariationMeasureValues_;
 
     WeakPtr<Pattern> pattern_;
 

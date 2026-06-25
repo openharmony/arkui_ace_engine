@@ -15,6 +15,10 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
+#include <utility>
+
+#include "core/common/frontend.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -39,6 +43,103 @@ int32_t GetNavigationUniqueId(const RefPtr<NavDestinationPattern>& pattern)
     return navigationUniqueId;
 }
 } // namespace
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
+    : navigationId(std::move(id)), name(std::move(name)), state(state)
+{}
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+    int32_t index, napi_value param, std::string navDesId)
+    : navigationId(std::move(id)), name(std::move(name)), state(state),
+      index(index), param(param), navDestinationId(std::move(navDesId))
+{}
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+    int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId)
+    : navigationId(std::move(id)), name(std::move(name)), state(state),
+    index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
+{}
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index,
+    napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId)
+    : navigationId(std::move(id)), name(std::move(name)), state(state), index(index), param(param),
+      navDestinationId(std::move(navDesId)), mode(mode),
+      uniqueId(std::move(uniqueId)), navigationUniqueId(std::move(navigationUniqueId))
+{}
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index,
+    napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId, std::optional<SizeF> size)
+    : navigationId(std::move(id)),
+      name(std::move(name)),
+      state(state),
+      index(index),
+      param(param),
+      navDestinationId(std::move(navDesId)),
+      mode(mode),
+      uniqueId(std::move(uniqueId)),
+      size(std::move(size))
+{}
+
+NavDestinationInfo::NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index,
+    napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId,
+    std::optional<SizeF> size)
+    : navigationId(std::move(id)),
+      name(std::move(name)),
+      state(state),
+      index(index),
+      param(param),
+      navDestinationId(std::move(navDesId)),
+      mode(mode),
+      uniqueId(std::move(uniqueId)),
+      navigationUniqueId(std::move(navigationUniqueId)),
+      size(std::move(size))
+{}
+
+ScrollEventInfo::ScrollEventInfo(std::string id, int32_t uniqueId, ScrollEventType scrollEvent, float offset,
+    Ace::Axis axis)
+    : id(std::move(id)), uniqueId(uniqueId), scrollEvent(scrollEvent), offset(offset), axis(axis)
+{}
+
+NavDestinationSwitchInfo::NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo,
+    std::optional<NavDestinationInfo>&& toInfo, NavigationOperation op)
+    : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
+      to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
+{}
+
+RouterPageInfoNG::RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
+    std::string pageId)
+    : index(index), name(std::move(name)), path(std::move(path)), state(state), pageId(std::move(pageId))
+{}
+
+RouterPageInfoNG::RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
+    std::string pageId, std::optional<SizeF> size)
+    : index(index), name(std::move(name)), path(std::move(path)), state(state),
+      pageId(std::move(pageId)), size(size)
+{}
+
+bool AbilityContextInfo::IsEqual(const AbilityContextInfo& info) const
+{
+    return name == info.name && bundleName == info.bundleName && moduleName == info.moduleName;
+}
+
+TabContentInfo::TabContentInfo(std::string tabContentId, int32_t tabContentUniqueId, TabContentState state,
+    int32_t index, std::string id, int32_t uniqueId)
+    : tabContentId(std::move(tabContentId)), tabContentUniqueId(tabContentUniqueId), state(state), index(index),
+      id(std::move(id)), uniqueId(uniqueId)
+{}
+
+TextChangeEventInfo::TextChangeEventInfo(std::string id, int32_t uniqueId, std::string content)
+    : id(std::move(id)), uniqueId(uniqueId), content(std::move(content))
+{}
+
+SwiperItemInfoNG::SwiperItemInfoNG(int32_t uniqueId, int32_t index)
+    : uniqueId(uniqueId), index(index)
+{}
+
+uint64_t GlobalGestureListenerStorage::CombineKey(GestureListenerType gestureType, GestureActionPhase phase)
+{
+    return (static_cast<uint64_t>(gestureType) << GESTURE_TYPE_SHIFT_BITS) | static_cast<uint64_t>(phase);
+}
 
 std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::beforePanStartCallbackMap_;
 std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::beforePanEndCallbackMap_;

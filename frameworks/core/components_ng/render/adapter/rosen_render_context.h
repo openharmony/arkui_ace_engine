@@ -17,13 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
 #include <cstdint>
+#include <list>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#endif
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_alpha_modifier.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_behind_window_filter_modifier.h"
@@ -56,9 +61,13 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
-#include "core/components_ng/property/particle_property.h"
 
 namespace OHOS::Ace::NG {
+struct EmitterOption;
+struct VelocityProperty;
+struct AccelerationProperty;
+struct ParticleColorPropertyOption;
+struct ParticleFloatPropertyOption;
 class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;
@@ -70,10 +79,13 @@ class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
 class PipelineContext;
+class RosenMixedRenderChildList;
+class UINode;
+
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext() = default;
+    RosenRenderContext();
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -148,6 +160,11 @@ public:
     void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
+
+    void InsertMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child,
+        const RefPtr<UINode>& nextSibling) override;
+
+    void RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child) override;
 
     void OnModifyDone() override;
 
@@ -258,6 +275,7 @@ public:
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
+    void ResetBlender() override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
@@ -270,6 +288,8 @@ public:
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
+
+    void UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void OnTransform3DMatrixUpdate(const Matrix4& matrix) override;
@@ -307,6 +327,21 @@ public:
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
+
+    bool IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode);
+    void RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode);
+    bool CanSwitchToSingleIfRenderNode();
+    void ResetMixedRenderChildren();
+    void ClearMixedPureRenderChildren();
+    int32_t GetMixedRenderChildCount();
+    int32_t GetMixedRenderChildIndexByRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
+    std::shared_ptr<Rosen::RSNode> GetMixedRenderChildAt(int32_t index);
+    std::shared_ptr<Rosen::RSNode> GetMixedRenderSibling(
+        const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset);
+    bool GetMixedRenderChildInsertIndexAfterRSNode(
+        const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex);
+    void InsertPureRenderChildAt(const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index);
+    void SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children);
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
@@ -501,6 +536,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
+    void SetLayerMark(bool isLayer) override;
     int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
     void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) override;
@@ -600,9 +636,12 @@ public:
     std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
         const FrostedGlassParam& param, float dipScale) override;
 
+    void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) override;
+    void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) override;
+
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
-        
+
     void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) override;
 
     void UpdateEdgeLightFilter(const SizeF& frameSize) override;
@@ -615,6 +654,8 @@ public:
     void ResetEdgeLightFilter() override;
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
+    void OnDoubleSidedUpdate(bool doubleSided) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
@@ -713,6 +754,7 @@ protected:
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    void ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void SetChildBounds(const RectF& paintRect) const;
@@ -868,6 +910,9 @@ protected:
 
     void OnEmitterPropertyUpdate();
 
+    void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) override;
+    void ResetRadiusGradientBlur() override;
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -921,6 +966,8 @@ protected:
     std::shared_ptr<OverlayTextModifier> overlayTextModifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> materialInteractionEffectModifier_;
+
     std::shared_ptr<Rosen::ModifierNG::RSBoundsClipModifier> clipBoundModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> customClipToFrameModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSMaskModifier> clipMaskModifier_;
@@ -963,7 +1010,7 @@ protected:
     Rosen::Vector4f borderWidth_ = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     bool isTouchUpFinished_ = true;
 
-    bool useContentRectForRSFrame_;
+    bool useContentRectForRSFrame_ = false;
     bool adjustRSFrameByContentRect_ = false;
     bool isFocusBoxGlow_ = false;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
@@ -980,7 +1027,6 @@ protected:
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
     bool hasKeyFrameCache_ = false;
-    PipelineContext* pipeline_;
 
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
     friend class PropertyTransitionEffectTemplate;
@@ -992,8 +1038,16 @@ protected:
 private:
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode>& rsNode);
+    void InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling);
+    void RemoveMixedFrameChild(const RefPtr<UINode>& child);
+    void NotifyMixedListChanged();
+    std::shared_ptr<Rosen::RSNode> ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const;
+    std::vector<std::shared_ptr<Rosen::RSNode>> BuildMixedTargetRSNodes(FrameNode* frameNode);
+    void ReCreateRsNodeTreeByTargetList(const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+        std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap);
 
     uint32_t backgroundTaskId_ = 0;
+    std::unique_ptr<RosenMixedRenderChildList> mixedRenderChildList_;
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;

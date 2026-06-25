@@ -15,7 +15,7 @@
 function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
   getUINativeModule().loadNativeModule(componentName);
   let module = globalThis.requireNapi(abcName);
-  if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog') {
+  if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog' || componentName === 'DatePickerDialog') {
     module.exportViewDialog();
   } else {
     module.exportView();
@@ -225,6 +225,20 @@ if (globalThis.Marquee === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Refresh === undefined) {
+  globalThis.Refresh = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Refresh');
+      let module = globalThis.requireNapi('arkui.components.arkrefresh');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().refresh.create(params);
+    },
+    name: 'JSRefresh'
+  }
+}
+
+// @ts-ignore
 if (globalThis.Radio === undefined) {
   globalThis.Radio = {
     create: function(params) {
@@ -306,6 +320,33 @@ if (globalThis.TimePickerDialog === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.TextPicker === undefined) {
+  globalThis.TextPicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextPicker');
+      const module = globalThis.requireNapi('arkui.components.arktextpicker');
+      module.exportView();
+      getUINativeModule().textpicker.create(params);
+    },
+ 	name: 'JSTextPicker'
+  }
+}
+
+// @ts-ignore
+if (globalThis.TextPickerDialog === undefined) {
+  globalThis.TextPickerDialog = class {
+    static name = 'JSTextPickerDialog'
+    constructor() {}
+    static show(params) {
+      getUINativeModule().loadNativeModule('TextPickerDialog');
+      let module = globalThis.requireNapi('arkui.components.arktextpicker');
+      module.exportViewDialog();
+      getUINativeModule().textPickerDialog.show(params);
+    }
+  }
+}
+
+// @ts-ignore
 if (globalThis.DataPanel === undefined) {
   globalThis.DataPanel = {
     create: function(params) {
@@ -330,6 +371,20 @@ if (globalThis.SymbolGlyph === undefined) {
       getUINativeModule().symbolGlyph.create(params);
     },
     name: 'JSSymbolGlyph'
+  };
+}
+
+// @ts-ignore
+if (globalThis.SymbolSpan === undefined) {
+  globalThis.SymbolSpan = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('SymbolSpan');
+      let module = globalThis.requireNapi('arkui.components.arksymbolspan');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().symbolSpan.jsCreate(params);
+    },
+    name: 'JSSymbolSpan'
   };
 }
 
@@ -456,10 +511,71 @@ if (globalThis.Search === undefined) {
       getUINativeModule().loadNativeModule("Search");
       var module = globalThis.requireNapi('arkui.components.arksearch');
       module.exportView();
+      module.loadComponent();
       getUINativeModule().search.jsCreate(params);
     },
     name: 'JSSearch'
   };
+}
+
+// @ts-ignore
+if (globalThis.Badge === undefined) {
+  globalThis.Badge = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("Badge");
+      let module = globalThis.requireNapi('arkui.components.arkbadge');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().badge.create(params);
+    },
+    name: 'JSBadge'
+  };
+}
+
+// @ts-ignore
+if (globalThis.ImageSpan === undefined) {
+  globalThis.ImageSpan = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("ImageSpan");
+      var module = globalThis.requireNapi('arkui.components.arkimagespan');
+      module.exportView();
+      module.loadComponent();
+      if (!ViewStackProcessor.UsesNewPipeline()) {
+        return;
+      }
+      Image.createImageSpan(params);
+      getUINativeModule().imageSpan.create();
+    },
+    name: 'JSImageSpan'
+  };
+}
+
+// @ts-ignore
+if (globalThis.TextTimer === undefined) {
+  globalThis.TextTimer = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextTimer');
+      let module = globalThis.requireNapi('arkui.components.arktexttimer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().texttimer.create(params?.isCountDown, params?.count, params?.controller, params?.startTime);
+    },
+    name: 'JSTextTimer'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Progress === undefined) {
+  globalThis.Progress = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Progress');
+      let module = globalThis.requireNapi('arkui.components.arkprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().progress.create(value?.value, value?.total, value?.style, value?.type);
+    },
+    name: 'JSProgress'
+  }
 }
 
 // @ts-ignore
@@ -477,6 +593,20 @@ if (globalThis.TextClock === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Toggle === undefined) {
+  globalThis.Toggle = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule('Toggle');
+      let module = globalThis.requireNapi('arkui.components.arktoggle');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().toggle.create(params);
+    },
+    name: 'JSToggle'
+  };
+}
+
+// @ts-ignore
 if (globalThis.LazyColumnLayout === undefined) {
   globalThis.LazyColumnLayout = {
     create: function () {
@@ -487,4 +617,73 @@ if (globalThis.LazyColumnLayout === undefined) {
       getUINativeModule().lazyColumnLayout.create();
     }
   }
+}
+
+// @ts-ignore
+if (globalThis.LoadingProgress === undefined) {
+  globalThis.LoadingProgress = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('LoadingProgress');
+      let module = globalThis.requireNapi('arkui.components.arkloadingprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().loadingProgress.create(params);
+    },
+ 	name: 'JSLoadingProgress'
+  };
+}
+
+// @ts-ignore
+if (globalThis.ImageAnimator === undefined) {
+  globalThis.ImageAnimator = {
+    create: function () {
+      getUINativeModule().loadNativeModule('ImageAnimator');
+      let module = globalThis.requireNapi('arkui.components.arkimageanimator');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().imageAnimator.create();
+    },
+    name: 'JSImageAnimator'
+  }
+}
+
+// @ts-ignore
+if (globalThis.DatePicker === undefined) {
+  globalThis.DatePicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('DatePicker');
+      const module = globalThis.requireNapi('arkui.components.arkdatepicker');
+      module.exportView();
+      getUINativeModule().datePicker.create(params);
+    },
+    name: 'JSDatePicker'
+  }
+}
+
+// @ts-ignore
+if (globalThis.DatePickerDialog === undefined) {
+  globalThis.DatePickerDialog = class {
+    static name = 'JSDatePickerDialog'
+    constructor() {}
+    static show(params) {
+      getUINativeModule().loadNativeModule('DatePickerDialog');
+      let module = globalThis.requireNapi('arkui.components.arkdatepicker');
+      module.exportViewDialog();
+      getUINativeModule().datePickerDialog.show(params);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.LazyVGridLayout === undefined) {
+  globalThis.LazyVGridLayout = {
+    create: function () {
+      getUINativeModule().loadNativeModule('LazyVGridLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazygridlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyVGridLayout.create();
+    },
+    name: 'JSLazyVGridLayout'
+  };
 }

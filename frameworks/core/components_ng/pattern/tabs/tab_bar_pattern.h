@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
@@ -824,6 +825,8 @@ private:
     void UpdateSubTabBarImageIndicator();
     void NotifyTabBarItemsChange();
     int32_t GetSelectChildIndex(const Offset& offset);
+
+    void CheckFloatingStyle(int32_t index);
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;

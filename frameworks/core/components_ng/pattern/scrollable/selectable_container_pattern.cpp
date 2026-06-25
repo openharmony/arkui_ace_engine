@@ -15,9 +15,14 @@
 
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
+#include <cmath>
+
+#include "core/common/back_press_handler_manager.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
+#include "core/event/pointer_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +30,41 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr int32_t TWO_FINGER_COUNT = 2;
+constexpr Dimension TWO_FINGER_SELECT_MAX_DISTANCE = 210.0_vp;
+
+bool IsTwoFingerSelectAllowed(const std::shared_ptr<BaseGestureEvent>& event)
+{
+    CHECK_NULL_RETURN(event, false);
+    const auto& fingers = event->GetFingerList();
+    if (static_cast<int32_t>(fingers.size()) != TWO_FINGER_COUNT) {
+        return false;
+    }
+    auto iter = fingers.begin();
+    auto& finger0 = *iter;
+    auto& finger1 = *(++iter);
+    auto dx = finger0.globalLocation_.GetX() - finger1.globalLocation_.GetX();
+    auto dy = finger0.globalLocation_.GetY() - finger1.globalLocation_.GetY();
+    auto distance = std::sqrt(dx * dx + dy * dy);
+    if (GreatNotEqual(distance, TWO_FINGER_SELECT_MAX_DISTANCE.ConvertToPx())) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+            "TwoFingerSelect reject: distance=%{public}.1f, max=%{public}.1f",
+            distance, TWO_FINGER_SELECT_MAX_DISTANCE.ConvertToPx());
+        return false;
+    }
+    auto rawPointerEvent = event->GetRawInputEvent();
+    if (rawPointerEvent) {
+        int64_t timeDiffMs = GetPointerDownTimeDiffMs(rawPointerEvent, finger0.fingerId_, finger1.fingerId_);
+        const static int64_t twoFingerSelectMaxTimeDiffMs = 80;
+        if (timeDiffMs >= 0 && timeDiffMs > twoFingerSelectMaxTimeDiffMs) {
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+                "TwoFingerSelect reject: timeDiff=%{public}" PRId64 "ms, max=%{public}" PRId64 "ms", timeDiffMs,
+                twoFingerSelectMaxTimeDiffMs);
+            return false;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "TwoFingerSelect allowed: distance=%{public}.1f", distance);
+    return true;
+}
 
 PointF ConvertGlobalToHostLocalPoint(
     SelectableContainerPattern* pattern, const std::shared_ptr<BaseGestureEvent>& event)
@@ -62,6 +102,92 @@ void SelectableContainerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, c
     json->PutExtAttr("enableEditMode", enableEditMode_ ? "true" : "false", filter);
 }
 
+void SelectableContainerPattern::OnDetachFromMainTree()
+{
+    ScrollablePattern::OnDetachFromMainTree();
+    RemoveBackPressCallback();
+}
+
+void SelectableContainerPattern::OnEnableEditModeChanged(bool)
+{
+    UpdateBackPressCallback();
+}
+
+void SelectableContainerPattern::OnEditModeOptionsChanged()
+{
+    UpdateBackPressCallback();
+}
+
+bool SelectableContainerPattern::NeedBackPressHandler() const
+{
+    return GetEnableEditMode();
+}
+
+bool SelectableContainerPattern::HandleBackPress()
+{
+    return ExitSwipeSelectModeOnBackPressed();
+}
+
+void SelectableContainerPattern::RemoveBackPressCallback()
+{
+    if (!hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    if (!pipeline || !host) {
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(AceType::WeakClaim(AceType::RawPtr(host)));
+    hasBackPressHandlerRegistered_ = false;
+}
+
+void SelectableContainerPattern::UpdateBackPressCallback()
+{
+    bool needRegister = NeedBackPressHandler();
+    if (needRegister == hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(host);
+    auto weakHost = AceType::WeakClaim(AceType::RawPtr(host));
+    if (!needRegister) {
+        pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(weakHost);
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    auto weak = AceType::WeakClaim(this);
+    pipeline->GetBackPressHandlerManager()->AddBackPressHandler(weakHost, [weak]() -> bool {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        pattern->hasBackPressHandlerRegistered_ = false;
+        return pattern->HandleBackPress();
+    });
+    hasBackPressHandlerRegistered_ = true;
+}
+
+bool SelectableContainerPattern::ExitSwipeSelectModeOnBackPressed()
+{
+    if (!GetEnableEditMode()) {
+        return false;
+    }
+    HandleSwipeSelectEnd();
+    SetEnableEditMode(false);
+    if (!GetEnableEditMode()) {
+        RemoveEditModeFromItems();
+    }
+    if (!GetEnableEditMode() && !ShouldEnableTwoFingerSelect() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+    UpdateBackPressCallback();
+    return true;
+}
+
 void SelectableContainerPattern::UninitMouseEvent()
 {
     if (!boxSelectPanEvent_) {
@@ -76,6 +202,9 @@ void SelectableContainerPattern::UninitMouseEvent()
     ClearMultiSelect();
     ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
+    if (!swipeSelectPanEvent_) {
+        gestureHub->SetOnGestureJudgeNativeBegin(nullptr);
+    }
 }
 
 void SelectableContainerPattern::InitMouseEvent()
@@ -449,6 +578,8 @@ void SelectableContainerPattern::SetEnableEditMode(bool enable)
     bool changed = (enableEditMode_ != enable);
     enableEditMode_ = enable;
     if (changed) {
+        editModeChanged_ = true;
+        OnEnableEditModeChanged(enable);
         FireEnableEditModeChangeEvent(enable);
     }
 }
@@ -472,6 +603,8 @@ void SelectableContainerPattern::TryEnterEditModeForSwipeSelect()
         return;
     }
     enableEditMode_ = true;
+    editModeChanged_ = true;
+    OnEnableEditModeChanged(true);
     if (IsDefaultMultiSelectStyleEnabled()) {
         ApplyEditModeToVisibleItems();
     }
@@ -486,25 +619,28 @@ GestureJudgeResult SelectableContainerPattern::JudgeSwipeSelectGesture(
         gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON && isMouseEventInit_) {
         return GestureJudgeResult::CONTINUE;
     }
+    if (gestureInfo->GetRecognizerType() == GestureTypeName::PAN_GESTURE &&
+        gestureInfo->GetType() != GestureTypeName::BOXSELECT &&
+        gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
+        if (!GetEnableEditMode()) {
+            return editModeOptions_.enableFingerMultiSelect && IsTwoFingerSelectAllowed(event) ?
+                GestureJudgeResult::REJECT: GestureJudgeResult::CONTINUE;
+        }
+        if (NeedJudgeWithHotZone()) {
+            return IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(this, event)) ?
+                GestureJudgeResult::REJECT : GestureJudgeResult::CONTINUE;
+        }
+    }
     if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
         gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
         if (!GetEnableEditMode()) {
-            auto fingerCount = static_cast<int32_t>(event->GetFingerList().size());
-            return fingerCount == TWO_FINGER_COUNT ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
+            return IsTwoFingerSelectAllowed(event) ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
         }
         if (NeedJudgeWithHotZone()) {
             return IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(this, event)) ?
                 GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
         }
         return GestureJudgeResult::CONTINUE;
-    }
-    if (NeedJudgeWithHotZone()) {
-        if (gestureInfo->GetRecognizerType() == GestureTypeName::PAN_GESTURE &&
-            gestureInfo->GetType() != GestureTypeName::BOXSELECT &&
-            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
-            return IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(this, event)) ?
-                GestureJudgeResult::REJECT : GestureJudgeResult::CONTINUE;
-        }
     }
     return GestureJudgeResult::CONTINUE;
 }
@@ -577,6 +713,8 @@ void SelectableContainerPattern::UninitSwipeSelectEvent()
                 }
                 return GestureJudgeResult::CONTINUE;
             });
+    } else {
+        gestureHub->SetOnGestureJudgeNativeBegin(nullptr);
     }
 }
 
@@ -622,11 +760,30 @@ void SelectableContainerPattern::HandleSwipeSelectUpdate(const GestureEvent& inf
         return;
     }
 
+    auto localPoint = info.GetLocalLocation();
     auto globalPoint = info.GetGlobalLocation();
+    const auto& fingers = info.GetFingerList();
+    if (fingers.size() >= TWO_FINGER_COUNT) {
+        auto iter = fingers.begin();
+        auto& f0 = *iter;
+        auto& f1 = *(++iter);
+        auto midLocalX = (f0.localLocation_.GetX() + f1.localLocation_.GetX()) / 2.0;
+        auto midLocalY = (f0.localLocation_.GetY() + f1.localLocation_.GetY()) / 2.0;
+        auto midGlobalX = (f0.globalLocation_.GetX() + f1.globalLocation_.GetX()) / 2.0;
+        auto midGlobalY = (f0.globalLocation_.GetY() + f1.globalLocation_.GetY()) / 2.0;
+        localPoint = Offset(midLocalX, midLocalY);
+        globalPoint = Offset(midGlobalX, midGlobalY);
+    }
+
     SwipeSelectAutoScroll(PointF(static_cast<float>(globalPoint.GetX()), static_cast<float>(globalPoint.GetY())));
 
-    auto localPoint = info.GetLocalLocation();
-    auto newStateKey = GetSwipeSelectStateKeyAtPosition(localPoint.GetX(), localPoint.GetY());
+    auto host = GetHost();
+    if (host) {
+        auto width = static_cast<float>(host->GetGeometryNode()->GetFrameRect().Width());
+        lastSwipeSelectLocalX_ = std::clamp(static_cast<float>(localPoint.GetX()), 0.0f, width);
+    }
+    auto newStateKey = GetSwipeSelectStateKeyNearPosition(
+        static_cast<float>(localPoint.GetX()), static_cast<float>(localPoint.GetY()));
     if (!newStateKey.IsValid() || newStateKey == swipeCurrentStateKey_) {
         return;
     }
@@ -655,6 +812,9 @@ void SelectableContainerPattern::HandleSwipeSelectEnd()
     swipeOriginalStates_.clear();
     swipeStartStateKey_ = {};
     swipeCurrentStateKey_ = {};
+    swipePrevRangeStartKey_ = {};
+    swipePrevRangeEndKey_ = {};
+    lastSwipeSelectLocalX_ = -1.0f;
 }
 
 void SelectableContainerPattern::HandleSwipeSelectCancel()
@@ -668,15 +828,14 @@ void SelectableContainerPattern::HandleSwipeSelectCancel()
     swipeOriginalStates_.clear();
     swipeStartStateKey_ = {};
     swipeCurrentStateKey_ = {};
+    swipePrevRangeStartKey_ = {};
+    swipePrevRangeEndKey_ = {};
+    lastSwipeSelectLocalX_ = -1.0f;
 }
 
-void SelectableContainerPattern::UpdateSwipeSelection()
+void SelectableContainerPattern::RecordSwipeOriginalStatesInRange(
+    const std::vector<SwipeSelectStateKey>& stateKeysInRange)
 {
-    auto rangeStartKey = swipeCurrentStateKey_ < swipeStartStateKey_ ? swipeCurrentStateKey_ : swipeStartStateKey_;
-    auto rangeEndKey = swipeStartStateKey_ < swipeCurrentStateKey_ ? swipeCurrentStateKey_ : swipeStartStateKey_;
-    bool isSelected = (swipeSelectState_ == SwipeSelectState::SELECTING);
-    std::vector<SwipeSelectStateKey> stateKeysInRange;
-    BuildSwipeSelectStateKeysInRange(swipeStartStateKey_, swipeCurrentStateKey_, stateKeysInRange);
     for (const auto& stateKey : stateKeysInRange) {
         if (swipeOriginalStates_.find(stateKey) == swipeOriginalStates_.end()) {
             auto frameNode = GetSelectableItemAtStateKey(stateKey);
@@ -689,15 +848,61 @@ void SelectableContainerPattern::UpdateSwipeSelection()
             }
             swipeOriginalStates_[stateKey] = itemPattern ? itemPattern->IsSelected() : false;
         }
+    }
+}
+
+void SelectableContainerPattern::ApplySwipeSelectionForFirstRange(
+    const std::vector<SwipeSelectStateKey>& stateKeysInRange, bool isSelected)
+{
+    for (const auto& stateKey : stateKeysInRange) {
         if (swipeOriginalStates_.find(stateKey) != swipeOriginalStates_.end()) {
             MarkSwipeItemSelectedByStateKey(stateKey, isSelected);
         }
     }
+}
+
+void SelectableContainerPattern::ApplySwipeSelectionForDeltaRange(
+    const SwipeSelectStateKey& rangeStartKey, const SwipeSelectStateKey& rangeEndKey, bool isSelected)
+{
+    std::vector<SwipeSelectStateKey> newKeysInRange;
+    BuildSwipeSelectStateKeysInRange(swipeStartStateKey_, swipeCurrentStateKey_, newKeysInRange);
+    for (const auto& stateKey : newKeysInRange) {
+        if (swipeOriginalStates_.find(stateKey) != swipeOriginalStates_.end() &&
+            (stateKey < swipePrevRangeStartKey_ || swipePrevRangeEndKey_ < stateKey)) {
+            MarkSwipeItemSelectedByStateKey(stateKey, isSelected);
+        }
+    }
+
     for (const auto& [stateKey, wasSelected] : swipeOriginalStates_) {
-        if (stateKey < rangeStartKey || rangeEndKey < stateKey) {
+        if ((stateKey < rangeStartKey || rangeEndKey < stateKey) &&
+            !(stateKey < swipePrevRangeStartKey_ || swipePrevRangeEndKey_ < stateKey)) {
             MarkSwipeItemSelectedByStateKey(stateKey, wasSelected);
         }
     }
+}
+
+void SelectableContainerPattern::UpdateSwipeSelection()
+{
+    auto rangeStartKey = swipeCurrentStateKey_ < swipeStartStateKey_ ? swipeCurrentStateKey_ : swipeStartStateKey_;
+    auto rangeEndKey = swipeStartStateKey_ < swipeCurrentStateKey_ ? swipeCurrentStateKey_ : swipeStartStateKey_;
+    if (swipePrevRangeStartKey_.IsValid() && swipePrevRangeEndKey_.IsValid() &&
+        rangeStartKey == swipePrevRangeStartKey_ && rangeEndKey == swipePrevRangeEndKey_) {
+        return;
+    }
+    bool isSelected = (swipeSelectState_ == SwipeSelectState::SELECTING);
+
+    std::vector<SwipeSelectStateKey> stateKeysInRange;
+    BuildSwipeSelectStateKeysInRange(swipeStartStateKey_, swipeCurrentStateKey_, stateKeysInRange);
+    RecordSwipeOriginalStatesInRange(stateKeysInRange);
+
+    if (!swipePrevRangeStartKey_.IsValid() || !swipePrevRangeEndKey_.IsValid()) {
+        ApplySwipeSelectionForFirstRange(stateKeysInRange, isSelected);
+    } else {
+        ApplySwipeSelectionForDeltaRange(rangeStartKey, rangeEndKey, isSelected);
+    }
+
+    swipePrevRangeStartKey_ = rangeStartKey;
+    swipePrevRangeEndKey_ = rangeEndKey;
 }
 
 void SelectableContainerPattern::SwipeSelectAutoScroll(const PointF& globalPoint)
@@ -710,12 +915,14 @@ void SelectableContainerPattern::SwipeSelectAutoScroll(const PointF& globalPoint
     if (!GetScrollable() || !IsScrollable()) {
         return;
     }
-    SetHotZoneScrollCallback([weak = WeakClaim(this)]() {
+    float capturedOffsetPct = offsetPct;
+    SetHotZoneScrollCallback([weak = WeakClaim(this), capturedOffsetPct]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->swipeSelectState_ == SwipeSelectState::INACTIVE) {
             return;
         }
+        pattern->UpdateSwipeSelectStateKeyForAutoScroll(capturedOffsetPct);
         pattern->UpdateSwipeSelection();
     });
     HotZoneScroll(offsetPct);
@@ -725,6 +932,34 @@ void SelectableContainerPattern::StopSwipeSelectAutoScroll()
 {
     StopHotzoneScroll();
     SetHotZoneScrollCallback(nullptr);
+}
+
+void SelectableContainerPattern::UpdateSwipeSelectStateKeyForAutoScroll(float offsetPct)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    float edgeX = GreatOrEqual(lastSwipeSelectLocalX_, 0.0f)
+        ? lastSwipeSelectLocalX_ : frameRect.Width() / 2.0f;
+    float edgeY = GreatNotEqual(offsetPct, 0.0f)
+        ? SWIPE_SELECT_EDGE_MARGIN_PX : frameRect.Height() - SWIPE_SELECT_EDGE_MARGIN_PX;
+    auto newStateKey = GetSwipeSelectStateKeyNearPosition(edgeX, edgeY);
+    if (!newStateKey.IsValid() || newStateKey == swipeCurrentStateKey_) {
+        return;
+    }
+    swipeCurrentStateKey_ = newStateKey;
+    if (swipeOriginalStates_.find(newStateKey) == swipeOriginalStates_.end()) {
+        auto frameNode = GetSelectableItemAtStateKey(newStateKey);
+        if (frameNode) {
+            auto itemPattern = frameNode->GetPattern<SelectableItemPattern>();
+            if (itemPattern && !itemPattern->Selectable()) {
+                return;
+            }
+            swipeOriginalStates_[newStateKey] = itemPattern ? itemPattern->IsSelected() : false;
+        }
+    }
 }
 
 void SelectableContainerPattern::ApplyEditModeToVisibleItems()

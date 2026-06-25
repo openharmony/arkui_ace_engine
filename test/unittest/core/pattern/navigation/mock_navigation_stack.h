@@ -20,6 +20,7 @@
 
 #define protected public
 #define private public
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -65,6 +66,9 @@ public:
     int32_t mode = 0; // 0 for standard and 1 for dialog
     bool isForceSet = false;
     bool isReplaced = false;
+    bool autoCleaned = false;
+    bool canRecovery = true;
+    std::string autoCleanedState;
 
 private:
     std::function<void()> onPop_;
@@ -222,6 +226,13 @@ public:
     }
 
     int32_t GetRecoveredDestinationMode(int32_t index);
+    bool IsAutoCleaned(int32_t index) const override;
+    bool GetAutoCleanedCanRecovery(int32_t index) const override;
+    void ClearAutoCleanedState(int32_t index) override;
+    std::string GetAutoCleanedState(int32_t index) const override;
+    void SaveStateToJsCallback(
+        int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state) override;
+    void MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery = true) override;
     uint64_t GetNavDestinationIdInt(int32_t index);
     bool GetIsForceSet(int32_t index);
     void ResetIsForceSetFlag(int32_t index);

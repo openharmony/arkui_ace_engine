@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -26,6 +27,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
@@ -38,6 +40,16 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+ListItemPattern::ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder)
+{}
+
+ListItemPattern::ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
+    : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
+{}
+
+ListItemPattern::~ListItemPattern() = default;
+
 namespace {
 constexpr float SWIPER_TH = 0.25f;
 constexpr float NEW_SWIPER_TH = 0.5f;
@@ -50,8 +62,6 @@ constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
-
-ListItemPattern::~ListItemPattern() = default;
 
 void ListItemPattern::BeforeCreateLayoutWrapper()
 {
@@ -156,7 +166,7 @@ bool ListItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (listItemStyle_ != V2::ListItemStyle::CARD ||
-        host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     auto layoutProperty = host->GetLayoutProperty<ListItemLayoutProperty>();
@@ -1729,4 +1739,5 @@ bool ListItemPattern::FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, Fo
     }
     return isFindTailOrHead;
 }
+
 } // namespace OHOS::Ace::NG

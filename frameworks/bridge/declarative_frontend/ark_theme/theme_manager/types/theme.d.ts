@@ -66,6 +66,9 @@ declare interface Colors {
   interactiveActive: ResourceColor;
   interactiveSelect: ResourceColor;
   interactiveClick: ResourceColor;
+  primary?: ResourceColor;
+  onPrimary?: ResourceColor;
+  container?: ResourceColor;
 }
 
 // interface_sdk-js/api/@ohos.arkui.theme.d.ts

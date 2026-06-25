@@ -207,7 +207,8 @@ public:
     // scrollSnap
     std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f,
         SnapDirection snapDirection = SnapDirection::NONE) override;
-    std::optional<float> CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection);
+    std::optional<float> CalcPredictNextSnapOffset(
+        float delta, SnapDirection snapDirection);
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets(const RefPtr<FrameNode>& host);
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, const RefPtr<FrameNode>& host);
@@ -473,9 +474,9 @@ private:
     double prevOffset_ = 0.0;
     double scrollableDistance_ = 0.0;
     float viewPortLength_ = 0.0f;
+    bool isAccessibilityFocusScroll_ = false;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
-    bool isAccessibilityFocusScroll_ = false;
     SizeF viewPort_;
     SizeF viewSize_;
     SizeF viewPortExtent_;

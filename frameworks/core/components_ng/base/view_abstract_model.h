@@ -31,6 +31,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/depth_option.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -603,6 +604,7 @@ public:
     virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
     // edgelight
     virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
+    virtual void SetDoubleSided(bool doubleSided) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

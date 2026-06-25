@@ -26,6 +26,7 @@ ace_unittest("ressched_report_test") {
   ]
 
   sources = [
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/ressched/ressched_click_optimizer.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",

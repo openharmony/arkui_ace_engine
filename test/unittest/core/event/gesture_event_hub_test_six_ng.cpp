@@ -417,7 +417,7 @@ HWTEST_F(GestureEventHubTestSixNg, PackInnerRecognizerParallelTest001, TestSize.
      *               the returned recognizer is innerParallelRecognizer_.
      */
     Offset offset;
-    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID);
     EXPECT_NE(gestureEventHub->innerParallelRecognizer_, nullptr);
     EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
     EXPECT_EQ(result, gestureEventHub->innerParallelRecognizer_);
@@ -453,7 +453,7 @@ HWTEST_F(GestureEventHubTestSixNg, PackInnerRecognizerParallelTest002, TestSize.
      *               the returned recognizer is innerExclusiveRecognizer_.
      */
     Offset offset;
-    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID);
     EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
     EXPECT_EQ(gestureEventHub->innerParallelRecognizer_, nullptr);
     EXPECT_EQ(result, gestureEventHub->innerExclusiveRecognizer_);
@@ -483,7 +483,7 @@ HWTEST_F(GestureEventHubTestSixNg, CleanInnerRecognizerClearsParallelTest001, Te
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers { clickRecognizer, coexistPan };
 
     Offset offset;
-    gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID);
     EXPECT_NE(gestureEventHub->innerParallelRecognizer_, nullptr);
     EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
 

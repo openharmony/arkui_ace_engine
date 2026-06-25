@@ -405,4 +405,120 @@ HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest013, TestSize.Level1)
     EXPECT_EQ(nodeId, 9999999999L);
     EXPECT_TRUE(listActions);
 }
+
+/**
+ * @tc.name: AccessibilityDfxTest014
+ * @tc.desc: DumpProcessInjectActionParameters with --SecurityClickAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest014, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--inject-action", "500", "--SecurityClickAction"};
+    int64_t nodeId = 0;
+    int32_t resultVal = 0;
+    InjectActionType actionType{};
+
+    bool ret = AccessibilityHidumper::DumpProcessInjectActionParameters(
+        params, nodeId, resultVal, actionType);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(nodeId, 500);
+    EXPECT_EQ(actionType, InjectActionType::SECURITY_CLICK_ACTION);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest015
+ * @tc.desc: DumpProcessInjectActionParameters with --CustomActionTest missing value
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest015, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--inject-action", "500", "--CustomActionTest"};
+    int64_t nodeId = 0;
+    int32_t resultVal = 0;
+    InjectActionType actionType{};
+
+    bool ret = AccessibilityHidumper::DumpProcessInjectActionParameters(
+        params, nodeId, resultVal, actionType);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest016
+ * @tc.desc: DumpProcessInjectActionParameters with no recognized flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest016, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--unknown-flag", "someValue"};
+    int64_t nodeId = 0;
+    int32_t resultVal = 0;
+    InjectActionType actionType{};
+
+    bool ret = AccessibilityHidumper::DumpProcessInjectActionParameters(
+        params, nodeId, resultVal, actionType);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest017
+ * @tc.desc: DumpProcessCustomActionParameters with --execute and action name
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest017, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--execute", "myAction"};
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    bool ret = AccessibilityHidumper::DumpProcessCustomActionParameters(
+        params, nodeId, actionName, listActions);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(nodeId, 100);
+    EXPECT_EQ(actionName, "myAction");
+    EXPECT_FALSE(listActions);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest018
+ * @tc.desc: DumpProcessCustomActionParameters with --execute but missing action name
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest018, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--execute"};
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    bool ret = AccessibilityHidumper::DumpProcessCustomActionParameters(
+        params, nodeId, actionName, listActions);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityDfxTest019
+ * @tc.desc: DumpProcessCustomActionParameters with --list and --execute together
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest019, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--list", "--execute", "myAction"};
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    bool ret = AccessibilityHidumper::DumpProcessCustomActionParameters(
+        params, nodeId, actionName, listActions);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(nodeId, 100);
+    EXPECT_EQ(actionName, "myAction");
+    EXPECT_TRUE(listActions);
+}
 } // namespace OHOS::Ace::NG

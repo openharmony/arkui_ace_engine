@@ -18,7 +18,6 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
 #include "core/components_ng/base/simplified_inspector.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 

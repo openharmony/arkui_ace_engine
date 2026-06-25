@@ -15,17 +15,20 @@
 
 #include <gmock/gmock.h>
 
+#include "core/common/thp_extra_manager.h"
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/clipboard/clipboard.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/ressched/taihang_optimizer.h"
+#include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -34,6 +37,7 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
@@ -58,6 +62,7 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline/container_window_manager.h"
+#include "base/resource/data_provider_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/image/image_cache.h"
@@ -295,10 +300,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
 
 void PipelineContext::GetComponentOverlayInspector(
     std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
-    ParamConfig config, bool isInSubWindow) const {}
+    ParamConfig config, bool isInSubWindow, double parentFinalOpacity) const {}
 
 void PipelineContext::GetOverlayInspector(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const {}
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config,
+    double parentFinalOpacity) const {}
 
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
@@ -405,6 +411,7 @@ void PipelineContext::SetupRootElement()
 {
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode_);
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->SetActive(true);
@@ -414,13 +421,17 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
+    if (rootFocusHub) {
+        rootFocusHub->SetFocusType(FocusType::SCOPE);
+        rootFocusHub->SetFocusable(true);
+    }
     rootNode_->AttachToMainTree(false, this);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    CHECK_NULL_VOID(stageNode);
     rootNode_->AddChild(stageNode);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    CHECK_NULL_VOID(stageManager_);
     auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
         auto frontend = weakFrontend.Upgrade();
         CHECK_NULL_RETURN(frontend, "");
@@ -557,9 +568,14 @@ void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
-void PipelineContext::OnSurfaceDensityChanged(double density) {}
-
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
+
+int32_t PipelineContext::RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnregisterTransformHintChangedCallback(int32_t callbackId) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
@@ -703,6 +719,13 @@ void PipelineContext::OriginalAvoidanceLogic(
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
 void PipelineContext::OnRawKeyboardChangedCallback() {}
+
+int32_t PipelineContext::RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnRegisterRawKeyboardChangedCallback(int32_t callbackId) {}
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
@@ -1418,6 +1441,9 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 
 void PipelineContext::InitManagers()
 {
+    memoryMgr_ = MakeRefPtr<MemoryManager>();
+    avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
+    toolbarManager_ = MakeRefPtr<ToolbarManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
@@ -1469,6 +1495,11 @@ void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     return nullptr;
+}
+
+RefPtr<PlatformResRegister> PipelineBase::GetPlatformResRegister() const
+{
+    return platformResRegister_;
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
@@ -1767,6 +1798,11 @@ float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
     return 1.0f;
 }
 
+std::optional<TextDirection> NG::PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
+}
+
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
@@ -1953,7 +1989,7 @@ bool WindowManager::GetPageViewportConfig(
 namespace OHOS::Ace::NG {
 bool PipelineContext::GetIsFocusActive() const
 {
-    return false;
+    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
 }
 
 RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
@@ -1965,15 +2001,15 @@ void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
 }
 
-void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
+ACE_WEAK_SYM void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
 {
 }
 
-void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
+ACE_WEAK_SYM void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
 {
 }
 
-ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
+ACE_WEAK_SYM ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
 {
     if (!node) {
         return;
@@ -1981,7 +2017,97 @@ ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhas
     active_ = true;
 }
 
-ScopedEnvConsumer::~ScopedEnvConsumer()
+ACE_WEAK_SYM ScopedEnvConsumer::~ScopedEnvConsumer()
 {
 }
+
+bool PipelineContext::GetIsRequestVsync()
+{
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestVsync();
+}
+
+RectF PipelineContext::GetRootRect()
+{
+    return {};
+}
+
+void PipelineContext::SetAreaChangeNodeMinDepth(int32_t depth) {}
+
+void PipelineContext::SetIsDisappearChangeNodeMinDepth(int32_t depth) {}
+
+int32_t PipelineContext::RegisterSurfaceChangedCallback(
+    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+{
+    static int32_t nextId = 0;
+    int32_t id = ++nextId;
+    surfaceChangedCallbackMap_.emplace(id, std::move(callback));
+    return id;
+}
+
+void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
+{
+    surfaceChangedCallbackMap_.erase(callbackId);
+}
+
+void PipelineContext::RemoveGestureTask(const DelayedTask& task) {}
+
+void PipelineContext::UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+{
+    surfacePositionChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId) {}
+
+int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId) {}
+
+int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId) {}
+
+int32_t PipelineContext::RegisterSurfacePositionChangedCallback(std::function<void(int, int)>&& callback)
+{
+    static int32_t nextPosId = 0;
+    int32_t id = ++nextPosId;
+    surfacePositionChangedCallbackMap_.emplace(id, std::move(callback));
+    return id;
+}
+
+int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& callback)
+{
+    return 0;
+}
+
+void PipelineContext::OnSurfaceDensityChanged(double density) {}
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void PipelineBase::OnSurfaceDensityChanged(double density) {}
+
+const RefPtr<UIDisplaySyncManager>& PipelineBase::GetOrCreateUIDisplaySyncManager()
+{
+    static RefPtr<UIDisplaySyncManager> manager;
+    return manager;
+}
+
+int32_t PipelineBase::RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+{
+    return 0;
+}
+
+void PipelineBase::UnregisterDensityChangedCallback(int) {}
+
+} // namespace OHOS::Ace

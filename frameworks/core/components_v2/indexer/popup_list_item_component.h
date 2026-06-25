@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/box/box_component.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/component_group.h"

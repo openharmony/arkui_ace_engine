@@ -389,12 +389,12 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     jsonEffect->Put("policy", POLICY[static_cast<int>(effectOption.policy)]);
     jsonEffect->Put("type", BLUR_TYPE[static_cast<int>(effectOption.blurType)]);
     jsonEffect->Put("inactiveColor", effectOption.inactiveColor.ColorToString().c_str());
-    auto grayscale = "[0,0]";
+    std::string grayscale = "[0,0]";
     if (effectOption.blurOption.grayscale.size() > 1) {
         grayscale = ("[" + std::to_string(effectOption.blurOption.grayscale[0]) + "," +
             std::to_string(effectOption.blurOption.grayscale[1]) + "]").c_str();
     }
-    jsonEffect->Put("blurOption", grayscale);
+    jsonEffect->Put("blurOption", grayscale.c_str());
     return jsonEffect;
 }
 } // namespace OHOS::Ace::NG

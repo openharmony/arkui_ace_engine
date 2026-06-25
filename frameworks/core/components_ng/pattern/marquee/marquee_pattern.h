@@ -56,7 +56,11 @@ struct MarqueeAnimationParam {
     bool isFirst;
     int32_t delay;
     float start;
+    float zero;
     float end;
+    float secondStart = 0.0f;
+    float secondZero = 0.0f;
+    float secondEnd = 0.0f;
     int32_t playCount;
     int32_t totalDuration;
     int32_t firstDuration;
@@ -66,7 +70,8 @@ struct MarqueeAnimationParam {
     {
         std::stringstream ss;
         ss << "MarqueeAnimationParam(isFirst:" << isFirst << " delay:" << delay;
-        ss << " start:" << start << " end:" << end << " playCount:" << playCount;
+        ss << " start:" << start << " zero:" << zero << " end:" << end << " playCount:" << playCount;
+        ss << " secondStart:" << secondStart << " secondZero:" << secondZero << " secondEnd:" << secondEnd;
         ss << " firstDuration:" << firstDuration << " secondDuration:" << secondDuration <<
             " totalDuration:" << totalDuration << ")";
         std::string output = ss.str();
@@ -159,8 +164,7 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    float GetTextOffset();
-    float GetTextOffsetOnly();
+    float GetTextOffset(bool needResetOffset = false);
     std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
@@ -178,19 +182,20 @@ private:
     void PlayMarqueeDoubleAnimation(float startPosition, float secondStartPos, int32_t playCount,
         bool needSecondPlay, StartMarqueeAnimationType startType);
     std::shared_ptr<AnimationUtils::Animation> ActionDoubleAnimation(
-        AnimationOption& option, MarqueeAnimationParam& param, bool needSecondPlay);
+        AnimationOption& option, MarqueeAnimationParam& param);
     int32_t CalcAnimeDuration(float end, float start, double step);
-    void CalcDuration(MarqueeAnimationParam& param, double step, bool directionMoveLeft, bool needSecondPlay);
+    void CalcDuration(MarqueeAnimationParam& param, double step);
     float GetSecondChildStart();
+    float NormalizeDoubleAnimationPhase(float firstStart, float textTotalLen, bool directionMoveLeft);
+    std::pair<float, float> GetDoubleAnimationOffsetByPhase(
+        float phase, float textTotalLen, bool directionMoveLeft);
     void CalcAnimationStart(float& firstStart, float& secondStart, float textTotalLen,
         float start, float end, bool directionMoveLeft);
-    void BuildAnimationKeyframes(const MarqueeAnimationParam& param, bool needSecondPlay, bool isFirst);
-    void HandleAnimationFinish(int32_t animationId, bool isFirst, int32_t playCount, bool needSecondPlay);
-    std::function<void()> CreateAnimationFinishCallback(int32_t animationId, bool isFirst, int32_t playCount,
-        bool needSecondPlay);
+    void BuildAnimationKeyframes(const MarqueeAnimationParam& param);
+    void HandleAnimationFinish(int32_t animationId);
+    std::function<void()> CreateAnimationFinishCallback(int32_t animationId);
     MarqueeAnimationParam CreateAnimationParam(bool isFirst, float start, int32_t delay, float end, int32_t playCount);
-    void CreateAnimationOptions(MarqueeAnimationParam& firstParam, MarqueeAnimationParam& secondParam,
-        double step, bool directionMoveLeft, bool needSecondPlay, AnimationOption& option, AnimationOption& option2);
+    void CreateAnimationOptions(MarqueeAnimationParam& param, double step, AnimationOption& option);
 
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();

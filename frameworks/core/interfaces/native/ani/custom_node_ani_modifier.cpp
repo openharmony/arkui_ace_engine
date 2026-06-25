@@ -42,12 +42,15 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetOnPageHideFunc(std::move(customNodeInfo.onPageHideFunc));
     customNode->SetOnBackPressedFunc(std::move(customNodeInfo.onBackPressedFunc));
     customNode->SetPageTransitionFunc(std::move(customNodeInfo.pageTransitionFunc));
+
     customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
     if (customNodeInfo.onDumpInfoFunc) {
         customNode->SetOnDumpInfoFunc(std::move(customNodeInfo.onDumpInfoFunc));
     }
     customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
+    customNode->SetClearParentReusePoolFunc(std::move(customNodeInfo.clearParentReusePoolFunc));
+    customNode->SetMemOptGetter(std::move(customNodeInfo.getMemOptFunc));
     customNode->SetDestroyFunction(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetJSViewName(customNodeInfo.onGetJsViewNameFunc());
 

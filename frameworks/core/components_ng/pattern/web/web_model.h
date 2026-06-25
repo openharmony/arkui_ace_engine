@@ -61,6 +61,7 @@ public:
     virtual void SetOnAllSslErrorRequest(std::function<bool(const BaseEventInfo *info)> &&jsCallback) = 0;
     virtual void SetOnSslSelectCertRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetMediaPlayGestureAccess(bool isNeedGestureAccess) = 0;
+    virtual void SetEnableFullscreenVideoOverlay(bool enable) {};
     virtual void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback) = 0;
     virtual void SetOnErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -199,6 +200,8 @@ public:
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetWebNativeMessageConnectFunction(
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetOnFullScreenVideoOverlayEnterFunction(
         std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetWebNativeMessageDisconnectFunction(
         std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};

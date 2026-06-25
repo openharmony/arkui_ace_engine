@@ -140,9 +140,9 @@ float LazyColumnLayoutInfo::UpdatePosWithIter(
     return delta;
 }
 
-void LazyColumnLayoutInfo::UpdatePosMap()
+void LazyColumnLayoutInfo::UpdatePosMap(float prevBodyMainSize)
 {
-    float prevTotalMainSize_ = totalMainSize_;
+    float prevTotalMainSize_ = prevBodyMainSize;
     if (!Positive(estimateItemSize_)) {
         auto estimateItemSize = GetEstimateItemSize();
         if (Positive(estimateItemSize)) {
@@ -238,6 +238,8 @@ void LazyColumnLayoutInfo::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
     DumpLog::GetInstance().AddDesc("space:" + std::to_string(space_));
     DumpLog::GetInstance().AddDesc("totalMainSize:" + std::to_string(totalMainSize_));
 }
@@ -247,6 +249,8 @@ void LazyColumnLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
     json->Put("itemTotalCount", totalItemCount_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
     json->Put("space", space_);
     json->Put("totalMainSize", totalMainSize_);
 }

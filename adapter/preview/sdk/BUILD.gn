@@ -134,6 +134,7 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_layoutalgorithm:layoutalgorithm",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_lazylayoutalgorithm:lazylayoutalgorithm",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_theme_control",
       "$ace_root/frameworks/bridge/declarative_frontend:shape",
@@ -152,6 +153,7 @@ if (is_ohos_standard_system) {
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/layoutalgorithm.abc",
+      "${out_path}/arkui/ace_engine/lazylayoutalgorithm.abc",
       "${out_path}/arkui/ace_engine/modifier.abc",
       "${out_path}/arkui/ace_engine/node.abc",
       "${out_path}/arkui/ace_engine/shape.abc",
@@ -174,6 +176,7 @@ if (is_ohos_standard_system) {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:containerreader",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:dynamiclayout",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:lazydynamiclayout",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
@@ -199,12 +202,24 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:symbolglyph",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:richeditor",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:lazycolumnlayout",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkbadge",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkprogress",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktexttimer",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgauge",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkimagespan",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkdatapanel",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextclock",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkloadingprogress",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkpatternlock",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arksymbolspan",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkcounter",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkqrcode",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktoggle",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkimageanimator",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkdatepicker",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arklazygridlayout",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkrefresh",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextpicker",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -217,6 +232,7 @@ if (is_ohos_standard_system) {
     sources = [
       "${out_path}/arkui/ace_engine/containerreader.abc",
       "${out_path}/arkui/ace_engine/arkdynamiclayout.abc",
+      "${out_path}/arkui/ace_engine/arklazydynamiclayout.abc",
       "${out_path}/arkui/ace_engine/arkdatapanel.abc",
       "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkcounter.abc",
@@ -237,17 +253,29 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkmenuitem.abc",
       "${out_path}/arkui/ace_engine/arkmenuitemgroup.abc",
       "${out_path}/arkui/ace_engine/arksidebarcontainer.abc",
+      "${out_path}/arkui/ace_engine/arkbadge.abc",
       "${out_path}/arkui/ace_engine/arkmarquee.abc",
+      "${out_path}/arkui/ace_engine/arkprogress.abc",
+      "${out_path}/arkui/ace_engine/arktexttimer.abc",
       "${out_path}/arkui/ace_engine/arksearch.abc",
       "${out_path}/arkui/ace_engine/arkstepper.abc",
       "${out_path}/arkui/ace_engine/arkstepperitem.abc",
       "${out_path}/arkui/ace_engine/arkradio.abc",
       "${out_path}/arkui/ace_engine/arkslider.abc",
       "${out_path}/arkui/ace_engine/arktimepicker.abc",
+      "${out_path}/arkui/ace_engine/arkloadingprogress.abc",
       "${out_path}/arkui/ace_engine/arkalphabetindexer.abc",
+      "${out_path}/arkui/ace_engine/arksymbolspan.abc",
+      "${out_path}/arkui/ace_engine/arkimagespan.abc",
       "${out_path}/arkui/ace_engine/arksymbolglyph.abc",
       "${out_path}/arkui/ace_engine/arkricheditor.abc",
+      "${out_path}/arkui/ace_engine/arktextpicker.abc",
       "${out_path}/arkui/ace_engine/arklazycolumnlayout.abc",
+      "${out_path}/arkui/ace_engine/arktoggle.abc",
+      "${out_path}/arkui/ace_engine/arkimageanimator.abc",
+      "${out_path}/arkui/ace_engine/arkdatepicker.abc",
+      "${out_path}/arkui/ace_engine/arklazygridlayout.abc",
+      "${out_path}/arkui/ace_engine/arkrefresh.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [

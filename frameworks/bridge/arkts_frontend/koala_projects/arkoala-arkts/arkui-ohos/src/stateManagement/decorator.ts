@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { IReusePool } from './utils'
 import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
@@ -21,9 +21,31 @@ import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
+import window from '@ohos.window';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
-export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
+import { Direction } from '#generated'
 
+const SYSTEM_ENV_KEY_DIRECTION = 'system.arkui.layout.direction'
+const SYSTEM_ENV_KEY_FONT_SCALE = 'system.arkui.fontScale'
+
+export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
+export { ReusePoolOwnership } from '../component/customComponent';
+/**
+ * Framework-internal extension of IReusePool. Carries the methods the
+ * framework needs to push/pop instances and inspect ownership; not exposed
+ * to applications.
+ */
+export interface IGlobalReusePoolVariable extends IReusePool {
+    readonly ownership: ReusePoolOwnership;
+    readonly acceptedClasses: Array<string>;
+    readonly owner: IVariableOwner;
+ 
+    pop(classKey: string, reuseId?: string): Object | undefined;
+    push(classKey: string, instance: Object, reuseId?: string): boolean;
+    peek(classKey: string, reuseId?: string): Object | undefined;
+    acceptsComponent(classKey: string): boolean;
+    isActive(): boolean;
+}
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
 }
@@ -39,9 +61,27 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
+    __setReadonlyEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void;
+    __getAndClearReadonlyEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined;
+    __getReadonlyEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void>;
+    __setReadonlyEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void;
+    __getReadonlyEnvUnregisterFuncs__Internal(): Map<string, () => void>;
+    __clearAllEnvRegistrations__Internal(): void;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
     __getCanUpdateStateVars__Internal(): boolean;
+    __findCustomEnvValueByKey__Internal(internalId: int32): Any;
+    __registerCustomEnvUpdateCallback__Internal(callback: (key: int32, value: Any) => void): void;
+    __updateCustomEnvVarValue__Internal(internalId: int32, callback: (key: int32, value: Any) => void): void;
+    __getCustomEnvCallbackMap__Internal(): Map<int32, Set<(key: int32, value: Any) => void>>;
+    __removeCustomEnvCallback__Internal(internalId: int32, callback: (key: int32, value: Any) => void): boolean;
+    __findWritableSystemEnvValueByKey__Internal(key: string): Any;
+    __addSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): void;
+    __registerWritableEnvUpdateCallback__Internal(callback: (key: string, value: Any) => void): void;
+    __removeSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): boolean;
+    __getSystemEnvValueCallbacks__Internal(key: string): Set<(value: Any) => void> | undefined;
+    __getSystemEnvCallbacksMap__Internal(): Map<string, Set<(value: Any) => void>>;
+    __getHasRegisteredWritableEnvCallback__Internal(): boolean;
 }
 
 export interface IDecoratedVariable {
@@ -52,7 +92,9 @@ export interface IDecoratedVariable {
 export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
-
+export interface IDecoratedV1ResettableVariable<T> {
+    resetOnReuse(newValue: T): void;
+}
 export interface IDecoratedV2Variable<T> extends IDecoratedVariable {
     resetOnReuse(newValue: T): void;
 }
@@ -72,7 +114,7 @@ export interface IDecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 
-export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
 export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
@@ -95,30 +137,38 @@ export interface IPropDecoratedVariable<T>
 export interface IPropRefDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
-export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(newSource: IDecoratedV1Variable<T>): void;
+}
 
-export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
-export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(provideAliasName: string, watchFunc?: WatchFuncType, consumeOptions?: ConsumeOptions<T>): void;
+}
 
 export interface IObjectLinkDecoratedVariable<T>
     extends IDecoratedImmutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
 export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
 export interface ILocalStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface ILocalStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(): void;
+}
 
-export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(): void;
+}
 
 export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
-
-export interface ILocalStoragePropRefDecoratedVariable<T>
-    extends IDecoratedMutableVariable<T>,
-        IDecoratedV1Variable<T> {}
 
 export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 
@@ -174,6 +224,18 @@ export interface MakeMonitorOptions {
 }
 
 export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
+
+export class CustomEnvValueResult<T> {
+    isFind: boolean;
+    outResult?: T;
+
+    constructor(isFind: boolean = false, outResult?: T) {
+        this.isFind = isFind;
+        this.outResult = outResult;
+    }
+}
+
+export interface ICustomEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
 
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
@@ -279,11 +341,18 @@ export interface IStateMgmtFactory {
     makeMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
     makeEnv<T>(
         owningView: IVariableOwner,
-        envValue: string,
+        envValue: string | SystemEnvKey<T>,
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
     makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
+    makeGlobalReusePool(ownership: ReusePoolOwnership, acceptedClasses: Class[], owner: IVariableOwner): IGlobalReusePoolVariable;
+    makeCustomEnv<T>(
+        owningView: IVariableOwner,
+        envKey: CustomEnvKey<T>,
+        varName: string,
+        defaultValue: T
+    ): ICustomEnvDecoratedVariable<T>;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -331,3 +400,57 @@ export interface IMonitorValue<T> {
 export type MonitorValueCallback = () => Any;
 export type MonitorCallback = (m: IMonitor) => void;
 export type ComputeCallback<T> = () => T;
+ 
+export class SystemEnvKey<T> {
+    key: string = '';
+    constructor(key: string) {
+        this.key = key;
+    }
+}
+ 
+export class WritableSystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 	 
+export class ReadonlySystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 
+export class ReadonlyEnvKey {
+    static readonly WINDOW_IS_FOCUSED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.focused');
+    static readonly WINDOW_DISPLAY_ID: ReadonlySystemEnvKey<long> = new ReadonlySystemEnvKey<long>('system.window.displayid');
+    static readonly WINDOW_SYSTEM_DENSITY: ReadonlySystemEnvKey<double> = new ReadonlySystemEnvKey<double>('system.window.density.system');
+    static readonly WINDOW_IS_HIGHLIGHTED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.highlighted');
+    static readonly WINDOW_SIZE: ReadonlySystemEnvKey<window.SizeInVP> = new ReadonlySystemEnvKey<window.SizeInVP>('system.window.size');
+    static readonly WINDOW_SIZE_PX: ReadonlySystemEnvKey<window.Size> = new ReadonlySystemEnvKey<window.Size>('system.window.size.px');
+    static readonly WINDOW_AVOID_AREA: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP>('system.window.avoidarea');
+    static readonly WINDOW_AVOID_AREA_PX: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX>('system.window.avoidarea.px');
+}
+
+export class WritableEnvKey {
+    static readonly DIRECTION: WritableSystemEnvKey<Direction> =
+        new WritableSystemEnvKey<Direction>(SYSTEM_ENV_KEY_DIRECTION)
+    static readonly FONT_SCALE: WritableSystemEnvKey<number> =
+        new WritableSystemEnvKey<number>(SYSTEM_ENV_KEY_FONT_SCALE)
+}
+
+export class CustomEnvKey<S> {
+    private static nextId: int32 = 1
+    private _internal_id: int32 = -1
+
+    constructor() {
+        this._internal_id = CustomEnvKey.nextId++
+    }
+
+    get internalId(): int32 {
+        return this._internal_id
+    }
+
+    static create<T>(): CustomEnvKey<T> {
+        return new CustomEnvKey<T>()
+    }
+}

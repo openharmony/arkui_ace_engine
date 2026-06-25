@@ -16,6 +16,7 @@
 #include "core/components/indexer/render_indexer.h"
 
 #include "base/log/event_report.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/text/render_text.h"
 
 namespace OHOS::Ace {

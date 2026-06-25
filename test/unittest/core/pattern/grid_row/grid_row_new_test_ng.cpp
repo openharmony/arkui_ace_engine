@@ -350,4 +350,50 @@ HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level0)
     expectedResult->xl = 4;
     EXPECT_EQ(gridContainerSize->ToString(), expectedResult->ToString());
 }
+
+/**
+ * @tc.name: GridRowLpxAttribute001
+ * @tc.desc: Test SetGutter with LPX unit registers LPX_GRID_ROW_GUTTER LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowNewTestNG, GridRowLpxAttribute001, TestSize.Level1)
+{
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    auto gutter = AceType::MakeRefPtr<V2::Gutter>();
+    gutter->xXs = lpxDim;
+    gutter->xSm = lpxDim;
+    gutter->xMd = lpxDim;
+    gutter->xLg = lpxDim;
+    gutter->xXl = lpxDim;
+    gutter->xXXl = lpxDim;
+    gutter->ySm = lpxDim;
+    gutter->yMd = lpxDim;
+    gutter->yLg = lpxDim;
+    gutter->yXl = lpxDim;
+    gutter->yXXl = lpxDim;
+
+    auto frameNode = CreateGridRow([](GridRowModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    GridRowModelNG::SetGutter(frameNode.GetRawPtr(), gutter);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 11);
+
+    auto vpGutter = AceType::MakeRefPtr<V2::Gutter>();
+    vpGutter->xXs = vpDim;
+    vpGutter->xSm = vpDim;
+    vpGutter->xMd = vpDim;
+    vpGutter->xLg = vpDim;
+    vpGutter->xXl = vpDim;
+    vpGutter->xXXl = vpDim;
+    vpGutter->ySm = vpDim;
+    vpGutter->yMd = vpDim;
+    vpGutter->yLg = vpDim;
+    vpGutter->yXl = vpDim;
+    vpGutter->yXXl = vpDim;
+    GridRowModelNG::SetGutter(frameNode.GetRawPtr(), vpGutter);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

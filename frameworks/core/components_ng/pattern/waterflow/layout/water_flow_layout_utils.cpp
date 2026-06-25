@@ -159,21 +159,16 @@ std::tuple<SizeF, bool, double> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapp
     const auto& props = wrapper->GetLayoutProperty();
     auto size = CreateIdealSize(props->GetLayoutConstraint().value(), axis, props->GetMeasureType(), true);
     auto layoutPolicy = props->GetLayoutPolicyProperty();
-    auto isMainWrap = false;
+    auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis);
     if (layoutPolicy.has_value()) {
-        auto isVertical = axis == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            props->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+            props->GetLayoutConstraint().value(), layoutPolicy, axis);
         size.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
-        if (isMainFix) {
+        if (axisLayoutPolicy.IsMainAxisFix()) {
             size.SetMainSize(LayoutInfinity<float>(), axis);
         }
     }
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis)) || isMainWrap;
+    auto matchChildren = ShouldMatchChildrenByLayoutPolicy(GetMainAxisSize(size, axis), layoutPolicy, axis);
     if (!matchChildren) {
         wrapper->GetGeometryNode()->SetFrameSize(size);
     }

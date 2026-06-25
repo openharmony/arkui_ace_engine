@@ -38,7 +38,6 @@
 #include "list_item_group_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "parallelize_ui_ani_modifier.h"
-#include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
 #include "paste_button_ani_modifier.h"
 #include "save_button_ani_modifier.h"
@@ -50,11 +49,14 @@
 #include "visual_effect_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
+#include "with_env_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "syntax_item_ani_modifier.h"
 #include "for_each_node_ani_modifier.h"
 #include "uinode_ani_modifier.h"
 #include "xbar_ani_modifier.h"
+#include "dynamiclayout_ani_modifier.h"
+
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
 {
@@ -71,6 +73,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
+        .getArkUIAniDynamicLayoutModifier = OHOS::Ace::NG::GetArkUIAniDynamicLayoutModifier,
         .getArkUIAniListItemGroupModifier = OHOS::Ace::NG::GetArkUIAniListItemGroupModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
@@ -84,7 +87,6 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
-        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
@@ -103,6 +105,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
         .getArkUIAniDetachedFreeRootModifier = OHOS::Ace::NG::GetDetachedFreeRootModifier,
         .getArkUIAniGestureEventUIObserverModifier = OHOS::Ace::NG::GetArkUIAniGestureEventUIObserverModifier,
+        .getArkUIAniWithEnvModifier = OHOS::Ace::NG::GetArkUIAniWithEnvModifier,
     };
     return &impl;
 }

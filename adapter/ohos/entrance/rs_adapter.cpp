@@ -32,6 +32,11 @@ void RsAdapter::RsUIDirectorInit(
     const OHOS::sptr<OHOS::Rosen::Window>& window, std::string cacheDir)
 {
     rsUiDirector = window->GetRSUIDirector();
+    if (rsUiDirector == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "Failed to get RSUIDirector from window windowId:%{public}d",
+            window->GetWindowId());
+        return;
+    }
     rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
     rsUiDirector->SetCacheDir(cacheDir);
 }
@@ -40,7 +45,11 @@ void RsAdapter::RsFlushImplicitTransaction(std::shared_ptr<OHOS::Rosen::RSUIDire
     const OHOS::sptr<OHOS::Rosen::Window> &dragWindow, std::shared_ptr<OHOS::Rosen::RSSurfaceNode> &surfaceNode)
 {
     rsUiDirector = dragWindow->GetRSUIDirector();
-
+    if (rsUiDirector == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "Failed to get RSUIDirector from window windowId:%{public}d",
+            dragWindow->GetWindowId());
+        return;
+    }
     auto surfaceNodeFromWindow = dragWindow->GetSurfaceNode();
     if (surfaceNodeFromWindow) {
         auto rsUiContext = surfaceNodeFromWindow->GetRSUIContext();
@@ -62,6 +71,11 @@ void RsAdapter::RsFlushImplicitTransactionWithRoot(
     std::shared_ptr<Rosen::RSNode>& rootNode)
 {
     rsUiDirector = dragWindow->GetRSUIDirector();
+    if (rsUiDirector == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "Failed to get RSUIDirector from window windowId:%{public}d",
+            dragWindow->GetWindowId());
+        return;
+    }
     auto surfaceNode1 = dragWindow->GetSurfaceNode();
     std::shared_ptr<Rosen::RSUIContext> rsUiContext;
     if (surfaceNode1) {

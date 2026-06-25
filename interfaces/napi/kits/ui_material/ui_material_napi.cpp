@@ -31,11 +31,15 @@ napi_module ui_material_module = {
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
 const std::string TYPE_NAME = "type";
 const char STYLE_NAME[] = "style";
 const char MATERIAL_COLOR_NAME[] = "materialColor";
 const char COLOR_INVERT_NAME[] = "colorInvert";
 const char APPLY_SHADOW_NAME[] = "applyShadow";
+const char INTERACTIVE_NAME[] = "interactive";
+const char LIGHT_EFFECT_NAME[] = "lightEffect";
+const char LIGHT_EFFECT_COLOR_NAME[] = "color";
 struct JsEnumInt {
     std::string_view enumName;
     int32_t enumInt;
@@ -72,6 +76,59 @@ napi_status EnumInit(napi_env env, napi_value exports, const char* name, const s
         return napiStatus;
     }
     return napi_ok;
+}
+
+bool CheckIsECStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        static_cast<int32_t>(from) <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        return true;
+    }
+    return false;
+}
+
+bool CheckIsECSubStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+        static_cast<int32_t>(from) <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        return true;
+    }
+    return false;
+}
+
+bool CheckNotLegalStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) < static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) ||
+        static_cast<int32_t>(from) > static_cast<int32_t>(UiMaterialStyle::MAX)) {
+        return true;
+    }
+    return false;
+}
+
+UiMaterialStyle ConvertToECStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        return static_cast<UiMaterialStyle>(style - UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+UiMaterialStyle ConvertToECSubStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
 }
 } // namespace
 
@@ -136,6 +193,34 @@ ImmersiveOptions UiMaterialNapi::ParseImmersiveOptions(napi_env env, napi_value 
         bool applyShadow = false;
         napi_get_value_bool(env, napiApplyShadowParam, &applyShadow);
         options.applyShadow = applyShadow;
+    }
+    napi_value napiInteractiveParam = GetNamedProperty(env, value, INTERACTIVE_NAME);
+    if (GetValueType(env, napiInteractiveParam) == napi_boolean) {
+        bool interactive = false;
+        napi_get_value_bool(env, napiInteractiveParam, &interactive);
+        options.interactive = interactive;
+    }
+    napi_value napiLightEffectParam = GetNamedProperty(env, value, LIGHT_EFFECT_NAME);
+    if (napiLightEffectParam != nullptr) {
+        napi_valuetype lightEffectType = GetValueType(env, napiLightEffectParam);
+        if (lightEffectType == napi_null) {
+            options.lightEffectOptions = std::nullopt;
+        } else if (lightEffectType == napi_object) {
+            options.lightEffectOptions = LightEffectOptions {};
+            napi_value napiColorParam = GetNamedProperty(env, napiLightEffectParam, LIGHT_EFFECT_COLOR_NAME);
+            Color lightColor;
+            RefPtr<ResourceObject> lightColorResObj;
+            if (ParseNapiColor(env, napiColorParam, lightColor, lightColorResObj)) {
+                options.lightEffectOptions->color = lightColor;
+                options.lightEffectOptions->colorResObj = lightColorResObj;
+            }
+        }
+    }
+    if (CheckIsECStyle(options.style)) {
+        ConvertToImmersiveOptionsEC(options);
+    }
+    if (CheckIsECSubStyle(options.style)) {
+        ConvertToImmersiveOptionsECSub(options);
     }
     return options;
 }
@@ -250,6 +335,142 @@ napi_value UiMaterialNapi::JSGetEmpty(napi_env env, napi_callback_info info)
     return result;
 }
 
+void UiMaterialNapi::ConvertToImmersiveOptionsEC(ImmersiveOptions& newOptions)
+{
+    newOptions.style = ConvertToECStyle(newOptions.style);
+    newOptions.materialColor = Color::TRANSPARENT;
+    newOptions.applyShadow = false;
+    newOptions.disableLightEffect = true;
+    newOptions.interactive = false;
+    newOptions.lightEffectOptions = std::nullopt;
+    newOptions.colorResObj = nullptr;
+}
+
+void UiMaterialNapi::ConvertToImmersiveOptionsECSub(ImmersiveOptions& newOptions)
+{
+    newOptions.style = ConvertToECSubStyle(newOptions.style);
+}
+
+napi_value UiMaterialNapi::JSConvertToECMaterial(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    static constexpr int32_t ARG_COUNT_1 = 1;
+    size_t argCount = ARG_COUNT_1;
+    napi_value argValue[ARG_COUNT_1] = { 0 };
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argCount, argValue, &jsThis, nullptr);
+    if (status != napi_ok || argCount < ARG_COUNT_1) {
+        TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "JSConvertToECMaterial | get info failed");
+        napi_value undefined;
+        napi_get_undefined(env, &undefined);
+        napi_value escapeResult;
+        napi_escape_handle(env, scope, undefined, &escapeResult);
+        napi_close_escapable_handle_scope(env, scope);
+        return escapeResult;
+    }
+
+    UiMaterial* nativeMaterial = nullptr;
+    status = napi_unwrap_s(env, argValue[0], &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&nativeMaterial));
+    if (status != napi_ok || !nativeMaterial) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+
+    auto originalOptions = nativeMaterial->GetImmersiveOptions();
+    if (nativeMaterial->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !originalOptions) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+    if (CheckNotLegalStyle(originalOptions->style)) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+
+    napi_value constructor = nullptr;
+    napi_get_named_property(env, argValue[0], "constructor", &constructor);
+    napi_value result = nullptr;
+    napi_new_instance(env, constructor, 0, nullptr, &result);
+
+    UiMaterial* newMaterial = nullptr;
+    status = napi_unwrap_s(env, result, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&newMaterial));
+    if (status != napi_ok || !newMaterial) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+    ImmersiveOptions newOptions = *originalOptions;
+    ConvertToImmersiveOptionsEC(newOptions);
+
+    newMaterial->SetImmersiveOptions(newOptions);
+    newMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    
+    napi_value escapeResult;
+    napi_escape_handle(env, scope, result, &escapeResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return escapeResult;
+}
+
+napi_value UiMaterialNapi::JSConvertToECSubMaterial(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    static constexpr int32_t ARG_COUNT_1 = 1;
+    size_t argCount = ARG_COUNT_1;
+    napi_value argValue[ARG_COUNT_1] = { 0 };
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argCount, argValue, &jsThis, nullptr);
+    if (status != napi_ok || argCount < ARG_COUNT_1) {
+        TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "JSConvertToECSubMaterial | get info failed");
+        napi_value undefined;
+        napi_get_undefined(env, &undefined);
+        napi_value escapeResult;
+        napi_escape_handle(env, scope, undefined, &escapeResult);
+        napi_close_escapable_handle_scope(env, scope);
+        return escapeResult;
+    }
+
+    UiMaterial* nativeMaterial = nullptr;
+    status = napi_unwrap_s(env, argValue[0], &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&nativeMaterial));
+    if (status != napi_ok || !nativeMaterial) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+
+    auto originalOptions = nativeMaterial->GetImmersiveOptions();
+    if (nativeMaterial->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !originalOptions) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+    if (CheckNotLegalStyle(originalOptions->style)) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+    napi_value constructor = nullptr;
+    napi_get_named_property(env, argValue[0], "constructor", &constructor);
+    napi_value result = nullptr;
+    napi_new_instance(env, constructor, 0, nullptr, &result);
+
+    UiMaterial* newMaterial = nullptr;
+    status = napi_unwrap_s(env, result, &UI_MATERIAL_TYPE_TAG, reinterpret_cast<void**>(&newMaterial));
+    if (status != napi_ok || !newMaterial) {
+        napi_close_escapable_handle_scope(env, scope);
+        return argValue[0];
+    }
+
+    ImmersiveOptions newOptions = *originalOptions;
+    ConvertToImmersiveOptionsECSub(newOptions);
+    
+    newMaterial->SetImmersiveOptions(newOptions);
+    newMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    
+    napi_value escapeResult;
+    napi_escape_handle(env, scope, result, &escapeResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return escapeResult;
+}
+
 void UiMaterialNapi::Destructor(napi_env env, void* nativeObject, void* finalize)
 {
     UiMaterial* uiMaterial = reinterpret_cast<UiMaterial*>(nativeObject);
@@ -340,6 +561,8 @@ napi_value UiMaterialNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("getGlobalMaterialLevel", JSGetImmersiveLevel),
         DECLARE_NAPI_FUNCTION("getMaterialInfo", JSGetMaterialInfo),
+        DECLARE_NAPI_FUNCTION("convertToECMaterial", JSConvertToECMaterial),
+        DECLARE_NAPI_FUNCTION("convertToECSubMaterial", JSConvertToECSubMaterial),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     napi_status status = napi_define_class(

@@ -20,7 +20,31 @@ class ArkContainerReaderComponent extends ArkComponent {
     getUINativeModule().loadNativeModule('ContainerReader');
     super(nativePtr, classType);
   }
+  breakpointConfig(value) {
+    getUINativeModule().loadNativeModule('ContainerReader');
+    modifierWithKey(this._modifiersWithKeys, ContainerReaderBreakPointConfigModifier.identity, ContainerReaderBreakPointConfigModifier, value);
+    return this;
+  }
 }
+
+class ContainerReaderBreakPointConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerreader.resetBreakPointConfig(node);
+    } else {
+      getUINativeModule().containerreader.setBreakPointConfig(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !deepCompareArrays(this.stageValue?.width, this.value?.width) ||
+      !deepCompareArrays(this.stageValue?.height, this.value?.height);
+  }
+}
+ContainerReaderBreakPointConfigModifier.identity = Symbol('containerReaderBreakPointConfig');
 
 class ContainerReader extends JSContainerBase {
   static create(params, build) {
@@ -54,7 +78,7 @@ class ContainerReader extends JSContainerBase {
     __Common__.onAppear(value);
   }
   static onDetach(value) {
-    __Common__.onAttach(value);
+    __Common__.onDetach(value);
   }
   static onDisAppear(value) {
     __Common__.onDisAppear(value);
@@ -71,5 +95,16 @@ function createComponent(nativePtr, classType) {
   return new ArkContainerReaderComponent(nativePtr, classType);
 }
 
-export default { ArkContainerReaderComponent, ContainerReader, createComponent};
+function exportComponent() {
+  globalThis.ArkContainerReaderComponent = ArkContainerReaderComponent;
+}
+
+function exportView() {
+  globalThis.ContainerReader = ContainerReader;
+}
+
+function loadComponent() {}
+
+export default { ArkContainerReaderComponent, ContainerReader, createComponent, exportComponent, exportView, loadComponent };
+
 

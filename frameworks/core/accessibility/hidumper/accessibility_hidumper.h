@@ -47,6 +47,8 @@ enum class DumpMode {
     EXECUTE_ACTION_TEST,
     WEB_ACC_DUMP,
     CUSTOM_ACTION_TEST,
+    SET_COMPONENT_TYPE_TEST,
+    CLEAR_COMPONENT_TYPE_TEST,
 };
 
 struct DumpInfoArgument {

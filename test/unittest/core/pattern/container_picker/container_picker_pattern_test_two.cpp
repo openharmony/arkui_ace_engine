@@ -841,9 +841,10 @@ HWTEST_F(ContainerPickerPatternTestTwo, SetLazyLoadIsLoopRepeatVirtualScroll2Tes
      * @tc.steps: step2. Create RepeatVirtualScroll2 and mount to pickerNode.
      */
     auto RepeatVirtualScroll2 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        ElementRegister::GetInstance()->MakeUniqueId(), 10, 10, [](int32_t, bool) { return std::make_pair(0, 0); },
+        ElementRegister::GetInstance()->MakeUniqueId(), 10, 10, 0,
+        [](int32_t, bool, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {}, [](int32_t, int32_t, int32_t, int32_t, bool, bool) {}, [](int32_t, int32_t) {},
-        []() {}, []() {});
+        []() {}, []() {}, []() {});
     ASSERT_NE(RepeatVirtualScroll2, nullptr);
     RepeatVirtualScroll2->MountToParent(nodePicker);
 

@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to  in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -19,56 +19,59 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 if (PUV2ViewBase.contextStack === undefined) {
   Reflect.set(PUV2ViewBase, 'contextStack', []);
 }
+const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const AccessibilitySelectedType = requireNapi('arkui.advanced.Chip').AccessibilitySelectedType;
 const Chip = requireNapi('arkui.advanced.Chip').Chip;
 const ChipSize = requireNapi('arkui.advanced.Chip').ChipSize;
-const AccessibilitySelectedType = requireNapi('arkui.advanced.Chip').AccessibilitySelectedType;
-const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const uiMaterial = requireNapi('arkui.uiMaterial');
 const deviceInfo = requireNapi('deviceInfo');
+const i18n = requireNapi('i18n');
 const noop = selectedIndexes => {};
 const colorStops = [
   ['rgba(0, 0, 0, 1)', 0],
   ['rgba(0, 0, 0, 0)', 1],
 ];
+const ENABLE_SYSTEM_MATERIAL_VERSION = 26;
 const defaultTheme = {
   itemStyle: {
     size: ChipSize.NORMAL,
     backgroundColor: {
-      id: -1,
+      id: 125829510,
       type: 10001,
       params: ['sys.color.ohos_id_color_button_normal'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     },
     fontColor: {
-      id: -1,
+      id: 125829210,
       type: 10001,
       params: ['sys.color.ohos_id_color_text_primary'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     },
     selectedFontColor: {
-      id: -1,
+      id: 125829213,
       type: 10001,
       params: ['sys.color.ohos_id_color_text_primary_contrary'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     },
     selectedBackgroundColor: {
-      id: -1,
+      id: 125829135,
       type: 10001,
       params: ['sys.color.ohos_id_color_emphasize'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     },
     fillColor: {
-      id: -1,
+      id: 125829192,
       type: 10001,
       params: ['sys.color.ohos_id_color_secondary'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     },
     selectedFillColor: {
-      id: -1,
+      id: 125829213,
       type: 10001,
       params: ['sys.color.ohos_id_color_text_primary_contrary'],
       bundleName: '__harDefaultBundleName__',
@@ -77,17 +80,36 @@ const defaultTheme = {
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
   chipGroupPadding: { top: 14, bottom: 14 },
+  chipBackgroundSystemMaterial:
+    deviceInfo.sdkApiVersion >= ENABLE_SYSTEM_MATERIAL_VERSION
+      ? new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        })
+      : undefined,
+  chipSelectedBackgroundSystemMaterial:
+    deviceInfo.sdkApiVersion >= ENABLE_SYSTEM_MATERIAL_VERSION
+      ? new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+          materialColor: {
+            id: 125831009,
+            type: 10001,
+            params: ['sys.color.comp_background_emphasize'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          },
+        })
+      : undefined,
 };
 const iconGroupSuffixTheme = {
   backgroundColor: {
-    id: -1,
+    id: 125829510,
     type: 10001,
     params: ['sys.color.ohos_id_color_button_normal'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   borderRadius: {
-    id: -1,
+    id: 125829696,
     type: 10002,
     params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'],
     bundleName: '__harDefaultBundleName__',
@@ -100,19 +122,20 @@ const iconGroupSuffixTheme = {
   marginLeft: 8,
   marginRight: 16,
   fillColor: {
-    id: -1,
+    id: 125829186,
     type: 10001,
     params: ['sys.color.ohos_id_color_primary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   defaultEffect: -1,
+  iconBackgroundSystemMaterial:
+    deviceInfo.sdkApiVersion >= ENABLE_SYSTEM_MATERIAL_VERSION
+      ? new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        })
+      : undefined,
 };
-var ChipGroupHeight;
-(function (ChipGroupHeight) {
-  ChipGroupHeight[(ChipGroupHeight['NORMAL'] = 36)] = 'NORMAL';
-  ChipGroupHeight[(ChipGroupHeight['SMALL'] = 28)] = 'SMALL';
-})(ChipGroupHeight || (ChipGroupHeight = {}));
 function parseDimension(uiContext, value, isValid, defaultValue) {
   if (value === void 0 || value === null) {
     return defaultValue;
@@ -274,8 +297,8 @@ export class IconGroupSuffix extends ViewPU {
             width: this.getBackgroundSize(),
             height: this.getBackgroundSize(),
           });
-          Button.backgroundColor(iconGroupSuffixTheme.backgroundColor);
           Button.borderRadius(iconGroupSuffixTheme.borderRadius);
+          Button.backgroundColor(this.getBackgroundColor(material));
           Button.systemMaterial(material);
           Button.accessibilityText(this.getAccessibilityText(suffixItem));
           Button.accessibilityDescription(this.getAccessibilityDescription(suffixItem));
@@ -319,11 +342,17 @@ export class IconGroupSuffix extends ViewPU {
     ForEach.pop();
     Row.pop();
   }
+  getBackgroundColor(material) {
+    if (!!material) {
+      return undefined;
+    }
+    return iconGroupSuffixTheme.backgroundColor;
+  }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (deviceInfo.sdkApiVersion >= 26) {
+      if (deviceInfo.sdkApiVersion >= ENABLE_SYSTEM_MATERIAL_VERSION) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -331,14 +360,33 @@ export class IconGroupSuffix extends ViewPU {
               this.ifElseBranchUpdateFunction(0, () => {
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   EffectComponent.create();
-                  EffectComponent.systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial));
+                  EffectComponent.systemMaterial(
+                    createECMaterial(
+                      withDefaultMaterial(
+                        this.iconBackgroundSystemMaterial,
+                        iconGroupSuffixTheme.iconBackgroundSystemMaterial
+                      )
+                    )
+                  );
                 }, EffectComponent);
-                this.IconButtonsBuilder.bind(this)(createSubECMaterial(this.iconBackgroundSystemMaterial));
+                this.IconButtonsBuilder.bind(this)(
+                  createSubECMaterial(
+                    withDefaultMaterial(
+                      this.iconBackgroundSystemMaterial,
+                      iconGroupSuffixTheme.iconBackgroundSystemMaterial
+                    )
+                  )
+                );
                 EffectComponent.pop();
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.IconButtonsBuilder.bind(this)(ObservedObject.GetRawObject(this.iconBackgroundSystemMaterial));
+                this.IconButtonsBuilder.bind(this)(
+                  withDefaultMaterial(
+                    this.iconBackgroundSystemMaterial,
+                    iconGroupSuffixTheme.iconBackgroundSystemMaterial
+                  )
+                );
               });
             }
           }, If);
@@ -400,6 +448,11 @@ export class ChipGroup extends ViewPU {
       this,
       'backgroundSystemMaterial'
     );
+    this.__selectedBackgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
+      params.selectedBackgroundSystemMaterial,
+      this,
+      'selectedBackgroundSystemMaterial'
+    );
     this.suffix = undefined;
     this.onChange = noop;
     this.scroller = new Scroller();
@@ -437,6 +490,9 @@ export class ChipGroup extends ViewPU {
     if (params.backgroundSystemMaterial === undefined) {
       this.__backgroundSystemMaterial.set(undefined);
     }
+    if (params.selectedBackgroundSystemMaterial === undefined) {
+      this.__selectedBackgroundSystemMaterial.set(undefined);
+    }
     if (params.suffix !== undefined) {
       this.suffix = params.suffix;
     }
@@ -463,6 +519,7 @@ export class ChipGroup extends ViewPU {
     this.__multiple.reset(params.multiple);
     this.__chipGroupSpace.reset(params.chipGroupSpace);
     this.__backgroundSystemMaterial.reset(params.backgroundSystemMaterial);
+    this.__selectedBackgroundSystemMaterial.reset(params.selectedBackgroundSystemMaterial);
     this.__chipGroupPadding.reset(params.chipGroupPadding);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
@@ -474,6 +531,7 @@ export class ChipGroup extends ViewPU {
     this.__multiple.purgeDependencyOnElmtId(rmElmtId);
     this.__chipGroupSpace.purgeDependencyOnElmtId(rmElmtId);
     this.__backgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
+    this.__selectedBackgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
     this.__isReachEnd.purgeDependencyOnElmtId(rmElmtId);
     this.__chipGroupPadding.purgeDependencyOnElmtId(rmElmtId);
     this.__isRefresh.purgeDependencyOnElmtId(rmElmtId);
@@ -487,6 +545,7 @@ export class ChipGroup extends ViewPU {
     this.__multiple.aboutToBeDeleted();
     this.__chipGroupSpace.aboutToBeDeleted();
     this.__backgroundSystemMaterial.aboutToBeDeleted();
+    this.__selectedBackgroundSystemMaterial.aboutToBeDeleted();
     this.__isReachEnd.aboutToBeDeleted();
     this.__chipGroupPadding.aboutToBeDeleted();
     this.__isRefresh.aboutToBeDeleted();
@@ -540,6 +599,12 @@ export class ChipGroup extends ViewPU {
   }
   set backgroundSystemMaterial(newValue) {
     this.__backgroundSystemMaterial.set(newValue);
+  }
+  get selectedBackgroundSystemMaterial() {
+    return this.__selectedBackgroundSystemMaterial.get();
+  }
+  set selectedBackgroundSystemMaterial(newValue) {
+    this.__selectedBackgroundSystemMaterial.set(newValue);
   }
   get isReachEnd() {
     return this.__isReachEnd.get();
@@ -630,6 +695,9 @@ export class ChipGroup extends ViewPU {
     return defaultTheme.itemStyle.selectedFillColor;
   }
   getBackgroundColor() {
+    if (!!this.backgroundSystemMaterial) {
+      return undefined;
+    }
     if (this.itemStyle && this.itemStyle.backgroundColor) {
       if (typeof this.itemStyle.backgroundColor === 'object') {
         let temp = this.itemStyle.backgroundColor;
@@ -646,6 +714,9 @@ export class ChipGroup extends ViewPU {
     return defaultTheme.itemStyle.backgroundColor;
   }
   getSelectedBackgroundColor() {
+    if (!!this.selectedBackgroundSystemMaterial) {
+      return undefined;
+    }
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
       if (typeof this.itemStyle.selectedBackgroundColor === 'object') {
         let temp = this.itemStyle.selectedBackgroundColor;
@@ -677,6 +748,9 @@ export class ChipGroup extends ViewPU {
   }
   isMultiple() {
     return this.multiple ?? false;
+  }
+  isRTL() {
+    return i18n.isRTL(i18n.System.getAppPreferredLanguage());
   }
   getChipGroupItemSpace() {
     if (this.chipGroupSpace == undefined) {
@@ -745,22 +819,14 @@ export class ChipGroup extends ViewPU {
       defaultTheme.chipGroupPadding.bottom
     );
   }
-  getChipGroupHeight() {
-    if (typeof this.chipSize === 'string') {
-      if (this.chipSize === ChipSize.NORMAL) {
-        return ChipGroupHeight.NORMAL;
-      } else {
-        return ChipGroupHeight.SMALL;
-      }
-    } else if (typeof this.chipSize === 'object') {
-      return this.chipSize.height;
-    } else {
-      return ChipGroupHeight.NORMAL;
-    }
-  }
-  ChipItemsBuilder(material, parent = null) {
+  ChipItemsBuilder(options, parent = null) {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create({ space: this.getChipGroupItemSpace() });
+      Row.padding({
+        left: this.getChipGroupStartSpace(),
+        right: this.getChipGroupEndSpace(),
+      });
+      Row.constraintSize({ minWidth: '100%' });
     }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
@@ -787,7 +853,8 @@ export class ChipGroup extends ViewPU {
                   enabled: () => true,
                   activated: () => this.isSelected(index),
                   backgroundColor: () => this.getBackgroundColor(),
-                  backgroundSystemMaterial: () => createSubECMaterial(this.backgroundSystemMaterial),
+                  backgroundSystemMaterial: () => options.backgroundSystemMaterial,
+                  activatedBackgroundSystemMaterial: () => options.activatedBackgroundSystemMaterial,
                   size: () => this.getChipSize(),
                   activatedBackgroundColor: () => this.getSelectedBackgroundColor(),
                   accessibilitySelectedType: () =>
@@ -846,16 +913,11 @@ export class ChipGroup extends ViewPU {
       Stack.create();
       Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
       Stack.layoutWeight(1);
-      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
+      Stack.blendMode(this.getOutsideBlendMode(), this.getOutsideBlendType());
       Stack.alignContent(Alignment.End);
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Scroll.create(this.scroller);
-      Scroll.padding({
-        left: this.getChipGroupStartSpace(),
-        right: this.getChipGroupEndSpace(),
-      });
-      Scroll.constraintSize({ minWidth: '100%' });
       Scroll.scrollable(ScrollDirection.Horizontal);
       Scroll.scrollBar(BarState.Off);
       Scroll.align(Alignment.Start);
@@ -867,7 +929,7 @@ export class ChipGroup extends ViewPU {
     }, Scroll);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (deviceInfo.sdkApiVersion >= 26) {
+      if (deviceInfo.sdkApiVersion >= ENABLE_SYSTEM_MATERIAL_VERSION) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -875,18 +937,24 @@ export class ChipGroup extends ViewPU {
               this.ifElseBranchUpdateFunction(0, () => {
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   EffectComponent.create();
-                  EffectComponent.systemMaterial(createECMaterial(this.backgroundSystemMaterial));
+                  EffectComponent.systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()));
                 }, EffectComponent);
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                  Row.create({ space: this.getChipGroupItemSpace() });
-                }, Row);
-                this.ChipItemsBuilder.bind(this)(createSubECMaterial(this.backgroundSystemMaterial));
-                Row.pop();
+                this.ChipItemsBuilder.bind(this)(
+                  makeBuilderParameterProxy('ChipItemsBuilder', {
+                    backgroundSystemMaterial: () => createSubECMaterial(this.getBackgroundSystemMaterial()),
+                    activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial(),
+                  })
+                );
                 EffectComponent.pop();
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.ChipItemsBuilder.bind(this)(ObservedObject.GetRawObject(this.backgroundSystemMaterial));
+                this.ChipItemsBuilder.bind(this)(
+                  makeBuilderParameterProxy('ChipItemsBuilder', {
+                    backgroundSystemMaterial: () => this.getBackgroundSystemMaterial(),
+                    activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial(),
+                  })
+                );
               });
             }
           }, If);
@@ -894,7 +962,7 @@ export class ChipGroup extends ViewPU {
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.ChipItemsBuilder.bind(this)(undefined);
+          this.ChipItemsBuilder.bind(this)(makeBuilderParameterProxy('ChipItemsBuilder', {}));
         });
       }
     }, If);
@@ -907,8 +975,8 @@ export class ChipGroup extends ViewPU {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-            Stack.height(this.getChipGroupHeight());
-            Stack.linearGradient({ angle: 90, colors: colorStops });
+            Stack.height(LayoutPolicy.matchParent);
+            Stack.linearGradient({ angle: this.isRTL() ? 270 : 90, colors: colorStops });
             Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
             Stack.hitTestBehavior(HitTestMode.None);
           }, Stack);
@@ -941,6 +1009,33 @@ export class ChipGroup extends ViewPU {
     If.pop();
     Row.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  getSelectedBackgroundSystemMaterial() {
+    if (deviceInfo.sdkApiVersion < ENABLE_SYSTEM_MATERIAL_VERSION) {
+      return undefined;
+    }
+    return withDefaultMaterial(
+      this.selectedBackgroundSystemMaterial,
+      defaultTheme.chipSelectedBackgroundSystemMaterial
+    );
+  }
+  getBackgroundSystemMaterial() {
+    if (deviceInfo.sdkApiVersion < ENABLE_SYSTEM_MATERIAL_VERSION) {
+      return undefined;
+    }
+    return withDefaultMaterial(this.backgroundSystemMaterial, defaultTheme.chipBackgroundSystemMaterial);
+  }
+  getOutsideBlendType() {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendApplyType.OFFSCREEN;
+  }
+  getOutsideBlendMode() {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendMode.SRC_OVER;
   }
   getPrefixIcon(chipItem) {
     return {
@@ -976,13 +1071,38 @@ export class ChipGroup extends ViewPU {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
+function withDefaultMaterial(material, defaultMaterial) {
+  const info = uiMaterial.getMaterialInfo();
+  if (info.state === uiMaterial.MaterialState.DISABLE) {
+    return undefined;
+  }
+  if (info.state === uiMaterial.MaterialState.ENABLE && !material) {
+    return defaultMaterial;
+  }
+  return material;
+}
 function enableEffectComponent(material) {
+  if (material) {
+    return material instanceof uiMaterial.ImmersiveMaterial;
+  }
   return false;
 }
 function createECMaterial(material) {
-  return undefined;
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECMaterial(material);
+  }
+  return material;
 }
 function createSubECMaterial(material) {
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECSubMaterial(material);
+  }
   return material;
 }
 

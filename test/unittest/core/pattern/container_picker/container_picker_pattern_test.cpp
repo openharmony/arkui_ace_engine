@@ -2627,23 +2627,48 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayed
 }
 
 /**
- * @tc.name: ContainerPickerUtilsTest_ClampPickerItemHeight001
- * @tc.desc: Test ClampPickerItemHeight function with lower and upper boundary input
+ * @tc.name: ContainerPickerUtilsTest_NormalizeDisplayedItemCount002
+ * @tc.desc: Test NormalizeDisplayedItemCount keeps odd values and bumps even values in valid range
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_ClampPickerItemHeight001, TestSize.Level1)
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayedItemCount002, TestSize.Level1)
 {
-    auto defaultVp = static_cast<float>(Dimension(40.0, DimensionUnit::VP).ConvertToVp());
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(3), 3);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(5), 5);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(7), 7);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(4), 5);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(6), 7);
+}
 
-    auto lower = ContainerPickerUtils::ClampPickerItemHeight(Dimension(39.0, DimensionUnit::VP));
-    auto min = ContainerPickerUtils::ClampPickerItemHeight(Dimension(40.0, DimensionUnit::VP));
-    auto max = ContainerPickerUtils::ClampPickerItemHeight(Dimension(64.0, DimensionUnit::VP));
-    auto higher = ContainerPickerUtils::ClampPickerItemHeight(Dimension(65.0, DimensionUnit::VP));
+/**
+ * @tc.name: ContainerPickerUtilsTest_ValidatePickerItemHeight001
+ * @tc.desc: Test ValidatePickerItemHeight returns PICKER_ITEM_HEIGHT when out of range, returns input when in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_ValidatePickerItemHeight001, TestSize.Level1)
+{
+    auto lower = ContainerPickerUtils::ValidatePickerItemHeight(Dimension(39.0, DimensionUnit::VP));
+    auto min = ContainerPickerUtils::ValidatePickerItemHeight(Dimension(40.0, DimensionUnit::VP));
+    auto max = ContainerPickerUtils::ValidatePickerItemHeight(Dimension(64.0, DimensionUnit::VP));
+    auto higher = ContainerPickerUtils::ValidatePickerItemHeight(Dimension(65.0, DimensionUnit::VP));
 
-    EXPECT_NEAR(lower.ConvertToVp(), defaultVp, EPSILON);
-    EXPECT_NEAR(min.ConvertToVp(), 40.0f, EPSILON);
-    EXPECT_NEAR(max.ConvertToVp(), 64.0f, EPSILON);
-    EXPECT_NEAR(higher.ConvertToVp(), defaultVp, EPSILON);
+    EXPECT_NEAR(lower.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), EPSILON);
+    EXPECT_NEAR(min.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), EPSILON);
+    EXPECT_NEAR(max.ConvertToVp(), Dimension(64.0, DimensionUnit::VP).ConvertToVp(), EPSILON);
+    EXPECT_NEAR(higher.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), EPSILON);
+}
+
+/**
+ * @tc.name: ContainerPickerUtilsTest_ValidatePickerItemHeight002
+ * @tc.desc: Test ValidatePickerItemHeight returns input unchanged when within valid range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_ValidatePickerItemHeight002, TestSize.Level1)
+{
+    constexpr float inRangeVp = 50.0f;
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(Dimension(inRangeVp, DimensionUnit::VP));
+
+    EXPECT_NEAR(result.ConvertToVp(), inRangeVp, EPSILON);
 }
 
 /**

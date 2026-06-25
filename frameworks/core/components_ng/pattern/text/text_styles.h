@@ -321,6 +321,8 @@ struct SymbolStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsFontColorResource, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColorResource, std::vector<RefPtr<ResourceObject>>);
 
     void AddResource(
         const std::string& key,
@@ -388,7 +390,8 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
     ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
- 
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TailIndents, NG::TailIndents);
+
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
@@ -461,16 +464,14 @@ ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontS
     const RefPtr<Pattern>& pattern = nullptr);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
+    TextStyle& textStyle, bool isSymbol, const RefPtr<Pattern>& pattern = nullptr);
+
+void UpdateTextStyleFromProperty(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, const RefPtr<Pattern>& pattern = nullptr);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
     const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr, const RefPtr<Pattern>& pattern = nullptr);
-
-void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
-void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme);
 
 ACE_FORCE_EXPORT std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 ACE_FORCE_EXPORT std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
@@ -482,6 +483,7 @@ std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrateg
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value);
 std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value);
+std::string GetFontVariationsInJson(const FONT_VARIATIONS_LIST& fontVariations);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

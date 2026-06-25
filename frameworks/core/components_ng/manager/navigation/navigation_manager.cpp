@@ -525,7 +525,8 @@ void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue>
             auto name = navdestinationInfo->GetString("name");
             auto param = navdestinationInfo->GetString("param");
             auto mode = navdestinationInfo->GetInt("mode");
-            navdestinationsInfo.emplace_back(NavdestinationRecoveryInfo(name, param, mode));
+            auto state = navdestinationInfo->GetString("state");
+            navdestinationsInfo.emplace_back(NavdestinationRecoveryInfo(name, param, mode, 0, state));
         }
         navigationRecoveryInfo_[navigationId] = navdestinationsInfo;
     }

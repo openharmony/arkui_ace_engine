@@ -234,6 +234,65 @@ void CallAnimationFrameJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_p
     jsFunc->Call(runtime, runtime->GetGlobal(), argv, argv.size());
 }
 
+enum class AnimationJsTaskType {
+    START,
+    FINISH,
+    CANCEL,
+    REPEAT,
+};
+
+struct AnimationJsTaskDispatch {
+    WeakPtr<JsiAnimatorBridge> bridgeWeak;
+    std::weak_ptr<JsRuntime> weakRuntime;
+    AnimationJsTaskType type;
+
+    void operator()() const
+    {
+        switch (type) {
+            case AnimationJsTaskType::START:
+                LOGI("call animation onstart event");
+                CallAnimationStartJs(bridgeWeak, weakRuntime.lock());
+                return;
+            case AnimationJsTaskType::FINISH:
+                LOGI("call animation onfinish event");
+                CallAnimationFinishJs(bridgeWeak, weakRuntime.lock());
+                return;
+            case AnimationJsTaskType::CANCEL:
+                LOGI("call animation oncancel event");
+                CallAnimationCancelJs(bridgeWeak, weakRuntime.lock());
+                return;
+            case AnimationJsTaskType::REPEAT:
+                LOGI("call animation onrepeat event");
+                CallAnimationRepeatJs(bridgeWeak, weakRuntime.lock());
+                return;
+        }
+    }
+};
+
+inline AnimationJsTaskDispatch MakeAnimationStartTask(
+    const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const std::weak_ptr<JsRuntime>& weakRuntime)
+{
+    return { bridgeWeak, weakRuntime, AnimationJsTaskType::START };
+}
+
+inline AnimationJsTaskDispatch MakeAnimationFinishTask(
+    const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const std::weak_ptr<JsRuntime>& weakRuntime)
+{
+    return { bridgeWeak, weakRuntime, AnimationJsTaskType::FINISH };
+}
+
+inline AnimationJsTaskDispatch MakeAnimationCancelTask(
+    const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const std::weak_ptr<JsRuntime>& weakRuntime)
+{
+    return { bridgeWeak, weakRuntime, AnimationJsTaskType::CANCEL };
+}
+
+inline AnimationJsTaskDispatch MakeAnimationRepeatTask(
+    const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const std::weak_ptr<JsRuntime>& weakRuntime)
+{
+    return { bridgeWeak, weakRuntime, AnimationJsTaskType::REPEAT };
+}
+
 void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const RefPtr<Animator>& animator,
     shared_ptr<JsRuntime> runtime)
 {
@@ -245,10 +304,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
-            LOGI("call animation onstart event");
-            CallAnimationStartJs(bridgeWeak, weakRuntime.lock());
-        }, "ArkUIAnimationStartEvent");
+        jsTaskExecutor.PostTask(MakeAnimationStartTask(bridgeWeak, weakRuntime), "ArkUIAnimationStartEvent");
     });
     animator->AddStopListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -257,10 +313,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
-            LOGI("call animation onfinish event");
-            CallAnimationFinishJs(bridgeWeak, weakRuntime.lock());
-        }, "ArkUIAnimationStopEvent");
+        jsTaskExecutor.PostTask(MakeAnimationFinishTask(bridgeWeak, weakRuntime), "ArkUIAnimationStopEvent");
     });
     animator->AddIdleListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -269,10 +322,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
-            LOGI("call animation oncancel event");
-            CallAnimationCancelJs(bridgeWeak, weakRuntime.lock());
-        }, "ArkUIAnimationCancelEvent");
+        jsTaskExecutor.PostTask(MakeAnimationCancelTask(bridgeWeak, weakRuntime), "ArkUIAnimationCancelEvent");
     });
     animator->AddRepeatListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -281,10 +331,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
-            LOGI("call animation onrepeat event");
-            CallAnimationRepeatJs(bridgeWeak, weakRuntime.lock());
-        }, "ArkUIAnimationRepeat");
+        jsTaskExecutor.PostTask(MakeAnimationRepeatTask(bridgeWeak, weakRuntime), "ArkUIAnimationRepeat");
     });
 }
 

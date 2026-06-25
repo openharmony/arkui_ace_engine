@@ -1357,6 +1357,41 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
 
+void NavDestinationModelNG::SetOnSaveState(FrameNode* frameNode, NG::NavDestinationSaveStateCallback&& onSaveState)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnSaveState(std::move(onSaveState));
+}
+
+void NavDestinationModelNG::SetOnSaveState(NG::NavDestinationSaveStateCallback&& onSaveState)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnSaveState(std::move(onSaveState));
+}
+
+void NavDestinationModelNG::SetOnRestoreState(
+    FrameNode* frameNode, NG::NavDestinationRestoreStateCallback&& onRestoreState)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnRestoreState(std::move(onRestoreState));
+}
+
+void NavDestinationModelNG::SetOnRestoreState(NG::NavDestinationRestoreStateCallback&& onRestoreState)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnRestoreState(std::move(onRestoreState));
+}
+
 void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

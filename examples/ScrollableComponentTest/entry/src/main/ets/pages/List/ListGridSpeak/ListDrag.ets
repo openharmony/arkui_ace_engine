@@ -65,7 +65,13 @@ struct ListDragPanel {
     .layoutWeight(1)
     .padding(10)
     .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
-      let rect = this.scroller.getItemRect(itemIndex);
+      let rect: RectResult;
+      try {
+        rect = this.scroller.getItemRect(itemIndex);
+      } catch (error) {
+        console.error(`Failed to get item rect for index ${itemIndex}:`, error);
+        return;
+      }
       let size: SizeOptions = {
         width: rect.width,
         height: rect.height

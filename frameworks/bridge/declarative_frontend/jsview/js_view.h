@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <optional>
 #include <string>
 #include <tuple>
 
@@ -342,10 +343,7 @@ public:
     void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
-    void JSResetRecycleCustomNode(const JSCallbackInfo& info)
-    {
-        recycleCustomNode_.Reset();
-    }
+    void JSResetRecycleCustomNode(const JSCallbackInfo& info);
 
     void JSSendStateInfo(const std::string& stateInfo);
 
@@ -409,13 +407,21 @@ public:
         return isV2_;
     }
 
+    void JSSetReusableMemOptStrategy(const int32_t reusableMemOptStrategy);
+
+    int32_t GetJSReusableMemOptStrategy() const
+    {
+        return reusableMemOptStrategy_;
+    }
+
+    void JSStartMemOpt();
+    void JSRequestProgressiveRelease();
+
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
     void JSGetDialogController(const JSCallbackInfo& info);
 
     bool JSAllowReusableV2Descendant();
-
-    void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
 
     void JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info);
 
@@ -423,7 +429,13 @@ public:
 
     void RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc);
 
+    void RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>& onSystemEnvUpdateFunc);
+
+    void RegisterUpdateForEnvCallback(const JSRef<JSFunc>& updateForEnvFunc);
+
     void JSFindCustomValueByKey(const JSCallbackInfo& info);
+
+    void JSFindSystemEnvValueByKey(const JSCallbackInfo& info);
 
     void SetLatestInstanceId(const int32_t instanceId);
 
@@ -465,6 +477,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    int32_t reusableMemOptStrategy_ = 0;
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
@@ -472,7 +485,8 @@ private:
     // Save two independent instance update callbacks
     std::function<void(int32_t)> updateInstanceForEnvCallback_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
-    std::function<void(const std::string&)> updateCustomEnvCallback_;
+    std::function<void(int32_t, const std::optional<JSRef<JSVal>>&)> updateCustomEnvCallback_;
+    std::function<void(const std::string&, const std::optional<JSRef<JSVal>>&)> updateEnvCallback_;
 
     int32_t latestInstanceId_ = -1;
 };

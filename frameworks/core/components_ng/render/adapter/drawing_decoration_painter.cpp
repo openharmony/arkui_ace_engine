@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 
+#include "base/geometry/shape.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/base/constants.h"
@@ -1251,10 +1252,10 @@ float DrawingDecorationPainter::ConvertRadiusToSigma(float radius)
 {
     constexpr float BLUR_SIGMA_SCALE = 0.57735f;
     constexpr float SCALE_HALF = 0.5f;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        return radius > 0.0f ? BLUR_SIGMA_SCALE * radius + SCALE_HALF : 0.0f;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return radius >= 0.0f ?
+            (NearZero(radius) ? 0.0f : BLUR_SIGMA_SCALE * radius + SCALE_HALF) : -1.0f;
     }
-    return radius >= 0.0f ?
-        (NearZero(radius) ? 0.0f : BLUR_SIGMA_SCALE * radius + SCALE_HALF) : -1.0f;
+    return radius > 0.0f ? BLUR_SIGMA_SCALE * radius + SCALE_HALF : 0.0f;
 }
 } // namespace OHOS::Ace::NG

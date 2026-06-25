@@ -762,6 +762,8 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
         } else {
             swiperPattern->SetGestureState(GestureState::GESTURE_STATE_NONE);
         }
+        CHECK_NULL_VOID(overlongDotIndicatorModifier_);
+        overlongDotIndicatorModifier_->SetIsDraggingIndicator(false);
     }
     if (swiperPattern->IsBindIndicator() && swiperPattern->GetMaxDisplayCount() > 0) {
         swiperPattern->SetTouchDownOnOverlong(false);

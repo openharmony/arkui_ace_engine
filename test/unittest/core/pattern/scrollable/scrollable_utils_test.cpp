@@ -144,7 +144,8 @@ RefPtr<UINode> ScrollableUtilsTest::CreateScrollableChildUINode()
 
 RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t childCount)
 {
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation) {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index = [](int32_t index,
+        bool inAnimation, bool forceCreateNewChild) {
         return std::make_pair(0, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
@@ -152,9 +153,10 @@ RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t c
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
+    std::function<void()> onPurgeAll = []() {};
     std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+        0, 0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     node->arrLen_ = childCount;
     node->totalCount_ = childCount;
     return node;
@@ -439,6 +441,8 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset003, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<ListItemPattern>(nullptr));
     listItemNode->geometryNode_->SetFrameSize({ 100, 80 });
     listItemNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    // Item range in list viewport is [60, 140], so its center is at 100 while list center is at 50.
+    // Accessibility center-limit should move the list by -50 to center the item.
     AceType::DynamicCast<MockRenderContext>(listItemNode->renderContext_)->SetPaintRectWithTransform(
         RectF(0, 60, 100, 80));
     parentFrameNode->AddChild(listItemNode);
@@ -478,6 +482,8 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset004, TestSize.Level1)
     AceType::DynamicCast<MockRenderContext>(listItemGroupNode->renderContext_)->SetPaintRectWithTransform(
         RectF(0, 20, 100, 140));
     listItemGroupPattern->SetIndexInList(0);
+    // The focused item occupies [60, 120] inside the group. With the group placed at y = 20,
+    // the focused child range in the list viewport becomes [80, 140], so the center-limit offset is -40.
     listItemGroupPattern->itemPosition_[0] = { -1, 60.0f, 120.0f, false };
     parentFrameNode->AddChild(listItemGroupNode);
 
@@ -521,6 +527,8 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset005, TestSize.Level1)
     auto listItemGroupNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, -1, listItemGroupPattern);
     listItemGroupNode->geometryNode_->SetFrameSize({ 100, 140 });
     listItemGroupNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    // Group range in list viewport is [20, 160], so its center is 90 while list center is 50.
+    // Accessibility center-limit should therefore move by -40.
     AceType::DynamicCast<MockRenderContext>(listItemGroupNode->renderContext_)->SetPaintRectWithTransform(
         RectF(0, 20, 100, 140));
     listItemGroupPattern->SetIndexInList(0);

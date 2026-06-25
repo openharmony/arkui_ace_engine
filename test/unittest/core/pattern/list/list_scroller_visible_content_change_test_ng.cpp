@@ -14,10 +14,20 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t API_VERSION_BELOW_TWENTY_SIX = 25;
+const int32_t API_VERSION_TWENTY_SIX = 26;
+const int32_t INVALID_INDEX = -1;
+const int32_t VALID_INDEX = 0;
+const int32_t VALID_AREA = 1;
+const int32_t VALID_INDEX_IN_GROUP = 2;
+}
+
 class ListScrollVisibleContentChangeTestNg : public ListTestNg {};
 
 /**
@@ -926,5 +936,209 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, ContentClip002, TestSize.Level1)
     layoutProperty_->UpdatePadding(padding0);
     EXPECT_CALL(*ctx, ResetContentClip()).Times(1);
     FlushUITasks();
+}
+
+/**
+ * @tc.name: UpdateStartListItemIndex001
+ * @tc.desc: Test UpdateStartListItemIndex when list is empty and API version below VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateStartListItemIndex001, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_BELOW_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->startInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    bool result = pattern_->UpdateStartListItemIndex();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->startInfo_.index, VALID_INDEX);
+    EXPECT_EQ(pattern_->startInfo_.area, VALID_AREA);
+    EXPECT_EQ(pattern_->startInfo_.indexInGroup, VALID_INDEX_IN_GROUP);
+}
+
+/**
+ * @tc.name: UpdateStartListItemIndex002
+ * @tc.desc: Test UpdateStartListItemIndex when list is empty, API version >= VERSION_TWENTY_SIX and startInfo is -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateStartListItemIndex002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->startInfo_ = { INVALID_INDEX, INVALID_INDEX, INVALID_INDEX };
+    bool result = pattern_->UpdateStartListItemIndex();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->startInfo_.index, INVALID_INDEX);
+    EXPECT_EQ(pattern_->startInfo_.area, INVALID_INDEX);
+    EXPECT_EQ(pattern_->startInfo_.indexInGroup, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: UpdateStartListItemIndex003
+ * @tc.desc: Test UpdateStartListItemIndex when list is empty, API version >= VERSION_TWENTY_SIX and startInfo needs
+ * reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateStartListItemIndex003, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->startInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    bool result = pattern_->UpdateStartListItemIndex();
+    EXPECT_TRUE(result);
+    EXPECT_EQ(pattern_->startInfo_.index, INVALID_INDEX);
+    EXPECT_EQ(pattern_->startInfo_.area, INVALID_INDEX);
+    EXPECT_EQ(pattern_->startInfo_.indexInGroup, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: UpdateEndListItemIndex001
+ * @tc.desc: Test UpdateEndListItemIndex when list is empty and API version below VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateEndListItemIndex001, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_BELOW_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->endInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    bool result = pattern_->UpdateEndListItemIndex();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->endInfo_.index, VALID_INDEX);
+    EXPECT_EQ(pattern_->endInfo_.area, VALID_AREA);
+    EXPECT_EQ(pattern_->endInfo_.indexInGroup, VALID_INDEX_IN_GROUP);
+}
+
+/**
+ * @tc.name: UpdateEndListItemIndex002
+ * @tc.desc: Test UpdateEndListItemIndex when list is empty, API version >= VERSION_TWENTY_SIX and endInfo is -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateEndListItemIndex002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->endInfo_ = { INVALID_INDEX, INVALID_INDEX, INVALID_INDEX };
+    bool result = pattern_->UpdateEndListItemIndex();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->endInfo_.index, INVALID_INDEX);
+    EXPECT_EQ(pattern_->endInfo_.area, INVALID_INDEX);
+    EXPECT_EQ(pattern_->endInfo_.indexInGroup, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: UpdateEndListItemIndex003
+ * @tc.desc: Test UpdateEndListItemIndex when list is empty, API version >= VERSION_TWENTY_SIX and endInfo needs reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, UpdateEndListItemIndex003, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY_SIX);
+    ListModelNG model = CreateList();
+    CreateDone();
+    
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildTrueTotalCount(), 0);
+    
+    pattern_->endInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    bool result = pattern_->UpdateEndListItemIndex();
+    EXPECT_TRUE(result);
+    EXPECT_EQ(pattern_->endInfo_.index, INVALID_INDEX);
+    EXPECT_EQ(pattern_->endInfo_.area, INVALID_INDEX);
+    EXPECT_EQ(pattern_->endInfo_.indexInGroup, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: OnScrollVisibleContentChangeWithEmptyList001
+ * @tc.desc: Test OnScrollVisibleContentChange with empty list when API version < VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChangeWithEmptyList001, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_BELOW_TWENTY_SIX);
+    
+    ListItemIndex startInfo, endInfo;
+    bool callbackTriggered = false;
+    auto onVisibleChange = [&startInfo, &endInfo, &callbackTriggered](ListItemIndex start, ListItemIndex end) {
+        startInfo = start;
+        endInfo = end;
+        callbackTriggered = true;
+    };
+    
+    ListModelNG model = CreateList();
+    model.SetOnScrollVisibleContentChange(onVisibleChange);
+    CreateDone();
+    
+    EXPECT_FALSE(callbackTriggered);
+    EXPECT_EQ(startInfo.index, INVALID_INDEX);
+    EXPECT_EQ(endInfo.index, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: OnScrollVisibleContentChangeWithEmptyList002
+ * @tc.desc: Test OnScrollVisibleContentChange with empty list when API version >= VERSION_TWENTY_SIX and info reset
+ * needed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChangeWithEmptyList002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY_SIX);
+    
+    ListItemIndex startInfo, endInfo;
+    bool callbackTriggered = false;
+    auto onVisibleChange = [&startInfo, &endInfo, &callbackTriggered](ListItemIndex start, ListItemIndex end) {
+        startInfo = start;
+        endInfo = end;
+        callbackTriggered = true;
+    };
+    
+    ListModelNG model = CreateList();
+    model.SetOnScrollVisibleContentChange(onVisibleChange);
+    CreateDone();
+    
+    EXPECT_FALSE(callbackTriggered);
+    EXPECT_EQ(startInfo.index, INVALID_INDEX);
+    EXPECT_EQ(endInfo.index, INVALID_INDEX);
+    
+    pattern_->startInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    pattern_->endInfo_ = { VALID_INDEX, VALID_AREA, VALID_INDEX_IN_GROUP };
+    pattern_->OnScrollVisibleContentChange(eventHub_, false);
+    
+    EXPECT_TRUE(callbackTriggered);
+    EXPECT_EQ(startInfo.index, INVALID_INDEX);
+    EXPECT_EQ(startInfo.area, INVALID_INDEX);
+    EXPECT_EQ(startInfo.indexInGroup, INVALID_INDEX);
+    EXPECT_EQ(endInfo.index, INVALID_INDEX);
+    EXPECT_EQ(endInfo.area, INVALID_INDEX);
+    EXPECT_EQ(endInfo.indexInGroup, INVALID_INDEX);
 }
 } // namespace OHOS::Ace::NG

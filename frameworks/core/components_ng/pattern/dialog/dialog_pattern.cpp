@@ -105,7 +105,26 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+constexpr float EDGELIGHT_THICKNESS = 250.0f;
+constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
+constexpr float EDGELIGHT_INTENSITY = 0.5f;
+constexpr float BUTTON_MIN_FONTSIZE = 9.0f;
+constexpr uint32_t EDGELIGHT_MOVING_TIME = 568;
+constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
+constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
+constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
+constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
+constexpr uint32_t MIN_FRAME_RATE = 60;
+constexpr uint32_t MAX_FRAME_RATE = 120;
+constexpr uint32_t EXPECTED_FRAME_RATE = 120;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
+const DistortionParam TERMINAL_DISTORTION_PARAM {
+    .luCorner = { 0, 0 },
+    .ruCorner = { 1, 0 },
+    .lbCorner = { 0, 1 },
+    .rbCorner = { 1, 1 },
+    .barrelDistortion = { 0, 0, 0, 0 },
+};
 
 std::string GetBoolStr(bool isTure)
 {
@@ -390,7 +409,7 @@ bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
     dialogProperties.backgroundBlurStyle.has_value() ||
     dialogProperties.blurStyleOption.has_value() || dialogProperties.effectOption.has_value() ||
     dialogProperties.borderWidth.has_value() || dialogProperties.borderColor.has_value() ||
-    dialogProperties.borderStyle.has_value()) {
+    dialogProperties.borderStyle.has_value() || !SystemProperties::IsDeviceSystemMaterialSupported()) {
         return false;
     }
     return true;
@@ -415,14 +434,27 @@ void DialogPattern::InitDefaultSystemMaterial()
     }
 }
 
-void DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
+bool DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
 {
-    CHECK_NULL_VOID(contentRenderContext_);
+    CHECK_NULL_RETURN(contentRenderContext_, false);
     if (dialogProperties_.systemMaterial &&
         MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         contentRenderContext_->UpdateBackBlurStyle(std::nullopt);
+        // Handle low-end devices with IMMERSIVE material
+        if (DialogManager::ShouldHandleSmoothImmersiveMaterial(dialogProperties_.systemMaterial)) {
+            DialogManager::HandleSmoothImmersiveMaterial(columnNode, dialogProperties_.systemMaterial);
+            return true;
+        }
+        // Normal processing for other cases
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
+        return true;
     }
+    return false;
+}
+
+bool DialogPattern::ShouldApplySystemMaterialShadow() const
+{
+    return DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial);
 }
 
 void DialogPattern::UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
@@ -453,14 +485,19 @@ void DialogPattern::UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>
         outerColorProp.SetColor(dialogTheme->GetDialogOuterBorderColor());
         contentRenderContext->UpdateOuterBorderColor(outerColorProp);
     }
-    if (props.shadow.has_value()) {
-        contentRenderContext->UpdateBackShadow(props.shadow.value());
-    } else {
-        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
-        contentRenderContext->UpdateBackShadow(shadow);
-    }
-    SetDialogSystemMaterial(contentNode);
+    UpdateDialogShadow(contentRenderContext, props);
     contentRenderContext->SetClipToBounds(true);
+}
+
+void DialogPattern::UpdateDialogShadow(const RefPtr<RenderContext>& renderContext, const DialogProperties& props)
+{
+    CHECK_NULL_VOID(renderContext);
+    if (props.shadow.has_value()) {
+        renderContext->UpdateBackShadow(props.shadow.value());
+    } else {
+        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme_->GetShadowDialog()));
+        renderContext->UpdateBackShadow(shadow);
+    }
 }
 
 // set render context properties of content frame
@@ -472,6 +509,14 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     contentRenderContext_ = contentRenderContext;
     auto pipeLineContext = contentNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
+    if (SetDialogSystemMaterial(contentNode)) {
+        UpdateContentBorderRadius(contentNode, props);
+        if (!DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
+            UpdateDialogShadow(contentRenderContext, props);
+        }
+        contentRenderContext->SetClipToBounds(true);
+        return;
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         DialogView::IsSupportBlurStyle(contentNode, dialogProperties_.isShowInSubWindow) && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
@@ -506,22 +551,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     }
     bool isCustomBorder = props.borderWidth.has_value() ||
         props.borderStyle.has_value() || props.borderColor.has_value();
-    BorderRadiusProperty radius;
-    if (props.borderRadius.has_value()) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            radius = props.borderRadius.value();
-            ParseBorderRadius(radius);
-            contentRenderContext->UpdateBorderRadius(radius);
-        } else {
-            contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
-        }
-    } else {
-        radius.SetRadius(dialogTheme_->GetRadius().GetX());
-        contentRenderContext->UpdateBorderRadius(radius);
-    }
-    if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
-        contentRenderContext->UpdateOuterBorderRadius(radius);
-    }
+    UpdateContentBorderRadius(contentNode, props);
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
@@ -567,6 +597,34 @@ void DialogPattern::ParseBorderRadius(BorderRadiusProperty& raidus)
     }
     if (!raidus.radiusBottomRight.has_value() || raidus.radiusBottomRight.value().Value() < 0) {
         raidus.radiusBottomRight = dialogTheme_->GetRadius().GetX();
+    }
+}
+
+void DialogPattern::UpdateContentBorderRadius(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
+{
+    CHECK_NULL_VOID(contentNode);
+    auto contentRenderContext = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(contentRenderContext);
+
+    bool isCustomBorder = props.borderWidth.has_value() ||
+        props.borderStyle.has_value() || props.borderColor.has_value();
+
+    BorderRadiusProperty radius;
+    if (props.borderRadius.has_value()) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            radius = props.borderRadius.value();
+            ParseBorderRadius(radius);
+            contentRenderContext->UpdateBorderRadius(radius);
+        } else {
+            contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
+        }
+    } else {
+        radius.SetRadius(dialogTheme_->GetRadius().GetX());
+        contentRenderContext->UpdateBorderRadius(radius);
+    }
+
+    if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+        contentRenderContext->UpdateOuterBorderRadius(radius);
     }
 }
 
@@ -684,6 +742,23 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
+    UpdateDrawFocusLevel();
+}
+
+void DialogPattern::UpdateDrawFocusLevel()
+{
+    std::list<DialogContentNode> textNodeList = {
+        DialogContentNode::TITLE,
+        DialogContentNode::SUBTITLE,
+        DialogContentNode::MESSAGE,
+    };
+    for (const auto& textNode : textNodeList) {
+        auto node = contentNodeMap_[textNode];
+        CHECK_NULL_CONTINUE(node);
+        auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_CONTINUE(accessibilityProperty);
+        accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    }
 }
 
 void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
@@ -784,13 +859,12 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(titleRowProps, nullptr);
-    titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    titleProp->UpdateFontWeight(FontWeight::BOLD);
+    titleProp->UpdateTextAlign(TextAlign::CENTER);
     if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateFontWeight(FontWeight::BOLD);
-        titleProp->UpdateTextAlign(TextAlign::CENTER);
         titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
-        titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     title->MountToParent(titleRow);
     title->MarkModifyDone();
@@ -815,6 +889,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     titleProp->UpdateContent(dialogProperties.subtitle);
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
+    titleProp->UpdateFontWeight(FontWeight::REGULAR);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
         titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
@@ -840,12 +915,11 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     ACE_UINODE_TRACE(subtitleRow);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
-    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    titleProp->UpdateTextAlign(TextAlign::CENTER);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateTextAlign(TextAlign::CENTER);
         titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
-        subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
@@ -1148,11 +1222,10 @@ void DialogPattern::UpdateDialogButtonProperty(
 {
     // update button padding
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    buttonProp->UpdateType(ButtonType::NORMAL);
+    buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
         buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
     }
-    buttonProp->UpdateBorderRadius(BorderRadiusProperty(dialogTheme_->GetButtonBorderRadius()));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -1285,7 +1358,8 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
                                                                            : dialogTheme_->GetNormalButtonFontSize();
-    textProps->UpdateFontSize(buttonTextSize);
+    textProps->UpdateAdaptMaxFontSize(buttonTextSize);
+    textProps->UpdateAdaptMinFontSize(Dimension(BUTTON_MIN_FONTSIZE, DimensionUnit::FP));
 
     // update text color
     Color color;
@@ -1545,7 +1619,7 @@ void DialogPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(
         contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial));
     if (InvertShadowColor()) {
         return;
     }
@@ -1560,7 +1634,7 @@ void DialogPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(
         contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial));
     if (InvertShadowColor()) {
         return;
     }
@@ -1646,6 +1720,12 @@ void DialogPattern::UpdateResourceColors()
 
     CHECK_NULL_VOID(contentRenderContext_);
     // Also reload internal resources for complex properties
+    if (dialogProperties_.shadow.has_value() &&
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
+        dialogProperties_.shadow->ReloadResources();
+        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
+    }
+    CHECK_NULL_VOID(!dialogProperties_.systemMaterial);
     if (dialogProperties_.backgroundColorResObj) {
         Color backgroundColor = dialogProperties_.backgroundColor.value();
         bool state = ResourceParseUtils::ParseResColor(dialogProperties_.backgroundColorResObj, backgroundColor);
@@ -1663,11 +1743,6 @@ void DialogPattern::UpdateResourceColors()
     if (dialogProperties_.borderColor.has_value()) {
         dialogProperties_.borderColor->ReloadResources();
         contentRenderContext_->UpdateBorderColor(dialogProperties_.borderColor.value());
-    }
-
-    if (dialogProperties_.shadow.has_value()) {
-        dialogProperties_.shadow->ReloadResources();
-        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
     }
 }
 bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -1785,7 +1860,8 @@ void DialogPattern::OnLanguageConfigurationUpdate()
         UpdateSheetIconAndText();
     }
 
-    if (dialogProperties_.shadow.has_value()) {
+    if (dialogProperties_.shadow.has_value() &&
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
         contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
     }
 
@@ -2338,20 +2414,21 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (NeedDistortion() && !isDialogShow_) {
-#if defined(ENABLE_ROSEN_BACKEND)
-        UpdateSDFRRectShape(DynamicCast<FrameNode>(host->GetFirstChild()));
-        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
-#endif
+        renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
     CHECK_EQUAL_RETURN(isDialogShow_, false, false);
-
-    if (NeedDistortion()) {
-        PlayDistortion();
-    }
-    if (NeedEdgeLight()) {
-        PlayFlowLight();
-        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
-    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto dialogPattern = weak.Upgrade();
+        CHECK_NULL_VOID(dialogPattern);
+        if (dialogPattern->NeedDistortion()) {
+            dialogPattern->PlayDistortion();
+        }
+        if (dialogPattern->NeedEdgeLight()) {
+            dialogPattern->PlayFlowLight();
+        }
+    });
     isDialogShow_ = false;
     return true;
 }
@@ -3325,26 +3402,27 @@ void DialogPattern::PlayFlowLight()
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto length = renderContext->GetPaintRectWithoutTransform().Height()*EDGELIGHT_LENGTH_RATIO;
     
     EdgeLightParam param  {
         .edgeLightPosition = EdgeLightPosition::BOTTOM,
-        .length = 300,
-        .intensity = 0.1,
+        .length = length,
+        .intensity = 0,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
     ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param, columnNode);
 
     EdgeLightParam param1 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
-        .intensity = 0.1,
+        .length = length,
+        .intensity = 0,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
 
     AnimationOption option;
-    option.SetDuration(500);
+    option.SetDuration(EDGELIGHT_MOVING_TIME);
     option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
 
     /**
@@ -3360,15 +3438,15 @@ void DialogPattern::PlayFlowLight()
 
     EdgeLightParam param2 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
-        .intensity = 0.3,
+        .length = length,
+        .intensity = EDGELIGHT_INTENSITY,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
     
     AnimationOption option2;
-    option2.SetDuration(480);
-    option2.SetDelay(300);  // Set delay
+    option2.SetDuration(HIGHLIGHT_ANIMATION_TIME);
+    option2.SetDelay(HIGHLIGHT_ANIMATION_DELAY_TIME);  // Set delay
     option2.SetCurve(Curves::LINEAR);
 
     /**
@@ -3382,15 +3460,15 @@ void DialogPattern::PlayFlowLight()
 
     EdgeLightParam param3 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
+        .length = length,
         .intensity = 0,
         .color = Color::WHITE,
         .thickness = 0.0
     };
     
     AnimationOption option3;
-    option3.SetDuration(280);
-    option3.SetDelay(500);  // Set delay
+    option3.SetDuration(LIGHT_DISAPPEARING_ANIMATION_TIME);
+    option3.SetDelay(LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME);  // Set delay
     option3.SetCurve(Curves::LINEAR);
 
     /**
@@ -3424,6 +3502,33 @@ std::vector<RefPtr<RenderContext>> GetFirstRenderContexts(const RefPtr<UINode>& 
     return childContexts;
 }
 
+void DialogPattern::StartMaskColorAnimation()
+{
+    /**
+     * Background color animation
+     * Animate from transparent to actual mask color value
+     * Uses same parameters as opacity animation in OpenDialogAnimationInner
+     */
+    auto dialogNode = GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    Color maskColorStart = dialogTheme_->GetMaskColorStart();
+    auto dialogContext = dialogNode->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    Color maskColorEnd = dialogContext->GetBackgroundColor().value_or(dialogTheme_->GetMaskColorEnd());
+    dialogContext->UpdateBackgroundColor(maskColorStart);
+    AnimationOption bgOption;
+    bgOption.SetCurve(Curves::SHARP);
+    bgOption.SetDuration(dialogTheme_->GetOpacityAnimationDurIn());
+    bgOption.SetFillMode(FillMode::FORWARDS);
+    bgOption.SetIteration(1);
+    bgOption.SetAnimationDirection(AnimationDirection::NORMAL);
+    AnimationUtils::Animate(bgOption, [weakRender = WeakPtr<RenderContext>(dialogContext), maskColorEnd]() {
+        auto render = weakRender.Upgrade();
+        CHECK_NULL_VOID(render);
+        render->UpdateBackgroundColor(maskColorEnd);
+    });
+}
+
 void DialogPattern::PlayDistortion()
 {
     auto dialogNode = GetHost();
@@ -3433,6 +3538,8 @@ void DialogPattern::PlayDistortion()
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     std::vector<RefPtr<RenderContext>> childContexts = GetFirstRenderContexts(columnNode);
+
+    StartMaskColorAnimation();
 
     /**
      * Stage 1: Initial distortion effect
@@ -3463,8 +3570,11 @@ void DialogPattern::PlayDistortion()
         .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
     };
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+        AceType::MakeRefPtr<FrameRateRange>(MIN_FRAME_RATE, MAX_FRAME_RATE, EXPECTED_FRAME_RATE);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 247, 25));  // Spring curve
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
     AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
         renderContext->UpdateDistortionParam(param1);
         for (const auto& childContext : childContexts) {
@@ -3484,7 +3594,7 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = {  0, 0, 0, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 110, 16));
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 235, 23));
     AnimationUtils::Animate(option, [renderContext, param2, childContexts]() {
         renderContext->UpdateDistortionParam(param2);
         for (const auto& childContext : childContexts) {
@@ -3517,13 +3627,7 @@ void DialogPattern::PlayDistortion()
      * Remove all distortion, restore to normal state
      * Set delay time 120ms, use default curve
      */
-    DistortionParam param4 {
-        .luCorner = { 0, 0 },
-        .ruCorner = { 1, 0 },
-        .lbCorner = { 0, 1 },
-        .rbCorner = { 1, 1 },
-        .barrelDistortion = { 0, 0, 0, 0 },  // Remove barrel distortion
-    };
+    DistortionParam param4 = TERMINAL_DISTORTION_PARAM;
     option.SetDelay(120);  // Set delay
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     AnimationUtils::Animate(option, [renderContext, param4, childContexts]() {
@@ -3534,45 +3638,4 @@ void DialogPattern::PlayDistortion()
     }, onFinishEvent_);
     TAG_LOGI(AceLogTag::ACE_DIALOG, "Distortion animation applied successfully");
 }
-
-#if defined(ENABLE_ROSEN_BACKEND)
-void DialogPattern::UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode)
-{
-    CHECK_NULL_VOID(contentNode);
-    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
-        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
-    auto shape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
-    CHECK_NULL_VOID(shape);
-
-    auto renderContext = contentNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto borderRadius = renderContext->GetBorderRadius();
-    float radiusTopLeftPx =
-        borderRadius ? (borderRadius->radiusTopLeft ? borderRadius->radiusTopLeft.value().ConvertToPx() : 0) : 0;
-    float radiusTopRightPx =
-        borderRadius ? (borderRadius->radiusTopRight ? borderRadius->radiusTopRight.value().ConvertToPx() : 0) : 0;
-    float radiusBottomLeftPx =
-        borderRadius ? (borderRadius->radiusBottomLeft ? borderRadius->radiusBottomLeft.value().ConvertToPx() : 0) : 0;
-    float radiusBottomRightPx =
-        borderRadius ? (borderRadius->radiusBottomRight ? borderRadius->radiusBottomRight.value().ConvertToPx() : 0)
-                     : 0;
-
-    auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    if (lastPaintRect_.Width() == paintRect.Width() && paintRect.Height() == paintRect.Height()) {
-        return;
-    }
-    OHOS::Rosen::RRect rrect(
-        OHOS::Rosen::RectF(
-            0,
-            0,
-            paintRect.Width(),
-            paintRect.Height()
-        ),
-        OHOS::Rosen::Vector4(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx)
-    );
-    shape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
-    
-    renderContext->SetSDFShape(shape);
-}
-#endif
 } // namespace OHOS::Ace::NG

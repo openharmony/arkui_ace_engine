@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/property/particle_property.h"
 
 #undef private
 #undef protected
@@ -630,5 +631,135 @@ HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread002, TestSize.Level0)
     eventhub->SetNDKDrawCompletedCallback(drawCompletedCallback);
     renderContext.RequestNextFrameMultiThread(true);
     EXPECT_EQ(eventhub->HasNDKDrawCompletedCallback(), true);
+}
+
+/**
+ * @tc.name: UpdateParticleOptionArray001
+ * @tc.desc: Test UpdateParticleOptionArray with empty list
+ */
+HWTEST_F(RenderContextTestNg, UpdateParticleOptionArray001, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+    std::list<NG::ParticleOption> emptyList;
+
+    EXPECT_FALSE(renderContext.HasParticleOptionArray());
+
+    renderContext.UpdateParticleOptionArray(emptyList);
+    EXPECT_TRUE(renderContext.HasParticleOptionArray());
+    EXPECT_EQ(renderContext.GetParticleOptionArrayValue().size(), 0u);
+}
+
+/**
+ * @tc.name: UpdateParticleOptionArray002
+ * @tc.desc: Test UpdateParticleOptionArray with same value skips update
+ */
+HWTEST_F(RenderContextTestNg, UpdateParticleOptionArray002, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+    std::list<NG::ParticleOption> list1;
+    std::list<NG::ParticleOption> list2;
+
+    renderContext.UpdateParticleOptionArray(list1);
+    EXPECT_TRUE(renderContext.HasParticleOptionArray());
+
+    // Update with same (NearEqual) value should not trigger OnParticleOptionArrayUpdate
+    renderContext.UpdateParticleOptionArray(list2);
+    EXPECT_TRUE(renderContext.HasParticleOptionArray());
+}
+
+/**
+ * @tc.name: UpdateParticleOptionArray003
+ * @tc.desc: Test UpdateParticleOptionArray with non-empty list
+ */
+HWTEST_F(RenderContextTestNg, UpdateParticleOptionArray003, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+
+    NG::ParticleOption option;
+    NG::EmitterOption emitterOption;
+    option.SetEmitterOption(emitterOption);
+
+    std::list<NG::ParticleOption> list = { option };
+    renderContext.UpdateParticleOptionArray(list);
+
+    EXPECT_TRUE(renderContext.HasParticleOptionArray());
+    EXPECT_EQ(renderContext.GetParticleOptionArrayValue().size(), 1u);
+}
+
+/**
+ * @tc.name: GetParticleOptionArrayValue001
+ * @tc.desc: Test GetParticleOptionArrayValue returns default when not set
+ */
+HWTEST_F(RenderContextTestNg, GetParticleOptionArrayValue001, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+    std::list<NG::ParticleOption> defaultVal;
+
+    EXPECT_FALSE(renderContext.HasParticleOptionArray());
+
+    auto& result = renderContext.GetParticleOptionArrayValue(defaultVal);
+    EXPECT_EQ(&result, &defaultVal);
+}
+
+/**
+ * @tc.name: GetParticleOptionArrayValue002
+ * @tc.desc: Test GetParticleOptionArrayValue returns actual value when set
+ */
+HWTEST_F(RenderContextTestNg, GetParticleOptionArrayValue002, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+
+    NG::ParticleOption option;
+    NG::EmitterOption emitterOption;
+    option.SetEmitterOption(emitterOption);
+
+    std::list<NG::ParticleOption> list = { option };
+    renderContext.UpdateParticleOptionArray(list);
+
+    std::list<NG::ParticleOption> defaultVal;
+    auto& result = renderContext.GetParticleOptionArrayValue(defaultVal);
+    EXPECT_NE(&result, &defaultVal);
+    EXPECT_EQ(result.size(), 1u);
+}
+
+/**
+ * @tc.name: CloneAndResetParticleOptionArray001
+ * @tc.desc: Test CloneParticleOptionArray and ResetParticleOptionArray
+ */
+HWTEST_F(RenderContextTestNg, CloneAndResetParticleOptionArray001, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+
+    // Clone when not set
+    auto cloned = renderContext.CloneParticleOptionArray();
+    EXPECT_FALSE(cloned.has_value());
+
+    // Set and clone
+    std::list<NG::ParticleOption> list;
+    renderContext.UpdateParticleOptionArray(list);
+    cloned = renderContext.CloneParticleOptionArray();
+    EXPECT_TRUE(cloned.has_value());
+
+    // Reset
+    renderContext.ResetParticleOptionArray();
+    EXPECT_FALSE(renderContext.HasParticleOptionArray());
+}
+
+/**
+ * @tc.name: GetParticleOptionArray001
+ * @tc.desc: Test GetParticleOptionArray returns nullopt ref when not set
+ */
+HWTEST_F(RenderContextTestNg, GetParticleOptionArray001, TestSize.Level1)
+{
+    NG::RenderContext renderContext;
+
+    const auto& result = renderContext.GetParticleOptionArray();
+    EXPECT_FALSE(result.has_value());
+
+    // Set value then get
+    std::list<NG::ParticleOption> list;
+    renderContext.UpdateParticleOptionArray(list);
+    const auto& result2 = renderContext.GetParticleOptionArray();
+    EXPECT_TRUE(result2.has_value());
 }
 } // namespace OHOS::Ace

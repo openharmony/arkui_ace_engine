@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/list/list_properties.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "ui/base/macros.h"
 #include "ui/view/components/tabs/tabs_data.h"
@@ -324,7 +325,7 @@ void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerTy
 }
 
 template<>
-void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
 {
     switch (src) {
         case ARK_IMAGE_FIT_CONTAIN: dst = ImageFit::CONTAIN; break;
@@ -391,7 +392,7 @@ void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
 }
 
 template<>
-void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
 {
     switch (src) {
         case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP:
@@ -1004,7 +1005,7 @@ void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
 }
 
 template<>
-void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
 {
     switch (src) {
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
@@ -2114,7 +2115,6 @@ void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src)
     switch (src) {
         case ARK_HDR_TYPE_DEFAULT: dst = HdrType::DEFAULT; break;
         case ARK_HDR_TYPE_AIHDR: dst = HdrType::AIHDR; break;
-        case ARK_HDR_TYPE_EDR: dst = HdrType::EDR; break;
         default: LOGE("Unexpected enum value in Ark_HdrType: %{public}d", src);
     }
 }
@@ -2583,7 +2583,7 @@ void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_Dist
 }
 
 template<>
-void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
 {
     switch (src) {
         case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;
@@ -2610,6 +2610,30 @@ void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_Dial
         case ARK_DIALOG_DISPLAY_MODE_SCREEN_BASED: dst = DialogDisplayModeInSubWindow::SCREEN_BASED; break;
         case ARK_DIALOG_DISPLAY_MODE_WINDOW_BASED: dst = DialogDisplayModeInSubWindow::WINDOW_BASED; break;
         default: LOGE("Unexpected enum value in Ark_DialogDisplayMode: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src)
+{
+    switch (src) {
+        case ARK_EDGE_LIGHT_POSITION_TOP_LEFT: dst = EdgeLightPosition::TOP_LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_TOP_RIGHT: dst = EdgeLightPosition::TOP_RIGHT; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM_LEFT: dst = EdgeLightPosition::BOTTOM_LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM_RIGHT: dst = EdgeLightPosition::BOTTOM_RIGHT; break;
+        case ARK_EDGE_LIGHT_POSITION_TOP: dst = EdgeLightPosition::TOP; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM: dst = EdgeLightPosition::BOTTOM; break;
+        case ARK_EDGE_LIGHT_POSITION_LEFT: dst = EdgeLightPosition::LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_RIGHT: dst = EdgeLightPosition::RIGHT; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeLightPosition: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src)
+{
+    switch (src) {
+        case ARK_UNION_MODE_SMOOTH_UNION: dst = UnionMode::SMOOTH_UNION; break;
+        case ARK_UNION_MODE_GRAVITY_UNION: dst = UnionMode::GRAVITY_UNION; break;
+        default: LOGE("Unexpected enum value in Ark_UnionMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

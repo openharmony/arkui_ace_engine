@@ -17,12 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_DIALOG_VIEW_H
 
 #include "base/utils/macros.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
+
+namespace OHOS::Ace {
+class ButtonTheme;
+class DialogTheme;
+class PickerTheme;
+}
 
 namespace OHOS::Ace::NG {
+class ButtonLayoutProperty;
+class RenderContext;
+class TextLayoutProperty;
+class TimePickerRowPattern;
 
 class ACE_EXPORT TimePickerDialogView {
 public:

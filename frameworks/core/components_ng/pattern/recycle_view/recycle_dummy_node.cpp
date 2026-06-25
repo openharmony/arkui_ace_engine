@@ -49,9 +49,18 @@ RecycleDummyNode::~RecycleDummyNode()
     if (child->TotalChildCount() == 0) {
         return;
     }
-    child->DetachFromMainTree();
     auto customNode = AceType::DynamicCast<CustomNodeBase>(child);
+    if (customNode) {
+        customNode->TryEnableParentCustomNodeMemOpt();
+    }
+    child->DetachFromMainTree();
+    CHECK_EQUAL_VOID(disableRecycle_, true);
     CHECK_NULL_VOID(customNode);
     customNode->FireRecycleSelf();
+}
+
+void RecycleDummyNode::SetDisableRecycle(bool disableRecycle)
+{
+    disableRecycle_ = disableRecycle;
 }
 } // namespace OHOS::Ace::NG

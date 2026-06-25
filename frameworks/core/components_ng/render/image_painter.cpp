@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/image_painter.h"
 
+#include "core/components/common/properties/gradient.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

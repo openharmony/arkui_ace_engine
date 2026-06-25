@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
@@ -543,6 +544,14 @@ void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void MenuItemModelNG::SetSubBuilder(FrameNode* frameNode, std::function<void()>&& subBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSubBuilder(std::move(subBuilder));
 }
 
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)

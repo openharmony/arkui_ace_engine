@@ -125,7 +125,7 @@ void JSScopeUtil::GetAllUIContexts(const JSCallbackInfo& info)
 
 void JSScopeUtil::ResolveUIContext(const JSCallbackInfo& info)
 {
-    auto currentIdWithReason = ContainerScope::CurrentIdWithReason(false);
+    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
     JSRef<JSArray> jsCurrentIdWithReason = JSRef<JSArray>::New();
     jsCurrentIdWithReason->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(GetMainInstanceId(currentIdWithReason.first))));
     jsCurrentIdWithReason->SetValueAt(

@@ -674,6 +674,17 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
     NodeModifier::SetOnListScrollVisibleContentChange,
+    NodeModifier::SetOnListEditModeChange,
+};
+
+const ComponentAsyncEventHandler ARC_LIST_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnArcListScrollIndex,
+    NodeModifier::SetOnArcListScrollStart,
+    NodeModifier::SetOnArcListScrollStop,
+    NodeModifier::SetOnArcListWillScroll,
+    NodeModifier::SetOnArcListDidScroll,
+    NodeModifier::SetOnArcListReachStart,
+    NodeModifier::SetOnArcListReachEnd,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -898,7 +909,7 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::ResetSwiperOnContentDidScroll,
     nullptr,
     nullptr,
     nullptr,
@@ -920,6 +931,17 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
     NodeModifier::ResetOnScrollVisibleContentChange,
+    NodeModifier::ResetOnListEditModeChange,
+};
+
+const ResetComponentAsyncEventHandler ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnArcListScrollIndex,
+    NodeModifier::ResetOnArcListScrollStart,
+    NodeModifier::ResetOnArcListScrollStop,
+    NodeModifier::ResetOnArcListWillScroll,
+    NodeModifier::ResetOnArcListDidScroll,
+    NodeModifier::ResetOnArcListReachStart,
+    NodeModifier::ResetOnArcListReachEnd,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1158,6 +1180,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_ARC_LIST: {
+            if (subKind >= sizeof(ARC_LIST_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_LIST_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_LIST_ITEM: {
@@ -1453,6 +1483,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ARC_LIST: {
+            if (subKind >=
+                sizeof(ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_LIST_ITEM: {
@@ -2423,6 +2463,11 @@ ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFl
     return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
 }
 
+ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle handle, ArkUI_ImmersiveMaterial* material)
+{
+    return CustomDialog::SetSystemMaterial(handle, material);
+}
+
 ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
 {
     return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
@@ -2456,6 +2501,12 @@ ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState)
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
 {
     return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 OpenCustomDialogWithErrorCallback(
+    ArkUIDialogHandle handle, void* userData, void (*callback)(int32_t errorCode, int32_t dialogId, void* userData))
+{
+    return CustomDialog::OpenCustomDialogWithErrorCallback(handle, userData, callback);
 }
 
 ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
@@ -2540,8 +2591,10 @@ const ArkUIDialogAPI* GetDialogAPI()
         .closeCustomDialog = CloseCustomDialog,
         .setSubwindowMode = SetDialogSubwindowMode,
         .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
+        .setSystemMaterial = SetSystemMaterial,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
-        .setBackgroundEffect = SetBackgroundEffect
+        .setBackgroundEffect = SetBackgroundEffect,
+        .openCustomDialogWithErrorCallback = OpenCustomDialogWithErrorCallback,
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

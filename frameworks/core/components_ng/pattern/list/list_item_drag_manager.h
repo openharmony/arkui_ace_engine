@@ -91,6 +91,7 @@ private:
     OffsetF GetParentPaddingOffset();
     bool GetDummyItemRect(int32_t index, RectF& rect) const;
     bool CheckItemExistence(int32_t index) const;
+    bool IsOnSameLine(const RectF& rect, int32_t diagonalIndex) const;
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;

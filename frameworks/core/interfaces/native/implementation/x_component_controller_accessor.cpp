@@ -20,37 +20,36 @@
 #include "arkoala_api_generated.h"
 
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace XComponentControllerAccessor {
-void DestroyPeerImpl(Ark_XComponentController peer)
+namespace XComponentControllerNativeAccessor {
+void DestroyPeerImpl(Ark_XComponentControllerNative peer)
 {
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     peerImpl->DecRefCount();
 }
-Ark_XComponentController ConstructImpl()
+Ark_XComponentControllerNative ConstructImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<XComponentControllerPeerImpl>();
+    auto peerImpl = Referenced::MakeRefPtr<XComponentControllerNativePeerImpl>();
     peerImpl->IncRefCount();
 #ifdef XCOMPONENT_SUPPORTED
     peerImpl->controller = std::make_shared<XComponentControllerNG>();
 #endif //XCOMPONENT_SUPPORTED
-    return reinterpret_cast<Ark_XComponentController>(Referenced::RawPtr(peerImpl));
+    return reinterpret_cast<Ark_XComponentControllerNative>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
+Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentControllerNative peer)
 {
     Ark_String arkSurfaceId = {};
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     auto surfaceId = peerImpl->controller->GetSurfaceId();
@@ -58,12 +57,12 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
     return arkSurfaceId;
 }
-void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
+void SetXComponentSurfaceRectImpl(Ark_XComponentControllerNative peer,
                                   const Ark_SurfaceRect* rect)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(rect);
@@ -89,12 +88,12 @@ void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
     peerImpl->controller->UpdateSurfaceBounds();
 #endif //XCOMPONENT_SUPPORTED
 }
-Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
+Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentControllerNative peer)
 {
     Ark_SurfaceRect rect;
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     float offsetX = 0.0f;
@@ -110,12 +109,12 @@ Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
     return rect;
 }
-void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
+void SetXComponentSurfaceRotationImpl(Ark_XComponentControllerNative peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(rotationOptions);
@@ -123,12 +122,12 @@ void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
     peerImpl->controller->SetSurfaceRotation(lock.value_or(false));
 #endif //XCOMPONENT_SUPPORTED
 }
-Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentController peer)
+Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentControllerNative peer)
 {
     Ark_SurfaceRotationOptions rotationOptions;
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     bool lock = peerImpl->controller->GetSurfaceRotation();
@@ -136,118 +135,49 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 #endif //XCOMPONENT_SUPPORTED
     return rotationOptions;
 }
-void StopImageAnalyzerImpl(Ark_XComponentController peer)
+void StopImageAnalyzerImpl(Ark_XComponentControllerNative peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-synthetic_Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    return peerImpl->arkOnSurfaceCreated;
-#else
-    return {};
-#endif //XCOMPONENT_SUPPORTED
-}
-void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
-                             const synthetic_Callback_String_Void* onSurfaceCreated)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceCreated);
-    peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreated);
-#endif //XCOMPONENT_SUPPORTED
-}
-Callback_String_SurfaceRect_Void GetOnSurfaceChangedImpl(Ark_XComponentController peer)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    return peerImpl->arkOnSurfaceChanged;
-#else
-    return {};
-#endif //XCOMPONENT_SUPPORTED
-}
-void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
-                             const Callback_String_SurfaceRect_Void* onSurfaceChanged)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceChanged);
-    peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChanged);
-#endif //XCOMPONENT_SUPPORTED
-}
-synthetic_Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    return peerImpl->arkOnSurfaceDestroyed;
-#else
-    return {};
-#endif //XCOMPONENT_SUPPORTED
-}
-void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
-                               const synthetic_Callback_String_Void* onSurfaceDestroyed)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->controller);
-    CHECK_NULL_VOID(onSurfaceDestroyed);
-    peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyed);
-#endif //XCOMPONENT_SUPPORTED
-}
-Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
+Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentControllerNative peer)
 {
     auto invalid = Converter::ArkValue<Opt_drawing_Canvas>();
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, invalid);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, invalid);
     auto canvas = peerImpl->GetCanvas();
     CHECK_NULL_RETURN(canvas, invalid);
-    return Converter::ArkValue<Opt_drawing_Canvas>(canvas.get());
+    return Converter::ArkValue<Opt_drawing_Canvas>(canvas);
 #else
     return invalid;
 #endif // XCOMPONENT_SUPPORTED
 }
 
-void UnlockCanvasAndPostImpl(Ark_XComponentController peer, Ark_drawing_Canvas canvas)
+void UnlockCanvasAndPostImpl(Ark_XComponentControllerNative peer, Ark_drawing_Canvas canvas)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(canvas);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
-    peerImpl->controller->UnlockCanvasAndPost(canvas->GetCanvas());
+    peerImpl->controller->UnlockCanvasAndPost(reinterpret_cast<RSCanvas*>(canvas));
 #endif // XCOMPONENT_SUPPORTED
 }
 
-void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer, const Ark_SurfaceConfig* config)
+void SetXComponentSurfaceConfigImpl(Ark_XComponentControllerNative peer, const Ark_SurfaceConfig* config)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(config);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     auto isOpaque = Converter::OptConvert<bool>(config->isOpaque);
@@ -255,27 +185,21 @@ void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer, const Ark_Sur
 #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentControllerAccessor
-const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()
+const GENERATED_ArkUIXComponentControllerNativeAccessor* GetXComponentControllerNativeAccessor()
 {
-    static const GENERATED_ArkUIXComponentControllerAccessor XComponentControllerAccessorImpl {
-        XComponentControllerAccessor::DestroyPeerImpl,
-        XComponentControllerAccessor::ConstructImpl,
-        XComponentControllerAccessor::GetFinalizerImpl,
-        XComponentControllerAccessor::GetXComponentSurfaceIdImpl,
-        XComponentControllerAccessor::SetXComponentSurfaceRectImpl,
-        XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
-        XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,
-        XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
-        XComponentControllerAccessor::StopImageAnalyzerImpl,
-        XComponentControllerAccessor::LockCanvasImpl,
-        XComponentControllerAccessor::UnlockCanvasAndPostImpl,
-        XComponentControllerAccessor::SetXComponentSurfaceConfigImpl,
-        XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
-        XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
-        XComponentControllerAccessor::GetOnSurfaceChangedImpl,
-        XComponentControllerAccessor::SetOnSurfaceChangedImpl,
-        XComponentControllerAccessor::GetOnSurfaceDestroyedImpl,
-        XComponentControllerAccessor::SetOnSurfaceDestroyedImpl,
+    static const GENERATED_ArkUIXComponentControllerNativeAccessor XComponentControllerAccessorImpl {
+        XComponentControllerNativeAccessor::DestroyPeerImpl,
+        XComponentControllerNativeAccessor::ConstructImpl,
+        XComponentControllerNativeAccessor::GetFinalizerImpl,
+        XComponentControllerNativeAccessor::GetXComponentSurfaceIdImpl,
+        XComponentControllerNativeAccessor::SetXComponentSurfaceRectImpl,
+        XComponentControllerNativeAccessor::GetXComponentSurfaceRectImpl,
+        XComponentControllerNativeAccessor::SetXComponentSurfaceRotationImpl,
+        XComponentControllerNativeAccessor::GetXComponentSurfaceRotationImpl,
+        XComponentControllerNativeAccessor::StopImageAnalyzerImpl,
+        XComponentControllerNativeAccessor::LockCanvasImpl,
+        XComponentControllerNativeAccessor::UnlockCanvasAndPostImpl,
+        XComponentControllerNativeAccessor::SetXComponentSurfaceConfigImpl,
     };
     return &XComponentControllerAccessorImpl;
 }

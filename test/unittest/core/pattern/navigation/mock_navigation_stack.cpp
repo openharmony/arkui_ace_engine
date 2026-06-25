@@ -201,6 +201,7 @@ void MockNavigationStack::SetPathArray(const std::vector<NavdestinationRecoveryI
         auto navPathInfo = AceType::MakeRefPtr<MockNavPathInfo>(recoveryInfo.name);
         navPathInfo->mode = recoveryInfo.mode;
         navPathInfo->fromRecovery = true;
+        navPathInfo->autoCleanedState = recoveryInfo.state;
         newPathArray.push_back(navPathInfo);
     }
     mockPathArray_ = newPathArray;
@@ -350,6 +351,73 @@ int32_t MockNavigationStack::GetRecoveredDestinationMode(int32_t index)
     }
 
     return mockPathArray_[index]->mode;
+}
+
+bool MockNavigationStack::IsAutoCleaned(int32_t index) const
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+
+    return mockPathArray_[index]->autoCleaned;
+}
+
+bool MockNavigationStack::GetAutoCleanedCanRecovery(int32_t index) const
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+
+    return mockPathArray_[index]->canRecovery;
+}
+
+void MockNavigationStack::ClearAutoCleanedState(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+
+    mockPathArray_[index]->autoCleaned = false;
+    mockPathArray_[index]->canRecovery = true;
+    mockPathArray_[index]->autoCleanedState.clear();
+}
+
+std::string MockNavigationStack::GetAutoCleanedState(int32_t index) const
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return "";
+    }
+
+    return mockPathArray_[index]->autoCleanedState;
+}
+
+void MockNavigationStack::SaveStateToJsCallback(
+    int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
+{
+    if (CheckIndexValid(index, mockPathArray_.size()) && mockPathArray_[index]->GetName() == name) {
+        mockPathArray_[index]->autoCleanedState = state;
+        return;
+    }
+
+    auto id = std::to_string(navDestinationId);
+    for (auto&& info : mockPathArray_) {
+        if (info->GetNavDestinationId() == id) {
+            info->autoCleanedState = state;
+            return;
+        }
+    }
+}
+
+void MockNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery)
+{
+    auto id = std::to_string(navDestinationId);
+    for (auto&& info : mockPathArray_) {
+        if (info->GetNavDestinationId() == id) {
+            info->autoCleaned = true;
+            info->canRecovery = canRecovery;
+            return;
+        }
+    }
 }
 
 void MockNavigationStack::CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo)

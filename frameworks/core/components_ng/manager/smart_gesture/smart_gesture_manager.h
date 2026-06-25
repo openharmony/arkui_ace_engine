@@ -32,6 +32,11 @@
 namespace OHOS::Ace::NG {
 class PipelineContext;
 
+struct PrimaryActionEntry {
+    WeakPtr<FrameNode> node;
+    uint64_t order = 0;
+};
+
 class ACE_FORCE_EXPORT SmartGestureManager : public virtual AceType {
     DECLARE_ACE_TYPE(SmartGestureManager, AceType);
 
@@ -98,6 +103,7 @@ private:
     bool ValidateSelectProposal(const SmartGestureProposal& proposal) const;
     bool ValidateScrollProposal(const SmartGestureProposal& proposal) const;
     bool ExecuteProposal(const SmartGestureProposal& proposal, const KeyEvent& event);
+    bool ExecuteSelectProposal(const RefPtr<FrameNode>& node);
     bool ExecuteClickProposal(const RefPtr<FrameNode>& node, const KeyEvent& event);
     bool ExecuteScrollProposal(const SmartGestureProposal& proposal);
     void ExecuteBackPressProposal();
@@ -111,8 +117,7 @@ private:
     WeakPtr<PipelineContext> context_;
     WeakPtr<FrameNode> selectedNode_;
     WeakPtr<FrameNode> selectedPaintedNode_;
-    std::unordered_map<int32_t, WeakPtr<FrameNode>> primaryActionRegistry_;
-    std::unordered_map<int32_t, uint64_t> primaryActionRegistryOrder_;
+    std::unordered_map<int32_t, PrimaryActionEntry> primaryActionRegistry_;
     uint64_t nextPrimaryActionOrder_ = 0;
 };
 } // namespace OHOS::Ace::NG

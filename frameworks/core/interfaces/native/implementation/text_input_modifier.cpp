@@ -200,7 +200,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
+    auto convValue = Converter::OptConvertColorForMaterial(value);
     TextFieldModelStatic::SetPlaceholderColor(frameNode, convValue);
 }
 void SetTextOverflowImpl(Ark_NativePointer node,
@@ -346,7 +346,7 @@ void SetFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
+    auto convValue = Converter::OptConvertColorForMaterial(value);
     TextFieldModelStatic::SetTextColor(frameNode, convValue);
 }
 void SetFontSizeImpl(Ark_NativePointer node,
@@ -1147,6 +1147,14 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetPunctuationOverflowImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetPunctuationOverflow(frameNode, convValue);
+}
 void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                      const Opt_SelectedDragPreviewStyle* value)
 {
@@ -1392,6 +1400,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         TextInputAttributeModifier::SetStrokeJoinStyleImpl,
         TextInputAttributeModifier::SetShaderStyleImpl,
+        TextInputAttributeModifier::SetPunctuationOverflowImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,

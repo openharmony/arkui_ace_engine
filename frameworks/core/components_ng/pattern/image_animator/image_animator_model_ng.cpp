@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,33 +21,44 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t DEFAULT_DURATION = 1000;
-    void InitImageNodeInImageAnimator(FrameNode* frameNode)
-    {
-        CHECK_NULL_VOID(frameNode);
-        if (frameNode->GetChildren().empty()) {
-            auto imageNode = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
-            CHECK_NULL_VOID(imageNode);
-            auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
-            CHECK_NULL_VOID(imagePattern);
-            imagePattern->SetImageAnimator(true);
-            auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-            CHECK_NULL_VOID(imageLayoutProperty);
-            imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-            frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-            frameNode->AddChild(imageNode);
-        }
+constexpr int32_t DEFAULT_DURATION = 1000;
+
+void InitImageNodeInImageAnimator(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetChildren().empty()) {
+        auto imageNode = FrameNode::CreateFrameNode(IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
+        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->AddChild(imageNode);
     }
 }
+} // namespace
 
 void ImageAnimatorModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::IMAGE_ANIMATOR_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", IMAGE_ANIMATOR_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
+        IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
+    CHECK_NULL_VOID(frameNode);
+    stack->Push(frameNode);
+}
+
+void ImageAnimatorModelNG::CreateImageAnimator()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", IMAGE_ANIMATOR_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        IMAGE_ANIMATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImageAnimatorPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
 }
@@ -162,11 +173,11 @@ RefPtr<ImageAnimatorPattern> ImageAnimatorModelNG::GetImageAnimatorPattern(Frame
 
 RefPtr<FrameNode> ImageAnimatorModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<ImageAnimatorPattern>());
+    auto frameNode =
+        FrameNode::CreateFrameNode(IMAGE_ANIMATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<ImageAnimatorPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        auto imageNode = FrameNode::CreateFrameNode(IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(imageNode, nullptr);
         auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
         CHECK_NULL_RETURN(imagePattern, nullptr);

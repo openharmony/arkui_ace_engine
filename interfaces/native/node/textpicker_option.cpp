@@ -77,15 +77,17 @@ void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentAr
     if (handle == nullptr) {
         return;
     }
-    if (handle->rangeContent->icon != nullptr) {
-        delete[] handle->rangeContent->icon;
-        handle->rangeContent->icon = nullptr;
-    }
-    if (handle->rangeContent->text != nullptr) {
-        delete[] handle->rangeContent->text;
-        handle->rangeContent->text = nullptr;
-    }
     if (handle->rangeContent != nullptr) {
+        for (int32_t i = 0; i < handle->rangeContentArraySize; i++) {
+            if (handle->rangeContent[i].icon != nullptr) {
+                delete[] handle->rangeContent[i].icon;
+                handle->rangeContent[i].icon = nullptr;
+            }
+            if (handle->rangeContent[i].text != nullptr) {
+                delete[] handle->rangeContent[i].text;
+                handle->rangeContent[i].text = nullptr;
+            }
+        }
         delete[] handle->rangeContent;
         handle->rangeContent = nullptr;
     }
@@ -127,14 +129,18 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePicker
     if (handle == nullptr) {
         return;
     }
-    if (handle->children != nullptr) {
-        OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(handle->children);
-        handle->children = nullptr;
+    int32_t size = handle->rangeContentArraySize;
+    for (int32_t i = 0; i < size; i++) {
+        if (handle[i].children != nullptr) {
+            OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(handle[i].children);
+            handle[i].children = nullptr;
+        }
+        if (handle[i].text != nullptr) {
+            delete[] handle[i].text;
+            handle[i].text = nullptr;
+        }
     }
-    if (handle->text != nullptr) {
-        delete[] handle->text;
-        handle->text = nullptr;
-    }
+    handle->rangeContentArraySize = 0;
     delete[] handle;
 }
 

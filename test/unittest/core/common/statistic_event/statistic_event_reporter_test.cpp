@@ -15,6 +15,9 @@
 
 #include "gtest/gtest.h"
 
+#include <thread>
+#include <vector>
+
 #define protected public
 #define private public
 
@@ -431,6 +434,39 @@ HWTEST_F(StatisticEventReporterTest, SendEvent003, TestSize.Level1)
 
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 3);
     EXPECT_EQ(reporter->totalEventCount_, 3);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test SendEvent can be called from sub threads safely
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, SendEvent004, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    constexpr int32_t threadCount = 8;
+    constexpr int32_t eventsPerThread = 1000;
+    constexpr int32_t expectedCount = threadCount * eventsPerThread;
+    std::vector<std::thread> workers;
+    workers.reserve(threadCount);
+    for (int32_t i = 0; i < threadCount; i++) {
+        workers.emplace_back([reporter, eventsPerThread]() {
+            for (int32_t j = 0; j < eventsPerThread; j++) {
+                reporter->SendEvent(StatisticEventType::FA_APP_START);
+            }
+        });
+    }
+    for (auto& worker : workers) {
+        worker.join();
+    }
+
+    auto iter = reporter->statisitcEventMap_.find(StatisticEventType::FA_APP_START);
+    ASSERT_NE(iter, reporter->statisitcEventMap_.end());
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, expectedCount);
+    EXPECT_EQ(iter->second.eventCount, expectedCount);
 }
 
 /**

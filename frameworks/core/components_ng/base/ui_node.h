@@ -17,16 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 
 #include <cstdint>
+#include <functional>
 #include <list>
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
 
-#include "ui/base/versions.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/ace_performance_check.h"
+#include "base/log/performance_check_types.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -37,9 +37,12 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Ace {
+
+enum class PlatformVersion;
 
 namespace NG {
     class NGGestureRecognizer;
@@ -119,6 +122,7 @@ struct InteractionEventBindingInfo  {
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
+constexpr double DEFAULT_NODE_OPACITY = 1.0;
 
 enum class UINodeType {
     FRAME_NODE,
@@ -153,6 +157,9 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+
+    virtual void OnMixedMountChildAdded(const RefPtr<UINode>& child) {}
+    virtual void OnMixedMountChildRemoved(const RefPtr<UINode>& child) {}
 
     void AdoptChild(const RefPtr<FrameNode>& child, bool silently = false, bool addDefaultTransition = false);
 
@@ -235,14 +242,7 @@ public:
         return false;
     }
 
-    void UpdateModalUiextensionCount(bool addNode)
-    {
-        if (addNode) {
-            modalUiextensionCount_++;
-        } else {
-            modalUiextensionCount_--;
-        }
-    }
+    void UpdateModalUiextensionCount(bool addNode);
 
     int32_t TotalChildCount() const;
     virtual void UpdateGeometryTransition();
@@ -270,24 +270,17 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild() const
-    {
-        if (children_.empty()) {
-            return nullptr;
-        }
-        return children_.back();
-    }
+    RefPtr<UINode> GetLastChild() const;
 
-    RefPtr<UINode> GetFirstChild() const
-    {
-        if (children_.empty()) {
-            return nullptr;
-        }
-        return children_.front();
-    }
+    RefPtr<UINode> GetFirstChild() const;
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    std::list<RefPtr<UINode>> MergeChildrenWithDisappearingChildren();
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateSelfVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+    {
+        OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+    }
     void GenerateOneDepthVisibleFrameWithOffset(
         std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
@@ -363,7 +356,8 @@ public:
     void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
     void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
         bool onlyNeedVisible, ParamConfig config = ParamConfig(),
-        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr);
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr,
+        double parentFinalOpacity = DEFAULT_NODE_OPACITY);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -385,13 +379,7 @@ public:
         return accessibilityId_;
     }
 
-    void SetDepth(int32_t depth)
-    {
-        depth_ = depth;
-        for (auto& child : children_) {
-            child->SetDepth(depth_ + 1);
-        }
-    }
+    void SetDepth(int32_t depth);
 
     bool IsRootNode() const
     {
@@ -431,13 +419,7 @@ public:
     }
 
     // TODO: SetHostPageId step on mount to page.
-    void SetHostPageId(int32_t id)
-    {
-        hostPageId_ = id;
-        for (auto& child : children_) {
-            child->SetHostPageId(id);
-        }
-    }
+    void SetHostPageId(int32_t id);
 
     void SetRemoveSilently(bool removeSilently)
     {
@@ -517,12 +499,7 @@ public:
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
-    virtual void FlushUpdateAndMarkDirty()
-    {
-        for (const auto& child : children_) {
-            child->FlushUpdateAndMarkDirty();
-        }
-    }
+    virtual void FlushUpdateAndMarkDirty();
 
     virtual void MarkNeedSyncRenderTree(bool needRebuild = false);
 
@@ -676,78 +653,17 @@ public:
     // --------------------------------------------------------------------------------
     // performance check get child count, depth, flex layout times and layout time
     void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void SetLayoutTime(int64_t time)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->layoutTime = time;
-        }
-    }
-    int64_t GetLayoutTime()
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->layoutTime;
-        }
-        return 0;
-    }
-    int32_t GetFlexLayouts()
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->flexLayouts;
-        }
-        return 0;
-    }
-    int32_t GetRow() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->codeRow;
-        }
-        return 0;
-    }
-    int32_t GetCol() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->codeCol;
-        }
-        return 0;
-    }
-    void SetRow(const int32_t row)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->codeRow = row;
-        }
-    }
-    void SetCol(const int32_t col)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->codeCol = col;
-        }
-    }
-    void SetFilePath(const std::string& sources)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->pagePath = sources;
-        }
-    }
-
-    std::string GetFilePath() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->pagePath;
-        }
-        return "";
-    }
-    void SetForeachItem()
-    {
-        if (nodeInfo_) {
-            nodeInfo_->isForEachItem = true;
-        }
-    }
-    void AddFlexLayouts()
-    {
-        if (nodeInfo_) {
-            nodeInfo_->flexLayouts++;
-        }
-    }
+    void SetLayoutTime(int64_t time);
+    int64_t GetLayoutTime();
+    int32_t GetFlexLayouts();
+    int32_t GetRow() const;
+    int32_t GetCol() const;
+    void SetRow(const int32_t row);
+    void SetCol(const int32_t col);
+    void SetFilePath(const std::string& sources);
+    std::string GetFilePath() const;
+    void SetForeachItem();
+    void AddFlexLayouts();
     virtual std::string GetCustomTag()
     {
         return GetTag();
@@ -780,13 +696,7 @@ public:
     // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent(bool allowTransition);
 
-    void MarkForceMeasure()
-    {
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        for (const auto& child : children_) {
-            child->MarkForceMeasure();
-        }
-    }
+    void MarkForceMeasure();
 
     std::string GetCurrentCustomNodeInfo();
     static int64_t GenerateAccessibilityId();
@@ -864,26 +774,14 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    void SetAccessibilityNodeVirtual()
-    {
-        isAccessibilityVirtualNode_ = true;
-        for (auto& it : GetChildren()) {
-            it->SetAccessibilityNodeVirtual();
-        }
-    }
+    void SetAccessibilityNodeVirtual();
 
     bool IsAccessibilityVirtualNode() const
     {
         return isAccessibilityVirtualNode_;
     }
 
-    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
-    {
-        parentForAccessibilityVirtualNode_ = parent;
-        for (auto& it : GetChildren()) {
-            it->SetAccessibilityVirtualNodeParent(parent);
-        }
-    }
+    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent);
 
     WeakPtr<UINode> GetVirtualNodeParent() const
     {
@@ -944,12 +842,7 @@ public:
         return layoutTags_;
     }
 
-    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
-    {
-        for (const auto& child : GetChildren()) {
-            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
-        }
-    }
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn);
 
     virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
     {
@@ -1080,13 +973,7 @@ public:
         return isMoving_;
     }
 
-    void setIsMoving(bool isMoving)
-    {
-        isMoving_ = isMoving;
-        for (auto& child : children_) {
-            child->setIsMoving(isMoving);
-        }
-    }
+    void setIsMoving(bool isMoving);
 
     bool isCrossLanguageAttributeSetting() const
     {
@@ -1264,6 +1151,15 @@ public:
         return isThreadSafeNode_;
     }
 
+    // Returns true if this node was created in an isolated thread (dc/card scenario).
+    // The flag is determined at construction time from ContainerScope::IsIsolatedThread()
+    // and is immutable for the node's entire lifecycle.
+    // Used for IsolatedThread consistency validation between nodes and pipelines.
+    bool IsIsolatedThread() const
+    {
+        return isIsolatedThread_;
+    }
+
     bool IsFree() const
     {
         return isFree_;
@@ -1298,6 +1194,9 @@ public:
     {
         return uiNodeType_;
     }
+    int32_t GetSelectionContainerId() const;
+    virtual void SetSelectionContainerId(int32_t selectionContainerId);
+    virtual void UpdateSelectionContainerId(int32_t selectionContainerId);
 
 private:
     bool uiNodeGcEnable_ = false;
@@ -1401,11 +1300,20 @@ protected:
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
+    int32_t selectionContainerId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
+
 private:
+    struct RectCullingState;
+
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
+        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
+        double parentFinalOpacity, const RectCullingState& rectCullingState);
+    RectCullingState CreateRectCullingState(bool onlyNeedVisible, ParamConfig config);
+    RectCullingState CreateChildRectCullingState(const RectCullingState& rectCullingState);
+    bool IsCulledByRect(const RectCullingState& rectCullingState, bool hasInspectableChildren);
+    bool HasInspectableChildrenForRectCulling(ParamConfig config);
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
@@ -1447,6 +1355,11 @@ private:
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;
+    // Indicates whether this node was created in an isolated (dc/card) thread.
+    // Set at construction from ContainerScope::IsIsolatedThread() and never changes afterwards.
+    // Used for IsolatedThread consistency validation: node should operate on pipeline
+    // with matching IsolatedThread identity to avoid cross-domain routing issues.
+    bool isIsolatedThread_ = false;
     bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     bool isRunningPendingUnsafeTask_ = false;
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;

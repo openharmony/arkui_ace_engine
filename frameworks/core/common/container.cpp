@@ -22,7 +22,11 @@
 
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_handler.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -33,12 +37,7 @@
 
 namespace OHOS::Ace {
 
-Container::Container() : state_(FrontendState::UNDEFINE)
-{
-    static std::once_flag registerThreadCheckOnce;
-    std::call_once(registerThreadCheckOnce,
-        []() { ContainerScope::RegisterThreadCheckFunc(&Container::CheckRunOnThreadByThreadId); });
-}
+Container::Container() : state_(FrontendState::UNDEFINE) {}
 
 Container::~Container() = default;
 
@@ -490,5 +489,110 @@ bool Container::IsCurrentUseNewPipeline()
 {
     auto container = Current();
     return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+}
+
+HintToTypeWrap Container::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
+int32_t Container::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+    bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish,
+    const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
+{
+    return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
+}
+
+bool Container::GreatOrEqualAPITargetVersion(PlatformVersion version)
+{
+    auto container = Current();
+    if (!container) {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        return apiTargetVersion >= static_cast<int32_t>(version);
+    }
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    return apiTargetVersion >= static_cast<int32_t>(version);
+}
+
+int32_t Container::GetCurrentApiTargetVersion()
+{
+    auto container = Current();
+    if (!container) {
+        return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+    }
+    return container->GetApiTargetVersion();
+}
+
+bool Container::LessThanAPITargetVersion(PlatformVersion version)
+{
+    auto container = Current();
+    CHECK_NULL_RETURN(container, false);
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    return apiTargetVersion < static_cast<int32_t>(version);
+}
+
+void Container::SetCurrentUsePartialUpdate(bool useIt)
+{
+    auto container = Current();
+    if (container) {
+        container->usePartialUpdate_ = useIt;
+    }
+}
+
+bool Container::IsCurrentUsePartialUpdate()
+{
+    auto container = Current();
+    return container ? container->usePartialUpdate_ : false;
+}
+
+bool Container::IsInFormContainer()
+{
+    auto container = Current();
+    return container ? container->isFRSCardContainer_ : false;
+}
+
+bool Container::IsInSubContainer()
+{
+    auto container = Current();
+    return container ? container->IsSubContainer() : false;
+}
+
+void Container::SetUseNewPipeline()
+{
+    useNewPipeline_ = true;
+}
+
+void Container::SetUsePartialUpdate()
+{
+    usePartialUpdate_ = true;
+}
+
+bool Container::IsUseNewPipeline() const
+{
+    return useNewPipeline_;
+}
+
+int32_t Container::GetApiTargetVersion() const
+{
+    return apiTargetVersion_;
+}
+
+void Container::SetApiTargetVersion(int32_t apiTargetVersion)
+{
+    apiTargetVersion_ = apiTargetVersion % 1000;
+}
+
+int64_t Container::GetCreateTime() const
+{
+    return createTime_;
+}
+
+void Container::SetCreateTime(int64_t time)
+{
+    createTime_ = time;
 }
 } // namespace OHOS::Ace

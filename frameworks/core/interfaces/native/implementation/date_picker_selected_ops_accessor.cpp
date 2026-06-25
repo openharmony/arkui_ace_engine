@@ -15,7 +15,9 @@
 
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/picker/datepicker_model_static.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_date_time.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

@@ -60,6 +60,15 @@ public:
         ViewStackProcessor::GetInstance()->PopContainer();
         return AceType::DynamicCast<FrameNode>(element);
     }
+
+    void AssertChildLayout(const RefPtr<FrameNode>& parent, int32_t index,
+        const SizeF& expectedSize, const OffsetF& expectedOffset)
+    {
+        auto geo = GetChildFrameNode(parent, index)->GetGeometryNode();
+        ASSERT_NE(geo, nullptr);
+        EXPECT_EQ(geo->GetFrameSize(), expectedSize) << geo->GetFrameSize().ToString();
+        EXPECT_EQ(geo->GetFrameOffset(), expectedOffset) << geo->GetFrameOffset().ToString();
+    }
 };
 }
 #endif // BASE_TEST_FLEX_NEW_TEST_COMMON_H

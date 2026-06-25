@@ -3196,6 +3196,10 @@
         "name": "OH_ArkUI_CustomDialog_OpenDialog"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CustomDialog_OpenDialogWithCallback"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_CustomDialog_CloseDialog"
     },
@@ -6200,6 +6204,14 @@
         "name": "OH_ArkUI_ParagraphStyle_GetRadialGradient"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_SetTailIndents"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_GetTailIndents"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_GestureStyle_Create"
     },
@@ -6770,6 +6782,26 @@
     },
     {
         "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_SetChildMountPolicy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetChildMountPolicy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_GetRenderNodeAt"
+    },
+    {
+        "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
     },
     {
@@ -6855,5 +6887,85 @@
     {
         "first_introduced": "26.0.0",
         "name": "OH_ArkUI_LineSpacingStyle_GetOnlyBetweenLines"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetSystemMaterialSupported"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetGlobalMaterialLevel"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_SetStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_GetStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_SetMaterialColor"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_GetMaterialColor"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_SetApplyShadow"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_GetApplyShadow"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_SetInteractive"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_GetInteractive"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LightEffectOptions_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LightEffectOptions_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_LightEffectOptions_SetColor"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_SetLightEffect"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_ImmersiveMaterial_GetLightEffectColor"
+    },
+    {
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterialInOptions"
+ 	},
+ 	{
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterial"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CreateIdentityTransitionEffect"
     }
 ]

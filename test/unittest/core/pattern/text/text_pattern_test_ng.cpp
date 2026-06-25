@@ -434,7 +434,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
-    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -451,7 +451,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent002, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
-    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -2514,7 +2514,7 @@ HWTEST_F(TextPatternTestNg, HandleMouseRightButton001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     Offset textOffset;
     textPattern->HandleMouseRightButton(info, textOffset);
-    EXPECT_NE(textPattern->GetSelectOverlay(), nullptr);
+    EXPECT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
 }
 
 /**
@@ -2572,6 +2572,47 @@ HWTEST_F(TextPatternTestNg, HandleSetStyledString01, TestSize.Level1)
     textPattern->UpdateStyledStringByColorMode();
     auto spanString = AceType::MakeRefPtr<SpanString>(u"1234455");
     textPattern->SetStyledString(spanString);
+}
+
+/**
+ * @tc.name: HandleSetStyledString02
+ * @tc.desc: Test UpdateStyledStringByColorMode refreshes style hash after span style changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSetStyledString02, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"1234455");
+    textPattern->SetStyledString(spanString);
+    auto hashResult = textPattern->GetSpanGroupHashResult();
+    ASSERT_NE(hashResult, nullptr);
+    ASSERT_EQ(hashResult->contentHashes.size(), static_cast<size_t>(1));
+    ASSERT_EQ(hashResult->styleHashes.size(), static_cast<size_t>(1));
+    auto firstContentHash = hashResult->contentHashes[0];
+    auto firstStyleHash = hashResult->styleHashes[0];
+
+    auto spans = textPattern->GetSpanItemChildren();
+    ASSERT_FALSE(spans.empty());
+    auto spanItem = spans.front();
+    ASSERT_NE(spanItem, nullptr);
+    spanItem->content = u"changed content";
+    spanItem->fontStyle->UpdateTextColor(Color::RED);
+
+    textPattern->UpdateStyledStringByColorMode();
+
+    hashResult = textPattern->GetSpanGroupHashResult();
+    ASSERT_NE(hashResult, nullptr);
+    ASSERT_EQ(hashResult->contentHashes.size(), static_cast<size_t>(1));
+    ASSERT_EQ(hashResult->styleHashes.size(), static_cast<size_t>(1));
+    EXPECT_EQ(firstContentHash, hashResult->contentHashes[0]);
+    EXPECT_NE(firstStyleHash, hashResult->styleHashes[0]);
 }
 
 /**

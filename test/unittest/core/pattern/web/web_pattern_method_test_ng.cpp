@@ -972,6 +972,7 @@ HWTEST_F(WebPatternMethodTestNg, InitHoverEvent_001, TestSize.Level1)
     webPattern->hoverEvent_ = nullptr;
 
     webPattern->InitHoverEvent(inputHub);
+    inputHub->CreateHoverEventActuator();
     EXPECT_NE(webPattern, nullptr);
     inputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc()(true);
     inputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc()(false);

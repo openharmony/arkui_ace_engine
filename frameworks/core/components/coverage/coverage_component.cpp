@@ -15,6 +15,8 @@
 
 #include "core/components/coverage/coverage_component.h"
 
+#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/coverage/render_coverage.h"
 
 namespace OHOS::Ace {

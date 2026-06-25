@@ -86,6 +86,10 @@ void RichEditorBaseTestNg::OnDrawVerify(
     ASSERT_NE(richEditorPattern, nullptr);
     auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
     richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
+
+    /**
+     * @tc.steps: step2. add span
+     */
     if (type == SelectSpanType::TYPESPAN) {
         AddSpan(text);
     } else if (type == SelectSpanType::TYPEIMAGE) {
@@ -108,21 +112,21 @@ void RichEditorBaseTestNg::OnDrawVerify(
     }
 
     /**
-     * @tc.steps: step2. Move handle
+     * @tc.steps: step3. Move handle
      */
     auto controller = richEditorPattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
 
     /**
-     * @tc.steps: step3. Test magnifier open or close
+     * @tc.steps: step4. Test magnifier open or close
      * @tc.expected: magnifier is open
      */
     auto ret = controller->GetShowMagnifier();
     EXPECT_TRUE(ret);
 
     /**
-     * @tc.steps: step4. Craete RichEditorOverlayModifier
+     * @tc.steps: step5. Craete RichEditorOverlayModifier
      */
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -132,7 +136,7 @@ void RichEditorBaseTestNg::OnDrawVerify(
     ASSERT_NE(richFieldOverlayModifier, nullptr);
 
     /**
-     * @tc.steps: step5. Create DrawingContext
+     * @tc.steps: step6. Create DrawingContext
      */
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -142,19 +146,19 @@ void RichEditorBaseTestNg::OnDrawVerify(
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
-     * @tc.steps: step6. Do onDraw(context)
+     * @tc.steps: step7. Do onDraw(context)
      */
     richFieldOverlayModifier->onDraw(context);
 
     /**
-     * @tc.steps: step7. When handle move done
+     * @tc.steps: step8 When handle move done
      */
     richEditorPattern->ProcessOverlay();
     RectF handleRect;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**
-     * @tc.steps: step8. Test magnifier open or close
+     * @tc.steps: step9. Test magnifier open or close
      * @tc.expected: magnifier is close
      */
     ret = controller->GetShowMagnifier();
@@ -2078,5 +2082,201 @@ HWTEST_F(RichEditorBaseTestNg, BeforeCreateLayoutWrapper002, TestSize.Level0)
      */
     richEditorPattern->BeforeCreateLayoutWrapper();
     EXPECT_NE(richEditorPattern, nullptr);
+}
+
+/**
+ * @tc.name: RichEditorGetTextLength001
+ * @tc.desc: test GetTextContentLength function returns correct text length
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorGetTextLength001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize RichEditor node
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test that length is 0 when text is empty
+     */
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 0);
+    
+    /**
+     * @tc.steps: step3. Insert text and verify length
+     */
+    const std::u16string testText = u"Hello";
+    richEditorPattern->InsertValue(testText);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+    
+    /**
+     * @tc.steps: step4. Insert text again and verify accumulated length
+     */
+    const std::u16string additionalText = u" World";
+    richEditorPattern->InsertValue(additionalText);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 11);
+    
+    /**
+     * @tc.steps: step5. Clean up resources
+     */
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent001
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize RichEditor node
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set shiftFlag_ to true
+     */
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent002
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP and shiftFlag_ false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->shiftFlag_ = false;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent003
+ * @tc.desc: test ReportShiftAndDirectionEvent with direction key UP and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    keyEvent.action = KeyAction::UP;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent004
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key DOWN and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent005
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP but direction key still pressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes = { KeyCode::KEY_DPAD_RIGHT };
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent006
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key CANCEL and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent006, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::CANCEL;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent007
+ * @tc.desc: test ReportShiftAndDirectionEvent integration with text and selection set
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent007, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(u"hello world");
+    richEditorPattern->textSelector_.Update(2, 7);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 2);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 7);
+
+    richEditorPattern->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    richEditorPattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG

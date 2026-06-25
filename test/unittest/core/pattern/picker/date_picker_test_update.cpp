@@ -28,11 +28,13 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #undef private
 #undef protected
 
@@ -2496,6 +2498,51 @@ HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize003, T
 }
 
 /**
+ * @tc.name: DatePickerPatternYearRange001
+ * @tc.desc: Test DatePickerPattern year range setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternYearRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+/**
+     * @tc.steps: step2. Check default year range.
+     */
+    auto startDate = datePickerPattern->GetStartDateSolar();
+    auto endDate = datePickerPattern->GetEndDateSolar();
+    EXPECT_GT(startDate.GetYear(), 0);
+    EXPECT_GT(endDate.GetYear(), startDate.GetYear());
+}
+
+/**
+ * @tc.name: DatePickerDialogViewSetTitleButtonRowNode001
+ * @tc.desc: Test DatePickerDialogView SetTitleButtonRowNode method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogViewSetTitleButtonRowNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Create title button row node.
+     */
+    auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
+    ASSERT_NE(titleButtonRow, nullptr);
+}
+
+/**
  * @tc.name: DatePickerConvertFontScaleValueSkipOptimize004
  * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with VP unit fontSize
  * @tc.type: FUNC
@@ -2584,5 +2631,84 @@ HWTEST_F(DatePickerTestUpdate, DatePickerNeedAdaptForAgingSkipOptimize003, TestS
 
     auto result = DatePickerDialogView::NeedAdaptForAging(false);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DatePickerDialogMaterialProperties001
+ * @tc.desc: Test PickerDialogInfo material properties: systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogMaterialProperties001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    PickerDialogInfo dialogInfo;
+    
+    // Test default value (null)
+    EXPECT_EQ(dialogInfo.systemMaterial, nullptr);
+    
+    // Test setting systemMaterial
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    dialogInfo.systemMaterial = systemMaterial;
+    EXPECT_NE(dialogInfo.systemMaterial, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerDialogMaterialProperties002
+ * @tc.desc: Test PickerDialogInfo material properties: distortionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogMaterialProperties002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    PickerDialogInfo dialogInfo;
+    
+    // Test default value (no value)
+    EXPECT_FALSE(dialogInfo.distortionMode.has_value());
+    
+    // Test setting distortionMode to DISTORTION_AUTO
+    dialogInfo.distortionMode = DistortionMode::DISTORTION_AUTO;
+    EXPECT_TRUE(dialogInfo.distortionMode.has_value());
+    EXPECT_EQ(dialogInfo.distortionMode.value(), DistortionMode::DISTORTION_AUTO);
+    
+    // Test setting distortionMode to DISTORTION_ENABLED
+    dialogInfo.distortionMode = DistortionMode::DISTORTION_ENABLED;
+    EXPECT_EQ(dialogInfo.distortionMode.value(), DistortionMode::DISTORTION_ENABLED);
+    
+    // Test setting distortionMode to DISTORTION_DISABLED
+    dialogInfo.distortionMode = DistortionMode::DISTORTION_DISABLED;
+    EXPECT_EQ(dialogInfo.distortionMode.value(), DistortionMode::DISTORTION_DISABLED);
+}
+
+/**
+ * @tc.name: DatePickerDialogMaterialProperties003
+ * @tc.desc: Test PickerDialogInfo material properties: edgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogMaterialProperties003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    PickerDialogInfo dialogInfo;
+    
+    // Test default value (no value)
+    EXPECT_FALSE(dialogInfo.edgeLightMode.has_value());
+    
+    // Test setting edgeLightMode to EDGELIGHT_AUTO
+    dialogInfo.edgeLightMode = EdgeLightMode::EDGELIGHT_AUTO;
+    EXPECT_TRUE(dialogInfo.edgeLightMode.has_value());
+    EXPECT_EQ(dialogInfo.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_AUTO);
+    
+    // Test setting edgeLightMode to EDGELIGHT_ENABLED
+    dialogInfo.edgeLightMode = EdgeLightMode::EDGELIGHT_ENABLED;
+    EXPECT_EQ(dialogInfo.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_ENABLED);
+    
+    // Test setting edgeLightMode to EDGELIGHT_DISABLED
+    dialogInfo.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
+    EXPECT_EQ(dialogInfo.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_DISABLED);
 }
 } // namespace OHOS::Ace::NG

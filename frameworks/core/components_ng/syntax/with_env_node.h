@@ -18,11 +18,13 @@
 
 #include <any>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -48,23 +50,20 @@ public:
         return true;
     }
 
-    void SetEnvProperty(const std::string& key, const std::string& value);
-    void SetEnvProperty(const std::string& key, double value);
-    void SetEnvProperty(const std::string& key, bool value);
     void SetCustomEnvProperty(const std::string& key, std::any value);
+    void RemoveCustomEnvProperty(const std::string& key);
 
-    bool GetEnvProperty(const std::string& key, std::string& value) const;
-    bool GetEnvProperty(const std::string& key, double& value) const;
-    bool GetEnvProperty(const std::string& key, bool& value) const;
-    const std::any* GetCustomEnvPropertyAny(const std::string& key) const;
-    bool HasEnvProperty(const std::string& key) const;
+    std::optional<std::any> GetCustomEnvPropertyAny(const std::string& key) const;
+    bool HasCustomEnvProperty(const std::string& key) const;
 
+    void RemoveSystemEnvProperty(const std::string& key);
+    bool SetSystemEnvProperty(const std::string& key, SystemEnvValue property);
+    std::optional<SystemEnvValue> GetSystemEnvProperty(const std::string& key) const;
+    bool HasSystemEnvProperty(const std::string& key) const;
 
 private:
-    std::unordered_map<std::string, std::string> envPropertiesStringType_;
-    std::unordered_map<std::string, double> envPropertiesDoubleType_;
-    std::unordered_map<std::string, bool> envPropertiesBoolType_;
     std::unordered_map<std::string, std::any> customEnvObjProperties_;
+    std::unordered_map<std::string, SystemEnvValue> systemEnvProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WithEnvNode);
 };

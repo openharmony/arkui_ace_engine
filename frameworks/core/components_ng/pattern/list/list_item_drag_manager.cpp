@@ -392,7 +392,34 @@ int32_t ListItemDragManager::CalcDiagonalIndex(const int32_t mainNearIndex, cons
     if (isRtl_ && axis_ == Axis::VERTICAL) {
         diagonalIndex = Negative(delta.GetCrossOffset(axis_)) ? mainNearIndex + 1 : mainNearIndex - 1;
     }
+    if (diagonalIndex < 0) {
+        diagonalIndex = 0;
+    } else if (diagonalIndex > totalCount_ - 1) {
+        diagonalIndex = totalCount_ - 1;
+    }
     return diagonalIndex;
+}
+
+bool ListItemDragManager::IsOnSameLine(const RectF& rect, int32_t diagonalIndex) const
+{
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_RETURN(forEach, true);
+
+    auto node = forEach->GetFrameNode(diagonalIndex);
+    RectF nearRect = RectF();
+    if (!node) {
+        bool isSuccess = GetDummyItemRect(diagonalIndex, nearRect);
+        CHECK_NULL_RETURN(isSuccess, true);
+    } else if (!node->IsActive()) {
+        return true;
+    } else {
+        auto geometry = node->GetGeometryNode();
+        CHECK_NULL_RETURN(geometry, true);
+        nearRect = geometry->GetMarginFrameRect();
+    }
+    float nearOffset = nearRect.GetOffset().GetMainOffset(axis_);
+    float selfOffset = rect.GetOffset().GetMainOffset(axis_);
+    return NearEqual(nearOffset, selfOffset);
 }
 
 int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta)
@@ -410,8 +437,9 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
     }
 
     bool isNeedScaleDiagonal = !NearEqual(mainRes.scale, 1.0f) && !NearEqual(crossRes.scale, 1.0f);
-    if ((mainNearIndex < 0 && crossNearIndex == totalCount_) ||
-        (mainNearIndex > totalCount_ - 1 && crossNearIndex == -1)) {
+    int32_t diagonalIndex = CalcDiagonalIndex(mainNearIndex, delta);
+    if (((mainNearIndex < 0 && crossNearIndex == totalCount_) ||
+        (mainNearIndex > totalCount_ - 1 && crossNearIndex == -1)) && !IsOnSameLine(rect, diagonalIndex)) {
         isNeedScaleDiagonal = true;
         int32_t crossIndexGap = mainNearIndex < 0 ? -mainNearIndex : mainNearIndex - totalCount_ + 1;
         float mainDis = rect.GetSize().MainSize(axis_) / 2;
@@ -419,14 +447,7 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
         mainRes.needMove = GreatNotEqual(std::abs(delta.GetMainOffset(axis_)), mainDis);
         crossRes.needMove = GreatNotEqual(std::abs(delta.GetCrossOffset(axis_)), crossDis);
     }
-    int32_t diagonalIndex = index;
     if (isNeedScaleDiagonal) {
-        diagonalIndex = CalcDiagonalIndex(mainNearIndex, delta);
-        if (diagonalIndex < 0) {
-            diagonalIndex = 0;
-        } else if (diagonalIndex > totalCount_ - 1) {
-            diagonalIndex = totalCount_ - 1;
-        }
         ScaleDiagonalItem(diagonalIndex, rect, delta);
     }
 

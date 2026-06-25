@@ -1042,6 +1042,24 @@ void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, a
     modifier->getCommonAniModifier()->checkThreadValid(checkUIThread, node);
 }
 
+struct ArkUIObjectLifecycleData {
+    ani_object weakRef;
+    ani_string className;
+    ani_string nodeType;
+    ani_long nodePtr;
+};
+
+void FireArkUIObjectLifecycleCallback(
+    ani_env* env, ani_object obj, ani_object weakRef, ani_string className, ani_string nodeType, ani_long nodePtr)
+{
+    ArkUIObjectLifecycleData data = { weakRef, className, nodeType, nodePtr };
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier && modifier->getCommonAniModifier());
+    std::string classNameStr = AniUtils::ANIStringToStdString(env, className);
+    modifier->getCommonAniModifier()->fireArkUIObjectLifecycleCallback(
+        nodePtr, classNameStr, static_cast<void*>(&data));
+}
+
 void ConvertRemoveCallbackFun(
     ani_vm* vm, std::function<void()>& callback, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {

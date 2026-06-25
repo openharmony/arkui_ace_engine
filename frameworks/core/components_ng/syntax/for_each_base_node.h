@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_BASE_NODE_H
 
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ForEachBaseNode : public UINode {
@@ -66,6 +67,35 @@ public:
     {
         return true;
     }
+
+    static void DisableRecycle(RefPtr<UINode> node)
+    {
+        CHECK_NULL_VOID(node);
+        auto recycleNode = AceType::DynamicCast<RecycleDummyNode>(node);
+        if (recycleNode) {
+            recycleNode->SetDisableRecycle(true);
+            return;
+        }
+        auto foreachNode = AceType::DynamicCast<ForEachBaseNode>(node);
+        if (foreachNode) {
+            foreachNode->DisableChildrenAndCachesRecycle();
+            return;
+        }
+        auto children = node->GetChildren();
+        for (auto child: children) {
+            DisableRecycle(child);
+        }
+    }
+
+    virtual void DisableChildrenAndCachesRecycle()
+    {
+        auto children = GetChildren();
+        for (auto child: children) {
+            DisableRecycle(child);
+        }
+    }
+    virtual void SetEnableSyncLoad(bool value) {}
+    virtual void SetIsSyncLoad(bool value) {}
 
 protected:
     std::function<void(int32_t, int32_t)> onMoveEvent_;

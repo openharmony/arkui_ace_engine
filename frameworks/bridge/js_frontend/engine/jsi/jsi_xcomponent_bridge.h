@@ -22,7 +22,6 @@
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
-#include "frameworks/core/components/common/properties/decoration.h"
 
 struct OH_NativeXComponent;
 namespace OHOS::Ace {

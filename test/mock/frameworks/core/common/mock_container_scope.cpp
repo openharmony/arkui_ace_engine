@@ -1,14 +1,19 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#include "core/common/container_scope.h"
-
-#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
-#include "base/utils/container_scope/container_scope_diagnostics.h"
-#endif
-
+#include "core/common/container.h"
 namespace OHOS::Ace {
 int32_t ContainerScope::CurrentId()
 {
@@ -40,9 +45,8 @@ int32_t ContainerScope::RecentForegroundId()
     return 0;
 }
 
-std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool checkThread)
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
 {
-    (void)checkThread;
     return { 0, InstanceIdGenReason::UNDEFINED };
 }
 
@@ -102,9 +106,8 @@ void ContainerScope::UpdateRecentForeground(int32_t id)
     (void)id;
 }
 
-int32_t ContainerScope::SafelyId(bool checkThread)
+int32_t ContainerScope::SafelyId()
 {
-    (void)checkThread;
     return 0;
 }
 
@@ -112,6 +115,25 @@ void ContainerScope::CheckIdChange(int32_t id)
 {
     (void)id;
 }
+
+void ContainerScope::MarkIsolatedThread() {}
+
+bool ContainerScope::IsIsolatedThread()
+{
+    return false;
+}
+
+void ContainerScope::AddLocal(int32_t id)
+{
+    (void)id;
+}
+
+void ContainerScope::RemoveLocal(int32_t id)
+{
+    (void)id;
+}
+
+void ContainerScope::ResetIsolatedThread() {}
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 
@@ -204,10 +226,5 @@ ContainerScope::ContainerScope(int32_t id, bool enable)
 ContainerScope::~ContainerScope()
 {
     UpdateCurrent(restoreId_);
-}
-
-void ContainerScope::RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc)
-{
-    (void)checkFunc;
 }
 } // namespace OHOS::Ace

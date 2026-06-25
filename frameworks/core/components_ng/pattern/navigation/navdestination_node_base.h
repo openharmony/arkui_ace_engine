@@ -108,16 +108,6 @@ public:
         return titleBarNode_;
     }
 
-    void SetTitleBarMaskNode(const RefPtr<UINode>& node)
-    {
-        titleBarMaskNode_ = node;
-    }
-
-    const RefPtr<UINode>& GetTitleBarMaskNode() const
-    {
-        return titleBarMaskNode_;
-    }
-
     void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
     {
         toolBarNode_ = toolBarNode;
@@ -265,17 +255,6 @@ public:
             onStartTransitionAnimationCb_();
         }
     }
-    void SetOnFinishTransitionAnimationCallback(std::function<void()>&& callback)
-    {
-        onFinishTransitionAnimationCb_ = std::move(callback);
-    }
-    void OnFinishOneTransitionAnimation()
-    {
-        if (onFinishTransitionAnimationCb_) {
-            onFinishTransitionAnimationCb_();
-        }
-    }
-
     void SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& status)
     {
         statusBarConfig_ = status;
@@ -405,7 +384,6 @@ protected:
     RefPtr<UINode> toolbarMoreMenuNode_;
     RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
-    RefPtr<UINode> titleBarMaskNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
@@ -420,7 +398,6 @@ protected:
     std::optional<int32_t> rotateAngle_;
     bool isCustomExpandRunning_ = false;
     std::function<void()> onStartTransitionAnimationCb_;
-    std::function<void()> onFinishTransitionAnimationCb_;
     // pair.first -> enable, pair.second -> animated
     std::optional<std::pair<bool, bool>> statusBarConfig_;
     std::optional<std::pair<bool, bool>> preStatusBarConfig_;

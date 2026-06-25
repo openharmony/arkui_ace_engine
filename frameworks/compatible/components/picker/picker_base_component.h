@@ -27,7 +27,6 @@
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_component.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/back_end_event_manager.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -212,10 +211,7 @@ public:
     {
         return theme_;
     }
-    void SetTheme(const RefPtr<PickerTheme>& value)
-    {
-        theme_ = value;
-    }
+    void SetTheme(const RefPtr<PickerTheme>& value);
 
 
     const RefPtr<PickerAnimationController>& GetAnimationController() const

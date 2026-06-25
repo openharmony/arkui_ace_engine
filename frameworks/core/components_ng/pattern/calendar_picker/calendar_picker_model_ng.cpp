@@ -15,8 +15,13 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+
 #include "base/i18n/localization.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -307,6 +312,8 @@ void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, con
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetX(), LpxAttribute::LPX_EDGE_ALIGN_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetY(), LpxAttribute::LPX_EDGE_ALIGN_Y, frameNode);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->SetCalendarEdgeAlign(alignType);
@@ -357,6 +364,25 @@ void CalendarPickerModelNG::SetPadding(const PaddingProperty& padding)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (padding.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.left.value().GetDimension(), LpxAttribute::LPX_PADDING_LEFT, frameNode);
+    }
+    if (padding.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.right.value().GetDimension(), LpxAttribute::LPX_PADDING_RIGHT, frameNode);
+    }
+    if (padding.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.top.value().GetDimension(), LpxAttribute::LPX_PADDING_TOP, frameNode);
+    }
+    if (padding.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.bottom.value().GetDimension(), LpxAttribute::LPX_PADDING_BOTTOM,
+            frameNode);
+    }
+    if (padding.start.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.start.value().GetDimension(), LpxAttribute::LPX_PADDING_START, frameNode);
+    }
+    if (padding.end.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.end.value().GetDimension(), LpxAttribute::LPX_PADDING_END, frameNode);
+    }
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     if (!pickerPattern->HasContentNode()) {
@@ -507,6 +533,9 @@ DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
 void CalendarPickerModelNG::SetEdgeAlign(
     FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
+    CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetX(), LpxAttribute::LPX_EDGE_ALIGN_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetY(), LpxAttribute::LPX_EDGE_ALIGN_Y, frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
@@ -521,6 +550,25 @@ void CalendarPickerModelNG::SetEdgeAlign(
 void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)
 {
     CHECK_NULL_VOID(frameNode);
+    if (padding.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.left.value().GetDimension(), LpxAttribute::LPX_PADDING_LEFT, frameNode);
+    }
+    if (padding.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.right.value().GetDimension(), LpxAttribute::LPX_PADDING_RIGHT, frameNode);
+    }
+    if (padding.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.top.value().GetDimension(), LpxAttribute::LPX_PADDING_TOP, frameNode);
+    }
+    if (padding.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.bottom.value().GetDimension(), LpxAttribute::LPX_PADDING_BOTTOM,
+            frameNode);
+    }
+    if (padding.start.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.start.value().GetDimension(), LpxAttribute::LPX_PADDING_START, frameNode);
+    }
+    if (padding.end.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(padding.end.value().GetDimension(), LpxAttribute::LPX_PADDING_END, frameNode);
+    }
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     if (!pickerPattern->HasContentNode()) {
@@ -605,11 +653,12 @@ void CalendarPickerModelNG::ClearBorderWidth(FrameNode* frameNode)
 void CalendarPickerModelNG::SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_PICKER_RADIUS, frameNode);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    auto calendarDate = pickerPattern->GetCalendarData();
-    calendarDate.dayRadius = radius;
-    pickerPattern->SetCalendarData(calendarDate);
+    auto calendarData = pickerPattern->GetCalendarData();
+    calendarData.dayRadius = radius;
+    pickerPattern->SetCalendarData(calendarData);
 }
 
 PickerDate CalendarPickerModelNG::GetStartDateWithNode(FrameNode* frameNode)

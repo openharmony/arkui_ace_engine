@@ -16,9 +16,12 @@
 #ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_IMAGE_SPAN_MODIFIER_H
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_IMAGE_SPAN_MODIFIER_H
 
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text/span/bridge/image_span/image_span_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIImageSpanCustomModifier* GetImageSpanCustomModifier();
 const ArkUIImageSpanModifier* GetImageSpanModifier();
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier();
 void SetImageSpanOnCompleteEvent(ArkUINodeHandle node, void* extraParam);

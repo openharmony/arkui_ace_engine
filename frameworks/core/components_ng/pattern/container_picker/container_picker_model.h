@@ -23,11 +23,12 @@
 #include "base/geometry/dimension.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 class ACE_EXPORT ContainerPickerModel {
 public:
@@ -56,6 +57,9 @@ public:
     static void ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void ProcessResourceObj(FrameNode* frameNode, const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void SetChangeEvent(ContainerPickerChangeEvent&& onChange);
+
+private:
+    static std::function<void()> CreateLpxUpdateCallback(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

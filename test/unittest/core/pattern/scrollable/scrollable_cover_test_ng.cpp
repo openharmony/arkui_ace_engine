@@ -28,6 +28,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
@@ -58,12 +59,18 @@ constexpr char BAR_STATE_OFF[] = "BarState.Off";
 constexpr const char* SCROLLBAR_WIDTH_PX = "5.00px";
 constexpr const char* SCROLLBAR_WIDTH_VP = "15.0vp";
 constexpr const char* SCROLLBAR_WIDTH_PERCENT = "100%";
+constexpr const char* SCROLLBAR_HEIGHT_PX = "5.00px";
+constexpr const char* SCROLLBAR_HEIGHT_VP = "15.0vp";
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
 constexpr char SCROLLBAR_COLOR_RED[] = "#FF0000";
 constexpr double SCROLLBAR_WIDTH_VALUE_PX = 5.0;
 constexpr double CAP_COEFFICIENT = 0.45;
 constexpr double SCROLLBAR_WIDTH_VALUE_VP = 15.0;
 constexpr double SCROLLBAR_WIDTH_VALUE_PERCENT = 1.0;
+constexpr double SCROLLBAR_HEIGHT_VALUE_PX = 5.0;
+constexpr double SCROLLBAR_HEIGHT_VALUE_VP = 15.0;
+constexpr double SCROLLBAR_THEME_HEIGHT_VALUE_VP = 18.0;
+constexpr double SCROLLBAR_START_MARGIN_VALUE_VP = 12.0;
 constexpr double SCROLLBARTHEME_WIDTH_VALUE_PX = 100.0;
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr int32_t FIRST_THRESHOLD = 4;
@@ -186,6 +193,66 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetScrollBarHeightTest001
+ * @tc.desc: Test SetScrollBarHeight and GetBarHeight method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, SetScrollBarHeightTest001, TestSize.Level1)
+{
+    ScrollableModelNG::SetScrollBarHeight(SCROLLBAR_HEIGHT_VP);
+    auto scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarHeight().Value(), SCROLLBAR_HEIGHT_VALUE_VP);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Unit(), DimensionUnit::VP);
+
+    ScrollableModelNG::SetScrollBarHeight(SCROLLBAR_HEIGHT_PX);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Value(), SCROLLBAR_HEIGHT_VALUE_PX);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Unit(), DimensionUnit::PX);
+
+    ScrollableModelNG::SetScrollBarHeight(
+        &(*scroll_), std::make_optional(Dimension(SCROLLBAR_HEIGHT_VALUE_VP, DimensionUnit::VP)));
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarHeight().Value(), SCROLLBAR_HEIGHT_VALUE_VP);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Unit(), DimensionUnit::VP);
+
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollBarTheme->scrollBarHeight_ = Dimension(SCROLLBAR_THEME_HEIGHT_VALUE_VP, DimensionUnit::VP);
+    auto scrollPattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->SetScrollBar(DisplayMode::AUTO);
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    ScrollableModelNG::ResetScrollBarHeight(&(*scroll_));
+    EXPECT_EQ(scrollablePn->GetScrollBarHeight(), std::nullopt);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Value(), SCROLLBAR_THEME_HEIGHT_VALUE_VP);
+    EXPECT_EQ(scrollablePn->GetBarHeight().Unit(), DimensionUnit::VP);
+    EXPECT_EQ(scrollBar->GetScrollBarHeight().Value(), SCROLLBAR_THEME_HEIGHT_VALUE_VP);
+    EXPECT_EQ(scrollBar->GetScrollBarHeight().Unit(), DimensionUnit::VP);
+    EXPECT_EQ(scrollBar->GetMinHeight().Value(), scrollBarTheme->GetMinHeight().Value());
+    EXPECT_EQ(scrollBar->GetMinHeight().Unit(), scrollBarTheme->GetMinHeight().Unit());
+}
+
+/**
+ * @tc.name: InnerScrollBarThemeStartMarginTest001
+ * @tc.desc: Test inner scrollbar start margin theme is applied through ScrollablePattern only
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InnerScrollBarThemeStartMarginTest001, TestSize.Level1)
+{
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollBarTheme->startMargin_ = Dimension(SCROLLBAR_START_MARGIN_VALUE_VP, DimensionUnit::VP);
+
+    auto scrollPattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->SetScrollBar(DisplayMode::AUTO);
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    EXPECT_EQ(scrollBar->GetScrollBarStartMargin().Value(), SCROLLBAR_START_MARGIN_VALUE_VP);
+    EXPECT_EQ(scrollBar->GetScrollBarStartMargin().Unit(), DimensionUnit::VP);
+}
+
+/**
  * @tc.name: SetScrollBarColorTest001
  * @tc.desc: Test SetScrollBarColor and GetBarColor method
  * @tc.type: FUNC
@@ -225,6 +292,35 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
     auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
     scrollablePn->propScrollBarProperty_ = nullptr;
     EXPECT_EQ(scrollablePn->GetBarColor(), scrollBarTheme->GetForegroundColor());
+}
+
+/**
+ * @tc.name: ScrollBarThemeBackgroundColorTest001
+ * @tc.desc: Test theme background color updates track color without overriding explicit thumb color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ScrollBarThemeBackgroundColorTest001, TestSize.Level1)
+{
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollBarTheme->foregroundColor_ = Color::GREEN;
+    scrollBarTheme->backgroundColor_ = Color::BLUE;
+
+    auto scrollPattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->SetScrollBar(DisplayMode::AUTO);
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    ScrollableModelNG::SetScrollBarColor(&(*scroll_), Color::RED);
+    scrollPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(scrollBar->foregroundColor_, Color::RED);
+    EXPECT_EQ(scrollBar->backgroundColor_, Color::BLUE);
+
+    ScrollableModelNG::ResetScrollBarColor(&(*scroll_));
+    scrollPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(scrollBar->foregroundColor_, Color::GREEN);
+    EXPECT_EQ(scrollBar->backgroundColor_, Color::BLUE);
 }
 
 /**
@@ -1606,6 +1702,25 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapStop001, TestSize.Level1)
     scrollable->isTouching_ = true;
     scrollable->ProcessScrollSnapStop();
     EXPECT_TRUE(scrollable->moved_);
+}
+
+/**
+ * @tc.name: ProcessScrollMotionRefreshPause001
+ * @tc.desc: Test ProcessScrollMotion should not pause normal scroll motion when refresh coordination takes over
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionRefreshPause001, TestSize.Level1)
+{
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    scrollable->currentPos_ = 0.0f;
+    scrollable->canOverScroll_ = true;
+
+    scrollable->SetIsRefreshScrollCallback([]() { return true; });
+    scrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_FALSE(scrollable->scrollPause_);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
 }
 
 /**

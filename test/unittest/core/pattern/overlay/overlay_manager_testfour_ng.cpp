@@ -35,7 +35,7 @@
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -682,5 +683,34 @@ HWTEST_F(OverlayManagerTestFourNg, OnThemeScopeUpdate002, TestSize.Level1)
     auto ret = sheetPattern->OnThemeScopeUpdate(sheetNode->GetThemeScopeId());
     EXPECT_FALSE(ret);
     MockContainer::Current()->SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: MountCustomKeyboard001
+ * @tc.desc: Test MountCustomKeyboard updates customKeyboardMap_ and customKeyboardNode_ correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, MountCustomKeyboard001, TestSize.Level1)
+{
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipeline = rootNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    
+    OverlayManager overlayManager(rootNode);
+    overlayManager.rootNodeWeak_ = rootNode;
+    
+    auto customKeyboard = FrameNode::CreateFrameNode(
+        V2::KEYBOARD_ETS_TAG, TARGET_ID_NEW, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customKeyboard, nullptr);
+    
+    int32_t targetId = TARGET_ID;
+    overlayManager.MountCustomKeyboard(customKeyboard, targetId);
+    
+    EXPECT_NE(overlayManager.customKeyboardMap_.find(targetId), overlayManager.customKeyboardMap_.end());
+    EXPECT_EQ(overlayManager.customKeyboardMap_[targetId], customKeyboard);
+    auto customKeyboardNode = overlayManager.customKeyboardNode_.Upgrade();
+    EXPECT_EQ(customKeyboardNode, customKeyboard);
+    EXPECT_EQ(overlayManager.oldTargetId_, targetId);
 }
 } // namespace OHOS::Ace::NG

@@ -309,4 +309,259 @@ HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG0
     machine->HandlePanOnActionCancel(info);
     EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropMgrState::IDLE));
 }
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG004
+ * @tc.desc: Test HandleLongPressOnPending when pipelineContext is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG004, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    auto stateReady = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)];
+    ASSERT_NE(stateReady, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = true;
+    overlayManager->SetIsGatherWithMenu(false);
+
+    /**
+     * @tc.steps: clean pipelineContext for testCase.
+     */
+    MockPipelineContext::TearDown();
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+
+    /**
+     * @tc.steps: reset pipelineContext for testCase.
+     */
+    MockPipelineContext::SetUp();
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG005
+ * @tc.desc: Test HandleLongPressOnPending when overlayManager is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG005, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    pipelineContext->overlayManager_ = nullptr;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    auto stateReady = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)];
+    ASSERT_NE(stateReady, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = true;
+
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG006
+ * @tc.desc: Test HandleLongPressOnPending when IsGatherWithMenu is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG006, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    auto stateReady = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)];
+    ASSERT_NE(stateReady, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = true;
+    overlayManager->SetIsGatherWithMenu(true);
+
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG007
+ * @tc.desc: Test HandleLongPressOnPending when hasGatherNode is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG007, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    auto stateReady = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)];
+    ASSERT_NE(stateReady, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = false;
+    overlayManager->SetIsGatherWithMenu(false);
+
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG008
+ * @tc.desc: Test HandleLongPressOnPending when IsGatherWithMenu is false and hasGatherNode is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG008, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    auto stateReady = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)];
+    ASSERT_NE(stateReady, nullptr);
+
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = true;
+    overlayManager->SetIsGatherWithMenu(false);
+
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG009
+ * @tc.desc: Test HandleLongPressOnPending when machine is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG009, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto stateReady = AceType::MakeRefPtr<DragDropInitiatingStateReady>(nullptr);
+    ASSERT_NE(stateReady, nullptr);
+
+    overlayManager->SetIsGatherWithMenu(false);
+
+    stateReady->HandleLongPressOnPending();
+    EXPECT_EQ(stateReady->GetStateMachine(), nullptr);
+}
 } // namespace OHOS::Ace::NG

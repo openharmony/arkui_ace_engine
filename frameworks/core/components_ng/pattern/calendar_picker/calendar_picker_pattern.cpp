@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+
 #include <algorithm>
 
 #include "base/i18n/localization.h"
@@ -30,6 +32,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<EventHub> CalendarPickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<CalendarPickerEventHub>();
+}
+
 namespace {
 constexpr int32_t YEAR_INDEX = 0;
 constexpr int32_t FIRST_SLASH = 1;
@@ -1299,7 +1307,7 @@ bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
@@ -1426,6 +1434,8 @@ void CalendarPickerPattern::FlushTextStyle()
             SetSelectedType(selected_);
         }
         if (layoutProperty->HasFontSize()) {
+            auto textNode = textLayoutProperty->GetHost();
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(layoutProperty->GetFontSize().value(), LpxAttribute::LPX_FONT_SIZE, textNode);
             textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
         }
         if (layoutProperty->HasWeight()) {

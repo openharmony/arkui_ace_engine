@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 #include "core/text/text_emoji_processor.h"
@@ -730,8 +731,11 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromMainTreeMultiThread();
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
@@ -866,6 +870,7 @@ public:
     void SetFallbackLineSpacing(bool isFallbackLineSpacing);
     bool IsFallbackLineSpacing();
     void SetKeyboardAppearance(KeyboardAppearance value);
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);
     KeyboardAppearance GetKeyboardAppearance() const;
     void SetSupportStyledUndo(bool enabled);
     bool IsSupportStyledUndo() const;
@@ -915,12 +920,19 @@ public:
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
     bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
-    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
+
+    // local/global coordinate conversion with render transform.
+    Offset ConvertToLocalOffsetWithTransform(const Offset& globalOffset);
+    RectF ConvertToLocalRectWithTransform(const RectF& globalRect);
+    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset) override;
+    RectF ConvertToGlobalRectWithTransform(const RectF& localRect);
+
     bool HasRenderTransform();
     VectorF GetHostScale() const;
 
 protected:
-    RefPtr<TextSelectOverlay> GetSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
     bool CanStartAITask() const override;
 
     template<typename T>
@@ -956,7 +968,6 @@ private:
     Color GetUrlPressColor();
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     RefPtr<RichEditorScrollController> scrollController_;
-    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
@@ -1099,6 +1110,7 @@ private:
     void UpdateCaretInfoToController();
     IMEClient GetIMEClientInfo();
     void FireOnWillAttachIME(IMEClient& imeClient);
+    void ReportShiftAndDirectionEvent(const KeyEvent& keyEvent);
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
@@ -1207,7 +1219,6 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
     RectF GetVisibleContentRect();
-    void ConvertLocalToGlobalRect(RectF& localRect);
     void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
     RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
@@ -1446,6 +1457,8 @@ private:
     std::optional<int32_t> maxLength_ = std::nullopt;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
+    KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     RefPtr<UINode> customKeyboardNode_;
     LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;

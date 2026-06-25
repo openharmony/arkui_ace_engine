@@ -751,7 +751,7 @@ HWTEST_F(TextTestNgFive, ShowSelectOverlay004, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 20);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
     OnPrepareMenuCallback onPrepareMenuCallback;

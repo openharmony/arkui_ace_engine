@@ -1381,8 +1381,8 @@ void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(
     for (const auto& child : layoutPolicyChildren_) {
         auto [isMainAxisMatch, isCrossAxisMatch] = GetMatchParentFlagAlongMainAndCrossAxis(child);
         auto childNode = child->GetHostNode();
-        auto childlayoutProperty = childNode->GetLayoutProperty();
-        if (childNode && childlayoutProperty && childlayoutProperty->IsExpandConstraintNeeded()) {
+        if (childNode && childNode->GetLayoutProperty() &&
+            childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
             child->SetDelaySelfLayoutForIgnore();
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
@@ -1402,16 +1402,40 @@ void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(
     }
 }
 
+void FlexLayoutAlgorithm::MeasureContainerReaderCrossAxisMatchParent(
+    const std::list<RefPtr<LayoutWrapper>>& containerReaderChildren, const LayoutConstraintF& layoutConstraint)
+{
+    for (const auto& child : containerReaderChildren) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        auto childConstraint = layoutConstraint;
+        if (childLayoutProperty) {
+            const auto& childCalcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
+            float remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
+            UpdateLayoutConstraintOnMainAxisWithoutUserDefined(
+                childConstraint, remainedMainAxisSize, childCalcConstraint);
+        }
+        child->Measure(childConstraint);
+        mainAxisSize_ += GetChildMainAxisSize(child) + space_;
+        allocatedSize_ += GetChildMainAxisSize(child) + space_;
+    }
+}
+
 bool FlexLayoutAlgorithm::MeasureCrossAxisMatchChildrenAndCorrect(const LayoutConstraintF& layoutConstraint)
 {
     if (childrenMatchParentAlongCrossAxisOnly_.empty()) {
         return false;
     }
+    std::list<RefPtr<LayoutWrapper>> containerReaderChildren;
     for (const auto& child : childrenMatchParentAlongCrossAxisOnly_) {
+        if (IsContainerReaderNode(child)) {
+            containerReaderChildren.emplace_back(child);
+            continue;
+        }
         child->Measure(layoutConstraint);
         mainAxisSize_ += GetChildMainAxisSize(child) + space_;
         allocatedSize_ += GetChildMainAxisSize(child) + space_;
     }
+    MeasureContainerReaderCrossAxisMatchParent(containerReaderChildren, layoutConstraint);
     return true;
 }
 

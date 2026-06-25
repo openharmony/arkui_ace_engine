@@ -24,7 +24,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;

@@ -48,7 +48,7 @@ public:
 
     static bool ObtainQRCodeColor(Color &qrcodeColor)
     {
-        CHECK_NULL_RETURN(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
+        CHECK_NULL_RETURN(!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             return false;
@@ -59,7 +59,7 @@ public:
 
     static bool ObtainBackgroundColor(Color &bgColor)
     {
-        CHECK_NULL_RETURN(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
+        CHECK_NULL_RETURN(!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), true);
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             return false;

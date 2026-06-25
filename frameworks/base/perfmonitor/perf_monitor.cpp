@@ -68,6 +68,9 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
     }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_start");
+    }
 }
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
@@ -94,6 +97,9 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_end");
+    }
 }
 
 void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
@@ -111,6 +117,12 @@ void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
 {
     PerfInterfaces::RecordInputEvent(type, sourceType, time);
+}
+
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time,
+    int32_t xPos, int32_t yPos)
+{
+    PerfInterfaces::RecordInputEvent(type, sourceType, time, xPos, yPos);
 }
 
 void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName)
@@ -211,4 +223,9 @@ void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& sur
     PerfInterfaces::ReportSurface(uniqueId, surfaceName, componentName, bundleName, pid);
 }
 
+void PerfMonitor::ReportComponentDetach(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+    PerfInterfaces::ReportComponentDetach(uniqueId, surfaceName, componentName, bundleName, pid);
+}
 } // namespace OHOS::Ace

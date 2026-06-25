@@ -40,11 +40,13 @@ public:
 
     void UpdateChangeEvent(bool check) const
     {
-        if (checkedChangeEvent_) {
-            checkedChangeEvent_(check);
+        auto checkedChangeEvent = checkedChangeEvent_;
+        auto changeEvent = changeEvent_;
+        if (checkedChangeEvent) {
+            checkedChangeEvent(check);
         }
-        if (changeEvent_) {
-            changeEvent_(check);
+        if (changeEvent) {
+            changeEvent(check);
         }
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;

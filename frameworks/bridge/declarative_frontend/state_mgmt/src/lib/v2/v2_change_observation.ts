@@ -69,6 +69,7 @@ class ObserveV2 {
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly ENV_PREFIX = '__env_'; // ENV_PREFIX + attrName => backing store attribute name
+  public static readonly IS_CUSTOM_ENV_INIT = '_isCustomEnvConstructionFinalized__Internal';
   public static readonly OB_PREFIX_LEN = 5;
   public static readonly NO_REUSE = -1; // mark no reuse on-going
   // used by array Handler to create dependency on artificial 'length'
@@ -266,7 +267,20 @@ class ObserveV2 {
       }
       PUV2ViewBase.endPreRender();
     };
-    setTimeout(() => createPreRenderTask(), 5);
+    // Defer the build to a macrotask (runs after the current render flush). Record
+    // a promise so preRender() waits for the pool push before resolving, otherwise
+    // the consumer renders against an empty pool and creates a fresh node.
+    pool.preRenderTasks_.push(new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          createPreRenderTask();
+        } catch(e) {
+          reject(e);
+          return;
+        }
+        resolve();
+      }, 5);
+    }));
   }
 
   /**
@@ -1515,6 +1529,18 @@ class ObserveV2 {
       enumerable: false
     }
     );
+  }
+
+  public static addCustomEnvDecoratorMeta(proto: Object, varName: string, envKey: number): void {
+    const customEnvProto = proto as {
+      __custom_env_deco_meta__?: {
+        varToKey: Record<string, number>;
+      };
+    };
+    const meta = customEnvProto.__custom_env_deco_meta__ ??= {
+      varToKey: {},
+    };
+    meta.varToKey[varName] = envKey;
   }
 
   public static usesV2Variables(proto: Object): boolean {

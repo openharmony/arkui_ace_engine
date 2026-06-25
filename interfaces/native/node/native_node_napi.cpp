@@ -236,23 +236,95 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
 
 ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
 {
-    CHECK_NULL_RETURN_WITH_MESSAGE(
-        env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Failed to initialize native module");
     auto callback = [](const char* moduleName) -> bool {
-        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext", "arkui.observer",
-            "arkui.inspector", "font", "arkui.uicontext", "arkui.components.arkgauge", "arkui.components.arkcheckbox",
-            "arkui.components.arkcheckboxgroup", "arkui.components.arkrating", "arkui.components.arkwaterflow",
-            "arkui.components.arkflowitem", "arkui.components.arkcalendarpicker", "arkui.components.arktimepicker",
-            "arkui.components.arkhyperlink", "arkui.components.arksearch", "arkui.components.arksymbolglyph",
-            "arkui.components.arkmarquee", "arkui.components.arkrowsplit", "arkui.components.arkcolumnsplit",
-            "arkui.components.arkfolderstack", "arkui.components.arkstepper", "arkui.components.arkstepperitem",
-            "arkui.components.arksidebarcontainer", "arkui.components.arkslider", "arkui.components.arkradio",
-            "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",
-            "arkui.components.arkdatapanel", "arkui.components.arktextclock", "arkui.components.arkpatternlock",
-            "arkui.components.arkcounter", "arkui.components.arkqrcode", "arkui.components.arkalphabetindexer",
-            "arkui.components.arkricheditor", "arkui.arktheme" };
+        const char* allowedModules[] = {
+            "arkui.node",
+            "arkui.modifier",
+            "measure",
+            "arkui.UIContext",
+            "arkui.observer",
+            "arkui.inspector",
+            "font",
+            "arkui.uicontext",
+            "arkui.components.arkgauge",
+            "arkui.components.arkcheckbox",
+            "arkui.components.arkcheckboxgroup",
+            "arkui.components.arkrating",
+            "arkui.components.arkwaterflow",
+            "arkui.components.arkflowitem",
+            "arkui.components.arkcalendarpicker",
+            "arkui.components.arktimepicker",
+            "arkui.components.arkhyperlink",
+            "arkui.components.arksearch",
+            "arkui.components.arksymbolglyph",
+            "arkui.components.arkmarquee",
+            "arkui.components.arkrowsplit",
+            "arkui.components.arkcolumnsplit",
+            "arkui.components.arkfolderstack",
+            "arkui.components.arkstepper",
+            "arkui.components.arkstepperitem",
+            "arkui.components.arksidebarcontainer",
+            "arkui.components.arkslider",
+            "arkui.components.arkradio",
+            "arkui.components.arkmenu",
+            "arkui.components.arkmenuitem",
+            "arkui.components.arkmenuitemgroup",
+            "arkui.components.arkdatapanel",
+            "arkui.components.arktextclock",
+            "arkui.components.arkpatternlock",
+            "arkui.components.arkcounter",
+            "arkui.components.arkqrcode",
+            "arkui.components.arkalphabetindexer",
+            "arkui.components.arkricheditor",
+            "arkui.components.selectioncontainer",
+            "arkui.arktheme",
+            "arkui.components.arktoggle",
+            "arkui.components.arktextinput",
+            "arkui.components.arktextarea",
+            "arkui.components.arkgrid",
+            "arkui.components.arkgriditem",
+            "arkui.components.arkbutton",
+            "arkui.components.arktoolbaritem",
+            "arkui.components.arklazygridlayout",
+            "arkui.components.arkloadingprogress",
+            "arkui.components.arkbadge",
+            "arkui.components.arkrefresh",
+            "arkui.components.arkblank",
+            "arkui.components.arkdivider",
+            "arkui.components.arkrelativecontainer",
+            "arkui.components.arkimagespan",
+            "arkui.components.arksymbolspan",
+            "arkui.components.arknavigator",
+            "arkui.components.arktabs",
+            "arkui.components.arktabcontent",
+            "arkui.components.arkswiper",
+            "arkui.components.arkswiperindicator",
+            "arkui.components.arkimageanimator",
+            "arkui.components.arkprogress",
+            "arkui.components.arktexttimer",
+            "arkui.components.arkcircle",
+            "arkui.components.arkellipse",
+            "arkui.components.arkline",
+            "arkui.components.arkpolyline",
+            "arkui.components.arkrect",
+            "arkui.components.arkshape",
+            "arkui.components.arkpolygon",
+            "arkui.components.arkpath",
+            "arkui.components.arkselect",
+            "arkui.components.arktextpicker",
+            "arkui.components.arkxcomponent",
+            "arkui.components.arkdatepicker",
+            "arkui.components.arkvideo",
+            "arkui.components.arkgridrow",
+            "arkui.components.arkgridcol",
+            "arkui.components.arkcanvas",
+            "arkui.components.arkpanel",
+            "arkui.components.arkgridcontainer",
+            "arkui.components.arkrefresh",
+        };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;
@@ -264,9 +336,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
     // so there is no need for synchronization or thread-safety mechanisms.
     static std::once_flag set_callback_flag;
     static napi_status ret = napi_ok;
-    std::call_once(set_callback_flag, [callback]() {
-        ret = napi_set_module_validate_callback(callback);
-    });
+    std::call_once(set_callback_flag, [callback]() { ret = napi_set_module_validate_callback(callback); });
     if (ret != napi_ok) {
         LOGE("fail to set module validate callback");
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to set module validate callback");
@@ -302,18 +372,19 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     napi_get_named_property(env, value, "typeName", &typeName);
     std::string typenameStr;
     GetStringFromNapiValue(env, typeName, typenameStr);
-    if (typenameStr == "AnimatedDrawableDescriptor" || typenameStr == "PixelMapDrawableDescriptor") {
-        OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
-        drawable->newDrawableDescriptor = objectNapi;
+    if (typenameStr == "LayeredDrawableDescriptor") {
+        auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
+        if (!descriptor) {
+            delete drawable;
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
-    if (!descriptor) {
-        delete drawable;
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
+    drawable->newDrawableDescriptor = objectNapi;
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -337,13 +408,18 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue(
 ArkUI_ErrorCode  OH_ArkUI_GetNavigationId(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getNavigationId(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -352,13 +428,18 @@ ArkUI_ErrorCode  OH_ArkUI_GetNavigationId(
 ArkUI_ErrorCode OH_ArkUI_GetNavDestinationName(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getNavDestinationName(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -366,11 +447,20 @@ ArkUI_ErrorCode OH_ArkUI_GetNavDestinationName(
 
 ArkUI_ErrorCode OH_ArkUI_GetNavStackLength(ArkUI_NodeHandle node, int32_t* length)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(length, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(length, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Length is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto stacklength = fullImpl->getNavigation()->getStackLength(node->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
+    auto navigationAPI = fullImpl->getNavigation();
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
+    auto stacklength = navigationAPI->getStackLength(node->uiNodeHandle);
     if (stacklength < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED,
+            __FUNCTION__, "Failed to get stack length");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     *length = stacklength;
@@ -380,13 +470,18 @@ ArkUI_ErrorCode OH_ArkUI_GetNavStackLength(ArkUI_NodeHandle node, int32_t* lengt
 ArkUI_ErrorCode OH_ArkUI_GetNavDestinationNameByIndex(
     ArkUI_NodeHandle node, int32_t index, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getNavDesNameByIndex(node->uiNodeHandle, index, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -395,13 +490,18 @@ ArkUI_ErrorCode OH_ArkUI_GetNavDestinationNameByIndex(
 ArkUI_ErrorCode OH_ArkUI_GetNavDestinationId(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getNavDestinationId(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -409,15 +509,21 @@ ArkUI_ErrorCode OH_ArkUI_GetNavDestinationId(
 
 ArkUI_ErrorCode OH_ArkUI_GetNavDestinationState(ArkUI_NodeHandle node, ArkUI_NavDestinationState* state)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(state, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(state, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "State is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
 
     auto navDestinationState = navigationAPI->getNavDestinationState(node->uiNodeHandle);
     if (navDestinationState < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED,
+            __FUNCTION__, "Failed to get navDestination state");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     *state = static_cast<ArkUI_NavDestinationState>(navDestinationState);
@@ -426,15 +532,21 @@ ArkUI_ErrorCode OH_ArkUI_GetNavDestinationState(ArkUI_NodeHandle node, ArkUI_Nav
 
 ArkUI_ErrorCode OH_ArkUI_GetNavDestinationIndex(ArkUI_NodeHandle node, int32_t* index)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(index, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(index, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Index is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
 
     auto retIndex = navigationAPI->getNavDestinationIndex(node->uiNodeHandle);
     if (retIndex < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__,
+            "Failed to get navDestination index");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     *index = retIndex;
@@ -443,25 +555,42 @@ ArkUI_ErrorCode OH_ArkUI_GetNavDestinationIndex(ArkUI_NodeHandle node, int32_t* 
 
 napi_value OH_ArkUI_GetNavDestinationParam(ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(node, nullptr);
+    if (!node) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+        return nullptr;
+    }
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, nullptr);
+    if (!fullImpl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__,
+            "Full implementation is null");
+        return nullptr;
+    }
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, nullptr);
+    if (!navigationAPI) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED,
+            __FUNCTION__, "Navigation API is null");
+        return nullptr;
+    }
     return reinterpret_cast<napi_value>(navigationAPI->getNavDestinationParam(node->uiNodeHandle));
 }
 
 ArkUI_ErrorCode OH_ArkUI_GetRouterPageIndex(ArkUI_NodeHandle node, int32_t* index)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(index, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(index, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Index is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
 
     auto retIndex = navigationAPI->getRouterPageIndex(node->uiNodeHandle);
     if (retIndex < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED,
+            __FUNCTION__, "Failed to get router page index");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     *index = retIndex;
@@ -471,13 +600,18 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageIndex(ArkUI_NodeHandle node, int32_t* inde
 ArkUI_ErrorCode OH_ArkUI_GetRouterPageName(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getRouterPageName(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -486,13 +620,18 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageName(
 ArkUI_ErrorCode OH_ArkUI_GetRouterPagePath(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getRouterPagePath(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
@@ -500,15 +639,21 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPagePath(
 
 ArkUI_ErrorCode OH_ArkUI_GetRouterPageState(ArkUI_NodeHandle node, ArkUI_RouterPageState* state)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(state, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(state, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "State is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
 
     auto routerPageState = navigationAPI->getRouterPageState(node->uiNodeHandle);
     if (routerPageState < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED,
+            __FUNCTION__, "Failed to get router page state");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     *state = static_cast<ArkUI_RouterPageState>(routerPageState);
@@ -518,13 +663,18 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageState(ArkUI_NodeHandle node, ArkUI_RouterP
 ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(buffer, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(writeLength, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "WriteLength is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     auto ret =
         navigationAPI->getRouterPageId(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);

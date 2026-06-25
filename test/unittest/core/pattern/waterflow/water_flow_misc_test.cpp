@@ -19,6 +19,8 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/render/paint_wrapper.h"
+
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 

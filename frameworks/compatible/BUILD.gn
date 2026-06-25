@@ -562,6 +562,9 @@ template("ace_compatible_source") {
       sources += [ "components/text_field/on_text_changed_listener_impl.cpp" ]
       external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
     }
+    if (use_mingw_win || use_mac || use_linux) {
+      sources += [ "$ace_root/frameworks/core/components/text_overlay/text_overlay_manager.cpp" ]
+    }
     deps = [
       "$ace_root/frameworks/core:ace_container_scope",
     ]

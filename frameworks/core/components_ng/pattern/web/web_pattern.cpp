@@ -45,12 +45,12 @@
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -69,7 +69,9 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/web/resource/web_delegate.h"
@@ -3961,6 +3963,13 @@ void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
     }
 }
 
+void WebPattern::OnFullScreenVideoOverlayUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateFullScreenVideoOverlayEnable(value);
+    }
+}
+
 void WebPattern::OnFileAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -4749,6 +4758,7 @@ void WebPattern::OnModifyDone()
 
         std::tuple<bool, bool> config = GetNativeVideoPlayerConfigValue({false, false});
         delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
+        delegate_->UpdateFullScreenVideoOverlayEnable(GetFullScreenVideoOverlayValue(false));
 
         if (GetEnableFollowSystemFontWeight()) {
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
@@ -4758,6 +4768,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
         delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
         UpdateScrollbarLayout();
+        delegate_->UpdateTouchEventFeatureDetectionEnabled();
     }
 
     // Set the default background color when the component did not set backgroundColor()
@@ -5330,7 +5341,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         touchPointY = touchPoint.y;
         if (info.GetSourceTool() == SourceTool::PEN &&
             delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
-            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(GetInspectorId(), touchPointX, touchPointY)) {
             TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
             isNeedInterceptedTouchEvent_ = true;
             WebRequestFocus();
@@ -10322,20 +10333,9 @@ int WebPattern::ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJ
     }
     if (!delegate_) {
         TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteInputMethodCommand: delegate_ is nullptr");
-        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
-            std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
         return static_cast<int>(WebCommandResult::DELEGATE_NULL);
     }
     result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
-    if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
-        auto xpathValue = comJson->GetValue("XPath");
-        std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
-        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
-            std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
-    } else if (result > RET_SUCCESS) {
-        NWeb::EventReport::ReportMSDPError(
-            INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
-    }
     return result;
 }
 

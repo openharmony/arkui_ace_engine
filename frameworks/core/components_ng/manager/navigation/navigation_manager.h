@@ -73,10 +73,12 @@ struct NavdestinationRecoveryInfo {
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
     int32_t launchMode = 0;
+    std::string state;
 
     NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode,
-        int32_t launchMode = 0)
-        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode) {}
+        int32_t launchMode = 0, const std::string& state = "")
+        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode), state(std::move(state))
+    {}
 };
 
 struct SequentialNavdestinationRecoveryInfo {
@@ -89,6 +91,11 @@ using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&, bool isRouter)>;
 
 const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
+
+using ColorPickerCallback = std::function<void(uint32_t luminace)>;
+using RegisterColorPickerCallback = std::function<void(const RefPtr<FrameNode>& node, int32_t samplingInterval,
+    int32_t brightThreshold, int32_t darkThreshold, ColorPickerCallback&& callback)>;
+using UnregisterColorPickerCallback = std::function<void(const RefPtr<FrameNode>& node)>;
 
 class NavigationManager : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationManager, AceType);
@@ -297,6 +304,28 @@ public:
     void FireNavigateChangeCallback(
         const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter = false);
 
+    void SetRegisterColorPickerCallback(RegisterColorPickerCallback&& callback)
+    {
+        registerColorPickerCallback_ = std::move(callback);
+    }
+    void RegisterColorPicker(const RefPtr<FrameNode>& node, int32_t samplingInterval,
+        int32_t brightThreshold, int32_t darkThreshold, ColorPickerCallback&& callback)
+    {
+        if (registerColorPickerCallback_) {
+            registerColorPickerCallback_(node, samplingInterval, brightThreshold, darkThreshold, std::move(callback));
+        }
+    }
+    void SetUnregisterColorPickerCallback(UnregisterColorPickerCallback&& callback)
+    {
+        unregisterColorPickerCallback_ = std::move(callback);
+    }
+    void UnregisterColorPicker(const RefPtr<FrameNode>& node)
+    {
+        if (unregisterColorPickerCallback_) {
+            unregisterColorPickerCallback_(node);
+        }
+    }
+
 private:
     RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
@@ -348,6 +377,9 @@ private:
     GetSystemColorCallback getSystemColorCallback_;
     int navigateCallbackId_ = 0;
     std::unordered_map<int32_t, TransitionCallback> changeCallbacks_; // page or navigation change callback
+
+    RegisterColorPickerCallback registerColorPickerCallback_;
+    UnregisterColorPickerCallback unregisterColorPickerCallback_;
 
     //-------force split begin-------
     int32_t currNestedDepth_ = 0;

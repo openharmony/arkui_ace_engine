@@ -377,6 +377,7 @@ public:
     ArkUI_AccessibilityProvider* GetNativeProvider();
     void PushType(StatisticEventType type);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    static std::string GetCompensationAngleFromFeatureManager();
 protected:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
@@ -394,6 +395,8 @@ protected:
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void RegisterTransformHintCallback(PipelineContext* context);
+    void LoadNative();
+    void OnSurfaceCreated();
 
     std::optional<std::string> id_;
     std::string nodeId_ = "-1";
@@ -439,8 +442,19 @@ protected:
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
 
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
+    std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    bool isTypedNode_ = false;
+    bool isNativeXComponent_ = false;
+
     OffsetF globalPosition_;
     void NativeXComponentOffset(double x, double y);
+    std::string GetLeakType();
+#ifdef ENABLE_ROSEN_BACKEND
+    static void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
+    const std::string& xcomponentId);
+#endif
 
 private:
     void OnAreaChangedInner() override;
@@ -452,11 +466,9 @@ private:
     void OnDetachContext(PipelineContext *context) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void LoadNative();
     void OnNativeLoad(FrameNode* frameNode);
     void OnNativeUnload(FrameNode* frameNode);
 
-    void OnSurfaceCreated();
     void OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow);
 
     void NativeSurfaceShow();
@@ -518,20 +530,15 @@ private:
 #endif
 
     void AddLayoutTask();
+    void applyBackGroundColor();
 
     void UpdateSdrRatioIfNeed();
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::optional<std::string> libraryname_;
-    std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
     std::optional<uint64_t> screenId_;
-
     WeakPtr<XComponentPattern> extPattern_;
-
-    std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
-    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
-
     bool hasXComponentInit_ = false;
     bool isXComponentSizeInit_ = false;
 
@@ -555,8 +562,6 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     uint32_t rotation_ = 0;
-    bool isTypedNode_ = false;
-    bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
@@ -568,6 +573,9 @@ private:
     int32_t foldDisplayCallbackId_ = -1;
     float xcomponentTouchSdrRatio_ = 0.0f;
     float xcomponentSizeSdrRatio_ = 0.0f;
+    static std::string compensationAngleFromFeatureManager_;
+    static std::atomic<bool> compensationAngleFlag_;
+    static std::mutex angleMtx_;
 };
 } // namespace OHOS::Ace::NG
 

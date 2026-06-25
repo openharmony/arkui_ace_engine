@@ -74,7 +74,7 @@ export class XComponentOpsHandWritten {
     }
     static hookXComponentStartImageAnalyzerImpl(
         controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
-        const peer = controller.getPeer();
+        const peer = controller.nativeObj.getPeer();
         if (peer === undefined) {
             return XComponentControllerExtender.startImageAnalyzer(controller, config);
         }

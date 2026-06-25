@@ -27,6 +27,7 @@
 // NOLINTEND
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -231,6 +232,11 @@ public:
         applyRowCount_++;
     }
 
+    void ApplyGeneralConstraints() override
+    {
+        applyGeneralCount_++;
+    }
+
     int64_t GetNodeId() const override
     {
         return nodeId_;
@@ -258,6 +264,9 @@ public:
 
     SmartLayoutRect GetChildrenBoundingBox() const override
     {
+        if (forceInvalidBoundingBox_) {
+            return SmartLayoutRect();
+        }
         if (children_.empty()) {
             return boundingBox_;
         }
@@ -297,9 +306,14 @@ public:
         size_.height.value = height;
     }
 
-    void SetBoundingBox(const SmartLayoutRect& rect)
+    void SetBoundingBox(const SmartLayoutRect& rect) override
     {
         boundingBox_ = rect;
+    }
+
+    const SmartLayoutRect& GetBoundingBox() const override
+    {
+        return boundingBox_;
     }
 
     void SetSolveResult(bool result)
@@ -315,6 +329,8 @@ public:
     bool solveCalled_ = false;
     int32_t applyColumnCount_ = 0;
     int32_t applyRowCount_ = 0;
+    int32_t applyGeneralCount_ = 0;
+    bool forceInvalidBoundingBox_ = false;
     std::vector<ChildLayoutInfo> createdInfos_;
 
 private:
@@ -405,9 +421,10 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest001, TestSize.Level1)
     SmartLayoutAlgorithm algorithm;
     EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(nullptr), SmartLayoutType::UNKNOWN);
 
+    // Non Column/Row/Flex tags fall back to the general (bounding-box) layout type.
     auto hostNode = CreateTestFrameNode("unknown", 1);
     auto wrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(hostNode), "unknown");
-    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::UNKNOWN);
+    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::GENERAL);
 }
 
 /**
@@ -483,7 +500,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest004, TestSize.Level1)
     parentWrapper->AddChild(childWithoutHost);
 
     auto infos = algorithm.CollectChildInfo(parentWrapper.GetRawPtr());
-    ASSERT_EQ(infos.size(), 2);
+    ASSERT_EQ(infos.size(), 1);
 
     EXPECT_EQ(infos[0].id, 101);
     EXPECT_EQ(infos[0].width, 50.0);
@@ -491,11 +508,6 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest004, TestSize.Level1)
     EXPECT_EQ(infos[0].offsetX, 3.0);
     EXPECT_EQ(infos[0].offsetY, 4.0);
     EXPECT_TRUE(infos[0].isBlank);
-
-    EXPECT_EQ(infos[1].id, 102);
-    EXPECT_EQ(infos[1].width, 0.0);
-    EXPECT_EQ(infos[1].height, 0.0);
-    EXPECT_FALSE(infos[1].isBlank);
 }
 
 /**
@@ -615,8 +627,8 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest008, TestSize.Level1)
 HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest009, TestSize.Level1)
 {
     SmartLayoutAlgorithm algorithm;
-    algorithm.ExecuteLayout(nullptr, SmartLayoutType::ROW);
-    algorithm.ExecuteLayout(nullptr, SmartLayoutType::UNKNOWN);
+    EXPECT_FALSE(algorithm.ExecuteLayout(nullptr, SmartLayoutType::ROW));
+    EXPECT_FALSE(algorithm.ExecuteLayout(nullptr, SmartLayoutType::UNKNOWN));
     EXPECT_EQ(algorithm.rootNode_, nullptr);
 }
 
@@ -632,7 +644,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest010, TestSize.Level1)
     auto wrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(host), V2::ROW_ETS_TAG);
 
     SmartLayoutEngineLoaderGuard guard(nullptr);
-    algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::ROW);
+    EXPECT_FALSE(algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::ROW));
     EXPECT_EQ(algorithm.rootNode_, nullptr);
 }
 
@@ -651,7 +663,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest011, TestSize.Level1)
     engine->returnNullRoot_ = true;
     {
         SmartLayoutEngineLoaderGuard guard(engine);
-        algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::ROW);
+        EXPECT_FALSE(algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::ROW));
     }
     delete engine;
     EXPECT_EQ(algorithm.rootNode_, nullptr);
@@ -697,11 +709,13 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest012, TestSize.Level1)
     engine->rootNode_->SetSolveResult(true);
     engine->rootNode_->SetSizeScale(1.5);
 
+    bool result = false;
     {
         SmartLayoutEngineLoaderGuard guard(engine);
-        algorithm.ExecuteLayout(parentWrapper.GetRawPtr(), SmartLayoutType::ROW);
+        result = algorithm.ExecuteLayout(parentWrapper.GetRawPtr(), SmartLayoutType::ROW);
     }
 
+    EXPECT_TRUE(result);
     ASSERT_NE(algorithm.rootNode_, nullptr);
     auto root = std::static_pointer_cast<SmartLayoutAlgorithmFakeNode>(algorithm.rootNode_);
     EXPECT_EQ(root->applyColumnCount_, 0);
@@ -710,8 +724,8 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest012, TestSize.Level1)
     ASSERT_EQ(root->createdInfos_.size(), 2);
     EXPECT_FALSE(root->createdInfos_[0].isBlank);
     EXPECT_TRUE(root->createdInfos_[1].isBlank);
-    EXPECT_TRUE(childWrapper1->layoutCalled_);
-    EXPECT_TRUE(childWrapper2->layoutCalled_);
+    EXPECT_FALSE(childWrapper1->layoutCalled_);
+    EXPECT_FALSE(childWrapper2->layoutCalled_);
     EXPECT_GT(childGeo1->GetFrameOffset().GetY(), 0.0f);
 
     delete engine;
@@ -743,11 +757,13 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest013, TestSize.Level1)
 
     auto* engine = new SmartLayoutAlgorithmFakeEngine();
     engine->rootNode_->SetSolveResult(false);
+    bool result = false;
     {
         SmartLayoutEngineLoaderGuard guard(engine);
-        algorithm.ExecuteLayout(parentWrapper.GetRawPtr(), SmartLayoutType::COLUMN);
+        result = algorithm.ExecuteLayout(parentWrapper.GetRawPtr(), SmartLayoutType::COLUMN);
     }
 
+    EXPECT_FALSE(result);
     ASSERT_NE(algorithm.rootNode_, nullptr);
     auto root = std::static_pointer_cast<SmartLayoutAlgorithmFakeNode>(algorithm.rootNode_);
     EXPECT_EQ(root->applyColumnCount_, 1);
@@ -823,7 +839,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest015, TestSize.Level1)
 HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest016, TestSize.Level1)
 {
     SmartLayoutAlgorithm algorithm;
-    algorithm.ApplyLayoutResults(nullptr);
+    EXPECT_FALSE(algorithm.ApplyLayoutResults(nullptr));
 
     auto root = std::make_shared<SmartLayoutAlgorithmFakeNode>(0, "root");
     algorithm.rootNode_ = root;
@@ -834,7 +850,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest016, TestSize.Level1)
     auto childWrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
         WeakPtr<FrameNode>(childHost), V2::TEXT_ETS_TAG);
     parentWrapper->AddChild(childWrapper);
-    algorithm.ApplyLayoutResults(parentWrapper.GetRawPtr());
+    EXPECT_FALSE(algorithm.ApplyLayoutResults(parentWrapper.GetRawPtr()));
     EXPECT_FALSE(childWrapper->layoutCalled_);
 }
 
@@ -863,17 +879,19 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest017, TestSize.Level1)
 
     auto* engine = new SmartLayoutAlgorithmFakeEngine();
     engine->rootNode_->SetSolveResult(true);
+    bool result = false;
     {
         SmartLayoutEngineLoaderGuard guard(engine);
-        algorithm.PerformSmartLayout(wrapper.GetRawPtr());
+        result = algorithm.PerformSmartLayout(wrapper.GetRawPtr());
     }
 
+    EXPECT_TRUE(result);
     ASSERT_NE(algorithm.rootNode_, nullptr);
     auto root = std::static_pointer_cast<SmartLayoutAlgorithmFakeNode>(algorithm.rootNode_);
     EXPECT_EQ(root->GetLayoutType(), SmartLayoutType::ROW);
     EXPECT_EQ(root->applyRowCount_, 1);
     EXPECT_TRUE(root->solveCalled_);
-    EXPECT_TRUE(childWrapper->layoutCalled_);
+    EXPECT_FALSE(childWrapper->layoutCalled_);
 
     delete engine;
 }
@@ -1066,7 +1084,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest026, TestSize.Level1)
         WeakPtr<FrameNode>(childHost), V2::TEXT_ETS_TAG);
     wrapper->AddChild(childWrapper);
     algorithm.rootNode_ = nullptr;
-    algorithm.ApplyLayoutResults(wrapper.GetRawPtr());
+    EXPECT_FALSE(algorithm.ApplyLayoutResults(wrapper.GetRawPtr()));
     EXPECT_FALSE(childWrapper->layoutCalled_);
 }
 
@@ -1177,6 +1195,112 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest033, TestSize.Level1)
 
     EXPECT_NEAR(offsets.first, 0.0, 0.001);
     EXPECT_NEAR(offsets.second, 0.0, 0.001);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest034
+ * @tc.desc: ApplyChildLayout skips positioned child and match-parent layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest034, TestSize.Level1)
+{
+    SmartLayoutAlgorithm algorithm;
+    std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> nodeMap;
+    nodeMap[3401] = std::make_shared<SmartLayoutAlgorithmFakeNode>(3401, "mapped");
+    auto posHost = CreateTestFrameNode(V2::TEXT_ETS_TAG, 3401);
+    posHost->GetRenderContext()->GetOrCreatePositionProperty()->UpdatePosition(
+        OffsetT<Dimension>(Dimension(1.0), Dimension(2.0)));
+    auto posWrapper =
+        AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(posHost), V2::TEXT_ETS_TAG);
+    algorithm.ApplyChildLayout(posWrapper, nodeMap, 1.0, 0.0, 0.0);
+    EXPECT_FALSE(posWrapper->layoutCalled_);
+
+    nodeMap[3402] = std::make_shared<SmartLayoutAlgorithmFakeNode>(3402, "match");
+    auto matchHost = CreateTestFrameNode(V2::TEXT_ETS_TAG, 3402);
+    auto matchWrapper =
+        AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(matchHost), V2::TEXT_ETS_TAG);
+    matchWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    algorithm.ApplyChildLayout(matchWrapper, nodeMap, 1.0, 0.0, 0.0);
+    EXPECT_FALSE(matchWrapper->layoutCalled_);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest035
+ * @tc.desc: Test GetLayoutTypeFromWrapper returns GENERAL for a wrapping Flex container
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest035, TestSize.Level1)
+{
+    SmartLayoutAlgorithm algorithm;
+    auto hostNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 35, AceType::MakeRefPtr<FlexLayoutPattern>(true));
+    auto wrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(hostNode), V2::FLEX_ETS_TAG);
+    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::GENERAL);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest036
+ * @tc.desc: Test ExecuteLayout GENERAL path applies general constraints with a valid bounding box,
+ *           and bails out before solving when the bounding box is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest036, TestSize.Level1)
+{
+    auto buildWrapper = [](int32_t id, RefPtr<FrameNode>& parentHostOut, RefPtr<FrameNode>& childHostOut) {
+        parentHostOut = CreateTestFrameNode(V2::FLEX_ETS_TAG, id);
+        auto parentWrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
+            WeakPtr<FrameNode>(parentHostOut), V2::FLEX_ETS_TAG);
+        auto parentGeo = AceType::MakeRefPtr<GeometryNode>();
+        parentGeo->SetFrameSize(SizeF(200.0f, 200.0f));
+        parentWrapper->SetGeometry(parentGeo);
+        parentWrapper->SetLayoutProp(AceType::MakeRefPtr<FlexLayoutProperty>());
+        childHostOut = CreateTestFrameNode(V2::TEXT_ETS_TAG, id + 1);
+        auto childWrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
+            WeakPtr<FrameNode>(childHostOut), V2::TEXT_ETS_TAG);
+        auto childGeo = AceType::MakeRefPtr<GeometryNode>();
+        childGeo->SetFrameSize(SizeF(50.0f, 50.0f));
+        childGeo->SetFrameOffset(OffsetF(10.0f, 10.0f));
+        childWrapper->SetGeometry(childGeo);
+        parentWrapper->AddChild(childWrapper);
+        return parentWrapper;
+    };
+
+    // Helper: run ExecuteLayout(GENERAL) with configurable FakeEngine state.
+    // Returns (result, root) for assertion. Engine is cleaned up internally.
+    auto runGeneral = [&buildWrapper](int32_t id, bool solveResult, bool forceInvalidBB) {
+        SmartLayoutAlgorithm algorithm;
+        RefPtr<FrameNode> parentHost;
+        RefPtr<FrameNode> childHost;
+        auto wrapper = buildWrapper(id, parentHost, childHost);
+        auto* engine = new SmartLayoutAlgorithmFakeEngine();
+        engine->rootNode_->SetSolveResult(solveResult);
+        engine->rootNode_->forceInvalidBoundingBox_ = forceInvalidBB;
+        bool result = false;
+        {
+            SmartLayoutEngineLoaderGuard guard(engine);
+            result = algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::GENERAL);
+        }
+        auto root = std::static_pointer_cast<SmartLayoutAlgorithmFakeNode>(algorithm.rootNode_);
+        delete engine;
+        return std::make_pair(result, root);
+    };
+
+    // Valid bounding box: general constraints applied, solved and results applied (covers GENERAL offset branch).
+    {
+        auto [result, root] = runGeneral(360, true, false);
+        EXPECT_TRUE(result);
+        EXPECT_EQ(root->applyGeneralCount_, 1);
+        EXPECT_TRUE(root->solveCalled_);
+    }
+
+    // Invalid bounding box: guard bails out before solving.
+    // forceInvalidBoundingBox_ makes GetChildrenBoundingBox() return invalid rect,
+    // so ProcessLayoutChildren skips SetBoundingBox, leaving GetBoundingBox() at default (invalid).
+    {
+        auto [result, root] = runGeneral(380, true, true);
+        EXPECT_FALSE(result);
+        EXPECT_EQ(root->applyGeneralCount_, 0);
+        EXPECT_FALSE(root->solveCalled_);
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -202,9 +202,12 @@ void CustomNodeBase::Reset()
     recycleRenderFunc_ = nullptr;
     onDumpInfoFunc_ = nullptr;
     onDumpInspectorFunc_ = nullptr;
+    clearParentReusePoolFunc_ = nullptr;
     getThisFunc_ = nullptr;
     onRecycleFunc_ = nullptr;
     onReuseFunc_ = nullptr;
+    releaseRecyclePoolFunc_ = nullptr;
+    getMemOptFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)
@@ -230,6 +233,31 @@ bool CustomNodeBase::GetIsV2()
 void CustomNodeBase::SetIsV2(bool isV2)
 {
     isV2_ = isV2;
+}
+
+ReusableMemOptStrategy CustomNodeBase::GetReusableMemOptStrategy()
+{
+    return reusableMemOptStrategy_;
+}
+
+void CustomNodeBase::SetReusableMemOptStrategy(int32_t reusableMemOptStrategy)
+{
+    reusableMemOptStrategy_ = static_cast<ReusableMemOptStrategy>(reusableMemOptStrategy);
+}
+
+void CustomNodeBase::SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback)
+{
+    releaseRecyclePoolFunc_ = std::move(callback);
+}
+
+void CustomNodeBase::TryEnableParentCustomNodeMemOpt()
+{
+    CHECK_EQUAL_VOID(reusableMemOptStrategy_, ReusableMemOptStrategy::DEFAULT);
+    auto uiNode = AceType::DynamicCast<UINode>(Claim(this));
+    CHECK_NULL_VOID(uiNode);
+    auto parentCustomNode = uiNode->GetParentCustomNode();
+    CHECK_NULL_VOID(parentCustomNode);
+    parentCustomNode->StartMemOpt();
 }
 
 const ExtraInfo& CustomNodeBase::GetExtraInfo() const
@@ -273,6 +301,19 @@ std::string CustomNodeBase::FireOnDumpInspectorFunc()
         return onDumpInspectorFunc_();
     }
     return "";
+}
+
+void CustomNodeBase::SetClearParentReusePoolFunc(std::function<void()>&& func)
+{
+    clearParentReusePoolFunc_ = std::move(func);
+}
+
+void CustomNodeBase::FireClearParentReusePoolFunc()
+{
+    if (clearParentReusePoolFunc_) {
+        ACE_SCOPED_TRACE("CustomNode:FireClearParentReusePoolFunc %s", GetJSViewName().c_str());
+        clearParentReusePoolFunc_();
+    }
 }
 
 bool CustomNodeBase::CheckFireOnAppear()
@@ -331,6 +372,22 @@ void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std:
 void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 {
     onDumpInspectorFunc_ = func;
+}
+
+void CustomNodeBase::SetMemOptGetter(std::function<int32_t()>&& func)
+{
+    getMemOptFunc_ = std::move(func);
+}
+
+int32_t CustomNodeBase::GetMemOpt() const
+{
+    return getMemOptFunc_ ? getMemOptFunc_() : 0;
+}
+
+void CustomNodeBase::SetStaMemopt(int32_t opt)
+{
+    staReusableMemOptStrategy_ =
+        (opt == 1)? StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION: StaReusableMemOptStrategy::DEFAULT;
 }
 
 void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)

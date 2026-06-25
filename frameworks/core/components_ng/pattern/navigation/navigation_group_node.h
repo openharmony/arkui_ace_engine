@@ -93,6 +93,13 @@ public:
     {
         return relatedPageDestinationNode_;
     }
+    const RefPtr<UINode>& GetRelatedPageOrForceSplitPlaceholder() const
+    {
+        if (relatedPageDestinationNode_) {
+            return relatedPageDestinationNode_;
+        }
+        return forceSplitPlaceHolderNode_;
+    }
 
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
@@ -451,6 +458,8 @@ public:
     {
         return std::move(primaryNodesToBeRemoved_);
     }
+    RefPtr<FrameNode> GetOrCreateMaskNode(bool isLeft);
+    void UpdateMaskNodeVisibility(bool isLeft, VisibleType type);
     //-------for force split------- end  ------
 
 protected:
@@ -546,6 +555,8 @@ private:
     // Use one counter so continuous split push/pop transitions only recover them after
     // the last running animation finishes.
     int32_t forceSplitRunningAnimationCount_ = 0;
+    RefPtr<FrameNode> leftMaskNode_ = nullptr;
+    RefPtr<FrameNode> rightMaskNode_ = nullptr;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

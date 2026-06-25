@@ -350,6 +350,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_LIST_SCROLL_INDEX;
         case NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE:
             return ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE;
+        case NODE_LIST_ON_EDIT_MODE_CHANGE:
+            return ON_LIST_EDIT_MODE_CHANGE;
         case NODE_WATER_FLOW_ON_SCROLL_INDEX:
             return ON_WATER_FLOW_SCROLL_INDEX;
         case NODE_TEXT_ON_DETECT_RESULT_UPDATE:
@@ -364,6 +366,20 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_DETACH;
         case NODE_LIST_ON_WILL_SCROLL:
             return ON_LIST_WILL_SCROLL;
+        case NODE_ARC_LIST_ON_SCROLL_INDEX:
+            return ON_ARC_LIST_SCROLL_INDEX;
+        case NODE_ARC_LIST_ON_REACH_START:
+            return ON_ARC_LIST_REACH_START;
+        case NODE_ARC_LIST_ON_REACH_END:
+            return ON_ARC_LIST_REACH_END;
+        case NODE_ARC_LIST_ON_SCROLL_START:
+            return ON_ARC_LIST_SCROLL_START;
+        case NODE_ARC_LIST_ON_SCROLL_STOP:
+            return ON_ARC_LIST_SCROLL_STOP;
+        case NODE_ARC_LIST_ON_WILL_SCROLL:
+            return ON_ARC_LIST_WILL_SCROLL;
+        case NODE_ARC_LIST_ON_DID_SCROLL:
+            return ON_ARC_LIST_DID_SCROLL;
         case NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL:
             return ON_SWIPER_DID_CONTENT_SCROLL;
         case NODE_SWIPER_EVENT_ON_UNSELECTED:
@@ -674,6 +690,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_LIST_ON_SCROLL_INDEX;
         case ON_LIST_DID_SCROLL:
             return NODE_LIST_ON_DID_SCROLL;
+        case ON_LIST_EDIT_MODE_CHANGE:
+            return NODE_LIST_ON_EDIT_MODE_CHANGE;
         case ON_WATER_FLOW_SCROLL_INDEX:
             return NODE_WATER_FLOW_ON_SCROLL_INDEX;
         case ON_WATER_FLOW_REACH_START:
@@ -698,6 +716,20 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_DID_STOP_FLING;
         case ON_LIST_REACH_START:
             return NODE_SCROLL_EVENT_ON_REACH_START;
+        case ON_ARC_LIST_SCROLL_INDEX:
+            return NODE_ARC_LIST_ON_SCROLL_INDEX;
+        case ON_ARC_LIST_SCROLL_START:
+            return NODE_ARC_LIST_ON_SCROLL_START;
+        case ON_ARC_LIST_SCROLL_STOP:
+            return NODE_ARC_LIST_ON_SCROLL_STOP;
+        case ON_ARC_LIST_WILL_SCROLL:
+            return NODE_ARC_LIST_ON_WILL_SCROLL;
+        case ON_ARC_LIST_DID_SCROLL:
+            return NODE_ARC_LIST_ON_DID_SCROLL;
+        case ON_ARC_LIST_REACH_START:
+            return NODE_ARC_LIST_ON_REACH_START;
+        case ON_ARC_LIST_REACH_END:
+            return NODE_ARC_LIST_ON_REACH_END;
         case ON_DETECT_RESULT_UPDATE:
             return NODE_TEXT_ON_DETECT_RESULT_UPDATE;
         case ON_ATTACH:

@@ -366,6 +366,7 @@ protected:
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
 #ifndef ACE_UNITTEST
+    void ApplyFontWeightVariations(Rosen::TextStyle& txtStyle, const TextStyle& textStyle);
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
     double GetFontAlign(TextAlign align, std::unique_ptr<RSParagraph>& paragraph) const;
     virtual void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) = 0;
@@ -416,6 +417,7 @@ protected:
     std::optional<bool> fontAntiAlias_;
     bool isPathChanged_ = true;
     bool isPath2dChanged_ = true;
+    std::optional<float> fontWeightScale_;
 
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];

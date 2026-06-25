@@ -18,6 +18,10 @@
 #if defined(MODEL_COMPONENT_SUPPORTED)
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #endif
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
@@ -44,6 +48,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef MODEL_COMPONENT_SUPPORTED
     auto frameNode = ModelViewNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::MODEL_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

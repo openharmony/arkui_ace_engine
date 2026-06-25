@@ -45,6 +45,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. update caret rect
+     */
     pattern->UpdateCaretRect(true);
 }
 
@@ -65,6 +68,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. check select area visible
+     */
     pattern->CheckSelectAreaVisible();
 }
 
@@ -161,6 +167,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->CanUndo(), false);
     EXPECT_EQ(pattern->CanRedo(), false);
+    /**
+     * @tc.steps: step2. HandleOnUndoAction
+     */
     pattern->HandleOnUndoAction();
     TextEditingValueNG record {
         .text = pattern->contentController_->GetTextUtf16Value(),
@@ -173,6 +182,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
         value.text = u"123";
         pattern->redoOperationRecords_.push_back(value);
     }
+    /**
+     * @tc.steps: step3. HandleOnUndoAction
+     */
     pattern->HandleOnUndoAction();
 }
 
@@ -652,8 +664,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. create pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. call AutoFillValueChanged
+     */
     pattern->isFillRequestFinish_ = true;
     pattern->AutoFillValueChanged();
 }
@@ -2116,11 +2134,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. GetPattern.
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
     Offset offset(1.0, 1.0);
     pattern->enableTouchAndHoverEffect_ = false;
+    /**
+     * @tc.steps: step3. HandleTouchDown.
+     */
     pattern->HandleTouchDown(offset);
     pattern->enableTouchAndHoverEffect_ = true;
     pattern->isMousePressed_ = true;

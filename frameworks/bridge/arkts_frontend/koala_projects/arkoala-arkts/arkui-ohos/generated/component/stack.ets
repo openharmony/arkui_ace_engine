@@ -126,7 +126,7 @@ export interface StackAttribute extends CommonMethod {
         }
         throw new Error('Unimplemented method pointLight')
     }
-    syncLoad(value: boolean): this {
+    syncLoad(value: boolean | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
             (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as StackAttribute).syncLoad(value));
@@ -220,8 +220,8 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
         this.getPeer()?.setPointLightAttribute(value_casted)
         return this
     }
-    public syncLoad(value: boolean): this {
-        const value_casted = value as (boolean)
+    public syncLoad(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
         this.getPeer()?.setSyncLoadAttribute(value_casted)
         return this
     }

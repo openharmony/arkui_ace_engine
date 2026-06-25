@@ -32,7 +32,7 @@ type FoldVoidCallback = () => void;
 function noop() {
 }
 
-class Layout {
+export class Layout {
   public size: Size = { width: 0, height: 0 };
   public position: NodePosition = { x: 0, y: 0 };
 }

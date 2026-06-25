@@ -183,8 +183,17 @@ public:
     void GetLocalPointWithTransform(OffsetF& localPoint);
     // original local rect to transformed local rect.
     void GetLocalRectWithTransform(RectF& localRect);
+    // transformed global rect to original local rect.
+    void RevertLocalRectWithTransform(RectF& rect);
 
     OffsetF GetPaintOffsetWithoutTransform();
+
+    // local/global coordinate conversion with render transform.
+    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
+    RectF ConvertToGlobalRectWithTransform(const RectF& localRect);
+    OffsetF ConvertToLocalOffsetWithTransform(const OffsetF& globalOffset);
+    RectF ConvertToLocalRectWithTransform(const RectF& globalRect);
+
     RectF GetPaintRectWithTransform();
     OffsetF GetPaintRectOffsetWithTransform();
     RectF GetVisibleContentRectWithTransform(float epsilon);
@@ -430,7 +439,6 @@ private:
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
-    bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
     bool IsEnableSelectionMenu();
     bool NeedsProcessMenuOnWinChange();
     bool isHandleDragging_ = false;

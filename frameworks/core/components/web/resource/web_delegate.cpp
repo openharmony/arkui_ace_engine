@@ -39,6 +39,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -70,6 +71,7 @@
 #include "core/common/container.h"
 #include "base/include/ark_web_errno.h"
 #include "arkweb_utils.h"
+#include "core/components_ng/pattern/web/web_util.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace {
@@ -182,6 +184,21 @@ Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
             return Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
         default:
             return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    }
+}
+
+template<typename T, typename F>
+void HandleVideoStatusCallback(
+    const std::map<std::string, std::string>& param, const std::string& key, F&& callback)
+{
+    T value;
+    if (!WebUtil::GetParamValue(param, key, value)) {
+        TAG_LOGE(
+            AceLogTag::ACE_WEB, "HandleVideoStatusCallback failed, %{public}s is invalid.", key.c_str());
+        return;
+    }
+    if (callback) {
+        callback(value);
     }
 }
 } // namespace
@@ -297,6 +314,33 @@ void FullScreenExitHandlerOhos::ExitFullScreen()
         // notify web component in arkui to exit fullscreen mode.
         delegate->ExitFullScreen();
     }
+}
+
+void FullScreenVideoOverlayHandlerOhos::SetVideoSurface(std::string surfaceId)
+{
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->SetVideoSurface(surfaceId);
+}
+
+void FullScreenVideoOverlayHandlerOhos::RequestMediaControl(int32_t action, std::string param)
+{
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->RequestMediaControl(action, param);
+}
+
+void FullScreenVideoOverlayHandlerOhos::AddListener(std::shared_ptr<VideoPlayerListener> listener)
+{
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->AddListener(std::move(listener));
 }
 
 bool AuthResultOhos::Confirm(std::string& userName, std::string& pwd)
@@ -3398,33 +3442,6 @@ void WebDelegate::UpdateWebLtpoInfo()
     }
 }
 
-void LtpoDisplayInfoListener::OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes)
-{
-    auto context = context_.Upgrade();
-    if (!context) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener context is null.");
-        return;
-    }
-    std::string changedAttributes;
-    for (const auto &s : attributes) {
-        changedAttributes += s + ";";
-    }
-    TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask(
-        [weak = delegate_]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                delegate->UpdateWebLtpoInfo();
-            }
-        },
-        TaskExecutor::TaskType::UI, "LtpoDisplayInfoListenerOnAttributeChange");
-}
-
 void WebDelegate::RegisterDisplayInfoChange()
 {
     if (displayListener_) {
@@ -4420,6 +4437,24 @@ void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateMediaPlayGestureAccess");
 }
 
+void WebDelegate::UpdateFullScreenVideoOverlayEnable(bool isNeedOverlay) {
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNeedOverlay]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFullScreenVideoOverlayEnable(isNeedOverlay);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateFullScreenVideoOverlayEnable");
+}
+
 void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
 {
     auto context = context_.Upgrade();
@@ -5245,6 +5280,31 @@ void WebDelegate::SetAudioMuted(bool muted)
     }
 }
 
+void WebDelegate::SetVideoSurface(std::string surfaceId)
+{
+    CHECK_NULL_VOID(nweb_);
+    if (surfaceId.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebDelegate::SetVideoSurface surfaceId is null");
+        return;
+    }
+    uint64_t videoSurface = StringUtils::StringToLongUint(surfaceId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::SetVideoSurface surfaceId:%{public}s, videoSurface:%{public}" PRIu64,
+        surfaceId.c_str(), videoSurface);
+    OHNativeWindow* window = nullptr;
+    int32_t ret = OH_NativeWindow_CreateNativeWindowFromSurfaceId(videoSurface, &window);
+    if (ret != GSERROR_OK || window == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId err:%{public}d or window is null ", ret);
+        return;
+    }
+    nweb_->SetVideoSurface(window);
+}
+
+void WebDelegate::RequestMediaControl(int32_t action, std::string param)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->RequestMediaControl(action, param);
+}
+
 void WebDelegate::Zoom(float factor)
 {
     auto context = context_.Upgrade();
@@ -5854,6 +5914,90 @@ void WebDelegate::OnFullScreenEnter(
 #endif
         },
         TaskExecutor::TaskType::JS, "ArkUIWebFullScreenEnter");
+}
+
+void WebDelegate::OnFullScreenVideoOverlayEnter(const char* mediaInfo)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), mediaInfo = std::string(mediaInfo)]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        auto callback = webPattern->GetOnFullScreenVideoOverlayEnterCallback();
+        if (!callback) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnFullScreenVideoOverlayEnter failed, callback is null.");
+            return;
+        }
+        auto wrappedHandler =
+            AceType::MakeRefPtr<FullScreenVideoOverlayHandlerOhos>(weak, WeakClaim(AceType::RawPtr(webNode)));
+        callback(std::make_shared<FullScreenVideoOverlayEnterEvent>(mediaInfo.c_str(), wrappedHandler));
+    }, "ArkUIWebFullScreenOverlayEnter");
+}
+
+void WebDelegate::HandleVideoSizeChanged(const std::map<std::string, std::string>& param)
+{
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!WebUtil::GetParamValue(param, "width", width) || !WebUtil::GetParamValue(param, "height", height)) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "WebDelegate::OnVideoStatusChanged failed, videoWidth or videoHeight is invalid.");
+        return;
+    }
+    if (videoPlayerListener_->OnVideoSizeChanged) {
+        videoPlayerListener_->OnVideoSizeChanged(width, height);
+    }
+}
+
+void WebDelegate::OnVideoStatusChanged(const int action, const std::map<std::string, std::string> &param)
+{
+    if (!videoPlayerListener_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnVideoStatusChanged failed, videoPlayerListener_ is null.");
+        return;
+    }
+
+    auto notificationType = static_cast<NG::VideoPlaybackNotificationType>(action);
+    switch (notificationType) {
+        case NG::VideoPlaybackNotificationType::ON_STATUS_CHANGED: {
+            HandleVideoStatusCallback<int32_t>(param, "playState", videoPlayerListener_->OnStatusChanged);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_MUTED_CHANGED:{
+            HandleVideoStatusCallback<bool>(param, "muted", videoPlayerListener_->OnMutedChanged);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_PLAYBACK_RATE_CHANGED:{
+            HandleVideoStatusCallback<double>(param, "playbackRate", videoPlayerListener_->OnPlaybackRateChanged);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_DURATION_CHANGED: {
+            HandleVideoStatusCallback<double>(param, "duration", videoPlayerListener_->OnDurationChanged);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_TIME_UPDATE: {
+            HandleVideoStatusCallback<double>(param, "currentTime", videoPlayerListener_->OnTimeUpdate);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_BUFFERED_END_TIME_CHANGED: {
+            HandleVideoStatusCallback<double>(param, "bufferedEndTime", videoPlayerListener_->OnBufferedEndTimeChanged);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_VIDEO_SIZE_CHANGED: {
+            HandleVideoSizeChanged(param);
+            break;
+        }
+        case NG::VideoPlaybackNotificationType::ON_ENDED: {
+            if (videoPlayerListener_->OnEnded) {
+                videoPlayerListener_->OnEnded();
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
@@ -10441,4 +10585,27 @@ void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
 }
 
+void WebDelegate::UpdateTouchEventFeatureDetectionEnabled()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                bool touchFeatureDetection = InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+                                                 Kit::InputCompatibleSource::LEFT_PRESS) ||
+                                             InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+                                                 Kit::InputCompatibleSource::SCROLL_AXIS_EVENT);
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting && touchFeatureDetection) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "TouchFeatureDetection is enabled");
+                    setting->PutTouchEventFeatureDetectionEnabled(touchFeatureDetection);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateTouchEventFeatureDetectionEnabled");
+}
 } // namespace OHOS::Ace

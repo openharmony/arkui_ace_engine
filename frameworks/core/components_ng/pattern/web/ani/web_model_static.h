@@ -46,6 +46,7 @@ public:
     static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
     static void SetMetaViewport(FrameNode* frameNode, bool enabled);
     static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
+    static void SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable);
     static void SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled);
     static void SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked);
     static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
@@ -132,6 +133,8 @@ public:
     static void SetOnFileSelectorShow(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetDefaultFileSelectorShow(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFullScreenVideoOverlayEnter(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);

@@ -56,6 +56,16 @@ void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPo
 }
 
 template<>
+void AssignCast(std::optional<IncrementalUpdatePolicy>& dst, const Ark_IncrementalUpdatePolicy& src)
+{
+    switch (src) {
+        case ARK_INCREMENTAL_UPDATE_POLICY_NONE: dst = IncrementalUpdatePolicy::NONE; break;
+        case ARK_INCREMENTAL_UPDATE_POLICY_PARAGRAPH_CACHE: dst = IncrementalUpdatePolicy::PARAGRAPH_CACHE; break;
+        default: LOGE("Unexpected enum value in ArkUI_IncrementalUpdatePolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<MarqueeUpdatePolicy>& dst, const Ark_MarqueeUpdatePolicy& src)
 {
     switch (src) {
@@ -486,6 +496,43 @@ void SetTextIndentImpl(Ark_NativePointer node,
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
+void SetTailIndentsImpl(Ark_NativePointer node,
+                        const Opt_Union_LengthMetrics_Array_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<NG::TailIndents> indent = std::nullopt;
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
+        TextModelStatic::SetTailIndents(frameNode, indent);
+        return;
+    }
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    if (value->value.selector == 0) {
+        auto singleValue = Converter::Convert<Dimension>(value->value.value0);
+        if (singleValue.IsNegative() || singleValue.Unit() == DimensionUnit::PERCENT) {
+            singleValue.Reset();
+        }
+        indentsArray.emplace_back(singleValue);
+    } else if (value->value.selector == 1) {
+        auto& arrayValue = value->value.value1;
+        indentsArray.reserve(arrayValue.length);
+        for (int32_t i = 0; i < arrayValue.length; i++) {
+            auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+            if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                dim.Reset();
+            }
+            indentsArray.emplace_back(dim);
+        }
+    }
+    if (indentsArray.empty()) {
+        TextModelStatic::SetTailIndents(frameNode, indent);
+        return;
+    }
+    tailIndents.indentsArray = std::move(indentsArray);
+    indent = tailIndents;
+    TextModelStatic::SetTailIndents(frameNode, indent);
+}
 void SetWordBreakImpl(Ark_NativePointer node,
                       const Opt_WordBreak* value)
 {
@@ -860,6 +907,14 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
+void SetPunctuationOverflowImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetPunctuationOverflow(frameNode, convValue);
+}
 void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                      const Opt_SelectedDragPreviewStyle* value)
 {
@@ -867,6 +922,14 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
     TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
+void SetIncrementalUpdatePolicyImpl(Ark_NativePointer node,
+                                    const Opt_IncrementalUpdatePolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<IncrementalUpdatePolicy>(value->value) : std::nullopt;
+    TextModelStatic::SetIncrementalUpdatePolicy(frameNode, convValue);
 }
 void SetTextDirectionImpl(Ark_NativePointer node,
                           const Opt_TextDirection* value)
@@ -1051,6 +1114,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetTextShadowImpl,
         TextAttributeModifier::SetHeightAdaptivePolicyImpl,
         TextAttributeModifier::SetTextIndentImpl,
+        TextAttributeModifier::SetTailIndentsImpl,
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,
@@ -1087,6 +1151,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAttributeModifier::SetFontVariationsImpl,
+        TextAttributeModifier::SetIncrementalUpdatePolicyImpl,
+        TextAttributeModifier::SetPunctuationOverflowImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetLineSpacingImpl,

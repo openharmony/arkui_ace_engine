@@ -572,7 +572,8 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
     panGestureOption->SetDistance(10.0f);
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
     panRecognizer->SetMouseDistance(1.0f);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     auto judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
                      const std::list<WeakPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
         return GestureJudgeResult::REJECT;
@@ -581,9 +582,9 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
                      const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         return GestureJudgeResult::REJECT;
     };
-    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
-    targetComponent->onGestureJudgeBegin_ = judgeFunc2;
-    panRecognizer->SetTargetComponent(targetComponent);
+    (void)judgeFunc2;
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    panRecognizer->AttachFrameNode(frameNode);
     /**
      * @tc.steps: step2. TriggerGestureJudgeCallback with inputEventType::AXIS.
      * @tc.expected: step2. result equals.
@@ -684,6 +685,32 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest002, TestSize.
     pan->OnFingerEscaped(ESCAPE_FINGER_ID_0);
 
     EXPECT_EQ(pan->currentFingers_, 0);
+}
+
+/**
+ * @tc.name: PanRecognizerOnFingerEscapedTest003
+ * @tc.desc: OnFingerEscaped does not removes all per-finger state for wrong id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest003, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    pan->touchPointsDistance_[ESCAPE_FINGER_ID_0] = Offset();
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+    pan->activeFingers_.push_back(ESCAPE_FINGER_ID_0);
+    pan->currentFingers_ = 1;
+
+    pan->OnFingerEscaped(ESCAPE_FINGER_ID_1);
+
+    EXPECT_FALSE(pan->touchPoints_.find(ESCAPE_FINGER_ID_0) == pan->touchPoints_.end());
+    EXPECT_FALSE(pan->touchPointsDistance_.find(ESCAPE_FINGER_ID_0) == pan->touchPointsDistance_.end());
+    EXPECT_FALSE(pan->fingersId_.find(ESCAPE_FINGER_ID_0) == pan->fingersId_.end());
+    EXPECT_EQ(pan->currentFingers_, 1);
 }
 
 /**

@@ -42,13 +42,7 @@ struct DynamicInitialConfig {
     HostWindowInfo hostWindowInfo;
 };
 
-struct SystemForceSplitConfig {
-    bool isRouter;
-    std::string homePage;
-    std::string configJsonStr;
-};
-
-struct AppForceSplitConfig {
+struct ForceSplitConfig {
     bool isRouter;
     std::string configJsonStr;
 };

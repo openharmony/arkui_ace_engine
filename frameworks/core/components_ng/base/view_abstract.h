@@ -32,10 +32,14 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/background_image.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/sys_options.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/motion_path_option.h"
@@ -70,6 +74,7 @@ class Blender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class BorderImage;
 class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
@@ -246,24 +251,40 @@ public:
     static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
     static void ResetSafeAreaPadding();
     static void ResetSafeAreaPadding(FrameNode* frameNode);
+    static void CheckSafeAreaPaddingLPX(const PaddingProperty& value);
+    static void CheckNodeSafeAreaPaddingLPX(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckNodeSafeAreaPaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty& value);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetMargin(const RefPtr<ResourceObject>& resObj);
     static void SetBorderRadius(const BorderRadiusProperty &value);
     static void SetBorderRadius(const Dimension &value);
     static void SetBorderRadius(const RefPtr<ResourceObject>& resObj);
+    static void CheckBorderRadiusLPX(const BorderRadiusProperty& value);
+    static void CheckNodeBorderRadiusLPX(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void CheckNodeBorderRadiusLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderRadiusProperty& value);
     static void SetBorderColor(const Color &value);
     static void SetBorderColor(const BorderColorProperty &value);
     static void SetBorderColor(const RefPtr<ResourceObject>& resobj);
     static void SetBorderWidth(const Dimension &value);
     static void SetBorderWidth(const BorderWidthProperty &value);
     static void SetBorderWidth(const RefPtr<ResourceObject>& resObj);
+    static void CheckBorderWidthLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderWidthLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetDashGap(const Dimension &value);
     static void SetDashGap(const BorderWidthProperty &value);
+    static void CheckBorderDashGapLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderDashGapLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(const Dimension &value);
     static void SetDashWidth(const BorderWidthProperty &value);
+    static void CheckBorderDashWidthLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderDashWidthLPX(
+        RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetOpacity(double opacity);
     static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
@@ -282,6 +303,9 @@ public:
     static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
     static void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(const UiMaterial* material);
+
+    static RefPtr<UiMaterial> ConvertToImmersiveEC(RefPtr<UiMaterial>& material);
+    static RefPtr<UiMaterial> ConvertToImmersiveECSub(RefPtr<UiMaterial>& material);
 
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
@@ -328,6 +352,7 @@ public:
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
     static void SetBlender(const OHOS::Rosen::Blender* blender);
+    static void ResetBlender();
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -594,6 +619,7 @@ public:
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
     static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
+    static void SetDoubleSided(bool doubleSided);
 
     static void Pop();
 
@@ -744,6 +770,9 @@ public:
     static void SetPositionX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
     static void SetPositionY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
+    static void CheckPositionEdgesLPX(const EdgesParam &value);
+    static void CheckNodePositionEdgesLPX(FrameNode *frameNode, const EdgesParam &value);
+    static void CheckNodePositionEdgesLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const EdgesParam &value);
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
@@ -819,6 +848,8 @@ public:
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseUnion(FrameNode* frameNode, bool useUnion);
+    static void SetMaterialShadow(FrameNode* frameNode);
+    static void ResetMaterialShadow(FrameNode* frameNode);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
@@ -848,8 +879,14 @@ public:
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
     static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckMarginLPX(const MarginProperty &value);
+    static void CheckNodeMarginLPX(FrameNode *frameNode, const MarginProperty &value);
+    static void CheckNodeMarginLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const MarginProperty &value);
     static void SetPadding(FrameNode* frameNode, const CalcLength& value);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckPaddingLPX(const PaddingProperty &value);
+    static void CheckNodePaddingLPX(FrameNode *frameNode, const PaddingProperty &value);
+    static void CheckNodePaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty &value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
@@ -917,6 +954,7 @@ public:
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
     static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
+    static void ResetBlender(FrameNode* frameNode);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
@@ -980,6 +1018,7 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset = false);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
+    static void SetDoubleSided(FrameNode* frameNode, bool doubleSided);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif
@@ -1154,8 +1193,22 @@ public:
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     // set systemMaterial for inner use, use SetSystemMaterial normally.
     static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
+    // Set systemMaterial with component scale adjustment (for drag scenario)
+    static void SetSystemMaterialWithScale(FrameNode* frameNode, const UiMaterial* material, float componentScale);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
+
+    static std::function<void()> GetOuterBorderWidthFuncForLPX(const Dimension& value);
+    static std::function<void()> GetOuterBorderWidthFuncForLPX(const BorderWidthProperty& value);
+
+    static std::function<void()> GetOuterBorderRadiusFuncForLPX(const Dimension& value);
+    static std::function<void()> GetOuterBorderRadiusFuncForLPX(const BorderRadiusProperty& value);
+
+    static std::function<void()> GetClipShapeFuncForLPX(const RefPtr<BasicShape>& basicShape);
+
+    static std::function<void()> GetMaskShapeFuncForLPX(const RefPtr<BasicShape>& basicShape);
+
+    static std::function<void()> GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option);
 
     static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
@@ -1218,6 +1271,9 @@ private:
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
     static void ResetBorderAndBackgroundEffect(
         FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterMaterialInteractionEvent(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void UnRegisterMaterialInteractionEvent(FrameNode* frameNode);
     static void SetImmersiveOptions(
         const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
     static void SetImmersiveConfigs(
@@ -1225,6 +1281,7 @@ private:
     static void ResetImmersiveShadowToDefault(
         const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
     static void RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode);
+    static void HistogramImmersiveOptions(const ImmersiveMaterialConfig& config);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

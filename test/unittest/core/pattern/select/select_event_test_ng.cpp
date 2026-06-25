@@ -32,6 +32,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -563,7 +564,7 @@ HWTEST_F(SelectBindMenuTouchTestNg, RegisterOnHover001, TestSize.Level1)
 
     auto inputHub = select->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
-    ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
+    inputHub->CreateHoverEventActuator();
 
     /**
      * @tc.steps: step2. Trigger hover callback with isHover = true
@@ -593,7 +594,7 @@ HWTEST_F(SelectBindMenuTouchTestNg, RegisterOnHover002, TestSize.Level1)
 
     auto inputHub = select->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
-    ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
+    inputHub->CreateHoverEventActuator();
 
     /**
      * @tc.steps: step2. First trigger hover true, then hover false
@@ -625,7 +626,7 @@ HWTEST_F(SelectBindMenuTouchTestNg, RegisterOnHover003, TestSize.Level1)
 
     auto inputHub = select->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
-    ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
+    inputHub->CreateHoverEventActuator();
 
     /**
      * @tc.steps: step2. Trigger hover callback
@@ -717,6 +718,7 @@ HWTEST_F(SelectBindMenuTouchTestNg, RegisterOnPress003, TestSize.Level1)
 
     auto inputHub = select->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     auto eventHub = select->GetEventHub<SelectEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->stateStyleMgr_, nullptr);

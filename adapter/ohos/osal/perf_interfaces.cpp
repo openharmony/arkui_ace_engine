@@ -48,6 +48,14 @@ void PerfInterfaces::RecordInputEvent(PerfActionType type, PerfSourceType source
     PerfMonitorAdapter::GetInstance().RecordInputEvent(dfxType, dfxSourceType, time);
 }
 
+void PerfInterfaces::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time,
+    int32_t xPos, int32_t yPos)
+{
+    HiviewDFX::PerfActionType dfxType = static_cast<HiviewDFX::PerfActionType>(static_cast<int>(type));
+    HiviewDFX::PerfSourceType dfxSourceType = static_cast<HiviewDFX::PerfSourceType>(static_cast<int>(sourceType));
+    PerfMonitorAdapter::GetInstance().RecordInputEvent(dfxType, dfxSourceType, time, xPos, yPos);
+}
+
 int64_t PerfInterfaces::GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     HiviewDFX::PerfActionType dfxType = static_cast<HiviewDFX::PerfActionType>(static_cast<int>(type));
@@ -156,5 +164,11 @@ void PerfInterfaces::ReportSurface(const uint64_t& uniqueId, const std::string& 
     const std::string& componentName, const std::string& bundleName, const int32_t pid)
 {
     PerfMonitorAdapter::GetInstance().ReportSurface(uniqueId, surfaceName, componentName, bundleName, pid);
+}
+
+void PerfInterfaces::ReportComponentDetach(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+    PerfMonitorAdapter::GetInstance().ReportComponentDetach(uniqueId, surfaceName, componentName, bundleName, pid);
 }
 } // namespace OHOS::Ace

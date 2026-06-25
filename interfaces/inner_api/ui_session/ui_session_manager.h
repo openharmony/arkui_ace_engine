@@ -32,6 +32,9 @@
 #include "ui_translate_manager.h"
 
 namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
 namespace Media {
 class PixelMap;
 } // namespace Media
@@ -46,6 +49,8 @@ public:
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
     using RelaxedCommandFunction = std::function<void(const std::string& command)>;
+    using ExeAppAIFunctionFunction = std::function<std::pair<uint32_t, std::string>(
+        const std::string&, const std::string&, const sptr<IRemoteObject>&, int32_t)>;
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
     using GetStateMgmtInfoFunction = std::function<void(const std::string& componentName,
         const std::string& propertyName, const std::string& jsonPath, bool onlyVisible)>;
@@ -223,10 +228,10 @@ public:
     virtual void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
         std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) {};
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
-    virtual void RegisterPipeLineExeAppAIFunction(
-        std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
-    virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
-    virtual void SendExeAppAIFunctionResult(uint32_t result) {};
+    virtual void RegisterPipeLineExeAppAIFunction(ExeAppAIFunctionFunction&& callback) {};
+    virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj, int32_t nodeId = -1) {};
+    virtual void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) {};
     virtual void GetSpecifiedContentOffsets(int32_t id, const std::string& content) {};
     virtual void HighlightSpecifiedContent(
         int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
@@ -299,7 +304,7 @@ protected:
     std::mutex selectTextCallbackMutex_;
     SendCommandFunction sendCommandFunction_ = 0;
     std::mutex sendCommandFunctionMutex_;
-    std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
+    ExeAppAIFunctionFunction pipelineExeAppAIFunctionCallback_;
     std::mutex pipelineExeAppAIFunctionCallbackMutex_;
     std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
     std::mutex startContentChangeDetectCallbackMutex_;

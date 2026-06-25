@@ -73,7 +73,7 @@ HWTEST_F(RsAdapterTest, RsUIDirectorInit001, TestSize.Level1)
     RsAdapter::RsUIDirectorInit(rsUiDirector, window, "");
 
     EXPECT_NE(rsUiDirector, nullptr);
-    EXPECT_EQ(rsUiDirector->GetRSUIContext(), nullptr);
+    EXPECT_EQ(rsUiDirector->GetRSUIContext(), window->GetSurfaceNode()->GetRSUIContext());
 
     EXPECT_EQ(OHOS::Rosen::WMError::WM_OK, window->Destroy());
 #endif
@@ -136,9 +136,9 @@ HWTEST_F(RsAdapterTest, RsFlushImplicitTransaction001, TestSize.Level1)
     RsAdapter::RsFlushImplicitTransaction(rsUiDirector, window, surfaceNode);
 
     EXPECT_NE(rsUiDirector, nullptr);
-    EXPECT_EQ(rsUiDirector->GetRSUIContext(), nullptr);
+    EXPECT_EQ(rsUiDirector->GetRSUIContext(), window->GetSurfaceNode()->GetRSUIContext());
     EXPECT_NE(rsUiDirector->GetRSSurfaceNode(), nullptr);
-    EXPECT_EQ(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
+    EXPECT_NE(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
 
     EXPECT_EQ(OHOS::Rosen::WMError::WM_OK, window->Destroy());
 #endif
@@ -177,8 +177,8 @@ HWTEST_F(RsAdapterTest, RsFlushImplicitTransaction002, TestSize.Level1)
     RsAdapter::RsFlushImplicitTransaction(rsUiDirector, window, surfaceNode);
 
     EXPECT_NE(rsUiDirector, nullptr);
-    EXPECT_EQ(rsUiDirector->GetRSSurfaceNode(), nullptr);
-    EXPECT_EQ(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
+    EXPECT_EQ(rsUiDirector->GetRSSurfaceNode(), window->GetSurfaceNode());
+    EXPECT_NE(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
 
     EXPECT_EQ(OHOS::Rosen::WMError::WM_OK, window->Destroy());
 #endif
@@ -218,11 +218,11 @@ HWTEST_F(RsAdapterTest, RsFlushImplicitTransactionWithRoot001, TestSize.Level1)
     RsAdapter::RsFlushImplicitTransactionWithRoot(rsUiDirector, window, surfaceNode, rootNode);
 
     EXPECT_NE(rsUiDirector, nullptr);
-    EXPECT_EQ(rsUiDirector->GetRSUIContext(), nullptr);
+    EXPECT_EQ(rsUiDirector->GetRSUIContext(), window->GetSurfaceNode()->GetRSUIContext());
     EXPECT_NE(rsUiDirector->GetRSSurfaceNode(), nullptr);
     EXPECT_NE(rootNode, nullptr);
-    EXPECT_EQ(rootNode->GetRSUIContext(), nullptr);
-    EXPECT_EQ(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
+    EXPECT_EQ(rootNode->GetRSUIContext(), window->GetSurfaceNode()->GetRSUIContext());
+    EXPECT_NE(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
 
     EXPECT_EQ(OHOS::Rosen::WMError::WM_OK, window->Destroy());
 #endif
@@ -264,8 +264,8 @@ HWTEST_F(RsAdapterTest, RsFlushImplicitTransactionWithRoot002, TestSize.Level1)
     EXPECT_NE(rsUiDirector, nullptr);
     EXPECT_NE(rsUiDirector->GetRSSurfaceNode(), nullptr);
     EXPECT_NE(rootNode, nullptr);
-    EXPECT_EQ(rootNode->GetRSUIContext(), nullptr);
-    EXPECT_EQ(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
+    EXPECT_EQ(rootNode->GetRSUIContext(), window->GetSurfaceNode()->GetRSUIContext());
+    EXPECT_NE(transactionProxy->implicitCommonTransactionData_->abilityName_, "");
 
     EXPECT_EQ(OHOS::Rosen::WMError::WM_OK, window->Destroy());
 #endif

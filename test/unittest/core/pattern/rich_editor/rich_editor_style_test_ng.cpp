@@ -301,6 +301,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyleWrapper001, T
     ASSERT_NE(richEditorPattern, nullptr);
     TextStyle spanStyle;
     KeyCode code = KeyCode::KEY_UNKNOWN;
+    /**
+     * @tc.steps: step2. test HandleSelectFontStyleWrapper
+     */
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
     EXPECT_EQ(spanStyle.GetFontWeight(), FontWeight::NORMAL);
 }
@@ -323,6 +326,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
     richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     KeyCode code = KeyCode::KEY_UNKNOWN;
+    /**
+     * @tc.steps: step2. test HandleSelectFontStyle
+     */
     richEditorPattern->HandleSelectFontStyle(code);
     EXPECT_EQ(richEditorPattern->caretTwinkling_, true);
 }
@@ -578,6 +584,8 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle001, TestSize.Level0)
     paragraphStyle.textAlign = TextAlign::END;
     paragraphStyle.leadingMargin = std::make_optional<NG::LeadingMargin>();
     paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    NG::Gradient gradient;
+    paragraphStyle.SetOptGradient(gradient);
     richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
     std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
 
@@ -639,6 +647,8 @@ HWTEST_F(RichEditorStyleTestNg, GetChangeSpanStyle002, TestSize.Level0)
     paragraphStyle.textAlign = TextAlign::END;
     paragraphStyle.leadingMargin = std::make_optional<NG::LeadingMargin>();
     paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    NG::Gradient gradient;
+    paragraphStyle.SetOptGradient(gradient);
     richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
     std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
 

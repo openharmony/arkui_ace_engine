@@ -289,9 +289,6 @@ bool PixelMapImage::CheckIfNeedForStretching(
 {
     // Check if dstRect is valid (width and height must be positive)
     if (LessOrEqual(dstRect.GetWidth(), 0.0f) || LessOrEqual(dstRect.GetHeight(), 0.0f)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "CheckIfNeedForStretching: dstRect is invalid (size <= 0.0f), dstRect=%{public}s",
-            dstRect.ToString().c_str());
         return false;
     }
 

@@ -14,16 +14,29 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/event/state_style_manager.h"
+#include "core/interfaces/native/node/node_arc_list_item_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+RefPtr<Pattern> CreateArcListItemPattern(void* b = nullptr, int32_t s = 0)
+{
+    auto* mod = NodeModifier::GetArcListItemCustomModifier();
+    CHECK_NULL_RETURN(mod, nullptr);
+    CHECK_NULL_RETURN(mod->createArcListItemPattern, nullptr);
+    return mod->createArcListItemPattern(b, s);
+}
+} // namespace
 
 void ListItemModelNG::Create(
     std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle, bool isCreateArc)
@@ -48,7 +61,7 @@ void ListItemModelNG::Create(
         } else {
             frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
                 [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), style = listItemStyle]() {
-                    return AceType::MakeRefPtr<ArcListItemPattern>(shallowBuilder, style);
+                    return CreateArcListItemPattern(AceType::RawPtr(shallowBuilder), static_cast<int32_t>(style));
                 });
         }
         stack->Push(frameNode);
@@ -79,7 +92,7 @@ void ListItemModelNG::Create(bool isCreateArc)
             []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
-            []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+            []() { return CreateArcListItemPattern(); });
     }
     stack->Push(frameNode);
 }
@@ -97,7 +110,7 @@ RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId, bool isCreate
 {
     if (isCreateArc) {
         return FrameNode::CreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
-            AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+            CreateArcListItemPattern());
     }
     auto frameNode = FrameNode::CreateFrameNode(
         V2::LIST_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
@@ -311,7 +324,10 @@ void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& sel
 void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
+    auto* mod = NodeModifier::GetArcListItemCustomModifier();
+    CHECK_NULL_VOID(mod);
+    CHECK_NULL_VOID(mod->setAutoScale);
+    mod->setAutoScale(frameNode, autoScale);
 }
 
 void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,

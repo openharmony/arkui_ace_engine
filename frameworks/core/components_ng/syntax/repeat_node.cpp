@@ -21,6 +21,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -260,7 +261,13 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
 
 bool RepeatNode::IsAllowAnimation()
 {
-    return GetParentFrameNode()->GetTag() == V2::LIST_ETS_TAG;
+    auto parent = GetParentFrameNode();
+    if (!parent) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT,
+            "RepeatNode::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
+        return false;
+    }
+    return LazyForEachUtils::GetEnableRepeatAnimation() && parent->GetTag() == V2::LIST_ETS_TAG;
 }
 
 bool RepeatNode::IsChildInAnimation(uint32_t fromIndex)

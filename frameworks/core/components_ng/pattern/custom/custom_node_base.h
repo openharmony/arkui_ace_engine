@@ -29,6 +29,17 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+
+enum class ReusableMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
+enum class StaReusableMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
@@ -45,6 +56,11 @@ public:
 
     void SetIsV2(bool isV2);
     bool GetIsV2();
+
+    void SetReusableMemOptStrategy(int32_t reusableMemOptStrategy);
+    ReusableMemOptStrategy GetReusableMemOptStrategy();
+    void TryEnableParentCustomNodeMemOpt();
+    void SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback);
 
     void SetThisFunc(std::function<void*()>&& getThisFunc);
     void* FireThisFunc();
@@ -106,6 +122,11 @@ public:
 
     void SetOnDumpInspectorFunc(std::function<std::string()>&& func);
     std::string FireOnDumpInspectorFunc();
+    void SetClearParentReusePoolFunc(std::function<void()>&& func);
+    void FireClearParentReusePoolFunc();
+    void SetMemOptGetter(std::function<int32_t()>&& func);
+    int32_t GetMemOpt() const;
+    void SetStaMemopt(int32_t opt);
 
     // called for PageTransition animation
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc);
@@ -144,6 +165,10 @@ protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
     bool isV2_ = false;
+    ReusableMemOptStrategy reusableMemOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    StaReusableMemOptStrategy staReusableMemOptStrategy_ = StaReusableMemOptStrategy::DEFAULT;
+    // int32_t remainingTimeMs, bool isProgressive, bool shouldCollect
+    std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc_;
     bool executeFireOnAppear_ = false;
     std::string reuseId_;
     std::string creatorId_;
@@ -164,10 +189,12 @@ private:
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     std::function<std::string()> onDumpInspectorFunc_;
     std::function<void()> clearAllRecycleFunc_;
+    std::function<void()> clearParentReusePoolFunc_;
     std::function<void*()> getThisFunc_;
     std::function<void()> onRecycleFunc_;
     std::function<void(void*)> onReuseFunc_;
     std::function<bool(int32_t)> triggerLifecycleFunc_;
+    std::function<int32_t()> getMemOptFunc_;
     bool needRebuild_ = false;
     RecycleNodeInfo recycleInfo_;
 };

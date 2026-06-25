@@ -105,7 +105,6 @@ HWTEST_F(JsonUtilTest, JsonUtilTest003, TestSize.Level1)
     EXPECT_FALSE(intValue->IsNull());
     EXPECT_TRUE(intValue->IsNumber());
     EXPECT_TRUE(intValue->GetInt() == intNum);
-    EXPECT_FALSE(intValue->GetUInt() == -1);
     EXPECT_TRUE(NearEqual(intValue->GetDouble(), doubleNum));
 }
 

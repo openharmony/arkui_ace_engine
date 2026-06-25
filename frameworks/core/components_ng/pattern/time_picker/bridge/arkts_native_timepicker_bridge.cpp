@@ -25,7 +25,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/i18n/time_format.h"
@@ -629,8 +629,22 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
             RefPtr<ResourceObject> colorResObj;
             ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color);
             auto bgColorRawPtr = AceType::RawPtr(colorResObj);
-            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
-                nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+            auto headRoomOptional = color.GetHeadRoomColor();
+            if (headRoomOptional.has_value()) {
+                auto colorWithHeadRoom = headRoomOptional.value();
+                ArkUI_Float32 hdrValues[5] = {
+                    static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                    static_cast<ArkUI_Float32>(colorWithHeadRoom.green),
+                    static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                    static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                    static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)
+                };
+                GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorForHDR(
+                    nativeNode, color.GetColorSpace(), hdrValues, bgColorRawPtr);
+            } else {
+                GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+                    nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+            }
         }
         GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerBackgroundColor(nativeNode, color.GetValue());
     } else {

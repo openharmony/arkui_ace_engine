@@ -21,25 +21,25 @@
 
 #include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
-#include "base/i18n/time_format.h"
-#include "base/utils/macros.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_types.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/picker_text_style.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
-#include "core/components_v2/inspector/utils.h"
-#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 
+namespace OHOS::Ace {
+class DialogTheme;
+class PickerTheme;
+}
 
 namespace OHOS::Ace::NG {
+class ButtonLayoutProperty;
+class TimePickerColumnPattern;
+using OHOS::Ace::PickerTheme;
 namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
 }
@@ -67,10 +67,7 @@ public:
         host->MarkModifyDone();
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<TimePickerEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -491,17 +488,7 @@ public:
 
     std::string AddZeroPrefix(const std::string& value) const;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
-        FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {

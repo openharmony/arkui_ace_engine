@@ -48,6 +48,43 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
     return isNeedPropagation;
 }
 
+bool TouchEventActuator::HandleInteractionEvent(const TouchEvent& point)
+{
+    if (!interactionEventCallback_) {
+        return false;
+    }
+    TouchEvent lastPoint;
+    if (point.isInterpolated) {
+        lastPoint = point;
+    } else {
+        lastPoint = !point.history.empty() ? point.history.back() : point;
+    }
+    auto event = CreateTouchEventInfo(lastPoint);
+    auto changedInfo = CreateChangedTouchInfo(lastPoint, point);
+    event.AddChangedTouchLocationInfo(std::move(changedInfo));
+    // all fingers collection
+    for (const auto& item : lastPoint.pointers) {
+        auto info = CreateTouchItemInfo(item, point, lastPoint.type);
+        event.AddTouchLocationInfo(std::move(info));
+    }
+    for (const auto& item : point.history) {
+        auto historyInfo = CreateHistoryTouchItemInfo(item, point);
+        event.AddHistoryLocationInfo(std::move(historyInfo));
+        event.AddHistoryPointerEvent(item.GetTouchEventPointerEvent());
+    }
+    return TriggerInteractionCallBack(event);
+}
+
+bool TouchEventActuator::TriggerInteractionCallBack(TouchEventInfo& event)
+{
+    if (interactionEventCallback_) {
+        auto interactionEvent = interactionEventCallback_;
+        (*interactionEvent)(event);
+        return true;
+    }
+    return false;
+}
+
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN &&

@@ -16,23 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_COLUMN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_COLUMN_PATTERN_H
 
-#include <utility>
-#include "ui/base/macros.h"
-
-#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
-#include "base/i18n/localization.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
-#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
-#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
-#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class TimePickerLayoutProperty;
 
 class ACE_FORCE_EXPORT TimePickerColumnPattern : public PickerColumnPattern {
     DECLARE_ACE_TYPE(TimePickerColumnPattern, PickerColumnPattern);

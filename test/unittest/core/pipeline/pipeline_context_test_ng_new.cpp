@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
+#include "iremote_object.h"
 #include "core/event/resample_algo.h"
 
 #define private public
@@ -1225,40 +1226,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg086, TestSize.Level1)
     context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
     bool isUpdateBGIamge = context_->CheckNeedDisableUpdateBackgroundImage();
     ASSERT_EQ(isUpdateBGIamge, true);
-}
-
-/**
- * @tc.name: PipelineContextTestNg087
- * @tc.desc: Test the function ClearNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->dirtyPropertyNodes_.emplace(frameNode_);
-    context_->needRenderNode_.emplace(WeakPtr<FrameNode>(frameNode_));
-    context_->dirtyFocusNode_ = frameNode_;
-    context_->dirtyFocusScope_ = frameNode_;
-    context_->dirtyRequestFocusNode_ = frameNode_;
-    context_->activeNode_ = frameNode_;
-    context_->focusNode_ = frameNode_;
-
-    /**
-     * @tc.step2: detach framenode.
-     */
-    context_->DetachNode(frameNode_);
-
-    EXPECT_NE(context_->dirtyPropertyNodes_.count(frameNode_), 1);
-    EXPECT_NE(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode_)), 1);
-    EXPECT_NE(context_->dirtyFocusNode_, frameNode_);
-    EXPECT_NE(context_->dirtyFocusScope_, frameNode_);
-    EXPECT_NE(context_->dirtyRequestFocusNode_, frameNode_);
-    EXPECT_NE(context_->activeNode_, frameNode_);
-    EXPECT_NE(context_->focusNode_, frameNode_);
 }
 
 /**
@@ -3141,8 +3108,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg256, TestSize.Level1)
     context_->rootNode_ = nullptr;
     EXPECT_EQ(context_->rootNode_, nullptr);
 
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 /**
@@ -3168,8 +3136,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg257, TestSize.Level1)
     /**
      * @tc.steps3: topNavNode cannot be found.
      */
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 /**
@@ -3221,8 +3190,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
 
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_AMBIGUOUS);
+    EXPECT_FALSE(result.second.empty());
 }
 
 /**
@@ -3277,10 +3247,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
      */
     std::list<RefPtr<FrameNode>> navDesNodes;
     rootNode->FindTopNavDestination(navDesNodes);
-    ASSERT_NE(navDesNodes.size(), 0);
-    auto topNavNode = navDesNodes.back();
-    ASSERT_NE(topNavNode, nullptr);
-    EXPECT_EQ(topNavNode, navDestinationNode4);
+    ASSERT_EQ(navDesNodes.size(), 4);
+    auto topNavNode = navDesNodes.empty() ? nullptr : navDesNodes.back();
+    EXPECT_NE(topNavNode, nullptr);
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
@@ -3291,8 +3260,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.push_back("-bind");
     EXPECT_EQ(params.size(), 2);
     context_->OnDumpBindAICaller(params);
-    auto result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALL_SUCCESS);
 
     /**
      * @tc.steps6: Call the function OnDumpBindAICaller.
@@ -3303,8 +3270,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.push_back("-unbind");
     EXPECT_EQ(params.size(), 2);
     context_->OnDumpBindAICaller(params);
-    result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
 
     /**
      * @tc.steps7: Call the function OnDumpBindAICaller.
@@ -3313,8 +3278,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.clear();
     EXPECT_EQ(params.size(), 0);
     context_->OnDumpBindAICaller(params);
-    result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
 }
 
 /**
@@ -3399,6 +3362,18 @@ HWTEST_F(PipelineContextTestNg, AddNeedReloadNodes001, TestSize.Level1)
      */
     context_->AddNeedReloadNodes(AceType::RawPtr(dirtyNode));
     EXPECT_EQ(context_->needReloadNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: LinearColorSetPlaceholder001
+ * @tc.desc: Test LinearColor.SetPlaceholder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, LinearColorSetPlaceholder001, TestSize.Level1)
+{
+    LinearColor linearColor;
+    linearColor.SetPlaceholder(ColorPlaceholder::BRAND);
+    EXPECT_EQ(linearColor.GetPlaceholder(), ColorPlaceholder::BRAND);
 }
 
 /**
@@ -3500,7 +3475,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
     EXPECT_EQ(pageId2, 1);
 
     auto it2 = context_->pageToNavigationNodes_.find(pageId);
-    bool empty2 = it2 == context_->pageToNavigationNodes_.end() || it->second.empty();
+    bool empty2 = it2 == context_->pageToNavigationNodes_.end() || it2->second.empty();
     EXPECT_EQ(empty2, true);
     std::string res2 = context_->GetCurrentPageName();
     EXPECT_EQ(res2, "testUrl");

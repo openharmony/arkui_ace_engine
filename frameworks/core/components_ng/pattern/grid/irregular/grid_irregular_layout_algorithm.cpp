@@ -61,18 +61,13 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = MeasureSelf(props);
     CalcContentOffset(wrapper_, mainSize);
     auto layoutPolicy = props->GetLayoutPolicyProperty();
-    auto isMainWrap = false;
+    auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, info_.axis_);
     if (layoutPolicy.has_value()) {
-        auto isVertical = info_.axis_ == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-        if (isMainFix) {
+        if (axisLayoutPolicy.IsMainAxisFix()) {
             frameSize_.SetMainSize(LayoutInfinity<float>(), info_.axis_);
         }
     }
-    bool matchChildren = GreaterOrEqualToInfinity(mainSize) || isMainWrap;
+    bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
 
     if (info_.targetIndex_) {
@@ -774,6 +769,9 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
+            if (pos.first < 0 || pos.second < 0) {
+                return false;
+            }
             auto constraint = filler.MeasureItem(GetFillParameters(host, info, originalWidth),
                 itemIdx, pos.first, pos.second, true).second;
 

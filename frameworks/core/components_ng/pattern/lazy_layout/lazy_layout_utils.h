@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,10 +34,25 @@ struct WaterFlowAncestorInfo {
 struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static bool IsAllowedIntermediateNode(const RefPtr<UINode>& node);
     static bool IsVerticalScrollableParent(const RefPtr<UINode>& node);
+    static bool IsScrollableParent(const RefPtr<UINode>& node, Axis axis);
     static void ValidateLazyLayoutParent(const RefPtr<FrameNode>& host, const std::string& componentName);
+    static void ValidateLazyLayoutParentWithAxis(
+        const RefPtr<FrameNode>& host, const std::string& componentName, Axis axis);
     static std::optional<ViewPosReference> GetViewPosReference(
         const RefPtr<FrameNode>& frameNode,
         const std::vector<std::string>& extraAllowedTags = {});
+
+    // Forward parent-reserved insets through the child layout constraint, so contentOffset changes are visible
+    // to constraint comparison and trigger a fresh child lazy layout.
+    // Header-inline so callers don't need to link lazy_layout_utils.cpp.
+    static void SetStickyInsets(LayoutConstraintF& constraint, float stickyInsetStart, float stickyInsetEnd)
+    {
+        if (!constraint.viewPosRef.has_value()) {
+            return;
+        }
+        constraint.viewPosRef->stickyInsetStart = stickyInsetStart;
+        constraint.viewPosRef->stickyInsetEnd = stickyInsetEnd;
+    }
 
     // True iff a WaterFlow ancestor exists WITHOUT crossing a FlowItem.
     static bool HasDirectWaterFlowAncestor(const RefPtr<FrameNode>& frameNode);

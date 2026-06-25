@@ -60,7 +60,6 @@ namespace {
     constexpr int64_t SEC_TO_MICROSEC = 1000000;
 
     const std::vector<std::tuple<std::string, CrownAction>> testFixtureEnumCrown = {
-        { "ARK_CROWN_ACTION_BEGIN", CrownAction::BEGIN },
         { "ARK_CROWN_ACTION_UPDATE", CrownAction::UPDATE },
         { "ARK_CROWN_ACTION_END", CrownAction::END },
         { "ARK_CROWN_ACTION_UNKNOWN", CrownAction::UNKNOWN },
@@ -79,7 +78,6 @@ namespace Converter {
     void AssignCast(std::optional<CrownAction>& dst, const Ark_CrownAction& src)
     {
         switch (src) {
-            case ARK_CROWN_ACTION_BEGIN: dst = CrownAction::BEGIN; break;
             case ARK_CROWN_ACTION_UPDATE: dst = CrownAction::UPDATE; break;
             case ARK_CROWN_ACTION_END: dst = CrownAction::END; break;
             default:

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/video/video_controller_v2.h"
 
 namespace OHOS::Ace {
+class VideoControllerAsync;
 using VideoEventFunc = std::function<void(const std::string&)>;
 using VideoErrorEventFunc = std::function<void(int32_t code, const std::string& message)>;
 class ACE_FORCE_EXPORT VideoModel {
@@ -32,6 +33,7 @@ public:
     virtual ~VideoModel() = default;
 
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
+    virtual void Create(const RefPtr<VideoControllerAsync>& videoControllerAsync) {}
     virtual void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetShowFirstFrame(bool showFirstFrame) {}
     virtual void SetProgressRate(double progressRate) = 0;

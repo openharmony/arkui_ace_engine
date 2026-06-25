@@ -59,6 +59,7 @@ void RotationRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "ROTATE RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
+    LogStateChange(refereeState_, RefereeState::SUCCEED, StateChangeReason::ROTATION_ANGLE_REACHED);
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchPoint = {};
@@ -76,6 +77,7 @@ void RotationRecognizer::OnAccepted()
 void RotationRecognizer::OnRejected()
 {
     if (refereeState_ != RefereeState::SUCCEED) {
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::REJECTED_BY_REFEREE);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::FAIL;
     }
@@ -109,6 +111,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         refereeState_ != RefereeState::DETECTING) {
         initialAngle_ = ComputeAngle();
         currentAngle_ = initialAngle_;
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -128,6 +131,7 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     UpdateTouchPointWithAxisEvent(event);
     if (refereeState_ == RefereeState::READY) {
         initialAngle_ = event.rotateAxisAngle;
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -310,6 +314,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED &&
         static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
@@ -460,10 +465,13 @@ void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallback
 
 GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
-    auto targetComponent = GetTargetComponent();
-    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
-    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
-    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, GestureJudgeResult::CONTINUE);
+
+    auto gestureRecognizerJudgeFunc = gestureHub->GetOnGestureRecognizerJudgeBegin();
+    auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
     if (!callback && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }

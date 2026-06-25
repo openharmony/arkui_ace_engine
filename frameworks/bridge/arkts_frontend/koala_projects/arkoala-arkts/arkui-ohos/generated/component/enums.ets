@@ -571,7 +571,6 @@ export enum PageFlipMode {
     SINGLE = 1
 }
 export enum CrownAction {
-    BEGIN = 0,
     UPDATE = 1,
     END = 2
 }
@@ -635,7 +634,8 @@ export enum AttributeModifierState {
     PRESSED = 1,
     FOCUSED = 2,
     DISABLED = 4,
-    SELECTED = 8
+    SELECTED = 8,
+    HOVERED = 16
 }
 export enum PresetFillType {
     BREAKPOINT_DEFAULT = 0,
@@ -680,10 +680,6 @@ export enum InputEventSubTypeMask {
 export enum InputEventInterceptAction {
     CONTINUE = 0,
     BLOCK = 1
-}
-export enum UIMaterialAnimationMode {
-    IMMERSIVE = 0,
-    NONE = 1
 }
 export enum GestureShortcut {
     PRIMARY = 0

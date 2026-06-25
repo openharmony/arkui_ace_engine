@@ -1680,7 +1680,7 @@ HWTEST_F(GestureEventHubTestNg, MinRecognizerGroupLoopSizeTest001, TestSize.Leve
      * @tc.expected: result is false
      */
     auto result = gestureEventHub->ProcessTouchTestHit(
-        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, responseLinkResult);
     auto sizeOfResponseLinkResult = static_cast<int32_t>(responseLinkResult.size());
     EXPECT_FALSE(result);
     EXPECT_EQ(sizeOfResponseLinkResult, 3);
@@ -1774,7 +1774,7 @@ HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHitSequence001, TestSize.Level1)
      * @tc.expected: result is false
      */
     auto result = scrollGestureEventHub->ProcessTouchTestHit(
-        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, responseLinkResult);
     EXPECT_FALSE(result);
     EXPECT_FALSE(panRecognizer->IsSystemGesture());
 }
@@ -3315,5 +3315,92 @@ HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_006, TestSize.Level1)
      */
     guestureEventHub->UpdateDragWindowVisibility(ctx);
     EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: BuildPreparedDragInfoDragAnimationType001
+ * @tc.desc: Test prepared drag info disables ArkUI animation for scene board touch and follow-hand morph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, BuildPreparedDragInfoDragAnimationType001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    MockContainer::SetUp(pipeline);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(pixelMap, nullptr);
+    EXPECT_CALL(*pixelMap, GetWidth()).Times(AnyNumber()).WillRepeatedly(Return(PIXELMAP_WIDTH));
+    EXPECT_CALL(*pixelMap, GetHeight()).Times(AnyNumber()).WillRepeatedly(Return(PIXELMAP_HEIGHT));
+
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = pipeline;
+    ctx.dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ctx.pixelMap = pixelMap;
+    ctx.event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ctx.info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+
+    container->SetIsSceneBoardWindow(false);
+    ctx.event->SetDragAnimationType(DragAnimationType::DEFAULT);
+    gestureEventHub->BuildPreparedDragInfo(ctx);
+    EXPECT_FALSE(ctx.preparedInfo.disableArkuiAnimation);
+
+    ctx.event->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    gestureEventHub->BuildPreparedDragInfo(ctx);
+    EXPECT_TRUE(ctx.preparedInfo.disableArkuiAnimation);
+
+    container->SetIsSceneBoardWindow(true);
+    ctx.event->SetDragAnimationType(DragAnimationType::DEFAULT);
+    gestureEventHub->BuildPreparedDragInfo(ctx);
+    EXPECT_TRUE(ctx.preparedInfo.disableArkuiAnimation);
+    EXPECT_EQ(ctx.preparedInfo.dragPreviewRect.Width(), PIXELMAP_WIDTH);
+    EXPECT_EQ(ctx.preparedInfo.dragPreviewRect.Height(), PIXELMAP_HEIGHT);
+
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: CreateDragDataDragAnimationType001
+ * @tc.desc: Test drag animation type is carried into DragDataCore and DragDropManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CreateDragDataDragAnimationType001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    dragEvent->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+
+    DragStartContext ctx;
+    ctx.frameNode = frameNode;
+    ctx.pipeline = pipeline;
+    ctx.dragDropManager = dragDropManager;
+    ctx.event = dragEvent;
+    ctx.pixelMapDuplicated = AceType::MakeRefPtr<MockPixelMap>();
+    ctx.pixelMapOffset = OffsetF(1.0f, 2.0f);
+    ctx.recordsSize = 2;
+    ctx.info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+
+    auto dragData = gestureEventHub->CreateDragData(ctx, "{}", 10, 3.0f, 4.0f);
+    EXPECT_EQ(dragData.dragAnimationType, static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH));
+    EXPECT_EQ(dragDropManager->GetDragAnimationType(), DragAnimationType::FOLLOW_HAND_MORPH);
+    EXPECT_EQ(dragData.shadowInfos.size(), 1);
+    EXPECT_EQ(dragData.shadowInfos.front().x, 1.0f);
+    EXPECT_EQ(dragData.shadowInfos.front().y, 2.0f);
 }
 } // namespace OHOS::Ace::NG

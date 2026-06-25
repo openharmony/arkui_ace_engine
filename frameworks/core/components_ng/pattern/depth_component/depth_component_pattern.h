@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/depth_component/depth_component_event_hub.h"
 #include "core/components_ng/pattern/depth_component/depth_component_layout_algorithm.h"
 #include "core/components_ng/pattern/depth_component/depth_component_layout_property.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -37,7 +38,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
 #include "render_service_client/core/ui/rs_depth_node.h"
 #endif
 
@@ -120,40 +121,12 @@ public:
         return backgroundSource.IsImage() ? backgroundSource.imageSourceInfo : ImageSourceInfo();
     }
 
-    DepthBackgroundOffset GetBackgroundOffset() const
-    {
-        auto host = GetHost();
-        if (!host) {
-            return {};
-        }
-
-        auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-        if (!depthLayoutProperty) {
-            return {};
-        }
-        return depthLayoutProperty->GetBackgroundOffset().value_or(DepthBackgroundOffset());
-    }
-
-    std::optional<NG::VectorF> GetBackgroundScale() const
-    {
-        auto host = GetHost();
-        if (!host) {
-            return std::nullopt;
-        }
-
-        auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-        if (!depthLayoutProperty) {
-            return std::nullopt;
-        }
-        return depthLayoutProperty->GetBackgroundScale().value_or(std::nullopt);
-    }
-
     bool IsGltfBackground() const
     {
         return GetBackgroundSource().IsGltf();
     }
 
-#if defined(KIT_3D_ENABLE)  && !defined(PREVIEW)
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
     {
         transformHintChangedCallbackId_ = id;
@@ -173,6 +146,16 @@ public:
     OHOS::Ace::DepthSpaceType GetDepthSpace() const
     {
         return depthSpace_;
+    }
+
+    void SetRender3DScale(float render3DScale)
+    {
+        render3DScale_ = render3DScale;
+    }
+
+    float GetRender3DScale() const
+    {
+        return render3DScale_;
     }
 
     int32_t GetBackgroundImageId()
@@ -201,13 +184,17 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DepthComponentPattern);
     void SetupBackgroundImageNode();
+    void ApplyOnCompleteCallback(const RefPtr<FrameNode>& backgroundImageNode);
+    void ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode);
+    void ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode);
     void RemoveBackgroundImageNode();
-    void ApplyBackgroundOffset(const RefPtr<FrameNode>& backgroundImageNode);
-    void ApplyBackgroundScale(const RefPtr<FrameNode>& backgroundImageNode);
+    bool IsCameraChange();
     void OnPaint3D();
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     void LoadDepthMap();
+    void ClearDepthMap();
+    LoadNotifier CreateDepthMapLoadNotifier();
     void OnDepthMapDataReady();
     void OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& canvasImage);
     void TransferDataToRosen();
@@ -215,25 +202,38 @@ private:
     void TransferDepthSpace(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferCameraParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferLightParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
+    void TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
+    void Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
+    void Get3DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
+    void PropagateCropToChildren();
 #endif
 
-#if defined(KIT_3D_ENABLE)  && !defined(PREVIEW)
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     void InitGltfAdapter();
     void UpdateGltfScene();
+    std::function<void(bool)> CreateGltfLoadCallback();
+    void FireGltfLoadCallback();
     void UpdateGltfCamera();
     void UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
     void CleanupGltfResources(bool clearAdapter = false);
     void CreateCustomNativeWindows(float width, float height);
     Render3D::WindowChangeInfo GetWindowChangeInfos(float width, float height) const;
     void UpdateWindowChangeSize(bool recreateWindow);
-    void Update3DOffset();
-    void Update3DScale();
     bool NeedUpdateWindowInfo();
     void UpdateWindowInfo();
     void MarkRender3D();
 #endif
 
+    struct TiltShiftResult {
+        float fov;
+        float xOffset;
+        float yOffset;
+    };
+    TiltShiftResult ComputeTiltShift(const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH);
+
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
+    float render3DScale_ = 1.0f;
+    float lastRender3DScale_ = 1.0f;
     ImageSourceInfo depthMap_;
     std::optional<int32_t> backgroundImageId_;
 
@@ -256,10 +256,16 @@ private:
     float height3d_ = 0.0;
     float lastWidth3d_ = 0.0;
     float lastHeight3d_ = 0.0;
+    bool isGltfLoaded_ = false;
+    std::optional<bool> pendingGltfLoadSuccess_;
 #endif
 
     RefPtr<ImageLoadingContext> depthMapLoadingCtx_;
     std::string lastLoadedDepthMapKey_;
+    float depthMapWidth_ = 0.0f;
+    float depthMapHeight_ = 0.0f;
+    bool isNeedRender_ = false;
+    std::optional<OHOS::Ace::DepthCameraParams> preCameraParams_;
 };
 
 } // namespace OHOS::Ace::NG

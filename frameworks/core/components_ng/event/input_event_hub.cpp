@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,8 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 
+    CreateMouseEventActuator();
+    CreateHoverEventActuator();
     if (mouseEventActuator_) {
         mouseEventActuator_->OnCollectMouseEvent(coordinateOffset, getEventTargetImpl, result);
     }
@@ -45,6 +47,7 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
     ACE_UINODE_TRACE(host);
+    CreateAccessibilityHoverEventActuator();
     if (accessibilityHoverEventActuator_) {
         accessibilityHoverEventActuator_->OnCollectAccessibilityHoverEvent(
             coordinateOffset, getEventTargetImpl, result, host);
@@ -56,6 +59,9 @@ bool InputEventHub::ProcessTipsMouseTestHit(const OffsetF& coordinateOffset, Tou
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+
+    CreateMouseEventActuator();
+    CreateHoverEventActuator();
     if (hoverEventActuator_) {
         hoverEventActuator_->OnCollectHoverEventForTips(coordinateOffset, getEventTargetImpl, result);
     }
@@ -71,10 +77,12 @@ bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, Touc
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
+    CreateHoverEventActuator();
     if (hoverEventActuator_) {
         hoverEventActuator_->OnCollectPenHoverEvent(coordinateOffset, getEventTargetImpl, result, host);
     }
 
+    CreateHoverMoveEventActuator();
     if (hoverMoveEventActuator_) {
         hoverMoveEventActuator_->OnCollectPenHoverMoveEvent(coordinateOffset, getEventTargetImpl, result, host);
     }
@@ -88,14 +96,17 @@ bool InputEventHub::ProcessAxisTestHit(
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 
-    if (axisEventActuator_ && !isCoastingAxis) {
-        axisEventActuator_->OnCollectAxisEvent(coordinateOffset, getEventTargetImpl, onAxisResult);
+    if (!isCoastingAxis) {
+        CreateAxisEventActuator();
+        if (axisEventActuator_) {
+            axisEventActuator_->OnCollectAxisEvent(coordinateOffset, getEventTargetImpl, onAxisResult);
+        }
         return false;
     }
 
-    if (coastingAxisEventActuator_ && isCoastingAxis) {
+    CreateCoastingAxisEventActuator();
+    if (coastingAxisEventActuator_) {
         coastingAxisEventActuator_->OnCollectCoastingAxisEvent(onAxisResult);
-        return false;
     }
     return false;
 }
@@ -126,7 +137,7 @@ std::string InputEventHub::GetHoverEffectStr() const
     }
 }
 
-void InputEventHub::SetHoverEffect(HoverEffectType type)
+ACE_FORCE_EXPORT void InputEventHub::SetHoverEffect(HoverEffectType type)
 {
     if (!hoverEffectActuator_) {
         hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
@@ -148,5 +159,104 @@ void InputEventHub::AddTouchpadInteractionListenerInner(TouchpadInteractionCallb
     CHECK_NULL_VOID(eventManager);
     auto weakPtr = WeakPtr<FrameNode>(frameNode);
     eventManager->AddTouchpadInteractionListenerInner(frameNode->GetId(), { weakPtr, std::move(callback) });
+}
+
+void InputEventHub::CreateMouseEventActuator()
+{
+    CHECK_NULL_VOID(userMouseFunc_ || userJSFrameNodeMouseFunc_ || !mouseInputEvents_.empty());
+    if (!mouseEventActuator_) {
+        mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userMouseFunc_) {
+        mouseEventActuator_->ReplaceInputEvent(std::move(userMouseFunc_));
+    }
+    if (userJSFrameNodeMouseFunc_) {
+        mouseEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(userJSFrameNodeMouseFunc_));
+    }
+    if (!mouseInputEvents_.empty()) {
+        for (auto& inputEvent : mouseInputEvents_) {
+            mouseEventActuator_->AddInputEvent(inputEvent);
+        }
+        mouseInputEvents_.clear();
+    }
+}
+
+void InputEventHub::CreateHoverEventActuator()
+{
+    CHECK_NULL_VOID(userHoverFunc_ || userJSFrameNodeHoverFunc_ || !hoverInputEvents_.empty());
+    if (!hoverEventActuator_) {
+        hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userHoverFunc_) {
+        hoverEventActuator_->ReplaceInputEvent(std::move(userHoverFunc_));
+    }
+    if (userJSFrameNodeHoverFunc_) {
+        hoverEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(userJSFrameNodeHoverFunc_));
+    }
+    if (!hoverInputEvents_.empty()) {
+        for (auto& inputEvent : hoverInputEvents_) {
+            hoverEventActuator_->AddInputEvent(inputEvent);
+        }
+        hoverInputEvents_.clear();
+    }
+}
+
+void InputEventHub::CreateHoverMoveEventActuator()
+{
+    CHECK_NULL_VOID(userHoverMoveFunc_ || userJSFrameNodeHoverMoveFunc_ || !hoverMoveInputEvents_.empty());
+    if (!hoverMoveEventActuator_) {
+        hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userHoverMoveFunc_) {
+        hoverMoveEventActuator_->ReplaceInputEvent(std::move(userHoverMoveFunc_));
+    }
+    if (userJSFrameNodeHoverMoveFunc_) {
+        hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(userJSFrameNodeHoverMoveFunc_));
+    }
+    if (!hoverMoveInputEvents_.empty()) {
+        for (auto& inputEvent : hoverMoveInputEvents_) {
+            hoverMoveEventActuator_->AddInputEvent(inputEvent);
+        }
+        hoverMoveInputEvents_.clear();
+    }
+}
+
+void InputEventHub::CreateAxisEventActuator()
+{
+    CHECK_NULL_VOID(userAxisFunc_ || !axisInputEvents_.empty());
+    if (!axisEventActuator_) {
+        axisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userAxisFunc_) {
+        axisEventActuator_->ReplaceInputEvent(std::move(userAxisFunc_));
+    }
+    if (!axisInputEvents_.empty()) {
+        for (auto& inputEvent : axisInputEvents_) {
+            axisEventActuator_->AddInputEvent(inputEvent);
+        }
+        axisInputEvents_.clear();
+    }
+}
+
+void InputEventHub::CreateCoastingAxisEventActuator()
+{
+    CHECK_NULL_VOID(userCoastingAxisFunc_);
+    if (!coastingAxisEventActuator_) {
+        coastingAxisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userCoastingAxisFunc_) {
+        coastingAxisEventActuator_->ReplaceInputEvent(std::move(userCoastingAxisFunc_));
+    }
+}
+
+void InputEventHub::CreateAccessibilityHoverEventActuator()
+{
+    CHECK_NULL_VOID(userAccessibilityHoverFunc_);
+    if (!accessibilityHoverEventActuator_) {
+        accessibilityHoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+    }
+    if (userAccessibilityHoverFunc_) {
+        accessibilityHoverEventActuator_->ReplaceInputEvent(std::move(userAccessibilityHoverFunc_));
+    }
 }
 } // namespace OHOS::Ace::NG

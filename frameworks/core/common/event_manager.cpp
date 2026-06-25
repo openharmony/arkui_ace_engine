@@ -28,10 +28,12 @@
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
+#include "core/event/resample_algo.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef RELAXED_INTERACTION_SUPPORT
@@ -117,6 +119,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (!curAccessibilityHoverResults_.empty()) {
         FalsifyHoverCancelEventAndDispatch(touchPoint);
     }
+    
+    if (lastDownFingerNumber_ == 0 && touchPoint.type == TouchType::DOWN && !needAppend) {
+        auto activeRecognizerManager = GetOrCreateActiveRecognizerManager();
+        if (activeRecognizerManager) {
+            activeRecognizerManager->CheckAndCleanBeforeNewTouch(touchPoint.id);
+        }
+    }
+    
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -528,9 +538,11 @@ bool EventManager::PostEventTouchTest(
     uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& item : hitTestResult) {
         item->SetIsPostEventResult(true);
+        item->SetIsPostTouchEventResult(true);
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
         if (group) {
             group->SetIsPostEventResultRecursively(true);
+            group->SetIsPostTouchEventResultRecursively(true);
             group->SetResponseLinkRecognizersRecursively(responseLinkResult);
             continue;
         }
@@ -591,13 +603,11 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
     auto currentReferee = refereeNG_;
     auto key = eventHandleId / EVENT_HANDLE;
     if (isNewReferee) {
-        auto iter = postEventRefereeWithStrategyNG_.find(key);
-        if (iter == postEventRefereeWithStrategyNG_.end() || (iter != postEventRefereeWithStrategyNG_.end() &&
-            !postEventRefereeWithStrategyNG_[key])) {
-            auto gestureReferee = AceType::MakeRefPtr<NG::GestureReferee>();
-            postEventRefereeWithStrategyNG_[key] = gestureReferee;
-        }
         currentReferee = postEventRefereeWithStrategyNG_[key];
+        if (!currentReferee) {
+            currentReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+            postEventRefereeWithStrategyNG_[key] = currentReferee;
+        }
     } else {
         // Post once use referee with refereeNG_, use upper-level referee more than once.
         if (key == POST_ONCE || key == 0) {
@@ -1497,6 +1507,7 @@ void EventManager::NotifyDragTouchEventListener(const TouchEvent& touchEvent)
 void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent,
     TouchTestResult touchTestResult, bool sendOnTouch)
 {
+    bool isTriggeredInteractionEvent = false;
     bool isStopTouchEvent = false;
     for (const auto& entry : touchTestResult) {
         if (touchEvent.passThrough) {
@@ -1513,6 +1524,9 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+        }
+        if (!recognizer && sendOnTouch && !isTriggeredInteractionEvent) {
+            isTriggeredInteractionEvent |= entry->HandleInteractionEvent(touchEvent);
         }
     }
 }
@@ -3493,5 +3507,13 @@ MouseFormat EventManager::GetCurrentMouseStyle()
 {
     CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
     return mouseStyleManager_->GetCurrentMouseStyle();
+}
+
+RefPtr<NG::ActiveRecognizerManager> EventManager::GetOrCreateActiveRecognizerManager()
+{
+    if (!activeRecognizerManager_) {
+        activeRecognizerManager_ = AceType::MakeRefPtr<NG::ActiveRecognizerManager>();
+    }
+    return activeRecognizerManager_;
 }
 } // namespace OHOS::Ace

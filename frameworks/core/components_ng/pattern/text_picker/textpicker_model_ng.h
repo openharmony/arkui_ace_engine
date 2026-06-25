@@ -17,13 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H
 
 #include "base/geometry/dimension.h"
+#include <shared_mutex>
+
 #include "core/components/common/layout/constants.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/common/resource/resource_object.h"
 namespace OHOS::Ace {
+class PickerTheme;
 class TextTheme;
 }
 
@@ -165,6 +166,11 @@ public:
     static void ParseGradientHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseDividerResObj(FrameNode* frameNode, const NG::ItemDivider& divider);
     static void TextPickerRemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void SetOnEnterSelectedArea(FrameNode* frameNode, TextChangeEvent&& onEnterSelectedArea);
+    static void HasUserDefinedDisappearFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedNormalFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedSelectedFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedOpacity(FrameNode* frameNode);
 
 private:
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);

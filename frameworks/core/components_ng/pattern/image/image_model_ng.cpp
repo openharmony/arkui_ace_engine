@@ -34,6 +34,7 @@
 #endif
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -99,12 +100,8 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
     SetFrameNodeDraggable(frameNode, imageInfoConfig.isImageSpan);
     pattern->SetImageType(imageInfoConfig.type);
     pattern->SetNeedLoadAlt(true);
-    if (imageInfoConfig.type == ImageType::PIXELMAP_DRAWABLE) {
-        pattern->SetPixelMapDrawable(imageInfoConfig.drawable);
-    } else {
-        pattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
-    }
-    if (imageInfoConfig.type != ImageType::ANIMATED_DRAWABLE && imageInfoConfig.type != ImageType::PIXELMAP_DRAWABLE) {
+    pattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
+    if (imageInfoConfig.type != ImageType::ANIMATED_DRAWABLE && imageInfoConfig.type != ImageType::PICTURE_DRAWABLE) {
         auto srcInfo = CreateSourceInfo(
             imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
         srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
@@ -150,6 +147,11 @@ void ImageModelNG::ResetImage(FrameNode* frameNode)
 void ImageModelNG::SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
     const std::string& moduleName, bool isUriPureNumber)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageType(ImageType::BASE);
+    pattern->UpdateDrawableDescriptor(nullptr);
     auto srcInfo = ImageSourceInfo { src, bundleName, moduleName };
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
 
@@ -158,6 +160,11 @@ void ImageModelNG::SetInitialSrc(FrameNode* frameNode, const std::string& src, c
 
 void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageType(ImageType::BASE);
+    pattern->UpdateDrawableDescriptor(nullptr);
     auto srcInfo = ImageSourceInfo(pixMap);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
@@ -585,19 +592,17 @@ void ImageModelNG::SetDrawableDescriptor(FrameNode* frameNode, void* newDrawable
     CHECK_NULL_VOID(pattern);
     auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
     CHECK_NULL_VOID(drawableAddr);
-    auto drawableType = drawableAddr->GetDrawableType();
-    if (drawableType != DrawableType::ANIMATED && drawableType != DrawableType::PIXELMAP) {
-        auto pixelMap = drawableAddr->GetPixelMap();
-        auto srcInfo = ImageSourceInfo(pixelMap);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
-    } else if (drawableType == DrawableType::PIXELMAP) {
-        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-        pattern->SetImageType(ImageType::PIXELMAP_DRAWABLE);
-        pattern->SetPixelMapDrawable(drawable);
-    } else {
-        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-        pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+    RefPtr<DrawableDescriptor> drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+    auto drawableType = drawable->GetDrawableType();
+    if (drawableType == DrawableType::ANIMATED || drawableType == DrawableType::PICTURE) {
+        pattern->SetImageType(drawableType == DrawableType::ANIMATED
+            ? ImageType::ANIMATED_DRAWABLE : ImageType::PICTURE_DRAWABLE);
         pattern->UpdateDrawableDescriptor(drawable);
+    } else {
+        auto pixelMap = drawable->GetPixelMap();
+        auto srcInfo = ImageSourceInfo(pixelMap);
+        pattern->UpdateDrawableDescriptor(nullptr);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
     }
 }
 

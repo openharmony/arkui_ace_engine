@@ -15,6 +15,8 @@
 
 #include "core/animation/animation_pub.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
+
 namespace {
 const char* g_animationInterfaceNames[4] = {
     "animation",
@@ -38,5 +40,30 @@ const char* GetAnimationInterfaceName(AnimationInterface interfaceName)
 int32_t GetAnimationFinishCount()
 {
     return g_animationCount++;
+}
+
+void HistogramInfiniteAnimationEvent(AnimationInterface animationInterface)
+{
+    switch (animationInterface) {
+        case AnimationInterface::ANIMATION: {
+            ACE_ENGINE_HISTOGRAM_BOOLEAN("animation", 1);
+            break;
+        }
+        case AnimationInterface::ANIMATE_TO: {
+            ACE_ENGINE_HISTOGRAM_BOOLEAN("animateTo", 1);
+            break;
+        }
+        case AnimationInterface::ANIMATE_TO_IMMEDIATELY: {
+            ACE_ENGINE_HISTOGRAM_BOOLEAN("animateToImmediately", 1);
+            break;
+        }
+        case AnimationInterface::KEYFRAME_ANIMATE_TO: {
+            ACE_ENGINE_HISTOGRAM_BOOLEAN("keyframeAnimateTo", 1);
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace

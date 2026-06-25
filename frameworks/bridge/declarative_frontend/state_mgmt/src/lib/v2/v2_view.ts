@@ -159,7 +159,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
 
         this.__customComponentExecuteInit__Internal();
-        this.__isCustomEnvConstructionFinalized__Internal = true;
     }
 
     public debugInfo__(): string {
@@ -189,6 +188,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         // Legacy Reuse — push to parent's local recycle pool
         if (!globalPool && parent && !(parent as ViewV2).isDeleting_) {
             parent.getOrCreateRecyclePool().pushRecycleV2Component(reuseId, this);
+            if (this.__getReusableMemOptStrategy__Internal() === 1) {
+                parent.__startMemOpt__Internal();
+            }
             this.hasBeenRecycled_ = true;
         } else if (globalPool && globalPool.isActive()) {
             // Global Reuse — return to the global pool
@@ -275,6 +277,37 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doRecycle);
     }
 
+    /**
+     * @function __releaseRecyclePool__Internal
+     * @description
+     * Unified interface for releasing recycle pool with boolean flags.
+     *
+     * @param {number} remainingTimeMs - The remaining time ms (only used if isProgressive is true)
+     * @param {boolean} isProgressive - Whether to use progressive release (with time limit)
+     * @param {boolean} shouldCollect - Whether to collect nodes before releasing (prepare phase)
+     * @returns {boolean} - true if all nodes have been released, false if more work remains
+     */
+    public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean {
+        this.__setHasStartMemOpt__Internal(false);
+        if (!this.recyclePoolV2_) {
+            return true; // No pool exists, considered "complete"
+        }
+
+        // Sync mode: no time limit, batch release, collect nodes
+        if (!isProgressive) {
+            this.recyclePoolV2_.purgeAllCleanableRecycleElmtIds();
+            return true;
+        }
+
+        // Collect nodes need to release progressively
+        if (shouldCollect) {
+            this.recyclePoolV2_.preparePurgeAllCleanableRecycleElmtIdsProgressive();
+        }
+
+        // Progressive mode: with time limit, collect nodes only once
+        return this.recyclePoolV2_.releaseCachedNodesProgressive(remainingTimeMs);
+    }
+
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
     private freezeRecycledComponent(): void {
         this.activeCount_--;
@@ -316,6 +349,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     getOrCreateRecyclePool(): RecyclePoolV2 {
         if (!this.recyclePoolV2_) {
           this.recyclePoolV2_ = new RecyclePoolV2();
+          // Set callback to request progressive release from C++ side
+          this.recyclePoolV2_.setRequestProgressiveReleaseCallback(() => {
+            this.__requestProgressiveRelease__Internal();
+          });
         }
         return this.recyclePoolV2_;
       }
@@ -1096,6 +1133,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     componentRef.childrenWeakrefMap_.clear();
                 }
 
+				const wasPreRendered = componentRef.isPreRendered;
                 componentRef.isPreRendered = false;
                 componentRef.paramsGenerator_ = getParams;
                 componentRef.myReusePool__ = globalPool ?? componentRef.myReusePool__;
@@ -1104,6 +1142,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 ViewV2.createRecycle(componentRef, isActuallyRecycled, reuseId, () => {
                     recycledNode?.aboutToReuseInternal(getParams());
                 });
+				if (wasPreRendered) {
+				  componentRef.updateStateVars(getParams());
+				}
                 if (recycledNode && !isActuallyRecycled) {
                     this.rerender();
                 }

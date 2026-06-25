@@ -33,6 +33,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -58,11 +59,13 @@ public:
     void SetUp() override
     {
         MockPipelineContext::SetUp();
+        LazyForEachUtils::SetEnableRepeatAnimation(true);
     }
 
     void TearDown() override
     {
         MockPipelineContext::TearDown();
+        LazyForEachUtils::SetEnableRepeatAnimation(false);
     }
 
     RefPtr<TestUINode> CreateTestUINode(int32_t nodeId)
@@ -92,11 +95,12 @@ public:
     /**
      * Function needed by RepeatVirtualScrollCaches constructor is special test case
      */
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index_;
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index_;
     std::function<void(IndexType, IndexType)> onRecycleItems_;
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
+    std::function<void()> onPurgeAll_;
     std::function<void()> onUpdateDirty_;
 };
 } // namespace OHOS::Ace::NG

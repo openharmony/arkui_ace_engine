@@ -19,6 +19,7 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
@@ -212,6 +213,65 @@ protected:
         .callSync = nullptr
     };
 };
+
+template<typename CallbackType, typename NodeType>
+auto GetSyncInvokerWithNode(const CallbackType& callback, NodeType&& node)
+{
+    using HelperType = CallbackHelper<CallbackType>;
+    static_assert(std::is_void_v<decltype(std::declval<HelperType&>().InvokeSync())>,
+        "GetSyncInvokerWithNode supports void InvokeSync() callbacks only.");
+    return [arkCallback = HelperType(callback), callbackNode = std::forward<NodeType>(node)]() {
+        PipelineContext::SetCallBackNode(callbackNode);
+        arkCallback.InvokeSync();
+    };
+}
+
+template<typename CallbackType>
+auto GetSyncInvoker(const CallbackType& callback)
+{
+    using HelperType = CallbackHelper<CallbackType>;
+    static_assert(std::is_void_v<decltype(std::declval<HelperType&>().InvokeSync())>,
+        "GetSyncInvoker supports void InvokeSync() callbacks only.");
+    return [arkCallback = HelperType(callback)]() {
+        arkCallback.InvokeSync();
+    };
+}
+
+template<typename CallbackType>
+auto GetContainerScopedSyncInvoker(const CallbackType& callback, int32_t instanceId)
+{
+    using HelperType = CallbackHelper<CallbackType>;
+    static_assert(std::is_void_v<decltype(std::declval<HelperType&>().InvokeSync())>,
+        "GetContainerScopedSyncInvoker supports void InvokeSync() callbacks only.");
+    return [arkCallback = HelperType(callback), instanceId]() {
+        ContainerScope scope(instanceId);
+        arkCallback.InvokeSync();
+    };
+}
+
+template<typename CallbackType, typename PayloadType>
+auto GetPayloadSyncInvoker(const CallbackType& callback, PayloadType&& payload)
+{
+    using HelperType = CallbackHelper<CallbackType>;
+    using StoredPayloadType = std::decay_t<PayloadType>;
+    static_assert(std::is_void_v<decltype(std::declval<HelperType&>().InvokeSync(
+        std::declval<StoredPayloadType>()))>,
+        "GetPayloadSyncInvoker supports void InvokeSync(payload) callbacks only.");
+    return [arkCallback = HelperType(callback), payload = std::forward<PayloadType>(payload)]() mutable {
+        arkCallback.InvokeSync(payload);
+    };
+}
+
+template<typename CallbackType>
+auto GetAsyncInvoker(const CallbackType& callback)
+{
+    using HelperType = CallbackHelper<CallbackType>;
+    static_assert(std::is_void_v<decltype(std::declval<HelperType&>().Invoke())>,
+        "GetAsyncInvoker supports void Invoke() callbacks only.");
+    return [arkCallback = HelperType(callback)]() {
+        arkCallback.Invoke();
+    };
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CALLBACK_HELPER_H

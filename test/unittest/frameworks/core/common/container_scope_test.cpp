@@ -15,7 +15,6 @@
 
 #include "gtest/gtest.h"
 #include "vector"
-#include "unordered_map"
 
 #include "core/common/container_scope.h"
 
@@ -34,38 +33,12 @@ constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t TEST_INSTANCE_ID_CONTAINER = 100000;
 constexpr int32_t TEST_INSTANCE_ID_SUB_CONTAINER = 1000000;
 const std::vector<int32_t> TEST_CONTAINERS = { 100000, 100001, 100002, 100003 };
-std::unordered_map<int32_t, bool> g_mockThreadCheckResult;
-
-void MockThreadCheckResult(int32_t id, bool canRunOnCurrentThread)
-{
-    g_mockThreadCheckResult[id] = canRunOnCurrentThread;
-}
-
-void ClearMockThreadCheckResult()
-{
-    g_mockThreadCheckResult.clear();
-}
 } // namespace
-
-class Container {
-public:
-    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
-};
-
-bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
-{
-    auto iter = g_mockThreadCheckResult.find(currentId);
-    if (iter != g_mockThreadCheckResult.end()) {
-        return iter->second;
-    }
-    return defaultRes;
-}
 
 class ContainerScopeTest : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        ContainerScope::RegisterThreadCheckFunc(&Container::CheckRunOnThreadByThreadId);
         ContainerScope::UpdateCurrent(INSTANCE_ID_PLATFORM);
     }
     static void TearDownTestSuite()
@@ -90,6 +63,7 @@ public:
 #endif
         ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
         ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
+        ContainerScope::ResetIsolatedThread();
     }
 };
 
@@ -493,14 +467,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
     EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "No valid instance exists");
 
     /**
-     * @tc.steps: step7. Test LOCAL reason description
-     * @tc.expected: Returns correct description for LOCAL
-     */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::LOCAL),
-        "No specific instance was specified, return the local thread instance");
-
-    /**
-     * @tc.steps: step8. Test invalid enum value (out of range)
+     * @tc.steps: step7. Test invalid enum value (out of range)
      * @tc.expected: Returns "Unknown reason"
      */
     EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "Unknown reason");
@@ -1061,85 +1028,338 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest042, TestSize.Level1)
 #endif // ENABLE_CONTAINER_SCOPE_TRACKING
 
 /**
- * @tc.name: ContainerScopeTest018
- * @tc.desc: SafelyId - local fallback and checkThread option
+ * @tc.name: ContainerScopeTest020
+ * @tc.desc: Isolated base query functions (ContainerCount, SingletonId, DefaultId)
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerScopeTest, ContainerScopeTest018, TestSize.Level1)
+HWTEST_F(ContainerScopeTest, ContainerScopeTest020, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Prepare ids and thread check result
+     * @tc.steps: step1. Mark isolated, no local containers added
+     * @tc.expected: ContainerCount=0, SingletonId=UNDEFINED, DefaultId=UNDEFINED
+     */
+    ContainerScope::MarkIsolatedThread();
+    EXPECT_EQ(ContainerScope::ContainerCount(), 0);
+    EXPECT_EQ(ContainerScope::SingletonId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::DefaultId(), INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Add one local container
+     * @tc.expected: ContainerCount=1, SingletonId=that ID, DefaultId=that ID
+     */
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::ContainerCount(), 1);
+    EXPECT_EQ(ContainerScope::SingletonId(), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::DefaultId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step3. Add a second local container
+     * @tc.expected: ContainerCount=2, SingletonId=UNDEFINED, DefaultId=last (rbegin)
+     */
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::ContainerCount(), 2);
+    EXPECT_EQ(ContainerScope::SingletonId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::DefaultId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+}
+
+/**
+ * @tc.name: ContainerScopeTest021
+ * @tc.desc: Isolated RecentActiveId and RecentForegroundId return local values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Setup global recent IDs and mark isolated
+     */
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step2. RecentActiveId/RecentForegroundId should return local (UNDEFINED), not global
+     * @tc.expected: Both UNDEFINED (local default, not the global value)
+     */
+    EXPECT_EQ(ContainerScope::RecentActiveId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step3. Update via dual-write, verify local is updated
+     */
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::RecentActiveId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest022
+ * @tc.desc: Isolated SafelyId full decision chain (empty→singleton→active→foreground→default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Isolated with empty local set
+     * @tc.expected: SafelyId = UNDEFINED
+     */
+    ContainerScope::MarkIsolatedThread();
+    EXPECT_EQ(ContainerScope::SafelyId(), INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Add one local container (singleton)
+     * @tc.expected: SafelyId = that ID
+     */
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step3. Add second, set local recent active
+     * @tc.expected: SafelyId = active ID
+     */
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Clear active, set local recent foreground
+     * @tc.expected: SafelyId = foreground ID
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step5. Clear both active and foreground
+     * @tc.expected: SafelyId = DefaultId (rbegin of local set)
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step6. Cleanup
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+}
+
+/**
+ * @tc.name: ContainerScopeTest023
+ * @tc.desc: Isolated CurrentIdWithReason full decision chain
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SCOPE - set CurrentId directly
+     */
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateCurrent(TEST_INSTANCE_ID_CONTAINER);
+    auto result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(result.second, InstanceIdGenReason::SCOPE);
+
+    /**
+     * @tc.steps: step2. SINGLETON - clear CurrentId, only one local container
+     */
+    ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+    result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(result.second, InstanceIdGenReason::SINGLETON);
+
+    /**
+     * @tc.steps: step3. ACTIVE - add second container, set local recent active
+     */
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(result.second, InstanceIdGenReason::ACTIVE);
+
+    /**
+     * @tc.steps: step4. FOREGROUND - clear active, set foreground
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
+    result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(result.second, InstanceIdGenReason::FOREGROUND);
+
+    /**
+     * @tc.steps: step5. DEFAULT - clear both active and foreground
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(result.second, InstanceIdGenReason::DEFAULT);
+
+    /**
+     * @tc.steps: step6. UNDEFINED - remove all local containers
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    result = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(result.first, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(result.second, InstanceIdGenReason::UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest024
+ * @tc.desc: Isolated local lifecycle: AddLocal, RemoveLocal, cache cleanup, and reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Setup: add global container for later verification
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step2. Mark isolated, add local containers, set local active/foreground
+     */
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step3. RemoveLocal clears active/foreground cache for that ID
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step4. ResetIsolatedThread restores global path
+     * @tc.expected: ContainerCount=1 (global), SafelyId returns global container
+     */
+    ContainerScope::ResetIsolatedThread();
+    EXPECT_EQ(ContainerScope::ContainerCount(), 1);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step5. Cleanup global
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest025
+ * @tc.desc: Isolated UpdateRecentActive/Foreground dual-write (global + local)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Mark isolated, add local container
+     */
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step2. UpdateRecentActive on isolated thread
+     * @tc.expected: RecentActiveId returns local value; global also updated
+     */
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::RecentActiveId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step3. UpdateRecentForeground on isolated thread
+     * @tc.expected: RecentForegroundId returns local value
+     */
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step4. Verify global was also written
+     * RemoveLocal + ResetIsolatedThread to fall back to global path.
+     * @tc.expected: Global RecentActiveId and RecentForegroundId were also set
+     */
+    ContainerScope::RemoveLocal(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::ResetIsolatedThread();
+    EXPECT_EQ(ContainerScope::RecentActiveId(), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step5. Cleanup global
+     */
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
+
+/**
+ * @tc.name: ContainerScopeTest026
+ * @tc.desc: Isolated thread does not return global container IDs
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add multiple global containers
      */
     ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
     ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
-    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
-    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
 
     /**
-     * @tc.steps: step2. checkThread=true prefers local thread id
-     * @tc.expected: SafelyId equals local id
+     * @tc.steps: step2. Mark isolated, add a different local container
      */
-    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+    constexpr int32_t LOCAL_ONLY_ID = 200000;
+    ContainerScope::MarkIsolatedThread();
+    ContainerScope::AddLocal(LOCAL_ONLY_ID);
 
     /**
-     * @tc.steps: step3. checkThread=false ignores local fallback
-     * @tc.expected: SafelyId equals active id
+     * @tc.steps: step3. All queries return local values, never global
+     * @tc.expected: ContainerCount=1, SingletonId=LOCAL_ONLY_ID, SafelyId=LOCAL_ONLY_ID
      */
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::ContainerCount(), 1);
+    EXPECT_EQ(ContainerScope::SingletonId(), LOCAL_ONLY_ID);
+    EXPECT_EQ(ContainerScope::SafelyId(), LOCAL_ONLY_ID);
+    EXPECT_EQ(ContainerScope::DefaultId(), LOCAL_ONLY_ID);
+    EXPECT_EQ(ContainerScope::RecentActiveId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::RecentForegroundId(), INSTANCE_ID_UNDEFINED);
 
     /**
-     * @tc.steps: step4. clear set value
+     * @tc.steps: step4. Cleanup
      */
+    ContainerScope::RemoveLocal(LOCAL_ONLY_ID);
     ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
     ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    ClearMockThreadCheckResult();
 }
 
 /**
- * @tc.name: ContainerScopeTest019
- * @tc.desc: CurrentIdWithReason - local fallback and checkThread option
+ * @tc.name: ContainerScopeTest_IsIsolatedThread_Lifecycle001
+ * @tc.desc: Test IsIsolatedThread default false, true after mark, false after reset
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerScopeTest, ContainerScopeTest019, TestSize.Level1)
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_IsIsolatedThread_Lifecycle001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Prepare ids and thread check result
-     */
-    ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
-    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
-    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
-    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
+    EXPECT_FALSE(ContainerScope::IsIsolatedThread());
 
-    /**
-     * @tc.steps: step2. checkThread=true returns local fallback with LOCAL reason
-     */
-    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
-    EXPECT_EQ(currentIdWithReason.first, TEST_INSTANCE_ID_SUB_CONTAINER);
-    EXPECT_EQ(currentIdWithReason.second, InstanceIdGenReason::LOCAL);
+    ContainerScope::MarkIsolatedThread();
+    EXPECT_TRUE(ContainerScope::IsIsolatedThread());
 
-    /**
-     * @tc.steps: step3. checkThread=false keeps foreground path and reason
-     */
-    auto currentIdWithReasonWithoutThreadCheck = ContainerScope::CurrentIdWithReason(false);
-    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.first, TEST_INSTANCE_ID_CONTAINER);
-    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.second, InstanceIdGenReason::FOREGROUND);
-
-    /**
-     * @tc.steps: step4. clear set value
-     */
-    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    ClearMockThreadCheckResult();
+    ContainerScope::ResetIsolatedThread();
+    EXPECT_FALSE(ContainerScope::IsIsolatedThread());
 }
 } // namespace OHOS::Ace

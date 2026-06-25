@@ -18,6 +18,7 @@
 #include <functional>
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/flex_property.h"
@@ -28,6 +29,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
@@ -40,6 +42,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/component_material_interaction.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
@@ -80,6 +83,8 @@
 
 namespace OHOS::Ace::NG {
 
+#define SCROLLABLE_IMPERATIVE_ATTRIBUTE "Imperative.ScrollableAttribute."
+
 namespace {
 enum class WidthBreakpoint { WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL };
 enum class HeightBreakpoint { HEIGHT_SM, HEIGHT_MD, HEIGHT_LG };
@@ -91,6 +96,7 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
 
 #ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
@@ -119,6 +125,70 @@ std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec
     return res;
 }
 
+const std::function<void()> EMPTY_CALLBACK = {};
+
+bool CheckDimensionUseLPX(const Dimension& dim)
+{
+    return dim.Unit() == DimensionUnit::LPX;
+}
+
+bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
+{
+    return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
+}
+
+UiMaterialStyle ConvertToECStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        return static_cast<UiMaterialStyle>(style - UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+UiMaterialStyle ConvertToECSubStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+bool CheckNotLegalStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) < static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) ||
+        static_cast<int32_t>(from) > static_cast<int32_t>(UiMaterialStyle::MAX)) {
+        return true;
+    }
+    return false;
+}
+
+void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECStyle(newOptions->style);
+    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->applyShadow = false;
+    newOptions->disableLightEffect = true;
+    newOptions->interactive = false;
+    newOptions->lightEffectOptions = std::nullopt;
+    newOptions->colorResObj = nullptr;
+}
+
+void ConvertToImmersiveOptionsECSub(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECSubStyle(newOptions->style);
+}
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -148,6 +218,7 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         height = layoutConstraint->selfIdealSize->Height();
     }
+    ACE_CHECK_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_WIDTH);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
@@ -194,6 +265,7 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
         if (layoutConstraint && layoutConstraint->selfIdealSize) {
             height = layoutConstraint->selfIdealSize->Height();
         }
+        ACE_CHECK_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_WIDTH);
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -217,6 +289,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         width = layoutConstraint->selfIdealSize->Width();
     }
+    ACE_CHECK_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_HEIGHT);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
@@ -263,6 +336,7 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
         if (layoutConstraint && layoutConstraint->selfIdealSize) {
             width = layoutConstraint->selfIdealSize->Width();
         }
+        ACE_CHECK_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_HEIGHT);
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -307,6 +381,7 @@ void ViewAbstract::SetMinWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MIN_WIDTH, frameNode);
     layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
 }
 
@@ -339,6 +414,7 @@ void ViewAbstract::SetMinWidth(const RefPtr<ResourceObject>& resObj)
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MIN_WIDTH, frameNode);
         layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -354,6 +430,7 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MIN_HEIGHT, frameNode);
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
 }
 
@@ -386,6 +463,7 @@ void ViewAbstract::SetMinHeight(const RefPtr<ResourceObject>& resObj)
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MIN_HEIGHT, frameNode);
         layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -413,6 +491,7 @@ void ViewAbstract::SetMaxWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MAX_WIDTH, frameNode);
     layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
 }
 
@@ -445,6 +524,7 @@ void ViewAbstract::SetMaxWidth(const RefPtr<ResourceObject>& resObj)
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MAX_WIDTH, frameNode);
         layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -460,6 +540,7 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MAX_HEIGHT, frameNode);
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
@@ -492,6 +573,7 @@ void ViewAbstract::SetMaxHeight(const RefPtr<ResourceObject>& resObj)
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MAX_HEIGHT, frameNode);
         layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -1069,6 +1151,21 @@ void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, co
     }
 }
 
+std::function<void()> ViewAbstract::GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), option]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnPixelStretchEffectUpdate(option);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1097,6 +1194,13 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         };
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
+
+    auto lpxUpdateFunc = GetPixelStretchEffectFuncForLPX(option);
+    if (CheckDimensionUseLPX(option.left) || CheckDimensionUseLPX(option.top) || CheckDimensionUseLPX(option.right) ||
+        CheckDimensionUseLPX(option.bottom)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, lpxUpdateFunc);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
@@ -1312,6 +1416,7 @@ void ViewAbstract::SetPadding(const CalcLength& value)
     }
     PaddingProperty padding;
     padding.SetEdges(value);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_PADDING);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding);
 }
 
@@ -1335,6 +1440,7 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(padding, layoutDirection);
+            CheckNodePaddingLPX(frameNode, padding);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, padding, frameNode);
@@ -1343,6 +1449,7 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
         };
         pattern->AddResObj("padding", resObj, std::move(updateFunc));
     }
+    CheckPaddingLPX(value);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
 }
 
@@ -1381,6 +1488,7 @@ void ViewAbstract::SetPadding(const RefPtr<ResourceObject>& resObj)
         }
         PaddingProperty paddingProperty;
         paddingProperty.SetEdges(paddingLength);
+        CheckNodePaddingLPX(frameNode, paddingProperty);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddingProperty, frameNode);
         if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
             ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddingProperty, frameNode);
@@ -1398,6 +1506,7 @@ void ViewAbstract::SetSafeAreaPadding(const CalcLength& value)
     }
     PaddingProperty padding;
     padding.SetEdges(value);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding);
 }
 
@@ -1421,12 +1530,14 @@ void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(padding, layoutDirection);
+            CheckNodeSafeAreaPaddingLPX(frameNode, padding);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("safeAreaPadding", resObj, std::move(updateFunc));
     }
+    CheckSafeAreaPaddingLPX(value);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value);
 }
 
@@ -1443,6 +1554,7 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& va
     CHECK_NULL_VOID(frameNode);
     PaddingProperty padding;
     padding.SetEdges(value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
 }
 
@@ -1462,12 +1574,14 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingPropert
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(padding, layoutDirection);
+            CheckNodeSafeAreaPaddingLPX(frameNode, padding);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("safeAreaPadding", resObj, std::move(updateFunc));
     }
+    CheckNodeSafeAreaPaddingLPX(frameNode, value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value, frameNode);
 }
 
@@ -1477,6 +1591,62 @@ void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
 }
 
+void ViewAbstract::CheckSafeAreaPaddingLPX(const PaddingProperty& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_TOP);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_BOTTOM);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_LEFT);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeSafeAreaPaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_TOP,
+                                     frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_BOTTOM,
+                                     frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_LEFT,
+                                     frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_RIGHT,
+                                     frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeSafeAreaPaddingLPX(FrameNode *frameNode, const PaddingProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_TOP,
+                                     frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_BOTTOM,
+                                     frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_LEFT,
+                                     frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_SAFE_AREA_PADDING_RIGHT,
+                                     frameNode);
+    }
+}
+
 void ViewAbstract::SetMargin(const CalcLength& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1484,6 +1654,7 @@ void ViewAbstract::SetMargin(const CalcLength& value)
     }
     MarginProperty margin;
     margin.SetEdges(value);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_MARGIN);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin);
 }
 
@@ -1507,6 +1678,7 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(margin, layoutDirection);
+            CheckNodeMarginLPX(frameNode, margin);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1515,6 +1687,7 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
         };
         pattern->AddResObj("margin", resObj, std::move(updateFunc));
     }
+    CheckMarginLPX(value);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Margin, value);
 }
 
@@ -1551,6 +1724,7 @@ void ViewAbstract::SetMargin(const RefPtr<ResourceObject>& resObj)
         }
         MarginProperty marginProperty;
         marginProperty.SetEdges(marginLength);
+        CheckNodeMarginLPX(frameNode, marginProperty);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, marginProperty, frameNode);
         pattern->UpdateMarginResource();
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -1567,6 +1741,7 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_RADIUS);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -1590,6 +1765,7 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderRadiuses(borderRadius, layoutDirection);
+            CheckNodeBorderRadiusLPX(frameNode, borderRadius);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1597,6 +1773,7 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
         };
         pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
     }
+    CheckBorderRadiusLPX(value);
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
 }
 
@@ -1625,6 +1802,7 @@ void ViewAbstract::SetBorderRadius(const RefPtr<ResourceObject>& resObj)
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(borderRadius);
         borderRadiusProperty.multiValued = false;
+        CheckNodeBorderRadiusLPX(frameNode, borderRadiusProperty);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
         pattern->UpdateBorderResource();
     };
@@ -1719,6 +1897,7 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
     } else {
         borderWidth.SetBorderWidth(value);
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_WIDTH);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, borderWidth);
     ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, borderWidth);
@@ -1744,6 +1923,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
+            CheckNodeBorderWidthLPX(frameNode, borderWidth);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
@@ -1754,6 +1934,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
         };
         pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
     }
+    CheckBorderWidthLPX(value);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, value);
@@ -1787,6 +1968,7 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
         } else {
             borderWidthProperty.SetBorderWidth(borderWidth);
         }
+        CheckNodeBorderWidthLPX(frameNode, borderWidthProperty);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
@@ -1822,6 +2004,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObj
         } else {
             borderWidthProperty.SetBorderWidth(borderWidth);
         }
+        CheckNodeBorderWidthLPX(frameNode, borderWidthProperty);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
@@ -1829,6 +2012,54 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObj
     };
     updateFunc(resObj);
     pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CheckBorderWidthLPX(const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_TOP);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_BOTTOM);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_LEFT);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderWidthLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty &value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderWidthLPX(FrameNode* frameNode, const BorderWidthProperty &value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_WIDTH_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderStyle(const BorderStyle& value)
@@ -1869,6 +2100,7 @@ void ViewAbstract::SetDashGap(const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP);
     ACE_UPDATE_RENDER_CONTEXT(DashGap, dashGap);
 }
 
@@ -1877,6 +2109,7 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
 }
 
@@ -1900,10 +2133,12 @@ void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashGap, layoutDirection);
+            CheckNodeBorderDashGapLPX(frameNode, dashGap);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
     }
+    CheckBorderDashGapLPX(value);
     ACE_UPDATE_RENDER_CONTEXT(DashGap, value);
 }
 
@@ -1923,11 +2158,69 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& v
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashGap, layoutDirection);
+            CheckNodeBorderDashGapLPX(frameNode, dashGap);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderDashGapLPX(frameNode, value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, value, frameNode);
+}
+
+void ViewAbstract::CheckBorderDashGapLPX(const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashGapLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetDashWidth(const Dimension& value)
@@ -1938,6 +2231,7 @@ void ViewAbstract::SetDashWidth(const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH);
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, dashWidth);
 }
 
@@ -1946,6 +2240,7 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
 }
 
@@ -1969,10 +2264,12 @@ void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
+            CheckNodeBorderDashWidthLPX(frameNode, dashWidth);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
     }
+    CheckBorderDashWidthLPX(value);
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, value);
 }
 
@@ -1992,11 +2289,92 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty&
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
+            CheckNodeBorderDashWidthLPX(frameNode, dashWidth);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderDashWidthLPX(frameNode, value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, value, frameNode);
+}
+
+void ViewAbstract::CheckBorderDashWidthLPX(const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashWidthLPX(
+    RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    }
+}
+
+std::function<void()> ViewAbstract::GetOuterBorderRadiusFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(value);
+        borderRadius.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, borderRadius, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderRadiusUpdate(borderRadius);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetOuterBorderRadiusFuncForLPX(const BorderRadiusProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [frameNode, value]() {
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderRadiusUpdate(value);
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
@@ -2007,6 +2385,11 @@ void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    ACE_CHECK_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc);
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, borderRadius);
 }
 
@@ -2015,6 +2398,11 @@ void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const Dimension& v
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, borderRadius, frameNode);
 }
 
@@ -2040,6 +2428,14 @@ void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
         };
         pattern->AddResObj("outerBorderRadius", resObj, std::move(updateFunc));
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
 }
 
@@ -2061,6 +2457,14 @@ void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadius
         };
         pattern->AddResObj("outerBorderRadius", resObj, std::move(updateFunc));
     }
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    }
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
 }
 
@@ -2123,6 +2527,40 @@ void ViewAbstract::SetOuterBorderColor(FrameNode* frameNode, const BorderColorPr
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, value, frameNode);
 }
 
+std::function<void()> ViewAbstract::GetOuterBorderWidthFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderWidthProperty borderWidth;
+        if (Negative(value.Value())) {
+            borderWidth.SetBorderWidth(Dimension(0));
+        } else {
+            borderWidth.SetBorderWidth(value);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, borderWidth, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderWidthUpdate(borderWidth);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetOuterBorderWidthFuncForLPX(const BorderWidthProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderWidthUpdate(value);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2134,6 +2572,11 @@ void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
     } else {
         borderWidth.SetBorderWidth(value);
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    ACE_CHECK_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc);
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, borderWidth);
 }
 
@@ -2145,6 +2588,9 @@ void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const Dimension& va
     } else {
         borderWidth.SetBorderWidth(value);
     }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, borderWidth, frameNode);
 }
 
@@ -2170,6 +2616,12 @@ void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
         };
         pattern->AddResObj("outerBorderWidth", resObj, std::move(updateFunc));
     }
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.topDimen) ||
+        CheckDimensionUseLPX(value.rightDimen) || CheckDimensionUseLPX(value.bottomDimen)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc);
+    }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
 }
 
@@ -2190,6 +2642,12 @@ void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthPr
             frameNode->MarkDirtyNode();
         };
         pattern->AddResObj("outerBorderWidth", resObj, std::move(updateFunc));
+    }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.topDimen) ||
+        CheckDimensionUseLPX(value.rightDimen) || CheckDimensionUseLPX(value.bottomDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
 }
@@ -3433,6 +3891,8 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     CheckIfParentNeedMarkDirty(frameNode);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3449,6 +3909,8 @@ void ViewAbstract::SetPosition(const Dimension& x, const Dimension& y,
     SetPositionX(value, xresObj);
     SetPositionY(value, yresObj);
     CheckIfParentNeedMarkDirty(frameNode);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3571,14 +4033,82 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
                     parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 }
             }
+            CheckNodePositionEdgesLPX(frameNode, edges);
             ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, edges, frameNode);
         };
         pattern->AddResObj("position.edges", resObj, std::move(updateFunc));
     }
     CheckIfParentNeedMarkDirty(frameNode);
+    CheckPositionEdgesLPX(value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+}
+
+void ViewAbstract::CheckPositionEdgesLPX(const EdgesParam& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.top.value(), LpxAttribute::LPX_POSITION_EDGES_TOP);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottom.value(), LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.left.value(), LpxAttribute::LPX_POSITION_EDGES_LEFT);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.right.value(), LpxAttribute::LPX_POSITION_EDGES_RIGHT);
+    }
+    if (value.start.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.start.value(), LpxAttribute::LPX_POSITION_EDGES_START);
+    }
+    if (value.end.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.end.value(), LpxAttribute::LPX_POSITION_EDGES_END);
+    }
+}
+
+void ViewAbstract::CheckNodePositionEdgesLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const EdgesParam& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value(), LpxAttribute::LPX_POSITION_EDGES_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value(), LpxAttribute::LPX_POSITION_EDGES_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value(), LpxAttribute::LPX_POSITION_EDGES_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value(), LpxAttribute::LPX_POSITION_EDGES_RIGHT, frameNode);
+    }
+    if (value.start.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.start.value(), LpxAttribute::LPX_POSITION_EDGES_START, frameNode);
+    }
+    if (value.end.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.end.value(), LpxAttribute::LPX_POSITION_EDGES_END, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodePositionEdgesLPX(FrameNode* frameNode, const EdgesParam& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value(), LpxAttribute::LPX_POSITION_EDGES_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value(), LpxAttribute::LPX_POSITION_EDGES_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value(), LpxAttribute::LPX_POSITION_EDGES_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value(), LpxAttribute::LPX_POSITION_EDGES_RIGHT, frameNode);
+    }
+    if (value.start.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.start.value(), LpxAttribute::LPX_POSITION_EDGES_START, frameNode);
+    }
+    if (value.end.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.end.value(), LpxAttribute::LPX_POSITION_EDGES_END, frameNode);
+    }
 }
 
 void ViewAbstract::CheckIfParentNeedMarkDirty(FrameNode* frameNode)
@@ -3603,6 +4133,8 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_OFFSET_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_OFFSET_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, OffsetEdges);
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
 }
@@ -3616,6 +4148,8 @@ void ViewAbstract::SetOffset(const Dimension& x, const Dimension& y,
     OffsetT<Dimension> value = { x, y };
     SetOffsetX(value, xresObj);
     SetOffsetY(value, yresObj);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_OFFSET_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_OFFSET_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, OffsetEdges);
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
 }
@@ -3720,6 +4254,8 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_MARK_ANCHOR_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_MARK_ANCHOR_Y);
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
 }
 
@@ -3732,6 +4268,8 @@ void ViewAbstract::MarkAnchor(const Dimension& x, const Dimension& y,
     OffsetT<Dimension> value = { x, y };
     MarkAnchorX(value, xresObj);
     MarkAnchorY(value, yresObj);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_MARK_ANCHOR_X);
+    ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_MARK_ANCHOR_Y);
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
 }
 
@@ -4060,6 +4598,12 @@ void ViewAbstract::BindPopup(
         }
     }
     param->SetShowInSubWindow(showInSubWindow);
+    if (!param->IsShowInSubWindow() && param->GetLevelMode() == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = DialogManager::GetEmbeddedOverlay(targetId, AceType::Claim(context));
+        if (embeddedOverlay) {
+            popupInfo.embeddedOveraly = embeddedOverlay;
+        }
+    }
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);
@@ -4963,6 +5507,18 @@ void ViewAbstract::SetBlender(const OHOS::Rosen::Blender* blender)
     ACE_UPDATE_RENDER_CONTEXT(Blender, blender);
 }
 
+void ViewAbstract::ResetBlender()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetBlender();
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5106,6 +5662,22 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
+std::function<void()> GetSweepGradientFuncForLPX(const NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), gradient]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnLastGradientTypeUpdate(NG::GradientType::SWEEP);
+        context->OnSweepGradientUpdate(gradient);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5133,6 +5705,22 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     }
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+}
+
+std::function<void()> GetRadialGradientFuncForLPX(const NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), gradient]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnLastGradientTypeUpdate(NG::GradientType::RADIAL);
+        context->OnRadialGradientUpdate(gradient);
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -5388,6 +5976,24 @@ void ViewAbstract::SetChainedTransition(
     }
 }
 
+std::function<void()> ViewAbstract::GetClipShapeFuncForLPX(const RefPtr<BasicShape>& basicShape)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), basicShape]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto target = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(target);
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+            target->OnClipEdgeUpdate(false);
+        }
+        target->UpdateClipShape(basicShape);
+        target->OnClipShapeUpdate(basicShape);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5425,6 +6031,13 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
         }
         target->UpdateClipShape(basicShape);
     }
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetClipShapeFuncForLPX(basicShape);
+    if (basicShape) {
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_CLIP_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
@@ -5460,6 +6073,13 @@ void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& 
         }
         target->UpdateClipShape(basicShape);
     }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK,frameNode);
+    if (basicShape) {
+        auto lpxUpdateFunc = GetClipShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_CLIP_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetClipEdge(bool isClip)
@@ -5479,6 +6099,7 @@ void ViewAbstract::SetClipEdge(bool isClip)
             }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
+            ACE_SET_LPX_UPDATE_CALLBACK(false,LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -5497,9 +6118,29 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
             }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(false,LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK, frameNode);
         }
         target->UpdateClipEdge(isClip);
     }
+}
+
+std::function<void()> ViewAbstract::GetMaskShapeFuncForLPX(const RefPtr<BasicShape>& basicShape)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), basicShape]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto target = frameNode->GetRenderContext();
+        if (target) {
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShape);
+            target->OnClipMaskUpdate(basicShape);
+        }
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
@@ -5538,6 +6179,14 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
         }
         target->UpdateClipMask(basicShape);
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK);
+    if (basicShape) {
+        auto lpxUpdateFunc = GetMaskShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_MASK_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
@@ -5575,6 +6224,7 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
         if (target->HasClipMask()) {
             target->ResetClipMask();
             target->OnClipMaskUpdate(nullptr);
+            ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK);
         }
         target->UpdateProgressMask(progress);
     }
@@ -5911,6 +6561,44 @@ void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Fi
     ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
 }
 
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveEC(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return nullptr;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return nullptr;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, nullptr);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, nullptr);
+    ConvertToImmersiveOptionsEC(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
+    return newMaterial;
+}
+
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return material;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return material;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, material);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, material);
+    ConvertToImmersiveOptionsECSub(options);
+    newMaterial->SetImmersiveOptions(*options);
+    return newMaterial;
+}
+
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5946,6 +6634,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("viewAbstract.uiMaterial");
+    UnRegisterMaterialInteractionEvent(frameNode);
     if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
         auto preConfig = renderContext->GetImmersiveMaterialConfig();
         if (!preConfig.has_value()) {
@@ -5961,7 +6650,16 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
             if (preConfig->colorInvert) {
                 renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
             }
-            renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            int32_t preStyle = static_cast<int32_t>(preConfig->key.style);
+            if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+                preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+                renderContext->SetMaterialShaderECSub(nullptr);
+            } else if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+                       preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+                renderContext->SetBackgroundNGFilterEC(nullptr);
+            } else {
+                renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            }
             auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
             if (transparencyCallbackId.has_value()) {
                 TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
@@ -6027,18 +6725,17 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = frameNode->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
         if (materialType == MaterialType::IMMERSIVE) {
+            pattern->ProcessDefaultImmersiveOptions(immersiveOptionsPtr);
             SetImmersiveOptions(frameNode, immersiveOptionsPtr);
             return;
         }
-        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        auto materialTheme = frameNode->GetTheme<UiMaterialTheme>(true);
         if (!materialTheme) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
-        auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+        auto params = materialTheme->GetUiMaterialParam(materialType, frameNode);
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
             return;
@@ -6068,6 +6765,102 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     // This function cannot save uiMaterial to renderContext.
 }
 
+void ViewAbstract::SetSystemMaterialWithScale(FrameNode* frameNode, const UiMaterial* material, float componentScale)
+{
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
+
+    // Process material with scale-adjusted dipScale
+    auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    auto immersiveOptionsPtr = nativeMaterial ? nativeMaterial->CopyImmersiveOptions() : nullptr;
+
+    auto updateFunc = [materialType, immersiveOptionsPtr = std::move(immersiveOptionsPtr),
+                    componentScale, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+
+        // Guard clause: only process IMMERSIVE material type
+        if (materialType != MaterialType::IMMERSIVE || !immersiveOptionsPtr) {
+            return;
+        }
+
+        // Use scale-adjusted dipScale for IMMERSIVE material
+        auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(immersiveOptionsPtr, frameNode, componentScale);
+        CHECK_NULL_VOID(config);
+        SetImmersiveConfigs(frameNode, config);
+
+        // Directly update shadow with scale-adjusted dipScale to ensure visual consistency
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (config->applyShadow && !NearZero(componentScale)) {
+            Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale / componentScale);
+            renderContext->UpdateBackShadow(shadow);
+        }
+    };
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (material != nullptr) {
+            updateFunc(nullptr);
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterialWithScale", resObj, std::move(updateFunc));
+        } else {
+            ResetSystemMaterialEffect(frameNode);
+        }
+        return;
+    }
+
+    if (nativeMaterial != nullptr) {
+        updateFunc(nullptr);
+    } else {
+        ResetSystemMaterialEffect(frameNode);
+    }
+}
+
+void ViewAbstract::RegisterMaterialInteractionEvent(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+}
+
+void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::UninitLightEffect(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveMaterialInteractionEvent();
+}
+
+void ViewAbstract::HistogramImmersiveOptions(const ImmersiveMaterialConfig& config)
+{
+    int32_t state = 0;
+    [[maybe_unused]] static constexpr int32_t HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL = 8;
+    if (config.HasLightEffect()) {
+        state |= 0b01;
+    }
+    if (config.interactive) {
+        state |= 0b10;
+    }
+    if (config.colorInvert) {
+        state |= 0b100;
+    }
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(
+        "uiMaterial.ImmersiveMaterial.enum", state, HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL);
+}
+
 void ViewAbstract::SetImmersiveOptions(
     const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
 {
@@ -6076,10 +6869,16 @@ void ViewAbstract::SetImmersiveOptions(
     if (!optionsPtr) {
         return;
     }
+    if (optionsPtr->interactive || optionsPtr->lightEffectOptions) {
+        RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+    } else {
+        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
+    }
     auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
     if (!materialConfig) {
         return;
     }
+    HistogramImmersiveOptions(*materialConfig);
     if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {
         RegisterTransparencyListener(frameNode);
         SetImmersiveConfigs(frameNode, materialConfig);
@@ -6129,6 +6928,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
     CHECK_NULL_VOID(pattern);
     auto preConfig = renderContext->GetImmersiveMaterialConfig();
     if (config->key.level == UiMaterialLevel::SMOOTH) {
+        if (frameNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+            return;
+        }
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
@@ -6158,13 +6960,29 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         return;
     }
     // gentle or exquisite
-    auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
-    if (preConfig && preConfig->colorInvert && !config->colorInvert) {
-        // reset color picker
-        renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+    int32_t style = static_cast<int32_t>(config->key.style);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECFilter(*config);
+        renderContext->SetBackgroundNGFilterEC(materialFilter);
+        if (config->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::CONTRAST, 500);
+        } else if (preConfig && preConfig->colorInvert) {
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 500);
+        }
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
+        renderContext->SetMaterialShaderECSub(materialFilter);
+    } else {
+        auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
+        if (preConfig && preConfig->colorInvert && !config->colorInvert) {
+            // reset color picker
+            renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+        }
+        renderContext->SetMaterialWithQualityLevel(
+            materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     }
-    renderContext->SetMaterialWithQualityLevel(
-        materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
     if (config->applyShadow) {
         Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
         renderContext->UpdateBackShadow(shadow);
@@ -6356,6 +7174,14 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
         }
         target->UpdateClipMask(basicShape);
     }
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK,frameNode);
+    if(basicShape) {
+        auto lpxUpdateFunc = GetMaskShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_MASK_SHAPE, lpxUpdateFunc,frameNode);
+        }
+    }
 }
 
 void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress)
@@ -6387,6 +7213,7 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
         if (target->HasClipMask()) {
             target->ResetClipMask();
             target->OnClipMaskUpdate(nullptr);
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK,frameNode);
         }
         target->UpdateProgressMask(progress);
     }
@@ -6679,10 +7506,12 @@ void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const BorderRadiusPrope
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderRadiuses(borderRadius, layoutDirection);
+            CheckNodeBorderRadiusLPX(frameNode, borderRadius);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
         };
         pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderRadiusLPX(frameNode, value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, value, frameNode);
 }
 
@@ -6691,6 +7520,7 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
 }
 
@@ -6728,11 +7558,67 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceOb
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(borderRadius);
         borderRadiusProperty.multiValued = false;
+        CheckNodeBorderRadiusLPX(frameNode, borderRadiusProperty);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
     pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::CheckBorderRadiusLPX(const BorderRadiusProperty& value)
+{
+    if (value.radiusTopLeft.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT);
+    }
+    if (value.radiusTopRight.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT);
+    }
+    if (value.radiusBottomRight.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT);
+    }
+    if (value.radiusBottomLeft.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderRadiusLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode,
+                                            const BorderRadiusProperty &value)
+{
+    if (value.radiusTopLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, frameNode);
+    }
+    if (value.radiusTopRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT,
+                                     frameNode);
+    }
+    if (value.radiusBottomRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT,
+                                     frameNode);
+    }
+    if (value.radiusBottomLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT,
+                                     frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderRadiusLPX(FrameNode *frameNode, const BorderRadiusProperty &value)
+{
+    if (value.radiusTopLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, frameNode);
+    }
+    if (value.radiusTopRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT,
+                                     frameNode);
+    }
+    if (value.radiusBottomRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomRight.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT,
+                                     frameNode);
+    }
+    if (value.radiusBottomLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.radiusBottomLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT,
+                                     frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
@@ -6751,6 +7637,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthPropert
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
+            CheckNodeBorderWidthLPX(frameNode, borderWidth);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
@@ -6758,6 +7645,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthPropert
         };
         pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderWidthLPX(frameNode, value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, value, frameNode);
@@ -6772,6 +7660,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
     } else {
         borderWidth.SetBorderWidth(value);
     }
+    CheckNodeBorderWidthLPX(frameNode, borderWidth);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
@@ -6863,6 +7752,7 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         height = layoutConstraint->selfIdealSize->Height();
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_WIDTH, frameNode);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
@@ -6933,6 +7823,7 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& 
         if (layoutConstraint && layoutConstraint->selfIdealSize) {
             height = layoutConstraint->selfIdealSize->Height();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_WIDTH, frameNode);
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -6951,6 +7842,7 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         width = layoutConstraint->selfIdealSize->Width();
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_HEIGHT, frameNode);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
@@ -6993,6 +7885,7 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>&
         if (layoutConstraint && layoutConstraint->selfIdealSize) {
             width = layoutConstraint->selfIdealSize->Width();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_HEIGHT, frameNode);
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -7112,6 +8005,8 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, 
     SetPositionX(frameNode, value, xresObj);
     SetPositionY(frameNode, value, yresObj);
     CheckIfParentNeedMarkDirty(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
@@ -7120,6 +8015,7 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
 {
     CHECK_NULL_VOID(frameNode);
     CheckIfParentNeedMarkDirty(frameNode);
+    CheckNodePositionEdgesLPX(frameNode, value);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
     if (!SystemProperties::ConfigChangePerform()) {
@@ -7147,6 +8043,7 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
                 parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         }
+        CheckNodePositionEdgesLPX(frameNode, edges);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, edges, frameNode);
     };
@@ -7496,6 +8393,13 @@ void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectO
         };
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
+
+    auto lpxUpdateFunc = GetPixelStretchEffectFuncForLPX(option);
+    if (CheckDimensionUseLPX(option.left) || CheckDimensionUseLPX(option.top) || CheckDimensionUseLPX(option.right) ||
+        CheckDimensionUseLPX(option.bottom)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, lpxUpdateFunc, frameNode);
+    }
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
 }
 
@@ -7557,6 +8461,29 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
 void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
+}
+
+void ViewAbstract::SetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    Shadow shadow = MaterialUtils::GetImmersiveShadow(pipeline->GetDipScale());
+    renderContext->UpdateBackShadow(shadow);
+}
+
+void ViewAbstract::ResetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    ResetImmersiveShadowToDefault(pattern, renderContext);
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
@@ -7922,6 +8849,8 @@ void ViewAbstract::SetOffsetY(FrameNode* frameNode, OffsetT<Dimension>& value, c
 void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_OFFSET_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_OFFSET_Y, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
@@ -7932,6 +8861,8 @@ void ViewAbstract::SetOffset(FrameNode* frameNode, OffsetT<Dimension>& value,
     CHECK_NULL_VOID(frameNode);
     SetOffsetX(frameNode, value, xresObj);
     SetOffsetY(frameNode, value, yresObj);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_OFFSET_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_OFFSET_Y, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
@@ -8136,6 +9067,8 @@ void ViewAbstract::CheckLocalizedBorderRadiuses(BorderRadiusProperty& value, con
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_MARK_ANCHOR_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_MARK_ANCHOR_Y, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, value, frameNode);
 }
 
@@ -8145,6 +9078,8 @@ void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& va
     CHECK_NULL_VOID(frameNode);
     MarkAnchorX(frameNode, value, xresObj);
     MarkAnchorY(frameNode, value, yresObj);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_MARK_ANCHOR_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_MARK_ANCHOR_Y, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, value, frameNode);
 }
 
@@ -8168,6 +9103,7 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     CHECK_NULL_VOID(frameNode);
     PaddingProperty padding;
     padding.SetEdges(value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_PADDING, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
@@ -8187,12 +9123,62 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(padding, layoutDirection);
+            CheckNodePaddingLPX(frameNode, padding);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("padding", resObj, std::move(updateFunc));
     }
+    CheckNodePaddingLPX(frameNode, value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
+}
+
+void ViewAbstract::CheckPaddingLPX(const PaddingProperty& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_PADDING_TOP);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_PADDING_BOTTOM);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_PADDING_LEFT);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_PADDING_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodePaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_PADDING_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_PADDING_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_PADDING_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_PADDING_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodePaddingLPX(FrameNode* frameNode, const PaddingProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_PADDING_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_PADDING_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_PADDING_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_PADDING_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -8200,6 +9186,7 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     CHECK_NULL_VOID(frameNode);
     MarginProperty margin;
     margin.SetEdges(value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetDimension(), LpxAttribute::LPX_MARGIN, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
@@ -8219,12 +9206,62 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedMarginOrPadding(margin, layoutDirection);
+            CheckNodeMarginLPX(frameNode, margin);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("margin", resObj, std::move(updateFunc));
     }
+    CheckNodeMarginLPX(frameNode, value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+}
+
+void ViewAbstract::CheckMarginLPX(const MarginProperty& value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_MARGIN_TOP);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_MARGIN_BOTTOM);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_MARGIN_LEFT);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_MARGIN_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeMarginLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const MarginProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_MARGIN_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_MARGIN_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_MARGIN_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_MARGIN_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeMarginLPX(FrameNode* frameNode, const MarginProperty &value)
+{
+    if (value.top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.top.value().GetDimension(), LpxAttribute::LPX_MARGIN_TOP, frameNode);
+    }
+    if (value.bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottom.value().GetDimension(), LpxAttribute::LPX_MARGIN_BOTTOM, frameNode);
+    }
+    if (value.left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.left.value().GetDimension(), LpxAttribute::LPX_MARGIN_LEFT, frameNode);
+    }
+    if (value.right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.right.value().GetDimension(), LpxAttribute::LPX_MARGIN_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
@@ -8318,6 +9355,7 @@ void ViewAbstract::SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(minWidth.GetDimension(), LpxAttribute::LPX_MIN_WIDTH, frameNode);
     layoutProperty->UpdateCalcMinSize(CalcSize(minWidth, std::nullopt));
 }
 
@@ -8346,6 +9384,7 @@ void ViewAbstract::SetMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MIN_WIDTH, frameNode);
         layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -8357,6 +9396,7 @@ void ViewAbstract::SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(maxWidth.GetDimension(), LpxAttribute::LPX_MAX_WIDTH, frameNode);
     layoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, std::nullopt));
 }
 
@@ -8385,6 +9425,7 @@ void ViewAbstract::SetMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width.GetDimension(), LpxAttribute::LPX_MAX_WIDTH, frameNode);
         layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -8396,6 +9437,7 @@ void ViewAbstract::SetMinHeight(FrameNode* frameNode, const CalcLength& minHeigh
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(minHeight.GetDimension(), LpxAttribute::LPX_MIN_HEIGHT, frameNode);
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
 }
 
@@ -8424,6 +9466,7 @@ void ViewAbstract::SetMinHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MIN_HEIGHT, frameNode);
         layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -8435,6 +9478,7 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeigh
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(maxHeight.GetDimension(), LpxAttribute::LPX_MAX_HEIGHT, frameNode);
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, maxHeight));
 }
 
@@ -8463,6 +9507,7 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(height.GetDimension(), LpxAttribute::LPX_MAX_HEIGHT, frameNode);
         layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -8660,6 +9705,14 @@ void ViewAbstract::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* 
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Blender, blender, frameNode);
+}
+
+void ViewAbstract::ResetBlender(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetBlender();
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
@@ -10896,6 +11949,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode)
 
 void ViewAbstract::SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_IMPERATIVE_ATTRIBUTE "SetOnWillScroll", onWillScroll ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -10951,6 +12005,8 @@ void ViewAbstract::ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode,
     OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_IMPERATIVE_ATTRIBUTE "SetOnScrollVisibleContentChange",
+        onScrollVisibleContentChange ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -11310,5 +12366,21 @@ void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
         renderContext->ResetEdgeLightParam();
         renderContext->ResetEdgeLightFilter();
     }  
+}
+
+void ViewAbstract::SetDoubleSided(FrameNode* frameNode, bool doubleSided)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateDoubleSided(doubleSided);
+}
+
+void ViewAbstract::SetDoubleSided(bool doubleSided)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetDoubleSided(frameNode, doubleSided);
 }
 } // namespace OHOS::Ace::NG

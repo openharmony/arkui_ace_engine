@@ -245,4 +245,112 @@ HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest010, TestSize.Level1
     ASSERT_NE(frameNode, nullptr);
     Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
+
+/**
+ * @tc.name: DumpCustomActionTest011
+ * @tc.desc: Test DumpCustomActionTest with empty custom actions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest011, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--list"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+}
+
+/**
+ * @tc.name: DumpCustomActionTest012
+ * @tc.desc: Test DumpCustomActionTest with --list and valid custom actions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest012, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--list"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"action1", []() {}});
+    actions.push_back({"action2", nullptr});
+    prop->SetAccessibilityCustomActions(actions);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+}
+
+/**
+ * @tc.name: DumpCustomActionTest013
+ * @tc.desc: Test DumpCustomActionTest with --execute but empty action name
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest013, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"action1", []() {}});
+    prop->SetAccessibilityCustomActions(actions);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+}
+
+/**
+ * @tc.name: DumpCustomActionTest014
+ * @tc.desc: Test DumpCustomActionTest executing action with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest014, TestSize.Level1)
+{
+    bool callbackExecuted = false;
+    std::vector<std::string> params = {"--custom-action-test", "100", "--execute", "testAction"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"testAction", [&callbackExecuted]() { callbackExecuted = true; }});
+    prop->SetAccessibilityCustomActions(actions);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+    EXPECT_TRUE(callbackExecuted);
+}
+
+/**
+ * @tc.name: DumpCustomActionTest015
+ * @tc.desc: Test DumpCustomActionTest executing action with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest015, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--execute", "nullAction"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"nullAction", nullptr});
+    prop->SetAccessibilityCustomActions(actions);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+}
+
+/**
+ * @tc.name: DumpCustomActionTest016
+ * @tc.desc: Test DumpCustomActionTest executing action with name not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperOsalTest, DumpCustomActionTest016, TestSize.Level1)
+{
+    std::vector<std::string> params = {"--custom-action-test", "100", "--execute", "nonExistent"};
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(prop, nullptr);
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"existingAction", []() {}});
+    prop->SetAccessibilityCustomActions(actions);
+    Framework::AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
+}
 } // namespace OHOS::Ace::NG

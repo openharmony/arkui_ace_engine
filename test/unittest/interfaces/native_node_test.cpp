@@ -25,9 +25,15 @@
 #include "event_converter.h"
 #include "interfaces/inner_api/ace/node_module_inner.h"
 #include "interfaces/native/native_styled_string.h"
+#include "interfaces/native/native_key_event.h"
+#include "interfaces/native/native_interface_focus.h"
+#include "interfaces/native/drag_and_drop.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/styled_string.h"
+#include "interfaces/native/node/node_component_snapshot.h"
+#include "interfaces/native/node/gesture_impl.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -38,6 +44,7 @@
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,6 +82,12 @@ void RunTaskInScopeTestCallback(void* userData)
 void CommonVisibleAreaApproximateChangeEventCallback(ArkUI_NodeEvent* event)
 {
     (void)event;
+}
+
+void SupportedUIStatesChangeCallback(int32_t currentStates, void* userData)
+{
+    (void)currentStates;
+    (void)userData;
 }
 } // namespace
 
@@ -118,7 +131,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize002, TestSize.Level1)
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100003, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     ArkUI_IntSize size = {0, 0};
 
     /**
@@ -310,7 +328,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInWindow002, TestSi
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100004, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     ArkUI_IntOffset globalOffset;
 
     /**
@@ -366,7 +389,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInScreen002, TestSi
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100005, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     ArkUI_IntOffset screenOffset;
 
     /**
@@ -422,7 +450,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow002,
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100006, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     ArkUI_IntOffset translateOffset;
 
     /**
@@ -478,7 +511,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen002,
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100007, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     ArkUI_IntOffset translateOffset;
 
     /**
@@ -535,7 +573,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemColorModeChangeEvent002, TestSiz
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100008, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     void* userData = nullptr;
     void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData) = nullptr;
 
@@ -593,7 +636,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemFontStyleChangeEvent002, TestSiz
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100009, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     void* userData = nullptr;
     void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData) = nullptr;
 
@@ -853,7 +901,12 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty002, TestSize.Level
      * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100010, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
     const char* name = nullptr;
     ArkUI_CustomProperty* handle = nullptr;
 
@@ -882,7 +935,11 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty003, TestSize.Level
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    ArkUI_NodeHandle node = new ArkUI_Node();
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    ArkUI_NodeHandle node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
     const char* name = "test_name";
     ArkUI_CustomProperty* handle = nullptr;
 
@@ -897,6 +954,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty003, TestSize.Level
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(node);
 }
 
 /**
@@ -1126,6 +1184,20 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetAttachedNodeHandleById002, TestSi
 
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NativeModule_SetNodeMountPolicy001
+ * @tc.desc: Test OH_ArkUI_NativeModule_SetChildMountPolicy with nullptr node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_SetNodeMountPolicy001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    auto result = OH_ArkUI_NativeModule_SetChildMountPolicy(nullptr, OH_ARKUI_NODE_MOUNT_POLICY_MIXED);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -1420,6 +1492,158 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetChildWithExpandMode001, TestSize.
 }
 
 /**
+ * @tc.name: NativeNodeTestTextPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestTextInputPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextInputPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextInputNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextInputNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextInputNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextInputNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestTextAreaPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_AREA_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextAreaPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextAreaNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextAreaNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextAreaNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextAreaNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestPunctuationOverflowInvalidParam
+ * @tc.desc: Test PunctuationOverflow attribute with invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestPunctuationOverflowInvalidParam, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue invalidValue[] = {{.i32 = true}, {.i32 = false}};
+    ArkUI_AttributeItem invalidItem = {invalidValue, sizeof(invalidValue) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &invalidItem);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value[] = {{.i32 = 2}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: OH_ArkUI_NodeUtils_GetPositionToParent001
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionToParent.
  * @tc.type: FUNC
@@ -1470,7 +1694,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_AddSupportedUIStates002, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     int32_t settingUIStatus = 1;
 
-    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(node, settingUIStatus, nullptr, false, nullptr),
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(node, settingUIStatus, SupportedUIStatesChangeCallback, false, nullptr),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(node, settingUIStatus), ARKUI_ERROR_CODE_NO_ERROR);
 
@@ -7303,6 +7527,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest085, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(node, nullptr, nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+
 }
 
 /**
@@ -7319,6 +7546,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest086, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(node, nullptr, nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+
 }
 
 /**
@@ -14632,5 +14862,767 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordi
     EXPECT_EQ(OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(manager, 200, 100, &outPos),
         ARKUI_ERROR_CODE_PARAM_INVALID);
     delete layoutManager;
+}
+namespace {
+constexpr int32_t TEST_INVALID_EVENT_TYPE = -1;
+constexpr int32_t TEST_WRONG_CATEGORY = 999;
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_GetDisplayId_NullDisplayId, TestSize.Level1)
+{
+    auto result = OH_ArkUI_DragEvent_GetDisplayId(nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_GetDragSource_NullBundleName, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    auto result = OH_ArkUI_DragEvent_GetDragSource(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), nullptr, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_GetDragSource_NullDragEvent, TestSize.Level1)
+{
+    char bundle[100] = { 0 };
+    auto result = OH_ArkUI_DragEvent_GetDragSource(nullptr, bundle, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_IsRemote_NullIsRemote, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    auto result = OH_ArkUI_DragEvent_IsRemote(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_IsRemote_NullDragEvent, TestSize.Level1)
+{
+    bool isRemote = false;
+    auto result = OH_ArkUI_DragEvent_IsRemote(nullptr, &isRemote);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, CreateDragActionWithNode_NullNode, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_CreateDragActionWithNode(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, CreateDragActionWithContext_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_CreateDragActionWithContext(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, DragAction_SetDataLoadParams_NullDataLoadParams, TestSize.Level1)
+{
+    ArkUIDragAction dragAction = {};
+    auto result = OH_ArkUI_DragAction_SetDataLoadParams(
+        reinterpret_cast<ArkUI_DragAction*>(&dragAction), nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragAction_SetDataLoadParams_NullDragActions, TestSize.Level1)
+{
+    auto result = OH_ArkUI_DragAction_SetDataLoadParams(nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragAction_UnregisterStatusListener_NullDragAction, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_DragAction_UnregisterStatusListener(nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetPreDragStatus_WrongCategory, TestSize.Level1)
+{
+    ArkUI_NodeEvent nodeEvent = {};
+    ArkUINodeEvent originEvent = {};
+    nodeEvent.category = TEST_WRONG_CATEGORY;
+    nodeEvent.origin = &originEvent;
+    auto result = OH_ArkUI_NodeEvent_GetPreDragStatus(&nodeEvent);
+    EXPECT_EQ(result, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_SetDataLoadParams_NullDataLoadParams, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    auto result = OH_ArkUI_DragEvent_SetDataLoadParams(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_SetDataLoadParams_NullDragEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_DragEvent_SetDataLoadParams(nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, EnableDropDisallowedBadge_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_EnableDropDisallowedBadge(nullptr, true);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_Dispatch_NullEvent, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    ArkUI_NodeHandle node = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    ASSERT_NE(node, nullptr);
+    OH_ArkUI_KeyEvent_Dispatch(node, nullptr);
+    nodeAPI->disposeNode(node);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsNumLockOn_NullState, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    auto result = OH_ArkUI_KeyEvent_IsNumLockOn(&event, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsCapsLockOn_NullState, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    auto result = OH_ArkUI_KeyEvent_IsCapsLockOn(&event, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsScrollLockOn_NullState, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    auto result = OH_ArkUI_KeyEvent_IsScrollLockOn(&event, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, TouchTestInfo_GetTouchTestInfoList_NullArray, TestSize.Level1)
+{
+    ArkUITouchTestInfo info = {};
+    auto tinfo = reinterpret_cast<ArkUI_TouchTestInfo*>(&info);
+    int32_t size = 0;
+    auto result = OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(tinfo, nullptr, &size);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, TouchTestInfo_GetTouchTestInfoList_NullSize, TestSize.Level1)
+{
+    ArkUITouchTestInfo info = {};
+    auto tinfo = reinterpret_cast<ArkUI_TouchTestInfo*>(&info);
+    ArkUI_TouchTestInfoItemArray array = nullptr;
+    auto result = OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(tinfo, &array, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetEventType_InvalidKind, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.kind = TEST_INVALID_EVENT_TYPE;
+    auto result = OH_ArkUI_NodeEvent_GetEventType(&event);
+    EXPECT_EQ(result, ArkUI_NodeEventType::NODE_TOUCH_EVENT);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetInputEvent_WrongCategory, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = TEST_WRONG_CATEGORY;
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetNodeComponentEvent_WrongCategory, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = TEST_WRONG_CATEGORY;
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetNodeComponentEvent_NullOriginEvent, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetStringAsyncEvent_WrongCategory, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = TEST_WRONG_CATEGORY;
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetStringAsyncEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetStringAsyncEvent_NullOriginEvent, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT);
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetStringAsyncEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetDragEvent_WrongCategory, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = TEST_WRONG_CATEGORY;
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetDragEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetDragEvent_NullOriginEvent, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetDragEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, ParallelInnerGestureEvent_GetUserData_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_ParallelInnerGestureEvent_GetUserData(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, ParallelInnerGestureEvent_GetCurrentRecognizer_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, PanGesture_SetDistanceMap_NullToolTypeArray, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.type = PAN_GESTURE;
+    recognizer.gesture = nullptr;
+    double distances[] = { 1.0 };
+    auto result = OH_ArkUI_PanGesture_SetDistanceMap(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer), 1, nullptr, distances);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, PanGesture_SetDistanceMap_NullDistanceArray, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.type = PAN_GESTURE;
+    recognizer.gesture = nullptr;
+    int toolTypes[] = { 0 };
+    auto result = OH_ArkUI_PanGesture_SetDistanceMap(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer), 1, toolTypes, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, PanGesture_SetDistanceMap_NullGesture, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.type = PAN_GESTURE;
+    recognizer.gesture = nullptr;
+    int toolTypes[] = { 0 };
+    double distances[] = { 1.0 };
+    auto result = OH_ArkUI_PanGesture_SetDistanceMap(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer), 1, toolTypes, distances);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, PreventGestureRecognizerBegin_NullGestureRecognizer, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.gesture = nullptr;
+    auto result = OH_ArkUI_PreventGestureRecognizerBegin(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer));
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, SetTouchTestDoneCallback_NullNode, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_SetTouchTestDoneCallback(nullptr, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, PanGesture_GetDistanceByToolType_NullDistance, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.type = PAN_GESTURE;
+    recognizer.gesture = nullptr;
+    auto result = OH_ArkUI_PanGesture_GetDistanceByToolType(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer), 0, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, PanGesture_GetDistanceByToolType_NullGestureRecognizer, TestSize.Level1)
+{
+    ArkUIGestureRecognizer recognizer = {};
+    recognizer.type = PAN_GESTURE;
+    recognizer.gesture = nullptr;
+    double distance = 0.0;
+    auto result = OH_ArkUI_PanGesture_GetDistanceByToolType(
+        reinterpret_cast<ArkUI_GestureRecognizer*>(&recognizer), 0, &distance);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, FocusRequest_NullNode, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_FocusRequest(nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+}
+
+HWTEST_F(NativeNodeTest, FocusClear_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusClear(nullptr);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusActivate(nullptr, true, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveTrue_AutoInactiveTrue, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, true, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveTrue_AutoInactiveFalse, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, true, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveFalse_AutoInactiveTrue, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, false, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveFalse_AutoInactiveFalse, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, false, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusSetAutoTransfer(nullptr, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_True, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetAutoTransfer(&mockContext, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_False, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetAutoTransfer(&mockContext, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusSetKeyProcessingMode(nullptr, ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_FocusNavigation, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_FocusAncestorEvent, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, ARKUI_KEY_PROCESSING_MODE_FOCUS_ANCESTOR_EVENT);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_InvalidMode, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, static_cast<ArkUI_KeyProcessingMode>(99));
+}
+
+HWTEST_F(NativeNodeTest, VisibleAreaEventOptions_GetMeasureFromViewport_NullOption, TestSize.Level1)
+{
+    auto result = OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(nullptr);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, CreateSnapshotOptions_Normal, TestSize.Level1)
+{
+    auto result = OH_ArkUI_CreateSnapshotOptions();
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, DragPreviewOption_CreateAndDispose_Normal, TestSize.Level1)
+{
+    auto* option = OH_ArkUI_CreateDragPreviewOption();
+    ASSERT_NE(option, nullptr);
+    OH_ArkUI_DragPreviewOption_Dispose(option);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetNodeComponentEvent_Normal, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    ArkUINodeEvent originEvent = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+    event.origin = &originEvent;
+    auto result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(&event);
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetStringAsyncEvent_Normal, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    ArkUINodeEvent originEvent = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT);
+    event.origin = &originEvent;
+    auto result = OH_ArkUI_NodeEvent_GetStringAsyncEvent(&event);
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetDragEvent_Normal, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    ArkUINodeEvent originEvent = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+    event.origin = &originEvent;
+    auto result = OH_ArkUI_NodeEvent_GetDragEvent(&event);
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_GetDisplayId_Normal, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    dragEvent.displayId = 42;
+    int32_t displayId = -1;
+    auto result = OH_ArkUI_DragEvent_GetDisplayId(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), &displayId);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(displayId, 42);
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_GetDragSource_Normal, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    const char bundleNameSrc[] = "com.test.bundle";
+    for (size_t i = 0; i < sizeof(bundleNameSrc); ++i) {
+        dragEvent.bundleName[i] = bundleNameSrc[i];
+    }
+    char bundleName[100] = { 0 };
+    auto result = OH_ArkUI_DragEvent_GetDragSource(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), bundleName, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_STREQ(bundleName, "com.test.bundle");
+}
+
+HWTEST_F(NativeNodeTest, DragEvent_IsRemote_Normal, TestSize.Level1)
+{
+    ArkUIDragEvent dragEvent = {};
+    dragEvent.isRemoteDev = true;
+    bool isRemote = false;
+    auto result = OH_ArkUI_DragEvent_IsRemote(
+        reinterpret_cast<ArkUI_DragEvent*>(&dragEvent), &isRemote);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(isRemote, true);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsNumLockOn_Normal, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    keyEvent.isNumLockOn = true;
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    bool state = false;
+    auto result = OH_ArkUI_KeyEvent_IsNumLockOn(&event, &state);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(state, true);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsCapsLockOn_Normal, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    keyEvent.isCapsLockOn = true;
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    bool state = false;
+    auto result = OH_ArkUI_KeyEvent_IsCapsLockOn(&event, &state);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(state, true);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_IsScrollLockOn_Normal, TestSize.Level1)
+{
+    ArkUIKeyEvent keyEvent = {};
+    keyEvent.isScrollLockOn = true;
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, &keyEvent, false };
+    bool state = false;
+    auto result = OH_ArkUI_KeyEvent_IsScrollLockOn(&event, &state);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(state, true);
+}
+
+HWTEST_F(NativeNodeTest, ParallelInnerGestureEvent_GetUserData_Normal, TestSize.Level1)
+{
+    ArkUIParallelInnerGestureEvent event = {};
+    int32_t userData = 42;
+    event.userData = &userData;
+    auto result = OH_ArkUI_ParallelInnerGestureEvent_GetUserData(
+        reinterpret_cast<ArkUI_ParallelInnerGestureEvent*>(&event));
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(*static_cast<int32_t*>(result), 42);
+}
+
+HWTEST_F(NativeNodeTest, ParallelInnerGestureEvent_GetCurrentRecognizer_Normal, TestSize.Level1)
+{
+    ArkUIParallelInnerGestureEvent event = {};
+    ArkUIGestureRecognizer recognizer = {};
+    event.current = &recognizer;
+    auto result = OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(
+        reinterpret_cast<ArkUI_ParallelInnerGestureEvent*>(&event));
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, TouchTestInfo_GetTouchTestInfoList_NullInfo, TestSize.Level1)
+{
+    ArkUI_TouchTestInfoItemArray array = nullptr;
+    int32_t size = 0;
+    auto result = OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(nullptr, &array, &size);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetPreDragStatus_NullNodeEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NodeEvent_GetPreDragStatus(nullptr);
+    EXPECT_EQ(result, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
+}
+
+HWTEST_F(NativeNodeTest, KeyEvent_Dispatch_NullKeyEvent, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    ArkUI_NodeHandle node = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    ASSERT_NE(node, nullptr);
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID, nullptr, false };
+    OH_ArkUI_KeyEvent_Dispatch(node, &event);
+    nodeAPI->disposeNode(node);
+}
+
+HWTEST_F(NativeNodeTest, HoverEvent_IsHovered_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_HoverEvent_IsHovered(nullptr);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, HoverEvent_IsHovered_NullHoverEvent, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_HOVER_EVENT_ID, nullptr, false };
+    auto result = OH_ArkUI_HoverEvent_IsHovered(&event);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, HoverEvent_IsHovered_WrongType, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent, false };
+    auto result = OH_ArkUI_HoverEvent_IsHovered(&event);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, HoverEvent_IsHovered_Normal, TestSize.Level1)
+{
+    ArkUIHoverEvent hoverEvent = {};
+    hoverEvent.isHover = true;
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_HOVER_EVENT_ID, &hoverEvent, false };
+    auto result = OH_ArkUI_HoverEvent_IsHovered(&event);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(NativeNodeTest, GetCoastingAxisEvent_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, GetCoastingAxisEvent_NullInputEvent, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_AXIS, C_COASTING_AXIS_EVENT_ID, nullptr, false };
+    auto result = OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, GetCoastingAxisEvent_WrongType, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent, false };
+    auto result = OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(&event);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, CoastingAxisEvent_GetPhase_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_CoastingAxisEvent_GetPhase(nullptr);
+    EXPECT_EQ(result, ARKUI_COASTING_AXIS_EVENT_PHASE_NONE);
+}
+
+HWTEST_F(NativeNodeTest, CoastingAxisEvent_GetPhase_NullCoastingEvent, TestSize.Level1)
+{
+    ArkUICoastingAxisEvent event = {};
+    auto result = OH_ArkUI_CoastingAxisEvent_GetPhase(
+        reinterpret_cast<ArkUI_CoastingAxisEvent*>(&event));
+    EXPECT_EQ(result, ARKUI_COASTING_AXIS_EVENT_PHASE_NONE);
+}
+
+HWTEST_F(NativeNodeTest, GetGestureRecognizerEnabled_NullRecognizer, TestSize.Level1)
+{
+    auto result = OH_ArkUI_GetGestureRecognizerEnabled(nullptr);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, IsBuiltInGesture_NullRecognizer, TestSize.Level1)
+{
+    auto result = OH_ArkUI_IsBuiltInGesture(nullptr);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, IsGestureRecognizerValid_NullRecognizer, TestSize.Level1)
+{
+    auto result = OH_ArkUI_IsGestureRecognizerValid(nullptr);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NativeNodeTest, GestureEvent_GetNode_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_GestureEvent_GetNode(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, GestureInterrupter_GetUserData_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_GestureInterrupter_GetUserData(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, VisibleAreaEventOptions_Create_Normal, TestSize.Level1)
+{
+    auto* option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    ASSERT_NE(option, nullptr);
+    OH_ArkUI_VisibleAreaEventOptions_Dispose(option);
+}
+
+HWTEST_F(NativeNodeTest, VisibleAreaEventOptions_GetMeasureFromViewport_Normal, TestSize.Level1)
+{
+    auto* option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    ASSERT_NE(option, nullptr);
+    OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport(option, true);
+    auto result = OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(option);
+    EXPECT_EQ(result, true);
+    OH_ArkUI_VisibleAreaEventOptions_Dispose(option);
+}
+
+HWTEST_F(NativeNodeTest, CreateDragPreviewOption_Normal, TestSize.Level1)
+{
+    auto* option = OH_ArkUI_CreateDragPreviewOption();
+    ASSERT_NE(option, nullptr);
+    OH_ArkUI_DragPreviewOption_Dispose(option);
+}
+
+HWTEST_F(NativeNodeTest, TouchRecognizer_GetNodeHandle_NullRecognizer, TestSize.Level1)
+{
+    auto result = OH_ArkUI_TouchRecognizer_GetNodeHandle(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetEventType_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NodeEvent_GetEventType(nullptr);
+    EXPECT_EQ(result, ArkUI_NodeEventType::NODE_TOUCH_EVENT);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetNodeHandle_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NodeEvent_GetNodeHandle(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetInputEvent_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NodeEvent_GetInputEvent(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetInputEvent_Normal, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    ArkUINodeEvent originEvent = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+    event.origin = &originEvent;
+    auto result = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    EXPECT_NE(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetUserData_NullEvent, TestSize.Level1)
+{
+    auto result = OH_ArkUI_NodeEvent_GetUserData(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(NativeNodeTest, NodeEvent_GetPreDragStatus_NullOriginEvent, TestSize.Level1)
+{
+    ArkUI_NodeEvent event = {};
+    event.category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+    event.origin = nullptr;
+    auto result = OH_ArkUI_NodeEvent_GetPreDragStatus(&event);
+    EXPECT_EQ(result, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
+}
+
+HWTEST_F(NativeNodeTest, DragAndDropInfo_GetDragStatus_NullInfo, TestSize.Level1)
+{
+    auto result = OH_ArkUI_DragAndDropInfo_GetDragStatus(nullptr);
+    EXPECT_EQ(result, ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN);
+}
+
+HWTEST_F(NativeNodeTest, DragAndDropInfo_GetDragEvent_NullInfo, TestSize.Level1)
+{
+    auto result = OH_ArkUI_DragAndDropInfo_GetDragEvent(nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace OHOS::Ace

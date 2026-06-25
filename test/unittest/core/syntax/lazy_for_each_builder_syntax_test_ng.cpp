@@ -1554,13 +1554,13 @@ HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyTest, TestSize.Level1
      */
     auto lazyForEachBuilder = CreateLazyForEachBuilder();
     ASSERT_NE(lazyForEachBuilder, nullptr);
-    
+
     /**
      * @tc.steps: step2. Ensure removingNodeList_ is empty
      * @tc.expected: removingNodeList_ is empty
      */
     EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
-    
+
     /**
      * @tc.steps: step3. Call RemovingExpiringItem with far deadline
      * @tc.expected: No crash, method returns immediately
@@ -1568,6 +1568,71 @@ HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyTest, TestSize.Level1
     int64_t deadline = GetSysTimestamp() + 10000;  // 很远的时间
     lazyForEachBuilder->RemovingExpiringItem(deadline);
     EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: SetEnableSyncLoadTest001
+ * @tc.desc: Test LazyForEachBuilder::SetEnableSyncLoad
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetEnableSyncLoadTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    EXPECT_EQ(lazyForEachBuilder->enableSyncLoad_, true);
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    EXPECT_EQ(lazyForEachBuilder->enableSyncLoad_, false);
+}
+
+/**
+ * @tc.name: SetIsSyncLoadTest001
+ * @tc.desc: Test LazyForEachBuilder::SetIsSyncLoad with true value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetIsSyncLoadTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    EXPECT_EQ(lazyForEachBuilder->isSyncLoad_, true);
+
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    EXPECT_EQ(lazyForEachBuilder->isSyncLoad_, false);
+}
+
+/**
+ * @tc.name: ReduceCacheCountTest001
+ * @tc.desc: Test ReduceCacheCount with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReduceCacheCountTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->startShowCached_ = 0;
+    lazyForEachBuilder->endShowCached_ = 0;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 2);
+
+    lazyForEachBuilder->startShowCached_ = 0;
+    lazyForEachBuilder->endShowCached_ = 1;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
+
+    lazyForEachBuilder->startShowCached_ = 1;
+    lazyForEachBuilder->endShowCached_ = 0;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
+
+    lazyForEachBuilder->startShowCached_ = 1;
+    lazyForEachBuilder->endShowCached_ = 1;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
 }
 
 } // namespace OHOS::Ace::NG

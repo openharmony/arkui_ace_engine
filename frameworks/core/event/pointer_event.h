@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,18 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_UPDATE = 21,
     POINTER_ACTION_ROTATE_END = 22,
     PULL_CANCEL = 37,
+};
+
+struct EventPositionInfo {
+    static constexpr int32_t INVALID_INT32 = std::numeric_limits<int32_t>::min();
+    static constexpr double INVALID_DOUBLE = std::numeric_limits<double>::lowest();
+
+    int32_t displayX = INVALID_INT32;
+    int32_t displayY = INVALID_INT32;
+    double displayXPos = INVALID_DOUBLE;
+    double displayYPos = INVALID_DOUBLE;
+    double globalX = INVALID_DOUBLE;
+    double globalY = INVALID_DOUBLE;
 };
 
 struct DragPointerEvent final : public PointerEvent {
@@ -158,5 +170,8 @@ struct DragPointerEvent final : public PointerEvent {
         history.clear();
     }
 };
+int64_t GetPointerDownTimeDiffMs(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId0, int32_t fingerId1);
+
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_POINTER_EVENT_H

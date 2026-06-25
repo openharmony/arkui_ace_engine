@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <mutex>
@@ -29,7 +30,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -101,7 +101,6 @@ class ExtensionHandler;
 class PaintWrapper;
 class GestureEventHub;
 class InputEventHub;
-class TargetComponent;
 struct DragPreviewOption;
 struct OptionsAfterApplied;
 class SamplerManager;
@@ -113,6 +112,7 @@ class DrawModifier;
 class NodeAnimatablePropertyBase;
 class CustomAnimatableArithmetic;
 class ContentModifier;
+enum class MountPolicy : int32_t;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -139,6 +139,74 @@ enum {
 
 enum class LpxAttribute {
     LPX_FONT_SIZE = 0,
+    LPX_POSITION_X,
+    LPX_POSITION_Y,
+    LPX_POSITION_EDGES_TOP,
+    LPX_POSITION_EDGES_BOTTOM,
+    LPX_POSITION_EDGES_LEFT,
+    LPX_POSITION_EDGES_RIGHT,
+    LPX_POSITION_EDGES_START,
+    LPX_POSITION_EDGES_END,
+    LPX_OFFSET_X,
+    LPX_OFFSET_Y,
+    LPX_MARK_ANCHOR_X,
+    LPX_MARK_ANCHOR_Y,
+    LPX_WIDTH,
+    LPX_HEIGHT,
+    LPX_PADDING,
+    LPX_SAFE_AREA_PADDING,
+    LPX_SAFE_AREA_PADDING_TOP,
+    LPX_SAFE_AREA_PADDING_BOTTOM,
+    LPX_SAFE_AREA_PADDING_LEFT,
+    LPX_SAFE_AREA_PADDING_RIGHT,
+    LPX_MARGIN,
+    LPX_MARGIN_TOP,
+    LPX_MARGIN_BOTTOM,
+    LPX_MARGIN_LEFT,
+    LPX_MARGIN_RIGHT,
+    LPX_BORDER_WIDTH,
+    LPX_BORDER_WIDTH_TOP,
+    LPX_BORDER_WIDTH_BOTTOM,
+    LPX_BORDER_WIDTH_LEFT,
+    LPX_BORDER_WIDTH_RIGHT,
+    LPX_BORDER_DASH_GAP,
+    LPX_BORDER_DASH_GAP_TOP,
+    LPX_BORDER_DASH_GAP_BOTTOM,
+    LPX_BORDER_DASH_GAP_LEFT,
+    LPX_BORDER_DASH_GAP_RIGHT,
+    LPX_BORDER_DASH_WIDTH,
+    LPX_BORDER_DASH_WIDTH_TOP,
+    LPX_BORDER_DASH_WIDTH_BOTTOM,
+    LPX_BORDER_DASH_WIDTH_LEFT,
+    LPX_BORDER_DASH_WIDTH_RIGHT,
+    LPX_MIN_WIDTH,
+    LPX_MAX_WIDTH,
+    LPX_MIN_HEIGHT,
+    LPX_MAX_HEIGHT,
+    LPX_BLANK_HEIGHT,
+    LPX_BLANK_MIN,
+    LPX_FLEX_MAIN_SPACE,
+    LPX_FLEX_CROSS_SPACE,
+    LPX_LINEAR_SPLIT_DIVIDER_START,
+    LPX_LINEAR_SPLIT_DIVIDER_END,
+    LPX_SHAPE_STROKE_WIDTH,
+    LPX_SHAPE_STROKE_DASH_OFFSET,
+    LPX_SHAPE_LEFT,
+    LPX_SHAPE_TOP,
+    LPX_RECT_RADIUS_WIDTH,
+    LPX_RECT_RADIUS_HEIGHT,
+    LPX_GRID_ROW_GUTTER_X_XS,
+    LPX_GRID_ROW_GUTTER_X_SM,
+    LPX_GRID_ROW_GUTTER_X_MD,
+    LPX_GRID_ROW_GUTTER_X_LG,
+    LPX_GRID_ROW_GUTTER_X_XL,
+    LPX_GRID_ROW_GUTTER_X_XXL,
+    LPX_GRID_ROW_GUTTER_Y_XS,
+    LPX_GRID_ROW_GUTTER_Y_SM,
+    LPX_GRID_ROW_GUTTER_Y_MD,
+    LPX_GRID_ROW_GUTTER_Y_LG,
+    LPX_GRID_ROW_GUTTER_Y_XL,
+    LPX_GRID_ROW_GUTTER_Y_XXL,
     LPX_ICON_SIZE,
     LPX_ICON_BORDER_RADIUS,
     LPX_TOP_LEFT_BORDER_RADIUS,
@@ -156,6 +224,12 @@ enum class LpxAttribute {
     LPX_TEXT_ICON_SPACE,
     LPX_ADAPT_MAX_FONT_SIZE,
     LPX_ADAPT_MIN_FONT_SIZE,
+    LPX_OUTER_BORDER_RADIUS,
+    LPX_OUTER_BORDER_WIDTH,
+    LPX_PIXEL_STRETCH_EFFECT,
+    LPX_CLIP_SHAPE,
+    LPX_MASK_SHAPE,
+    LPX_GRADIENT,
     LPX_RESPONSE_REGION_WIDTH,
     LPX_RESPONSE_REGION_HEIGHT,
     LPX_RESPONSE_REGION_X,
@@ -229,6 +303,33 @@ enum class LpxAttribute {
     LPX_LABEL_FONT_SIZE,
     LPX_MARK_SIZE,
     LPX_MARK_STROKE_WIDTH,
+    LPX_BADGE_BORDER_WIDTH,
+    LPX_BADGE_CIRCLE_SIZE,
+    LPX_BADGE_OUTER_BORDER_WIDTH,
+    LPX_BADGE_POSITION_X,
+    LPX_BADGE_POSITION_Y,
+    LPX_BASE_LINE_OFFSET,
+    LPX_CANCEL_ICON_SIZE,
+    LPX_CARET_WIDTH,
+    LPX_GAUGE_INDICATOR_SPACE,
+    LPX_LETTER_SPACING,
+    LPX_LINE_SPACING,
+    LPX_LINE_HEIGHT,
+    LPX_MARQUEE_SPACING,
+    LPX_MAX_LINE_HEIGHT,
+    LPX_MIN_LINE_HEIGHT,
+    LPX_PATTERNLOCK_ACTIVE_CIRCLE_RADIUS,
+    LPX_PATTERNLOCK_CIRCLE_RADIUS,
+    LPX_PATTERNLOCK_SIDE_LENGTH,
+    LPX_PLACEHOLDER_FONT_SIZE,
+    LPX_PROGRESS_BORDER_RADIUS,
+    LPX_PROGRESS_BORDER_WIDTH,
+    LPX_PROGRESS_SCALE_WIDTH,
+    LPX_PROGRESS_STROKE_RADIUS,
+    LPX_SEARCH_HEIGHT,
+    LPX_STROKE_WIDTH,
+    LPX_TEXT_INDENT,
+    LPX_TEXT_SPAN,
     ALWAYS
 };
 
@@ -337,14 +438,7 @@ public:
 
     void OnFreezeStateChange() override;
 
-    void ProcessPropertyDiff()
-    {
-        if (isPropertyDiffMarked_) {
-            MarkModifyDone();
-            MarkDirtyNode();
-            isPropertyDiffMarked_ = false;
-        }
-    }
+    void ProcessPropertyDiff();
 
     void FlushUpdateAndMarkDirty() override;
 
@@ -393,23 +487,12 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
-    {
-        CreateEventHubInner();
-        CHECK_NULL_VOID(eventHub_);
-        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
-    }
+    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback);
 
     void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(
-        const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip = false)
-    {
-        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
-        CreateEventHubInner();
-        CHECK_NULL_VOID(eventHub_);
-        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
-    }
+        const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip = false);
 
     void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
     {
@@ -421,11 +504,7 @@ public:
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
-    void CleanVisibleAreaInnerCallback()
-    {
-        CHECK_NULL_VOID(eventHub_);
-        eventHub_->CleanVisibleAreaCallback(false);
-    }
+    void CleanVisibleAreaInnerCallback();
 
     void TriggerVisibleAreaChangeCallback(
         uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
@@ -526,6 +605,13 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
+    MountPolicy GetMountPolicy();
+
+    void SetMountPolicy(MountPolicy mountPolicy);
+
+    void OnMixedMountChildAdded(const RefPtr<UINode>& child) override;
+    void OnMixedMountChildRemoved(const RefPtr<UINode>& child) override;
+
     RefPtr<GestureEventHub> GetOrCreateGestureEventHub();
 
     RefPtr<InputEventHub> GetOrCreateInputEventHub();
@@ -546,8 +632,6 @@ public:
     FocusType GetFocusType() const;
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
-
-    void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
@@ -571,6 +655,9 @@ public:
     bool IsAtomicNode() const override;
 
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+    void ClearNeedSyncRenderTree();
+
+    void GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children);
 
     void RebuildRenderContextTree() override;
 
@@ -590,6 +677,8 @@ public:
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
+
+    bool IsDisappearOrNoVisibleArea(uint64_t timestamp);
 
     bool IsPrivacySensitive() const
     {
@@ -759,10 +848,7 @@ public:
     }
 
     void SetConfigurationModeUpdateCallback(
-        const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
-    {
-        configurationUpdateCallback_ = callback;
-    }
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback);
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
@@ -771,11 +857,7 @@ public:
 
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
-    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
-    {
-        std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
-        ndkFontUpdateCallback_ = callback;
-    }
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback);
 
     void FireColorNDKCallback();
     void FireFontNDKCallback(const ConfigurationChange& configurationChange);
@@ -816,19 +898,9 @@ public:
         exclusiveEventForChild_ = exclusiveEventForChild;
     }
 
-    void SetDraggable(bool draggable)
-    {
-        draggable_ = draggable;
-        userSet_ = true;
-        customerSet_ = false;
-    }
+    void SetDraggable(bool draggable);
 
-    void SetCustomerDraggable(bool draggable)
-    {
-        draggable_ = draggable;
-        userSet_ = true;
-        customerSet_ = true;
-    }
+    void SetCustomerDraggable(bool draggable);
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true);
 
@@ -836,12 +908,7 @@ public:
 
     const DragPreviewOption& GetDragPreviewOption();
 
-    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
-    {
-        isNeedRefreshBackgroundBuilder_ = true;
-        builderFunc_ = std::move(buildFunc);
-        backgroundNode_ = nullptr;
-    }
+    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc);
 
     void SetIsNeedRefreshBackgroundBuilder(bool isNeedRefreshBackgroundBuilder)
     {
@@ -912,11 +979,7 @@ public:
         return dragPreviewInfo_;
     }
 
-    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
-    {
-        overlayNode_ = overlayNode;
-        SetOverlayNodeIsFree(IsFree());
-    }
+    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode);
 
     void SetOverlayNodeIsFree(bool isFree);
 
@@ -1008,12 +1071,7 @@ public:
     bool PostponedTaskForIgnore(LayoutSafeAreaBundleType type);
     void PostponedTaskForIgnoreDefault();
 
-    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
-    {
-        if (child) {
-            delayLayoutChildren_.emplace_back(child);
-        }
-    }
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child);
 
     const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
     {
@@ -1044,11 +1102,7 @@ public:
         return geometryNode_;
     }
 
-    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
-    {
-        layoutProperty_ = layoutProperty;
-        layoutProperty_->SetHost(WeakClaim(this));
-    }
+    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty);
 
     const RefPtr<LayoutProperty>& GetLayoutProperty() const override
     {
@@ -1081,6 +1135,7 @@ public:
     void DoSetActiveChildRange(
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes);
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -1213,12 +1268,7 @@ public:
     RectF GetRectWithRender();
     bool CheckAncestorPageShow();
 
-    void SetRemoveCustomProperties(std::function<void()> func)
-    {
-        if (!removeCustomProperties_) {
-            removeCustomProperties_ = func;
-        }
-    }
+    void SetRemoveCustomProperties(std::function<void()> func);
     void SetCustomPropertyCallback(std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,
         std::function<std::string()>&& getAllCustomPropertiesFunc);
@@ -1241,11 +1291,7 @@ public:
         isGeometryTransitionIn_ = isGeometryTransitionIn;
     }
 
-    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
-    {
-        SetIsGeometryTransitionIn(isGeometryTransitionIn);
-        UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
-    }
+    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
@@ -1275,18 +1321,7 @@ public:
 
     void UpdateAccessibilityNodeRect();
 
-    RectF GetVirtualNodeTransformRectRelativeToWindow()
-    {
-        auto parentUinode = GetVirtualNodeParent().Upgrade();
-        CHECK_NULL_RETURN(parentUinode, RectF {});
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
-        CHECK_NULL_RETURN(parentFrame, RectF {});
-        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
-        auto currentRect = GetTransformRectRelativeToWindow();
-        currentRect.SetTop(currentRect.Top() + parentRect.Top());
-        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
-        return currentRect;
-    }
+    RectF GetVirtualNodeTransformRectRelativeToWindow();
 
     void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
     {
@@ -1389,10 +1424,12 @@ public:
      * @description: this callback triggered by ai assistant by ui_session proxy.
      * @param funcName function name of the target function.
      * @param params params for target function in json format.
-     * @return check ai function call success or not:
+     * @param remoteObj remote object.
+     * @return pair containing result code and result data:
      * 0 means success, 1 means aiCallerHelper_ is null, 2 means functionName not found
      */
-    uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
+    std::pair<uint32_t, std::string> CallAIFunction(const std::string& functionName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj);
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 
@@ -1423,11 +1460,6 @@ public:
 
     LayoutConstraintF GetLayoutConstraint() const;
 
-    WeakPtr<TargetComponent> GetTargetComponent() const
-    {
-        return targetComponent_;
-    }
-
     void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
     {
         exposeInnerGestureFlag_ = exposeInnerGestureFlag;
@@ -1448,12 +1480,7 @@ public:
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
     const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
-    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
-    {
-        if (visibleAreaChangeTriggerReason_ != triggerReason) {
-            visibleAreaChangeTriggerReason_ = triggerReason;
-        }
-    }
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason);
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
@@ -1530,10 +1557,7 @@ public:
         return paintNode_;
     }
 
-    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
-    {
-        accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
-    }
+    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode);
 
     const RefPtr<FrameNode>& GetFocusPaintNode() const
     {
@@ -1559,12 +1583,7 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
     void ReportSelectedText(bool isRegister);
 
-    void ResetLastFrameNodeRect()
-    {
-        if (lastFrameNodeRect_) {
-            lastFrameNodeRect_.reset();
-        }
-    }
+    void ResetLastFrameNodeRect();
 
     bool HasMultipleChild();
     bool IsAncestorScrollable() const
@@ -1606,6 +1625,9 @@ public:
 
     void RegisterLpxAttribute(LpxAttribute attribute);
     void UnRegisterLpxAttribute(LpxAttribute attribute);
+    void RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback);
+    void UnRegisterLpxUpdateCallback(LpxAttribute attribute);
+    void FireLpxUpdateCallbacks();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1840,7 +1862,6 @@ private:
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FrameProxy> frameProxy_;
-    WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
 
@@ -1915,6 +1936,9 @@ private:
     bool isPendingState_ = false;
     // Marks whether the background builder needs to be refreshed due to surface changes.
     bool isNeedRefreshBackgroundBuilder_ = false;
+
+    MountPolicy mountPolicy_;
+
     int32_t refreshBackgroundBuilderId_ = 0;
 
     bool hasPreMake_ = false;
@@ -1978,6 +2002,7 @@ private:
     std::shared_ptr<AICallerHelper> aiCallerHelper_;
 
     std::unordered_set<LpxAttribute> lpxAttributes_;
+    std::unordered_map<LpxAttribute, std::function<void()>> lpxUpdateCallbacks_;
     uint64_t ownedTid_ = 0;
 };
 

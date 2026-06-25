@@ -133,6 +133,22 @@ public:
 
     void SetBarColor(Color barColor);
 
+    void SetTrackRect(const Rect& trackRect)
+    {
+        trackRect_ = trackRect;
+    }
+
+    void SetTrackColor(Color trackColor)
+    {
+        trackColor_ = trackColor;
+    }
+
+    void SetNeedPaintTrack(bool needPaintTrack)
+    {
+        needPaintTrack_ = needPaintTrack;
+        SetOverlayChange();
+    }
+
     RefPtr<PropertyColor> GetBarColor()
     {
         return barColor_;
@@ -181,7 +197,10 @@ private:
 
     // no Animatable
     RefPtr<PropertyColor> barColor_;
+    Rect trackRect_;
+    Color trackColor_ = Color::TRANSPARENT;
     bool isAdaptAnimationStop_ = true;
+    bool needPaintTrack_ = false;
     float lastMainModeHeight_ = 0.f;
     float lastMainModeOffset_ = 0.f;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);

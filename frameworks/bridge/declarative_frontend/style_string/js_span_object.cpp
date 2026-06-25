@@ -35,6 +35,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/image/image_component.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -211,7 +212,7 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         auto hasJsColor = JSViewAbstract::ParseJsColor(colorObj, color, resObj);
         if (!colorObj->IsNull() && !hasJsColor) {
             // From version 26 and above, styledString's withTheme takes effect.
-            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(context);
                 auto theme = context->GetTheme<TextTheme>();
@@ -517,9 +518,7 @@ void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
         }
         fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
     }
-    if (!fontVariations.empty()) {
-        font.fontVariations = fontVariations;
-    }
+    font.fontVariations = fontVariations;
 }
 
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
@@ -1700,7 +1699,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             }
         }
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        auto obj = func->ExecuteJS(1, &jsVal);
+        auto obj = func->ExecuteJSWithObjCheck(1, &jsVal);
         if (obj->IsObject()) {
             JSRef<JSObject> result = JSRef<JSObject>::Cast(obj);
             float width = 0;
@@ -1776,7 +1775,7 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         customSpanOptionsObj->SetProperty<float>("baseline", customSpanOptions.baseline);
         auto customSpanOptionsVal = JSRef<JSVal>::Cast(customSpanOptionsObj);
         JSRef<JSVal> params[] = { jsVal, customSpanOptionsVal };
-        func->ExecuteJS(2, params);
+        func->ExecuteJSWithObjCheck(2, params);
         if (unwrapCanvas) {
             unwrapCanvas->RestoreCanvas();
             unwrapCanvas->ResetCanvas();
@@ -2005,6 +2004,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "textDirection", &JSParagraphStyleSpan::GetTextDirection, &JSParagraphStyleSpan::SetTextDirection);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "shaderStyle", &JSParagraphStyleSpan::GetShaderStyle, &JSParagraphStyleSpan::SetShaderStyle);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "tailIndents", &JSParagraphStyleSpan::GetTailIndents, &JSParagraphStyleSpan::SetTailIndents);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
@@ -2073,6 +2074,7 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
     ParseParagraphSpacing(obj, paragraphStyle);
     ParseJsTextDirection(obj, paragraphStyle);
     ParseJsShaderStyle(obj, paragraphStyle);
+    ParseJsTailIndents(obj, paragraphStyle);
     return paragraphStyle;
 }
 void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
@@ -2401,6 +2403,10 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
         return;
     }
     auto shaderStyleObj = obj->GetProperty("shaderStyle");
+    if (!shaderStyleObj->IsObject()) {
+        paragraphStyle.ResetGradient();
+        return;
+    }
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
@@ -2408,16 +2414,69 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
     paragraphStyle.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        paragraphStyle.SetGradient(gradientShaderStyle.value());
+        paragraphStyle.SetOptGradient(gradientShaderStyle);
     } else {
         paragraphStyle.ResetGradient();
     }
     if (resObj && colorShaderStyle.has_value()) {
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(jsObject->GetProperty("color"));
+        if (!colorObj->IsObject()) {
+            return;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
         JSViewAbstract::CompleteResourceObject(jsObj);
         resObj = JSViewAbstract::GetResourceObject(jsObj);
         paragraphStyle.colorShaderStyleResObj = resObj;
+    }
+}
+
+void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    CHECK_NULL_VOID(obj->HasProperty("tailIndents"));
+    auto tailIndentsObj = obj->GetProperty("tailIndents");
+    if (tailIndentsObj->IsNull() || tailIndentsObj->IsUndefined()) {
+        return;
+    }
+    NG::TailIndents tailIndents;
+    if (tailIndentsObj->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(tailIndentsObj);
+        NG::TailIndentsArray indentsArray;
+        indentsArray.reserve(array->Length());
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            CalcDimension dimension;
+            RefPtr<ResourceObject> resObj;
+            bool parsed = false;
+            if (value->IsObject()) {
+                JSRef<JSObject> valObj = JSRef<JSObject>::Cast(value);
+                parsed = JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj);
+            }
+            if (!parsed) {
+                parsed = JSContainerBase::ParseJsDimensionFpNG(value, dimension, resObj);
+            }
+            if (!parsed || dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+                dimension.Reset();
+            }
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
+        }
+        tailIndents.indentsArray = std::move(indentsArray);
+    } else if (tailIndentsObj->IsObject()) {
+        CalcDimension dimension;
+        RefPtr<ResourceObject> resObj;
+        JSRef<JSObject> valObj = JSRef<JSObject>::Cast(tailIndentsObj);
+        bool parsed = JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj);
+        if (!parsed) {
+            parsed = JSContainerBase::ParseJsDimensionFpNG(tailIndentsObj, dimension, resObj);
+        }
+        if (!parsed || dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+            dimension.Reset();
+        }
+        NG::TailIndentsArray indentsArray;
+        indentsArray.emplace_back(static_cast<Dimension>(dimension));
+        tailIndents.indentsArray = std::move(indentsArray);
+    }
+    if (tailIndents.HasValue()) {
+        paragraphStyle.tailIndents = tailIndents;
     }
 }
 
@@ -2587,6 +2646,20 @@ void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
 }
  
 void JSParagraphStyleSpan::SetShaderStyle(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetTailIndents(const JSCallbackInfo& info)
+{
+    auto paragraphStyle = GetParagraphStyle();
+    if (paragraphStyle.tailIndents.has_value() && paragraphStyle.tailIndents->HasValue()) {
+        auto array = JSRef<JSArray>::New();
+        for (const auto& dim : paragraphStyle.tailIndents->indentsArray.value()) {
+            array->SetValueAt(array->Length(), JSRef<JSVal>::Make(ToJSValue(dim.ConvertToVp())));
+        }
+        info.SetReturnValue(JSRef<JSVal>::Cast(array));
+    }
+}
+
+void JSParagraphStyleSpan::SetTailIndents(const JSCallbackInfo& info) {}
 
 JSRef<JSObject>& JSParagraphStyleSpan::GetJsLeadingMarginSpanObject()
 {

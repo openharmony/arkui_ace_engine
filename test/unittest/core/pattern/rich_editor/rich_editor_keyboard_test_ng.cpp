@@ -258,10 +258,14 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboardBuilder, TestSize.Level0
 
     auto oldFunc = richEditorPattern->customKeyboardBuilder_;
     auto func = []() {};
-
+    /**
+ 	 * @tc.steps: step1. test empty func
+ 	 */
     richEditorPattern->customKeyboardBuilder_ = func;
     richEditorPattern->RequestCustomKeyboardBuilder();
-
+    /**
+ 	 * @tc.steps: step2. test KeyboardBuilder
+ 	 */
     richEditorPattern->customKeyboardBuilder_ = oldFunc;
     richEditorPattern->RequestCustomKeyboardBuilder();
 }

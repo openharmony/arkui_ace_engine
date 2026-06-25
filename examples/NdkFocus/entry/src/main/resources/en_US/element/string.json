@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "NdkFocus"
+    },
+    {
+      "name": "a_status",
+      "value": "aStatus: "
+    },
+    {
+      "name": "is_status",
+      "value": "isStatus: "
+    },
+    {
+      "name": "no_status",
+      "value": "noStatus: "
+    },
+    {
+      "name": "state_information",
+      "value": "stateInformation"
+    },
+    {
+      "name": "transfer_status",
+      "value": "transferStatus: "
+    },
+    {
+      "name": "enable",
+      "value": "enable"
+    },
+    {
+      "name": "disable",
+      "value": "disable"
+    },
+    {
+      "name": "control_operation",
+      "value": "controlOperation"
+    },
+    {
+      "name": "test_button",
+      "value": "testButton"
+    },
+    {
+      "name": "check_button",
+      "value": "checkButton"
+    },
+    {
+      "name": "set_be_focusable",
+      "value": "setBeFocusable"
+    },
+    {
+      "name": "set_be_not_focusable",
+      "value": "Set Button0 to be non-focusable"
+    },
+    {
+      "name": "synchronize_request_focus",
+      "value": "Synchronize request focus (0)"
+    },
+    {
+      "name": "synchronize_request_focus1",
+      "value": "Synchronize request focus (1)"
+    },
+    {
+      "name": "deactivate",
+      "value": "deactivate"
+    },
+    {
+      "name": "activate_focus",
+      "value": "Activate Focus"
+    },
+    {
+      "name": "clear_focus",
+      "value": "Clear Focus"
+    },
+    {
+      "name": "disable_automatic_transfer",
+      "value": "Disable automatic transfer"
+    },
+    {
+      "name": "enable_automatic_transfer",
+      "value": "Enable automatic transfer"
+    },
+    {
+      "name": "propagate_upward_to_ancestor_components",
+      "value": "Propagate upward to ancestor components"
+    },
+    {
+      "name": "key_events_are_used_for_focus_navigation",
+      "value": "Key events are used for focus navigation"
+    }
+  ]
+}

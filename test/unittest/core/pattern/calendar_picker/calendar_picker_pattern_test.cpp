@@ -50,14 +50,15 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
+#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -1429,5 +1430,257 @@ HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest056, TestSize.Level
                       std::to_string(pair.first.GetDay()) + "," + std::to_string(pair.second.GetYear()) + "-" +
                       std::to_string(pair.second.GetMonth()) + "-" + std::to_string(pair.second.GetDay());
     EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(Referenced::RawPtr(frameNode)), ret);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest057
+ * @tc.desc: Test SetPadding with LPX unit for padding properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest057, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    PaddingProperty padding;
+    constexpr double lpxValue = 10.0;
+    padding.left = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.right = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.top = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.bottom = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+
+    CalendarPickerModelNG::GetInstance()->SetPadding(padding);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_LEFT) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_RIGHT) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_TOP) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_BOTTOM) != frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest058
+ * @tc.desc: Test SetPadding with VP unit (non-LPX) for padding properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest058, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    PaddingProperty padding;
+    constexpr double vpValue = 10.0;
+    padding.left = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+    padding.right = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+    padding.top = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+    padding.bottom = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+
+    CalendarPickerModelNG::GetInstance()->SetPadding(padding);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_LEFT) == frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_RIGHT) == frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_TOP) == frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_BOTTOM) == frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest059
+ * @tc.desc: Test SetEdgeAlign with LPX unit for offset properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest059, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    constexpr double lpxValueX = 10.0;
+    constexpr double lpxValueY = 20.0;
+    DimensionOffset offset(Dimension(lpxValueX, DimensionUnit::LPX), Dimension(lpxValueY, DimensionUnit::LPX));
+    CalendarEdgeAlign alignType = CalendarEdgeAlign::EDGE_ALIGN_END;
+
+    CalendarPickerModelNG::GetInstance()->SetEdgeAlign(alignType, offset);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_X) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_Y) != frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest060
+ * @tc.desc: Test SetEdgeAlign with VP unit (non-LPX) for offset properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest060, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    constexpr double vpValueX = 10.0;
+    constexpr double vpValueY = 20.0;
+    DimensionOffset offset(Dimension(vpValueX, DimensionUnit::VP), Dimension(vpValueY, DimensionUnit::VP));
+    CalendarEdgeAlign alignType = CalendarEdgeAlign::EDGE_ALIGN_END;
+
+    CalendarPickerModelNG::GetInstance()->SetEdgeAlign(alignType, offset);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_X) == frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_Y) == frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest061
+ * @tc.desc: Test SetHintRadiusWithNode with LPX unit for radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest061, TestSize.Level0)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 10.0;
+    Dimension radius(lpxValue, DimensionUnit::LPX);
+
+    CalendarPickerModelNG::SetHintRadiusWithNode(Referenced::RawPtr(frameNode), radius);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_RADIUS) != frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest062
+ * @tc.desc: Test SetHintRadiusWithNode with VP unit (non-LPX) for radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest062, TestSize.Level0)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 10.0;
+    Dimension radius(vpValue, DimensionUnit::VP);
+
+    CalendarPickerModelNG::SetHintRadiusWithNode(Referenced::RawPtr(frameNode), radius);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_RADIUS) == frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest063
+ * @tc.desc: Test SetPadding with LPX unit for start and end padding properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest063, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    PaddingProperty padding;
+    constexpr double lpxValue = 10.0;
+    padding.start = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.end = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+
+    CalendarPickerModelNG::GetInstance()->SetPadding(padding);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_START) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_END) != frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest064
+ * @tc.desc: Test SetPadding with VP unit (non-LPX) for start and end padding properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest064, TestSize.Level0)
+{
+    CreateCalendarPicker();
+
+    PaddingProperty padding;
+    constexpr double vpValue = 10.0;
+    padding.start = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+    padding.end = CalcLength(Dimension(vpValue, DimensionUnit::VP));
+
+    CalendarPickerModelNG::GetInstance()->SetPadding(padding);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_START) == frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_END) == frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest065
+ * @tc.desc: Test SetEdgeAlign with FrameNode and LPX unit for offset properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest065, TestSize.Level0)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValueX = 10.0;
+    constexpr double lpxValueY = 20.0;
+    DimensionOffset offset(Dimension(lpxValueX, DimensionUnit::LPX), Dimension(lpxValueY, DimensionUnit::LPX));
+    CalendarEdgeAlign alignType = CalendarEdgeAlign::EDGE_ALIGN_END;
+
+    CalendarPickerModelNG::SetEdgeAlign(Referenced::RawPtr(frameNode), alignType, offset);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_X) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_EDGE_ALIGN_Y) != frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest066
+ * @tc.desc: Test SetPadding with FrameNode and LPX unit for all padding properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTest, CalendarPickerPatternTest066, TestSize.Level0)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    PaddingProperty padding;
+    constexpr double lpxValue = 10.0;
+    padding.left = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.right = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.top = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+    padding.bottom = CalcLength(Dimension(lpxValue, DimensionUnit::LPX));
+
+    CalendarPickerModelNG::SetPadding(Referenced::RawPtr(frameNode), padding);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_LEFT) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_RIGHT) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_TOP) != frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_PADDING_BOTTOM) != frameNode->lpxAttributes_.end());
 }
 } // namespace OHOS::Ace::NG

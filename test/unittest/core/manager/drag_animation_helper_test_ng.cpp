@@ -21,6 +21,11 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1540,5 +1545,684 @@ HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation002, TestSize.Level1)
      */
     auto opacity = renderContext->GetOpacity().value();
     EXPECT_TRUE(opacity == 0.0f || opacity == 1.0f);
+}
+
+/**
+ * @tc.name: CalcDistanceBeforeLifting003
+ * @tc.desc: test CalcDistanceBeforeLifting with isGrid=false and multiple children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcDistanceBeforeLifting003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data with multiple list items.
+     */
+    auto imageNodeId1 = GetElmtId();
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode1, nullptr);
+
+    auto imageNodeId2 = GetElmtId();
+    auto imageNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId2, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode2, nullptr);
+
+    GatherNodeChildInfo childInfo1;
+    childInfo1.imageNode = AceType::WeakClaim(AceType::RawPtr(imageNode1));
+    childInfo1.width = 100.0f;
+    childInfo1.height = 150.0f;
+    childInfo1.halfWidth = 50.0f;
+    childInfo1.halfHeight = 75.0f;
+    childInfo1.offset = OffsetF(10.0f, 20.0f);
+
+    GatherNodeChildInfo childInfo2;
+    childInfo2.imageNode = AceType::WeakClaim(AceType::RawPtr(imageNode2));
+    childInfo2.width = 100.0f;
+    childInfo2.height = 80.0f;
+    childInfo2.halfWidth = 50.0f;
+    childInfo2.halfHeight = 40.0f;
+    childInfo2.offset = OffsetF(20.0f, 40.0f);
+
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    gatherNodeChildrenInfo.push_back(childInfo1);
+    gatherNodeChildrenInfo.push_back(childInfo2);
+
+    OffsetF gatherNodeCenter(50.0f, 100.0f);
+    CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
+
+    /**
+     * @tc.steps: step2. Call CalcDistanceBeforeLifting with isGrid=false.
+     * @tc.expected: maxTranslation uses min of heights after first child sets it.
+     */
+    DragAnimationHelper::CalcDistanceBeforeLifting(
+        false, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
+
+    EXPECT_GT(calcResult.maxDistance, 0.0f);
+    EXPECT_GT(calcResult.minDistance, 0.0f);
+    EXPECT_GT(calcResult.maxTranslation, 0.0f);
+    constexpr float LIST_MOVE_SCALE = 0.2f;
+    EXPECT_NEAR(calcResult.maxTranslation, 80.0f * LIST_MOVE_SCALE, EPSILON);
+}
+
+/**
+ * @tc.name: ShowBadgeAnimation002
+ * @tc.desc: test ShowBadgeAnimation when IsShowBadgeAnimation is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowBadgeAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create textNode.
+     */
+    auto textNodeId = GetElmtId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(textNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get dragDropManager and set IsShowBadgeAnimation to false.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->SetIsShowBadgeAnimation(false);
+
+    /**
+     * @tc.steps: step3. Call ShowBadgeAnimation.
+     * @tc.expected: Should return early without animation, scale set directly.
+     */
+    DragAnimationHelper::ShowBadgeAnimation(textNode);
+
+    /**
+     * @tc.steps: step4. Verify transform scale was set directly without animation.
+     */
+    auto renderContext = textNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto transformScale = renderContext->GetTransformScale();
+    EXPECT_TRUE(transformScale.has_value());
+    constexpr float BADGE_ANIMATION_SCALE = 1.0f;
+    EXPECT_NEAR(transformScale->x, BADGE_ANIMATION_SCALE, EPSILON);
+    EXPECT_NEAR(transformScale->y, BADGE_ANIMATION_SCALE, EPSILON);
+}
+
+/**
+ * @tc.name: CalcBadgeTextOffset003
+ * @tc.desc: test CalcBadgeTextOffset with non-RTL and valid MenuPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create nodes for testing.
+     */
+    auto imageNodeId = GetElmtId();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewAfterAnimationScale(1.0f);
+
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up geometry node with size.
+     */
+    auto geometryNode = imageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+
+    /**
+     * @tc.steps: step3. Get pipeline context and set up themeManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    pipelineContext->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            if (type == MenuTheme::TypeId()) {
+                return AceType::MakeRefPtr<MenuTheme>();
+            }
+            return nullptr;
+        });
+
+    /**
+     * @tc.steps: step4. Call CalcBadgeTextOffset in non-RTL mode.
+     */
+    const int32_t badgeLength = 2;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+
+    auto offset = DragAnimationHelper::CalcBadgeTextOffset(host, imageNode, pipelineContext, badgeLength);
+
+    /**
+     * @tc.steps: step5. Verify offset calculation.
+     * @tc.expected: Should have valid offset X and Y values.
+     */
+    constexpr float BADGE_RELATIVE_OFFSET_VALUE = 8.0f;
+    constexpr float previewAfterAnimationScale = 1.0f;
+    float expectedX = 0.0f + 100.0f * previewAfterAnimationScale -
+        BADGE_RELATIVE_OFFSET_VALUE - (BADGE_RELATIVE_OFFSET_VALUE * badgeLength);
+    float expectedY = 0.0f - BADGE_RELATIVE_OFFSET_VALUE;
+    EXPECT_NEAR(offset.GetX(), expectedX, EPSILON);
+    EXPECT_NEAR(offset.GetY(), expectedY, EPSILON);
+}
+
+/**
+ * @tc.name: SwapGatherNodeToSubwindowInUIExtension001
+ * @tc.desc: Test SwapGatherNodeToSubwindowInUIExtension through ShowGatherAnimationWithMenu
+ *           when IsUIExtensionWindow is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, SwapGatherNodeToSubwindowInUIExtension001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get pipeline context and set instanceId.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetUseFlushUITasks(false);
+    constexpr int32_t testInstanceId = 100;
+    pipelineContext->SetInstanceId(testInstanceId);
+
+    /**
+     * @tc.steps: step2. Get container and set UIExtensionWindow.
+     */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isUIExtensionWindow_ = true;
+    ON_CALL(*container, GetInstanceId()).WillByDefault(Return(testInstanceId));
+    AceEngine::Get().AddContainer(testInstanceId, container);
+
+    /**
+     * @tc.steps: step3. Create subwindowRootNode and menuWrapperNode.
+     */
+    auto subwindowRootNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(subwindowRootNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<MenuWrapperPattern>(GetElmtId()));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    menuWrapperNode->MountToParent(subwindowRootNode);
+
+    /**
+     * @tc.steps: step4. Create gatherNode and mount to overlayManager.
+     */
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto gatherNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(gatherNode, nullptr);
+    gatherNode->AttachContext(AceType::RawPtr(pipelineContext), true);
+
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    overlayManager->MountGatherNodeToRootNode(gatherNode, gatherNodeChildrenInfo);
+
+    /**
+     * @tc.steps: step5. Call ShowGatherAnimationWithMenu.
+     * @tc.expected: SwapGatherNodeToSubwindowInUIExtension should be triggered via AddAfterRenderTask.
+     */
+    DragAnimationHelper::ShowGatherAnimationWithMenu(menuWrapperNode);
+
+    /**
+     * @tc.steps: step6. Verify gatherNode was moved to subwindowRootNode.
+     */
+    auto gatherNodeParent = gatherNode->GetParent();
+    EXPECT_EQ(gatherNodeParent, subwindowRootNode);
+
+    /**
+     * @tc.steps: step7. Clean up.
+     */
+    AceEngine::Get().RemoveContainer(testInstanceId);
+    container->isUIExtensionWindow_ = false;
+}
+
+
+/**
+ * @tc.name: ShowDragNodeCopyAnimation001
+ * @tc.desc: test ShowDragNodeCopyAnimation with defaultAnimationBeforeLifting=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowDragNodeCopyAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set previewOptions.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    DragPreviewOption previewOptions;
+    previewOptions.defaultAnimationBeforeLifting = false;
+    frameNode->SetDragPreviewOptions(previewOptions);
+
+    /**
+     * @tc.steps: step2. Create dragNodeCopy and set to overlayManager.
+     */
+    auto dragNodeCopy = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(dragNodeCopy, nullptr);
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->SetDragNodeCopy(dragNodeCopy);
+
+    /**
+     * @tc.steps: step3. Call ShowDragNodeCopyAnimation.
+     * @tc.expected: Should return early without animation.
+     */
+    DragAnimationHelper::ShowDragNodeCopyAnimation(overlayManager, frameNode);
+
+    /**
+     * @tc.steps: step4. Verify visibility was not changed.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    EXPECT_EQ(visibility, VisibleType::VISIBLE);
+}
+
+
+/**
+ * @tc.name: PreLayout002
+ * @tc.desc: test PreLayout with valid imageNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, PreLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create imageNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Attach to pipeline context.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    imageNode->AttachContext(AceType::RawPtr(pipelineContext), true);
+
+    /**
+     * @tc.steps: step3. Call PreLayout.
+     * @tc.expected: Should execute FlushSyncGeometryNodeTasks and PreLayout at lines 867-868.
+     */
+    DragAnimationHelper::PreLayout(imageNode);
+
+    /**
+     * @tc.steps: step4. Verify imageNode context is valid.
+     */
+    auto context = imageNode->GetContext();
+    ASSERT_NE(context, nullptr);
+}
+
+/**
+ * @tc.name: UpdateBadgeTextNodePosition001
+ * @tc.desc: test UpdateBadgeTextNodePosition with valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, UpdateBadgeTextNodePosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set pixelMap.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    gestureHub->SetPixelMap(mockPixelMap);
+
+    /**
+     * @tc.steps: step2. Create textNode.
+     */
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Set RTL to false.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    /**
+     * @tc.steps: step4. Call UpdateBadgeTextNodePosition with valid parameters.
+     * @tc.expected: Should update position.
+     */
+    constexpr int32_t childSize = 2;
+    constexpr float previewScale = 1.05f;
+    OffsetF previewOffset(10.0f, 20.0f);
+    DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, childSize, previewScale, previewOffset);
+
+    /**
+     * @tc.steps: step5. Verify position was updated.
+     */
+    auto position = textRenderContext->GetPosition();
+    EXPECT_TRUE(position.has_value());
+}
+
+/**
+ * @tc.name: ShowPreviewBadgeAnimation001
+ * @tc.desc: test ShowPreviewBadgeAnimation with column nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowPreviewBadgeAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with gestureHub.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    DragPreviewOption previewOptions;
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = 2;
+    frameNode->SetDragPreviewOptions(previewOptions);
+
+    /**
+     * @tc.steps: step2. Get overlayManager without pixelMapNode.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->pixmapColumnNodeWeak_ = nullptr;
+
+    /**
+     * @tc.steps: step3. Call ShowPreviewBadgeAnimation.
+     * @tc.expected: Should return early.
+     */
+    DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, overlayManager);
+}
+
+/**
+ * @tc.name: ShowPreviewBadgeAnimation002
+ * @tc.desc: test ShowPreviewBadgeAnimation with valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowPreviewBadgeAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with gestureHub.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    DragPreviewOption previewOptions;
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = 2;
+    frameNode->SetDragPreviewOptions(previewOptions);
+
+    /**
+     * @tc.steps: step2. Create column node and set to overlayManager.
+     */
+    auto column = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(column, nullptr);
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->pixmapColumnNodeWeak_ = column;
+
+    /**
+     * @tc.steps: step3. Call ShowPreviewBadgeAnimation.
+     * @tc.expected: Should execute successfully.
+     */
+    DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, overlayManager);
+
+    /**
+     * @tc.steps: step4. Verify textNode was added to column.
+     */
+    EXPECT_GT(column->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: MountPixelMapWithBadge001
+ * @tc.desc: test MountPixelMapWithBadge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, MountPixelMapWithBadge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create imageNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create textRowNode.
+     */
+    auto textRowNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textRowNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create relativeContainerNode.
+     */
+    auto relativeContainerNode = FrameNode::CreateFrameNode(
+        V2::RELATIVE_CONTAINER_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<RelativeContainerPattern>());
+    ASSERT_NE(relativeContainerNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Create columnNode.
+     */
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    /**
+     * @tc.steps: step5. Prepare PreparedInfoForDrag.
+     */
+    PreparedInfoForDrag data;
+    data.imageNode = imageNode;
+    data.textRowNode = textRowNode;
+    data.relativeContainerNode = relativeContainerNode;
+
+    /**
+     * @tc.steps: step6. Call MountPixelMapWithBadge.
+     * @tc.expected: Should execute successfully.
+     */
+    DragAnimationHelper::MountPixelMapWithBadge(data, columnNode);
+
+    /**
+     * @tc.steps: step7. Verify relativeContainerNode was added to columnNode.
+     */
+    EXPECT_EQ(columnNode->GetChildren().size(), 1);
+    auto child = columnNode->GetChildByIndex(0);
+    EXPECT_EQ(child, relativeContainerNode);
+}
+
+/**
+ * @tc.name: MountPixelMap002
+ * @tc.desc: test MountPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, MountPixelMap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create imageNode and relativeContainerNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    auto relativeContainerNode = FrameNode::CreateFrameNode(
+        V2::RELATIVE_CONTAINER_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<RelativeContainerPattern>());
+    ASSERT_NE(relativeContainerNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create frameNode with gestureHub and pixelMap.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    gestureHub->SetPixelMap(mockPixelMap);
+
+    /**
+     * @tc.steps: step3. Get overlayManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Prepare PreparedInfoForDrag with SIZE_TRANSITION effect.
+     */
+    PreparedInfoForDrag data;
+    data.imageNode = imageNode;
+    data.relativeContainerNode = relativeContainerNode;
+    data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+
+    /**
+     * @tc.steps: step5. Call MountPixelMap with isDragPixelMap = false.
+     * @tc.expected: Should execute MountPixelMapSizeContentTransition successfully.
+     */
+    DragAnimationHelper::MountPixelMap(overlayManager, gestureHub, data, false);
+
+    /**
+     * @tc.steps: step6. Verify pixelMap was mounted.
+     */
+    EXPECT_TRUE(overlayManager->hasDragPixelMap_);
+}
+
+/**
+ * @tc.name: MountPixelMapSizeContentTransition001
+ * @tc.desc: test MountPixelMapSizeContentTransition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, MountPixelMapSizeContentTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create imageNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create relativeContainerNode.
+     */
+    auto relativeContainerNode = FrameNode::CreateFrameNode(
+        V2::RELATIVE_CONTAINER_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<RelativeContainerPattern>());
+    ASSERT_NE(relativeContainerNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create textRowNode.
+     */
+    auto textRowNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textRowNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Create menuNode.
+     */
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(),
+        AceType::MakeRefPtr<MenuPattern>(GetElmtId(),
+        V2::COLUMN_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step5. Create columnNode.
+     */
+    auto columnNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    /**
+     * @tc.steps: step6. Prepare PreparedInfoForDrag with textRowNode and menuNode.
+     */
+    PreparedInfoForDrag data;
+    data.imageNode = imageNode;
+    data.relativeContainerNode = relativeContainerNode;
+    data.textRowNode = textRowNode;
+    data.menuNode = menuNode;
+    data.originPreviewRect = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    data.borderRadius = BorderRadiusProperty(Dimension(0.0f));
+
+    /**
+     * @tc.steps: step7. Call MountPixelMapSizeContentTransition.
+     * @tc.expected: Should execute lines 1179 and 1182.
+     */
+    DragAnimationHelper::MountPixelMapSizeContentTransition(data, columnNode);
+
+    /**
+     * @tc.steps: step8. Verify nodes were added correctly.
+     */
+    EXPECT_GT(relativeContainerNode->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: GetMenuRenderContextFromMenuWrapper002
+ * @tc.desc: test GetMenuRenderContextFromMenuWrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetMenuRenderContextFromMenuWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuWrapperNode with MenuWrapperPattern.
+     */
+    auto menuWrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<MenuWrapperPattern>(GetElmtId()));
+    ASSERT_NE(menuWrapperNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create menuNode and add as first child of menuWrapperNode.
+     */
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(),
+        AceType::MakeRefPtr<MenuPattern>(GetElmtId(),
+        V2::COLUMN_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuWrapperNode->AddChild(menuNode);
+
+    /**
+     * @tc.steps: step3. Call GetMenuRenderContextFromMenuWrapper.
+     * @tc.expected: Should return menuNode's renderContext.
+     */
+    auto renderContext = DragAnimationHelper::GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
+
+    /**
+     * @tc.steps: step4. Verify renderContext is valid.
+     */
+    EXPECT_NE(renderContext, nullptr);
 }
 } // namespace OHOS::Ace::NG

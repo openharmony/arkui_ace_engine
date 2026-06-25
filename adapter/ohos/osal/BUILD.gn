@@ -32,6 +32,9 @@ template("ace_osal_ohos_source_set") {
     if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
+    if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [
         "hilog:libhilog",
@@ -72,6 +75,7 @@ template("ace_osal_ohos_source_set") {
       "dynamic_module_helper.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
+      "feature_manager.cpp",
       "feature_param.cpp",
       "frame_report.cpp",
       "image_analyzer_adapter_impl.cpp",
@@ -110,6 +114,10 @@ template("ace_osal_ohos_source_set") {
       "websocket_manager.cpp",
       "window_utils.cpp",
     ]
+    if (vpe_enabled) {
+      sources += [ "contrast_enhancer_image_ohos.cpp" ]
+      external_deps += [ "video_processing_engine:videoprocessingengine" ]
+    }
     if (defined(config.enable_standard_input) && config.enable_standard_input) {
       sources += [ "ime_extra_config_ohos.cpp" ]
     }
@@ -185,6 +193,8 @@ template("ace_osal_ohos_source_set") {
           "accessibility/focus_move/accessibility_focus_move_osal_third.cpp",
           "accessibility/focus_move/accessibility_focus_strategy.cpp",
           "accessibility/focus_move/accessibility_focus_third_node_utils.cpp",
+          "accessibility/focus_move/accessibility_focus_virtual_node_utils.cpp",
+          "accessibility/hover/accessibility_hover_virtual_node_utils.cpp",
           "js_accessibility_manager.cpp",
           "js_third_accessibility_hover_ng.cpp",
           "js_third_provider_interaction_operation.cpp",
@@ -220,6 +230,7 @@ template("ace_osal_ohos_source_set") {
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "page_viewport_config_ohos.cpp",
+      "picture_ohos.cpp",
       "pixel_map_ohos.cpp",
       "system_bar_style_ohos.cpp",
     ]
@@ -237,6 +248,7 @@ template("ace_osal_ohos_source_set") {
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
+      "graphic_surface:surface",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",

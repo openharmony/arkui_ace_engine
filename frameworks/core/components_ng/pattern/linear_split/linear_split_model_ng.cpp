@@ -52,12 +52,16 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ColumnSplitDi
             CHECK_NULL_VOID(frameNode);
             ColumnSplitDivider& value = const_cast<ColumnSplitDivider&>(divider);
             value.ReloadResources();
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value.startMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_START, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value.endMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_END, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
         pattern->AddResObj("columnSplit.divider", resObj, std::move(updateFunc));
     }
+    ACE_CHECK_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_START);
+    ACE_CHECK_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_END);
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
 }
 
@@ -91,12 +95,16 @@ void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitTyp
             CHECK_NULL_VOID(frameNode);
             ColumnSplitDivider& value = const_cast<ColumnSplitDivider&>(divider);
             value.ReloadResources();
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value.startMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_START, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value.endMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_END, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
         pattern->AddResObj("columnSplit.divider", resObj, std::move(updateFunc));
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_START, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_LINEAR_SPLIT_DIVIDER_END, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);
 }
 

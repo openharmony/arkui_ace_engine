@@ -82,7 +82,6 @@ export class ArkSystemColors implements Colors {
         this.warning = _r(125830979, 10001, '', '', 'sys.color.warning');
         this.alert = _r(125830980, 10001, '', '', 'sys.color.alert');
         this.confirm = _r(125830981, 10001, '', '', 'sys.color.confirm');
-
         this.fontPrimary = _r(125830982, 10001, '', '', 'sys.color.font_primary');
         this.fontSecondary = _r(125830983, 10001, '', '', 'sys.color.font_secondary');
         this.fontTertiary = _r(125830984, 10001, '', '', 'sys.color.font_tertiary');

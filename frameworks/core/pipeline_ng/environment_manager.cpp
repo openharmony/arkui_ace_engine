@@ -15,6 +15,9 @@
 
 #include "core/pipeline_ng/environment_manager.h"
 
+#include <utility>
+
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -59,66 +62,14 @@ RefPtr<WithEnvNode> FindWithEnvNodeInternal(const RefPtr<UINode>& startNode)
     return nullptr;
 }
 
-bool ReadScopeValue(
-    const RefPtr<WithEnvNode>& scope, EnvironmentPropertyKind kind, const std::string& key,
-    EnvironmentQueryResult& outResult)
-{
-    CHECK_NULL_RETURN(scope, false);
-    if (kind == EnvironmentPropertyKind::CUSTOM) {
-        auto value = scope->GetCustomEnvPropertyAny(key);
-        if (!value) {
-            return false;
-        }
-        outResult.type = EnvironmentValueType::CUSTOM;
-        outResult.value = value;
-        return true;
-    }
-    if (kind == EnvironmentPropertyKind::ENV) {
-        if (scope->GetEnvProperty(key, outResult.boolValue)) {
-            outResult.type = EnvironmentValueType::BOOLEAN;
-            return true;
-        }
-        if (scope->GetEnvProperty(key, outResult.numberValue)) {
-            outResult.type = EnvironmentValueType::NUMBER;
-            return true;
-        }
-        if (scope->GetEnvProperty(key, outResult.stringValue)) {
-            outResult.type = EnvironmentValueType::STRING;
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ScopeDefinesValue(const RefPtr<WithEnvNode>& scope, EnvironmentPropertyKind kind, const std::string& key)
 {
     CHECK_NULL_RETURN(scope, false);
     if (kind == EnvironmentPropertyKind::ENV) {
-        return scope->HasEnvProperty(key);
+        return scope->HasSystemEnvProperty(key);
     }
-    EnvironmentQueryResult result;
-    return ReadScopeValue(scope, kind, key, result);
-}
-
-bool SetScopeValue(const RefPtr<WithEnvNode>& scope, EnvironmentPropertyKind kind, const std::string& key,
-    const std::any& value)
-{
-    CHECK_NULL_RETURN(scope, false);
     if (kind == EnvironmentPropertyKind::CUSTOM) {
-        scope->SetCustomEnvProperty(key, value);
-        return true;
-    }
-    if (auto boolValue = std::any_cast<bool>(&value)) {
-        scope->SetEnvProperty(key, *boolValue);
-        return true;
-    }
-    if (auto doubleValue = std::any_cast<double>(&value)) {
-        scope->SetEnvProperty(key, *doubleValue);
-        return true;
-    }
-    if (auto stringValue = std::any_cast<std::string>(&value)) {
-        scope->SetEnvProperty(key, *stringValue);
-        return true;
+        return scope->HasCustomEnvProperty(key);
     }
     return false;
 }
@@ -204,56 +155,113 @@ void EnvironmentManager::RegisterValueChangedCallback(
     GetValueChangedCallbacks()[ToIndex(kind)][key] = callback;
 }
 
-RefPtr<UINode> EnvironmentManager::FindWithEnvNode(const RefPtr<UINode>& startNode) const
+bool EnvironmentManager::RemoveSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key)
 {
-    return FindWithEnvNodeInternal(startNode);
-}
-
-bool EnvironmentManager::SetValue(
-    const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key, std::any value)
-{
-    if (!IsValidKind(kind)) {
-        return false;
-    }
     auto withEnvNode = AceType::DynamicCast<WithEnvNode>(scope);
     CHECK_NULL_RETURN(withEnvNode, false);
 
-    if (!SetScopeValue(withEnvNode, kind, key, value)) {
-        return false;
+    if (!withEnvNode->HasSystemEnvProperty(key)) {
+        return true;
     }
-    NotifyValueChanged(scope, kind, key);
+    withEnvNode->RemoveSystemEnvProperty(key);
+    NotifyValueChanged(scope, EnvironmentPropertyKind::ENV, key);
     return true;
 }
 
-bool EnvironmentManager::FindValueByKey(const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind,
-    const std::string& key, EnvironmentQueryResult& outResult)
+bool EnvironmentManager::SetSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key, SystemEnvValue value)
 {
-    return FindValueByKey(startScope, GetCurrentEnvConsumerNode(), kind, key, outResult);
-}
+    auto withEnvNode = AceType::DynamicCast<WithEnvNode>(scope);
+    CHECK_NULL_RETURN(withEnvNode, false);
 
-bool EnvironmentManager::FindValueByKey(const RefPtr<UINode>& startScope, const RefPtr<UINode>& dependentNode,
-    EnvironmentPropertyKind kind, const std::string& key, EnvironmentQueryResult& outResult)
-{
-    outResult = {};
-    if (!IsValidKind(kind)) {
+    if (!withEnvNode->SetSystemEnvProperty(key, value)) {
         return false;
     }
-    if (!ResolveOwnerScopeAndValue(startScope, kind, key, outResult)) {
-        if (dependentNode) {
-            EraseDependency(kind, dependentNode->GetId(), key);
+    ChangedEnvValue changedValue;
+    changedValue.systemValue.emplace(value);
+    NotifyValueChanged(scope, EnvironmentPropertyKind::ENV, key, changedValue);
+    return true;
+}
+
+bool EnvironmentManager::FindSystemEnvValueByKey(
+    const RefPtr<UINode>& consumer, const std::string& key, SystemEnvValue& outValue)
+{
+    if (!ResolveSystemEnvValue(consumer, key, outValue)) {
+        if (consumer) {
+            EraseDependency(EnvironmentPropertyKind::ENV, consumer->GetId(), key);
         }
         return false;
     }
-    RegisterDependency(kind, dependentNode, key);
+    RegisterDependency(EnvironmentPropertyKind::ENV, consumer, key);
     return true;
 }
 
-bool EnvironmentManager::ResolveOwnerScopeAndValue(const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind,
-    const std::string& key, EnvironmentQueryResult& outResult) const
+bool EnvironmentManager::RemoveCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key)
+{
+    auto withEnvNode = AceType::DynamicCast<WithEnvNode>(scope);
+    CHECK_NULL_RETURN(withEnvNode, false);
+
+    if (!withEnvNode->HasCustomEnvProperty(key)) {
+        return true;
+    }
+    withEnvNode->RemoveCustomEnvProperty(key);
+    NotifyValueChanged(scope, EnvironmentPropertyKind::CUSTOM, key);
+    return true;
+}
+
+bool EnvironmentManager::SetCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key, std::any value)
+{
+    auto withEnvNode = AceType::DynamicCast<WithEnvNode>(scope);
+    CHECK_NULL_RETURN(withEnvNode, false);
+
+    ChangedEnvValue changedValue;
+    changedValue.customValue.emplace(value);
+    withEnvNode->SetCustomEnvProperty(key, std::move(value));
+    NotifyValueChanged(scope, EnvironmentPropertyKind::CUSTOM, key, changedValue);
+    return true;
+}
+
+bool EnvironmentManager::FindCustomEnvValueByKey(
+    const RefPtr<UINode>& consumer, const std::string& key, std::any& outValue)
+{
+    if (!ResolveCustomEnvValue(consumer, key, outValue)) {
+        if (consumer) {
+            EraseDependency(EnvironmentPropertyKind::CUSTOM, consumer->GetId(), key);
+        }
+        return false;
+    }
+    RegisterDependency(EnvironmentPropertyKind::CUSTOM, consumer, key);
+    return true;
+}
+
+bool EnvironmentManager::ResolveSystemEnvValueForImplicitReader(
+    const RefPtr<UINode>& reader, const std::string& key, SystemEnvValue& outValue) const
+{
+    return ResolveSystemEnvValue(reader, key, outValue);
+}
+
+bool EnvironmentManager::ResolveSystemEnvValue(
+    const RefPtr<UINode>& startScope, const std::string& key, SystemEnvValue& outValue) const
 {
     auto currentScope = FindWithEnvNodeInternal(startScope);
     while (currentScope) {
-        if (ReadScopeValue(currentScope, kind, key, outResult)) {
+        auto value = currentScope->GetSystemEnvProperty(key);
+        if (value) {
+            outValue = *value;
+            return true;
+        }
+        currentScope = FindWithEnvNodeInternal(currentScope->GetParent());
+    }
+    return false;
+}
+
+bool EnvironmentManager::ResolveCustomEnvValue(
+    const RefPtr<UINode>& startScope, const std::string& key, std::any& outValue) const
+{
+    auto currentScope = FindWithEnvNodeInternal(startScope);
+    while (currentScope) {
+        auto value = currentScope->GetCustomEnvPropertyAny(key);
+        if (value) {
+            outValue = *value;
             return true;
         }
         currentScope = FindWithEnvNodeInternal(currentScope->GetParent());
@@ -286,8 +294,8 @@ void EnvironmentManager::EraseDependency(EnvironmentPropertyKind kind, int32_t n
     }
 }
 
-void EnvironmentManager::NotifyValueChanged(
-    const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key)
+void EnvironmentManager::NotifyValueChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind,
+    const std::string& key, const std::optional<ChangedEnvValue>& changedValue)
 {
     CHECK_NULL_VOID(scope);
     auto innerCoversKey = [kind, &key](const RefPtr<WithEnvNode>& inner) {
@@ -298,9 +306,9 @@ void EnvironmentManager::NotifyValueChanged(
     auto& registry = dependents_[ToIndex(kind)];
     for (const auto& child : scope->GetChildren()) {
         DfsNotifyScopeSubtree(child, innerCoversKey,
-            [this, kind, &key, shouldDispatchAllAffectedNodes, &registry](const RefPtr<UINode>& node) {
+            [this, kind, &key, &changedValue, shouldDispatchAllAffectedNodes, &registry](const RefPtr<UINode>& node) {
                 if (shouldDispatchAllAffectedNodes) {
-                    DispatchValueChangedToAffectedNode(node, kind, key);
+                    DispatchValueChangedToAffectedNode(node, kind, key, changedValue);
                     return;
                 }
                 auto iter = registry.find(node->GetId());
@@ -314,13 +322,13 @@ void EnvironmentManager::NotifyValueChanged(
                 if (iter->second.keys.count(key) == 0) {
                     return;
                 }
-                DispatchValueChangedToAffectedNode(node, kind, key);
+                DispatchValueChangedToAffectedNode(node, kind, key, changedValue);
             });
     }
 }
 
-void EnvironmentManager::DispatchValueChangedToAffectedNode(
-    const RefPtr<UINode>& node, EnvironmentPropertyKind kind, const std::string& key)
+void EnvironmentManager::DispatchValueChangedToAffectedNode(const RefPtr<UINode>& node, EnvironmentPropertyKind kind,
+    const std::string& key, const std::optional<ChangedEnvValue>& changedValue)
 {
     CHECK_NULL_VOID(node);
     auto callback = GetValueChangedCallback(kind, key);
@@ -330,7 +338,22 @@ void EnvironmentManager::DispatchValueChangedToAffectedNode(
     if (kind == EnvironmentPropertyKind::CUSTOM) {
         auto customNode = AceType::DynamicCast<CustomNode>(node);
         if (customNode) {
-            customNode->FireOnCustomEnvUpdate(key);
+            if (changedValue) {
+                customNode->FireOnCustomEnvUpdate(key, changedValue->customValue.value_or(std::any()));
+            } else {
+                customNode->FireOnCustomEnvUpdate(key);
+            }
+            customNode->MarkNeedUpdate();
+        }
+    }
+    if (kind == EnvironmentPropertyKind::ENV) {
+        auto customNode = AceType::DynamicCast<CustomNode>(node);
+        if (customNode) {
+            if (changedValue) {
+                customNode->FireOnSystemEnvUpdate(key, changedValue->systemValue.value_or(SystemEnvValue()));
+            } else {
+                customNode->FireOnSystemEnvUpdate(key);
+            }
             customNode->MarkNeedUpdate();
         }
     }

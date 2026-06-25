@@ -28,9 +28,11 @@
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_BLUR_RADIUS = 40;
+constexpr double GRADUAL_BLUR_MASK_EXTRA_HEIGHT_VP = 32.0;
 
 enum class ScrollEffectType {
     COMMON_BLUR = 0,
@@ -171,6 +173,7 @@ struct NavigationTitlebarOptions {
     NavigationTextOptions textOptions;
     bool enableHoverMode = false;
     bool enableCustomTitlePaddingCheck = false;
+    RefPtr<UiMaterial> material = nullptr;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {

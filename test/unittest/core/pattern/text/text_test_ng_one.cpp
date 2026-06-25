@@ -104,7 +104,7 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestGetSelectAreaFromHandle001, TestSiz
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF rect;
@@ -145,7 +145,7 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level
  	 */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     SelectMenuInfo menuInfo;
@@ -694,7 +694,7 @@ HWTEST_F(TextTestNgOne, TextPattern015, TestSize.Level1)
      * @tc.steps: step2. test pattern OnHandleAreaChanged
      */
     RectF handleRect = CONTENT_RECT;
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     pattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
     pattern->OnHandleAreaChanged();
     EXPECT_EQ(pattern->selectOverlay_->SelectOverlayIsOn(), false);
@@ -720,7 +720,7 @@ HWTEST_F(TextTestNgOne, TextPattern016, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 0;
     int32_t prevHeight = 0;
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
@@ -772,7 +772,7 @@ HWTEST_F(TextTestNgOne, TextPattern017, TestSize.Level1)
     /**
      * @tc.steps: step3. test pattern UpdateSelectOverlayOrCreate
      */
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     pattern->UpdateSelectOverlayOrCreate(selectInfo, true);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
@@ -813,7 +813,7 @@ HWTEST_F(TextTestNgOne, TextPattern019, TestSize.Level1)
     /**
      * @tc.steps: step2. show selectoverlay.
      */
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     pattern->ShowSelectOverlay();
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
 
@@ -1689,5 +1689,64 @@ HWTEST_F(TextTestNgOne, SetClipEdge007, TestSize.Level1)
     textModelNG.SetClipEdge(false);
     textModelNG.SetClipEdge(false);
     EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson001
+ * @tc.desc: Verify GetFontVariationsInJson with empty list
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson001, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST emptyList;
+    ASSERT_EQ(GetFontVariationsInJson(emptyList), "[]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson002
+ * @tc.desc: Verify GetFontVariationsInJson with single item without isNormalized
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson002, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wght", 400.0f, std::nullopt } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wght, value:400.000000}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson003
+ * @tc.desc: Verify GetFontVariationsInJson with single item with isNormalized true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson003, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wght", 700.0f, true } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wght, value:700.000000, isNormalized:true}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson004
+ * @tc.desc: Verify GetFontVariationsInJson with single item with isNormalized false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson004, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wdth", 100.0f, false } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wdth, value:100.000000, isNormalized:false}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson005
+ * @tc.desc: Verify GetFontVariationsInJson with multiple items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson005, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = {
+        { "wght", 400.0f, std::nullopt },
+        { "wdth", 100.0f, true },
+    };
+    std::string expected = "[{axis:wght, value:400.000000}, {axis:wdth, value:100.000000, isNormalized:true}]";
+    ASSERT_EQ(GetFontVariationsInJson(list), expected);
 }
 } // namespace OHOS::Ace::NG

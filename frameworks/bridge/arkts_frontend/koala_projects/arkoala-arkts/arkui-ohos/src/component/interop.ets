@@ -395,8 +395,7 @@ export function registerTransferCompatibleUpdatableBuilderCallback(): void {
  	    throw new Error('registerTransferCompatibleUpdatableBuilderCallback error: global objects is undefined');
  	}
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Any>(builder).unwrap()!};
-    registerCallback.invoke(callback);
+    registerCallback.invoke(unwrapTransferCompatibleUpdatableBuilder<Any>);
 }
 
 type ESValueOrUndefined  = ESValue | undefined;
@@ -625,6 +624,13 @@ export function transferCompatibleUpdatableBuilder<T>(
     return dynamicBuilder;
 }
 
+export function unwrapTransferCompatibleUpdatableBuilder<T>(
+    /** @memo */
+    builder: (args: T) => void
+): Any {
+    return transferCompatibleUpdatableBuilder(builder).unwrap();
+}
+
 /**
  * Creates a proxy for static object literal in the ArkTS 1.1 context
  * to intercept property getter operations.
@@ -692,6 +698,26 @@ function registertransferCompatibleDynamicBuilderCallback(): void {
  	}
     const registerCallback = global.getProperty('registerTransferCompatibleDynamicBuilderCallback');
     registerCallback.invoke(transferCompatibleDynamicBuilder);
+    const registerCallback1 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback1');
+    registerCallback1.invoke(transferCompatibleDynamicBuilder1);
+    const registerCallback2 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback2');
+    registerCallback2.invoke(transferCompatibleDynamicBuilder2);
+    const registerCallback3 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback3');
+    registerCallback3.invoke(transferCompatibleDynamicBuilder3);
+    const registerCallback4 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback4');
+    registerCallback4.invoke(transferCompatibleDynamicBuilder4);
+    const registerCallback5 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback5');
+    registerCallback5.invoke(transferCompatibleDynamicBuilder5);
+    const registerCallback6 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback6');
+    registerCallback6.invoke(transferCompatibleDynamicBuilder6);
+    const registerCallback7 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback7');
+    registerCallback7.invoke(transferCompatibleDynamicBuilder7);
+    const registerCallback8 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback8');
+    registerCallback8.invoke(transferCompatibleDynamicBuilder8);
+    const registerCallback9 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback9');
+    registerCallback9.invoke(transferCompatibleDynamicBuilder9);
+    const registerCallback10 = global.getProperty('registerTransferCompatibleDynamicBuilderCallback10');
+    registerCallback10.invoke(transferCompatibleDynamicBuilder10);
 }
 
 // -------------------- code below for navigation interop --------------------
@@ -1063,22 +1089,144 @@ function registerNavPathStackCallback(): void {
 }
 // -------------------- code above for navigation interop --------------------
 
-function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) => void):
+function transferCompatibleDynamicBuilder(builder: Any):
 /** @memo */
-(...args: FixedArray<Any>) => void {
+() => void {
     return (
         /** @memo */
-        (...args: FixedArray<Any>) => {
+        () => {
             StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder');
-            let argsESValue: FixedArray<ESValueOrUndefined> = new FixedArray<ESValueOrUndefined>(args.length);
-            for (let i = 0; i < args.length; i++) {
-                if (args[i] instanceof ESValue) {
-                    argsESValue[i] = args[i] as ESValue;
-                } else {
-                    argsESValue[i] = ESValue.wrap(args[i]);
-                }
-            }
-            compatibleWrappedBuilderInternal(builder, ...argsESValue);
+            compatibleWrappedBuilderInternal(builder);
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder1(builder: Any):
+/** @memo */
+(arg0: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder1');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder2(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder2');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder3(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder3');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1), ESValue.wrap(arg2));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder4(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder4');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder5(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder5');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder6(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder6');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4), ESValue.wrap(arg5));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder7(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder7');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4), ESValue.wrap(arg5), ESValue.wrap(arg6));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder8(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder8');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4), ESValue.wrap(arg5),
+                ESValue.wrap(arg6), ESValue.wrap(arg7));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder9(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder9');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4), ESValue.wrap(arg5),
+                ESValue.wrap(arg6), ESValue.wrap(arg7), ESValue.wrap(arg8));
+        }
+    )
+}
+
+function transferCompatibleDynamicBuilder10(builder: Any):
+/** @memo */
+(arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any) => void {
+    return (
+        /** @memo */
+        (arg0: Any, arg1: Any, arg2: Any, arg3: Any, arg4: Any, arg5: Any, arg6: Any, arg7: Any, arg8: Any, arg9: Any) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder10');
+            compatibleWrappedBuilderInternal(builder, ESValue.wrap(arg0), ESValue.wrap(arg1),
+                ESValue.wrap(arg2), ESValue.wrap(arg3), ESValue.wrap(arg4), ESValue.wrap(arg5),
+                ESValue.wrap(arg6), ESValue.wrap(arg7), ESValue.wrap(arg8), ESValue.wrap(arg9));
         }
     )
 }

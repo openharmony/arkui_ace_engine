@@ -29,7 +29,7 @@ void ShapeAbstractModelStatic::SetWidth(FrameNode* frameNode, const std::optiona
         }
         ViewAbstract::SetWidth(frameNode, CalcLength(val));
     } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, false);
+        ViewAbstract::ClearWidthOrHeight(frameNode, true);
     }
 }
 
@@ -42,12 +42,13 @@ void ShapeAbstractModelStatic::SetHeight(FrameNode* frameNode, const std::option
         }
         ViewAbstract::SetHeight(frameNode, CalcLength(val));
     } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, true);
+        ViewAbstract::ClearWidthOrHeight(frameNode, false);
     }
 }
 
 void ShapeAbstractModelStatic::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dashOffset, LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
 }
 

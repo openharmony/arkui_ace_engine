@@ -14,6 +14,8 @@
  */
 
 #include "scroll_bar_test_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 #include "gtest/gtest.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
@@ -1280,6 +1282,65 @@ HWTEST_F(ScrollBarTestNg, UpdateScrollBarDisplay, TestSize.Level1)
     pattern_->UpdateScrollBarDisplay();
     EXPECT_FALSE(pattern_->controlDistanceChanged_);
     EXPECT_TRUE(pattern_->disappearAnimation_);
+}
+
+/**
+ * @tc.name: ScrollBarHeightTheme001
+ * @tc.desc: Test scroll_bar_height theme value is ignored when UseInnerScrollBar is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme001, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+    scrollBarTheme->scrollBarHeight_ = 37.0_vp;
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_FALSE(pattern_->UseInnerScrollBar());
+    pattern_->scrollBar_->SetMinHeight(Dimension());
+    pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
+    EXPECT_EQ(pattern_->scrollBar_->GetBarRect().Height(), 300.0);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 48.0);
+}
+
+/**
+ * @tc.name: ScrollBarStartMarginTheme001
+ * @tc.desc: Test scroll_bar_start_margin theme value is ignored when UseInnerScrollBar is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarStartMarginTheme001, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+    auto oldStartMargin = scrollBarTheme->startMargin_;
+    scrollBarTheme->startMargin_ = 12.0_vp;
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_FALSE(pattern_->UseInnerScrollBar());
+    pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Top(), 0.0);
+
+    scrollBarTheme->startMargin_ = oldStartMargin;
 }
 
 /**

@@ -18,6 +18,8 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 
+#include <cmath>
+#include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
@@ -63,9 +65,11 @@
 #include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
+#include "base/utils/feature_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/common/color_inverter.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
@@ -79,6 +83,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -144,7 +149,19 @@ constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 constexpr int32_t MAX_DVSYNC_TIME_USE_COUNT = 5;
-constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
+constexpr size_t DUMP_PARAM_DEFAULT_START_INDEX = 2;
+constexpr size_t DUMP_PARAM_VISIBLE_INFO_START_INDEX = 1;
+constexpr size_t DUMP_PARAM_INTERACTION_INFO_OFFSET = 0;
+constexpr size_t DUMP_PARAM_ACCESSIBILITY_INFO_OFFSET = 1;
+constexpr size_t DUMP_PARAM_CACHE_NODES_OFFSET = 2;
+constexpr size_t DUMP_PARAM_WITH_WEB_OFFSET = 3;
+constexpr size_t DUMP_PARAM_WITH_UI_EXTENSION_OFFSET = 4;
+constexpr size_t DUMP_PARAM_RECT_CULLING_OFFSET = 5;
+constexpr size_t DUMP_PARAM_MIN_OPACITY_OFFSET = 6;
+constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG =
+    DUMP_PARAM_DEFAULT_START_INDEX + DUMP_PARAM_WITH_WEB_OFFSET + 1;
+constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG =
+    DUMP_PARAM_VISIBLE_INFO_START_INDEX + DUMP_PARAM_MIN_OPACITY_OFFSET + 1;
 constexpr int32_t OVERLAY_ID = -10000;
 #ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_MICROSEC = 16600;
@@ -185,21 +202,105 @@ int32_t GetDepthFromParams(const std::vector<std::string>& params)
     return depth;
 }
 
+ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params, size_t startIndex);
+
 ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params)
 {
+    return ParseDumpParamConfig(params, DUMP_PARAM_DEFAULT_START_INDEX);
+}
+
+bool ParseBoolParam(const std::string& param)
+{
+    return param == "1" || param == "true";
+}
+
+float NormalizeMinOpacity(float minOpacity)
+{
+    if (!std::isfinite(minOpacity)) {
+        return 0.0f;
+    }
+    if (GreatNotEqual(minOpacity, 1.0f)) {
+        return 1.0f;
+    }
+    if (LessNotEqual(minOpacity, 0.0f)) {
+        return 0.0f;
+    }
+    return minOpacity;
+}
+
+float ParseMinOpacityParam(const std::string& param)
+{
+    double minOpacity = 0.0;
+    if (!StringUtils::StringToDouble(param, minOpacity)) {
+        return 0.0f;
+    }
+    return static_cast<float>(minOpacity);
+}
+
+double GetNodeOpacityValue(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_NODE_OPACITY);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, DEFAULT_NODE_OPACITY);
+    return renderContext->GetOpacityValue(DEFAULT_NODE_OPACITY);
+}
+
+ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params, size_t startIndex)
+{
     ParamConfig config;
-    if (params.size() < SIMPLIFYTREE_WITH_PARAMCONFIG) {
+    if (params.size() <= startIndex) {
         return config;
     }
-    config.interactionInfo = (params[2] == "1");
-    config.accessibilityInfo = (params[3] == "1");
-    config.cacheNodes = (params[4] == "1");
-    config.withWeb = (params[5] == "1");
-    config.withUIExtension = (params.size() > SIMPLIFYTREE_WITH_PARAMCONFIG) && (params[6] == "1");
+    config.interactionInfo = ParseBoolParam(params[startIndex + DUMP_PARAM_INTERACTION_INFO_OFFSET]);
+    const auto accessibilityInfoIndex = startIndex + DUMP_PARAM_ACCESSIBILITY_INFO_OFFSET;
+    if (params.size() > accessibilityInfoIndex) {
+        config.accessibilityInfo = ParseBoolParam(params[accessibilityInfoIndex]);
+    }
+    const auto cacheNodesIndex = startIndex + DUMP_PARAM_CACHE_NODES_OFFSET;
+    if (params.size() > cacheNodesIndex) {
+        config.cacheNodes = ParseBoolParam(params[cacheNodesIndex]);
+    }
+    const auto withWebIndex = startIndex + DUMP_PARAM_WITH_WEB_OFFSET;
+    if (params.size() > withWebIndex) {
+        config.withWeb = ParseBoolParam(params[withWebIndex]);
+    }
+    const auto withUIExtensionIndex = startIndex + DUMP_PARAM_WITH_UI_EXTENSION_OFFSET;
+    if (params.size() > withUIExtensionIndex) {
+        config.withUIExtension = ParseBoolParam(params[withUIExtensionIndex]);
+    }
+    const auto rectCullingIndex = startIndex + DUMP_PARAM_RECT_CULLING_OFFSET;
+    if (params.size() > rectCullingIndex && params[rectCullingIndex] != PID_FLAG) {
+        config.rectCulling = ParseBoolParam(params[rectCullingIndex]);
+    }
+    const auto minOpacityIndex = startIndex + DUMP_PARAM_MIN_OPACITY_OFFSET;
+    if (params.size() > minOpacityIndex && params[rectCullingIndex] != PID_FLAG &&
+        params[minOpacityIndex] != PID_FLAG) {
+        config.minOpacity = ParseMinOpacityParam(params[minOpacityIndex]);
+    }
     return config;
 }
 
- void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
+double GetAncestorOpacityBeforeNode(const RefPtr<UINode>& node)
+{
+    double opacity = DEFAULT_NODE_OPACITY;
+    for (auto parent = node ? node->GetParent() : nullptr; parent; parent = parent->GetParent()) {
+        opacity *= GetNodeOpacityValue(parent);
+    }
+    return opacity;
+}
+
+bool HasDumpedJsonContent(const std::shared_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    if (json->Contains("$type")) {
+        return true;
+    }
+    auto children = json->GetValue("$children");
+    return children && children->IsArray() && children->GetArraySize() > 0;
+}
+
+void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
 {
     CHECK_NULL_VOID(parentJson && childJson);
     if (!parentJson->Contains("$children")) {
@@ -235,16 +336,50 @@ RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeg
     return nullptr;
 }
 
+constexpr uint32_t AI_CALL_NODE_INVALID = 3;
+constexpr uint32_t AI_CALL_NODE_AMBIGUOUS = 5;
+
+std::vector<RefPtr<NG::FrameNode>> CollectCandidateNavDestinationNodes(const std::list<RefPtr<NG::FrameNode>>& navNodes)
+{
+    std::vector<RefPtr<NG::FrameNode>> result;
+    for (const auto& node : navNodes) {
+        CHECK_NULL_CONTINUE(node);
+        if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            result.emplace_back(node);
+        }
+    }
+    return result;
+}
+
+std::string BuildExeAppAIFunctionAmbiguousData(
+    const std::string& funcName, const std::vector<RefPtr<NG::FrameNode>>& candidateNodes)
+{
+    auto root = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(root, "");
+    root->Put("funcName", funcName.c_str());
+    auto candidateNodeIds = JsonUtil::CreateArray();
+    CHECK_NULL_RETURN(candidateNodeIds, root->ToString());
+    for (const auto& node : candidateNodes) {
+        CHECK_NULL_CONTINUE(node);
+        auto nodeId = JsonUtil::ParseJsonString(std::to_string(node->GetId()));
+        CHECK_NULL_CONTINUE(nodeId);
+        candidateNodeIds->PutRef(std::move(nodeId));
+    }
+    root->PutRef("candidateNodeIds", std::move(candidateNodeIds));
+    return root->ToString();
+}
+
 class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
     ~TestAICaller() override = default;
-    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    std::pair<bool, std::string> onAIFunctionCaller(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj) override
     {
         if (funcName.compare("Success") == 0) {
-            return true;
+            return { true, "success" };
         }
-        return false;
+        return { false, "" };
     }
 };
 } // namespace
@@ -288,6 +423,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    // This determines the pipeline's IsolatedThread identity for its entire lifecycle.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -322,6 +460,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 PipelineContext::PipelineContext()
@@ -351,6 +491,8 @@ PipelineContext::PipelineContext()
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 bool PipelineContext::GetIsRequestVsync()
@@ -481,7 +623,7 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 bool PipelineContext::NeedSoftKeyboard()
 {
     auto needSoftKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch need keyboard %d", needSoftKeyboard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch needKB=%{public}d", needSoftKeyboard);
     return needSoftKeyboard;
 }
 
@@ -511,6 +653,12 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
     if (!CheckThreadSafe()) {
         LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
     }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (dirtyNode && isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
+        LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
+    }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -522,6 +670,12 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     if (!dirtyNode) {
         LOGW("dirtyNode invalid");
         return;
+    }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
+        LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
@@ -546,6 +700,12 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     if (IsDestroyed()) {
         LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
+    }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
+        LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -606,6 +766,12 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
+        LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
+    }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
@@ -633,6 +799,12 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
 {
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (node && isIsolatedThread_ != node->IsIsolatedThread()) {
+        LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
+    }
     dirtyFreezeNode_.emplace_back(WeakClaim(node));
     hasIdleTasks_ = true;
     RequestFrame();
@@ -951,6 +1123,7 @@ void PipelineContext::ReloadNodesResource()
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
                 ResourceParseUtils::SetNeedReload(forceDarkAllowed);
                 SetIsSystemColorChange(true);
+                frameNode->SetRerenderable(true);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 SetIsSystemColorChange(originIsSystemColorChange);
                 ResourceParseUtils::SetNeedReload(false);
@@ -959,6 +1132,7 @@ void PipelineContext::ReloadNodesResource()
             bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
             ResourceParseUtils::SetNeedReload(forceDarkAllowed);
             SetIsSystemColorChange(true);
+            needReloadNode->SetRerenderable(true);
             needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
             SetIsSystemColorChange(originIsSystemColorChange);
             ResourceParseUtils::SetNeedReload(false);
@@ -1198,26 +1372,20 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("FlushMouseEventVoluntarily x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
 
-    MouseEvent event;
+    auto scaleEvent = lastMouseEvent_->CreateScaleEvent(viewScale_);
     if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
-        event.mockFlushEvent = true;
+        scaleEvent.mockFlushEvent = true;
     }
-    event.x = lastMouseEvent_->x;
-    event.y = lastMouseEvent_->y;
-    event.time = lastMouseEvent_->time;
-    event.action = MouseAction::MOVE;
-    event.button = MouseButton::NONE_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.deviceId = lastMouseEvent_->deviceId;
-    event.sourceTool = SourceTool::MOUSE;
-    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
+    scaleEvent.action = MouseAction::MOVE;
+    scaleEvent.button = MouseButton::NONE_BUTTON;
+    scaleEvent.sourceType = SourceType::MOUSE;
+    scaleEvent.sourceTool = SourceTool::MOUSE;
 
-    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
-    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceType = scaleEvent.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
 
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
@@ -1646,9 +1814,14 @@ void PipelineContext::FlushFocusView()
     ACE_EVENT_SCOPED_TRACE("FlushFocusView:[%s][%d][enable:%d][show:%d]", lastFocusViewHub->GetFrameName().c_str(),
         lastFocusViewHub->GetFrameId(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow());
     auto container = Container::Current();
-    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
-        (!lastFocusView->IsRootScopeCurrentFocus())) {
+    if (container && container->IsDynamicRender() && (!lastFocusView->IsRootScopeCurrentFocus())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
+    }
+    if (container && container->IsUIExtensionWindow() && (!lastFocusView->IsRootScopeCurrentFocus())) {
+        if (focusManager_->GetIsFocusActive() ||
+            !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            lastFocusView->SetIsViewRootScopeFocused(false);
+        }
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
@@ -2443,7 +2616,7 @@ void PipelineContext::PostKeyboardAvoidTask()
             }
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation done, trigger avoid");
             auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
             auto positionY = manager->GetLaterAvoidPositionY();
             auto height = manager->GetLaterAvoidHeight();
@@ -2633,6 +2806,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
+    FireLpxUpdateCallbacks();
     MarkLpxDirtyNodes();
 }
 
@@ -2959,8 +3133,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, "
-            "safeHeight: %{public}f, rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+            "AvoidanceLogic kh=%{public}f posY=%{public}f safeH=%{public}f rootH=%{public}f offset=%{public}f",
             keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
@@ -3028,7 +3201,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
     if (keyboardHeight >= rootHeight_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboard > rootRect, skip avoid");
         return;
     }
 
@@ -3064,12 +3237,12 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
             NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
         prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ignore illegal height change");
         return;
     }
 
     if (manager->UsingCustomKeyboardAvoid()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use customKB avoid");
         return;
     }
 
@@ -3099,8 +3272,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
 
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
-
         float keyboardOffset =
             manager ? manager->GetClickPositionOffset() : context->safeAreaManager_->GetKeyboardOffset();
         float currentPos =
@@ -3115,7 +3286,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         currentPos += adjust;
 
         if (!onFocusField) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use window origin arg");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
             positionY -= keyboardOffset;
@@ -3145,8 +3316,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
+            "DoKeyboardAvoid kh=%{public}f posY=%{public}f textH=%{public}f rootH=%{public}f adjust=%{public}f "
+            "offset=%{public}f",
             keyboardHeight, positionY, height, rootSize.Height(), adjust,
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -3200,7 +3371,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(float keyboard
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (manager->UsingCustomKeyboardAvoid()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use custom avoid");
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
@@ -3245,7 +3416,6 @@ void PipelineContext::DoKeyboardAvoidFunc(
         keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
     }
     SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
     float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
                      GetSafeAreaManager()->GetKeyboardOffset(true);
     auto onFocusField = manager->GetOnFocusTextField().Upgrade();
@@ -3271,9 +3441,8 @@ void PipelineContext::DoKeyboardAvoidFunc(
     }
     manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
     TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-        "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-        "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
-        "final calculate keyboard offset is %{public}f",
+        "CaretAvoid kh=%{public}f caretPos=%{public}f caretH=%{public}f rootH=%{public}f adjust=%{public}f "
+        "lastOffset=%{public}f offset=%{public}f",
         keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
         safeAreaManager_->GetKeyboardOffset());
     SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -3629,7 +3798,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.tid = static_cast<uint64_t>(pthread_self());
     }
 #endif
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+    if (scalePoint.type != TouchType::DOWN) {
+        ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+    }
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
@@ -3689,6 +3860,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
         eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        if (!touchOptimizer_->IsTouchDownNotifiedToClick()) {
+            ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+        }
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
@@ -4214,15 +4388,24 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             jsParams = std::vector<std::string>(params.begin() + 1, params.end());
         }
 
-        auto stageNode = stageManager_->GetStageNode();
-        CHECK_NULL_RETURN(stageNode, false);
-        auto children = stageNode->GetChildren();
-        for (const auto& pageNode : children) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-            CHECK_NULL_RETURN(frameNode, false);
-            auto pagePattern = frameNode->GetPattern<PagePattern>();
+        bool isHelp = params.size() >= 2 && params[1] == "-h";
+        if (isHelp) {
+            auto pageNode = stageManager_->GetLastPage();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
             CHECK_NULL_RETURN(pagePattern, false);
             pagePattern->FireDumpListener(jsParams);
+        } else {
+            auto stageNode = stageManager_->GetStageNode();
+            CHECK_NULL_RETURN(stageNode, false);
+            auto children = stageNode->GetChildren();
+            for (const auto& pageNode : children) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+                CHECK_NULL_RETURN(frameNode, false);
+                auto pagePattern = frameNode->GetPattern<PagePattern>();
+                CHECK_NULL_RETURN(pagePattern, false);
+                pagePattern->FireDumpListener(jsParams);
+            }
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
@@ -4332,9 +4515,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
         auto rootChildren = rootNode_->GetChildren();
         auto config = ParamConfig{true, true, true, true};
+        DumpVisibleInspectorTree(root, config);
+        DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-visibleInfoWithModifiedParam" &&
+               params.size() >= SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG) {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        auto config = ParseDumpParamConfig(params, DUMP_PARAM_VISIBLE_INFO_START_INDEX);
         DumpVisibleInspectorTree(root, config);
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
@@ -4342,6 +4531,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-featuremanager") {
+        if (params.size() < PARAM_NUM) {
+            DumpLog::GetInstance().Print("Error: -featuremanager needs key");
+        } else {
+            std::string value;
+            auto ret = FeatureManager::GetInstance().GetFeatureParam(params[1], value);
+            if (ret == FeatureManager::SUCCESS) {
+                DumpLog::GetInstance().Print(value);
+            } else {
+                DumpLog::GetInstance().Print(
+                    "Error: FeatureManager get feature param failed, ret: " + std::to_string(ret));
+            }
+        }
     } else if (params[0] == "-resource") {
         DumpResLoadError();
     } else if (params[0] == "-start") {
@@ -4780,21 +4982,10 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
+    *lastMouseEvent_ = event;
     if (event.mockFlushEvent && event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseEvent_->isMockWindowTransFlag = true;
     }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
-    lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
-    lastMouseEvent_->pointerEvent = event.pointerEvent;
-    lastMouseEvent_->deviceId = event.deviceId;
-    lastMouseEvent_->sourceTool = event.sourceTool;
-    lastMouseEvent_->targetDisplayId = event.targetDisplayId;
     lastSourceType_ = event.sourceType;
 }
 
@@ -7003,7 +7194,9 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 {
     static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
         V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
-        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG, V2::OVERLAY_ETS_TAG,
+        V2::ORDER_OVERLAY_ETS_TAG
+    };
 
     if (targetTags.find(tag) != targetTags.end()) {
         return true;
@@ -7013,16 +7206,23 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 
 bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
     std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
-    bool isInSubWindow, ParamConfig config) const
+    bool isInSubWindow, ParamConfig config, double rootNodeFinalOpacity) const
 {
     auto childNodes = rootNode->GetChildren();
     bool hasOverlay = false;
     for (const auto& child : childNodes) {
         auto tag = child->GetTag();
         if (IsTagInOverlay(tag)) {
-            hasOverlay = true;
+            if (!NearZero(config.minOpacity) &&
+                LessNotEqual(rootNodeFinalOpacity * GetNodeOpacityValue(child), config.minOpacity)) {
+                continue;
+            }
             auto eachOverlayContent = JsonUtil::CreateSharedPtrJson();
-            child->DumpSimplifyTreeWithParamConfig(0, eachOverlayContent, true, config);
+            child->DumpSimplifyTreeWithParamConfig(0, eachOverlayContent, true, config, nullptr, rootNodeFinalOpacity);
+            if (!eachOverlayContent->Contains("$type")) {
+                continue;
+            }
+            hasOverlay = true;
             if (isInSubWindow) {
                 subWindowOverlayArray->Put(eachOverlayContent);
             } else {
@@ -7033,10 +7233,17 @@ bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& ro
     return hasOverlay;
 }
 
-void PipelineContext::GetComponentOverlayInspector(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config, bool isInSubWindow) const
+void PipelineContext::GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root,
+    RefPtr<NG::FrameNode> startNode, ParamConfig config, bool isInSubWindow, double parentFinalOpacity) const
 {
     CHECK_NULL_VOID(startNode);
+    auto startNodeFinalOpacity = parentFinalOpacity;
+    if (!NearZero(config.minOpacity)) {
+        startNodeFinalOpacity *= GetNodeOpacityValue(startNode);
+    }
+    if (!NearZero(config.minOpacity) && LessNotEqual(startNodeFinalOpacity, config.minOpacity)) {
+        return;
+    }
     auto subRoot = JsonUtil::CreateSharedPtrJson(true);
     if (isInSubWindow) {
         startNode->DumpSimplifyTreeBase(subRoot);
@@ -7053,7 +7260,8 @@ void PipelineContext::GetComponentOverlayInspector(
     // value of subWindow
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     bool hasOverlay =
-        ProcessOverlayChildrenDumpInfo(startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
+        ProcessOverlayChildrenDumpInfo(
+            startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config, startNodeFinalOpacity);
 
     if (isInSubWindow) {
         subRoot->PutRef("$children", std::move(subWindowOverlayArray));
@@ -7072,11 +7280,11 @@ void PipelineContext::GetComponentOverlayInspector(
     GetOverlayInfo(hasOverlay, root, overlayContent, overlayChildrenArray, overlayArray);
 }
 
-void PipelineContext::GetOverlayInspector(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+    ParamConfig config, double parentFinalOpacity) const
 {
     // component overlay
-    GetComponentOverlayInspector(root, startNode, config, false);
+    GetComponentOverlayInspector(root, startNode, config, false, parentFinalOpacity);
     // sub-window overlay
     auto subContainerIds = SubwindowManager::GetInstance()->GetAllSubContainerId(Container::CurrentId());
     for (auto& containerId : subContainerIds) {
@@ -7098,8 +7306,18 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
         if (navNode == nullptr) {
             continue;
         }
+        auto navNodeParentFinalOpacity = DEFAULT_NODE_OPACITY;
+        if (!NearZero(config.minOpacity)) {
+            navNodeParentFinalOpacity = GetAncestorOpacityBeforeNode(navNode);
+            if (LessNotEqual(navNodeParentFinalOpacity * GetNodeOpacityValue(navNode), config.minOpacity)) {
+                continue;
+            }
+        }
         auto navNodeJson = JsonUtil::CreateSharedPtrJson();
-        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config);
+        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config, nullptr, navNodeParentFinalOpacity);
+        if (!navNodeJson->Contains("$type")) {
+            continue;
+        }
         childrenJson->Put(navNodeJson);
     }
 }
@@ -7128,6 +7346,11 @@ void PipelineContext::DumpSimplifyTreeJsonEntrance(
 
 void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
 {
+    config.minOpacity = NormalizeMinOpacity(config.minOpacity);
+    CHECK_NULL_VOID(rootNode_);
+    if (!NearZero(config.minOpacity) && LessNotEqual(GetNodeOpacityValue(rootNode_), config.minOpacity)) {
+        return;
+    }
     auto containerModalNode = GetContainerModalNode();
     auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
     auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
@@ -7135,12 +7358,20 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
     // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
     std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
     std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
+    bool addContainerModalTitleJson = true;
     if (dumpBeginNode != rootNode_) {
         // ContainerModal case
         containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
         // In this case, ContainerModalPattern can not be nullptr
         auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
-        if (titleRow) {
+        auto titleRowBelowMinOpacity = false;
+        if (titleRow && !NearZero(config.minOpacity)) {
+            auto titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
+            titleRowBelowMinOpacity =
+                LessNotEqual(titleRowParentFinalOpacity * GetNodeOpacityValue(titleRow), config.minOpacity);
+        }
+        addContainerModalTitleJson = !titleRowBelowMinOpacity;
+        if (titleRow && !titleRowBelowMinOpacity) {
             DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
         }
         pseudoRootJson = JsonUtil::CreateSharedPtrJson();
@@ -7148,30 +7379,58 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
         rootNode_->DumpSimplifyTreeBase(rootJson);
         rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
     }
-    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config);
+    auto dumpBeginParentFinalOpacity = DEFAULT_NODE_OPACITY;
+    if (!NearZero(config.minOpacity)) {
+        dumpBeginParentFinalOpacity = GetAncestorOpacityBeforeNode(dumpBeginNode);
+    }
+    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config, dumpBeginParentFinalOpacity);
     if (atomicServiceDumpNode) {
         auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
             overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
-        if (atomicServiceRoot) {
-            // dump component-overlay only, sub-window overlay has been dumped in rootJson
-            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false);
-            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
-            AddJsonChild(pseudoRootJson, atomicRootJson);
+        auto atomicServiceRootParentFinalOpacity = DEFAULT_NODE_OPACITY;
+        auto atomicServiceRootBelowMinOpacity = false;
+        if (atomicServiceRoot && !NearZero(config.minOpacity)) {
+            atomicServiceRootParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceRoot);
+            atomicServiceRootBelowMinOpacity = LessNotEqual(
+                atomicServiceRootParentFinalOpacity * GetNodeOpacityValue(atomicServiceRoot), config.minOpacity);
         }
-        auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
-            overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
-        if (atomicServiceMenuBar) {
-            DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
-            AddJsonChild(atomicRootJson, atomicMenuBarJson);
+        if (atomicServiceRoot && !atomicServiceRootBelowMinOpacity) {
+            // dump component-overlay only, sub-window overlay has been dumped in rootJson
+            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false,
+                atomicServiceRootParentFinalOpacity);
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
+            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
+                AddJsonChild(pseudoRootJson, atomicRootJson);
+            }
+            auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
+                overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+            auto atomicServiceMenuBarBelowMinOpacity = false;
+            if (atomicServiceMenuBar && !NearZero(config.minOpacity)) {
+                auto menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
+                atomicServiceMenuBarBelowMinOpacity =
+                    LessNotEqual(menuBarParentFinalOpacity * GetNodeOpacityValue(atomicServiceMenuBar),
+                        config.minOpacity);
+            }
+            if (atomicServiceMenuBar && !atomicServiceMenuBarBelowMinOpacity) {
+                DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
+                if (!config.rectCulling || HasDumpedJsonContent(atomicMenuBarJson)) {
+                    AddJsonChild(atomicRootJson, atomicMenuBarJson);
+                }
+            }
         }
     } else {
         DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
     }
     if (pseudoRootJson != rootJson) {
-        AddJsonChild(rootJson, containerModalTitleJson);
-        AddJsonChild(rootJson, pseudoRootJson);
+        if (addContainerModalTitleJson &&
+            (!config.rectCulling || HasDumpedJsonContent(containerModalTitleJson))) {
+            AddJsonChild(rootJson, containerModalTitleJson);
+        }
+        if (!config.rectCulling || HasDumpedJsonContent(pseudoRootJson)) {
+            AddJsonChild(rootJson, pseudoRootJson);
+        }
     }
 }
 
@@ -7191,8 +7450,10 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
         }
     };
     ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
-                     "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
-        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
+                     "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]"
+                     "[config.rectCulling:%d][config.minOpacity:%f]",
+        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb,
+        config.rectCulling, config.minOpacity);
     if (onlyNeedVisible) {
         DumpVisibleInspectorTree(root, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
@@ -7816,16 +8077,27 @@ bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
     return ret;
 }
 
-uint32_t PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params)
+std::pair<uint32_t, std::string> PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName,
+    const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId)
 {
-    static constexpr uint32_t AI_CALL_NODE_INVALID = 3;
     std::list<RefPtr<NG::FrameNode>> navNodes;
-    CHECK_NULL_RETURN(rootNode_, AI_CALL_NODE_INVALID);
+    CHECK_NULL_RETURN(rootNode_, std::make_pair(AI_CALL_NODE_INVALID, ""));
     rootNode_->FindTopNavDestination(navNodes);
-    CHECK_NULL_RETURN(!navNodes.empty(), AI_CALL_NODE_INVALID);
-    auto topNavNode = navNodes.back();
-    CHECK_NULL_RETURN(topNavNode, AI_CALL_NODE_INVALID);
-    return topNavNode->CallAIFunction(funcName, params);
+    auto candidateNodes = CollectCandidateNavDestinationNodes(navNodes);
+    CHECK_NULL_RETURN(!candidateNodes.empty(), std::make_pair(AI_CALL_NODE_INVALID, ""));
+    if (nodeId != -1) {
+        for (const auto& node : candidateNodes) {
+            CHECK_NULL_CONTINUE(node);
+            if (node->GetId() == nodeId) {
+                return node->CallAIFunction(funcName, params, remoteObj);
+            }
+        }
+        return { AI_CALL_NODE_INVALID, "" };
+    }
+    if (candidateNodes.size() > 1) {
+        return { AI_CALL_NODE_AMBIGUOUS, BuildExeAppAIFunctionAmbiguousData(funcName, candidateNodes) };
+    }
+    return candidateNodes.front()->CallAIFunction(funcName, params, remoteObj);
 }
 
 void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params) const
@@ -8000,6 +8272,18 @@ void PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
     lpxDirtyNodes_.erase(node);
 }
 
+void PipelineContext::FireLpxUpdateCallbacks()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->FireLpxUpdateCallbacks();
+    }
+}
+
 void PipelineContext::MarkLpxDirtyNodes()
 {
     auto lpxDirtyNodes = lpxDirtyNodes_;
@@ -8067,6 +8351,7 @@ void PipelineContext::InitManagers()
     toolbarManager_ = MakeRefPtr<ToolbarManager>();
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
+    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
 }
 
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
@@ -8134,20 +8419,36 @@ void PipelineContext::FlushRelaxedInteraction()
 #endif
 }
 
+std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_DIRECTION, envValue)) {
+        return std::nullopt;
+    }
+
+    if (auto direction = envValue.GetDirection()) {
+        return *direction;
+    }
+    return std::nullopt;
+}
+
 std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_RETURN(host, std::nullopt);
     auto envManager = GetEnvironmentManager();
     CHECK_NULL_RETURN(envManager, std::nullopt);
 
-    EnvironmentQueryResult result;
-    if (!envManager->FindValueByKey(
-        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_FONT_SCALE, result)) {
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_FONT_SCALE, envValue)) {
         return std::nullopt;
     }
 
-    if (result.type == EnvironmentValueType::NUMBER) {
-        return static_cast<float>(result.numberValue);
+    if (auto fontScale = envValue.GetDouble()) {
+        return static_cast<float>(*fontScale);
     }
     return std::nullopt;
 }
@@ -8173,4 +8474,160 @@ RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeMana
     }
     return dynamicComponentSafeManager_;
 }
+
+int32_t PipelineContext::RegisterSurfaceChangedCallback(
+    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+{
+    if (callback) {
+        surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
+{
+    surfaceChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+{
+    if (callback) {
+        foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+{
+    foldStatusChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+{
+    if (callback) {
+        halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+{
+    halfFoldHoverChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+{
+    if (callback) {
+        rawKeyboardChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterRawKeyboardChangedCallback(int32_t callbackId)
+{
+    rawKeyboardChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+{
+    if (callback) {
+        foldDisplayModeChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId)
+{
+    foldDisplayModeChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+{
+    if (callback) {
+        surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+{
+    surfacePositionChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+{
+    if (callback) {
+        transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterTransformHintChangedCallback(int32_t callbackId)
+{
+    transformHintChangedCallbackMap_.erase(callbackId);
+}
+
+void PipelineContext::RemoveGestureTask(const DelayedTask& task)
+{
+    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+        if (iter->recognizer == task.recognizer) {
+            iter = delayedTasks_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+RectF PipelineContext::GetRootRect()
+{
+    CHECK_NULL_RETURN(rootNode_, RectF());
+    auto geometryNode = rootNode_->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    return geometryNode->GetFrameRect();
+}
+
+void PipelineContext::OnFlushReloadFinish()
+{
+    auto tasks = std::move(afterReloadAnimationTasks_);
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void PipelineContext::SetAreaChangeNodeMinDepth(int32_t depth)
+{
+    if (areaChangeNodeMinDepth_ > 0) {
+        areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+    } else {
+        areaChangeNodeMinDepth_ = depth;
+    }
+}
+
+void PipelineContext::SetIsDisappearChangeNodeMinDepth(int32_t depth)
+{
+    if (isDisappearChangeNodeMinDepth_ > 0) {
+        isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+    } else {
+        isDisappearChangeNodeMinDepth_ = depth;
+    }
+}
+
+int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& callback)
+{
+    if (callback) {
+        rotationEndCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
 } // namespace OHOS::Ace::NG

@@ -21,12 +21,15 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_handler.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 namespace {
 int32_t g_id = 0;
+constexpr int32_t API_VERSION_MODULUS = 1000;
 } // namespace
 
 Container::Container() = default;
@@ -192,6 +195,13 @@ int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAut
     return isPopup ? AceAutoFillError::ACE_AUTO_FILL_SUCCESS : AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
 }
 
+HintToTypeWrap MockContainer::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
 void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)
 {
     displayInfo_ = displayInfo;
@@ -203,6 +213,21 @@ RefPtr<DisplayInfo> Container::GetDisplayInfo()
 }
 
 void Container::InitIsFoldable() {}
+
+HintToTypeWrap Container::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
+int32_t Container::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
+{
+    return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
+}
 
 bool Container::IsFoldable()
 {
@@ -336,5 +361,53 @@ bool Container::IsCurrentUseNewPipeline()
 {
     auto container = Current();
     return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+}
+
+void Container::SetUseNewPipeline()
+{
+    useNewPipeline_ = true;
+}
+
+bool Container::IsInSubContainer()
+{
+    auto container = Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->IsSubContainer();
+}
+
+bool Container::LessThanAPITargetVersion(PlatformVersion version)
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    return container->GetApiTargetVersion() < static_cast<int32_t>(version);
+}
+
+bool Container::GreatOrEqualAPITargetVersion(PlatformVersion version)
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    return container->GetApiTargetVersion() >= static_cast<int32_t>(version);
+}
+
+int32_t Container::GetCurrentApiTargetVersion()
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, 0);
+    return container->GetApiTargetVersion();
+}
+
+int32_t Container::GetApiTargetVersion() const
+{
+    return apiTargetVersion_;
+}
+
+void Container::SetApiTargetVersion(int32_t apiTargetVersion)
+{
+    apiTargetVersion_ = apiTargetVersion % API_VERSION_MODULUS;
+}
+
+bool Container::IsUseNewPipeline() const
+{
+    return true;
 }
 } // namespace OHOS::Ace

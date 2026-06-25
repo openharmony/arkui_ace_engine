@@ -49,6 +49,12 @@ void DragDropInitiatingHandler::NotifyLongPressOnActionCancel(const GestureEvent
     initiatingFlow_->HandleLongPressOnActionCancel(info);
 }
 
+void DragDropInitiatingHandler::NotifyLongPressOnPending()
+{
+    CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->HandleLongPressOnPending();
+}
+
 void DragDropInitiatingHandler::NotifyPreviewLongPressOnAction(const GestureEvent& info)
 {
     CHECK_NULL_VOID(initiatingFlow_);

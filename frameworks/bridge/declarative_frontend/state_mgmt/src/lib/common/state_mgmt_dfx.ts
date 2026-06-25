@@ -21,6 +21,21 @@ class stateMgmtDFX {
   private static readonly DUMP_LAST_LENGTH: number = 3;
   public static enableDebug: boolean = false;
 
+  // Help text printed by the hidumper '-h' command (see PUV2ViewBase.debugInfoDumpHelp).
+  public static readonly DUMP_HELP_COMMANDS: Array<[string, string]> = [
+    ['-dumpAll',              'Print all component info (hierarchy + state vars + element ids)'],
+    ['-viewHierarchy',        'Print the view hierarchy tree'],
+    ['-stateVariables',       'Print state variables and dependencies'],
+    ['-registeredElementIds', 'Print registered element IDs and their update functions'],
+    ['-dirtyElementIds',      'Print dirty registered element IDs (pending updates)'],
+    ['-inactiveComponents',   'Print list of inactive components'],
+    ['-h',                    'Print this help message'],
+  ];
+  public static readonly DUMP_HELP_MODIFIERS: Array<[string, string]> = [
+    ['-r',           'Apply command recursively to child views'],
+    ['-viewId=<id>', 'Apply command to a specific view by ID'],
+  ];
+
   public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
     changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
     return {

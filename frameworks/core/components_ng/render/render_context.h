@@ -19,37 +19,29 @@
 #include <cstdint>
 #include <functional>
 
+#include "ui/properties/gradient_property.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/particle_property.h"
-#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/opinc_type.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/canvas_draw_function.h"
-#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
 
-struct ParticleOptionArrayStorage;
 namespace OHOS::Rosen {
 class DrawCmdList;
 class VisualEffect;
@@ -57,11 +49,13 @@ class Filter;
 enum class Gravity;
 class Blender;
 class RSNGFilterBase;
+class RSNGShaderBase;
 class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
+class ShapeRect;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
@@ -77,11 +71,14 @@ class Modifier;
 
 namespace OHOS::Ace::NG {
 
+struct ParticleOption;
+
 struct ShapeMaskProperty;
 
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class UINode;
 class InspectorFilter;
 class Modifier;
 class OverlayModifier;
@@ -144,6 +141,11 @@ public:
     virtual void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
+
+    virtual void InsertMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child,
+        const RefPtr<UINode>& nextSibling) {}
+
+    virtual void RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child) {}
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
@@ -285,30 +287,15 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption()
-    {
-        return oneCenterTransition_;
-    }
-    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value)
-    {
-        oneCenterTransition_ = value;
-    }
+    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption();
+    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value);
     virtual void OnNodeDisappear(bool recursive) {}
     virtual void OnNodeAppear(bool recursive) {}
-    virtual bool HasTransitionOutAnimation() const
-    {
-        return false;
-    }
+    virtual bool HasTransitionOutAnimation() const;
 
-    virtual bool HasDisappearTransition() const
-    {
-        return false;
-    }
+    virtual bool HasDisappearTransition() const;
 
-    virtual bool IsSynced() const
-    {
-        return isSynced_;
-    }
+    virtual bool IsSynced() const;
 
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
@@ -371,6 +358,7 @@ public:
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
+    virtual void ResetBlender() {}
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
@@ -383,6 +371,9 @@ public:
     {
         return nullptr;
     }
+    virtual void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) {}
+
+    virtual void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) {}
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}
@@ -430,25 +421,17 @@ public:
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
     virtual void SetMarkNodeGroup(bool isNodeGroup) {}
+    virtual void SetLayerMark(bool isLayer) {}
 
-    virtual RectF GetPaintRectWithTransform()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithTransform();
     virtual int32_t GetRotateDegree() { return 0; }
     virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 
-    virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
-    {
-        return {};
-    }
+    virtual std::pair<RectF, bool> GetPaintRectWithTranslate();
 
-    virtual Matrix4 GetLocalTransformMatrix()
-    {
-        return Matrix4();
-    }
+    virtual Matrix4 GetLocalTransformMatrix();
 
     virtual void GetPointWithRevert(PointF& point) {}
 
@@ -458,39 +441,21 @@ public:
 
     virtual void GetPointTransformRotate(PointF& point) {}
 
-    virtual Matrix4 GetMatrixWithTransformRotate()
-    {
-        return {};
-    }
+    virtual Matrix4 GetMatrixWithTransformRotate();
 
-    virtual RectF GetPaintRectWithoutTransform()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithoutTransform();
 
-    virtual RectF GetPaintRectWithTransformWithoutDegree()
-    {
-        return {};
-    }
+    virtual RectF GetPaintRectWithTransformWithoutDegree();
 
     // get position property
-    virtual RectF GetPropertyOfPosition()
-    {
-        return {};
-    }
+    virtual RectF GetPropertyOfPosition();
 
     // stop the property animation and get the current paint rect.
-    virtual OffsetF GetShowingTranslateProperty()
-    {
-        return OffsetF();
-    }
+    virtual OffsetF GetShowingTranslateProperty();
 
     virtual void CancelTranslateXYAnimation() {}
 
-    virtual OffsetF GetTranslateXYProperty()
-    {
-        return OffsetF();
-    }
+    virtual OffsetF GetTranslateXYProperty();
 
     // update translateXY in backend.
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
@@ -525,40 +490,16 @@ public:
     bool HasSharedTransition() const;
     bool HasSharedTransitionOption() const;
 
-    void SetIsModalRootNode(bool isModalRootNode)
-    {
-        isModalRootNode_ = isModalRootNode;
-    }
+    void SetIsModalRootNode(bool isModalRootNode);
 
-    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree)
-    {
-        isNeedRebuildRSTree_ = isNeedRebuildRSTree;
-    }
+    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree);
 
-    std::optional<BlurStyleOption> GetBackBlurStyle() const
-    {
-        return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
-    }
-    std::optional<Dimension> GetBackBlurRadius() const
-    {
-        return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
-    }
-    std::optional<EffectOption> GetBackgroundEffect() const
-    {
-        return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
-    }
-    std::optional<BlurOption> GetBackdropBlurOption() const
-    {
-        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
-    }
-    std::optional<BlurStyleOption> GetFrontBlurStyle() const
-    {
-        return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
-    }
-    std::optional<Dimension> GetFrontBlurRadius() const
-    {
-        return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
-    }
+    std::optional<BlurStyleOption> GetBackBlurStyle() const;
+    std::optional<Dimension> GetBackBlurRadius() const;
+    std::optional<EffectOption> GetBackgroundEffect() const;
+    std::optional<BlurOption> GetBackdropBlurOption() const;
+    std::optional<BlurStyleOption> GetFrontBlurStyle() const;
+    std::optional<Dimension> GetFrontBlurRadius() const;
 
     virtual void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
@@ -608,7 +549,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SpatialEffect, SpatialEffectParams);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
+    const std::optional<std::list<ParticleOption>>& GetParticleOptionArray() const;
+    bool HasParticleOptionArray() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue(const std::list<ParticleOption>& defaultValue) const;
+    std::optional<std::list<ParticleOption>> CloneParticleOptionArray() const;
+    void ResetParticleOptionArray();
+    void UpdateParticleOptionArray(const std::list<ParticleOption>& value);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true)
     {
@@ -819,24 +766,18 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // DoubleSided
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DoubleSided, bool);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
-    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
-    {
-        return 0;
-    }
+    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed);
 
-    virtual bool IsUniRenderEnabled()
-    {
-        return true;
-    }
+    virtual bool IsUniRenderEnabled();
     virtual void SetRenderFrameOffset(const OffsetF& offset) {}
 
-    virtual bool DoTextureExport(uint64_t /* surfaceId */)
-    {
-        return false;
-    }
+    virtual bool DoTextureExport(uint64_t /* surfaceId */);
 
     virtual bool StopTextureExport()
     {
@@ -859,10 +800,7 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
-    void SetNeedAnimateFlag(bool isNeedAnimate)
-    {
-        isNeedAnimate_ = isNeedAnimate;
-    }
+    void SetNeedAnimateFlag(bool isNeedAnimate);
 
     virtual uint64_t GetNodeId() const
     {
@@ -888,6 +826,8 @@ public:
         return 0.0f;
     }
     virtual void SetBaseRotateInZ(float degree) {}
+
+    virtual void UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY) {}
 
     virtual void UpdateWindowBlur() {}
     virtual size_t GetAnimationsCount() const
@@ -941,15 +881,20 @@ public:
 
     virtual void UpdateSubmenuDistortionParam() {}
 
-    void SetIsFree(bool isFree)
-    {
-        isFree_ = isFree;
-    }
+    void SetIsFree(bool isFree);
     virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
 
     virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
+
+    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
+
+    virtual void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) {}
+    virtual void ResetRadiusGradientBlur() {}
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;
@@ -962,6 +907,7 @@ protected:
     bool handleChildBounds_ = false;
     bool isNeedAnimate_ = true;
     bool isFree_ = false;
+    std::optional<std::list<ParticleOption>> propParticleOptionArray_;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -1023,11 +969,6 @@ protected:
 
     virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
 
-    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
-
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}
     virtual void OnFrontContrastUpdate(const Dimension& value) {}
@@ -1062,6 +1003,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
     virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
+    virtual void OnDoubleSidedUpdate(bool doubleSided) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

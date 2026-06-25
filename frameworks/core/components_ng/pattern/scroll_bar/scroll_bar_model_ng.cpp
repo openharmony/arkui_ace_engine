@@ -15,7 +15,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
+#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
 
@@ -23,7 +23,16 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE };
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
+RefPtr<Pattern> CreateArcScrollBarPattern()
+{
+    auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
+    CHECK_NULL_RETURN(mod, nullptr);
+    CHECK_NULL_RETURN(mod->createArcScrollBarPattern, nullptr);
+    return mod->createArcScrollBarPattern();
 }
+} // namespace
+
 RefPtr<ScrollProxy> ScrollBarModelNG::GetScrollBarProxy(const RefPtr<ScrollProxy>& scrollProxy)
 {
     auto proxy = AceType::DynamicCast<NG::ScrollBarProxy>(scrollProxy);
@@ -47,7 +56,7 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
         auto deviceType = SystemProperties::GetDeviceType();
         if (deviceType == DeviceType::WATCH || deviceType == DeviceType::WEARABLE) {
             frameNode = FrameNode::GetOrCreateFrameNode(
-                V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
+                V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return CreateArcScrollBarPattern(); });
         }
     } else {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
@@ -81,6 +90,13 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
         auto visible = (DISPLAY_MODE[stateValue] == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible, frameNode);
     }
+}
+
+RefPtr<FrameNode> ScrollBarModelNG::CreateArcScrollBar(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return CreateArcScrollBarPattern(); });
 }
 
 void ScrollBarModelNG::SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)

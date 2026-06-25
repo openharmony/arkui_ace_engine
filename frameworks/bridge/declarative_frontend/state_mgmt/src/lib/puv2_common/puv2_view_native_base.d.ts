@@ -38,6 +38,9 @@ declare class NativeViewPartialUpdate {
   resetRecycleCustomNode(): void;
   sendStateInfo(stateInfo: string): void;
   setIsV2(isV2: boolean): void;
+  setReusableMemOptStrategy(reusableMemOptStrategy: number): void;
+  startMemOpt(): void;
+  requestProgressiveRelease(): void;
   allowReusableV2Descendant(): boolean;
   getInstanceId(): number;
   getMainInstanceId(): number;
@@ -50,8 +53,7 @@ declare class NativeViewPartialUpdate {
   getUIContext(): UIContext;
   getUniqueId(): number;
   getDialogController(): object;
-  registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void;
-  findCustomValueByKey(key: string): any;
-  registerUpdateCustomEnvCallback(callback: (key: string) => void): void;
+  findCustomValueByKey(key: number): CustomEnvValue;
+  findEnvValueByKey(key: string): CustomEnvValue;
   setCreatorId(id: number): void;
 }

@@ -16,7 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_ADVANCED_TEXT_STYLE_H
 #include "ui/base/ace_type.h"
 
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
 #include "frameworks/base/geometry/ng/point_t.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 

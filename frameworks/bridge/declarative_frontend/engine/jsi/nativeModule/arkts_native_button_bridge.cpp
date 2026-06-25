@@ -27,6 +27,29 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        nativeNode = nullptr;
+        return true;
+    }
+    return false;
+}
+
+bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    if (firstArg->IsBoolean()) {
+        return firstArg->ToBoolean(vm)->Value();
+    }
+    return false;
+}
+} // namespace
+
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
@@ -575,37 +598,45 @@ void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDim, std::v
 ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);     // topLeft value
-    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);    // topRight value
-    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);  // bottomLeft value
-    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_4); // bottomRight value
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = IsJsView(firstArg, vm);
+    if (isJsView) {
+        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+        ArkTSUtils::SetButtonBorderRadiusByJs(vm, nativeNode, secondArg);
+        ArkTSUtils::SetRenderStrategy(runtimeCallInfo, CALL_ARG_3);
+    } else {
+        Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);     // topLeft value
+        Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);    // topRight value
+        Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);  // bottomLeft value
+        Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_4); // bottomRight value
 
-    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
-        bottomRightArgs->IsUndefined()) {
-        GetArkUINodeModifiers()->getButtonModifier()->resetButtonBorderRadius(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+        if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+            bottomRightArgs->IsUndefined()) {
+            GetArkUINodeModifiers()->getButtonModifier()->resetButtonBorderRadius(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        std::optional<CalcDimension> radiusTopLeft;
+        std::optional<CalcDimension> radiusTopRight;
+        std::optional<CalcDimension> radiusBottomLeft;
+        std::optional<CalcDimension> radiusBottomRight;
+
+        ParseBorderRadius(vm, topLeftArgs, radiusTopLeft);
+        ParseBorderRadius(vm, topRightArgs, radiusTopRight);
+        ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
+        ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
+
+        std::vector<ArkUI_Float32> options;
+        PushBorderRadiusVector(radiusTopLeft, options);
+        PushBorderRadiusVector(radiusTopRight, options);
+        PushBorderRadiusVector(radiusBottomLeft, options);
+        PushBorderRadiusVector(radiusBottomRight, options);
+
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonBorderRadius(nativeNode, options.data(), options.size());
     }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-
-    ParseBorderRadius(vm, topLeftArgs, radiusTopLeft);
-    ParseBorderRadius(vm, topRightArgs, radiusTopRight);
-    ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
-    ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
-
-    std::vector<ArkUI_Float32> options;
-    PushBorderRadiusVector(radiusTopLeft, options);
-    PushBorderRadiusVector(radiusTopRight, options);
-    PushBorderRadiusVector(radiusBottomLeft, options);
-    PushBorderRadiusVector(radiusBottomRight, options);
-
-    GetArkUINodeModifiers()->getButtonModifier()->setButtonBorderRadius(nativeNode, options.data(), options.size());
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -14,7 +14,6 @@
  */
 #include "calendar_picker_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
 
 namespace OHOS::Ace::NG {
 PickerDate CalendarPickerUtils::ParseDate(

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 
+#include <cerrno>
+#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
@@ -28,9 +30,13 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -660,7 +666,14 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 std::string TimePickerColumnPattern::GetTimeUnitString(const std::string& timeValue,
     TimeUnitStyle timeStyle, MeasureFormatStyle formatStyle) const
 {
-    double time = std::stod(timeValue);
+    errno = 0;
+    char* endPtr = nullptr;
+    long long timeLong = std::strtoll(timeValue.c_str(), &endPtr, 10);
+    if (endPtr == timeValue.c_str() || *endPtr != '\0' || errno == ERANGE ||
+        timeLong < INT_MIN || timeLong > INT_MAX) {
+        return timeValue;
+    }
+    double time = static_cast<double>(timeLong);
     std::string unitString = Localization::GetInstance()->TimeUnitFormat(time, timeStyle, formatStyle);
     if (unitString.empty()) {
         return timeValue;
@@ -696,6 +709,11 @@ std::string TimePickerColumnPattern::GetCurrentOption() const
             return "";
         }
         std::string text = timePickerRowPattern->GetOptionsValue(frameNode, index);
+        CHECK_EQUAL_RETURN(text.empty(), true, "");
+        bool isValid = std::all_of(text.begin(), text.end(), [](char c) {
+            return std::isdigit(static_cast<unsigned char>(c));
+        });
+        CHECK_EQUAL_RETURN(isValid, false, text);
         if (AceApplicationInfo::GetInstance().GetLanguage() == "zh" && text.compare("00") == 0) {
             text = "0";
         }
@@ -717,14 +735,8 @@ std::string TimePickerColumnPattern::GetCurrentOption() const
         } else {
             result = text;
         }
-        if (result.empty()) {
-            return "";
-        }
-        if (result.front() == '0') {
-            result = "[n1]" + result;
-        } else {
-            result = "[n2]" + result;
-        }
+        CHECK_EQUAL_RETURN(result.empty(), true, "");
+        result = (result.front() == '0') ? "[n1]" + result : "[n2]" + result;
         return result;
     }
     return "";

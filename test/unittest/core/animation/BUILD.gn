@@ -35,7 +35,11 @@ ace_unittest("geometry_transition_test_ng") {
 ace_unittest("callback_thread_wrapper_test") {
   module_name = "ScrollingSet-Refresh"
   type = "new"
-  sources = [ "callback_thread_wrapper_test.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/animation/animation_pub.cpp",
+    "animation_pub_test.cpp",
+    "callback_thread_wrapper_test.cpp",
+  ]
 
   if (!ace_enable_full_test_suite) {
     sources = []

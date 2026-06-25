@@ -17,28 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_TEXT_TEXT_DECLARATION_H
 
 #include "core/components/declaration/common/declaration.h"
-#include "core/components/common/properties/text_style.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace {
 
-struct TextSpecializedAttribute : Attribute {
-    std::string data;
-};
-
-struct TextSpecializedStyle : Style {
-    TextStyle textStyle;
-    Color focusColor;
-    CopyOptions copyOptions;
-    bool isMaxWidthLayout = false;
-    bool autoMaxLines = false;
-};
-
-enum class TextShadowSettings {
-    OFFSET_ONLY = 2,
-    OFFSET_EXTRA,
-    OFFSET_BLUR_CLOR,
-};
+// Forward declaration
+class TextStyle;
 
 class ACE_FORCE_EXPORT TextDeclaration : public Declaration {
     DECLARE_ACE_TYPE(TextDeclaration, Declaration);
@@ -49,103 +32,28 @@ public:
 
     void InitializeStyle() override;
 
-    const std::string& GetData() const
-    {
-        auto& attribute = static_cast<TextSpecializedAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
-        return attribute.data;
-    }
+    const std::string& GetData() const;
+    void SetData(const std::string& data);
+    const TextStyle& GetTextStyle() const;
+    void SetTextStyle(const TextStyle& textStyle);
 
-    void SetData(const std::string& data)
-    {
-        auto& attribute = MaybeResetAttribute<TextSpecializedAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        CheckIsChanged(attribute.data, data);
-        attribute.data = data;
-    }
+    const Color& GetFocusColor() const;
+    void SetFocusColor(const Color& focusColor);
 
-    const TextStyle& GetTextStyle() const
-    {
-        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.textStyle;
-    }
+    const CopyOptions& GetCopyOption() const;
+    void SetCopyOption(const CopyOptions& copyOptions);
 
-    void SetTextStyle(const TextStyle& textStyle)
-    {
-        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
-        CheckIsChanged(style.textStyle, textStyle);
-        style.textStyle = textStyle;
-    }
+    bool IsMaxWidthLayout() const;
+    void SetIsMaxWidthLayout(bool isMaxWidthLayout);
 
-    const Color& GetFocusColor() const
-    {
-        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.focusColor;
-    }
+    bool GetAutoMaxLines() const;
+    void SetAutoMaxLines(bool autoMaxLines);
 
-    void SetFocusColor(const Color& focusColor)
-    {
-        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
-        CheckIsChanged(style.focusColor, focusColor);
-        style.focusColor = focusColor;
-    }
+    bool IsChanged() const;
+    void SetIsChanged(bool isChanged);
 
-    const CopyOptions& GetCopyOption() const
-    {
-        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.copyOptions;
-    }
-
-    void SetCopyOption(const CopyOptions& copyOptions)
-    {
-        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
-        CheckIsChanged(style.copyOptions, copyOptions);
-        style.copyOptions = copyOptions;
-    }
-
-    bool IsMaxWidthLayout() const
-    {
-        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.isMaxWidthLayout;
-    }
-
-    void SetIsMaxWidthLayout(bool isMaxWidthLayout)
-    {
-        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
-        CheckIsChanged(style.isMaxWidthLayout, isMaxWidthLayout);
-        style.isMaxWidthLayout = isMaxWidthLayout;
-    }
-
-    bool GetAutoMaxLines() const
-    {
-        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.autoMaxLines;
-    }
-
-    void SetAutoMaxLines(bool autoMaxLines)
-    {
-        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
-        CheckIsChanged(style.autoMaxLines, autoMaxLines);
-        style.autoMaxLines = autoMaxLines;
-    }
-
-    bool IsChanged() const
-    {
-        return isChanged_;
-    }
-
-    void SetIsChanged(bool isChanged)
-    {
-        isChanged_ = isChanged;
-    }
-
-    bool HasSetTextFontSize() const
-    {
-        return hasSetTextFontSize_;
-    }
-
-    bool HasSetTextColor() const
-    {
-        return hasSetTextColor_;
-    }
+    bool HasSetTextFontSize() const;
+    bool HasSetTextColor() const;
 
     static std::vector<Shadow> ParseTextShadow(const std::string& val, TextDeclaration& declaration);
 

@@ -248,9 +248,10 @@ int32_t UIContentServiceStubImpl::GetLatestHitTestNodeInfosForTouch(
 }
 
 int32_t UIContentServiceStubImpl::ExeAppAIFunction(
-    const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+    const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
+    const std::function<void(uint32_t, std::string)>& finishCallback)
 {
-    UiSessionManager::GetInstance()->ExeAppAIFunction(funcName, params);
+    UiSessionManager::GetInstance()->ExeAppAIFunction(funcName, params, remoteObj, nodeId);
     return NO_ERROR;
 }
 

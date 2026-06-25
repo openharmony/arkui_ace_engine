@@ -23,7 +23,8 @@ import {
     HorizontalAlign, ButtonAttribute, LocalizedMargin, LoadingProgress, LocalizedPadding, CommonMethod, ButtonStyleMode,
     RelativeContainer, BaseGestureEvent, ThemeColorMode, NestedScrollMode, GestureRecognizer, GestureJudgeResult,
     ConstraintSizeOptions, CustomPopupOptions, TextHeightAdaptivePolicy, PopupStateChangeParam, LocalizedAlignRuleOptions,
-    PromptActionDialogController, CustomLayout, ButtonLabelStyle, WordBreak, TextAttribute
+    PromptActionDialogController, CustomLayout, ButtonLabelStyle, WordBreak, TextAttribute,
+    AccessibilityRoleType
   } from '@ohos.arkui.component';
   import {
     Local, Once, Trace, Event, Param, Require, Monitor, PropRef, Provider, IMonitor, Consumer, Computed, ObservedV2,
@@ -166,7 +167,7 @@ import {
     @Local checkedInner?: boolean = false;
   
     @Monitor(['checked'])
-    checkedChangeMonitor(monitor: IMonitor) {
+    checkedChangeMonitor(monitor: IMonitor): void {
       this.checkedInner = monitor.value<boolean>('checked')?.now;
     }
   
@@ -237,7 +238,7 @@ import {
       this.fontColorWithTheme = theme.colors.fontPrimary;
     }
   
-    build() {
+    build(): void {
       Column() {
         CustomDialogContentComponent({
           contentBuilder: () => {
@@ -490,7 +491,7 @@ import {
       return sizeResult;
     }
   
-    build() {
+    build(): void {
       this.dialogBuilder();
     }
   }
@@ -505,7 +506,7 @@ import {
     @Local selectedIndexInner?: int = -1;
   
     @Monitor(['selectedIndex'])
-    selectedIndexMonitor(monitor: IMonitor) {
+    selectedIndexMonitor(monitor: IMonitor): void {
       this.selectedIndexInner = monitor.value<int>('selectedIndex')?.now;
     }
   
@@ -586,7 +587,7 @@ import {
           resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
           getStringSync((resource as Resource).id) as string;
         }
-        return selected ? `${selectText},${resourceString}` : resourceString;
+        return resourceString;
       } catch (error) {
         let code: number | undefined = (error as ClassCastError).code;
         let message: string | undefined = (error as ClassCastError).message;
@@ -659,10 +660,13 @@ import {
                 .focusBox({
                   margin: new LengthMetrics(-2, LengthUnit.VP)
                 })
+                .accessibilityChecked(this.selectedIndexInner === index)
                 .accessibilityText(this.getAccessibilityText(item.title, this.selectedIndexInner === index))
+                .accessibilityRole(AccessibilityRoleType.RADIO)
                 .onClick((event: ClickEvent) => {
                   this.selectedIndexInner = index;
                   item?.action();
+                  closeDialog(this.getDialogController(), 'onClick');
                 })
               }
               .applyStyles(this.paddingStyle)
@@ -703,7 +707,7 @@ import {
       .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) } as LocalizedMargin)
     }
   
-    build() {
+    build(): void {
       Column() {
         CustomDialogContentComponent({
           primaryTitle: this.title,
@@ -785,7 +789,7 @@ import {
       return sizeResult;
     }
   
-    build() {
+    build(): void {
       this.dialogBuilder();
     }
   }
@@ -799,7 +803,7 @@ import {
     @Local checkedInner?: boolean = this.checked;
   
     @Monitor(['checked'])
-    checkedMonitor(monitor: IMonitor) {
+    checkedMonitor(monitor: IMonitor): void {
       this.checkedInner = monitor.value<boolean>('checked')?.now;
     }
   
@@ -960,7 +964,7 @@ import {
       }
     }
   
-    build() {
+    build(): void {
       Column() {
         CustomDialogContentComponent({
           primaryTitle: this.title,
@@ -1008,7 +1012,7 @@ import {
       return buttons;
     }
   
-    build() {
+    build(): void {
       Column() {
         CustomDialogContentComponent({
           primaryTitle: this.primaryTitle,
@@ -1070,7 +1074,7 @@ import {
     @Param primaryTitle?: ResourceStr = undefined;
     @Param secondaryTitle?: ResourceStr = undefined;
     @Builder
-    doNothingBuilder() {
+    doNothingBuilder(): void {
     }
     @BuilderParam contentBuilder: () => void = this.doNothingBuilder;
     @Param contentAreaPadding?: LocalizedPadding = undefined;
@@ -1078,7 +1082,7 @@ import {
     @Provider() fontSizeScale: number = 1;
     @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   
-    build() {
+    build(): void {
       Column() {
         CustomDialogContentComponent({
           primaryTitle: this.primaryTitle,
@@ -1170,7 +1174,7 @@ import {
       return sizeResult;
     }
   
-    build() {
+    build(): void {
       this.dialogBuilder();
     }
   }
@@ -1222,7 +1226,7 @@ import {
     @Param@Once isHasDefaultFocus: boolean = false;
     @Param@Once isAllFocusFalse: boolean = false;
   
-    build() {
+    build(): void {
       RelativeContainer() {
         Scroll(this.scroller) {
           Column() {
@@ -1746,7 +1750,7 @@ import {
         if (buttonOptions?.action) {
           ((buttonOptions as AdvancedDialogV2Button).action as AdvancedDialogV2ButtonAction)();
         }
-        controller?.close();
+        closeDialog(controller, 'onKeyEvent');
         event.stopPropagation();
       }
       return false;
@@ -1755,11 +1759,7 @@ import {
       if (buttonOptions?.action) {
         ((buttonOptions as AdvancedDialogV2Button).action as AdvancedDialogV2ButtonAction)();
       }
-      if (controller) {
-  
-        controller?.close();
-      } else {
-      }
+      closeDialog(controller, 'onClick');
     })
     this.defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
     this.buttonStyle(buttonOptions?.buttonStyle ?? getDefaultButtonStyle())
@@ -1767,6 +1767,15 @@ import {
     this.type(ButtonType.ROUNDED_RECTANGLE)
     this.enabled(buttonOptions?.enabled ?? true)
     return this;
+  }
+
+  function closeDialog(controller: PromptActionDialogController | undefined, funcName: string) {
+    if (controller) {
+      hilog.info(0x3900, 'AdvancedDialog', `button ${funcName} controller true`);
+      controller.close();
+    } else {
+      hilog.info(0x3900, 'AdvancedDialog', `button ${funcName} controller false`);
+    }
   }
   
   function getDefaultButtonStyle(): ButtonStyleMode {
@@ -1868,7 +1877,7 @@ import {
     @Provider() fontSizeScale: number = 1;
     @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   
-    build() {
+    build(): void {
       Column() {
         Column() {
           CustomDialogContentComponent({
@@ -1941,7 +1950,7 @@ import {
       }
     }
   
-    build() {
+    build(): void {
       Column() {
         this.targetBuilder();
       }

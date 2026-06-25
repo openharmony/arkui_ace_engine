@@ -81,6 +81,8 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetCompleteReloadFunc(std::move(completeReloadFunc));
     customNode->SetJSViewName(std::move(info.jsViewName));
     customNode->SetIsV2(std::move(info.isV2));
+    customNode->SetReusableMemOptStrategy(std::move(info.reusableMemOptStrategy));
+    customNode->SetReleaseRecyclePoolFunction(std::move(info.releaseRecyclePoolFunc));
     customNode->SetRecycleFunction(std::move(info.recycleCustomNodeFunc));
     customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
     customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
@@ -143,5 +145,21 @@ bool ViewPartialUpdateModelNG::RegisterUpdateJSInstanceCallback(
     CHECK_NULL_RETURN(customNode, false);
     customNode->RegisterUpdateJSInstanceCallback(std::move(instanceChangeCallback));
     return true;
+}
+
+void ViewPartialUpdateModelNG::StartMemOpt(const WeakPtr<AceType>& node)
+{
+    auto weakNode = AceType::DynamicCast<NG::CustomNode>(node);
+    auto customNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(customNode);
+    customNode->StartMemOpt();
+}
+
+void ViewPartialUpdateModelNG::RequestProgressiveRelease(const WeakPtr<AceType>& node)
+{
+    auto weakNode = AceType::DynamicCast<NG::CustomNode>(node);
+    auto customNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(customNode);
+    customNode->CleanCache(false, false);
 }
 } // namespace OHOS::Ace::NG

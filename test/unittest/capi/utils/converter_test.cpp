@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "../capi_gen140_compat.h"
@@ -25,6 +26,57 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Ark_Int32 TEST_RESOURCE_ID = 17;
+int32_t g_holdCount = 0;
+int32_t g_releaseCount = 0;
+int32_t g_syncCallCount = 0;
+int32_t g_asyncCallCount = 0;
+Ark_Int32 g_lastResourceId = 0;
+
+void ResetCallbackState()
+{
+    g_holdCount = 0;
+    g_releaseCount = 0;
+    g_syncCallCount = 0;
+    g_asyncCallCount = 0;
+    g_lastResourceId = 0;
+}
+
+void HoldResource(Ark_Int32 resourceId)
+{
+    ++g_holdCount;
+    g_lastResourceId = resourceId;
+}
+
+void ReleaseResource(Ark_Int32 resourceId)
+{
+    ++g_releaseCount;
+    g_lastResourceId = resourceId;
+}
+
+void CallVoid(Ark_Int32 resourceId)
+{
+    ++g_asyncCallCount;
+    g_lastResourceId = resourceId;
+}
+
+void CallVoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId)
+{
+    (void)vmContext;
+    ++g_syncCallCount;
+    g_lastResourceId = resourceId;
+}
+
+VoidCallback MakeVoidCallback()
+{
+    return {
+        .resource = { .resourceId = TEST_RESOURCE_ID, .hold = HoldResource, .release = ReleaseResource },
+        .call = CallVoid,
+        .callSync = CallVoidSync,
+    };
+}
+} // namespace
 
 class ConvertorTest : public testing::Test {
 };
@@ -140,5 +192,29 @@ HWTEST_F(ConvertorTest, getOptTestEmpty, TestSize.Level1)
     auto value = Converter::ArkValue<Opt_Union_Number_String>();
     std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
     ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConvertorTest, callbackInvokerKeepsResourceAndInvokesCallbacks, TestSize.Level1)
+{
+    ResetCallbackState();
+    {
+        auto callback = MakeVoidCallback();
+        auto syncInvoker = GetSyncInvoker(callback);
+        auto asyncInvoker = GetAsyncInvoker(callback);
+
+        EXPECT_EQ(g_holdCount, 2);
+        syncInvoker();
+        asyncInvoker();
+
+        EXPECT_EQ(g_syncCallCount, 1);
+        EXPECT_EQ(g_asyncCallCount, 1);
+        EXPECT_EQ(g_lastResourceId, TEST_RESOURCE_ID);
+    }
+    EXPECT_EQ(g_releaseCount, 2);
 }
 } // namespace OHOS::Ace::NG

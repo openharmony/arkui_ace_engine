@@ -592,7 +592,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
     focusHub->onPaintFocusStateCallback_();
     KeyEvent keyEvent;
     focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
-
+    
     ASSERT_NE(pattern->mouseEvent_, nullptr);
     MouseInfo info;
     info.SetButton(MouseButton::RIGHT_BUTTON);

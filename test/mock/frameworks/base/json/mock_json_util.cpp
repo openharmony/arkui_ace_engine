@@ -16,64 +16,6 @@
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace {
-void MarkAsArrayForMockJson(const JsonValue* value);
-
-bool JsonValue::PutExtAttr(const char* key, const char* value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, size_t value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, int32_t value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, int64_t value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, double value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, bool value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
-bool JsonValue::PutExtAttr(const char* key, const std::unique_ptr<JsonValue>& value, const NG::InspectorFilter& filter)
-{
-    (void)key;
-    (void)value;
-    (void)filter;
-    return true;
-}
-
 std::unique_ptr<JsonValue> JsonUtil::ParseJsonData(const char* data, const char** parseEnd)
 {
     (void)data;
@@ -110,7 +52,6 @@ std::shared_ptr<JsonValue> JsonUtil::CreateSharedPtrJson(bool isRoot)
 std::unique_ptr<JsonValue> JsonUtil::CreateArray(bool isRoot)
 {
     auto value = std::make_unique<JsonValue>(nullptr, isRoot);
-    MarkAsArrayForMockJson(value.get());
     return value;
 }
 } // namespace OHOS::Ace

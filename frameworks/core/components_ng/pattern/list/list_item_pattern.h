@@ -31,6 +31,10 @@
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace OHOS::Ace {
+class Animator;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 class ForEachBaseNode;
 class InspectorFilter;
@@ -57,10 +61,8 @@ public:
 
     void SwipeBackward();
 
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
-        : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
-    {}
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle);
     ~ListItemPattern() override;
 
     void OnRecycle() override;

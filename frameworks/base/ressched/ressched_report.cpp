@@ -14,6 +14,7 @@
  */
 
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_click_optimizer.h"
 
 #include "core/common/container.h"
 #include "core/event/key_event.h"
@@ -32,6 +33,7 @@ constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
+constexpr uint32_t RES_TYPE_FLOAT_START_FROM_SIDEBAR = 216;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST = 511;
 #ifdef FFRT_EXISTS
@@ -63,6 +65,9 @@ constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 4;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
+constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -99,8 +104,11 @@ constexpr char TO_PAGE_INFO[] = "to_page";
 constexpr char TRANSITION_MODE[] = "transition_mode";
 constexpr char FROM_COMPONENT_NAME[] = "from_component_name";
 constexpr char TO_COMPONENT_NAME[] = "to_component_name";
+constexpr char WINDOW_ID[] = "window_id";
 constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
 constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
+constexpr char FLOAT_START_FROM_SIDEBAR_START[] = "float_start_from_sidebar_start";
+constexpr char FLOAT_START_FROM_SIDEBAR_END[] = "float_start_from_sidebar_end";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -177,7 +185,7 @@ void ResSchedReport::TriggerModuleSerializer()
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param,
-    int64_t tid)
+    int64_t tid, int64_t longTid)
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[Ressched::NAME] = name;
@@ -185,9 +193,12 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
     if (tid == ResDefine::INVALID_DATA) {
         tid = GetTid();
     }
+    if (longTid == ResDefine::INVALID_DATA) {
+        longTid = static_cast<int64_t>(GetPthreadSelf());
+    }
     int64_t pid = GetPid();
     if (pid != tid) {
-        payload["scrTid"] = std::to_string(static_cast<uint64_t>(GetPthreadSelf()));
+        payload["scrTid"] = std::to_string(longTid);
     }
 #endif
     if (!reportDataFunc_) {
@@ -288,6 +299,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_BACKPRESSED_EVENT, 0, payload);
                 }
             },
+            { FLOAT_START_FROM_SIDEBAR_START,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 0, payload);
+                }
+            },
+            { FLOAT_START_FROM_SIDEBAR_END,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 1, payload);
+                }
+            },
         };
     auto it = functionMap.find(name);
     if (it == functionMap.end()) {
@@ -352,6 +375,12 @@ bool ResSchedReport::AppSwiperReportEnableCheck(const std::unordered_map<std::st
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
 {
+    OnTouchEvent(touchEvent, config, nullptr, false);
+}
+
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
+                                  const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled)
+{
     if (!triggerExecuted) {
         auto curContainer = Container::Current();
         CHECK_NULL_VOID(curContainer);
@@ -370,7 +399,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
     }
     switch (touchEvent.type) {
         case TouchType::DOWN:
-            HandleTouchDown(touchEvent, config);
+            HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
             break;
         case TouchType::UP:
             HandleTouchUp(touchEvent, config);
@@ -464,14 +493,42 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
     }
 }
 
-void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
+                                     const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled)
 {
     std::unordered_map<std::string, std::string> payload;
     payload[Ressched::NAME] = TOUCH;
     LoadReportConfig(config, payload);
+
+    if (!weakNode.Invalid() && isClickExtEnabled) {
+        CollectComponentInfo(weakNode, payload);
+    }
+
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
     isInTouch_ = true;
+}
+
+void ResSchedReport::CollectComponentInfo(const WeakPtr<NG::FrameNode>& weakNode,
+                                          std::unordered_map<std::string, std::string>& payload)
+{
+    auto node = weakNode.Upgrade();
+    CHECK_NULL_VOID(node);
+
+    auto& aceInfo = AceApplicationInfo::GetInstance();
+    payload["pid"] = std::to_string(aceInfo.GetPid());
+    payload["uid"] = std::to_string(aceInfo.GetUid());
+    payload["bundleName"] = aceInfo.GetPackageName();
+    payload["abilityName"] = aceInfo.GetAbilityName();
+    payload["text"] = "";
+    std::string path = node->GetPath();
+    payload["path"] = path.substr(0, MAX_UPDATE_TEXT_LENGTH);
+
+    std::string text;
+    ResSchedClickOptimizer::GetComponentTextRecursive(weakNode, text, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
+        MAX_TOUCH_DOWN_RECURSIVE_NODES);
+    CHECK_EQUAL_VOID(text.empty(), true);
+    payload["text"] = text.substr(0, MAX_UPDATE_TEXT_LENGTH);
 }
 
 void ResSchedReport::HandleKeyDown(const KeyEvent& event)
@@ -675,21 +732,20 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
     }
 }
 
-void ResSchedReport::HandlePageTransition(const std::string& fromPage,
-    const std::string& toPage, const std::string& mode,
-    const std::string& fromComponentName, const std::string& toComponentName)
+void ResSchedReport::HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId)
 {
-    if (fromPage.empty() && toPage.empty()) {
+    if (pageTransitionInfo.fromPage.empty() && pageTransitionInfo.toPage.empty()) {
         TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
-            fromPage.c_str(), toPage.c_str());
+            pageTransitionInfo.fromPage.c_str(), pageTransitionInfo.toPage.c_str());
         return;
     }
     std::unordered_map<std::string, std::string> payload;
-    payload[FROM_PAGE_INFO] = fromPage;
-    payload[TO_PAGE_INFO] = toPage;
-    payload[TRANSITION_MODE] = mode;
-    payload[FROM_COMPONENT_NAME] = fromComponentName;
-    payload[TO_COMPONENT_NAME] = toComponentName;
+    payload[FROM_PAGE_INFO] = pageTransitionInfo.fromPage;
+    payload[TO_PAGE_INFO] = pageTransitionInfo.toPage;
+    payload[TRANSITION_MODE] = pageTransitionInfo.mode;
+    payload[FROM_COMPONENT_NAME] = pageTransitionInfo.fromComponentName;
+    payload[TO_COMPONENT_NAME] = pageTransitionInfo.toComponentName;
+    payload[WINDOW_ID] = std::to_string(windowId);
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
 }

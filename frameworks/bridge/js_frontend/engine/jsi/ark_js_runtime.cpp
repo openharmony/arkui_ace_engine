@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "base/utils/system_properties.h"
 #include "ecmascript/napi/include/dfx_jsnapi.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"

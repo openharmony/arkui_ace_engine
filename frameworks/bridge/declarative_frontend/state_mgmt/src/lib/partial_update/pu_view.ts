@@ -70,6 +70,7 @@ abstract class ViewPU extends PUV2ViewBase
   public paramsGenerator_: () => Object;
 
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
+  private delayedWatchedProps_: Set<string> = new Set<string>();
 
   private recycleManager_: RecycleManager = undefined;
   private myReusePool__ : __ReusePool_Internal__  | undefined;
@@ -279,7 +280,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.myReusePool__ = this.getReusePoolInternal(this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     }
     this.__customComponentExecuteInit__Internal();
-    this.__isCustomEnvConstructionFinalized__Internal = true;
   }
 
   // inform the subscribed property
@@ -344,6 +344,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
+    this.delayedWatchedProps_.clear();
     this.providedVars_?.clear();
     if (this.ownObservedPropertiesStore__) {
       this.ownObservedPropertiesStore__.clear();
@@ -417,6 +418,37 @@ abstract class ViewPU extends PUV2ViewBase
       return this.recycleManager_?.getDumpInfo();
     }
     return ''; // for lint warning
+  }
+
+  /**
+   * @function __releaseRecyclePool__Internal
+   * @description
+   * Unified interface for releasing recycle pool with boolean flags.
+   *
+   * @param {number} remainingTimeMs - The remaining time in ms (only used if isProgressive is true)
+   * @param {boolean} isProgressive - Whether to use progressive release (with time limit)
+   * @param {boolean} shouldCollect - Whether to collect nodes before releasing (prepare phase)
+   * @returns {boolean} - true if all nodes have been released, false if more work remains
+   */
+  public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean {
+    this.__setHasStartMemOpt__Internal(false);
+    if (!this.recycleManager_) {
+      return true; // No pool exists, considered "complete"
+    }
+
+    // Sync mode: no time limit, batch release
+    if (!isProgressive) {
+      this.recycleManager_.purgeAllCleanableRecycleNode();
+      return true;
+    }
+
+    // Collect nodes need to release progressively
+    if (shouldCollect) {
+      this.recycleManager_.preparePurgeAllCleanableRecycleNodeProgressive();
+    }
+
+    // Progressive mode: with time limit, collect nodes only once
+    return this.recycleManager_.releaseCachedNodesProgressive(remainingTimeMs);
   }
 
    /**
@@ -737,7 +769,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
+    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size && !this.delayedWatchedProps_.size) {
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
@@ -769,6 +801,15 @@ abstract class ViewPU extends PUV2ViewBase
         this.dirtDescendantElementIds_.add(elementId);
       }
       this.elmtIdsDelayedUpdate.clear();
+      
+      for (const varName of this.delayedWatchedProps_) {
+        const cb = this.watchedProps.get(varName);
+        if (cb) {
+          stateMgmtConsole.debug(`   ... calling delayed @Watch function`);
+          cb.call(this, varName);
+        }
+      }
+      this.delayedWatchedProps_.clear();
     } finally {
       this.restoreInstanceId();
     }
@@ -788,6 +829,18 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected declareWatch(propStr: string, callback: (propName: string) => void): void {
     this.watchedProps.set(propStr, callback);
+  }
+
+  protected override __notifyDecoratedWatch__Internal(varName: string): void {
+    if (this.isCompFreezeAllowed() && !this.isViewActive()) {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} delays @Watch function while component is frozen`);
+      this.delayedWatchedProps_.add(varName);
+      return;
+    }
+    const cb = this.watchedProps.get(varName);
+    if (cb && typeof cb === 'function') {
+      cb.call(this, varName);
+    }
   }
 
   /**
@@ -1115,6 +1168,10 @@ abstract class ViewPU extends PUV2ViewBase
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager_) {
       this.recycleManager_ = new RecycleManager;
+      // Set callback to request progressive release from C++ side
+      this.recycleManager_.setRequestProgressiveReleaseCallback(() => {
+        this.__requestProgressiveRelease__Internal();
+      });
     }
     return this.recycleManager_;
   }
@@ -1190,6 +1247,17 @@ abstract class ViewPU extends PUV2ViewBase
     }
   }
 
+  private  __tryQueuPreRenderCreation__Internal(name: string, componentClass?: ViewPUConstructor): boolean {
+    const preRenderPool = ViewPU.getCurrentPreRenderPool();
+    if (!preRenderPool || !componentClass) {
+      return false;
+    }
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
+    ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
+    return true;
+  }
+
   /**
    * @function observeRecycleComponentCreation
    * @description custom node recycle creation
@@ -1220,15 +1288,11 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     // PRE-RENDER mode: queue for later creation
-    const preRenderPool = ViewPU.getCurrentPreRenderPool();
-    if (preRenderPool) {
-      const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-      stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
-      ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
+    if (this.__tryQueuPreRenderCreation__Internal(name, componentClass)) {
       return;
     }
     // PRE-RENDERED CHILD: reuse child already created during pre-render
-    if (this.preRenderedChildren_?.has(name) && this.mountPreRenderedChild(name)) {
+    if (this.mountPreRenderedChild(name)) {
         return;
     }
 
@@ -1314,7 +1378,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
-        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse) {
+        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse && this.getReusePoolInternal()) {
           this.resetStateVarsOnReuse(params);
         }
         this.updateStateVars(params);
@@ -1387,6 +1451,9 @@ abstract class ViewPU extends PUV2ViewBase
     // Check if Legacy Reuse Pool exists
     if (!globalPool && parent && !(parent as ViewPU).isDeleting_) {
       parent.getOrCreateRecycleManager().pushRecycleNode(name, this);
+      if (this.__getReusableMemOptStrategy__Internal() === 1) {
+        parent.__startMemOpt__Internal();
+      }
       this.hasBeenRecycled_ = true;
     } else if (globalPool && globalPool.isActive()) {
       // Global Rewse Pool

@@ -16,6 +16,7 @@
 #include "napi_utils.h"
 #include "base/i18n/localization.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "jsnapi.h"
@@ -44,8 +45,10 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
     { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
     { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
     { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
+    { ERROR_CODE_DIALOG_CANNOT_OPEN, "The dialog cannot be opened due to node mount failure. " },
     { ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW,
         "The overlay cannot be opened due to the system pop-up window." },
+    { ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, "The dialog cannot be opened due to subwindow create failure. " },
     { ERROR_CODE_TOAST_NOT_FOUND, "Toast not found. " }
 };
 
@@ -969,8 +972,7 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = StringUtils::StringToInt(info.params[1]);
             pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
-            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
-            ReplaceHolder(pluralResults, info.params, startIndex + 2); // plural holder in index 2
+            ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
             auto count = StringUtils::StringToInt(info.params[0]);
             pluralResults = resourceWrapper->GetPluralString(info.resId, count);
@@ -997,8 +999,7 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             originStr = resourceWrapper->GetStringByName(info.params[0]);
-            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
-            ReplaceHolder(originStr, info.params, startIndex + 1);
+            ReplaceHolder(originStr, info.params, 1);
         } else {
             originStr = resourceWrapper->GetString(info.resId);
             int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
@@ -1361,8 +1362,12 @@ bool HasGetter(napi_env env, napi_value value, const std::string& key)
     auto vm = nativeEngine->GetEcmaVm();
     CHECK_NULL_RETURN(vm, false);
 
-    auto localObject = NapiValueToLocalValue(value)->ToObject(vm);
-    if (localObject->IsUndefined()) {
+    auto localValue = NapiValueToLocalValue(value);
+    if (localValue.IsEmpty() || localValue->IsNull() || localValue->IsUndefined()) {
+        return false;
+    }
+    auto localObject = localValue->ToObject(vm);
+    if (localObject.IsEmpty() || localObject->IsUndefined()) {
         return false;
     }
     auto stringRef = panda::StringRef::NewFromUtf8(vm, key.c_str());
@@ -1383,5 +1388,81 @@ int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext)
     napi_get_named_property(env, uiContext, "instanceId_", &instanceId);
     napi_get_value_int32(env, instanceId, &result);
     return result;
+}
+
+bool GetBoolProperty(napi_env env, napi_value object, const char* name, bool& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetInt32Property(napi_env env, napi_value object, const char* name, int32_t& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetDoubleProperty(napi_env env, napi_value object, const char* name, double& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_double(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetStringProperty(napi_env env, napi_value object, const char* name, std::string& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    return GetNapiString(env, value, result, valueType);
+}
+
+bool GetFunctionProperty(napi_env env, napi_value object, const char* name, napi_ref& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, value, 1, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetVoidCallbackProperty(napi_env env, napi_value object, const char* name, std::function<void()>& result)
+{
+    napi_ref ref = nullptr;
+    if (!GetFunctionProperty(env, object, name, ref)) {
+        return false;
+    }
+    result = [env, ref]() {
+        napi_value fn = nullptr;
+        napi_get_reference_value(env, ref, &fn);
+        napi_value retVal = nullptr;
+        napi_call_function(env, nullptr, fn, 0, nullptr, &retVal);
+        napi_delete_reference(env, ref);
+    };
+    return true;
 }
 } // namespace OHOS::Ace::Napi

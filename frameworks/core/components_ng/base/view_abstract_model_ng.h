@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/property.h"
@@ -1111,6 +1112,11 @@ public:
     void SetEdgeLightParam(const std::optional<EdgeLightParam>& param) override
     {
         ViewAbstract::SetEdgeLightParam(param);
+    }
+
+    void SetDoubleSided(bool doubleSided) override
+    {
+        ViewAbstract::SetDoubleSided(doubleSided);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override

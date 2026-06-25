@@ -21,13 +21,16 @@
 
 // SORTED_SECTION
 #include "base/geometry/response_region.h"
+#include "base/i18n/time_format.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
@@ -36,6 +39,8 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_date.h"
+#include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
@@ -61,6 +66,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1367,7 +1373,7 @@ Font Convert(const Ark_arkui_component_units_Font& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_FontWeight& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_FontWeight& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1378,7 +1384,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Int32& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1390,7 +1396,7 @@ FontWeightInt Convert(const Ark_Int32& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_String& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_String& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1413,7 +1419,7 @@ FontWeightInt Convert(const Ark_String& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Resource& src)
 {
     FontWeightInt dst = {};
     ResourceConverter resourceConverter(src);
@@ -1434,7 +1440,7 @@ FontWeightInt Convert(const Ark_Resource& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_ResourceStr& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_ResourceStr& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0:
@@ -2067,9 +2073,7 @@ OptionParam Convert(const Ark_MenuElement& src)
 {
     OptionParam param;
     param.value = Converter::OptConvert<std::string>(src.value).value_or(param.value);
-    param.action = [arkCallback = CallbackHelper(src.action)]() {
-        arkCallback.Invoke();
-    };
+    param.action = GetAsyncInvoker(src.action);
     param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
     param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
     auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
@@ -2458,7 +2462,8 @@ template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Op
     const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
@@ -3403,13 +3408,13 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
 }
 
 template<>
-PickerValueType Convert(const Ark_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_String& src)
 {
     return Converter::Convert<std::string>(src);
 }
 
 template<>
-PickerValueType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_Resource& src)
 {
     auto value = Converter::OptConvert<std::string>(src);
     if (value) {
@@ -3419,20 +3424,20 @@ PickerValueType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerValueType Convert(const Array_ResourceStr& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_ResourceStr& src)
 {
     auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
     return Squash(value);
 }
 
 template<>
-PickerValueType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_String& src)
 {
     return Converter::Convert<std::vector<std::string>>(src);
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3442,7 +3447,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_I32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3591,7 +3596,7 @@ void AssignCast(
 }
 
 template<>
-PickerRangeType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_String& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     std::vector<std::string> tmp;
@@ -3607,7 +3612,7 @@ PickerRangeType Convert(const Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_Array_String& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     std::vector<std::vector<std::string>> tmp;
@@ -3624,7 +3629,7 @@ PickerRangeType Convert(const Array_Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Ark_Resource& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
@@ -3641,7 +3646,7 @@ PickerRangeType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
@@ -3650,7 +3655,7 @@ PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
@@ -3752,10 +3757,7 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
     if (optOnDisappear.has_value()) {
-        selectMenuParam.onDisappear =
-            [arkCallback = CallbackHelper(optOnDisappear.value())]() {
-                arkCallback.InvokeSync();
-        };
+        selectMenuParam.onDisappear = GetSyncInvoker(optOnDisappear.value());
     }
     auto optOnMenuShow = Converter::OptConvert<MenuCallback>(src.onMenuShow);
     if (optOnMenuShow.has_value()) {
@@ -4027,6 +4029,23 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
         options.effectOption = effectOption;
     }
+    if (src.scrollEffectOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::ScrollEffectOptions scrollEffectOpt;
+        const auto& srcEffect = src.scrollEffectOptions.value;
+        if (srcEffect.scrollEffectType.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.scrollEffectType =
+                static_cast<NG::ScrollEffectType>(srcEffect.scrollEffectType.value);
+        }
+        if (srcEffect.blurEffectiveStartOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveStartOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveStartOffset.value);
+        }
+        if (srcEffect.blurEffectiveEndOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveEndOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveEndOffset.value);
+        }
+        options.scrollEffectOptions = scrollEffectOpt;
+    }
     return options;
 }
 
@@ -4091,14 +4110,10 @@ template<>
 NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
 {
     NG::NavDestinationTransition dst{};
-    dst.event = [callback = CallbackHelper(src.event)]() {
-        callback.Invoke();
-    };
+    dst.event = GetAsyncInvoker(src.event);
     auto optCallback = GetOpt(src.onTransitionEnd);
     if (optCallback) {
-        dst.onTransitionEnd = [callback = CallbackHelper(*optCallback)]() {
-            callback.Invoke();
-        };
+        dst.onTransitionEnd = GetAsyncInvoker(*optCallback);
     }
     dst.duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_NAVDESTINATION_TRANSITION_DURATION);
     dst.delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
@@ -4121,6 +4136,118 @@ template<>
 void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value)
 {
     dst = ImageSourceInfo();
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthVector3>& dst, const Ark_DepthVector3& src)
+{
+    OHOS::Ace::DepthVector3 result;
+    result.x = static_cast<float>(src.x);
+    result.y = static_cast<float>(src.y);
+    result.z = static_cast<float>(src.z);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthVector4>& dst, const Ark_DepthVector4& src)
+{
+    OHOS::Ace::DepthVector4 result;
+    result.x = static_cast<float>(src.x);
+    result.y = static_cast<float>(src.y);
+    result.z = static_cast<float>(src.z);
+    result.w = static_cast<float>(src.w);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthColorRGB>& dst, const Ark_DepthColorRGB& src)
+{
+    OHOS::Ace::DepthColorRGB result;
+    result.red = src.red;
+    result.green = src.green;
+    result.blue = src.blue;
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthSpaceType>& dst, const Ark_DepthSpaceType& src)
+{
+    switch (src) {
+        case ARK_DEPTH_SPACE_TYPE_INSTANCE:
+            dst = OHOS::Ace::DepthSpaceType::INSTANCE;
+            break;
+        case ARK_DEPTH_SPACE_TYPE_GLOBAL:
+            dst = OHOS::Ace::DepthSpaceType::GLOBAL;
+            break;
+        default:
+            LOGW("Unexpected Ark_DepthSpaceType value: %{public}d", static_cast<int>(src));
+            dst = OHOS::Ace::DepthSpaceType::INSTANCE;
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthCameraParams>& dst, const Ark_DepthCameraParams& src)
+{
+    OHOS::Ace::DepthCameraParams result;
+    auto position = Converter::OptConvert<OHOS::Ace::DepthVector3>(src.position);
+    if (position) {
+        result.position = *position;
+    }
+    auto quaternion = Converter::OptConvert<OHOS::Ace::DepthVector4>(src.quaternion);
+    if (quaternion) {
+        result.quaternion = *quaternion;
+    }
+    result.yFov = Converter::Convert<float>(src.yFov);
+    result.zNear = Converter::Convert<float>(src.zNear);
+    result.zFar = Converter::Convert<float>(src.zFar);
+    if (src.cameraBufferCrop.tag != INTEROP_TAG_UNDEFINED) {
+        const auto& cropSrc = src.cameraBufferCrop.value;
+        OHOS::Ace::CameraBufferCrop crop;
+        crop.bufferWidth = cropSrc.bufferWidth;
+        crop.bufferHeight = cropSrc.bufferHeight;
+        crop.cropOffset = { Converter::ArkValue<Ark_Int32>(cropSrc.cropOffset.x),
+                            Converter::ArkValue<Ark_Int32>(cropSrc.cropOffset.y) };
+        crop.cropScale = Converter::ArkValue<Ark_Float64>(cropSrc.cropScale);
+        result.cameraBufferCrop = crop;
+    }
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthLightParams>& dst, const Ark_DepthLightParams& src)
+{
+    OHOS::Ace::DepthLightParams result;
+    auto direction = Converter::OptConvert<OHOS::Ace::DepthVector3>(src.direction);
+    if (direction) {
+        result.direction = *direction;
+    }
+    auto color = Converter::OptConvert<OHOS::Ace::DepthColorRGB>(src.color);
+    if (color) {
+        result.color = *color;
+    }
+    result.intensity = Converter::Convert<float>(src.intensity);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthBackgroundSource>& dst,
+    const Ark_Union_ResourceStr_image_PixelMap& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_ResourceStr& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            if (info) {
+                dst = OHOS::Ace::DepthBackgroundSource::CreateImage(*info);
+            }
+        },
+        [&dst](const Ark_image_PixelMap& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            if (info) {
+                dst = OHOS::Ace::DepthBackgroundSource::CreateImage(*info);
+            }
+        },
+        []() {});
 }
 
 template<>
@@ -4355,5 +4482,77 @@ void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_Union
     dst = UnionEffectContainerOptions{};
     auto spacing = Converter::OptConvert<float>(src.spacing);
     dst->spacing = spacing.value_or(0.0f);
+}
+
+template<>
+void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src)
+{
+    auto immersiveOptions = ImmersiveOptions();
+    auto style = Converter::OptConvert<int32_t>(src.style);
+    if (style.has_value()) {
+        immersiveOptions.style = static_cast<UiMaterialStyle>(style.value());
+    }
+    auto materialColor = Converter::OptConvert<Color>(src.materialColor);
+    if (materialColor.has_value()) {
+        immersiveOptions.materialColor = materialColor.value();
+    }
+    auto colorInvert = Converter::OptConvert<bool>(src.colorInvert);
+    if (colorInvert.has_value()) {
+        immersiveOptions.colorInvert = colorInvert.value();
+    }
+    auto applyShadow = Converter::OptConvert<bool>(src.applyShadow);
+    if (applyShadow.has_value()) {
+        immersiveOptions.applyShadow = applyShadow.value();
+    }
+    auto interactive = Converter::OptConvert<bool>(src.interactive);
+    if (interactive.has_value()) {
+        immersiveOptions.interactive = interactive;
+    }
+    auto lightEffectOptions = Converter::OptConvert<LightEffectOptions>(src.lightEffect);
+    if (lightEffectOptions.has_value()) {
+        immersiveOptions.lightEffectOptions = lightEffectOptions;
+    }
+
+    dst = immersiveOptions;
+}
+template<>
+void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src)
+{
+    auto lightEffectColor = Converter::OptConvert<Color>(src.color);
+    LightEffectOptions lightEffectOptions;
+    if (lightEffectColor.has_value()) {
+        lightEffectOptions.color = lightEffectColor.value();
+    }
+    dst = lightEffectOptions;
+}
+
+std::optional<Color> OptConvertColorForMaterial(const Opt_ResourceColor* value)
+{
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    return OptConvertColorForMaterial(value->value);
+}
+
+std::optional<Color> OptConvertColorForMaterial(const Ark_ResourceColor& value)
+{
+    std::optional<Color> result;
+    AssignUnionTo(result, value);
+    if (result.has_value() && value.selector == SELECTOR_ID_3) {
+        const Ark_Resource& resource = value.value3;
+        int64_t resourceId = resource.id;
+        if (resourceId != -1) {
+            result->FillColorPlaceholderIfNeed(static_cast<uint32_t>(resourceId));
+        } else {
+            if (resource.params.tag != INTEROP_TAG_UNDEFINED && resource.params.value.length > 0) {
+                auto& firstParam = resource.params.value.array[0];
+                if (firstParam.selector == SELECTOR_ID_0) {
+                    std::string resourceName = Convert<std::string>(firstParam.value0);
+                    result->FillColorPlaceholderIfNeed(resourceName);
+                }
+            }
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG::Converter

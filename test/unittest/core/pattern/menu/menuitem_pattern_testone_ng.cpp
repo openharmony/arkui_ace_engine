@@ -73,6 +73,7 @@ const std::string TEXT_TAG = "text";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t TARGET_ID = 3;
+constexpr int32_t THEME_SCOPE_ID = 6;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 constexpr Color COLOR_SRC(0xff0000aa);
 constexpr Color COLOR_DES(0xffffffee);
@@ -814,6 +815,52 @@ HWTEST_F(MenuItemPatternTestOneNg, UpdateImageNode001, TestSize.Level1)
     auto symbol = itemProperty->GetSelectSymbol();
     menuItemPattern->UpdateImageNode(row, selectIcon);
     ASSERT_NE(symbol, nullptr);
+}
+
+/**
+ * @tc.name: UpdateImageNode002
+ * @tc.desc: Verify UpdateImageNode().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, UpdateImageNode002, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    menuItemNode->SetThemeScopeId(THEME_SCOPE_ID);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+
+    auto itemProperty = menuItemPattern->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+    itemProperty->SetSelectSymbol([](WeakPtr<NG::FrameNode>) {});
+    itemProperty->UpdateSelectIconSrc("");
+    RefPtr<FrameNode> row = wrapperNode;
+    RefPtr<FrameNode> selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    menuItemPattern->UpdateImageNode(row, selectIcon);
+    ASSERT_NE(selectIcon->GetThemeScopeId(), THEME_SCOPE_ID);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**

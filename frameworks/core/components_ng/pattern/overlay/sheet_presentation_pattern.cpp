@@ -19,6 +19,7 @@
 #include "core/components_ng/syntax/with_theme_node.h"
 
 #include "base/geometry/dimension.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -141,10 +142,16 @@ void SheetPresentationPattern::OnModifyDone()
             BlurStyleOption options;
             options.blurStyle = blurStyle;
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value_or(options));
+            auto bgBlurStyle = sheetStyle.backgroundBlurStyle.value_or(options);
+            if (!SetBlurUnderEffectComponent(bgBlurStyle)) {
+                renderContext->UpdateBackBlurStyle(bgBlurStyle);
+            }
         } else if (!MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial) &&
+                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
     }
     InitPanEvent();
@@ -275,6 +282,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     InitPageHeight();
     sheetObject_->DirtyLayoutProcess(layoutAlgorithmWrapper);
+    ReachToBottomWhenCloseAndRotate();
     UpdateFontScaleStatus();
     UpdateCloseIconStatus();
     UpdateTitlePadding();
@@ -321,7 +329,7 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
-            auto sheetWrapper = sheetNode->GetParent();
+            auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetWrapper);
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -458,7 +466,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         if (sheetPattern->GetSheetTypeNoProcess() == SheetType::SHEET_POPUP) {
-            auto sheetWrapper = sheetNode->GetParent();
+            auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetWrapper);
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -571,6 +579,64 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
 }
 
+RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const RefPtr<FrameNode>& node)
+{
+    // get parent node, if effectComponent exist then skip.
+    auto parentNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    if (parentNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+        auto grandeParentNode = AceType::DynamicCast<FrameNode>(parentNode->GetParent());
+        return grandeParentNode;
+    }
+    return parentNode;
+}
+
+void SheetPresentationPattern::SetSheetCloseIconMaterial()
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::ULTRA_THIN;
+    options.applyShadow = true;
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        options.colorInvert = true;
+        options.interactive = true;
+        LightEffectOptions lightEffectOptions;
+        options.lightEffectOptions = lightEffectOptions;
+    }
+    material->SetImmersiveOptions(options);
+
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto closeIconSymbolColor = sheetTheme->GetCloseIconSymbolColor();
+    closeIconSymbolColor.SetPlaceholder(ColorPlaceholder::ICON_PRIMARY);
+    auto iconSymbol = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(iconSymbol);
+    auto symbolLayoutProperty = iconSymbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolLayoutProperty);
+    symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+}
+
+void SheetPresentationPattern::ClearSheetCloseIconMaterial()
+{
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), nullptr);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto renderContext = sheetCloseIcon->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+}
+
 void SheetPresentationPattern::SetSheetRenderMaterial()
 {
     auto host = GetHost();
@@ -580,13 +646,35 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.systemMaterial", 1);
+        if (CheckIfUseEffectComponent(sheetStyle)) {
+            sheetStyle.systemMaterialECSub = ViewAbstract::ConvertToImmersiveECSub(sheetStyle.systemMaterial);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterialECSub));
+        } else {
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
         }
+        SetSheetCloseIconMaterial();
     }
+}
+
+bool SheetPresentationPattern::SetBlurUnderEffectComponent(const BlurStyleOption& bgBlurStyle)
+{
+    // try set blur on effectComponent if effectComponent exist.
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    if (parentNode->GetTag() != V2::EFFECT_COMPONENT_ETS_TAG) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto renderContextEC = parentNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContextEC, false);
+
+    renderContext->UpdateUseEffect(true);
+    renderContextEC->UpdateBackBlurStyle(bgBlurStyle);
+    return true;
 }
 
 void SheetPresentationPattern::ClearSheetRenderMaterial()
@@ -598,13 +686,8 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
-        }
-        RemoveResObj("sheet.uiMaterial"); // check
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
+        ClearSheetCloseIconMaterial();
     }
 }
 
@@ -720,13 +803,15 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
-        return;
-    }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.shadow.has_value() ||
+        (renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        // Check if the sheetStyle has shadow or if the system material is set and apply material's shadow
+        return;
+    }
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
@@ -1305,6 +1390,7 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     auto sheetEdgeLightMode = GetSheetEdgeLightMode();
     if (SheetEdgeLightBase::CheckIfNeedShowEdgeLight(sheetEdgeLightMode, sheetType) && isTransitionIn &&
         isFirstTransition) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.edgeLightMode", 1);
         SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(host);
         AnimationOption optionEdgeLight = SheetEdgeLightBase::GetSheetEdgeLightAnimatePreShowOption();
         const std::function<void()> event = SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(host);
@@ -1714,7 +1800,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         UpdateSheetTitleLineOptimize(needSpacingOptimize);
         scale_ = pipeline->GetFontScale();
         lineSpacingOptimizeFlag_ = needSpacingOptimize;
-        auto sheetWrapper = host->GetParent();
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);
         sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -1757,7 +1843,11 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.backgroundColor.has_value()) {
+    // - has systemMaterial and not SMOOTH -> return
+    // - has systemMaterial and SMOOTH -> update default backgroundColor
+    // - no systemMaterial and sheetStyle.backgroundColor has value -> return
+    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) ||
+        (!sheetStyle.systemMaterial && sheetStyle.backgroundColor.has_value())) {
         return;
     }
     auto pipeline = host->GetContext();
@@ -1781,7 +1871,10 @@ void SheetPresentationPattern::UpdateSheetBackgroundBlurStyle()
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
         if (sheetStyle.backgroundBlurStyle.has_value()) {
-            renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value());
+            auto bgBlurStyle = sheetStyle.backgroundBlurStyle.value();
+            if (!SetBlurUnderEffectComponent(bgBlurStyle)) {
+                renderContext->UpdateBackBlurStyle(bgBlurStyle);
+            }
         }
     }
 }
@@ -1798,7 +1891,7 @@ float SheetPresentationPattern::GetWrapperHeight()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
-    auto sheetWrapper = host->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_RETURN(sheetWrapper, 0.0f);
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
     CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
@@ -1811,7 +1904,7 @@ float SheetPresentationPattern::GetWrapperWidth()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
-    auto sheetWrapper = host->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_RETURN(sheetWrapper, 0.0f);
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
     CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
@@ -2093,7 +2186,7 @@ int32_t SheetPresentationPattern::GetSubWindowId() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, INVALID_SUBWINDOW_ID);
-    auto sheetWrapper = host->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_RETURN(sheetWrapper, INVALID_SUBWINDOW_ID);
     auto wrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
     auto sheetWrapperPattern = wrapperNode->GetPattern<SheetWrapperPattern>();
@@ -2636,6 +2729,30 @@ bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
     return isWindowChanged;
 }
 
+void SheetPresentationPattern::ReachToBottomWhenCloseAndRotate()
+{
+    if (isOnDisappearing_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE ||
+            sheetType_ == SheetType::SHEET_CENTER) {
+            renderContext->UpdateTransformTranslate({ 0.0f, pageHeight_, 0.0f });
+        }
+        auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (sheetType_ == SheetType::SHEET_CONTENT_COVER &&
+            sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT) == ModalTransition::DEFAULT) {
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto height = geometryNode->GetFrameSize().Height();
+            renderContext->UpdateTransformTranslate({ 0.0f, height, 0.0f });
+        }
+    }
+}
+
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
@@ -2965,7 +3082,7 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto sheetWrapper = host->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_RETURN(sheetWrapper, nullptr);
     auto node = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
     CHECK_NULL_RETURN(node, nullptr);
@@ -3018,7 +3135,7 @@ RefPtr<FrameNode> SheetPresentationPattern::GetOverlayRoot()
         CHECK_NULL_RETURN(overlay, nullptr);
         return AceType::DynamicCast<FrameNode>(overlay->GetRootNode().Upgrade());
     }
-    auto sheetWrapper = host->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_RETURN(sheetWrapper, nullptr);
     return AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
 }
@@ -4118,6 +4235,10 @@ void SheetPresentationPattern::OnWillDisappear()
     SendMessagesBeforeTransitionOut();
     auto hostNode = GetHost();
     CHECK_NULL_VOID(hostNode);
+    auto sheetWrapper = hostNode->GetParent();
+    if (sheetWrapper) {
+        sheetWrapper->MarkRemoving();
+    }
     auto pipelineContext = hostNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto navigationManager = pipelineContext->GetNavigationManager();
@@ -4415,8 +4536,8 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     // Parse the background olor using the resource object.
     Color backgroundColor;
     bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     if (!result) {
-        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         backgroundColor = (sheetTheme != nullptr) ? sheetTheme->GetSheetBackgoundColor() : backgroundColor;
     }
 
@@ -4430,7 +4551,12 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
 
     // Update sheet mask background color.
     auto renderContext = sheetNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(backgroundColor);
+    if (!currSheetStyle.systemMaterial) {
+        renderContext->UpdateBackgroundColor(backgroundColor);
+    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH &&
+               sheetTheme) {
+        renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+    }
     sheetNode->MarkModifyDone();
 }
 

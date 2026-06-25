@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {

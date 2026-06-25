@@ -69,6 +69,7 @@ using BackToTopCallback = std::function<bool()>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
+using IsRefreshScrollCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
 using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
@@ -81,7 +82,7 @@ using OnDidStopFlingCallback = std::function<void()>;
 class FrameNode;
 class PipelineContext;
 
-class Scrollable : public TouchEventTarget {
+class ACE_FORCE_EXPORT Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
@@ -150,7 +151,7 @@ public:
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {
@@ -371,6 +372,11 @@ public:
     void SetIsReverseCallback(const IsReverseCallback& isReverseCallback)
     {
         isReverseCallback_ = isReverseCallback;
+    }
+
+    void SetIsRefreshScrollCallback(IsRefreshScrollCallback&& isRefreshScrollCallback)
+    {
+        isRefreshScrollCallback_ = std::move(isRefreshScrollCallback);
     }
 
     void OnAnimateStop();
@@ -766,6 +772,7 @@ private:
     OnDidStopDraggingCallback onDidStopDraggingCallback_;
     OnWillStartFlingCallback onWillStartFlingCallback_;
     OnDidStopFlingCallback onDidStopFlingCallback_;
+
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
@@ -835,6 +842,7 @@ private:
 
     DragFRCSceneCallback dragFRCSceneCallback_;
     FixScrollParamCallback fixScrollParamCallback_;
+    IsRefreshScrollCallback isRefreshScrollCallback_;
     uint64_t lastVsyncTime_ = 0;
     uint64_t lastAxisVsyncTime_ = 0; // only used in mouse wheel scenes
     AnimationState state_ = AnimationState::IDLE;

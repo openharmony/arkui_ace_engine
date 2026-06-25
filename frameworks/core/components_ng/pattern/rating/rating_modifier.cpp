@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 
+#include "core/animation/curves.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components/theme/icon_theme.h"
@@ -268,5 +269,54 @@ void RatingModifier::PaintReverseStar(DrawingContext& context)
         offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
     }
     canvas.Restore();
+}
+
+void RatingModifier::SetHoverState(const RatingAnimationType& state, const RefPtr<FrameNode>& host)
+{
+    if (state_ == state) {
+        return;
+    }
+    state_ = state;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto hoverDuration = static_cast<int32_t>(ratingTheme->GetHoverAnimationDuration());
+    auto pressDuration = static_cast<int32_t>(ratingTheme->GetPressAnimationDuration());
+    switch (state) {
+        case RatingAnimationType::HOVER:
+            SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), hoverDuration, Curves::FRICTION, host);
+            break;
+        case RatingAnimationType::FOCUS:
+            SetBoardColor(LinearColor(ratingTheme->GetFocusColor()), hoverDuration, Curves::FRICTION, host);
+            break;
+        case RatingAnimationType::HOVERTOPRESS:
+            SetBoardColor(LinearColor(ratingTheme->GetPressColor()), pressDuration, Curves::SHARP, host);
+            break;
+        case RatingAnimationType::PRESSTOHOVER:
+            SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), pressDuration, Curves::SHARP, host);
+            break;
+        case RatingAnimationType::PRESS:
+            SetBoardColor(LinearColor(ratingTheme->GetPressColor()), hoverDuration, Curves::SHARP, host);
+            break;
+        case RatingAnimationType::NONE:
+            SetBoardColor(LinearColor(Color::TRANSPARENT), hoverDuration, Curves::FRICTION, host);
+            break;
+        default:
+            break;
+    }
+}
+
+void RatingModifier::SetBoardColor(
+    LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    if (boardColor_) {
+        AnimationOption option = AnimationOption();
+        option.SetDuration(duration);
+        option.SetCurve(curve);
+        AnimationUtils::Animate(
+            option, [&]() { boardColor_->Set(color); }, nullptr, nullptr, host->GetContextRefPtr());
+    }
 }
 } // namespace OHOS::Ace::NG

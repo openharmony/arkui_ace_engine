@@ -2484,6 +2484,7 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.L
      * @tc.steps: step4. test "UpdateSheetBackgroundColor",
      * @tc.expected: HasBackgroundColor = false.
      */
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
     sheetPattern->UpdateSheetBackgroundColor();
     auto renderContext = sheetNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);

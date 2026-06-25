@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/text_style.h"
 
+#include "base/log/log_wrapper.h"
 #include "ui/base/utils/utils.h"
 
 #include "core/components_ng/base/inspector_filter.h"
@@ -149,6 +150,26 @@ std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorLis
     }
     return symbolColorList;
 }
+
+std::string ConvertTextShadowToString(const std::vector<Shadow>& shadows)
+{
+    std::string result;
+    for (const auto& shadow : shadows) {
+        result.append("radius")
+              .append(std::to_string(shadow.GetBlurRadius()))
+              .append("color")
+              .append(shadow.GetColor().ColorToString())
+              .append("offsetX")
+              .append(std::to_string(shadow.GetOffset().GetX()))
+              .append("offsetY")
+              .append(std::to_string(shadow.GetOffset().GetY()))
+              .append(",");
+    }
+    if (!result.empty()) {
+        result = result.substr(0, result.size() - 1);
+    }
+    return result;
+}
 } // namespace StringUtils
 
 FontWeight ConvertFontWeight(FontWeight fontWeight)
@@ -211,7 +232,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
            propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ && propStrokeWidth_ == rhs.propStrokeWidth_ &&
            propStrokeColor_ == rhs.propStrokeColor_ && propStrokeJoinStyle_ == rhs.propStrokeJoinStyle_ &&
-           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
+           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_) && propTailIndent_ == rhs.propTailIndent_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

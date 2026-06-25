@@ -102,6 +102,14 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+    auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
+    RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
+    auto origin = dotIndicatorModifier_->GetBoundsRect();
+    if (origin.IsValid() && boundsRect.IsValid()) {
+        boundsRect = boundsRect.CombineRectT(origin);
+    }
+    dotIndicatorModifier_->SetBoundsRect(boundsRect);
+    paintWrapper->FlushContentModifier();
 }
 
 void OverlengthDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
@@ -161,8 +169,12 @@ void OverlengthDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* pai
             }
             if (maxDisplayCount_ > NUM_2 && maxDisplayCount_ <= static_cast<int32_t>(vectorBlackPointCenterX_.size())) {
                 float actualItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
-                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_2] -= actualItemWidth * 0.25f;
-                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_1] -= actualItemWidth * 0.875f;
+                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_2] -=
+                    actualItemWidth * 0.25f; // The offset of the second minimum point is 0.25 times the item width, and
+                                             // formula is (1 - 0.5) *0.5 = 0.25.
+                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_1] -=
+                    actualItemWidth * 0.875f; // the offset of the minimum point is 0.875 times the item width, and
+                                              // formula is (1 - 0.25) * 0.5 + 0.5 = 0.875.
             }
             longPointCenterX_.first = longPointCenterX_.first - changeValue;
             longPointCenterX_.second = longPointCenterX_.second - changeValue;
@@ -216,6 +228,7 @@ void OverlengthDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* 
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
+    dotIndicatorModifier_->SetIsDraggingIndicator(true);
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto swiperTheme = GetSwiperIndicatorTheme();

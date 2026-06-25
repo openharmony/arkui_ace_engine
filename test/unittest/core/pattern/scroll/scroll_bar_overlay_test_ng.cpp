@@ -14,6 +14,7 @@
  */
 #include "scroll_test_ng.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/modifier.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
@@ -1074,5 +1075,23 @@ HWTEST_F(ScrollBarOverlayTestNg, OnDrawWithDifferentModes001, TestSize.Level1)
     modifier.onDraw(drawingContext);
 }
 
-} // namespace OHOS::Ace::NG
+/**
+ * @tc.name: SetNeedPaintTrack001
+ * @tc.desc: Test SetNeedPaintTrack triggers overlay change count update
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, SetNeedPaintTrack001, TestSize.Level1)
+{
+    ScrollBarOverlayModifier modifier;
+    const auto& attachedProperties = modifier.GetAttachedProperties();
+    ASSERT_FALSE(attachedProperties.empty());
+    auto changeCount = AceType::DynamicCast<PropertyInt>(attachedProperties.front());
+    ASSERT_NE(changeCount, nullptr);
+    auto before = changeCount->Get();
 
+    modifier.SetNeedPaintTrack(true);
+
+    EXPECT_EQ(changeCount->Get(), before + 1);
+}
+
+} // namespace OHOS::Ace::NG

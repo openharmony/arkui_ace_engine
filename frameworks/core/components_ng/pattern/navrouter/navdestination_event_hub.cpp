@@ -20,6 +20,7 @@
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 void NavDestinationEventHub::FireOnDisappear()
@@ -62,6 +63,17 @@ void NavDestinationEventHub::FireAutoSave()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     container->RequestAutoSave(node);
+}
+
+void NavDestinationEventHub::FireOnSaveState()
+{
+    if (onSaveState_) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+        CHECK_NULL_VOID(navDestination);
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->CallSavedStateToJS(onSaveState_());
+    }
 }
 
 void NavDestinationEventHub::FireOnShownEvent(
@@ -131,6 +143,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestV
         builder.SetId(id).SetNavDst(name).SetHost(host).SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
     }
+    FireOnSaveState();
 }
 
 void NavDestinationEventHub::FireOnAppear()

@@ -19,9 +19,11 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/blur_style_option.h"
 
 namespace OHOS::Ace {
 

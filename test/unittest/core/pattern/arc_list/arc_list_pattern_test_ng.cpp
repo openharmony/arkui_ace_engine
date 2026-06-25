@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components/list/arc_list_item_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +32,365 @@ constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
 class ArcListPatternTestNg : public ArcListTestNg {
 public:
 };
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate001
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API>=26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with CARD style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set theme color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    // Set theme color to RED
+    auto arcListItemTheme = MockPipelineContext::pipeline_->GetTheme<ArcListItemTheme>();
+    auto originalColor = arcListItemTheme->itemDefaultColor_;
+    arcListItemTheme->itemDefaultColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color is updated to theme color (RED)
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED);
+
+    // Restore
+    arcListItem->apiVersion_ = oriApiVersion;
+    arcListItemTheme->itemDefaultColor_ = originalColor;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate002
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API>=26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with CARD style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLUE)
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate003
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API>=26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with NONE style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set API version
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to NONE style
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = arcListItem->GetRenderContext()->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate004
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API>=26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with NONE style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GREEN)
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate005
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API<26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with CARD style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GRAY);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GRAY) due to API < 26
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GRAY);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate006
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API<26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with CARD style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLACK)
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLACK);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate007
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API<26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with NONE style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to API < 26
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: ArcListItemOnThemeScopeUpdate008
+ * @tc.desc: Test ArcListItemPattern OnThemeScopeUpdate: API<26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, ArcListItemOnThemeScopeUpdate008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ArcList with NONE style ArcListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ArcListItem node and set background color
+     */
+    auto arcListItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(arcListItem, nullptr);
+
+    auto pattern = arcListItem->GetPattern<ArcListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = arcListItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+
+    auto layoutProperty = arcListItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged
+     */
+    auto oriApiVersion = arcListItem->apiVersion_;
+    arcListItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+
+    arcListItem->apiVersion_ = oriApiVersion;
+}
 
 /**
  * @tc.name: OnDirtyLayoutWrapperSwap001

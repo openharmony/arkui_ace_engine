@@ -18,12 +18,17 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
@@ -36,6 +41,18 @@ using namespace testing::ext;
 class ScrollablePatternTestNg : public TestNG {
 public:
 };
+
+namespace {
+void SetUpMockScrollBarTheme()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = ScrollablePatternTestNg::CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+}
+} // namespace
 
 /**
  * @tc.name: HandleScrollParallel001
@@ -561,7 +578,7 @@ HWTEST_F(ScrollablePatternTestNg, GetOutOfScrollableOffset001, TestSize.Level1)
     std::optional<float> height = 8.0f;
     OptionalSizeF selfIdealSize(width, height);
     OptionalSizeF parentIdealSize(width, height);
-    ViewPosReference viewPosRef = { 5.0f, 5.0f, 0.0f, 0.0f, 5.0f, ReferenceEdge::END, Axis::FREE };
+    ViewPosReference viewPosRef = { 5.0f, 5.0f, 0.0f, 0.0f, 5.0f, 0.0f, 0.0f, ReferenceEdge::END, Axis::FREE };
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = selfIdealSize;
     layoutConstraint.parentIdealSize = parentIdealSize;
@@ -611,7 +628,7 @@ HWTEST_F(ScrollablePatternTestNg, GetOutOfScrollableOffset002, TestSize.Level1)
     std::optional<float> height = 8.0f;
     OptionalSizeF selfIdealSize(width, height);
     OptionalSizeF parentIdealSize(width, height);
-    ViewPosReference viewPosRef = { 5.0f, 5.0f, 0.0f, 0.0f, 5.0f, ReferenceEdge::END, Axis::FREE };
+    ViewPosReference viewPosRef = { 5.0f, 5.0f, 0.0f, 0.0f, 5.0f, 0.0f, 0.0f, ReferenceEdge::END, Axis::FREE };
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = selfIdealSize;
     layoutConstraint.parentIdealSize = parentIdealSize;
@@ -1223,6 +1240,7 @@ HWTEST_F(ScrollablePatternTestNg, UpdateMouseStartOffset002, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
+    SetUpMockScrollBarTheme();
     RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
@@ -1235,6 +1253,7 @@ HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     scrollablePattern->scrollBar_ = scrollBar;
     scrollablePattern->OnColorConfigurationUpdate();
     EXPECT_EQ(scrollablePattern->scrollBar_->foregroundColor_.colorValue_.value, 0xffff0000);
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -1703,7 +1722,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr001, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::BOUNDARY, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::BOUNDARY, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "ContentClipMode.BOUNDARY");
@@ -1719,7 +1738,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr002, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::CUSTOM, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::CUSTOM, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "RectShape");
@@ -1735,7 +1754,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr003, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::SAFE_AREA, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::SAFE_AREA, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "ContentClipMode.SAFE_AREA");
@@ -1752,7 +1771,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr004, TestSize.Level1)
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     int32_t number = 6;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(static_cast<ContentClipMode>(number), shapeRect);
+    auto contentClip = ContentClip(static_cast<ContentClipMode>(number), shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "");
@@ -2188,5 +2207,33 @@ HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree003, TestSize.Level1)
     EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(1);
     scrollablePattern->parent_ = parent;
     scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test ScrollablePattern OnAttachToMainTree can rebind refresh coordination after refresh is inserted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+
+    scrollablePattern->CreateRefreshCoordination();
+    ASSERT_NE(scrollablePattern->refreshCoordination_, nullptr);
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->InCoordination());
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->IsValid());
+
+    auto refreshPattern = AceType::MakeRefPtr<RefreshPattern>();
+    auto refreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 2, refreshPattern);
+    ASSERT_NE(refreshNode, nullptr);
+    scrollNode->MountToParent(refreshNode);
+
+    scrollablePattern->OnAttachToMainTree();
+
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->InCoordination());
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

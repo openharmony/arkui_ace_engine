@@ -30,6 +30,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_static.h"
@@ -412,18 +413,37 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
  */
 HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level0)
 {
+    // Create counter with original CounterTheme mock
     CounterModelNG model;
     model.Create();
     GetInstance();
+    ASSERT_NE(frameNode_, nullptr);
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     auto layoutProperty = pattern_->CreateLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     auto host = pattern_->GetHost();
     ASSERT_NE(host, nullptr);
+
+    // Set API version on host node for GreatOrEqualAPITargetVersion check
+    host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    // Switch to TextTheme mock for OnThemeScopeUpdate
+    auto originalThemeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    auto textTheme = TextTheme::Builder().Build(themeConstants);
+    auto textThemeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(textThemeManager);
+    EXPECT_CALL(*textThemeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*textThemeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
+
     EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
     renderContext->UpdateForegroundColor(COLOR);
+    renderContext->UpdateForegroundColorFlag(true);
     EXPECT_FALSE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+
+    // Restore original themeManager
+    MockPipelineContext::GetCurrent()->SetThemeManager(originalThemeManager);
 }
 
 /**
@@ -698,15 +718,17 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Lev
  */
 HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest001, TestSize.Level1)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    int32_t addId = 100;
-    bool called = false;
-    CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+    Create([](CounterModelNG model) {
+        bool called = false;
+        CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+        model.SetOnInc(std::move(onInc));
+    });
 
-    CounterModelNG model;
-    model.SetOnInc(std::move(onInc));
-
-    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    auto counterPattern = frameNode_->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    auto addId = counterPattern->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
 
     EXPECT_EQ(gestureHub->parallelCombineClick, false);
@@ -874,5 +896,565 @@ HWTEST_F(CounterTestNg, CounterPatternUpdateButtonTextColorTest001, TestSize.Lev
     ASSERT_NE(addTextLayoutProperty, nullptr);
     EXPECT_TRUE(addTextLayoutProperty->HasTextColor());
     EXPECT_EQ(addTextLayoutProperty->GetTextColorValue(Color::BLACK), anotherTestColor);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateCounterModelNGTest001
+ * @tc.desc: Test CreateCounterModelNG creates counter with 3 child nodes and correct layout properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateCounterModelNGTest001, TestSize.Level1)
+{
+    CounterModelNG::CreateCounterModelNG();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto counterNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(counterNode, nullptr);
+
+    // Verify 3 child nodes: sub, content, add
+    EXPECT_EQ(counterNode->GetChildren().size(), 3);
+
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    EXPECT_TRUE(counterPattern->HasSubNode());
+    EXPECT_TRUE(counterPattern->HasContentNode());
+    EXPECT_TRUE(counterPattern->HasAddNode());
+
+    // Verify layout properties
+    auto linearLayoutProperty = counterNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(linearLayoutProperty, nullptr);
+    EXPECT_EQ(linearLayoutProperty->GetMainAxisAlign(), FlexAlign::CENTER);
+
+    auto renderContext = counterNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Verify default size from theme is applied
+    auto layoutProperty = counterNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_TRUE(selfIdealSize.has_value());
+}
+
+/**
+ * @tc.name: CounterModelNGCreateCounterModelNGTest002
+ * @tc.desc: Test CreateCounterModelNG sub button has correct text and properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateCounterModelNGTest002, TestSize.Level1)
+{
+    CounterModelNG::CreateCounterModelNG();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto counterNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(counterNode, nullptr);
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+
+    auto subId = counterPattern->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(
+        counterNode->GetChildAtIndex(counterNode->GetChildIndexById(subId)));
+    ASSERT_NE(subNode, nullptr);
+
+    // Sub button has transparent background
+    auto subRenderContext = subNode->GetRenderContext();
+    ASSERT_NE(subRenderContext, nullptr);
+    EXPECT_EQ(subRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
+
+    // Sub button has state effect enabled
+    auto buttonEventHub = subNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_TRUE(buttonEventHub->GetStateEffect());
+
+    // Sub button type is NORMAL
+    auto buttonLayoutProperty = subNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE), ButtonType::NORMAL);
+
+    // Sub button text is "-"
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetFirstChild());
+    ASSERT_NE(subTextNode, nullptr);
+    auto textLayoutProperty = subTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContent().value_or(u""), u"-");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::START), TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateCounterModelNGTest003
+ * @tc.desc: Test CreateCounterModelNG add button has correct text and properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateCounterModelNGTest003, TestSize.Level1)
+{
+    CounterModelNG::CreateCounterModelNG();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto counterNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(counterNode, nullptr);
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+
+    auto addId = counterPattern->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(
+        counterNode->GetChildAtIndex(counterNode->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
+
+    // Add button has transparent background
+    auto addRenderContext = addNode->GetRenderContext();
+    ASSERT_NE(addRenderContext, nullptr);
+    EXPECT_EQ(addRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
+
+    // Add button has state effect enabled
+    auto buttonEventHub = addNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_TRUE(buttonEventHub->GetStateEffect());
+
+    // Add button text is "+"
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetFirstChild());
+    ASSERT_NE(addTextNode, nullptr);
+    auto textLayoutProperty = addTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContent().value_or(u""), u"+");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::START), TextAlign::CENTER);
+
+    // Text node has transparent background
+    auto textRenderContext = addTextNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(textRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateCounterModelNGTest004
+ * @tc.desc: Test CreateCounterModelNG content node has correct properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateCounterModelNGTest004, TestSize.Level1)
+{
+    CounterModelNG::CreateCounterModelNG();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto counterNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(counterNode, nullptr);
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+
+    auto contentId = counterPattern->GetContentId();
+    auto contentNode = AceType::DynamicCast<FrameNode>(
+        counterNode->GetChildAtIndex(counterNode->GetChildIndexById(contentId)));
+    ASSERT_NE(contentNode, nullptr);
+
+    // Content node has transparent background
+    auto contentRenderContext = contentNode->GetRenderContext();
+    ASSERT_NE(contentRenderContext, nullptr);
+    EXPECT_EQ(contentRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
+
+    // Content node has main axis alignment CENTER
+    auto linearLayoutProperty = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(linearLayoutProperty, nullptr);
+    EXPECT_EQ(linearLayoutProperty->GetMainAxisAlign(), FlexAlign::CENTER);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateButtonChildStaticTest001
+ * @tc.desc: Test CreateButtonChildStatic with SUB symbol "-"
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateButtonChildStaticTest001, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
+    ASSERT_NE(counterTheme, nullptr);
+
+    int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto buttonNode = CounterModelNG::CreateButtonChildStatic(buttonId, u"-", counterTheme);
+    ASSERT_NE(buttonNode, nullptr);
+
+    // Verify button has one text child
+    EXPECT_EQ(buttonNode->GetChildren().size(), 1);
+
+    // Verify button properties
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE), ButtonType::NORMAL);
+    EXPECT_EQ(buttonLayoutProperty->GetCreateWithLabelValue(true), false);
+
+    // Verify button ideal size from theme
+    auto selfIdealSize = buttonNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+    ASSERT_TRUE(selfIdealSize.has_value());
+    ASSERT_TRUE(selfIdealSize->Width().has_value());
+    ASSERT_TRUE(selfIdealSize->Height().has_value());
+    EXPECT_EQ(selfIdealSize->Width()->GetDimension().Value(), counterTheme->GetControlWidth().Value());
+    EXPECT_EQ(selfIdealSize->Height()->GetDimension().Value(), counterTheme->GetHeight().Value());
+
+    // Verify button state effect
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    EXPECT_TRUE(buttonEventHub->GetStateEffect());
+
+    // Verify text child content is "-"
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContent().value_or(u""), u"-");
+    EXPECT_EQ(textLayoutProperty->GetTextAlignValue(TextAlign::START), TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateButtonChildStaticTest002
+ * @tc.desc: Test CreateButtonChildStatic with ADD symbol "+"
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateButtonChildStaticTest002, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
+    ASSERT_NE(counterTheme, nullptr);
+
+    int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto buttonNode = CounterModelNG::CreateButtonChildStatic(buttonId, u"+", counterTheme);
+    ASSERT_NE(buttonNode, nullptr);
+
+    // Verify text child content is "+"
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContent().value_or(u""), u"+");
+}
+
+/**
+ * @tc.name: CounterModelNGCreateButtonChildStaticTest003
+ * @tc.desc: Test CreateButtonChildStatic text node properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateButtonChildStaticTest003, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
+    ASSERT_NE(counterTheme, nullptr);
+
+    int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto buttonNode = CounterModelNG::CreateButtonChildStatic(buttonId, u"-", counterTheme);
+    ASSERT_NE(buttonNode, nullptr);
+
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+
+    // Verify text node ideal size from theme
+    auto textSelfIdealSize = textNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+    ASSERT_TRUE(textSelfIdealSize.has_value());
+    ASSERT_TRUE(textSelfIdealSize->Width().has_value());
+    ASSERT_TRUE(textSelfIdealSize->Height().has_value());
+    EXPECT_EQ(textSelfIdealSize->Width()->GetDimension().Value(), counterTheme->GetControlWidth().Value());
+    EXPECT_EQ(textSelfIdealSize->Height()->GetDimension().Value(), counterTheme->GetHeight().Value());
+}
+
+/**
+ * @tc.name: CounterModelNGCreateButtonChildStaticTest004
+ * @tc.desc: Test CreateButtonChildStatic returns existing node when id is registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateButtonChildStaticTest004, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
+    ASSERT_NE(counterTheme, nullptr);
+
+    int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    // First call creates the button node
+    auto buttonNode1 = CounterModelNG::CreateButtonChildStatic(buttonId, u"-", counterTheme);
+    ASSERT_NE(buttonNode1, nullptr);
+
+    // Second call with same id returns the same button node (GetOrCreateFrameNode)
+    auto buttonNode2 = CounterModelNG::CreateButtonChildStatic(buttonId, u"+", counterTheme);
+    ASSERT_NE(buttonNode2, nullptr);
+    // Same node instance
+    EXPECT_EQ(buttonNode1->GetId(), buttonNode2->GetId());
+}
+
+/**
+ * @tc.name: CounterModelNGSetOnIncTest002
+ * @tc.desc: Test SetOnInc with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest002, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        CounterModel::CounterEventFunc nullCallback;
+        model.SetOnInc(std::move(nullCallback));
+    });
+
+    // Verify add button gesture hub has no user click callback (null callback skipped)
+    auto addId = pattern_->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
+    auto gestureHub = addNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->clickEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: CounterModelNGSetOnIncTest003
+ * @tc.desc: Test SetOnInc sets click event and callback is invocable
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest003, TestSize.Level1)
+{
+    bool called = false;
+    Create([](CounterModelNG model) {
+        // empty callback - will be overridden below
+    });
+
+    CounterModelNG model;
+    CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
+    model.SetOnInc(std::move(onInc));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    auto addId = counterPattern->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    ASSERT_NE(addNode, nullptr);
+    auto gestureHub = addNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->parallelCombineClick, false);
+    EXPECT_NE(gestureHub->clickEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->clickEventActuator_->userCallback_, nullptr);
+}
+
+/**
+ * @tc.name: CounterModelNGSetOnDecTest001
+ * @tc.desc: Test SetOnDec with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGSetOnDecTest001, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        CounterModel::CounterEventFunc nullCallback;
+        model.SetOnDec(std::move(nullCallback));
+    });
+
+    // Verify sub button gesture hub has no user click callback (null callback skipped)
+    auto subId = pattern_->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(subId)));
+    ASSERT_NE(subNode, nullptr);
+    auto gestureHub = subNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->clickEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: CounterModelNGSetOnDecTest002
+ * @tc.desc: Test SetOnDec sets click event and callback is invocable
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGSetOnDecTest002, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        // empty callback - will be overridden below
+    });
+
+    CounterModelNG model;
+    CounterModel::CounterEventFunc onDec = []() {};
+    model.SetOnDec(std::move(onDec));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    auto subId = counterPattern->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    ASSERT_NE(subNode, nullptr);
+    auto gestureHub = subNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->parallelCombineClick, false);
+    EXPECT_NE(gestureHub->clickEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->clickEventActuator_->userCallback_, nullptr);
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmMeasureTest001
+ * @tc.desc: Test Measure with width MATCH_PARENT layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmMeasureTest001, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        model.SetWidth(300.0_vp);
+        model.SetHeight(40.0_vp);
+    });
+
+    auto counterLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+
+    // Set parent constraint with parentIdealSize
+    LayoutConstraintF parentConstraint;
+    parentConstraint.parentIdealSize = OptionalSizeF(500.0f, 100.0f);
+    parentConstraint.percentReference = SizeF(500.0f, 100.0f);
+    parentConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    parentConstraint.minSize = SizeF(0.0f, 0.0f);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(counterLayoutAlgorithm));
+
+    counterLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // Width should be set from parentIdealSize (MATCH_PARENT)
+    auto frameSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), 500.0f);
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmMeasureTest002
+ * @tc.desc: Test Measure with height MATCH_PARENT layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmMeasureTest002, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        model.SetWidth(300.0_vp);
+        model.SetHeight(40.0_vp);
+    });
+
+    auto counterLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    LayoutConstraintF parentConstraint;
+    parentConstraint.parentIdealSize = OptionalSizeF(500.0f, 100.0f);
+    parentConstraint.percentReference = SizeF(500.0f, 100.0f);
+    parentConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    parentConstraint.minSize = SizeF(0.0f, 0.0f);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(counterLayoutAlgorithm));
+
+    counterLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto frameSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(frameSize.Height(), 100.0f);
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmMeasureTest003
+ * @tc.desc: Test Measure with width FIX_AT_IDEAL_SIZE layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmMeasureTest003, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        model.SetWidth(300.0_vp);
+        model.SetHeight(40.0_vp);
+    });
+
+    auto counterLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+
+    LayoutConstraintF parentConstraint;
+    parentConstraint.parentIdealSize = OptionalSizeF(500.0f, 100.0f);
+    parentConstraint.percentReference = SizeF(500.0f, 100.0f);
+    parentConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    parentConstraint.minSize = SizeF(0.0f, 0.0f);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(counterLayoutAlgorithm));
+
+    counterLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    // Verify layout policy was set correctly
+    auto policy = layoutProperty_->GetLayoutPolicyProperty();
+    ASSERT_TRUE(policy.has_value());
+    EXPECT_TRUE(policy->IsWidthFix());
+    EXPECT_TRUE(policy->IsHeightFix());
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmMeasureTest004
+ * @tc.desc: Test Measure with width WRAP_CONTENT layout policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmMeasureTest004, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        model.SetWidth(300.0_vp);
+        model.SetHeight(40.0_vp);
+    });
+
+    auto counterLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+
+    LayoutConstraintF parentConstraint;
+    parentConstraint.parentIdealSize = OptionalSizeF(500.0f, 100.0f);
+    parentConstraint.percentReference = SizeF(500.0f, 100.0f);
+    parentConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    parentConstraint.minSize = SizeF(0.0f, 0.0f);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(counterLayoutAlgorithm));
+
+    counterLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    // Verify WRAP_CONTENT policy was set correctly
+    auto policy = layoutProperty_->GetLayoutPolicyProperty();
+    ASSERT_TRUE(policy.has_value());
+    EXPECT_TRUE(policy->IsWidthWrap());
+    EXPECT_TRUE(policy->IsHeightWrap());
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmMeasureTest005
+ * @tc.desc: Test Measure with width NO_MATCH and height MATCH_PARENT (else + match branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmMeasureTest005, TestSize.Level1)
+{
+    Create([](CounterModelNG model) {
+        model.SetWidth(300.0_vp);
+        model.SetHeight(40.0_vp);
+    });
+
+    auto counterLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    // Width NO_MATCH + Height MATCH_PARENT: checkLayoutPolicy=true (height is not NO_MATCH)
+    // Width falls into else branch, Height falls into IsHeightMatch branch
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    LayoutConstraintF parentConstraint;
+    parentConstraint.parentIdealSize = OptionalSizeF(500.0f, 100.0f);
+    parentConstraint.percentReference = SizeF(500.0f, 100.0f);
+    parentConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    parentConstraint.minSize = SizeF(0.0f, 0.0f);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(counterLayoutAlgorithm));
+
+    counterLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // Height should be set from parentIdealSize (MATCH_PARENT)
+    auto frameSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(frameSize.Height(), 100.0f);
 }
 } // namespace OHOS::Ace::NG

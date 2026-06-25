@@ -1,0 +1,11 @@
+{
+  "devices": {
+    "general": [ "default"]
+  },
+  "production": {
+    "removedSysCaps": [
+      "SystemCapability.Security.DeviceSecurityLevel",
+      "SystemCapability.UserIAM.UserAuth.PinAuth"
+    ]
+  }
+}

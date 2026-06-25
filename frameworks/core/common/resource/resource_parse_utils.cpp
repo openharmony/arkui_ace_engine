@@ -27,6 +27,7 @@
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -398,21 +399,6 @@ void ResourceParseUtilsBase::InvertColorWithResource(const RefPtr<ResourceObject
     resObj->SetColorMode(colorMode);
 }
 
-bool ResourceParseUtilsBase::ParseColorWithColorMode(
-    const RefPtr<ResourceObject>& resObj, Color& result, const ColorMode& colorMode)
-{
-    if (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED) {
-        return false;
-    }
-    if (needReload_ && (colorMode == ColorMode::DARK)) {
-        result = ColorInverter::Invert(resObj->GetColor(), resObj->GetInstanceId(), resObj->GetNodeTag());
-    } else {
-        result = resObj->GetColor();
-    }
-    resObj->SetColorMode(colorMode);
-    return true;
-}
-
 bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
     RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode)
 {
@@ -423,35 +409,6 @@ bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>&
     result = resourceWrapper->GetColorByName(params[0].value.value());
     InvertColorWithResource(resObj, result, colorMode);
     return true;
-}
-
-bool ResourceParseUtilsBase::ParseResColorWithId(const RefPtr<ResourceObject>& resObj, Color& result,
-    RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode, bool adaptMaterial)
-{
-    auto resId = resObj->GetId();
-    auto type = resObj->GetType();
-    if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
-        bool state = Color::ParseColorString(value, result);
-        InvertColorWithResource(resObj, result, colorMode);
-        return state;
-    }
-    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId);
-        result = Color(ColorAlphaAdapt(value));
-        InvertColorWithResource(resObj, result, colorMode);
-        return true;
-    }
-    if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(resId);
-        result.SetResourceId(resId);
-        if (adaptMaterial) {
-            result.FillColorPlaceholderIfNeed(resId);
-        }
-        InvertColorWithResource(resObj, result, colorMode);
-        return true;
-    }
-    return false;
 }
 
 bool ResourceParseUtilsBase::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial)
@@ -481,16 +438,36 @@ bool ResourceParseUtilsBase::ParseResColor(const RefPtr<ResourceObject>& resObj,
     if (resId == -1) {
         return ParseResColorWithName(resObj, result, resourceWrapper, colorMode);
     }
-    return ParseResColorWithId(resObj, result, resourceWrapper, colorMode, adaptMaterial);
+
+    auto type = resObj->GetType();
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId);
+        bool state = Color::ParseColorString(value, result);
+        InvertColorWithResource(resObj, result, colorMode);
+        return state;
+    }
+    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(resId);
+        result = Color(ColorAlphaAdapt(value));
+        InvertColorWithResource(resObj, result, colorMode);
+        return true;
+    }
+    if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(resId);
+        result.SetResourceId(resId);
+        if (adaptMaterial) {
+            result.FillColorPlaceholderIfNeed(resId);
+        }
+        InvertColorWithResource(resObj, result, colorMode);
+        return true;
+    }
+    return false;
 }
 
 bool ResourceParseUtilsBase::ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
     const ColorMode& colorMode)
 {
     CHECK_NULL_RETURN(resObj, false);
-    if (!resObj->IsResource()) {
-        return ParseColorWithColorMode(resObj, result, colorMode);
-    }
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
@@ -499,24 +476,13 @@ bool ResourceParseUtilsBase::ParseResColorWithColorMode(const RefPtr<ResourceObj
     auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     CHECK_NULL_RETURN(resourceWrapper, false);
     auto resourceAdapter = resourceWrapper->GetResourceAdapter();
-    auto overrideWrapper = resourceWrapper;
-    if (resourceAdapter) {
-        ResourceConfiguration config;
-        config.SetColorMode(colorMode);
-        ConfigurationChange configChange { .colorModeUpdate = true };
-
-        auto overrideAdapter = resourceAdapter->GetOverrideResourceAdapter(config, configChange);
-        if (overrideAdapter) {
-            RefPtr<ThemeConstants> themeConstants;
-            overrideWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, overrideAdapter);
-        }
-    }
-
-    auto resId = resObj->GetId();
-    if (resId == -1) {
-        return ParseResColorWithName(resObj, result, overrideWrapper, colorMode);
-    }
-    return ParseResColorWithId(resObj, result, overrideWrapper, colorMode);
+    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : container->GetColorMode();
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorMode);
+    bool state = ParseResColor(resObj, result);
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
+    return state;
 }
 
 bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result)

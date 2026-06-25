@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
+  "badge",
   "container_reader",
   "dynamiclayout",
   "counter",
@@ -32,6 +33,8 @@ component_modules = [
   "linear_split",
   "side_bar",
   "marquee",
+  "progress",
+  "texttimer",
   "search",
   "stepper",
   "radio",
@@ -39,14 +42,31 @@ component_modules = [
   "time_picker",
   "calendar_picker",
   "indexer",
+  "loading_progress",
   "symbol",
+  "span",
   "rich_editor",
   "menu",
   "lazy_column_layout",
+  "toggle",
+  "image_animator",
+  "date_picker",
+  "lazy_grid_layout",
+  "refresh",
+  "text_picker",
 ]
 
 if (!ace_engine_feature_wearable) {
     component_modules += [ "folder_stack", ]
+}
+
+# ArcList/ArcScrollBar split SOs (libarclist.z.so / libarcscrollbar.z.so) are
+# built only for cross-platform (arkuiX); other builds keep them in the main SO.
+if (is_arkui_x) {
+    component_modules += [
+        "arc_list",
+        "arc_scroll_bar",
+    ]
 }
 
 component_modules_libs = []
@@ -54,16 +74,20 @@ component_modules_libs = []
 foreach(module, component_modules) {
   sub_name = string_replace(module, "_", "")
   module_name = "arkui_$sub_name"
+  module_path = module
+  if (module == "span") {
+    module_path = "text/span"
+  }
   ohos_shared_library(module_name) {
     deps = []
     if (is_ohos) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_ohos" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_ohos" ]
     } else if (use_mingw_win) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_windows" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_windows" ]
     } else if (use_mac) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_mac" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_mac" ]
     } else if (use_linux) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module_path}:ace_core_components_${module}_pattern_ng_linux" ]
     }
 
     deps += [

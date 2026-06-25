@@ -1303,15 +1303,13 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHandleOverdueDeadlineTest
      */
     RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
         FINGER_NUMBER, false);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     PanDirection panDirection;
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
-    longPressRecognizerPtr->targetComponent_ = targetComponent;
-    longPressRecognizerPtr->targetComponent_->node_ = frameNode;
+    guestureEventHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+    longPressRecognizerPtr->AttachFrameNode(frameNode);
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
@@ -1858,7 +1856,8 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize
      */
     RefPtr<LongPressRecognizer> longPressRecognizer =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
@@ -1873,7 +1872,7 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize
     TouchEvent touchEvent;
     touchEvent.rollAngle = 0;
     longPressRecognizer->touchPoints_[0] = touchEvent;
-    longPressRecognizer->targetComponent_ = targetComponent;
+    longPressRecognizer->AttachFrameNode(frameNode);
     GestureJudgeResult result = longPressRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
 
@@ -1882,7 +1881,7 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize
      * @tc.steps: case2: gestureRecognizerJudgeFunc is not null.
      * @tc.expected: step2. result equals.
      */
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     result = longPressRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 
@@ -1891,7 +1890,7 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize
      * @tc.steps: case3: callback is not null.
      * @tc.expected: step2. result equals.
      */
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    gestureEventHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     result = longPressRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 }
@@ -2192,7 +2191,8 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize
 {
     RefPtr<LongPressRecognizer> longPressRecognizer =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     longPressRecognizer->inputEventType_ = InputEventType::KEYBOARD;
     longPressRecognizer->deviceId_ = 1;
     longPressRecognizer->lastAction_ = 1;
@@ -2207,8 +2207,8 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize
     TouchEvent touchEvent;
     touchEvent.rollAngle = 0;
     longPressRecognizer->touchPoints_[0] = touchEvent;
-    longPressRecognizer->targetComponent_ = targetComponent;
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    longPressRecognizer->AttachFrameNode(frameNode);
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     longPressRecognizer->TriggerGestureJudgeCallback();
 }
 
@@ -2224,7 +2224,8 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize
      */
     RefPtr<LongPressRecognizer> longPressRecognizer =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 2, false, false, false, true);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
@@ -2237,14 +2238,14 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize
      * @tc.expected: step2. result equals.
      */
 
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     TouchEvent touchEvent;
     touchEvent.rollAngle = 0;
     longPressRecognizer->touchPoints_[0] = touchEvent;
     longPressRecognizer->touchPoints_[1] = touchEvent;
     longPressRecognizer->touchPoints_[2] = touchEvent;
-    longPressRecognizer->targetComponent_ = targetComponent;
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    longPressRecognizer->AttachFrameNode(frameNode);
+    gestureEventHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     longPressRecognizer->HandleOverdueDeadline(true);
     EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
 }
@@ -2441,5 +2442,95 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHasActionTest001, TestSiz
     auto callback = [](const GestureEvent&) {};
     longPressRecognizer->SetOnAction(callback);
     EXPECT_EQ(longPressRecognizer->HasAction(), true);
+}
+
+/**
+ * @tc.name: LongPressRecognizerSendCallbackMsgGateTest001
+ * @tc.desc: Test LongPressRecognizer function: SendCallbackMsg trigger gate
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerSendCallbackMsgGateTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizer, nullptr);
+    int32_t callbackCount = 0;
+    auto callback = std::make_unique<GestureEventFunc>([&callbackCount](GestureEvent& info) {
+        callbackCount++;
+    });
+
+    longPressRecognizer->isOnActionTriggered_ = false;
+    longPressRecognizer->SendCallbackMsg(callback, false, GestureCallbackType::END);
+    EXPECT_EQ(callbackCount, 0);
+
+    longPressRecognizer->SendCallbackMsg(callback, false, GestureCallbackType::START);
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_TRUE(longPressRecognizer->isOnActionTriggered_);
+
+    longPressRecognizer->SendCallbackMsg(callback, false, GestureCallbackType::END);
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_FALSE(longPressRecognizer->isOnActionTriggered_);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTriggerCallbackMsgTest001
+ * @tc.desc: Test LongPressRecognizer function: TriggerCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTriggerCallbackMsgTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizer, nullptr);
+
+    std::unique_ptr<GestureEventFunc> nullCallback;
+    longPressRecognizer->TriggerCallbackMsg(nullCallback, false, GestureCallbackType::START);
+
+    int32_t callbackCount = 0;
+    auto callback = std::make_unique<GestureEventFunc>([&callbackCount](GestureEvent& info) {
+        callbackCount++;
+    });
+    longPressRecognizer->TriggerCallbackMsg(callback, false, GestureCallbackType::START);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: LongPressRecognizerOnResetStatusTest001
+ * @tc.desc: Test LongPressRecognizer function: OnResetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerOnResetStatusTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizer, nullptr);
+    longPressRecognizer->longPressFingerCountForSequence_ = 2;
+    longPressRecognizer->isOnActionTriggered_ = true;
+    longPressRecognizer->localMatrix_.emplace_back();
+
+    longPressRecognizer->OnResetStatus();
+    EXPECT_EQ(longPressRecognizer->longPressFingerCountForSequence_, 0);
+    EXPECT_FALSE(longPressRecognizer->isOnActionTriggered_);
+    EXPECT_TRUE(longPressRecognizer->localMatrix_.empty());
+}
+
+/**
+ * @tc.name: LongPressRecognizerPrintCurrentFingersInfoTest001
+ * @tc.desc: Test LongPressRecognizer function: PrintCurrentFingersInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerPrintCurrentFingersInfoTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    ASSERT_NE(longPressRecognizer, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    touchEvent.id = 1;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+
+    longPressRecognizer->PrintCurrentFingersInfo();
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

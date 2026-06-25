@@ -28,6 +28,7 @@ public:
     static void Create(const JSCallbackInfo& info);
 
     static void RemoveNode(const JSCallbackInfo& info);
+    static void RemoveNodes(const JSCallbackInfo& info);
     static void SetInvalid(const JSCallbackInfo& info);
     static void RequestContainerReLayout(const JSCallbackInfo& info);
     static void NotifyContainerLayoutChange(const JSCallbackInfo& info);

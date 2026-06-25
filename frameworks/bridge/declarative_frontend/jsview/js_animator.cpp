@@ -16,7 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
-
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_animator_function.h"
 #include "bridge/declarative_frontend/jsview/models/animator_model_impl.h"
@@ -188,6 +188,7 @@ void JSAnimator::JSBind(BindingTarget globalObj)
 void JSAnimator::Create(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.AnimatorAttribute", 1);
     if (info.Length() != 1) {
         return;
     }
@@ -204,6 +205,7 @@ void JSAnimator::Pop() {}
 void JSAnimator::SetState(int32_t state)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.state", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "animator component setState failed, id:%{public}s, state:%{public}d",
@@ -241,6 +243,7 @@ void JSAnimator::SetState(int32_t state)
 void JSAnimator::SetDuration(int32_t duration)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.duration", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -251,6 +254,7 @@ void JSAnimator::SetDuration(int32_t duration)
 void JSAnimator::SetCurve(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.curve", 1);
     if (info.Length() != 1) {
         return;
     }
@@ -270,6 +274,7 @@ void JSAnimator::SetCurve(const JSCallbackInfo& info)
 void JSAnimator::SetDelay(int32_t delay)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.delay", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -280,6 +285,7 @@ void JSAnimator::SetDelay(int32_t delay)
 void JSAnimator::SetFillMode(int32_t fillMode)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.fillMode", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -290,6 +296,7 @@ void JSAnimator::SetFillMode(int32_t fillMode)
 void JSAnimator::SetIteration(int32_t iteration)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.iterations", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -300,6 +307,7 @@ void JSAnimator::SetIteration(int32_t iteration)
 void JSAnimator::SetPlayMode(int32_t playMode)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.playMode", 1);
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -310,6 +318,7 @@ void JSAnimator::SetPlayMode(int32_t playMode)
 void JSAnimator::SetMotion(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.motion", 1);
     if (info.Length() != 1 || !info[0]->IsObject()) {
         return;
     }
@@ -329,6 +338,7 @@ void JSAnimator::SetMotion(const JSCallbackInfo& info)
 void JSAnimator::OnStart(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onStart", 1);
     auto callback = GetEventCallback(info, "Animator.onStart");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::START, animatorId_);
 }
@@ -336,6 +346,7 @@ void JSAnimator::OnStart(const JSCallbackInfo& info)
 void JSAnimator::OnPause(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onPause", 1);
     auto callback = GetEventCallback(info, "Animator.onPause");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::PAUSE, animatorId_);
 }
@@ -343,6 +354,7 @@ void JSAnimator::OnPause(const JSCallbackInfo& info)
 void JSAnimator::OnRepeat(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onRepeat", 1);
     auto callback = GetEventCallback(info, "Animator.onRepeat");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::REPEAT, animatorId_);
 }
@@ -350,6 +362,7 @@ void JSAnimator::OnRepeat(const JSCallbackInfo& info)
 void JSAnimator::OnCancel(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onCancel", 1);
     auto callback = GetEventCallback(info, "Animator.onCancel");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::CANCEL, animatorId_);
 }
@@ -357,6 +370,7 @@ void JSAnimator::OnCancel(const JSCallbackInfo& info)
 void JSAnimator::OnFinish(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onFinish", 1);
     auto callback = GetEventCallback(info, "Animator.onFinish");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::FINISH, animatorId_);
 }
@@ -364,6 +378,7 @@ void JSAnimator::OnFinish(const JSCallbackInfo& info)
 void JSAnimator::OnFrame(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.onFrame", 1);
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -383,6 +398,7 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
 void JSSpringProp::ConstructorCallback(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.SpringProp", 1);
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
         return;
     }
@@ -412,10 +428,13 @@ void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
     }
     auto obj = AceType::MakeRefPtr<JSMotion>();
     if (len == FRICTION_MOTION_LENGTH) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.FrictionMotion", 1);
         HandleFrictionMotion(info, obj);
     } else if (len == SPRING_MOTION_LENGTH) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.SpringMotion", 1);
         HandleSpringMotion(info, obj);
     } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("component.Animator.ScrollMotion", 1);
         HandleScrollMotion(info, obj);
     }
     obj->IncRefCount();

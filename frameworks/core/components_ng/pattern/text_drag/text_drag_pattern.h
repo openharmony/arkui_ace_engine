@@ -76,6 +76,8 @@ struct TextDragData {
     float lastLineHeight_ = 0;
     SelectPositionInfo selectPosition_;
     bool oneLineSelected_ = false;
+    // Content left offset for horizontal scrolling
+    std::optional<float> contentLeft_ = std::nullopt;
     void initSelecitonInfo(SelectPositionInfo selectionInfo, bool oneLineSelected)
     {
         selectPosition_ = selectionInfo;
@@ -139,6 +141,11 @@ public:
     const RectF& GetTextRect() const
     {
         return textDragData_.textRect_;
+    }
+
+    std::optional<float> GetContentLeft() const
+    {
+        return textDragData_.contentLeft_;
     }
 
     float GetFrameWidth() const
@@ -253,11 +260,13 @@ public:
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode,
         const RefPtr<FrameNode>& hostNode = nullptr);
+    virtual TextDragData CreateTextDragData(const RectF& textRect, const OffsetF& localDragOffset,
+        const OffsetF& globalDragOffset, const RectF& leftHandler, const RectF& rightHandler);
     virtual OffsetF ConvertToGlobalOffset(const OffsetF& localOffset, const OffsetF& parentGlobalOffset);
     virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
         const OffsetF globalOffset, const OffsetF textStartOffset);
-    static void AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler);
+    virtual void AdjustHandlers(const RectF& contentRect, RectF& leftHandler, RectF& rightHandler);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);

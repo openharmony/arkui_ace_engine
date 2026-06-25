@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "base/geometry/shape.h"
 #include "core/common/container.h"
 #include <cmath>
 #include "ui/base/utils/utils.h"
@@ -84,7 +85,6 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
     UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
-    UpdateShaderStyle(textFieldLayoutProperty, textStyle);
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -139,6 +139,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStylesAppend(const RefPtr<FrameNode>
     textStyle.SetEnableAutoSpacing(textFieldLayoutProperty->GetEnableAutoSpacingValue(false));
     textStyle.SetOrphanCharOptimization(textFieldLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetCompressLeadingPunctuation(textFieldLayoutProperty->GetCompressLeadingPunctuationValue(false));
+    textStyle.SetPunctuationOverflow(textFieldLayoutProperty->GetPunctuationOverflowValue(false));
     textStyle.SetIncludeFontPadding(textFieldLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textFieldLayoutProperty->GetFallbackLineSpacingValue(false));
     // use for modifier.
@@ -823,6 +824,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(theme);
+    UpdateShaderStyle(layoutProperty, textStyle);
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
@@ -900,6 +902,7 @@ void TextFieldLayoutAlgorithm::UpdateStyledPlaceholderProperty(LayoutWrapper* la
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(TextAlign, TextAlign);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(EnableAutoSpacing, EnableAutoSpacing);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(PunctuationOverflow, PunctuationOverflow);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(IncludeFontPadding, IncludeFontPadding);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(FallbackLineSpacing, FallbackLineSpacing);
     UPDATE_STYLED_PLACEHOLDER_TEXT_PROPERTY(OrphanCharOptimization, OrphanCharOptimization);
@@ -1106,6 +1109,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
         .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .punctuationOverflow = textStyle.GetPunctuationOverflow(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
     };
@@ -1155,6 +1159,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
         .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .punctuationOverflow = textStyle.GetPunctuationOverflow(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing() };
     if (!paragraphData.disableTextAlign) {

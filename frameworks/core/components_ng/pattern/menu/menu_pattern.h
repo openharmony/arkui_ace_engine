@@ -38,7 +38,6 @@
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 constexpr double MENU_ANIMATION_MAX_SCALE = 1.0f;
 constexpr double MENU_ANIMATION_MIN_OPACITY = 0.0f;
@@ -81,6 +80,12 @@ public:
         : targetId_(targetId), targetTag_(std::move(tag)), type_(type)
     {}
     ~MenuPattern() override = default;
+
+    // Whether a touch point (given in the host node's local coordinate space) is still inside the host's
+    // frame bounds. Shared hit criterion for touch-up-to-dismiss used by both MenuPattern and
+    // CustomMenuItemPattern, mirroring ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu dismisses" share the same criterion.
+    static bool IsOffsetInNodeBounds(const RefPtr<FrameNode>& host, const Offset& offset);
 
     bool IsAtomicNode() const override
     {
@@ -713,8 +718,6 @@ public:
     bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool IsUseDistortionAnimation() const;
-    bool FireSelectDisappearDistortAnimation(AnimationOption& option);
-    void FireSelectDisappearLightAnimation();
 
     float GetTranslateYForStack()
     {
@@ -790,8 +793,47 @@ public:
         isColorModeFollowTarget_ = isColorModeFollowTarget;
     }
 
+    bool IsExtensionInnerMenu()
+    {
+        return isExtensionInnerMenu_;
+    }
+
+    void SetExtensionInnerMenu(bool isExtensionInnerMenu)
+    {
+        isExtensionInnerMenu_ = isExtensionInnerMenu;
+    }
+
+    void SetIsExtensionMenuEnableNewAnimation(bool flag)
+    {
+        isExtensionMenuEnableNewAnimation_ = flag;
+    }
+
+    bool GetIsExtensionMenuEnableNewAnimation()
+    {
+        return isExtensionMenuEnableNewAnimation_;
+    }
+
+    void SetSelectMenuPaintRect(const RectF& rect)
+    {
+        selectMenuPaintRect_ = rect;
+    }
+
+    RectF GetSelectMenuPaintRect() const
+    {
+        return selectMenuPaintRect_;
+    }
+
+    using BeforeExtensionMenuDistortAnimationCallback =
+        std::function<void(const RefPtr<FrameNode>&, const OffsetF&)>;
+
+    void SetBeforeExtensionMenuDistortAnimationCallback(BeforeExtensionMenuDistortAnimationCallback&& callback)
+    {
+        beforeExtensionMenuDistortAnimationCallback_ = std::move(callback);
+    }
+
+    OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
-    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex = 0);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -842,12 +884,8 @@ private:
     MenuParam GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
     void PlayDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDisapperDistortAnimation(AnimationOption& disappearOption);
     void PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement);
-    void PlaySelectTranslateAnimation(const OffsetF& offset);
     void PlayLightAnimation();
-    void PlayDisappearLightAnimation();
     void ShowMenuAppearAnimation();
     void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
@@ -890,10 +928,12 @@ private:
     void OnAttachToMainTree() override;
     void BuildDivider();
     RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
-
+    void PlayExtensionMenuDistortAnimation(const OffsetF& menuPosition);
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
+    // true once the finger has moved out of the menu bounds during the current touch sequence
+    bool movedOutOfRegion_ = false;
     const int32_t targetId_ = -1;
     const std::string targetTag_;
     MenuType type_ = MenuType::MENU;
@@ -915,6 +955,7 @@ private:
     bool isShowHoverImage_ = false;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
+    bool isExtensionInnerMenu_ = false;
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
@@ -955,9 +996,12 @@ private:
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
     bool isColorModeFollowTarget_ = true;
-
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;
+
+    bool isExtensionMenuEnableNewAnimation_ = false;
+    RectF selectMenuPaintRect_;
+    BeforeExtensionMenuDistortAnimationCallback beforeExtensionMenuDistortAnimationCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

@@ -90,6 +90,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     auto animationInterfaceName = GetAnimationInterfaceName(interface);
     CHECK_NULL_VOID(animationInterfaceName);
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        HistogramInfiniteAnimationEvent(interface);
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
                 "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
@@ -149,6 +150,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
 {
     auto triggerId = pipelineContext->GetInstanceId();
     ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), triggerId, count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     NG::ScopedViewStackProcessor scopedProcessor;
     AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
@@ -238,10 +241,7 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
             static_cast<long long>(DEFAULT_DURATION - timeInterval));
     }
     auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
-    std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
-        ContainerScope scope(currentId);
-        arkCallback.InvokeSync();
-    };
+    std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(*onFinish, currentId);
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
@@ -473,9 +473,7 @@ void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
     bool immediately = Converter::Convert<bool>(arkImmediately);
     std::function<void()> onEventFinish;
     if (event) {
-        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
-            arkCallback.InvokeSync();
-        };
+        onEventFinish = GetSyncInvoker(*event);
     }
 
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -497,12 +495,11 @@ void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
     std::optional<int32_t> count;
     if (onFinish) {
         count = GetAnimationFinishCount();
-        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
-            ContainerScope scope(currentId);
-            arkCallback.InvokeSync();
-        };
+        std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(*onFinish, currentId);
         option.SetOnFinishEvent(onFinishEvent);
     }
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
 
     ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, immediately);
 }
@@ -531,11 +528,7 @@ void KeyframeAnimationImplImpl(Ark_VMContext vmContext,
     option.SetIteration(iterations);
     if (param && param->onFinish.tag != INTEROP_TAG_UNDEFINED) {
         count = GetAnimationFinishCount();
-        auto onFinishEvent = [arkCallback = CallbackHelper(param->onFinish.value),
-                                 currentId = Container::CurrentIdSafely()]() mutable {
-            ContainerScope scope(currentId);
-            arkCallback.InvokeSync();
-        };
+        auto onFinishEvent = GetContainerScopedSyncInvoker(param->onFinish.value, Container::CurrentIdSafely());
         option.SetOnFinishEvent(onFinishEvent);
     }
     std::vector<Keyframe> parsedKeyframes;
@@ -550,17 +543,17 @@ void KeyframeAnimationImplImpl(Ark_VMContext vmContext,
             }
             totalDuration += keyframe.duration;
             keyframe.curve = Converter::OptConvert<RefPtr<Curve>>(arkFrame.curve).value_or(Curves::EASE_IN_OUT);
-            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event),
-                                            currentId = Container::CurrentIdSafely()]() {
-                ContainerScope scope(currentId);
-                arkCallback.InvokeSync();
-            };
+            keyframe.animationClosure =
+                GetContainerScopedSyncInvoker(arkFrame.event, Container::CurrentIdSafely());
 
             parsedKeyframes.emplace_back(std::move(keyframe));
         }
     }
     option.SetDuration(totalDuration);
     option.SetCurve(Curves::EASE_IN_OUT);
+    PrintAnimationInfo(option, AnimationInterface::KEYFRAME_ANIMATE_TO, count);
+    option.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
+    NG::ScopedViewStackProcessor scopedProcessor;
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }

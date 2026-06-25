@@ -38,6 +38,9 @@ void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
         painter.SetOpacity(0);
         return;
     }
+    painter.SetNeedPaintTrack(bar.GetUseInnerScrollBar());
+    painter.SetTrackRect(bar.GetTrackRect());
+    painter.SetTrackColor(bar.GetBackgroundColor());
     painter.SetBarColor(bar.GetForegroundColor());
     painter.StartBarAnimation(
         bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());

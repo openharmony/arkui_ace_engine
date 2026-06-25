@@ -1633,14 +1633,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg102, TestSize.Level
 
 /**
  * @tc.name: PipelineContextFourTestNg103
- * @tc.desc: Test GetPageRootNode returns valid FrameNode when last page is not PAGE_ETS_TAG.
+ * @tc.desc: Test GetPageRootNode returns nullptr when last page is not PAGE_ETS_TAG.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg103, TestSize.Level1)
 {
     /**
      * @tc.steps: 1. Create a page node with a custom tag (not PAGE_ETS_TAG).
-     * @tc.expected: GetPageRootNode returns the FrameNode.
+     * @tc.expected: GetPageRootNode returns nullptr.
      */
     ASSERT_NE(context_, nullptr);
 
@@ -1696,6 +1696,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg104, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     EXPECT_EQ(result->GetId(), childNodeId);
     EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
 }
@@ -1737,6 +1740,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg105, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     EXPECT_EQ(result->GetId(), childNodeId1);
     EXPECT_EQ(result->GetTag(), "child1");
 }
@@ -1779,6 +1785,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg106, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     EXPECT_EQ(result->GetId(), childNodeId);
     EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
 }
@@ -1856,6 +1865,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg108, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     EXPECT_EQ(result->GetId(), childNodeId);
     EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
 }
@@ -1943,6 +1955,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg110, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     EXPECT_EQ(result->GetId(), targetNodeId);
     EXPECT_EQ(result->GetTag(), "target");
 }
@@ -2018,6 +2033,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg112, TestSize.Level
 
     auto result = context_->GetPageRootNode();
     EXPECT_NE(result, nullptr);
+    if (result == nullptr) {
+        return;
+    }
     // Should return the first node, not the second or third
     EXPECT_EQ(result->GetId(), firstNodeId);
     EXPECT_EQ(result->GetTag(), "first");

@@ -15,6 +15,8 @@
 
 #include "rosen_render_slider.h"
 
+#include "core/components/common/properties/decoration.h"
+
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderSlider::Create()
 {

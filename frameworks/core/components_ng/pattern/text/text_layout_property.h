@@ -101,8 +101,11 @@ public:
         ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
+        ResetSelectedBackgroundColorFlagByUser();
+        ResetCopyOptionFlagByUser();
         ResetTextColorFlagByUser();
         ResetClipEdge();
+        ResetIncrementalUpdatePolicy();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -183,6 +186,8 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(TextEffectStrategy, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(
+        IncrementalUpdatePolicy, IncrementalUpdatePolicy, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipDirection, TextFlipDirection, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipEnableBlur, bool, PROPERTY_UPDATE_NORMAL);
@@ -200,9 +205,11 @@ public:
         UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptionFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextSelectableMode, TextSelectableMode, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimationNeeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlDefualtColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
@@ -225,12 +232,17 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SymbolStyle, ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, IsFontColorResource, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SymbolStyle, FontColorResource, std::vector<RefPtr<ResourceObject>>, PROPERTY_UPDATE_MEASURE_SELF);
 
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TailIndents, TailIndents, PROPERTY_UPDATE_MEASURE);
 
     TextDecoration GetTextDecorationFirst() const
     {
@@ -293,8 +305,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
     std::string GetTextMarqueeOptionsString() const;
+    std::string GetTailIndentInJson() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
-
     void SetIsNewMaterial(bool isNewMaterial)
     {
         isNewMaterial_ = isNewMaterial;
