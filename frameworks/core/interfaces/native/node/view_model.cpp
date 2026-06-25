@@ -497,6 +497,7 @@ void* createRelativeContainerNode(ArkUI_Int32 nodeId)
 {
     auto modifier = NodeModifier::GetRelativeContainerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
     return modifier->createFrameNode(nodeId);
 }
 void* createGridNode(ArkUI_Int32 nodeId)
@@ -524,6 +525,7 @@ void* createBlankNode(ArkUI_Int32 nodeId)
 {
     auto modifier = NodeModifier::GetBlankModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
     return modifier->createFrameNode(nodeId);
 }
 

@@ -138,19 +138,9 @@ void SetDividerStrokeWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, int32_
     GetDividerModelImpl()->StrokeWidth(CalcDimension(value, static_cast<DimensionUnit>(unit)));
 }
 
-void ResetDividerStrokeWidthImpl(ArkUINodeHandle node)
-{
-    GetDividerModelImpl()->StrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
-}
-
 void SetDividerLineCapImpl(ArkUINodeHandle node, int32_t lineCap)
 {
     GetDividerModelImpl()->LineCap(GetLineCap(lineCap));
-}
-
-void ResetDividerLineCapImpl(ArkUINodeHandle node)
-{
-    GetDividerModelImpl()->LineCap(DEFAULT_DIVIDER_LINE_CAP);
 }
 
 void SetDividerColorImpl(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
@@ -168,10 +158,6 @@ void SetDividerVerticalImpl(ArkUINodeHandle node, ArkUI_Bool value)
     GetDividerModelImpl()->Vertical(value);
 }
 
-void ResetDividerVerticalImpl(ArkUINodeHandle node)
-{
-    GetDividerModelImpl()->Vertical(DEFAULT_DIVIDER_VERTICAL);
-}
 #endif
 
 const ArkUIDividerModifier* GetDividerDynamicModifier()
@@ -183,13 +169,13 @@ const ArkUIDividerModifier* GetDividerDynamicModifier()
         static const ArkUIDividerModifier modifier = {
             .createModel = CreateModelImpl,
             .setDividerStrokeWidth = SetDividerStrokeWidthImpl,
-            .resetDividerStrokeWidth = ResetDividerStrokeWidthImpl,
+            .resetDividerStrokeWidth = nullptr,
             .setDividerLineCap = SetDividerLineCapImpl,
-            .resetDividerLineCap = ResetDividerLineCapImpl,
+            .resetDividerLineCap = nullptr,
             .setDividerColor = SetDividerColorImpl,
             .resetDividerColor = ResetDividerColorImpl,
             .setDividerVertical = SetDividerVerticalImpl,
-            .resetDividerVertical = ResetDividerVerticalImpl,
+            .resetDividerVertical = nullptr,
             .createFrameNode = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

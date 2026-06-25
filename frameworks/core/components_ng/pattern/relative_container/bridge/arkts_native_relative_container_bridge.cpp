@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/relative_container/bridge/arkts_native_relative_container_bridge.h"
+#include <cstddef>
 
 #include "base/geometry/calc_dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -199,7 +200,8 @@ void JSParseBarrier(EcmaVM* vm, const Local<JSValueRef>& args, BarrierInfo& barr
 
     if (referencedIdVal->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(referencedIdVal);
-        for (size_t i = 0; i < array->Length(vm); i++) {
+        size_t length = static_cast<size_t>(ArkTSUtils::GetArrayLength(vm, array));
+        for (size_t i = 0; i < length; i++) {
             Local<JSValueRef> refIdVal = panda::ArrayRef::GetValueAt(vm, array, i);
             if (refIdVal->IsString(vm)) {
                 barrierInfoItem.referencedId.emplace_back(refIdVal->ToString(vm)->ToString(vm));
@@ -224,7 +226,8 @@ bool HandleSetGuideLineForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, 
 
     if (idsArg->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(idsArg);
-        for (size_t i = 0; i < array->Length(vm); i++) {
+        size_t length = static_cast<size_t>(ArkTSUtils::GetArrayLength(vm, array));
+        for (size_t i = 0; i < length; i++) {
             GuidelineInfo guidelineInfoItem;
             Local<JSValueRef> item = panda::ArrayRef::GetValueAt(vm, array, i);
             JSParseGuideline(vm, item, guidelineInfoItem);
@@ -251,7 +254,8 @@ bool HandleSetBarrierForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, co
 
     if (idsArg->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(idsArg);
-        for (size_t i = 0; i < array->Length(vm); i++) {
+        size_t length = static_cast<size_t>(ArkTSUtils::GetArrayLength(vm, array));
+        for (size_t i = 0; i < length; i++) {
             BarrierInfo barrierInfoItem;
             Local<JSValueRef> item = panda::ArrayRef::GetValueAt(vm, array, i);
             JSParseBarrier(vm, item, barrierInfoItem);
@@ -284,7 +288,6 @@ ArkUINativeModuleValue RelativeContainerBridge::CreateRelativeContainer(ArkUIRun
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
     GetArkUINodeModifiers()->getRelativeContainerModifier()->createModel();
     return panda::JSValueRef::Undefined(vm);
 }
@@ -307,10 +310,14 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
         return panda::JSValueRef::Undefined(vm);
     }
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !positionsArg->IsArray(vm)) {
+        CHECK_NULL_RETURN(
+            GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
+    CHECK_NULL_RETURN(
+        GetArkUINodeModifiers()->getRelativeContainerModifier()->setGuideLine, panda::JSValueRef::Undefined(vm));
     std::vector<ArkUIGuidelineStyle> guidelineInfos;
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
@@ -346,6 +353,8 @@ ArkUINativeModuleValue RelativeContainerBridge::ResetGuideLine(ArkUIRuntimeCallI
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline,
+        panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -368,10 +377,14 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         HandleSetBarrierForJsView(vm, firstArg, idsArg, frameNode), false, panda::JSValueRef::Undefined(vm));
 
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !referenceIdsArg->IsArray(vm)) {
+        CHECK_NULL_RETURN(
+            GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
+    CHECK_NULL_RETURN(
+        GetArkUINodeModifiers()->getRelativeContainerModifier()->setBarrier, panda::JSValueRef::Undefined(vm));
     std::vector<ArkUIBarrierStyle> barrierInfos;
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
@@ -416,6 +429,8 @@ ArkUINativeModuleValue RelativeContainerBridge::ResetBarrier(ArkUIRuntimeCallInf
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(
+        GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

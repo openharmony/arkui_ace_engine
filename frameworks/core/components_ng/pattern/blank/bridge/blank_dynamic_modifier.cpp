@@ -104,33 +104,22 @@ void CreateModelImpl()
 
 void SetColorImpl(ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr)
 {
-    GetBlankModelImpl()->SetColor(Color(value));
-}
-
-void ResetColorImpl(ArkUINodeHandle node)
-{
-    GetBlankModelImpl()->SetColor(Color::TRANSPARENT);
+    auto color = Color(value);
+    GetBlankModelImpl()->SetColor(color);
 }
 
 void SetBlankHeightImpl(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
-    GetBlankModelImpl()->SetHeight(CalcDimension(heightValue, static_cast<DimensionUnit>(heightUnit)));
-}
-
-void ResetBlankHeightImpl(ArkUINodeHandle node)
-{
-    GetBlankModelImpl()->SetHeight(CalcDimension(0.0, DimensionUnit::VP));
+    auto height = CalcDimension(heightValue, static_cast<DimensionUnit>(heightUnit));
+    GetBlankModelImpl()->SetHeight(height);
 }
 
 void SetBlankMinImpl(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit)
 {
-    GetBlankModelImpl()->SetBlankMin(CalcDimension(minValue, static_cast<DimensionUnit>(minUnit)));
+    auto blankMin = CalcDimension(minValue, static_cast<DimensionUnit>(minUnit));
+    GetBlankModelImpl()->SetBlankMin(blankMin);
 }
 
-void ResetBlankMinImpl(ArkUINodeHandle node)
-{
-    GetBlankModelImpl()->SetBlankMin(CalcDimension(0.0, DimensionUnit::VP));
-}
 #endif
 
 const ArkUIBlankModifier* GetBlankDynamicModifier()
@@ -142,11 +131,11 @@ const ArkUIBlankModifier* GetBlankDynamicModifier()
         static const ArkUIBlankModifier modifier = {
             .createModel = CreateModelImpl,
             .setColor = SetColorImpl,
-            .resetColor = ResetColorImpl,
+            .resetColor = nullptr,
             .setBlankHeight = SetBlankHeightImpl,
-            .resetBlankHeight = ResetBlankHeightImpl,
+            .resetBlankHeight = nullptr,
             .setBlankMin = SetBlankMinImpl,
-            .resetBlankMin = ResetBlankMinImpl,
+            .resetBlankMin = nullptr,
             .createFrameNode = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

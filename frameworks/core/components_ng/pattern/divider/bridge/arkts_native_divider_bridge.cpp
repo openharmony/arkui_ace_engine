@@ -93,14 +93,20 @@ ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runti
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false)) {
             strokeWidth = 1.0_px;
         }
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
         return panda::JSValueRef::Undefined(vm);
     }
     if (ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false) && strokeWidth.Value() >= 0) {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     } else {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -113,6 +119,8 @@ ArkUINativeModuleValue DividerBridge::ResetStrokeWidth(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth,
+        panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -127,8 +135,12 @@ ArkUINativeModuleValue DividerBridge::SetLineCap(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (lineCapArg->IsNumber()) {
         int32_t lineCap = lineCapArg->Int32Value(vm);
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerLineCap,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->setDividerLineCap(nativeNode, lineCap);
     } else {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -141,6 +153,8 @@ ArkUINativeModuleValue DividerBridge::ResetLineCap(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap,
+        panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -165,8 +179,12 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     }
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, dividerResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(dividerResObj);
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerColor,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->setDividerColor(nativeNode, color.GetValue(), colorRawPtr);
     } else {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -179,6 +197,8 @@ ArkUINativeModuleValue DividerBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor,
+        panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -193,8 +213,12 @@ ArkUINativeModuleValue DividerBridge::SetVertical(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (verticalArg->IsBoolean()) {
         bool value = verticalArg->ToBoolean(vm)->Value();
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerVertical,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->setDividerVertical(nativeNode, value);
     } else {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical,
+            panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -207,6 +231,8 @@ ArkUINativeModuleValue DividerBridge::ResetVertical(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical,
+        panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

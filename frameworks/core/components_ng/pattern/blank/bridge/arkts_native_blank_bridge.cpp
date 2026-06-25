@@ -67,8 +67,8 @@ ArkUINativeModuleValue BlankBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     CalcDimension blankMin(0.0, DimensionUnit::VP);
     GetArkUINodeModifiers()->getBlankModifier()->createModel();
     auto* frameNode = reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (firstArg->IsUndefined()) {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setBlankMin, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getBlankModifier()->setBlankMin(
             reinterpret_cast<ArkUINodeHandle>(frameNode), blankMin.Value(), static_cast<int32_t>(blankMin.Unit()));
         return panda::JSValueRef::Undefined(vm);
@@ -78,6 +78,7 @@ ArkUINativeModuleValue BlankBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
         if (blankMin.IsNegative() || blankMin.Unit() == DimensionUnit::PERCENT) {
             blankMin.SetValue(0.0);
         }
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setBlankMin, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getBlankModifier()->setBlankMin(
             reinterpret_cast<ArkUINodeHandle>(frameNode), blankMin.Value(), static_cast<int32_t>(blankMin.Unit()));
     }
@@ -99,28 +100,26 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     RefPtr<ResourceObject> blankResObj;
     bool isJsView = IsJsView(firstArg, vm);
     if (isJsView) {
-        BlankModelNG::ResetResObj(reinterpret_cast<FrameNode*>(nativeNode), "blank.color");
-        auto* frameNode = reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (!ArkTSUtils::ParseJsColor(vm, secondArg, color, blankResObj)) {
-            BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
+            CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setColor, panda::JSValueRef::Undefined(vm));
+            GetArkUINodeModifiers()->getBlankModifier()->setColor(
+                nativeNode, Color::TRANSPARENT.GetValue(), AceType::RawPtr(blankResObj));
             return panda::JSValueRef::Undefined(vm);
         }
-        if (SystemProperties::ConfigChangePerform() && blankResObj) {
-            BlankModelNG::SetColor(frameNode, blankResObj);
-            return panda::JSValueRef::Undefined(vm);
-        } else {
-            BlankModelNG::SetColor(frameNode, color);
-            return panda::JSValueRef::Undefined(vm);
-        }
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setColor, panda::JSValueRef::Undefined(vm));
+        GetArkUINodeModifiers()->getBlankModifier()->setColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(blankResObj));
+        return panda::JSValueRef::Undefined(vm);
     }
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, blankResObj, nodeInfo)) {
         uint32_t value = color.GetValue();
         auto blankRawPtr = AceType::RawPtr(blankResObj);
-        GetArkUINodeModifiers()->getBlankModifier()->setColor(nativeNode, value,
-            blankRawPtr);
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setColor, panda::JSValueRef::Undefined(vm));
+        GetArkUINodeModifiers()->getBlankModifier()->setColor(nativeNode, value, blankRawPtr);
     } else {
+        CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetColor, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -134,6 +133,7 @@ ArkUINativeModuleValue BlankBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCall
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetColor, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -151,15 +151,6 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
     std::string calcStr;
-    bool isJsView = IsJsView(nodeArg, vm);
-    if (isJsView) {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height, heightResObj)) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        GetArkUINodeModifiers()->getBlankModifier()->setBlankHeight(
-            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
-        return panda::JSValueRef::Undefined(vm);
-    }
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height, heightResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
@@ -178,6 +169,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     if (!ArkTSUtils::ParseJsDimensionVp(vm, valueArg, height)) {
         return panda::JSValueRef::Undefined(vm);
     }
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setBlankHeight, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->setBlankHeight(
         nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
@@ -191,6 +183,7 @@ ArkUINativeModuleValue BlankBridge::ResetBlankHeight(ArkUIRuntimeCallInfo* runti
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -213,6 +206,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankMin(ArkUIRuntimeCallInfo* runtimeCal
     if (blankMin.IsNegative() || blankMin.Unit() == DimensionUnit::PERCENT) {
         blankMin.SetValue(0.0);
     }
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->setBlankMin, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->setBlankMin(
         nativeNode, blankMin.Value(), static_cast<int32_t>(blankMin.Unit()));
     return panda::JSValueRef::Undefined(vm);
@@ -226,6 +220,7 @@ ArkUINativeModuleValue BlankBridge::ResetBlankMin(ArkUIRuntimeCallInfo* runtimeC
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetBlankMin, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetBlankMin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
