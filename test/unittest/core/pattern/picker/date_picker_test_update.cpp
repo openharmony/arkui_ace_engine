@@ -2498,6 +2498,51 @@ HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize003, T
 }
 
 /**
+ * @tc.name: DatePickerPatternYearRange001
+ * @tc.desc: Test DatePickerPattern year range setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternYearRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+/**
+     * @tc.steps: step2. Check default year range.
+     */
+    auto startDate = datePickerPattern->GetStartDateSolar();
+    auto endDate = datePickerPattern->GetEndDateSolar();
+    EXPECT_GT(startDate.GetYear(), 0);
+    EXPECT_GT(endDate.GetYear(), startDate.GetYear());
+}
+
+/**
+ * @tc.name: DatePickerDialogViewSetTitleButtonRowNode001
+ * @tc.desc: Test DatePickerDialogView SetTitleButtonRowNode method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogViewSetTitleButtonRowNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Create title button row node.
+     */
+    auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
+    ASSERT_NE(titleButtonRow, nullptr);
+}
+
+/**
  * @tc.name: DatePickerConvertFontScaleValueSkipOptimize004
  * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with VP unit fontSize
  * @tc.type: FUNC
