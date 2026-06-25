@@ -267,7 +267,6 @@ export struct GridObjectSortComponent {
 
   // component rendering
   aboutToAppear() {
-    this.dataList.length = 50
     this.selected =
       this.dataList && this.deduplicate(this.dataList).filter(val => val.selected).sort(this.sortBy());
     this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(val => !val.selected).sort(this.sortBy());
