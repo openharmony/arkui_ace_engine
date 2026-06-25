@@ -61,6 +61,7 @@ ace_unittest("overlay_manager_test_ng") {
     "sheet_wrapper_paint_test_ng.cpp",
     "sheet_wrapper_layout_test_one_ng.cpp",
     "sheet_wrapper_layout_test_two_ng.cpp",
+    "sheet_ec_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
