@@ -45,9 +45,31 @@ public:
         ResetSelectedBackgroundColor();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        StackLayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        json->PutExtAttr("copyOption", CopyOptionsToStr(GetCopyOptionValue(CopyOptions::InApp)), filter);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+
+private:
+    static const char* CopyOptionsToStr(CopyOptions opt)
+    {
+        switch (opt) {
+            case CopyOptions::None: return "None";
+            case CopyOptions::InApp: return "InApp";
+            case CopyOptions::Local: return "Local";
+            case CopyOptions::Distributed: return "Distributed";
+            default: return "InApp";
+        }
+    }
 };
 
 } // namespace OHOS::Ace::NG

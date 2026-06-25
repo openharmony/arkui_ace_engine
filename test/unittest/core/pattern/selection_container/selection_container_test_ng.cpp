@@ -21,6 +21,7 @@
 
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -33,6 +34,9 @@
 #include "core/components_ng/manager/select_content_overlay/selection_container_child.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "base/json/json_util.h"
+#include "core/components/text/text_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1651,5 +1655,104 @@ HWTEST_F(SelectionContainerPatternTest, GetSelectionEndChildTest001, TestSize.Le
     auto result = pattern_->GetSelectionEndChild();
     
     EXPECT_EQ(result, child1_);
+}
+
+/**
+ * @tc.name: CopyOptionsToStrTest001
+ * @tc.desc: Test SelectionContainerLayoutProperty::CopyOptionsToStr maps all enum values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, CopyOptionsToStrTest001, TestSize.Level1)
+{
+    EXPECT_STREQ(SelectionContainerLayoutProperty::CopyOptionsToStr(CopyOptions::None), "None");
+    EXPECT_STREQ(SelectionContainerLayoutProperty::CopyOptionsToStr(CopyOptions::InApp), "InApp");
+    EXPECT_STREQ(SelectionContainerLayoutProperty::CopyOptionsToStr(CopyOptions::Local), "Local");
+    EXPECT_STREQ(SelectionContainerLayoutProperty::CopyOptionsToStr(CopyOptions::Distributed), "Distributed");
+}
+
+/**
+ * @tc.name: SelectionContainerLayoutToJsonValueTest001
+ * @tc.desc: Test SelectionContainerLayoutProperty::ToJsonValue dumps copyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, SelectionContainerLayoutToJsonValueTest001, TestSize.Level1)
+{
+    auto layoutProperty = containerNode_->GetLayoutProperty<SelectionContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCopyOption(CopyOptions::Local);
+    auto json = JsonUtil::Create(true);
+    const InspectorFilter filter;
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("copyOption"), "Local");
+}
+
+/**
+ * @tc.name: GetCaretColorStrTest001
+ * @tc.desc: Test GetCaretColorStr resolves explicit value and theme default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, GetCaretColorStrTest001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    pipeline->themeManager_ = themeManager;
+    auto layoutProperty = containerNode_->GetLayoutProperty<SelectionContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretColor(TEST_CARET_COLOR);
+    EXPECT_EQ(pattern_->GetCaretColorStr(), TEST_CARET_COLOR.ColorToString());
+
+    layoutProperty->ResetCaretColor();
+    auto theme = containerNode_->GetContext()->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(pattern_->GetCaretColorStr(), theme->GetCaretColor().ColorToString());
+}
+
+/**
+ * @tc.name: GetSelectedBackgroundColorStrTest001
+ * @tc.desc: Test GetSelectedBackgroundColorStr resolves explicit value and theme default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, GetSelectedBackgroundColorStrTest001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    pipeline->themeManager_ = themeManager;
+    auto layoutProperty = containerNode_->GetLayoutProperty<SelectionContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSelectedBackgroundColor(TEST_SELECTED_BG_COLOR);
+    EXPECT_EQ(pattern_->GetSelectedBackgroundColorStr(), TEST_SELECTED_BG_COLOR.ColorToString());
+
+    layoutProperty->ResetSelectedBackgroundColor();
+    auto theme = containerNode_->GetContext()->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(pattern_->GetSelectedBackgroundColorStr(), theme->GetSelectedColor().ColorToString());
+}
+
+/**
+ * @tc.name: GetBindSelectionMenuInJsonTest001
+ * @tc.desc: Test GetBindSelectionMenuInJson with no registered menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, GetBindSelectionMenuInJsonTest001, TestSize.Level1)
+{
+    EXPECT_EQ(pattern_->GetBindSelectionMenuInJson(), "[]");
+}
+
+/**
+ * @tc.name: SelectionContainerToJsonValueTest001
+ * @tc.desc: Test SelectionContainerPattern::ToJsonValue dumps pattern-level keys
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, SelectionContainerToJsonValueTest001, TestSize.Level1)
+{
+    auto json = JsonUtil::Create(true);
+    const InspectorFilter filter;
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("enableHapticFeedback"));
+    EXPECT_TRUE(json->Contains("caretColor"));
+    EXPECT_TRUE(json->Contains("bindSelectionMenu"));
+    EXPECT_TRUE(json->Contains("content"));
 }
 } // namespace OHOS::Ace::NG
