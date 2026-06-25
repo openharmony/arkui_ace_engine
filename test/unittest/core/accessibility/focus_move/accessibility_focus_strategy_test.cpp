@@ -183,7 +183,7 @@ public:
     }
     bool IsAccessibiltyVisible() override
     {
-        return false;
+        return mockIsAccessibilityVisible_;
     }
 
     bool IsChildTreeContainer() override
@@ -208,6 +208,7 @@ public:
     bool mockChildTreeContainer = false;
     bool mockIsEmbededTarget_ = false;
     bool mockIsDescendantMode_ = false;
+    bool mockIsAccessibilityVisible_ = false;
 private:
 };
 } // namespace
@@ -249,6 +250,51 @@ HWTEST_F(AccessibilityFocusStrategyTest, CheckNodeMatchedFocusType001, TestSize.
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: CheckNodeMatchedFocusType002
+ * @tc.desc: CheckNodeMatchedFocusType returns false when focus type rules are not available.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CheckNodeMatchedFocusType002, TestSize.Level1)
+{
+    auto checkNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    ASSERT_NE(checkNode, nullptr);
+
+    auto result = CheckNodeMatchedFocusType(checkNode, Accessibility::FocusRuleType::FOCUS_BY_LINK);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CanAccessibilityFocusFocusRuleType001
+ * @tc.desc: CanAccessibilityFocus stops before focus type check when node is null or invisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CanAccessibilityFocusFocusRuleType001, TestSize.Level1)
+{
+    AccessibilityFocusStrategy strategy(Accessibility::FocusRuleType::FOCUS_BY_TITLE);
+    auto invisibleNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    ASSERT_NE(invisibleNode, nullptr);
+    invisibleNode->mockIsAccessibilityVisible_ = false;
+
+    EXPECT_FALSE(strategy.CanAccessibilityFocus(nullptr));
+    EXPECT_FALSE(strategy.CanAccessibilityFocus(invisibleNode));
+}
+
+/**
+ * @tc.name: CanAccessibilityFocusFocusRuleType002
+ * @tc.desc: CanAccessibilityFocus returns false when node does not match FocusRuleType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CanAccessibilityFocusFocusRuleType002, TestSize.Level1)
+{
+    AccessibilityFocusStrategy strategy(Accessibility::FocusRuleType::FOCUS_BY_LINK);
+    auto visibleNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    ASSERT_NE(visibleNode, nullptr);
+    visibleNode->mockIsAccessibilityVisible_ = true;
+
+    EXPECT_FALSE(strategy.CanAccessibilityFocus(visibleNode));
+}
 
 /**
  * @tc.name: FindLastNodeWithoutCheck001
