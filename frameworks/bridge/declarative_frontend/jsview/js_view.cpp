@@ -831,12 +831,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteTriggerLifecycle(eventId);
     };
 
-    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active, bool isReuse = false) -> void {
+    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active, bool isReuse = false,
+        bool suppressActiveLifecycle = false) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
         CHECK_NULL_VOID(jsView->jsViewFunction_);
-        jsView->jsViewFunction_->ExecuteSetActive(active, isReuse);
+        jsView->jsViewFunction_->ExecuteSetActive(active, isReuse, suppressActiveLifecycle);
     };
 
     auto onDumpInfoFunc = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& params) -> void {

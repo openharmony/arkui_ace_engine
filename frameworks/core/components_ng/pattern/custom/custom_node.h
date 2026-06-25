@@ -115,7 +115,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override;
 
     void SetDestroying(bool isDestroying, bool cleanStatus) override;
 

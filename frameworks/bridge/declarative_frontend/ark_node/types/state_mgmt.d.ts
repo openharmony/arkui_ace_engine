@@ -243,7 +243,7 @@ interface IView extends IPropertySubscriber {
     setDeleting(): void;
     setDeleteStatusRecursively(): void;
     isCompFreezeAllowed(): boolean;
-    setActiveInternal(newState: boolean, isReuse: boolean): void;
+    setActiveInternal(newState: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
     findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
     localStorage_: LocalStorage;
     debugInfoViewHierarchyInternal(depth: number, recursive: boolean): string;
@@ -311,7 +311,7 @@ declare abstract class ViewBuildNodeBase {
     clearChildBuilderNode(): void;
     protected purgeDeletedElmtIds(): void;
     setShareLocalStorage(localStorage: LocalStorage): void;
-    protected propagateToChildren(weakRefMap: Map<number, WeakRef<IView | ViewBuildNodeBase>> | undefined, active: boolean, isReuse: boolean): void;
+    protected propagateToChildren(weakRefMap: Map<number, WeakRef<IView | ViewBuildNodeBase>> | undefined, active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
 }
 
 // ============================================================================
@@ -395,7 +395,7 @@ declare abstract class ViewPU extends PUV2ViewBase implements IViewPropertiesCha
     setDeleting(): void;
     setDeleteStatusRecursively(): void;
     isCompFreezeAllowed(): boolean;
-    setActiveInternal(newState: boolean, isReuse: boolean): void;
+    setActiveInternal(newState: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
     findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
     debugInfoViewHierarchyInternal(depth: number, recursive: boolean): string;
     debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number, recursive: boolean): string;

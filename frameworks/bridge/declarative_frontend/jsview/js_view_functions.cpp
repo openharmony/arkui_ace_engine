@@ -202,16 +202,20 @@ bool ViewFunctions::ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isPr
     }
 }
 
-void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
+void ViewFunctions::ExecuteSetActive(bool active, bool isReuse, bool suppressActiveLifecycle)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
         JSFastNativeScope scope(func->GetEcmaVM());
-        JSRef<JSVal> params[2]; // 2: the count of parameter
+        JSRef<JSVal> params[3]; // 3: the count of parameter
         params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(active)));
         params[1] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(isReuse)));
-        func->Call(jsObject_.Lock(), 2, params); // 2: the count of parameter
+        constexpr int32_t suppressActiveLifecycleNumInParams = 2; // 2: params array index for suppressActiveLifecycle
+        params[suppressActiveLifecycleNumInParams] = JSRef<JSVal>(
+            JSVal(JsiValueConvertor::toJsiValue(suppressActiveLifecycle))
+        );
+        func->Call(jsObject_.Lock(), 3, params); // 3: the count of parameter
     } else {
         LOGE("the set active func is null");
     }

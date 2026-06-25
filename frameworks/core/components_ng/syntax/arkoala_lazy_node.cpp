@@ -310,7 +310,7 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
     }
 }
 
-void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "ArkoalaLazyNode.SetJSViewActive: %{public}s ...", active ? "true" : "false");

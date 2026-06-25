@@ -145,7 +145,8 @@ public:
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type);
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override;
 
     void BuildAllChildren();
 

@@ -392,7 +392,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     isViewActive(): boolean {
         return this.instance.__getActive__Internal() > 0;
     }
-    setActiveInternal(active: boolean, isReuse: boolean): void {
+    setActiveInternal(active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void {
         const isSwitch: boolean = this.setActiveCount(active);
         const status = this.isViewActive();
         if (status) {
@@ -405,7 +405,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             this.instance.__fireActiveOrInactiveFunc__Internal(status);
         }
         this.switchNodeFreeze();
-        this.instance.__propagateToChild__Internal(active, isReuse);
+        this.instance.__propagateToChild__Internal(active, isReuse, suppressActiveLifecycle);
     }
     pageTransition(): void {
         if (this.instance instanceof PageLifeCycle) {

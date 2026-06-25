@@ -844,7 +844,8 @@ void RepeatVirtualScroll2Node::NotifyColorModeChange(uint32_t colorMode)
     });
 }
 
-void RepeatVirtualScroll2Node::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void RepeatVirtualScroll2Node::SetJSViewActive(bool active, bool isLazyForEachNode,
+    bool isReuse, bool suppressActiveLifecycle)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "SetJSViewActive ...");
     caches_.ForEachCacheItem([active](RIDType rid, const CacheItem& cacheItem) {

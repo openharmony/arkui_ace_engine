@@ -344,18 +344,18 @@ abstract class ViewBuildNodeBase {
      * @param isReuse - Related to component reuse
      */
     protected propagateToChildren(weakRefMap: Map<number, WeakRef<IView | ViewBuildNodeBase>> | undefined,
-        active: boolean, isReuse: boolean): void {
+        active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean = false): void {
         if (weakRefMap) {
             for (const child of weakRefMap.values()) {
-                child.deref()?.setActiveInternal(active, isReuse);
+                child.deref()?.setActiveInternal(active, isReuse, suppressActiveLifecycle);
             }
         }
     }
     // overwritten by sub classes
-    public setActiveInternal(active: boolean, isReuse = false): void {
+    public setActiveInternal(active: boolean, isReuse = false, suppressActiveLifecycle = false): void {
         // Propagate state to all child View
-        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse, suppressActiveLifecycle);
         // Propagate state to all child BuilderNode
-        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse, suppressActiveLifecycle);
     }
 }

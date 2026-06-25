@@ -264,19 +264,20 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
 
     static ani_method setActiveMethod = nullptr;
     if (!setActiveMethod) {
-        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "setActiveInternal", "zz:", &
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "setActiveInternal", "zzz:", &
             setActiveMethod);
     }
-    auto setActive = [vm, weakRef](bool a, bool b) {
+    auto setActive = [vm, weakRef](bool a, bool b, bool c) {
         ani_env *env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
         ani_boolean released;
         ani_ref localRef;
         ani_boolean param1 = ani_boolean(a);
         ani_boolean param2 = ani_boolean(b);
+        ani_boolean param3 = ani_boolean(c);
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
-            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2);
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2, param3);
             env->Reference_Delete(localRef);
         }
     };

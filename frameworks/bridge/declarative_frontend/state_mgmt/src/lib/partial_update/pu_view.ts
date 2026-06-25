@@ -471,36 +471,41 @@ abstract class ViewPU extends PUV2ViewBase
  * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
  * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
+ * @param suppressActiveLifecycle whether to surprise the active lifecycle
  */
-  public setActiveInternal(active: boolean, isReuse = false): void {
+  public setActiveInternal(active: boolean, isReuse = false, suppressActiveLifecycle = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     const isCompFreezeAllowed = this.isCompFreezeAllowed();
-    if (!isCompFreezeAllowed && this.__needToActiveOrInactiveLifecycle__Internal) {
+    if (this.__needToActiveOrInactiveLifecycle__Internal && !isCompFreezeAllowed) {
       // Non-freeze state: use __activeCountForNonFreeze__Internal
       // Only execute when @Active/@Inactive decorator is used for performance
       const oldCount = this.__activeCountForNonFreeze__Internal;
       this.setActiveCountForNonFreeze(active);
-      this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+      this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount, suppressActiveLifecycle);
     }
     if (isCompFreezeAllowed) {
       const oldCount = this.activeCount_;
       this.setActiveCount(active);
       if (this.isViewActive()) {
-        if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+        if (this.__needToActiveOrInactiveLifecycle__Internal && !suppressActiveLifecycle &&
+            oldCount === 0 && this.activeCount_ > 0 &&
+            !this.__isComponentActiveOrInactive__Internal) {
           this.__needToExecuteActive__Internal = true;
         }
         this.onActiveInternal();
       } else {
-        if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+        if (this.__needToActiveOrInactiveLifecycle__Internal && !suppressActiveLifecycle &&
+            oldCount > 0 && this.activeCount_ === 0 &&
+            this.__isComponentActiveOrInactive__Internal) {
           this.__needToExecuteInactive__Internal = true;
         }
         this.onInactiveInternal();
       }
     }
     // Propagate state to all child View
-    this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+    this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse, suppressActiveLifecycle);
     // Propagate state to all child BuilderNode
-    this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+    this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse, suppressActiveLifecycle);
 
     if (InteropConfigureStateMgmt.needsInterop()) {
       this.handleActiveChangeForInterop(active);
@@ -518,7 +523,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.performDelayedUpdate();
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-    if (this.__needToExecuteActive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+    if (this.__needToActiveOrInactiveLifecycle__Internal && this.__needToExecuteActive__Internal) {
       this.__customComponentExecuteActive__Internal();
       this.__needToExecuteActive__Internal = false;
     }
@@ -534,7 +539,7 @@ abstract class ViewPU extends PUV2ViewBase
     for (const stateLinkProp of this.ownObservedPropertiesStore_) {
       stateLinkProp.enableDelayedNotification();
     }
-    if (this.__needToExecuteInactive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+    if ( this.__needToActiveOrInactiveLifecycle__Internal && this.__needToExecuteInactive__Internal) {
       this.__customComponentExecuteInactive__Internal();
       this.__needToExecuteInactive__Internal = false;
     }

@@ -363,7 +363,7 @@ class JSBuilderNode extends BaseNode {
     return this.activeCount_ > 0;
   }
 
-  public setActiveInternal(active: boolean, isReuse: boolean = false): void {
+  public setActiveInternal(active: boolean, isReuse: boolean = false, suppressActiveLifecycle: boolean = false): void {
     stateMgmtProfiler.begin('BuilderNode.setActive');
     if (!isReuse) {
       this.activeCount_ += active ? 1 : -1;
@@ -378,8 +378,8 @@ class JSBuilderNode extends BaseNode {
       }
     }
     if (this.inheritFreeze) {
-      this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
-      this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+      this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse, suppressActiveLifecycle);
+      this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse, suppressActiveLifecycle);
     }
     stateMgmtProfiler.end();
   }

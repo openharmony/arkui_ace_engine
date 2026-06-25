@@ -351,7 +351,7 @@ void UINode::SetDestroying(bool isDestroying, bool cleanStatus) {}
 
 void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule, bool isUserFreeze) {}
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse) {}
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle) {}
 
 bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 {
