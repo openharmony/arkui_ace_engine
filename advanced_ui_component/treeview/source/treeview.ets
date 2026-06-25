@@ -1057,6 +1057,12 @@ export struct TreeView {
     })
   }
 
+  aboutToDisappear(): void {
+    accessibility.off('screenReaderStateChange', (state: boolean) => {
+      console.info(`Unsubscribe screen reader state change, result: ${JSON.stringify(state)}`);
+    });
+  }
+
   decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
     let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;

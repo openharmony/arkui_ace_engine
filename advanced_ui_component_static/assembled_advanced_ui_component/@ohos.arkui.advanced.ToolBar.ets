@@ -357,9 +357,13 @@ import {
       } else if (typeof resource === 'undefined') {
         return this.toStringFormat(this.toolBarList[Double.toInt(index)]?.content);
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((resource as Resource).id)
-        return str as string;
+        try {
+          let str: string | undefined = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+          getStringSync((resource as Resource).id)
+          return str as string;
+        } catch (error) {
+          return '';
+        }
       }
     }
   
@@ -369,9 +373,13 @@ import {
       } else if (typeof resource === 'undefined') {
         return '' as string;
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((resource as Resource).id)
-        return str as string;
+        try {
+          let str: string | undefined = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+          getStringSync((resource as Resource).id)
+          return str as string;
+        } catch (error) {
+          return '';
+        }
       }
     }
   

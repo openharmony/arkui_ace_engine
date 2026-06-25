@@ -1123,8 +1123,12 @@ export struct Filter {
         .map((item: FilterResult): ResourceStr => {
           if (typeof item.value !== 'string') {
             let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
-            return (uiContent as common.UIAbilityContext).resourceManager
-              .getStringSync((item.value as Resource).id as Long)
+            try {
+              return (uiContent as common.UIAbilityContext).resourceManager
+                .getStringSync((item.value as Resource).id as Long)
+            } catch (error) {
+              return '';
+            }
           } else {
             return item.value;
           }

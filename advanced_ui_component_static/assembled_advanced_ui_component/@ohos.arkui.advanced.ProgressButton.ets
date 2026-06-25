@@ -161,8 +161,12 @@ export struct ProgressButton {
     if (typeof this.progressButtonWidth === 'string') {
       resourceString = this.progressButtonWidth as string;
     } else {
-      resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((this.progressButtonWidth as Resource).id) as string;
+      try {
+        resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((this.progressButtonWidth as Resource).id) as string;
+      } catch (error) {
+        resourceString = '';
+      }
     }
     const regex = new RegExp('^(?:[0-9]+(\\.[0-9]+)?|([0-9]+(\\.[0-9]+)?)%|([0-9]+(\\.[0-9]+)?)vp)$');
     if (regex.test(resourceString)) {

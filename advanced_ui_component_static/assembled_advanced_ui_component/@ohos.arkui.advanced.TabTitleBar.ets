@@ -848,8 +848,12 @@ struct ImageMenuItem {
       let accessibilityText: string = '';
       let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
-        accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
-          .getStringSync((this.item.accessibilityText as Resource).id as Long)
+        try {
+          accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+            .getStringSync((this.item.accessibilityText as Resource).id as Long)
+        } catch (error) {
+          accessibilityText = '';
+        }
       }
       return accessibilityText as string;
     }
@@ -873,8 +877,12 @@ struct ImageMenuItem {
         let accessibilityText: string = '';
         let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
-          accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
-            .getStringSync((this.item.accessibilityText as Resource).id as Long)
+          try {
+            accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+              .getStringSync((this.item.accessibilityText as Resource).id as Long)
+          } catch (error) {
+            accessibilityText = '';
+          }
         }
         return accessibilityText as string;
       }
@@ -906,8 +914,12 @@ struct ImageMenuItem {
         let accessibilityDescription: string = ' ';
         let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
-          accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
-            .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
+          try {
+            accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
+              .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
+          } catch (error) {
+            accessibilityDescription = ' ';
+          }
         }
         return accessibilityDescription as string;
       }

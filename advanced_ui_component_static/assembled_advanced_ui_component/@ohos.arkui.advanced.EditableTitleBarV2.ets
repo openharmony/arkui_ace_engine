@@ -848,8 +848,12 @@ export struct ImageMenuItemV2 {
 
   private getAccessibilityDescriptionV2(): string | undefined {
     if (UtilV2.isResourceType(this.itemV2.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      } catch (error) {
+        return '';
+      }
     } else if (this.itemV2.accessibilityDescription && this.itemV2.accessibilityDescription !== '') {
       return this.itemV2.accessibilityDescription as string;
     }

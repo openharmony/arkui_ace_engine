@@ -626,8 +626,12 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.operationItems[0].accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
-        (this.operationItems[0].accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
+          (this.operationItems[0].accessibilityDescription as Resource).id);
+      } catch (error) {
+        return '';
+      }
     } else if (this.operationItems[0].accessibilityDescription &&
       this.operationItems[0].accessibilityDescription !== '') {
       return this.operationItems[0].accessibilityDescription as string;
@@ -1042,8 +1046,12 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.operationItems[0].accessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.operationItems[0].accessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.operationItems[0].accessibilityText as Resource).id);
+      } catch (error) {
+        return '';
+      }
     } else if (this.operationItems[0].accessibilityText) {
       return this.operationItems[0].accessibilityText as string;
     } else {
@@ -1089,8 +1097,12 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.title?.titleAccessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+      } catch (error) {
+        return '';
+      }
     }
     return this.title?.titleAccessibilityText as string;
   }
@@ -1251,8 +1263,12 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityText(): string | undefined {
     if (Util.isResourceType(this.item?.accessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.item?.accessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.item?.accessibilityText as Resource).id);
+      } catch (error) {
+        return '';
+      }
     } else if (this.item?.accessibilityText) {
       return this.item?.accessibilityText as string;
     }
@@ -1268,8 +1284,12 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityDescription(): string | undefined {
     if (Util.isResourceType(this.item?.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.item?.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.item?.accessibilityDescription as Resource).id);
+      } catch (error) {
+        return '';
+      }
     } else if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
       return this.item?.accessibilityDescription as string;
     }

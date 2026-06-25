@@ -572,9 +572,13 @@ export struct ToolBarV2 {
     } else if (typeof resource === 'undefined') {
       return this.toStringFormat(this.toolBarList[index]?.content?.text);
     } else {
-      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((resource as Resource).id)
-      return str as string;
+      try {
+        let str: string = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((resource as Resource).id)
+        return str as string;
+      } catch (error) {
+        return '';
+      }
     }
   }
 
@@ -584,9 +588,13 @@ export struct ToolBarV2 {
     } else if (typeof resource === 'undefined') {
       return '' as string;
     } else {
-      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((resource as Resource).id)
-      return str as string;
+      try {
+        let str: string = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((resource as Resource).id)
+        return str as string;
+      } catch (error) {
+        return '';
+      }
     }
   }
 
