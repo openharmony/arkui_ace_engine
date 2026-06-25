@@ -25,7 +25,9 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components_ng/base/modifier.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -165,3 +167,50 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
     return context2d_;
 }
 } // namespace OHOS::Ace::Framework
+
+// Exported for libarkui_canvas.z.so (Canvas dynamic module).
+// Creates a JSDrawingRenderingContext with proper JS prototype and invokes
+// the callback with it. This is called via dlopen/dlsym from the canvas bridge.
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_OnReadyCreateAndInvoke(
+    void* vmRaw, void* callbackRefRaw, void* patternRaw, int32_t instanceId, int32_t unit)
+{
+    auto vm = reinterpret_cast<EcmaVM*>(vmRaw);
+    auto& callbackRef = *reinterpret_cast<panda::CopyableGlobal<panda::FunctionRef>*>(callbackRefRaw);
+
+    auto jsDrawingContext = OHOS::Ace::Framework::JSClass<
+        OHOS::Ace::Framework::JSDrawingRenderingContext>::NewInstance();
+    auto drawingContext = OHOS::Ace::Referenced::Claim(
+        jsDrawingContext->Unwrap<OHOS::Ace::Framework::JSDrawingRenderingContext>());
+    drawingContext->SetBuiltIn(true);
+    drawingContext->SetInstanceId(instanceId);
+    if (patternRaw) {
+        auto pattern = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::AceType*>(patternRaw));
+        drawingContext->SetCanvasPattern(pattern);
+        auto canvasPattern = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::CanvasPattern>(pattern);
+        if (canvasPattern) {
+            auto frameNode = canvasPattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            std::function<void(OHOS::Ace::CanvasUnit)> cb =
+                [drawingContext](OHOS::Ace::CanvasUnit u) { drawingContext->SetUnit(u); };
+            auto* modifier = OHOS::Ace::NG::NodeModifier::GetCanvasModifier();
+            CHECK_NULL_VOID(modifier);
+            CHECK_NULL_VOID(modifier->setUpdateContextCallback);
+            modifier->setUpdateContextCallback(
+                reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(frameNode)), &cb);
+            auto* modifier2 = OHOS::Ace::NG::NodeModifier::GetCanvasModifier();
+            CHECK_NULL_VOID(modifier2);
+            CHECK_NULL_VOID(modifier2->setRSCanvasForDrawingContext);
+            modifier2->setRSCanvasForDrawingContext(
+                reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(frameNode)));
+        }
+    }
+    drawingContext->SetUnit(static_cast<OHOS::Ace::CanvasUnit>(unit));
+
+     auto callback = callbackRef.ToLocal();
+    if (callback->IsFunction(vm)) {
+        panda::Local<panda::JSValueRef> argv[] = { jsDrawingContext->GetLocalHandle() };
+        panda::TryCatch trycatch(vm);
+        auto result = callback->Call(vm, callback, argv, 1);
+        OHOS::Ace::NG::ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+    }
+}
