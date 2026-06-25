@@ -26,11 +26,15 @@ namespace OHOS::Ace {
 // Should use CJUIModifier API later
 NG::BlankModelNG* GetBlankModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find blank dynamic module");
+    static NG::BlankModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find blank dynamic module");
+        }
+        model = reinterpret_cast<NG::BlankModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::BlankModelNG*>(module->GetModel());
+    return model;
 }
 
 } // namespace OHOS::Ace

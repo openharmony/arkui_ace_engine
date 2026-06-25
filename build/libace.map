@@ -4102,7 +4102,6 @@
       OHOS::Ace::BackEndEventIdManager::*;
       OHOS::Ace::BackgroundImageSize::*;
       OHOS::Ace::Base64Util::Decode*;
-      OHOS::Ace::BlankModel::*;
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::BoxComponent::*;
       OHOS::Ace::CalendarPickerModel::*;
@@ -4132,7 +4131,6 @@
       OHOS::Ace::DatePickerDialogModel::*;
       OHOS::Ace::DatePickerModel::*;
       OHOS::Ace::Dimension::*;
-      OHOS::Ace::DividerModel::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::DrawableDescriptor::*;
@@ -4467,7 +4465,6 @@
       OHOS::Ace::RefreshModel::*;
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
-      OHOS::Ace::RelativeContainerModel::*;
       OHOS::Ace::NG::RelativeContainerModelNG::CreateFrameNode*;
       OHOS::Ace::NG::CalcSize::IsWidthDimensionUnitAuto*;
       OHOS::Ace::NG::CalcSize::IsHeightDimensionUnitAuto*;
@@ -4783,7 +4780,6 @@
       vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::CustomNode;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
-      vtable?for?OHOS::Ace::NG::DividerPattern;
       vtable?for?OHOS::Ace::NG::EventHub;
       vtable?for?OHOS::Ace::NG::ExtensionHandler;
       vtable?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
@@ -4944,7 +4940,6 @@
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::ClickRecognizer;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
-      VTT?for?OHOS::Ace::NG::DividerPattern;
       VTT?for?OHOS::Ace::NG::EventHub;
       VTT?for?OHOS::Ace::NG::ExtensionHandler;
       VTT?for?OHOS::Ace::NG::FlexLayoutAlgorithm;

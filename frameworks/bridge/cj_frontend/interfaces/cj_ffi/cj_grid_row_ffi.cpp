@@ -26,11 +26,15 @@ using namespace OHOS::Ace;
 namespace OHOS::Ace {
 NG::GridRowModelNG* GetGridRowModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridRow");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find gridrow dynamic module");
+    static NG::GridRowModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridRow");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find gridrow dynamic module");
+        }
+        model = reinterpret_cast<NG::GridRowModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::GridRowModelNG*>(module->GetModel());
+    return model;
 }
 } // namespace OHOS::Ace
 

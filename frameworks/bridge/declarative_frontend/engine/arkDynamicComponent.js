@@ -523,12 +523,12 @@ if (globalThis.Divider === undefined) {
 // @ts-ignore
 if (globalThis.RelativeContainer === undefined) {
   globalThis.RelativeContainer = {
-    create: function(value) {
+    create: function() {
       getUINativeModule().loadNativeModule('RelativeContainer');
       let module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
       module.exportView();
       module.loadComponent();
-      getUINativeModule().relativeContainer.create(value);
+      getUINativeModule().relativeContainer.create();
     },
     name: 'JSRelativeContainer'
   }

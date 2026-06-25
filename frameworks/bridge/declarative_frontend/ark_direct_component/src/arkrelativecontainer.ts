@@ -102,8 +102,8 @@ function loadComponent(): ComponentObj | undefined {
 }
 
 class JSRelativeContainer extends JSContainerBase {
-  static create(value: any): void {
-    getUINativeModule().relativeContainer.create(value);
+  static create(): void {
+    getUINativeModule().relativeContainer.create();
   }
 
   static guideLine(value: any): void {

@@ -24,11 +24,15 @@ using namespace OHOS::Ace;
 namespace OHOS::Ace {
 NG::GridColModelNG* GetGridColModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridCol");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find gridcol dynamic module");
+    static NG::GridColModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridCol");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find gridcol dynamic module");
+        }
+        model = reinterpret_cast<NG::GridColModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::GridColModelNG*>(module->GetModel());
+    return model;
 }
 } // namespace OHOS::Ace
 

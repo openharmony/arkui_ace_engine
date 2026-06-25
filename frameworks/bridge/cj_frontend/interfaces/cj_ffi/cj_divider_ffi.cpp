@@ -25,9 +25,15 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace {
 NG::DividerModelNG* GetDividerModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Divider");
-    CHECK_NULL_RETURN(module, nullptr);
-    return static_cast<NG::DividerModelNG*>(module->GetModel());
+    static NG::DividerModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Divider");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find divider dynamic module");
+        }
+        model = reinterpret_cast<NG::DividerModelNG*>(module->GetModel());
+    }
+    return model;
 }
 } // namespace OHOS::Ace
 namespace {

@@ -24,11 +24,15 @@ namespace OHOS::Ace {
 // Should use CJUIModifier API later
 NG::RelativeContainerModelNG* GetRelativeContainerModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RelativeContainer");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find relative container dynamic module");
+    static NG::RelativeContainerModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RelativeContainer");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find relative container dynamic module");
+        }
+        model = reinterpret_cast<NG::RelativeContainerModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::RelativeContainerModelNG*>(module->GetModel());
+    return model;
 }
 
 }
