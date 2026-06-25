@@ -201,6 +201,11 @@ public:
 
     virtual void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) {}
 
+    virtual bool UpdatePageUrl(void* customNode, const std::string& pageName)
+    {
+        return false;
+    }
+
     virtual void SetPageUrlCheckFunc(PageUrlCheckFunc&& func)
     {
         pageUrlCheckFunc_ = func;

@@ -338,6 +338,16 @@ public:
         return navigationStackExtend_;
     }
 
+    virtual bool GetOhmUrl(const RefPtr<UINode>& customNode, std::string& moduleName, std::string& fileName)
+    {
+        return false;
+    }
+
+    virtual bool CreateNodeFromRecovery(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
+    {
+        return false;
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

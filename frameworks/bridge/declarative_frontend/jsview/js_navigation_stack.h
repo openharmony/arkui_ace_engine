@@ -177,6 +177,11 @@ public:
         return false;
     }
 
+    bool GetOhmUrl(const RefPtr<NG::UINode>& customNode, std::string& moduleName, std::string& fileName) override;
+
+    bool CreateNodeFromRecovery(int32_t index, const WeakPtr<NG::UINode>& customNode,
+        RefPtr<NG::UINode>& node) override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;

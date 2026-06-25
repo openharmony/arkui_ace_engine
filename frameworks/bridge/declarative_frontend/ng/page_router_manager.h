@@ -50,6 +50,7 @@ using IsNamedRouterNeedPreloadCallback = std::function<bool(const std::string&)>
 using PreloadNamedRouterCallback = std::function<void(const std::string&, std::function<void(bool)>&&)>;
 using UpdateRootComponentCallback = std::function<bool()>;
 using GenerateIntentPageCallback = std::function<bool(const std::string&, const std::string&, const std::string&)>;
+using UpdateOhmUrlCallback = std::function<bool(void* customNode, const std::string& pageName)>;
 #if defined(PREVIEW)
 using IsComponentPreviewCallback = std::function<bool()>;
 #endif
@@ -277,6 +278,11 @@ public:
 
     bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const;
 
+    void SetUpdatePageUrlCallback(UpdateOhmUrlCallback callback)
+    {
+        ohmUrlCallback_ = callback;
+    }
+
 protected:
     class RouterOptScope {
     public:
@@ -418,6 +424,7 @@ protected:
     PreloadNamedRouterCallback preloadNamedRouter_;
     UpdateRootComponentCallback updateRootComponent_;
     GenerateIntentPageCallback generateIntentPageCallback_;
+    UpdateOhmUrlCallback ohmUrlCallback_;
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;

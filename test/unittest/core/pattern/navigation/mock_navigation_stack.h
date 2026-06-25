@@ -242,6 +242,25 @@ public:
 
     MOCK_METHOD2(CreateHomeDestination, bool(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node));
 
+    bool GetOhmUrl(const RefPtr<UINode>& customNode, std::string& moduleName, std::string& fileName) override
+    {
+        moduleName = mockModuleName_;
+        fileName = mockFileName_;
+        return mockGetOhmUrlResult_;
+    }
+
+    bool CreateNodeFromRecovery(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node) override
+    {
+        return CreateNodeByIndex(index, customNode, node);
+    }
+
+    void SetMockGetOhmUrlResult(bool result, const std::string& moduleName = "", const std::string& fileName = "")
+    {
+        mockGetOhmUrlResult_ = result;
+        mockModuleName_ = moduleName;
+        mockFileName_ = fileName;
+    }
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
@@ -254,6 +273,9 @@ private:
     std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
     std::vector<NavdestinationRecoveryInfo> recoveryPushCalls_;
     std::map<int32_t, bool> mockIsEntryMap_;
+    bool mockGetOhmUrlResult_ = false;
+    std::string mockModuleName_;
+    std::string mockFileName_;
     int32_t size_ = 0;
 };
 } // namespace NG
