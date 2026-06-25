@@ -29,7 +29,6 @@
 #include "base/utils/noncopyable.h"
 #include "base/want/want_wrap.h"
 #include "base/utils/utils.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -37,11 +36,11 @@
 #include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
-#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace {
 struct ButtonInfo;
+struct DialogProperties;
 struct ModalUIExtensionCallbacks;
 struct ModalUIExtensionConfig;
 struct ModalUIExtensionAllowedUpdateConfig;
@@ -57,6 +56,8 @@ struct ContentCoverParam;
 struct DatePickerSettingData;
 struct TextPickerSettingData;
 struct TimePickerSettingData;
+struct SheetStyle;
+struct ToastInfo;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,

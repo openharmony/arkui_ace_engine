@@ -24,7 +24,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 

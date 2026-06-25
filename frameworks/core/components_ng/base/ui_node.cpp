@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
+#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
 #include "ui/base/versions.h"
 
 namespace OHOS::Ace::NG {

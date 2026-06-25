@@ -19,13 +19,12 @@
 #include <string>
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-
+class InspectorFilter;
 
 class ACE_EXPORT SelectLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(SelectLayoutProperty, LayoutProperty);

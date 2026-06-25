@@ -19,11 +19,12 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 namespace {
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 // arrow actual display height against shadow

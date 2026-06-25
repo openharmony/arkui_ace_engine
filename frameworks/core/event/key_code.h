@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/utils/macros.h"
+#include "core/event/blur_reason.h"
 
 namespace OHOS::Ace {
 
@@ -453,23 +454,6 @@ constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 
 ACE_FORCE_EXPORT uint64_t CalculateModifierKeyState(const std::vector<KeyCode>& status);
-
-enum class BlurReason : int32_t {
-    FOCUS_SWITCH = 0,
-    WINDOW_BLUR = 1,
-    FRAME_DESTROY = 2, // frame node detached from main tree
-    VIEW_SWITCH = 3,
-    CLEAR_FOCUS = 4, // User api clearFocus triggered
-    BACK_TO_TABSTOP = 5,
-};
-
-enum class FocusReason : int32_t {
-    DEFAULT = 0,
-    FOCUS_TRAVEL = 1,
-    FOCUS_TOUCH = 2,
-    WINDOW_FOCUS = 3,
-    VIEW_SWITCH = 4,
-};
 
 } // namespace OHOS::Ace
 

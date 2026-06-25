@@ -19,10 +19,10 @@
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 constexpr Dimension PORTRAIT_BOTTOM_SECURITY = 96.0_vp;
 class ACE_EXPORT DialogLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(DialogLayoutProperty, LayoutProperty);

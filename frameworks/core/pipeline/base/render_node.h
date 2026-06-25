@@ -25,7 +25,6 @@
 #include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/animation/property_animatable.h"
-#include "core/common/draw_delegate.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
@@ -34,11 +33,13 @@
 #include "core/event/axis_event.h"
 #include "core/event/mouse_raw_recognizer.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/click_recognizer.h"
-#include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Rosen {
+class RSNode;
+}
 
 namespace OHOS::Ace::V2 {
 
@@ -55,7 +56,11 @@ enum class VisualState;
 ACE_FORCE_EXPORT extern const Dimension FOCUS_BOUNDARY;
 ACE_FORCE_EXPORT bool IsRosenBackendEnabledForRenderNode();
 
+class ClickRecognizer;
 class Component;
+class DragEndInfo;
+class DragUpdateInfo;
+class DrawDelegate;
 
 // If no insertion location is specified, new child will be added to the end of children list by default.
 constexpr int32_t DEFAULT_RENDER_NODE_SLOT = -1;

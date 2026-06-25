@@ -20,10 +20,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // PaintProperty are used to set render properties.
 class DividerRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(DividerRenderProperty, PaintProperty);

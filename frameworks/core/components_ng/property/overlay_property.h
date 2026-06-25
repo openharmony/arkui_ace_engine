@@ -22,10 +22,10 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 struct OverlayOptions {
     OverlayOptions() = default;

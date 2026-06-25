@@ -23,6 +23,9 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/with_theme_node.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include <string>

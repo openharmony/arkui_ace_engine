@@ -18,13 +18,14 @@
 
 #include <string>
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // PaintProperty are used to set render properties.
 class SliderPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(SliderPaintProperty, PaintProperty);

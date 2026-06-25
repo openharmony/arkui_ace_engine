@@ -20,12 +20,12 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 using ColorStopArray = std::vector<std::pair<Color, Dimension>>;
 enum class GaugeType : int32_t {
     TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT = 0,

@@ -28,6 +28,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

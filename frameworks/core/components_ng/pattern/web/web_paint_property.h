@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_PAINT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class WebPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(WebPaintProperty, PaintProperty);
 

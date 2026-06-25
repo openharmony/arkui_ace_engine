@@ -18,7 +18,6 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_owner.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_style.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -27,6 +26,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT LoadingProgressPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(LoadingProgressPaintProperty, PaintProperty);

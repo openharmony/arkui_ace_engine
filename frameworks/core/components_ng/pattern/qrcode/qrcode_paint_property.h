@@ -19,11 +19,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/qrcode/qrcode_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class QRCodePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(QRCodePaintProperty, PaintProperty);

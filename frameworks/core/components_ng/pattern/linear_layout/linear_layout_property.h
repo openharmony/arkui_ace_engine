@@ -18,7 +18,6 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/property/flex_property.h"
@@ -26,6 +25,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT LinearLayoutProperty : public FlexLayoutProperty {
     DECLARE_ACE_TYPE(LinearLayoutProperty, FlexLayoutProperty);
 

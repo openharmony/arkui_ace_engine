@@ -20,12 +20,12 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 struct ControlButtonStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonWidth, Dimension);

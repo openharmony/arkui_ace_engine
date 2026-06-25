@@ -20,7 +20,6 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
@@ -44,6 +43,8 @@ public:                                                                     \
     }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT TextFieldLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextFieldLayoutProperty, LayoutProperty);
 

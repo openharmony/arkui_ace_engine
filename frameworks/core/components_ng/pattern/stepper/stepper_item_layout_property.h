@@ -18,11 +18,11 @@
 
 #include "base/i18n/localization.h"
 #include "core/components/stepper/stepper_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT StepperItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(StepperItemLayoutProperty, LayoutProperty);

@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_LAYOUT_PROPERTY_H
 
 #include <string>
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT StepperLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(StepperLayoutProperty, LayoutProperty);

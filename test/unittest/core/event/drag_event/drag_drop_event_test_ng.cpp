@@ -16,6 +16,7 @@
 #include "test/unittest/core/event/drag_event/drag_event_common_test_ng.h"
 
 #define private public
+#include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

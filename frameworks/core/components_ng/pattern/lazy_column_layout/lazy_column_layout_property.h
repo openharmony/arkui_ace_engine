@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT LazyColumnLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(LazyColumnLayoutProperty, LayoutProperty);
 

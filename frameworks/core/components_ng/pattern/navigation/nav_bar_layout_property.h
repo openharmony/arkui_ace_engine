@@ -19,13 +19,13 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navdestination_layout_property_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT NavBarLayoutProperty : public NavDestinationLayoutPropertyBase {
     DECLARE_ACE_TYPE(NavBarLayoutProperty, NavDestinationLayoutPropertyBase);
