@@ -4457,6 +4457,57 @@ void JsAccessibilityManager::DumpCustomActionTest(const std::vector<std::string>
     AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
 
+void JsAccessibilityManager::DumpSetComponentTypeTest(const std::vector<std::string>& params)
+{
+    constexpr size_t setComponentTypeParamSize = 4;
+    constexpr size_t nodeIdIndex = 2;
+    constexpr size_t componentTypeIndex = 3;
+    if (params.size() != setComponentTypeParamSize || params[componentTypeIndex].empty()) {
+        DumpLog::GetInstance().Print(
+            "Usage: -accessibility --set-component-type <accessibilityId> <componentType>");
+        return;
+    }
+
+    auto nodeId = StringUtils::StringToLongInt(params[nodeIdIndex]);
+    RefPtr<NG::FrameNode> frameNode;
+    auto pipeline = FindPipelineByElementId(nodeId, frameNode);
+    if (!pipeline || !frameNode) {
+        DumpLog::GetInstance().Print("Error: can't find node with ID " + params[nodeIdIndex]);
+        return;
+    }
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityRole(params[componentTypeIndex]);
+    DumpLog::GetInstance().Print(
+        "Set accessibility componentType success. nodeId: " + std::to_string(frameNode->GetAccessibilityId()) +
+        ", componentType: " + params[componentTypeIndex]);
+}
+
+void JsAccessibilityManager::DumpClearComponentTypeTest(const std::vector<std::string>& params)
+{
+    constexpr size_t clearComponentTypeParamSize = 3;
+    constexpr size_t nodeIdIndex = 2;
+    if (params.size() != clearComponentTypeParamSize) {
+        DumpLog::GetInstance().Print("Usage: -accessibility --clear-component-type <accessibilityId>");
+        return;
+    }
+
+    auto nodeId = StringUtils::StringToLongInt(params[nodeIdIndex]);
+    RefPtr<NG::FrameNode> frameNode;
+    auto pipeline = FindPipelineByElementId(nodeId, frameNode);
+    if (!pipeline || !frameNode) {
+        DumpLog::GetInstance().Print("Error: can't find node with ID " + params[nodeIdIndex]);
+        return;
+    }
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityRole();
+    DumpLog::GetInstance().Print(
+        "Clear accessibility componentType success. nodeId: " + std::to_string(frameNode->GetAccessibilityId()));
+}
+
 void JsAccessibilityManager::DumpEmbedSearchTest(const std::vector<std::string>& params)
 {
     int64_t nodeId = 0;
@@ -4750,6 +4801,8 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         { "--set-whitelist", DumpMode::SET_CHECKLIST_TEST },
         { "--get-whitelist", DumpMode::GET_CHECKLIST_TEST },
         { "--execute-action", DumpMode::EXECUTE_ACTION_TEST },
+        { "--set-component-type", DumpMode::SET_COMPONENT_TYPE_TEST },
+        { "--clear-component-type", DumpMode::CLEAR_COMPONENT_TYPE_TEST },
         { "-json", DumpMode::TREE },
     };
 
@@ -4871,6 +4924,12 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
 #endif
         case DumpMode::CUSTOM_ACTION_TEST:
             DumpCustomActionTest(params);
+            break;
+        case DumpMode::SET_COMPONENT_TYPE_TEST:
+            DumpSetComponentTypeTest(params);
+            break;
+        case DumpMode::CLEAR_COMPONENT_TYPE_TEST:
+            DumpClearComponentTypeTest(params);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -8478,8 +8537,8 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
 {
     HILOG_INFO_FOCUS(
         "focus move search with condition %{public}" PRId64 ", "
-        "direction: %{public}d, condition %{public}d parentId %{public}" PRId64 ", requestId %{public}d",
-        info.GetAccessibilityId(), param.direction, param.condition, param.parentId, requestId);
+        "direction: %{public}d, condition %{public}d, focusRuleType %{public}d, parentId %{public}" PRId64 ", requestId %{public}d",
+        info.GetAccessibilityId(), param.direction, param.condition, param.type, param.parentId, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     std::list<AccessibilityElementInfo> infos;
     FocusMoveResult errorResult = {
