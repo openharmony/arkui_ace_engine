@@ -1059,9 +1059,7 @@ export struct TreeViewV2 {
   }
 
   aboutToDisappear(): void {
-    accessibility.off('screenReaderStateChange', (state: boolean) => {
-      console.info(`Unsubscribe screen reader state change, result: ${JSON.stringify(state)}`);
-    });
+    accessibility.off('screenReaderStateChange');
   }
 
   decideFontScale(): number {

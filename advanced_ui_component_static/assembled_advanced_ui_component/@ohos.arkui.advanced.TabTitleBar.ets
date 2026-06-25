@@ -918,7 +918,7 @@ struct ImageMenuItem {
             accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
               .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
           } catch (error) {
-            accessibilityDescription = ' ';
+            accessibilityDescription = '';
           }
         }
         return accessibilityDescription as string;

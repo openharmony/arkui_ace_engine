@@ -1158,9 +1158,7 @@ export class TreeViewV2 extends ViewV2 {
     }
 
     aboutToDisappear() {
-        accessibility.off('screenReaderStateChange', (state) => {
-            console.info(`Unsubscribe screen reader state change, result: ${JSON.stringify(state)}`);
-        });
+        accessibility.off('screenReaderStateChange');
     }
 
     decideFontScale() {

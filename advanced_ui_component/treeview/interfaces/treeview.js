@@ -1079,9 +1079,7 @@ export class TreeView extends ViewPU {
     }
 
     aboutToDisappear() {
-        accessibility.off('screenReaderStateChange', (state) => {
-            console.info(`Unsubscribe screen reader state change, result: ${JSON.stringify(state)}`);
-        });
+        accessibility.off('screenReaderStateChange');
     }
 
     decideFontScale() {
