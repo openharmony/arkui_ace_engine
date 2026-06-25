@@ -19909,8 +19909,13 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
-  hdrBrightness(value) {
-    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+  hdrBrightness(value, hdrType) {
+    if (isUndefined(value) || isNull(value)) {
+      modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, undefined);
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier,
+      { brightness: value, hdrType: hdrType });
     return this;
   }
   enableTransparentLayer(value) {
@@ -20052,11 +20057,12 @@ class XComponentHdrBrightnessModifier extends ModifierWithKey {
       getUINativeModule().xComponent.resetHdrBrightness(node);
     }
     else {
-      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value.brightness, this.value.hdrType);
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.brightness, this.value.brightness) ||
+      !isBaseOrResourceEqual(this.stageValue.hdrType, this.value.hdrType);
   }
 }
 XComponentHdrBrightnessModifier.identity = Symbol('xComponentHdrBrightness');

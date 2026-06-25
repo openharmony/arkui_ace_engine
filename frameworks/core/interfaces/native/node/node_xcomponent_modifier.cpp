@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t ERROR_UINT_CODE = -1;
+constexpr int32_t INVALID_HDR_TYPE = -1;
 thread_local std::string g_strValue;
 
 void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
@@ -202,11 +203,15 @@ void ResetXComponentEnableSecure(ArkUINodeHandle node)
     XComponentModelNG::EnableSecure(frameNode, false);
 }
 
-void SetXComponentHdrBrightness(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness)
+void SetXComponentHdrBrightness(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness, ArkUI_Int32 hdrType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    XComponentModelNG::HdrBrightness(frameNode, hdrBrightness);
+    if (hdrType == INVALID_HDR_TYPE) {
+        XComponentModelNG::HdrBrightness(frameNode, hdrBrightness);
+        return;
+    }
+    XComponentModelNG::HdrBrightness(frameNode, hdrBrightness, static_cast<HdrType>(hdrType));
 }
 
 void ResetXComponentHdrBrightness(ArkUINodeHandle node)
