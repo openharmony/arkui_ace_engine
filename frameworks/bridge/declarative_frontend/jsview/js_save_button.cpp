@@ -353,18 +353,18 @@ void JSSaveButton::SetSymbolFontWeight(const JSCallbackInfo& info)
 
 void JSSaveButton::SetAccessibilityRole(const JSCallbackInfo& info)
 {
+    AccessibilityRoleType accRoleType = AccessibilityRoleType::BUTTON;
     if (info.Length() < 1 || !info[0]->IsNumber()) {
+        std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
+        ViewAbstractModel::GetInstance()->SetAccessibilityRole(roleStr, false);
         return;
     }
     uint32_t roleValue = 0;
     ParseJsInteger(info[0], roleValue);
 
     auto secRoleType = static_cast<SecurityComponentRoleType>(roleValue);
-    AccessibilityRoleType accRoleType;
     if (secRoleType == SecurityComponentRoleType::ROLE_NONE) {
         accRoleType = AccessibilityRoleType::ROLE_NONE;
-    } else {
-        accRoleType = AccessibilityRoleType::BUTTON;
     }
 
     std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
