@@ -4307,7 +4307,6 @@
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::BuildMenuBarRow*;
       OHOS::Ace::NG::BuildTitleNodeForCj*;
-      OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::ColorSampler::*;
       OHOS::Ace::NG::ComponentSnapshot::*;
       OHOS::Ace::NG::ContainerModalView::*;
@@ -4368,7 +4367,6 @@
       OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
       OHOS::Ace::NG::NodeModifier::GetDividerModifier*;
-      OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::NG::PaddingPropertyF::*;
       OHOS::Ace::NG::PaddingPropertyT*;
@@ -4791,7 +4789,6 @@
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       vtable?for?OHOS::Ace::NG::CalendarMonthPattern;
       vtable?for?OHOS::Ace::NG::CalendarPattern;
-      vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::ClickRecognizer;
       vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::CustomNode;
@@ -4825,8 +4822,6 @@
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
       vtable?for?OHOS::Ace::NG::NavigationGroupNode;
       vtable?for?OHOS::Ace::NG::NavigationStack;
-      vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
-      vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::NG::ParticlePattern;
@@ -4954,7 +4949,6 @@
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::NG::CalendarMonthPattern;
       VTT?for?OHOS::Ace::NG::CalendarPattern;
-      VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::ClickRecognizer;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::EventHub;
@@ -4974,8 +4968,6 @@
       VTT?for?OHOS::Ace::NG::ExclusiveRecognizer;
       VTT?for?OHOS::Ace::NG::MenuWrapperPattern;
       VTT?for?OHOS::Ace::NG::NavigationStack;
-      VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
-      VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       VTT?for?OHOS::Ace::NG::PagePattern;
       VTT?for?OHOS::Ace::NG::ParticlePattern;

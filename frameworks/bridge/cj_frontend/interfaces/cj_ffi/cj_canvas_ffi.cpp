@@ -37,6 +37,22 @@ using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+NG::CanvasModelNG* GetCanvasModel()
+{
+    static NG::CanvasModelNG* model = nullptr;
+    if (model != nullptr) {
+        return model;
+    }
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Canvas");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find canvas dynamic module");
+    }
+    model = reinterpret_cast<NG::CanvasModelNG*>(module->GetModel());
+    return model;
+}
+} // namespace OHOS::Ace
+
 namespace {
 constexpr int32_t PIXEL_SIZE = 4;
 enum class CanvasImageType { COORDINATES_ONLY = 0, COORDINATES_AND_SIZE, COORDINATES_AND_SIZE_WITH_SOURCE };
