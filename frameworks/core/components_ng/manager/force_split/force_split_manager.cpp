@@ -38,34 +38,6 @@ ForceSplitManager::ForceSplitManager()
 {
 }
 
-void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
-{
-    if (surfaceChangeCallbackId_.has_value()) {
-        return;
-    }
-    auto context = pipeline_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason) {
-        auto mgr = weakMgr.Upgrade();
-        CHECK_NULL_VOID(mgr);
-        mgr->ChangeForceSplitModeIfNeeded();
-    };
-    surfaceChangeCallbackId_ = context->RegisterSurfaceChangedCallback(std::move(callback));
-}
-
-void ForceSplitManager::ChangeForceSplitModeIfNeeded()
-{
-    if (!delayedIsForceSplitEnable_.has_value()) {
-        return;
-    }
-    bool isEnable = delayedIsForceSplitEnable_.value();
-    auto mode = delayedMode_.value();
-    delayedIsForceSplitEnable_ = std::nullopt;
-    delayedMode_ = std::nullopt;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "delayed %{public}s forceSplit", (isEnable ? "enable" : "disable"));
-    SetForceSplitEnable(isEnable, mode, false);
-}
-
 bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
 {
     if (isRouter) {
@@ -74,30 +46,10 @@ bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
     return isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_;
 }
 
-void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
+void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}d, needUpdateViewport:%{public}d",
-        (isForceSplit ? "enable" : "disable"), static_cast<int32_t>(mode), needUpdateViewport);
-    /**
-     * As long as the application supports force split, regardless of whether it is enabled or not,
-     * the SetForceSplitEnable interface will be called.
-     */
-    isForceSplitSupported_ = true;
-    if (needUpdateViewport) {
-        delayedIsForceSplitEnable_ = isForceSplit;
-        delayedMode_ = mode;
-        RegisterSurfaceChangeCallbackIfNeeded();
-        return;
-    }
-    if (delayedIsForceSplitEnable_.has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed isForceSplitEnable:%{public}d",
-            delayedIsForceSplitEnable_.value());
-        delayedIsForceSplitEnable_ = std::nullopt;
-    }
-    if (delayedMode_.has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "override delayed mode:%{public}d", delayedMode_.value());
-        delayedMode_ = std::nullopt;
-    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, mode:%{public}d",
+        (isForceSplit ? "enable" : "disable"), static_cast<int32_t>(mode));
     if (isForceSplitEnable_ == isForceSplit && mode_ == mode) {
         return;
     }

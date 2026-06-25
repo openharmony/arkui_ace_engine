@@ -523,8 +523,6 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) {}
-
     virtual void SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig) {}
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
