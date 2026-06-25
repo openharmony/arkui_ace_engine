@@ -958,7 +958,6 @@ Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, {});
     auto size = ViewAbstract::GetConfigSize(AceType::RawPtr(frameNode));
     if (!size.has_value()) {
-        LOGW("This frameNode do not have config size, return default.");
         auto width = std::make_optional<CalcLength>();
         auto height = std::make_optional<CalcLength>();
         auto calcSize = std::make_optional<CalcSize>(width, height);
