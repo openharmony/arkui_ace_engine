@@ -4126,11 +4126,12 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
 
 DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
 {
-    if (!vectorValue->IsObject()) {
-        return DepthVector3();
-    }
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();
