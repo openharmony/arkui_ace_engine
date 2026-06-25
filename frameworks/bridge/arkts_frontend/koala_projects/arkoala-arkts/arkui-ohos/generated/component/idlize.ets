@@ -1756,6 +1756,80 @@ export class CommonShape implements MaterializedBase {
         return obj
     }
 }
+export class ContainerReaderExtender {
+    public static containerReaderConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ContainerReaderExtender.containerReaderConstructor_serialize(id_casted)
+    }
+    public static setContainerReaderOptions(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const node_casted = node as (KPointer)
+        const size_casted = size as (Size)
+        const onChange_casted = onChange as (Callback_SizeInfo_Void)
+        const widthBreakpoint_casted = widthBreakpoint as (Bindable<WidthBreakpoint> | undefined)
+        const heightBreakpoint_casted = heightBreakpoint as (Bindable<HeightBreakpoint> | undefined)
+        ContainerReaderExtender.setContainerReaderOptions_serialize(node_casted, size_casted, onChange_casted, widthBreakpoint_casted, heightBreakpoint_casted)
+        return
+    }
+    public static breakpointConfig(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const node_casted = node as (KPointer)
+        const width_casted = width as (Array<double> | undefined)
+        const height_casted = height as (Array<double> | undefined)
+        ContainerReaderExtender.breakpointConfig_serialize(node_casted, width_casted, height_casted)
+        return
+    }
+    private static containerReaderConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._ContainerReaderExtender_containerReaderConstructor(id)
+        return retval
+    }
+    private static setContainerReaderOptions_serialize(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        thisSerializer.holdAndWriteCallback(onChange)
+        if (widthBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthBreakpointTmpValue = widthBreakpoint!
+            Bindable_WidthBreakpoint_serializer.write(thisSerializer, widthBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (heightBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightBreakpointTmpValue = heightBreakpoint!
+            Bindable_HeightBreakpoint_serializer.write(thisSerializer, heightBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_setContainerReaderOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static breakpointConfig_serialize(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (width !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthTmpValue = width!
+            thisSerializer.writeInt32((widthTmpValue.length).toInt())
+            for (let widthTmpValueCounterI = 0; widthTmpValueCounterI < widthTmpValue.length; widthTmpValueCounterI++) {
+                const widthTmpValueTmpElement: double = widthTmpValue[widthTmpValueCounterI]
+                thisSerializer.writeFloat64(widthTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (height !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightTmpValue = height!
+            thisSerializer.writeInt32((heightTmpValue.length).toInt())
+            for (let heightTmpValueCounterI = 0; heightTmpValueCounterI < heightTmpValue.length; heightTmpValueCounterI++) {
+                const heightTmpValueTmpElement: double = heightTmpValue[heightTmpValueCounterI]
+                thisSerializer.writeFloat64(heightTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_breakpointConfig(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export class ContentModifierHelper {
     public static contentModifierButton(node: KPointer, contentModifier: ContentModifier<ButtonConfiguration>, builder: ((parentNode: KPointer,config: ButtonConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
@@ -7299,6 +7373,7 @@ export enum ArcDirectionInner {
 export type AnimationStartHandler = (index: int32, targetIndex: int32, extraInfo: SwiperAnimationEvent) => void;
 export type AnimationEndHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
 export type GestureSwipeHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
+export type Callback_SizeInfo_Void = (size: Size) => void;
 export interface ComponentInfo {
     size: Size;
     localOffset: Offset_componentutils;

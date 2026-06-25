@@ -157,6 +157,9 @@
             "@ohos.arkui.components.ArkDynamicLayout": [
                 "./@ohos.arkui.components.ArkDynamicLayout"
             ],
+            "@ohos.arkui.components.ContainerReader": [
+                "./@ohos.arkui.components.ContainerReader.ets"
+            ],
             "@ohos.arkui.WithEnv": [
                 "./@ohos.arkui.WithEnv"
             ],

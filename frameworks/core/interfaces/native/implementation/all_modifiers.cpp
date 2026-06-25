@@ -230,6 +230,7 @@ const GENERATED_ArkUIColorMetricsLinearGradientAccessor* GetColorMetricsLinearGr
 const GENERATED_ArkUIColorShaderStyleAccessor* GetColorShaderStyleAccessor();
 const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
+const GENERATED_ArkUIContainerReaderExtenderAccessor* GetContainerReaderExtenderAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
 const GENERATED_ArkUIContentTransitionAccessor* GetContentTransitionAccessor();
 const GENERATED_ArkUIContentTransitionEffectAccessor* GetContentTransitionEffectAccessor();
@@ -586,6 +587,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetColorShaderStyleAccessor,
         GetCommonShapeAccessor,
         GetConsoleMessageAccessor,
+        GetContainerReaderExtenderAccessor,
         GetContentModifierHelperAccessor,
         GetContentTransitionAccessor,
         GetContentTransitionEffectAccessor,

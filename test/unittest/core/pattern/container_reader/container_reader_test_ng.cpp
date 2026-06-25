@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_reader/container_reader_event_hub.h"
 #include "core/components_ng/pattern/container_reader/container_reader_layout_property.h"
+#include "core/components_ng/pattern/container_reader/container_reader_model_static.h"
 #include "core/components_ng/pattern/container_reader/container_reader_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -1703,4 +1704,267 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
 
     MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
+
+// ==================== ContainerReaderModelStatic - CreateFrameNode ====================
+
+/**
+ * @tc.name: ModelStatic_CreateFrameNode001
+ * @tc.desc: Test ContainerReaderModelStatic::CreateFrameNode creates valid FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_CreateFrameNode001, TestSize.Level1)
+{
+    int32_t nodeId = 100;
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<ContainerReaderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    EXPECT_EQ(frameNode->GetTag(), "ContainerReader");
+}
+
+// ==================== ContainerReaderModelStatic - SetBreakPointConfig ====================
+
+/**
+ * @tc.name: ModelStatic_SetBreakPointConfig001
+ * @tc.desc: Test ContainerReaderModelStatic::SetBreakPointConfig sets custom breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetBreakPointConfig001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(101);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<double> widthBreakpoints = { TEST_CUSTOM_BREAKPOINT_320, TEST_CUSTOM_BREAKPOINT_600 };
+    std::vector<double> heightBreakpoints = { TEST_CUSTOM_BREAKPOINT_840 };
+    
+    ContainerReaderModelStatic::SetBreakPointConfig(
+        frameNode.GetRawPtr(), widthBreakpoints, heightBreakpoints);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerReaderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto config = layoutProperty->GetBreakPointConfig();
+    ASSERT_TRUE(config.has_value());
+    ASSERT_TRUE(config->widthBreakpoints.has_value());
+    EXPECT_EQ(config->widthBreakpoints->size(), 2UL);
+    ASSERT_TRUE(config->heightBreakpoints.has_value());
+    EXPECT_EQ(config->heightBreakpoints->size(), 1UL);
+}
+
+/**
+ * @tc.name: ModelStatic_SetBreakPointConfig002
+ * @tc.desc: Test ContainerReaderModelStatic::SetBreakPointConfig with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetBreakPointConfig002, TestSize.Level1)
+{
+    std::vector<double> widthBreakpoints = { TEST_CUSTOM_BREAKPOINT_320 };
+    std::vector<double> heightBreakpoints = { TEST_CUSTOM_BREAKPOINT_600 };
+    
+    ContainerReaderModelStatic::SetBreakPointConfig(nullptr, widthBreakpoints, heightBreakpoints);
+}
+
+/**
+ * @tc.name: ModelStatic_SetBreakPointConfig003
+ * @tc.desc: Test ContainerReaderModelStatic::SetBreakPointConfig with empty breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetBreakPointConfig003, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(102);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<double> emptyWidth;
+    std::vector<double> emptyHeight;
+    
+    ContainerReaderModelStatic::SetBreakPointConfig(
+        frameNode.GetRawPtr(), emptyWidth, emptyHeight);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerReaderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto config = layoutProperty->GetBreakPointConfig();
+    ASSERT_TRUE(config.has_value());
+}
+
+// ==================== ContainerReaderModelStatic - ResetBreakPointConfig ====================
+
+/**
+ * @tc.name: ModelStatic_ResetBreakPointConfig001
+ * @tc.desc: Test ContainerReaderModelStatic::ResetBreakPointConfig clears custom breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_ResetBreakPointConfig001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(103);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<double> widthBreakpoints = { TEST_CUSTOM_BREAKPOINT_320 };
+    std::vector<double> heightBreakpoints = { TEST_CUSTOM_BREAKPOINT_600 };
+    
+    ContainerReaderModelStatic::SetBreakPointConfig(
+        frameNode.GetRawPtr(), widthBreakpoints, heightBreakpoints);
+    
+    ContainerReaderModelStatic::ResetBreakPointConfig(frameNode.GetRawPtr());
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerReaderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto config = layoutProperty->GetBreakPointConfig();
+    ASSERT_TRUE(config.has_value());
+    EXPECT_FALSE(config->widthBreakpoints.has_value());
+    EXPECT_FALSE(config->heightBreakpoints.has_value());
+}
+
+/**
+ * @tc.name: ModelStatic_ResetBreakPointConfig002
+ * @tc.desc: Test ContainerReaderModelStatic::ResetBreakPointConfig with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_ResetBreakPointConfig002, TestSize.Level1)
+{
+    ContainerReaderModelStatic::ResetBreakPointConfig(nullptr);
+}
+
+// ==================== ContainerReaderModelStatic - SetOnSizeChange ====================
+
+/**
+ * @tc.name: ModelStatic_SetOnSizeChange001
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnSizeChange registers event handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnSizeChange001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(104);
+    ASSERT_NE(frameNode, nullptr);
+    
+    SizeF receivedSize(0.0f, 0.0f);
+    ContainerReaderModelStatic::SetOnSizeChange(
+        frameNode.GetRawPtr(), [&receivedSize](const SizeF& size) { receivedSize = size; });
+    
+    auto eventHub = frameNode->GetEventHub<ContainerReaderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    eventHub->FireSizeChange(SizeF(TEST_WIDTH_MD, TEST_HEIGHT_NORMAL));
+    EXPECT_EQ(receivedSize.Width(), TEST_WIDTH_MD);
+    EXPECT_EQ(receivedSize.Height(), TEST_HEIGHT_NORMAL);
+}
+
+/**
+ * @tc.name: ModelStatic_SetOnSizeChange002
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnSizeChange with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnSizeChange002, TestSize.Level1)
+{
+    ContainerReaderModelStatic::SetOnSizeChange(nullptr, [](const SizeF& size) {});
+}
+
+// ==================== ContainerReaderModelStatic - SetOnWidthBreakpointChange ====================
+
+/**
+ * @tc.name: ModelStatic_SetOnWidthBreakpointChange001
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnWidthBreakpointChange registers event handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnWidthBreakpointChange001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(105);
+    ASSERT_NE(frameNode, nullptr);
+    
+    WidthBreakpoint receivedBp = WidthBreakpoint::UNDEFINED;
+    ContainerReaderModelStatic::SetOnWidthBreakpointChange(
+        frameNode.GetRawPtr(), [&receivedBp](WidthBreakpoint bp) { receivedBp = bp; });
+    
+    auto eventHub = frameNode->GetEventHub<ContainerReaderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    eventHub->FireWidthBreakpointChange(WidthBreakpoint::WIDTH_LG);
+    EXPECT_EQ(receivedBp, WidthBreakpoint::WIDTH_LG);
+}
+
+/**
+ * @tc.name: ModelStatic_SetOnWidthBreakpointChange002
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnWidthBreakpointChange with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnWidthBreakpointChange002, TestSize.Level1)
+{
+    ContainerReaderModelStatic::SetOnWidthBreakpointChange(nullptr, [](WidthBreakpoint bp) {});
+}
+
+// ==================== ContainerReaderModelStatic - SetOnHeightBreakpointChange ====================
+
+/**
+ * @tc.name: ModelStatic_SetOnHeightBreakpointChange001
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnHeightBreakpointChange registers event handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnHeightBreakpointChange001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(106);
+    ASSERT_NE(frameNode, nullptr);
+    
+    HeightBreakpoint receivedBp = HeightBreakpoint::HEIGHT_SM;
+    ContainerReaderModelStatic::SetOnHeightBreakpointChange(
+        frameNode.GetRawPtr(), [&receivedBp](HeightBreakpoint bp) { receivedBp = bp; });
+    
+    auto eventHub = frameNode->GetEventHub<ContainerReaderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    eventHub->FireHeightBreakpointChange(HeightBreakpoint::HEIGHT_LG);
+    EXPECT_EQ(receivedBp, HeightBreakpoint::HEIGHT_LG);
+}
+
+/**
+ * @tc.name: ModelStatic_SetOnHeightBreakpointChange002
+ * @tc.desc: Test ContainerReaderModelStatic::SetOnHeightBreakpointChange with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetOnHeightBreakpointChange002, TestSize.Level1)
+{
+    ContainerReaderModelStatic::SetOnHeightBreakpointChange(nullptr, [](HeightBreakpoint bp) {});
+}
+
+// ==================== ContainerReaderModelStatic - SetRenderFunction ====================
+
+/**
+ * @tc.name: ModelStatic_SetRenderFunction001
+ * @tc.desc: Test ContainerReaderModelStatic::SetRenderFunction sets render function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetRenderFunction001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(107);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<ContainerReaderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIsInitialRender(true);
+    
+    bool renderCalled = false;
+    ContainerReaderRenderFunction renderFunc = [&renderCalled](int64_t id, bool& ret) -> RefPtr<UINode> {
+        renderCalled = true;
+        return nullptr;
+    };
+    
+    ContainerReaderModelStatic::SetRenderFunction(frameNode.GetRawPtr(), renderFunc);
+}
+
+/**
+ * @tc.name: ModelStatic_SetRenderFunction002
+ * @tc.desc: Test ContainerReaderModelStatic::SetRenderFunction with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetRenderFunction002, TestSize.Level1)
+{
+    ContainerReaderRenderFunction renderFunc = [](int64_t id, bool& ret) -> RefPtr<UINode> {
+        return nullptr;
+    };
+    
+    ContainerReaderModelStatic::SetRenderFunction(nullptr, renderFunc);
+}
+
 } // namespace OHOS::Ace::NG

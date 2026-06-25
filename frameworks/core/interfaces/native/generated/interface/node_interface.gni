@@ -72,6 +72,7 @@ generated_sources = [
   "implementation/component_root_modifier.cpp",
   "implementation/console_message_accessor.cpp",
   "implementation/container_span_modifier.cpp",
+  "implementation/container_reader_extender_accessor.cpp",
   "implementation/content_modifier_helper_accessor.cpp",
   "implementation/content_transition_accessor.cpp",
   "implementation/content_transition_effect_accessor.cpp",

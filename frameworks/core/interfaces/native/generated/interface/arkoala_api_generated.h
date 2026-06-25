@@ -1504,6 +1504,8 @@ typedef struct Callback_GestureJudgeResult_Void Callback_GestureJudgeResult_Void
 typedef struct Opt_Callback_GestureJudgeResult_Void Opt_Callback_GestureJudgeResult_Void;
 typedef struct Callback_GestureRecognizer_Void Callback_GestureRecognizer_Void;
 typedef struct Opt_Callback_GestureRecognizer_Void Opt_Callback_GestureRecognizer_Void;
+typedef struct Callback_HeightBreakpoint_Void Callback_HeightBreakpoint_Void;
+typedef struct Opt_Callback_HeightBreakpoint_Void Opt_Callback_HeightBreakpoint_Void;
 typedef struct Callback_HitTestMode_Void Callback_HitTestMode_Void;
 typedef struct Opt_Callback_HitTestMode_Void Opt_Callback_HitTestMode_Void;
 typedef struct Callback_HoverEvent_Void Callback_HoverEvent_Void;
@@ -1724,6 +1726,8 @@ typedef struct Callback_SheetType_Void Callback_SheetType_Void;
 typedef struct Opt_Callback_SheetType_Void Opt_Callback_SheetType_Void;
 typedef struct Callback_Size_Void Callback_Size_Void;
 typedef struct Opt_Callback_Size_Void Opt_Callback_Size_Void;
+typedef struct Callback_SizeInfo_Void Callback_SizeInfo_Void;
+typedef struct Opt_Callback_SizeInfo_Void Opt_Callback_SizeInfo_Void;
 typedef struct Callback_SizeResult_Void Callback_SizeResult_Void;
 typedef struct Opt_Callback_SizeResult_Void Opt_Callback_SizeResult_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
@@ -1780,6 +1784,8 @@ typedef struct Callback_VisibilityChangeReason_Void Callback_VisibilityChangeRea
 typedef struct Opt_Callback_VisibilityChangeReason_Void Opt_Callback_VisibilityChangeReason_Void;
 typedef struct Callback_WebKeyboardOptions_Void Callback_WebKeyboardOptions_Void;
 typedef struct Opt_Callback_WebKeyboardOptions_Void Opt_Callback_WebKeyboardOptions_Void;
+typedef struct Callback_WidthBreakpoint_Void Callback_WidthBreakpoint_Void;
+typedef struct Opt_Callback_WidthBreakpoint_Void Opt_Callback_WidthBreakpoint_Void;
 typedef struct CheckBoxGroupModifierBuilder CheckBoxGroupModifierBuilder;
 typedef struct Opt_CheckBoxGroupModifierBuilder Opt_CheckBoxGroupModifierBuilder;
 typedef struct CheckBoxModifierBuilder CheckBoxModifierBuilder;
@@ -2200,10 +2206,14 @@ typedef struct Ark_Bindable_Date Ark_Bindable_Date;
 typedef struct Opt_Bindable_Date Opt_Bindable_Date;
 typedef struct Ark_Bindable_F64 Ark_Bindable_F64;
 typedef struct Opt_Bindable_F64 Opt_Bindable_F64;
+typedef struct Ark_Bindable_HeightBreakpoint Ark_Bindable_HeightBreakpoint;
+typedef struct Opt_Bindable_HeightBreakpoint Opt_Bindable_HeightBreakpoint;
 typedef struct Ark_Bindable_I32 Ark_Bindable_I32;
 typedef struct Opt_Bindable_I32 Opt_Bindable_I32;
 typedef struct Ark_Bindable_String Ark_Bindable_String;
 typedef struct Opt_Bindable_String Opt_Bindable_String;
+typedef struct Ark_Bindable_WidthBreakpoint Ark_Bindable_WidthBreakpoint;
+typedef struct Opt_Bindable_WidthBreakpoint Opt_Bindable_WidthBreakpoint;
 typedef struct Ark_BindableResourceStrArray Ark_BindableResourceStrArray;
 typedef struct Opt_BindableResourceStrArray Opt_BindableResourceStrArray;
 typedef struct Ark_BlankScreenDetails Ark_BlankScreenDetails;
@@ -11763,6 +11773,16 @@ typedef struct Opt_Callback_GestureRecognizer_Void {
     Ark_Tag tag;
     Callback_GestureRecognizer_Void value;
 } Opt_Callback_GestureRecognizer_Void;
+typedef struct Callback_HeightBreakpoint_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_HeightBreakpoint data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_HeightBreakpoint data);
+} Callback_HeightBreakpoint_Void;
+typedef struct Opt_Callback_HeightBreakpoint_Void {
+    Ark_Tag tag;
+    Callback_HeightBreakpoint_Void value;
+} Opt_Callback_HeightBreakpoint_Void;
 typedef struct Callback_HitTestMode_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12863,6 +12883,16 @@ typedef struct Opt_Callback_Size_Void {
     Ark_Tag tag;
     Callback_Size_Void value;
 } Opt_Callback_Size_Void;
+typedef struct Callback_SizeInfo_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Size size);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size);
+} Callback_SizeInfo_Void;
+typedef struct Opt_Callback_SizeInfo_Void {
+    Ark_Tag tag;
+    Callback_SizeInfo_Void value;
+} Opt_Callback_SizeInfo_Void;
 typedef struct Callback_SizeResult_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13143,6 +13173,16 @@ typedef struct Opt_Callback_WebKeyboardOptions_Void {
     Ark_Tag tag;
     Callback_WebKeyboardOptions_Void value;
 } Opt_Callback_WebKeyboardOptions_Void;
+typedef struct Callback_WidthBreakpoint_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_WidthBreakpoint data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_WidthBreakpoint data);
+} Callback_WidthBreakpoint_Void;
+typedef struct Opt_Callback_WidthBreakpoint_Void {
+    Ark_Tag tag;
+    Callback_WidthBreakpoint_Void value;
+} Opt_Callback_WidthBreakpoint_Void;
 typedef struct CheckBoxGroupModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15216,6 +15256,15 @@ typedef struct Opt_Bindable_F64 {
     Ark_Tag tag;
     Ark_Bindable_F64 value;
 } Opt_Bindable_F64;
+typedef struct Ark_Bindable_HeightBreakpoint {
+    /* kind: Interface */
+    Ark_HeightBreakpoint value;
+    Callback_HeightBreakpoint_Void onChange;
+} Ark_Bindable_HeightBreakpoint;
+typedef struct Opt_Bindable_HeightBreakpoint {
+    Ark_Tag tag;
+    Ark_Bindable_HeightBreakpoint value;
+} Opt_Bindable_HeightBreakpoint;
 typedef struct Ark_Bindable_I32 {
     /* kind: Interface */
     Ark_Int32 value;
@@ -15234,6 +15283,15 @@ typedef struct Opt_Bindable_String {
     Ark_Tag tag;
     Ark_Bindable_String value;
 } Opt_Bindable_String;
+typedef struct Ark_Bindable_WidthBreakpoint {
+    /* kind: Interface */
+    Ark_WidthBreakpoint value;
+    Callback_WidthBreakpoint_Void onChange;
+} Ark_Bindable_WidthBreakpoint;
+typedef struct Opt_Bindable_WidthBreakpoint {
+    Ark_Tag tag;
+    Ark_Bindable_WidthBreakpoint value;
+} Opt_Bindable_WidthBreakpoint;
 typedef struct Ark_BindableResourceStrArray {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -29308,6 +29366,18 @@ typedef struct GENERATED_ArkUIConsoleMessageAccessor {
     Ark_ConsoleMessageSource (*getSource)(Ark_ConsoleMessage peer);
 } GENERATED_ArkUIConsoleMessageAccessor;
 
+typedef struct GENERATED_ArkUIContainerReaderExtenderAccessor {
+    Ark_NativePointer (*containerReaderConstructor)(Ark_Int32 id);
+    void (*setContainerReaderOptions)(Ark_NativePointer node,
+                                      const Ark_Size* size,
+                                      const Callback_SizeInfo_Void* onChange,
+                                      const Opt_Bindable_WidthBreakpoint* widthBreakpoint,
+                                      const Opt_Bindable_HeightBreakpoint* heightBreakpoint);
+    void (*breakpointConfig)(Ark_NativePointer node,
+                             const Opt_Array_F64* width,
+                             const Opt_Array_F64* height);
+} GENERATED_ArkUIContainerReaderExtenderAccessor;
+
 typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
     void (*contentModifierButton)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
@@ -32797,6 +32867,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIColorShaderStyleAccessor* (*getColorShaderStyleAccessor)();
     const GENERATED_ArkUICommonShapeAccessor* (*getCommonShapeAccessor)();
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
+    const GENERATED_ArkUIContainerReaderExtenderAccessor* (*getContainerReaderExtenderAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
     const GENERATED_ArkUIContentTransitionAccessor* (*getContentTransitionAccessor)();
     const GENERATED_ArkUIContentTransitionEffectAccessor* (*getContentTransitionEffectAccessor)();

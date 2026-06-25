@@ -4349,6 +4349,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ConsoleMessage_getSource(ptr: KPointer): KInt
     @ani.unsafe.Direct
+    native static _ContainerReaderExtender_containerReaderConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ContainerReaderExtender_setContainerReaderOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ContainerReaderExtender_breakpointConfig(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void

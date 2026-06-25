@@ -18,7 +18,7 @@
 
 import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureCollectInterceptCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
-import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, OnSurfaceChangedCb, OnSurfaceCreatedCb, OnSurfaceDestroyedCb, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
+import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_SizeInfo_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, OnSurfaceChangedCb, OnSurfaceCreatedCb, OnSurfaceDestroyedCb, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
 import { extractors, TouchEvent } from '#handwritten'
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
@@ -85,7 +85,7 @@ import { ArcSwiperContentTransitionProxy } from '@ohos.arkui.ArcSwiper'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { default as dragController } from '@ohos.arkui.dragController'
 import { DrawContext as arkui_Graphics_DrawContext, LengthMetrics as arkui_Graphics_LengthMetrics, Size } from 'arkui.Graphics'
-import { GestureCollectIntervention, HitTestMode, ResponseType, Edge, ScrollSource } from './../../component/enums'
+import { GestureCollectIntervention, HeightBreakpoint, HitTestMode, WidthBreakpoint, ResponseType, Edge, ScrollSource } from './../../component/enums'
 import { MarqueeState } from './../../component/text'
 import { CustomBuilder } from './../../component/builder'
 import { RefreshStatus } from './../../component/refresh'
@@ -644,6 +644,12 @@ export function deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializ
     const call = (ResourceHolder.instance().get(resourceId) as ((value: GestureRecognizer) => void))
     let value: GestureRecognizer = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
     call(value)
+}
+export function deserializeAndCallCallback_HeightBreakpoint_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<HeightBreakpoint, void>)
+    let data: HeightBreakpoint = HeightBreakpoint.fromValue(thisDeserializer.readInt32())
+    call(data)
 }
 export function deserializeAndCallCallback_HitTestMode_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -1810,6 +1816,12 @@ export function deserializeAndCallCallback_Size_Void(thisDeserializer: Deseriali
     let size: Size = Size_serializer.read(thisDeserializer)
     call(size)
 }
+export function deserializeAndCallCallback_SizeInfo_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as Callback_SizeInfo_Void)
+    let size: Size = Size_serializer.read(thisDeserializer)
+    call(size)
+}
 export function deserializeAndCallCallback_SizeResult_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: SizeResult) => void))
@@ -2066,6 +2078,12 @@ export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeseriali
     const call = (ResourceHolder.instance().get(resourceId) as ((value: WebKeyboardOptions) => void))
     let value: WebKeyboardOptions = WebKeyboardOptions_serializer.read(thisDeserializer)
     call(value)
+}
+export function deserializeAndCallCallback_WidthBreakpoint_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<WidthBreakpoint, void>)
+    let data: WidthBreakpoint = WidthBreakpoint.fromValue(thisDeserializer.readInt32())
+    call(data)
 }
 export function deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4384,6 +4402,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_GESTUREINFO_BASEGESTUREEVENT_GESTUREJUDGERESULT: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_GESTUREJUDGERESULT_VOID: return deserializeAndCallCallback_GestureJudgeResult_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_GESTURERECOGNIZER_VOID: return deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_HEIGHTBREAKPOINT_VOID: return deserializeAndCallCallback_HeightBreakpoint_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_HITTESTMODE_VOID: return deserializeAndCallCallback_HitTestMode_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_HOVEREVENT_VOID: return deserializeAndCallCallback_HoverEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_I32_F64_COMPUTEDBARATTRIBUTE: return deserializeAndCallCallback_I32_F64_ComputedBarAttribute(thisDeserializer);
@@ -4495,6 +4514,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_SHEETDISMISS_VOID: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SHEETTYPE_VOID: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SIZE_VOID: return deserializeAndCallCallback_Size_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_SIZEINFO_VOID: return deserializeAndCallCallback_SizeInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SIZERESULT_VOID: return deserializeAndCallCallback_SizeResult_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SPRINGBACKACTION_VOID: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STARTLINEINFO_VOID: return deserializeAndCallCallback_StartLineInfo_Void(thisDeserializer);
@@ -4523,6 +4543,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_USERDATASPAN_VOID: return deserializeAndCallCallback_UserDataSpan_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_VISIBILITYCHANGEREASON_VOID: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_WEBKEYBOARDOPTIONS_VOID: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_WIDTHBREAKPOINT_VOID: return deserializeAndCallCallback_WidthBreakpoint_Void(thisDeserializer);
         case CallbackKind.KIND_CHECKBOXGROUPMODIFIERBUILDER: return deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_CHECKBOXMODIFIERBUILDER: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_CONTENTDIDSCROLLCALLBACK: return deserializeAndCallContentDidScrollCallback(thisDeserializer);

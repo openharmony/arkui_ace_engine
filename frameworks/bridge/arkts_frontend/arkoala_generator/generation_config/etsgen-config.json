@@ -74,6 +74,7 @@
         "ArcListInterface",
         "ArcListItemInterface",
         "ArcScrollBarInterface",
+        "ContainerReaderInterface",
         "Gesture",
         "GestureGroup",
         "TapGesture",
