@@ -49,6 +49,7 @@ class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
+struct OptionParam;
 
 struct SelectProperties {
     std::string value;
@@ -76,6 +77,9 @@ class MenuPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(MenuPattern, Pattern, FocusView);
 
 public:
+    using GridMenuPasteItemBuilder =
+        std::function<RefPtr<FrameNode>(const OptionParam&, const RefPtr<FrameNode>&, int32_t)>;
+
     MenuPattern(int32_t targetId, std::string tag, MenuType type)
         : targetId_(targetId), targetTag_(std::move(tag)), type_(type)
     {}
@@ -564,6 +568,25 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
+    void SetGridMenuPasteItemBuilder(GridMenuPasteItemBuilder&& builder)
+    {
+        gridMenuPasteItemBuilder_ = std::move(builder);
+    }
+
+    void ResetGridMenuPasteItemBuilder()
+    {
+        gridMenuPasteItemBuilder_ = std::nullopt;
+    }
+
+    RefPtr<FrameNode> BuildGridMenuPasteItem(
+        const OptionParam& param, const RefPtr<FrameNode>& defaultGridItem, int32_t themeScopeId) const
+    {
+        if (!gridMenuPasteItemBuilder_.has_value()) {
+            return nullptr;
+        }
+        return gridMenuPasteItemBuilder_.value()(param, defaultGridItem, themeScopeId);
+    }
+
     void ResetBuilderFunc()
     {
         makeFunc_ = std::nullopt;
@@ -954,6 +977,7 @@ private:
     std::vector<SelectProperties> selectProperties_;
     std::vector<SelectParam> selectParams_;
     std::optional<SelectMakeCallback> makeFunc_;
+    std::optional<GridMenuPasteItemBuilder> gridMenuPasteItemBuilder_;
 
     RefPtr<FrameNode> parentMenuItem_;
     mutable RefPtr<FrameNode> showedSubMenu_;

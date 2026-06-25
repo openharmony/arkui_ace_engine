@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
@@ -133,7 +134,7 @@ void MenuViewTestNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getTheme = [](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -143,7 +144,11 @@ void MenuViewTestNg::MockPipelineContextGetTheme()
         } else {
             return AceType::MakeRefPtr<MenuTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
 }
 
 void MenuViewTestNg::TearDown()
@@ -2630,5 +2635,247 @@ HWTEST_F(MenuViewTestNg, UpdateMenuBackgroundStyleOption001, TestSize.Level1)
     menuParam.backgroundBlurStyleOption = blurOption;
     // Verify the guard is active - paintProperty state is correct
     EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+}
+
+/**
+ * @tc.name: CreateGridItem001
+ * @tc.desc: Verify CreateGridItem keeps default single-line text behavior and text menu grid items disable it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, CreateGridItem001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    OptionParam normalParam;
+    normalParam.value = "Copy";
+    normalParam.enabled = false;
+    auto normalGridItem = MenuView::CreateGridItem(normalParam, 0);
+    ASSERT_NE(normalGridItem, nullptr);
+
+    auto normalEventHub = normalGridItem->GetEventHub<EventHub>();
+    ASSERT_NE(normalEventHub, nullptr);
+    EXPECT_FALSE(normalEventHub->IsEnabled());
+
+    auto normalLayoutProperty = normalGridItem->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(normalLayoutProperty, nullptr);
+    const auto& normalConstraint = normalLayoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(normalConstraint, nullptr);
+    ASSERT_TRUE(normalConstraint->selfIdealSize.has_value());
+    EXPECT_TRUE(normalConstraint->selfIdealSize->Height().has_value());
+
+    auto normalTextNode = AceType::DynamicCast<FrameNode>(normalGridItem->GetChildAtIndex(0));
+    ASSERT_NE(normalTextNode, nullptr);
+    auto normalTextProperty = normalTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(normalTextProperty, nullptr);
+    EXPECT_TRUE(normalTextProperty->HasMaxLines());
+    EXPECT_TRUE(normalTextProperty->HasTextOverflow());
+    EXPECT_EQ(normalTextProperty->GetTextOverflowValue(TextOverflow::CLIP), TextOverflow::ELLIPSIS);
+
+    OptionParam textMenuParam;
+    textMenuParam.value = "Paste";
+    textMenuParam.isTextMenuGridMenuItem = true;
+    auto textMenuGridItem = MenuView::CreateGridItem(textMenuParam, 1);
+    ASSERT_NE(textMenuGridItem, nullptr);
+
+    auto textMenuTextNode = AceType::DynamicCast<FrameNode>(textMenuGridItem->GetChildAtIndex(0));
+    ASSERT_NE(textMenuTextNode, nullptr);
+    auto textMenuTextProperty = textMenuTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textMenuTextProperty, nullptr);
+    EXPECT_FALSE(textMenuTextProperty->HasMaxLines());
+    EXPECT_FALSE(textMenuTextProperty->HasTextOverflow());
+}
+
+/**
+ * @tc.name: CreateGridItem002
+ * @tc.desc: Verify CreateGridItem uses symbol node when symbol callback exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, CreateGridItem002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    bool symbolApplied = false;
+    OptionParam symbolParam;
+    symbolParam.value = "Copy";
+    symbolParam.isTextMenuGridMenuItem = true;
+    symbolParam.symbol = [&symbolApplied](WeakPtr<FrameNode> weak) {
+        auto symbolNode = weak.Upgrade();
+        if (!symbolNode) {
+            return;
+        }
+        symbolApplied = true;
+        auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        if (!symbolProperty) {
+            return;
+        }
+        symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(1234));
+    };
+
+    auto symbolGridItem = MenuView::CreateGridItem(symbolParam, 0);
+    ASSERT_NE(symbolGridItem, nullptr);
+    EXPECT_TRUE(symbolApplied);
+
+    auto symbolNode = AceType::DynamicCast<FrameNode>(symbolGridItem->GetChildAtIndex(0));
+    ASSERT_NE(symbolNode, nullptr);
+    EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty, nullptr);
+    EXPECT_EQ(symbolProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()), SymbolSourceInfo(1234));
+
+    auto textNode = AceType::DynamicCast<FrameNode>(symbolGridItem->GetChildAtIndex(1));
+    ASSERT_NE(textNode, nullptr);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_FALSE(textProperty->HasMaxLines());
+    EXPECT_FALSE(textProperty->HasTextOverflow());
+}
+
+/**
+ * @tc.name: BuildGridListColumn001
+ * @tc.desc: Verify BuildGridListColumn extracts paste item state and triggers custom grid paste builder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, BuildGridListColumn001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto customMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(customMenuNode, nullptr);
+    auto customMenuPattern = customMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(customMenuPattern, nullptr);
+
+    auto createMenuItem = [this](const std::string& content, bool menuItemEnabled, bool isTextMenuGridMenuItem,
+                              bool withPasteButton, bool pasteEnabled) {
+        auto menuItemNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuItemPattern>());
+        EXPECT_NE(menuItemNode, nullptr);
+        auto layoutProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        EXPECT_NE(layoutProperty, nullptr);
+        if (layoutProperty) {
+            layoutProperty->UpdateContent(content);
+            layoutProperty->UpdateStartIcon(ImageSourceInfo("resource:///ohos_test.svg"));
+        }
+
+        auto menuItemEventHub = menuItemNode->GetEventHub<MenuItemEventHub>();
+        EXPECT_NE(menuItemEventHub, nullptr);
+        if (menuItemEventHub) {
+            menuItemEventHub->SetEnabled(menuItemEnabled);
+        }
+
+        auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+        EXPECT_NE(menuItemPattern, nullptr);
+        if (menuItemPattern) {
+            menuItemPattern->SetIsTextMenuGridMenuItem(isTextMenuGridMenuItem);
+            if (withPasteButton) {
+                auto pasteNode = FrameNode::CreateFrameNode(
+                    V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<Pattern>());
+                EXPECT_NE(pasteNode, nullptr);
+                auto pasteEventHub = pasteNode->GetEventHub<EventHub>();
+                EXPECT_NE(pasteEventHub, nullptr);
+                if (pasteEventHub) {
+                    pasteEventHub->SetEnabled(pasteEnabled);
+                }
+                menuItemPattern->SetPasteButton(pasteNode);
+            }
+        }
+        return menuItemNode;
+    };
+
+    auto pasteMenuItem = createMenuItem("Paste", true, true, true, false);
+    auto listMenuItem = createMenuItem("More", true, false, false, true);
+    ASSERT_NE(pasteMenuItem, nullptr);
+    ASSERT_NE(listMenuItem, nullptr);
+    pasteMenuItem->MountToParent(customMenuNode);
+    listMenuItem->MountToParent(customMenuNode);
+
+    bool builderCalled = false;
+    bool capturedEnabled = true;
+    bool capturedPasteOption = false;
+    bool capturedTextMenuGridItem = false;
+    customMenuPattern->SetGridMenuPasteItemBuilder(
+        [&](const OptionParam& param, const RefPtr<FrameNode>& defaultGridItem, int32_t themeScopeId) {
+            builderCalled = true;
+            capturedEnabled = param.enabled;
+            capturedPasteOption = param.isPasteOption;
+            capturedTextMenuGridItem = param.isTextMenuGridMenuItem;
+            EXPECT_NE(defaultGridItem, nullptr);
+            EXPECT_EQ(themeScopeId, 0);
+            return FrameNode::CreateFrameNode(
+                V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        });
+
+    MenuGridStyleOptions gridStyle;
+    gridStyle.count = 1;
+    gridStyle.horizontalSize = 1;
+    gridStyle.position = MenuGridPosition::TOP;
+    MenuParam menuParam;
+    menuParam.gridStyle = gridStyle;
+
+    auto result = MenuView::BuildGridListColumn(customMenuNode, customMenuNode, menuParam, 0);
+    ASSERT_EQ(result, customMenuNode);
+    EXPECT_TRUE(builderCalled);
+    EXPECT_FALSE(capturedEnabled);
+    EXPECT_TRUE(capturedPasteOption);
+    EXPECT_TRUE(capturedTextMenuGridItem);
+    ASSERT_EQ(customMenuNode->GetChildren().size(), 3);
+
+    auto gridContainer = AceType::DynamicCast<FrameNode>(customMenuNode->GetChildAtIndex(0));
+    ASSERT_NE(gridContainer, nullptr);
+    EXPECT_EQ(gridContainer->GetTag(), V2::COLUMN_ETS_TAG);
+}
+
+/**
+ * @tc.name: BuildGridListColumn002
+ * @tc.desc: Verify BuildGridListColumn keeps row cross-axis center when no text menu grid item exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, BuildGridListColumn002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto customMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(customMenuNode, nullptr);
+
+    auto createMenuItem = [this](const std::string& content) {
+        auto menuItemNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuItemPattern>());
+        EXPECT_NE(menuItemNode, nullptr);
+        auto layoutProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        EXPECT_NE(layoutProperty, nullptr);
+        if (layoutProperty) {
+            layoutProperty->UpdateContent(content);
+            layoutProperty->UpdateStartIcon(ImageSourceInfo("resource:///ohos_test.svg"));
+        }
+        auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+        EXPECT_NE(menuItemPattern, nullptr);
+        if (menuItemPattern) {
+            menuItemPattern->SetIsTextMenuGridMenuItem(false);
+        }
+        return menuItemNode;
+    };
+
+    auto firstMenuItem = createMenuItem("Copy");
+    auto secondMenuItem = createMenuItem("Paste");
+    ASSERT_NE(firstMenuItem, nullptr);
+    ASSERT_NE(secondMenuItem, nullptr);
+    firstMenuItem->MountToParent(customMenuNode);
+    secondMenuItem->MountToParent(customMenuNode);
+
+    MenuGridStyleOptions gridStyle;
+    gridStyle.count = 2;
+    gridStyle.horizontalSize = 2;
+    MenuParam menuParam;
+    menuParam.gridStyle = gridStyle;
+
+    auto result = MenuView::BuildGridListColumn(customMenuNode, customMenuNode, menuParam, 0);
+    ASSERT_EQ(result, customMenuNode);
+
+    auto gridContainer = AceType::DynamicCast<FrameNode>(customMenuNode->GetChildAtIndex(0));
+    ASSERT_NE(gridContainer, nullptr);
+    auto rowNode = AceType::DynamicCast<FrameNode>(gridContainer->GetChildAtIndex(0));
+    ASSERT_NE(rowNode, nullptr);
+    auto rowProps = rowNode->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(rowProps, nullptr);
+    EXPECT_EQ(rowProps->GetCrossAxisAlign().value_or(FlexAlign::FLEX_END), static_cast<FlexAlign>(4));
 }
 } // namespace OHOS::Ace::NG

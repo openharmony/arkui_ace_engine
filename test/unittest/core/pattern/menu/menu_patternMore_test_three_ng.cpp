@@ -243,8 +243,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition007, T
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
     auto result = menuPattern_->GetAdjustedExtensionMenuPosition(menuPosition);
-    float expectedX = selectMenuPaintRect.Left() +
-        (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f;
+    float expectedX = 0.0f;
     EXPECT_NEAR(result.GetX(), expectedX, 0.01f);
     EXPECT_NEAR(result.GetY(), selectMenuPaintRect.Top(), 0.01f);
 }
@@ -396,8 +395,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition013, T
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 0.0f);
     auto result = menuPattern_->GetAdjustedExtensionMenuPosition(menuPosition);
-    float expectedX = selectMenuPaintRect.Left() +
-        (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f;
+    float expectedX = 0.0f;
     EXPECT_NEAR(result.GetX(), expectedX, 0.01f);
 }
 

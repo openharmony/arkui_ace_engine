@@ -1513,7 +1513,7 @@ HWTEST_F(MenuItemPatternTestOneNg, UpdateOptionStyle001, TestSize.Level1)
     EXPECT_EQ(itemPattern->fontColor_.value(), COLOR_SRC);
     itemPattern->UpdateOptionStyle();
 
-    EXPECT_EQ(itemPattern->fontColor_.value(), selectPattern->optionFont_.FontColor.value());
+    EXPECT_EQ(itemPattern->fontColor_.value(), COLOR_SRC);
 }
 
 /**

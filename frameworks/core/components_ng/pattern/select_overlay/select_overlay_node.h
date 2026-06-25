@@ -184,25 +184,26 @@ private:
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     bool IsShowOnTargetAPIVersion();
     bool IsShowTranslateOnTargetAPIVersion();
-    std::function<void()> GetDefaultOptionCallback();
     std::function<void(WeakPtr<NG::FrameNode>)> GetSymbolFunc(const std::string& symbolId);
-    std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
+    std::vector<OptionParam> GetDefaultOptionsParams(
+        const std::shared_ptr<SelectOverlayInfo>& info, std::vector<std::string>& paramIds);
     void GetFlexibleOptionsParams(
-        const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);
+        const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params,
+        std::vector<std::string>& paramIds);
     void addMenuOptionItemsParams(
-        std::vector<OptionParam>& params, const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
+        std::vector<OptionParam>& params, const std::shared_ptr<SelectOverlayInfo>& info, int32_t index,
+        std::vector<std::string>& paramIds);
     void AddExtensionMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
-    void AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
-        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex);
     void AddCreateMenuExtensionMenuParams(const std::vector<MenuOptionsParam>& menuOptionItems,
-        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params);
+        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params,
+        std::vector<std::string>& paramIds);
     std::function<void()> CreateExtensionMenuOptionCallback(int32_t id, const OnMenuItemCallback& onCreateCallback,
         const std::function<void()>& systemEvent, const MenuOptionsParam& item);
     RefPtr<FrameNode> GetExtensionMenuOutterrMenu(std::vector<OptionParam>& params, const MenuParam& menuParam,
         const RefPtr<FrameNode>& caller);
     void InitExtensionMenu(const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller,
         const MenuParam& menuParam, ColorMode colorMode);
-    void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller);
+    void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller, int32_t gridCount);
 
     void MoreAnimation(bool noAnimation);
     void BackAnimation(bool noAnimation);

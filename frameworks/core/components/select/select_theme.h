@@ -1744,6 +1744,18 @@ public:
     {
         return gridMenuFontWeight_;
     }
+    void SetGridMenuFontColor(const Color& value)
+    {
+        gridMenuFontColor_ = value;
+    }
+    void SetGridMenuHoverColor(const Color& value)
+    {
+        gridMenuHoverColor_ = value;
+    }
+    void SetGridMenuClickedColor(const Color& value)
+    {
+        gridMenuClickedColor_ = value;
+    }
     const Color& GetGridMenuFontColor() const
     {
         return gridMenuFontColor_;

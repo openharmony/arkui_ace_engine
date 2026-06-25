@@ -53,6 +53,9 @@ public:
             SetFontColor(colors->FontPrimary());
             SetButtonBackgroundColor(colors->CompBackgroundTertiary());
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                SetGridMenuFontColor(colors->FontPrimary());
+                SetGridMenuHoverColor(colors->InteractiveHover());
+                SetGridMenuClickedColor(colors->InteractiveClick());
                 SetMenuFontColor(colors->FontPrimary());
                 SetMenuIconColor(colors->IconPrimary());
                 SetSecondaryFontColor(colors->FontSecondary());
