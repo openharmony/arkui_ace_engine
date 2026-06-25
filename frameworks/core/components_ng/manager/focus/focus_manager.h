@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/listener.h"
+#include "core/common/container.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 
 namespace OHOS::Ace::NG {
@@ -355,6 +356,7 @@ private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
     void ReportFocusSwitching(FocusReason focusReason);
     bool NeedChangeFocusAvtive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive);
+    void HandleContainer(const RefPtr<FocusView>& curFocusView, const RefPtr<Container>& container);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
