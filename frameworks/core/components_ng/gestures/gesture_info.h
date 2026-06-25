@@ -266,6 +266,9 @@ public:
     void SetUserData(void* userData)
     {
         userData_ = userData;
+        if (gestureInfo_) {
+            gestureInfo_->SetUserData(userData);
+        }
     }
 
     void* GetUserData() const

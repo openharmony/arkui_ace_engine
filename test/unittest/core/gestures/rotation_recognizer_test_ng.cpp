@@ -2456,4 +2456,57 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerHandleTouchMoveEventTest010
     rotationRecognizer->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);
 }
+
+/**
+ * @tc.name: RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    RefPtr<RotationRecognizer> rotationRecognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    rotationRecognizer->AttachFrameNode(frameNode);
+
+    rotationRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    rotationRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = rotationRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    RefPtr<RotationRecognizer> rotationRecognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    rotationRecognizer->AttachFrameNode(frameNode);
+
+    rotationRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    rotationRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = rotationRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    RefPtr<RotationRecognizer> rotationRecognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    rotationRecognizer->AttachFrameNode(frameNode);
+
+    rotationRecognizer->gestureInfo_ = nullptr;
+    auto result = rotationRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG

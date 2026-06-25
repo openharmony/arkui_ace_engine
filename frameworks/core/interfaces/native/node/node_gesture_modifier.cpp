@@ -222,6 +222,7 @@ void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
     gestureRef->SetDisposeTag(true);
+    gestureRef->SetUserData(nullptr);
     gestureRef->DecRefCount();
 }
 

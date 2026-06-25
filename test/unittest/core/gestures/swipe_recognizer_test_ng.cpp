@@ -1621,4 +1621,60 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerGetAxisDirectionTest004, TestSize
     auto axis = swipeRecognizerPtr->GetAxisDirection();
     EXPECT_EQ(axis, Axis::NONE);
 }
+
+/**
+ * @tc.name: SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    swipeRecognizer->AttachFrameNode(frameNode);
+
+    swipeRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    swipeRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = swipeRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    swipeRecognizer->AttachFrameNode(frameNode);
+
+    swipeRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    swipeRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = swipeRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    swipeRecognizer->AttachFrameNode(frameNode);
+
+    swipeRecognizer->gestureInfo_ = nullptr;
+    auto result = swipeRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG
