@@ -11246,6 +11246,7 @@ class ArkDotIndicator extends DotIndicator {
     this.maxDisplayCountValue = undefined;
     this.spaceValue = undefined;
     this.ignoreSizeValue = undefined;
+    this.indicatorIconValue = undefined;
   }
   isEqual(another) {
     return (this.type === another.type &&
@@ -11262,7 +11263,8 @@ class ArkDotIndicator extends DotIndicator {
       this.selectedColorValue === another.selectedColorValue &&
       this.maxDisplayCountValue === another.maxDisplayCountValue &&
       this.spaceValue === another.spaceValue &&
-      this.ignoreSizeValue === another.ignoreSizeValue);
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.indicatorIconValue === another.indicatorIconValue);
   }
 }
 class ArkDigitIndicator extends DigitIndicator {
@@ -20001,6 +20003,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       let selectedDigitFontWeight;
       let maxDisplayCount;
       let space;
+      let indicatorIcon;
       let ignoreSize;
       let setIgnoreSize;
       if (typeof this.value === 'boolean') {
@@ -20022,9 +20025,10 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         space = this.value.spaceValue;
         ignoreSize = this.value.ignoreSizeValue;
         setIgnoreSize = this.value.setIgnoreSizeValue;
+        indicatorIcon = this.value.indicatorIconValue;
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
           selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount, space, ignoreSize,
-          setIgnoreSize);
+          setIgnoreSize, indicatorIcon);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
@@ -20070,7 +20074,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue) ||
         !isBaseOrResourceEqual(this.stageValue.spaceValue, this.value.spaceValue) ||
         !isBaseOrResourceEqual(this.stageValue.ignoreSizeValue, this.value.ignoreSizeValue) ||
-        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue)
+        !isBaseOrResourceEqual(this.stageValue.setIgnoreSizeValue, this.value.setIgnoreSizeValue) ||
+        !isBaseOrResourceEqual(this.stageValue.indicatorIconValue, this.value.indicatorIconValue)
       );
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {

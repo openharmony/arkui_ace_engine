@@ -101,7 +101,11 @@ public:
         CHECK_NULL_VOID(paintMethod);
         CHECK_NULL_VOID(swiperLayoutProperty);
         paintMethod->SetAxis(swiperPattern->GetDirection());
-        paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
+        if (NeedCustomDotIndicatorLayout()) {
+            paintMethod->SetCurrentIndex(GetStableCustomIconSelectedPageIndex(swiperPattern));
+        } else {
+            paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
+        }
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
@@ -120,6 +124,7 @@ public:
         paintMethod->SetIsPressed(isPressed_);
         paintMethod->SetHoverPoint(hoverPoint_);
         paintMethod->SetIsLongPressed(isLongPressed_);
+        paintMethod->SetDisableIndicatorAnimation(NeedCustomDotIndicatorLayout());
         if (mouseClickIndex_) {
             mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
         }
@@ -287,6 +292,47 @@ public:
     virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
+    bool NeedCustomDotIndicatorLayout() const
+    {
+        return hasCustomDotIndicatorLayout_;
+    }
+    bool UpdateCustomDotIndicatorLayoutFlag();
+    bool ClearIndicatorIconState()
+    {
+        bool hasIconState = !indicatorWrapperNodeByItem_.empty();
+        hasCustomDotIndicatorLayout_ = false;
+        indicatorIconIndexes_.clear();
+        indicatorWrapperNodeByItem_.clear();
+        activeCustomIconInfos_.clear();
+        pendingFadeInSlots_.clear();
+        return hasIconState;
+    }
+    Color GetDefaultSymbolColor(bool isSelected) const;
+    LinearVector<float> GetCustomIconCenterX() const;
+    std::optional<int32_t> GetCustomIconVisibleIndex(int32_t itemIndex) const;
+    bool IsCustomIconSelected(int32_t itemIndex) const;
+    void RefreshCustomIconNodesForOverlongTransition();
+    const std::vector<int32_t>& GetIndicatorIconIndexes() const
+    {
+        return indicatorIconIndexes_;
+    }
+    struct ActiveCustomIconInfo {
+        int32_t itemIndex = -1;
+        int32_t slotIndex = -1;
+        int32_t wrapperId = -1;
+    };
+    const std::vector<ActiveCustomIconInfo>& GetActiveCustomIconInfos() const
+    {
+        return activeCustomIconInfos_;
+    }
+    const std::vector<int32_t>& GetPendingFadeInSlots() const
+    {
+        return pendingFadeInSlots_;
+    }
+    void ScheduleBatchFadeAnimation(const std::vector<RefPtr<FrameNode>>& fadeInList);
+    void PlayBatchFadeAnimation(const std::vector<RefPtr<FrameNode>>& fadeInList, bool hasFadeSlots);
+    bool HasValidCustomIconAtIndex(int32_t itemIndex) const;
+    int32_t GetStableCustomIconSelectedPageIndex(const RefPtr<SwiperPattern>& swiperPattern) const;
     void ResetDotModifier();
     const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
     {
@@ -308,6 +354,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
     void HandleTouchUp();
+    void MarkCustomIconLayoutDirty();
     void HandleDragStart(const GestureEvent& info);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
@@ -379,10 +426,16 @@ private:
     std::optional<GestureState> keepGestureState_;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
+    std::vector<int32_t> indicatorIconIndexes_;
+    std::map<int32_t, RefPtr<FrameNode>> indicatorWrapperNodeByItem_;
+    std::vector<ActiveCustomIconInfo> activeCustomIconInfos_;
+    std::vector<int32_t> pendingFadeInSlots_;
+    bool hasCustomDotIndicatorLayout_ = false;
 
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
+    virtual std::shared_ptr<SwiperParameters> ObtainSwiperParameters() const;
     virtual void FireChangeEvent() const {}
     virtual void FireIndicatorIndexChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
@@ -486,6 +539,8 @@ protected:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
     void UpdateDigitalIndicator();
+    void UpdateDotIndicatorIconNodes();
+    void UpdateDotIndicatorIconNode(const RefPtr<FrameNode>& iconNode, int32_t itemIndex);
 };
 } // namespace OHOS::Ace::NG
 

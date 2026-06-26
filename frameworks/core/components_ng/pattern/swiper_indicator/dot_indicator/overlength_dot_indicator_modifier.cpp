@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -40,7 +41,291 @@ constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 constexpr float HALF_FLOAT = 0.5f;
 constexpr int32_t OVERLONG_SMALL_COUNT = 2;
 constexpr int32_t DOUBLE_INT = 2;
+
+bool IsFadeSlotForOverlongType(int32_t slotIndex, int32_t maxDisplayCount, OverlongType overlongType)
+{
+    if (slotIndex < 0 || slotIndex >= maxDisplayCount) {
+        return true;
+    }
+    if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+        return slotIndex >= maxDisplayCount - SECOND_POINT_INDEX - 1;
+    }
+    if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+        return slotIndex <= SECOND_POINT_INDEX;
+    }
+    if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT) {
+        return slotIndex <= SECOND_POINT_INDEX || slotIndex >= maxDisplayCount - SECOND_POINT_INDEX - 1;
+    }
+    return false;
+}
+
+bool IsWillFadeSlotForOverlongType(
+    int32_t slotIndex, int32_t maxDisplayCount, OverlongType currentOverlongType, OverlongType targetOverlongType)
+{
+    if (currentOverlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT &&
+        targetOverlongType == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT) {
+        if (slotIndex <= SECOND_POINT_INDEX) {
+            return true;
+        }
+    }
+    if (currentOverlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL &&
+        targetOverlongType == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT) {
+        if (slotIndex >= maxDisplayCount - SECOND_POINT_INDEX - 1) {
+            return true;
+        }
+    }
+    if (currentOverlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT &&
+        targetOverlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+        return true;
+    }
+    if (currentOverlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL &&
+        targetOverlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+        return true;
+    }
+    return false;
+}
+
+bool IsMoveFadeSlot(int32_t slotIndex, int32_t maxDisplayCount, OverlongIndicatorMove moveDirection)
+{
+    if (moveDirection == OverlongIndicatorMove::MOVE_BACKWARD) {
+        if (slotIndex <= THIRD_POINT_INDEX) {
+            return true;
+        }
+    }
+    if (moveDirection == OverlongIndicatorMove::MOVE_FORWARD) {
+        if (slotIndex >= maxDisplayCount - THIRD_POINT_INDEX - 1) {
+            return true;    
+        }
+    }
+    return false;
+}
+
+int32_t GetStableSelectedSlotForPage(int32_t pageIndex, int32_t realItemCount, int32_t maxDisplayCount,
+    OverlongType overlongType)
+{
+    if (maxDisplayCount <= 0 || realItemCount <= 0) {
+        return 0;
+    }
+    if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+        return std::clamp(pageIndex, 0, maxDisplayCount - 1 - THIRD_POINT_INDEX);
+    }
+    if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT) {
+        return maxDisplayCount - 1 - THIRD_POINT_INDEX;
+    }
+    if (pageIndex >= realItemCount - 1) {
+        return maxDisplayCount - 1;
+    }
+    if (pageIndex == realItemCount - 1 - SECOND_POINT_INDEX) {
+        return maxDisplayCount - 1 - SECOND_POINT_INDEX;
+    }
+    return maxDisplayCount - 1 - THIRD_POINT_INDEX;
+}
+
 } // namespace
+
+LinearVector<float> OverlengthDotIndicatorModifier::GetVisibleAnimationStartCenterXOrCurrent() const
+{
+    if (animationStartCenterX_.empty()) {
+        return GetBlackPointCenterX();
+    }
+    return animationStartCenterX_;
+}
+
+int32_t OverlengthDotIndicatorModifier::GetSelectedSlot() const
+{
+    return GetStableSelectedSlotForPage(currentIndex_, realItemCount_, maxDisplayCount_, currentOverlongType_);
+}
+
+int32_t OverlengthDotIndicatorModifier::GetVisualSelectedSlot() const
+{
+    if (!isDraggingIndicator_) {
+        bool useStartPair = (currentIndex_ != animationStartIndex_) &&
+            (currentSelectedIndex_ == animationStartSelectedIndex_);
+        if (useStartPair) {
+            return animationStartSelectedIndex_;
+        }
+        return currentSelectedIndex_;
+    }
+    return targetSelectedIndex_ == currentSelectedIndex_ ? currentSelectedIndex_ : targetSelectedIndex_;
+}
+
+std::vector<RefPtr<FrameNode>> OverlengthDotIndicatorModifier::GetActiveCustomIconWrappers() const
+{
+    std::vector<RefPtr<FrameNode>> result;
+    auto host = indicatorHost_.Upgrade();
+    CHECK_NULL_RETURN(host, result);
+    auto indicatorPattern = host->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_RETURN(indicatorPattern, result);
+    const auto& activeInfos = indicatorPattern->GetActiveCustomIconInfos();
+    if (activeInfos.empty()) {
+        return result;
+    }
+    auto children = host->GetChildren();
+    std::unordered_map<int32_t, RefPtr<FrameNode>> wrapperById;
+    wrapperById.reserve(children.size());
+    for (const auto& child : children) {
+        auto wrapperNode = AceType::DynamicCast<FrameNode>(child);
+        if (!wrapperNode) {
+            continue;
+        }
+        wrapperById[wrapperNode->GetId()] = wrapperNode;
+    }
+    result.reserve(activeInfos.size());
+    for (const auto& info : activeInfos) {
+        auto iter = wrapperById.find(info.wrapperId);
+        if (iter == wrapperById.end()) {
+            continue;
+        }
+        result.emplace_back(iter->second);
+    }
+    return result;
+}
+
+std::optional<int32_t> OverlengthDotIndicatorModifier::CalcSlotForPage(
+    int32_t pageIndex, int32_t currentIndex, int32_t realItemCount,
+    int32_t maxDisplayCount, OverlongType overlongType)
+{
+    if (maxDisplayCount <= 0) {
+        return std::nullopt;
+    }
+    if (overlongType == OverlongType::NONE) {
+        int32_t slot = pageIndex - currentIndex;
+        return (slot >= 0 && slot < maxDisplayCount) ? std::optional<int32_t>(slot) : std::nullopt;
+    }
+    if (pageIndex < 0 || pageIndex >= realItemCount) {
+        return std::nullopt;
+    }
+    auto stableSelectedSlot = GetStableSelectedSlotForPage(currentIndex, realItemCount, maxDisplayCount, overlongType);
+    int32_t slot = pageIndex - currentIndex + stableSelectedSlot;
+    if (slot < 0 || slot >= maxDisplayCount) {
+        return std::nullopt;
+    }
+    if (IsFadeSlotForOverlongType(slot, maxDisplayCount, overlongType)) {
+        return std::nullopt;
+    }
+    return slot;
+}
+
+std::optional<int32_t> OverlengthDotIndicatorModifier::GetSlotForPage(int32_t pageIndex) const
+{
+    if (currentOverlongType_ == OverlongType::NONE) {
+        return CalcSlotForPage(pageIndex, currentIndex_, realItemCount_, maxDisplayCount_, currentOverlongType_);
+    }
+
+    if (pageIndex < 0 || pageIndex >= realItemCount_) {
+        return std::nullopt;
+    }
+
+    bool useStartPair =
+        (currentIndex_ != animationStartIndex_) &&
+        (currentSelectedIndex_ == animationStartSelectedIndex_);
+    bool useTargetSelectedSlot =
+        currentIndex_ == animationStartIndex_ &&
+        currentSelectedIndex_ != targetSelectedIndex_;
+    int32_t pageAnchor = useStartPair ? animationStartIndex_ : currentIndex_;
+    int32_t selectedSlotAnchor = useStartPair ? animationStartSelectedIndex_ :
+        (useTargetSelectedSlot ? targetSelectedIndex_ : currentSelectedIndex_);
+    int32_t slot = pageIndex - pageAnchor + selectedSlotAnchor;
+    if (slot < 0 || slot >= maxDisplayCount_) {
+        return std::nullopt;
+    }
+
+    if (IsFadeSlotForOverlongType(slot, maxDisplayCount_, currentOverlongType_)) {
+        return std::nullopt;
+    }
+    bool isOverlongTypeSwitching = !keepStatus_ && currentOverlongType_ != targetOverlongType_;
+    if (isOverlongTypeSwitching &&
+        IsWillFadeSlotForOverlongType(slot, maxDisplayCount_, currentOverlongType_, targetOverlongType_)) {
+            return std::nullopt;
+    }
+    if (currentOverlongType_ == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT &&
+        IsMoveFadeSlot(slot, maxDisplayCount_, moveDirection_)) {
+        return std::nullopt;
+    }
+    return slot;
+}
+
+void OverlengthDotIndicatorModifier::UpdateCustomIconOffsets(const ContentProperty& contentProperty)
+{
+    if (!hasCustomIcon_) {
+        return;
+    }
+    auto host = indicatorHost_.Upgrade();
+    if (!host) {
+        return;
+    }
+    auto indicatorPattern = host->GetPattern<SwiperIndicatorPattern>();
+    if (!indicatorPattern) {
+        return;
+    }
+    auto activeWrappers = GetActiveCustomIconWrappers();
+    const auto& activeInfos = indicatorPattern->GetActiveCustomIconInfos();
+    if (activeWrappers.empty() || activeInfos.empty()) {
+        return;
+    }
+    size_t count = std::min(activeWrappers.size(), activeInfos.size());
+    for (size_t index = 0; index < count; ++index) {
+        auto wrapperNode = activeWrappers[index];
+        if (!wrapperNode) {
+            continue;
+        }
+        int32_t slotIndex = activeInfos[index].slotIndex;
+        if (slotIndex < 0 || static_cast<size_t>(slotIndex) >= contentProperty.vectorBlackPointCenterX.size()) {
+            continue;
+        }
+        auto renderContext = wrapperNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        float centerX = contentProperty.vectorBlackPointCenterX[slotIndex];
+        bool isSelected = (slotIndex == GetSelectedSlot());
+        auto childGeometry = wrapperNode->GetGeometryNode();
+        float iconHalfWidth = 0.0f;
+        float iconHalfHeight = 0.0f;
+        if (childGeometry) {
+            auto childFrameSize = childGeometry->GetFrameSize();
+            iconHalfWidth = childFrameSize.Width() * HALF_FLOAT;
+            iconHalfHeight = childFrameSize.Height() * HALF_FLOAT;
+        } else {
+            iconHalfWidth = isSelected ? contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
+                                       : contentProperty.itemHalfSizes[ITEM_HALF_WIDTH];
+            iconHalfHeight = isSelected ? contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]
+                                        : contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT];
+        }
+        auto baseOffset = childGeometry ? childGeometry->GetMarginFrameOffset() : OffsetF();
+        float targetOffsetX = 0.0f;
+        float targetOffsetY = 0.0f;
+        if (axis_ == Axis::HORIZONTAL) {
+            targetOffsetX = centerX - iconHalfWidth;
+            targetOffsetY = centerY_ - iconHalfHeight;
+        } else {
+            targetOffsetX = centerY_ - iconHalfWidth;
+            targetOffsetY = centerX - iconHalfHeight;
+        }
+        bool isInitialBaseOffset = NearZero(baseOffset.GetX()) && NearZero(baseOffset.GetY()) &&
+            (!NearZero(targetOffsetX) || !NearZero(targetOffsetY));
+        if (isInitialBaseOffset) {
+            continue;
+        }
+        auto deltaX = targetOffsetX - baseOffset.GetX();
+        auto deltaY = targetOffsetY - baseOffset.GetY();
+        renderContext->UpdateOffset(OffsetT<Dimension>(
+            Dimension(deltaX, DimensionUnit::PX),
+            Dimension(deltaY, DimensionUnit::PX)));
+    }
+}
+
+void OverlengthDotIndicatorModifier::RequestCustomIconRefreshBeforeBlackAnimation()
+{
+    if (!hasCustomIcon_) {
+        return;
+    }
+    auto host = indicatorHost_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto indicatorPattern = host->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    indicatorPattern->RefreshCustomIconNodesForOverlongTransition();
+}
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 {
@@ -62,6 +347,7 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 
     PaintBackground(context, contentProperty, maxDisplayCount_, isBindIndicator_);
     PaintContent(context, contentProperty);
+    UpdateCustomIconOffsets(contentProperty);
     isDrawbackground_ = false;
 }
 
@@ -152,6 +438,11 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
 {
     PaintBlackPoint(context, contentProperty);
     RSCanvas& canvas = context.canvas;
+    auto selSlot = targetSelectedIndex_ == currentSelectedIndex_ ? currentSelectedIndex_ : targetSelectedIndex_;
+    selSlot = isHorizontalAndRTL_ ? maxDisplayCount_ - 1 - selSlot : selSlot;
+    if (HasCustomIconAtIndex(selSlot)) {
+        return;
+    }
     auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
 
     OffsetF leftCenter = { leftCenterX, centerY_ };
@@ -170,6 +461,16 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     PaintSelectedIndicator(canvas, leftCenter, rightCenter, itemHalfSizes, true);
 }
 
+bool OverlengthDotIndicatorModifier::IsIndicatorIconFadeInSlot(int32_t slot) const
+{
+    for (auto fadeInSlot : indicatorIconFadeInSlots_) {
+        if (fadeInSlot == slot) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas& canvas = context.canvas;
@@ -180,6 +481,11 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
             break;
         }
 
+        bool hasCustomIcon = HasCustomIconAtIndex(static_cast<int32_t>(i));
+        bool isIndicatorIconFadeInSlot = hasCustomIcon && IsIndicatorIconFadeInSlot(static_cast<int32_t>(i));
+        if (hasCustomIcon && !isIndicatorIconFadeInSlot) {
+            continue;
+        }
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         float width = contentProperty.unselectedIndicatorWidth[i];
         float height = contentProperty.unselectedIndicatorHeight[i];
@@ -193,6 +499,10 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
         } else if (i == totalCount - 1 && moveDirection_ != OverlongIndicatorMove::NONE) {
             // new point color
             paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
+        }
+        if (isIndicatorIconFadeInSlot) {
+            auto opacity = indicatorIconOpacity_->Get();
+            paintColor = paintColor.BlendOpacity(opacity);
         }
         if (!isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
                                      center.GetX() + width * HALF_FLOAT < backgroundEnd_)) {
@@ -385,6 +695,7 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
             modifier->currentOverlongType_ = modifier->targetOverlongType_;
             modifier->blackPointsAnimEnd_ = true;
             modifier->needUpdate_ = false;
+            modifier->RequestCustomIconRefreshBeforeBlackAnimation();
         }
     });
 }
@@ -737,12 +1048,19 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
 
     needUpdate_ = false;
     blackPointsAnimEnd_ = true;
+    auto previousCurrentType = currentOverlongType_;
+    auto previousCurrentSelectedIndex = currentSelectedIndex_;
     currentSelectedIndex_ = targetSelectedIndex_;
     currentOverlongType_ = targetOverlongType_;
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     normalMargin_ = margin;
     CalcAnimationEndCenterX(itemHalfSizes);
+    bool needRefreshCustomIcons = hasCustomIcon_ && !keepStatus_ &&
+        (targetOverlongType_ != previousCurrentType || targetSelectedIndex_ != previousCurrentSelectedIndex);
+    if (needRefreshCustomIcons) {
+        RequestCustomIconRefreshBeforeBlackAnimation();
+    }
     PlayBlackPointsAnimation(itemHalfSizes);
 
     std::vector<std::pair<float, float>> pointCenterX;

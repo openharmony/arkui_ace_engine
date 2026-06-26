@@ -26,6 +26,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
+    static SwiperParameters GetDotIndicatorInfo(const JSCallbackInfo& info, const JSRef<JSObject>& obj);
+    static void ParseIndicatorIconList(
+        const JSCallbackInfo& info, const JSRef<JSObject>& obj, SwiperParameters& swiperParameters);
+
 protected:
     static void SetLoop(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);

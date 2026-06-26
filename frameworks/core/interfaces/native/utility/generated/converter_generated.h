@@ -1749,6 +1749,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ResourceStr_SymbolGlyphModifier& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ResourceStr_TabBarSymbol& src)
 {
     switch (src.selector) {
@@ -4337,6 +4352,7 @@ ASSIGN_OPT(Opt_Array_HistoricalPoint)
 ASSIGN_OPT(Opt_Array_I32)
 ASSIGN_OPT(Opt_Array_ImageAnalyzerType)
 ASSIGN_OPT(Opt_Array_ImageFrameInfo)
+ASSIGN_OPT(Opt_Array_IndicatorIconInfo)
 ASSIGN_OPT(Opt_Array_KeyframeState)
 ASSIGN_OPT(Opt_Array_Layoutable)
 ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
@@ -5154,6 +5170,7 @@ ASSIGN_OPT(Opt_Union_ResourceStr_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_ResourceStr_image_PixelMap)
 ASSIGN_OPT(Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_ResourceStr_Scene)
+ASSIGN_OPT(Opt_Union_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_ResourceStr_TabBarSymbol)
 ASSIGN_OPT(Opt_Union_RotateOptions_RotateAngleOptions)
 ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
@@ -5236,6 +5253,7 @@ ASSIGN_OPT(Opt_GaugeShadowOptions)
 ASSIGN_OPT(Opt_GridColOptions)
 ASSIGN_OPT(Opt_ImageAlt)
 ASSIGN_OPT(Opt_ImageFrameInfo)
+ASSIGN_OPT(Opt_IndicatorIconInfo)
 ASSIGN_OPT(Opt_InputCounterOptions)
 ASSIGN_OPT(Opt_KeyframeAnimateParam)
 ASSIGN_OPT(Opt_Length)

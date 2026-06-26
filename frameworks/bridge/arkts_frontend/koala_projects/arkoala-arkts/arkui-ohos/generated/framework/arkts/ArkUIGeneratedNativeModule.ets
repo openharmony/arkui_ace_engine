@@ -4567,6 +4567,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DotIndicator_space(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _DotIndicator_indicatorIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _DragEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _DragEvent_getFinalizer(): KPointer

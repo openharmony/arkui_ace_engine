@@ -272,6 +272,7 @@ protected:
 
 private:
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
+    std::shared_ptr<SwiperParameters> ObtainSwiperParameters() const override;
     void SaveDotIndicatorProperty();
     void SaveDigitIndicatorProperty();
     void UpdatePaintProperty();

@@ -26,6 +26,7 @@ class JSSwiper : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static SwiperParameters GetDotIndicatorInfo(const JSCallbackInfo& info, const JSRef<JSObject>& obj);
 
 protected:
     static void SetIndicatorInteractive(const JSCallbackInfo& info);

@@ -18,11 +18,15 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 namespace OHOS::Ace::NG {
+class SwiperPattern;
+class SwiperIndicatorPattern;
+
 class ACE_EXPORT DotIndicatorLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(DotIndicatorLayoutAlgorithm, LayoutAlgorithm);
 
@@ -70,8 +74,23 @@ public:
     }
 
 private:
+    struct CustomIconLayoutItem {
+        int32_t wrapperId = -1;
+        int32_t slotIndex = -1;
+    };
+    struct CustomIconLayoutContext {
+        Axis direction = Axis::HORIZONTAL;
+        SizeF frameSize;
+        float crossSize = 0.0f;
+        std::vector<float> pointCenters;
+        std::vector<CustomIconLayoutItem> items;
+    };
+
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     SizeF CalcIndicatorFrameSize(LayoutWrapper* layoutWrapper, float indicatorWidth, float indicatorHeight);
+    bool InitCustomIconLayoutContext(LayoutWrapper* layoutWrapper,
+        const RefPtr<SwiperIndicatorPattern>& indicatorPattern, CustomIconLayoutContext& context) const;
+    void LayoutCustomIconChildren(LayoutWrapper* layoutWrapper, const CustomIconLayoutContext& context) const;
 
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;

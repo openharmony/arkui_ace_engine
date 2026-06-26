@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -68,6 +69,7 @@ constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
 constexpr int32_t DOT_INDICATOR_SPACE = 14;
 constexpr int32_t DOT_INDICATOR_IGNORE_SIZE = 15;
 constexpr int32_t DOT_INDICATOR_SET_IGNORE_SIZE = 16;
+constexpr int32_t DOT_INDICATOR_INDICATOR_ICON = 17;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 constexpr int32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr int32_t STOP_WHEN_TOUCHED = 2;
@@ -91,6 +93,67 @@ constexpr int32_t ARROW_RESOURCE_BACKGROUND_COLOR = 1;
 constexpr int32_t ARROW_RESOURCE_SIZE = 2;
 constexpr int32_t ARROW_RESOURCE_COLOR = 3;
 constexpr int32_t ARROW_RESOURCE_VECTOR_LENGTH = 4;
+
+bool ParseSymbolIndicatorIcon(EcmaVM* vm, const Local<JSValueRef>& iconValue,
+    OHOS::Ace::IndicatorIconParam& iconParam)
+{
+    if (!iconValue->IsObject(vm)) {
+        return false;
+    }
+    auto iconObject = iconValue->ToObject(vm);
+    if (!iconObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "fontColor"))) {
+        return false;
+    }
+    ArkTSUtils::SetSymbolOptionApply(vm, iconParam.symbolApply, iconValue);
+    if (!iconParam.symbolApply) {
+        return false;
+    }
+    iconParam.sourceType = OHOS::Ace::IndicatorIconParam::SourceType::SYMBOL;
+    return true;
+}
+
+bool ParseMediaIndicatorIcon(EcmaVM* vm, const Local<JSValueRef>& iconValue,
+    OHOS::Ace::IndicatorIconParam& iconParam)
+{
+    RefPtr<ResourceObject> resourceObject;
+    std::string iconSrc;
+    if (!ArkTSUtils::ParseJsMedia(vm, iconValue, iconSrc, resourceObject) || iconSrc.empty()) {
+        return false;
+    }
+    iconParam.sourceType = OHOS::Ace::IndicatorIconParam::SourceType::MEDIA;
+    iconParam.iconSrc = iconSrc;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, iconValue, iconParam.bundleName, iconParam.moduleName);
+    return true;
+}
+
+void ParseIndicatorIconList(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo,
+    std::map<int32_t, OHOS::Ace::IndicatorIconParam>& indicatorIconMap)
+{
+    auto iconListArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_INDICATOR_ICON);
+    if (iconListArg.IsEmpty() || iconListArg->IsNull() || iconListArg->IsUndefined() || !iconListArg->IsArray(vm)) {
+        return;
+    }
+    auto iconListLength = ArkTSUtils::GetArrayLength(vm, iconListArg);
+    for (int32_t index = 0; index < iconListLength; ++index) {
+        auto iconInfoValue = panda::ArrayRef::GetValueAt(vm, iconListArg, index);
+        if (!iconInfoValue->IsObject(vm)) {
+            continue;
+        }
+        Local<ObjectRef> iconInfoObject = iconInfoValue->ToObject(vm);
+        auto itemIndexValue = iconInfoObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "index"));
+        int32_t itemIndex = -1;
+        if (!ArkTSUtils::ParseJsInteger(vm, itemIndexValue, itemIndex) || itemIndex < 0) {
+            continue;
+        }
+        auto iconValue = iconInfoObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "icon"));
+        OHOS::Ace::IndicatorIconParam iconParam;
+        if (!ParseSymbolIndicatorIcon(vm, iconValue, iconParam) &&
+            !ParseMediaIndicatorIcon(vm, iconValue, iconParam)) {
+            continue;
+        }
+        indicatorIconMap[itemIndex] = std::move(iconParam);
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -943,12 +1006,14 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
     std::string indicatorStr = "";
     std::vector<RefPtr<ResourceObject>> resObjs;
     resObjs.resize(INDICATOR_RESOURCE_VECTOR_LENGTH);
+    std::map<int32_t, OHOS::Ace::IndicatorIconParam> indicatorIconMap;
     if (type == "boolean") {
         Local<JSValueRef> indicatorArg = runtimeCallInfo->GetCallArgRef(INDICATOR_VALUE_INDEX);
         std::string indicator = indicatorArg->ToBoolean(vm)->Value() ? "1" : "0";
         indicatorStr = type + "|" + indicator;
     } else if (type == "ArkDotIndicator") {
         indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
+        ParseIndicatorIconList(vm, runtimeCallInfo, indicatorIconMap);
     } else if (type == "ArkDigitIndicator") {
         indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "IndicatorComponentController") {
@@ -964,7 +1029,12 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
     } else {
         indicatorStr = "boolean|1";
     }
-    if (SystemProperties::ConfigChangePerform()) {
+    if (!indicatorIconMap.empty()) {
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicatorWithIcon(
+            nativeNode, indicatorStr.c_str(),
+            SystemProperties::ConfigChangePerform() ? static_cast<void*>(&resObjs) : nullptr,
+            static_cast<void*>(&indicatorIconMap));
+    } else if (SystemProperties::ConfigChangePerform()) {
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndicatorRaw(nativeNode, indicatorStr.c_str(),
             static_cast<void*>(&resObjs));
     } else {
