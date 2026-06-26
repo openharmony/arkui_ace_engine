@@ -764,15 +764,19 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     if (!pipelineContext) {
         return;
     }
-
     auto executor = pipelineContext->GetTaskExecutor();
     if (!executor) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(theme);
+    bool lessThanApi11 = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    RefPtr<DialogTheme> theme;
+    if (lessThanApi11) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        theme = pipeline->GetTheme<DialogTheme>();
+        CHECK_NULL_VOID(theme);
+    }
+
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
@@ -790,8 +794,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     dialogLifeCycleEvent["didDisappearId"] = pickerDialogEvent.onDidDisappear;
     dialogLifeCycleEvent["willAppearId"] = pickerDialogEvent.onWillAppear;
     dialogLifeCycleEvent["willDisappearId"] = pickerDialogEvent.onWillDisappear;
+
     DialogProperties properties;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (lessThanApi11) {
         properties.alignment = theme->GetAlignment();
     }
     if (pickerDialog.alignment.has_value()) {
@@ -820,7 +825,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     properties.distortionMode = pickerDialog.distortionMode;
     properties.edgeLightMode = pickerDialog.edgeLightMode;
     properties.customStyle = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (lessThanApi11) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
     if (pickerDialog.offset.has_value()) {

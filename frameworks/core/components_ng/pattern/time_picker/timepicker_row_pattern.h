@@ -719,6 +719,7 @@ private:
     bool OnCrownEvent(const CrownEvent& event);
 #endif
     void UpdateTitleNodeContent();
+    bool CheckOnModifyDonePrerequisites(const RefPtr<FrameNode>& host);
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -888,6 +889,7 @@ private:
     bool isInDatePickerDialog_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isWindowFullscreen_ = true;
+    bool isModifyDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

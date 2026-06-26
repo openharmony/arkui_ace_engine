@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -71,10 +72,11 @@ namespace CalendarPickerModifier {
 
 Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = CalendarPickerModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto pickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_PICKER_ETS_TAG, id, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
+    CHECK_NULL_RETURN(pickerNode, nullptr);
+    pickerNode->IncRefCount();
+    return AceType::RawPtr(pickerNode);
 }
 } // namespace CalendarPickerModifier
 namespace CalendarPickerInterfaceModifier {

@@ -506,27 +506,45 @@ void TimePickerRowPattern::SetCallBack()
     });
 }
 
+bool TimePickerRowPattern::CheckOnModifyDonePrerequisites(const RefPtr<FrameNode>& host)
+{
+    if (!host) {
+        return false;
+    }
+    auto pipeline = host->GetContext();
+    if (!pipeline) {
+        return false;
+    }
+    auto windowManager = pipeline->GetWindowManager();
+    if (!windowManager) {
+        return false;
+    }
+    isWindowFullscreen_ = (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    return true;
+}
+
 void TimePickerRowPattern::OnModifyDone()
 {
+    CHECK_EQUAL_VOID(isModifyDone_, true);
+    isModifyDone_ = true;
     Pattern::CheckLocalized();
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    if (!CheckOnModifyDonePrerequisites(host)) {
+        isModifyDone_ = false;
+        return;
+    }
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    auto windowMode = windowManager->GetWindowMode();
-    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
-
+    if (!pickerProperty) {
+        isModifyDone_ = false;
+        return;
+    }
     isForceUpdate_ = isForceUpdate_ ||
         (loop_ != pickerProperty->GetLoopValue(true)) ||
         (hour24_ != pickerProperty->GetIsUseMilitaryTimeValue(false));
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         ColumnPatternInitHapticController();
+        isModifyDone_ = false;
         return;
     }
     LimitSelectedTimeInRange();
@@ -552,6 +570,7 @@ void TimePickerRowPattern::OnModifyDone()
     }
     SetDefaultFocus();
     InitSelectorProps();
+    isModifyDone_ = false;
 }
 
 void TimePickerRowPattern::InitSelect()
