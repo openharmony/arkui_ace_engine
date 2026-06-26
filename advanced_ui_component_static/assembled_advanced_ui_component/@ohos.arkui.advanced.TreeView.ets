@@ -427,6 +427,7 @@ export class NodeInfo {
   public fontColor: ResourceColor = '';
 
   constructor(node: NodeItem, nodeParam: NodeParam) {
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.node = node;
     this.nodeParam = nodeParam;
     this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(nodeParam);
@@ -441,22 +442,22 @@ export class NodeInfo {
     this.nodeHeight = NODE_HEIGHT;
     this.nodeLeftPadding = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET; // calculate left padding
     this.nodeColor = $r('sys.color.ohos_id_color_background');
-    this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
-    this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
+    this.nodeIsShow = (node.nodeLevel > 0) ? false : true;
+    this.listItemHeight = (node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
     this.isShowTitle = true;
     this.isShowInputText = false;
     this.isSelected = false;
     this.status = {
       normal: $r('sys.color.ohos_id_color_background_transparent'),
-      hover: this.treeViewTheme.itemHoverBgColor,
-      press: this.treeViewTheme.itemPressedBgColor,
-      selected: this.treeViewTheme.itemSelectedBgColor,
+      hover: treeViewThemeTemp.itemHoverBgColor,
+      press: treeViewThemeTemp.itemPressedBgColor,
+      selected: treeViewThemeTemp.itemSelectedBgColor,
       highLight: $r('sys.color.ohos_id_color_activated')
     };
 
     this.nodeBorder = {
       borderWidth: BORDER_WIDTH_NONE,
-      borderColor: this.treeViewTheme.borderFocusedColor,
+      borderColor: treeViewThemeTemp.borderFocusedColor,
       borderRadius: $r('sys.float.ohos_id_corner_radius_clicked')
     };
     this.flagLineLeftMargin = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
@@ -5476,12 +5477,13 @@ export class MainTitleNode extends NodeBaseInfo {
 
   constructor(mainTitleName: ResourceStr) {
     super();
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.mainTitleName = mainTitleName;
     this.itemWidth = ITEM_WIDTH;
     this.itemHeight = ITEM_HEIGHT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.mainTitleSetting = {
-      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontColor: treeViewThemeTemp.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };
@@ -5559,11 +5561,12 @@ export class InputText extends NodeBaseInfo {
 
   constructor() {
     super();
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.itemWidth = ITEM_WIDTH;
     this.itemHeight = ITEM_HEIGHT_INPUT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.inputTextSetting = {
-      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontColor: treeViewThemeTemp.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };
