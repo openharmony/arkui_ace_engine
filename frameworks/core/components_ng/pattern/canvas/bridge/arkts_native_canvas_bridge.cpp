@@ -169,7 +169,12 @@ ArkUINativeModuleValue CanvasBridge::CreateCanvas(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
     // 1. Create the FrameNode + CanvasPattern (matches CanvasModel::GetInstance()->Create()).
-    GetArkUINodeModifiers()->getCanvasModifier()->createModel();
+    auto* nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto* canvasModifier = nodeModifiers->getCanvasModifier();
+    CHECK_NULL_RETURN(canvasModifier, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(canvasModifier->createModel, panda::JSValueRef::Undefined(vm));
+    canvasModifier->createModel();
     auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
@@ -231,7 +236,10 @@ ArkUINativeModuleValue CanvasBridge::SetCanvasOnReady(ArkUIRuntimeCallInfo* runt
                                       : ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
-        GetArkUINodeModifiers()->getCanvasModifier()->resetCanvasOnReady(nativeNode);
+        auto* nms = GetArkUINodeModifiers();
+        if (nms && nms->getCanvasModifier()) {
+            nms->getCanvasModifier()->resetCanvasOnReady(nativeNode);
+        }
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);

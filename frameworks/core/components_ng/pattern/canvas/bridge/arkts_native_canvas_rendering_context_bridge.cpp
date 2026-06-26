@@ -34,6 +34,14 @@
 
 namespace OHOS::Ace::NG {
 
+// TODO: Unify drawing method dispatch — some methods use modifier->setCanvasXxx()
+// (BeginPath, MoveTo, LineTo, Arc, Fill, Stroke, FillRect, FillText, LineWidth,
+// GlobalAlpha, AntiAlias, FillStyle, StrokeStyle) while others call pattern->Xxx()
+// directly (BezierCurveTo, ArcTo, Ellipse, Rect, RoundRect, etc.). After Bug-2
+// removed VP→PX from the modifier, the modifier functions are thin wrappers
+// around CanvasPattern. Consider removing the modifier indirection for
+// drawing calls and calling pattern->Xxx() uniformly.
+
 namespace {
 
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
@@ -385,7 +393,6 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Rect(ArkUIRuntimeCallInfo
     double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
     double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
     double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    LOGI("[canvas-module] bridgeRect");
     pattern->AddRect(OHOS::Ace::Rect(x, y, w, h));
     return panda::JSValueRef::Undefined(vm);
 }
