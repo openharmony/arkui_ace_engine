@@ -1446,14 +1446,14 @@ void SubwindowManager::HideSubWindowNG()
     }
 }
 
-void SubwindowManager::HideToastSubWindowNG(int32_t instanceId)
+void SubwindowManager::HideSubWindowNG(int32_t instanceId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide toast subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide subwindow enter");
     RefPtr<Subwindow> subwindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId);
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide toast subwindow, subwindow is null.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide subwindow, subwindow is null.");
     }
 }
 
