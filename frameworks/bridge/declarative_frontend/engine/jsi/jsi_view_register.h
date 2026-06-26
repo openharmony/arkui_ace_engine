@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported = false);
+void JsUnbindViews();
 void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList,
     void* nativeEngine, bool isReload = false);
 void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull = false);

@@ -1068,4 +1068,11 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSMock::JSBind(globalObj);
 }
 
+void JsUnbindViews()
+{
+#ifdef CROSS_PLATFORM
+    JsiClassBase::UnDeclareAll();
+#endif
+}
+
 } // namespace OHOS::Ace::Framework

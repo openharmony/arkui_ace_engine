@@ -973,6 +973,23 @@ void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
     IFunctionBinding::functions.erase(env);
 }
 
+void JsiDeclarativeEngineInstance::UnloadAceModule()
+{
+#ifdef CROSS_PLATFORM
+    JsUnbindViews();
+    JsiDeclarativeEngine::UnloadAceModule();
+    isModulePreloaded_ = false;
+    isModuleInitialized_ = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+    }
+    localRuntime_ = nullptr;
+    cardRuntime_ = nullptr;
+    g_declarativeRuntime = nullptr;
+#endif
+}
+
 void JsiDeclarativeEngineInstance::InitConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitConsoleModule");
@@ -3194,6 +3211,21 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
 void JsiDeclarativeEngine::ResetNamedRouterRegisterMap()
 {
     namedRouterRegisterMap_.clear();
+}
+
+void JsiDeclarativeEngine::UnloadAceModule()
+{
+#ifdef CROSS_PLATFORM
+    namedRouterRegisterMap_.clear();
+    emptyNamedRouterRegisterMap_.clear();
+    routerPathInfoMap_.clear();
+    for (auto& [name, builder] : builderMap_) {
+        builder.FreeGlobalHandleAddr();
+    }
+    builderMap_.clear();
+    obj_.FreeGlobalHandleAddr();
+    obj_.Empty();
+#endif
 }
 
 std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)

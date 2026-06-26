@@ -98,6 +98,7 @@ public:
     static void PreloadAceModuleForCustomRuntime(void* runtime);
     static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
+    static void UnloadAceModule();
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     static void PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime);
 #endif
@@ -551,6 +552,8 @@ public:
 
     // crossPlatform Clears the 'namedRouterRegisterMap_'
     static void ResetNamedRouterRegisterMap();
+
+    static void UnloadAceModule();
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
