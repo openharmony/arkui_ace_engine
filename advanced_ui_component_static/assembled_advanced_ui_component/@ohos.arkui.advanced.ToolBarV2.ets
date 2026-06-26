@@ -17,7 +17,7 @@ import {
   Resource, ResourceStr, GestureModifier, UIGestureEvent, LongPressGestureHandler, ResourceColor, AttributeModifier,
   ColumnAttribute, Builder, Button, ButtonType, Column, SymbolGlyph, Text, FontWeight, TextOverflow, TextAlign,
   FlexAlign, Placement, Color, SymbolEffect, Image, ImageFit, PX, FP, LPX, VP, GeometryInfo, Measurable, SizeResult,
-  ConstraintSizeOptions, MeasureResult, Divider, Row, ForEach, BlurStyle, ColorMetrics, ShadowStyle, $r,
+  ConstraintSizeOptions, MeasureResult, Divider, Row, ForEach, BlurStyle, ShadowStyle, $r,
   LocalizedPadding, Margin, Padding, ButtonOptions, ClickEvent, CommonMethod, MenuElement,
   ComponentV2, CustomLayout, MenuOptions, Position, Layoutable
 } from '@ohos.arkui.component'
