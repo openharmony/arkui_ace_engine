@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
@@ -2763,6 +2764,10 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
+    if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+        ButtonModelStatic::BackgroundColor(frameNode, colorValue);
+        return;
+    }
     if (!colorValue) {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
