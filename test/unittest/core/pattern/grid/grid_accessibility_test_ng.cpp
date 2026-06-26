@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
@@ -263,5 +264,223 @@ HWTEST_F(GridAccessibilityTestNg, UnScrollableGrid003, TestSize.Level1)
     accessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> expectedActions = {};
     EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
+}
+
+/**
+ * @tc.name: GridA11ySourceUserSwipe001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="user" for USER entry (swipe gesture) in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceUserSwipe001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Perform drag action (SCROLL_FROM_UPDATE) to trigger user scroll.
+     * @tc.expected: SCROLL_END event with scrollSource="user" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    DragAction(frameNode_, Offset(0, HEIGHT / 2), -ITEM_MAIN_SIZE, 0);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "user");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceApiFling001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for Fling API in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceApiFling001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger Fling to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    Fling(1000.0);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceApiAnimateTo001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth AnimateTo API in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceApiAnimateTo001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth AnimateTo to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, nullptr, true);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceApiScrollToIndex001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth ScrollToIndex API in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceApiScrollToIndex001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth ScrollToIndex to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    ScrollToIndex(10, true, ScrollAlign::CENTER);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceApiScrollToEdge001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth ScrollToEdge API in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceApiScrollToEdge001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth ScrollToEdge to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY);
+    int32_t offsetTime = OFFSET_TIME;
+    for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME;
+        FlushUITasks(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceApiScrollPage001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth ScrollPage API in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceApiScrollPage001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth ScrollPage to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    ScrollPage(false, true);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceAccessibilityForward001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="accessibility" for
+ *           accessibility PerformAction ScrollForward in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceAccessibilityForward001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger ActActionScrollForward.
+     * @tc.expected: SCROLL_END event with scrollSource="accessibility" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    accessibilityProperty_->ActActionScrollForward();
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: GridA11ySourceAccessibilityBackward001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="accessibility" for
+ *           accessibility PerformAction ScrollBackward in Grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAccessibilityTestNg, GridA11ySourceAccessibilityBackward001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(20);
+    CreateDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger ActActionScrollBackward.
+     * @tc.expected: SCROLL_END event with scrollSource="accessibility" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    accessibilityProperty_->ActActionScrollBackward();
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
 }
 } // namespace OHOS::Ace::NG

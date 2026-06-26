@@ -206,8 +206,8 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
     SetAccessibilityFocusScroll(false);
-    if (scrollStop_) {
-        // Reset accessibilityScrollSource_ when scrolling stops or a single-frame jump layout completes
+    if (!IsScrolling()) {
+        // Reset accessibilityScrollSource_ when scrolling is not in progress
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();

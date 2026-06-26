@@ -225,4 +225,13 @@ void ScrollableUtilsTestNG::AnimateToIndexWithTicks(
     ScrollToIndex(index, true, align, extraOffset);
     TickToFinish();
 }
+
+std::shared_ptr<AccessibilityEvent> ScrollableUtilsTestNG::CaptureSendAccessibilityEventInfo(
+    const RefPtr<MockPipelineContext>& pipeline)
+{
+    auto event = std::make_shared<AccessibilityEvent>();
+    EXPECT_CALL(*pipeline, SendEventToAccessibility(_))
+        .WillRepeatedly(testing::SaveArg<0>(event.get()));
+    return event;
+}
 } // namespace OHOS::Ace::NG

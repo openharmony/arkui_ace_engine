@@ -477,8 +477,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
-    if (scrollStop_) {
-        // Reset accessibilityScrollSource_ when scrolling stops or a single-frame jump layout completes
+    if (!IsScrolling()) {
+        // Reset accessibilityScrollSource_ when scrolling is not in progress
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     }
     MarkSelectedItems();

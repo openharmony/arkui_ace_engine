@@ -910,6 +910,11 @@ public:
         return scrollable->GetNestedScrolling();
     }
 
+    void SetIsScrolling(bool isScrolling)
+    {
+        isScrolling_ = isScrolling;
+    }
+
     bool IsScrolling() const
     {
         return isScrolling_;
