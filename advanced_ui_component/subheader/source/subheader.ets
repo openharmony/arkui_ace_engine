@@ -139,8 +139,8 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
-  .wordBreak(WordBreak.HYPHENATION)
   .orphanCharOptimization(true)
+  .punctuationOverflow(true)
 }
 
 @Extend(Text)
@@ -152,8 +152,8 @@ function primaryTitleStyles(fontStyle: FontStyle) {
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
-  .wordBreak(WordBreak.HYPHENATION)
   .orphanCharOptimization(true)
+  .punctuationOverflow(true)
 }
 
 @Styles
