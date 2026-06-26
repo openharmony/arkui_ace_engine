@@ -356,6 +356,16 @@ public:
         return uiMaterialType_;
     }
 
+    void SetIsSystemApp(bool isSystemApp)
+    {
+        isSystemApp_ = isSystemApp;
+    }
+
+    bool IsSystemApp() const
+    {
+        return isSystemApp_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -399,6 +409,7 @@ protected:
     std::string uiMaterialState_;
     std::string uiMaterialType_;
     TextMenuInfo textMenuInfo_;
+    bool isSystemApp_ = false;
 };
 
 } // namespace OHOS::Ace
