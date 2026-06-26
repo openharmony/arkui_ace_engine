@@ -4348,21 +4348,23 @@ void TextFieldPattern::HandleCountStyle()
     if (!noDeleteOperation) {
         return;
     }
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (IsUnderlineMode()) {
+    if (IsUnderlineMode() && !IsShowCount()) {
+        auto theme = GetTheme();
+        CHECK_NULL_VOID(theme);
         if (showCountBorderStyle_) {
-            auto theme = GetTheme();
-            CHECK_NULL_VOID(theme);
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
             SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
         } else if (!IsShowError()) {
-            ApplyUnderlineTheme();
+            underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
+            SetUnderlineColor(HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
+                : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor()));
         }
     }
     if (!IsShowCount()) {
         return;
     }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     if (inputValue == DEFAULT_MODE) {
