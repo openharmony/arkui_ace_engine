@@ -27,6 +27,7 @@
 #include "base/utils/macros.h"
 
 #include "param_config.h"
+#include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
 #include "ui_session_json_util.h"
 #include "ui_translate_manager.h"
@@ -58,6 +59,7 @@ public:
         std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
 
     using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
+    using GetAbilityLanguageInfoFunction = std::function<int32_t(std::string&, std::string&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -202,7 +204,26 @@ public:
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void EraseProcessId(const std::string& key, int32_t targetPid) {};
+    virtual void MarkPageTranslateOwner(int32_t processId) {};
+    virtual void OnPageTranslateResultHandled(int32_t processId) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
+    virtual int32_t GetPageTranslateText(const std::string& request)
+    {
+        return FAILED;
+    };
+    virtual int32_t StartPageTranslate(const std::string& request)
+    {
+        return FAILED;
+    };
+    virtual void EndPageTranslate() {};
+    virtual void ResetPageTranslate(int32_t nodeId = -1) {};
+    virtual void SendPageTranslateResult(const std::string& result) {};
+    virtual void SendPageTextToAI(int32_t nodeId, const std::string& text, int64_t version) {};
+    virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+    {
+        return FAILED;
+    };
+    virtual void SaveGetCurrentAbilityLanguageInfoFunction(GetAbilityLanguageInfoFunction&& callback) {};
     virtual void GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, bool onlyVisible = false) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
@@ -312,6 +333,8 @@ protected:
     std::mutex stopContentChangeDetectCallbackMutex_;
     GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
     std::mutex getWebInfoByRequestCallbackMutex_;
+    GetAbilityLanguageInfoFunction getAbilityLanguageInfoCallback_;
+    std::mutex getAbilityLanguageInfoCallbackMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
 };
 } // namespace OHOS::Ace
