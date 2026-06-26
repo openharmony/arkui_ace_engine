@@ -426,6 +426,9 @@ private:
     void UpdateDragPointNode();
     void UpdateBlurCoverNode();
     void UpdateSelectedTrackFrameNode(float centerX, float centerY);
+    void UpdateParticleFrameNode(float centerX, float centerY);
+    void UpdateParticleFrameOffset(Axis direction, bool reverse);
+    void UpdateEmitterProperties(float centerX, float centerY, Axis direction, bool reverse);
     void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius, bool isRealPosition);
     void UpdateMaterialFrameNode(
         const RefPtr<FrameNode>& frameNode, float newSize, float posX, float posY, float borderRadiusValue);
@@ -450,7 +453,7 @@ private:
     void RestoreDeformAnimation();
     void ScheduleDeformRestore();
     std::list<NG::ParticleOption> CreateParticleOptions(
-        float emitterLength, float trackThickness, const Color& blockColor, Axis direction);
+        float emitterWidth, float emitterHeight, Axis direction, float blockCenterPx, bool reverse);
     void StopParticleEffect();
 
     std::optional<SliderMakeCallback> makeFunc_;

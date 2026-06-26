@@ -1451,6 +1451,8 @@
       "OHOS::Ace::NG::ImagePainter::DrawImage(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::SizeT<float> const&) const";
       "OHOS::Ace::NG::ImagePattern::ImagePattern()";
       "OHOS::Ace::NG::ParticlePattern::ParticlePattern(unsigned int)";
+      "OHOS::Ace::NG::ParticlePattern::UpdateVelocityFields(std::__h::vector<OHOS::Ace::ParticleVelocityField, std::__h::allocator<OHOS::Ace::ParticleVelocityField>> const&)";
+      "OHOS::Ace::NG::ParticlePattern::updateEmitterPosition(std::__h::vector<OHOS::Ace::EmitterProperty, std::__h::allocator<OHOS::Ace::EmitterProperty>>&)";
       "OHOS::Ace::NG::ImageSpanItem::SetImageSpanOptions(OHOS::Ace::ImageSpanOptions const&)";
       "OHOS::Ace::NG::ImageSpanItem::UpdateLpxUnitFlag()";
       "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
