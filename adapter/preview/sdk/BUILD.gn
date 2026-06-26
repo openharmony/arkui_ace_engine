@@ -222,6 +222,8 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkrefresh",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextpicker",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkselect",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgrid",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgriditem",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -280,6 +282,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arklazygridlayout.abc",
       "${out_path}/arkui/ace_engine/arkrefresh.abc",
       "${out_path}/arkui/ace_engine/arkselect.abc",
+      "${out_path}/arkui/ace_engine/arkgrid.abc",
+      "${out_path}/arkui/ace_engine/arkgriditem.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [

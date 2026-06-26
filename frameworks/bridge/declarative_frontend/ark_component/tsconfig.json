@@ -12,7 +12,6 @@
         "src/ArkFlex.ts",
         "src/ArkGridRow.ts",
         "src/ArkScrollable.ts",
-        "src/ArkGrid.ts",
         "src/ArkGridCol.ts",
         "src/ArkImage.ts",
         "src/ArkRow.ts",

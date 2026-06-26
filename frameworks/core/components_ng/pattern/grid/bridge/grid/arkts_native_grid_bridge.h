@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_GRID_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_GRID_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_BRIDGE_GRID_ARKTS_NATIVE_GRID_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_BRIDGE_GRID_ARKTS_NATIVE_GRID_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class GridBridge {
 public:
+    static void RegisterGridAttributes(Local<ObjectRef> object, EcmaVM* vm);
+    static ArkUINativeModuleValue CreateGrid(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue PopGrid(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetRowsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -49,8 +52,12 @@ public:
     static ArkUINativeModuleValue ResetCellLength(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetLayoutDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetLayoutDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetDragAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSupportAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -86,7 +93,17 @@ public:
     static ArkUINativeModuleValue SetSupportLazyLoadingEmptyBranch(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnReachEnd(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnScrollStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnScrollFrameBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue WillUseProxy(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetJSScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetJSScrollBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetJSEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_GRID_BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_BRIDGE_GRID_ARKTS_NATIVE_GRID_BRIDGE_H

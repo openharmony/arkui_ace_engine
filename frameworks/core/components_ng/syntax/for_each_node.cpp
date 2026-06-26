@@ -16,8 +16,8 @@
 #include "core/components_ng/syntax/for_each_node.h"
 
 #include "base/log/dump_log.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -343,9 +343,9 @@ void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = childNode->GetPattern<GridItemPattern>();
+        auto pattern = NodeModifier::GetGridItemCustomModifier();
         CHECK_NULL_VOID(pattern);
-        pattern->InitDragManager(AceType::Claim(this));
+        pattern->initDragManager(childNode, AceType::Claim(this));
     }
 }
 
@@ -381,14 +381,14 @@ void ForEachNode::InitAllChildrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = childNode->GetPattern<GridItemPattern>();
+            auto pattern = NodeModifier::GetGridItemCustomModifier();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->InitDragManager(AceType::Claim(this));
+                pattern->initDragManager(childNode, AceType::Claim(this));
             } else {
-                pattern->DeInitDragManager();
+                pattern->deInitDragManager(childNode);
             }
         }
     }

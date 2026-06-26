@@ -56,6 +56,7 @@ component_modules = [
   "refresh",
   "text_picker",
   "select",
+  "grid",
 ]
 
 if (!ace_engine_feature_wearable) {

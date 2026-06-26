@@ -94,6 +94,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
+        { "Grid", "grid" },
+        { "GridItem", "grid" },
         { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },

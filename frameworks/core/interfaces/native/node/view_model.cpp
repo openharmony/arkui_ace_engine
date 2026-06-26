@@ -23,6 +23,8 @@
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
+#include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -86,8 +88,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
@@ -498,10 +498,9 @@ void* createRelativeContainerNode(ArkUI_Int32 nodeId)
 }
 void* createGridNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetGridModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createTabsNode(ArkUI_Int32 nodeId)
@@ -513,10 +512,9 @@ void* createTabsNode(ArkUI_Int32 nodeId)
 
 void* createGridItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridItemModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetGridItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createBlankNode(ArkUI_Int32 nodeId)

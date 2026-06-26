@@ -32,7 +32,7 @@ using OnGridDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using OnGridDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
 using OnGridDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 
-class ACE_EXPORT GridLayoutComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT GridLayoutComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridLayoutComponent, ComponentGroup);
 
 public:
@@ -50,25 +50,25 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void SetDirection(FlexDirection direction);
+    ACE_FORCE_EXPORT void SetDirection(FlexDirection direction);
     void SetFlexAlign(FlexAlign flexAlign);
     void SetColumnCount(int32_t count);
     void SetRowCount(int32_t count);
     void SetWidth(double width);
     void SetHeight(double height);
-    void SetColumnsArgs(const std::string& columnsArgs);
-    void SetRowsArgs(const std::string& rowsArgs);
-    void SetColumnGap(const Dimension& columnGap);
-    void SetRowGap(const Dimension& rowGap);
-    void SetRightToLeft(bool rightToLeft);
+    ACE_FORCE_EXPORT void SetColumnsArgs(const std::string& columnsArgs);
+    ACE_FORCE_EXPORT void SetRowsArgs(const std::string& rowsArgs);
+    ACE_FORCE_EXPORT void SetColumnGap(const Dimension& columnGap);
+    ACE_FORCE_EXPORT void SetRowGap(const Dimension& rowGap);
+    ACE_FORCE_EXPORT void SetRightToLeft(bool rightToLeft);
 
     // set scroll bar color
-    void SetScrollBarColor(const std::string& color);
+    ACE_FORCE_EXPORT void SetScrollBarColor(const std::string& color);
 
     // set scroll bar width
-    void SetScrollBarWidth(const std::string& width);
+    ACE_FORCE_EXPORT void SetScrollBarWidth(const std::string& width);
 
-    void SetScrollBar(DisplayMode displayMode);
+    ACE_FORCE_EXPORT void SetScrollBar(DisplayMode displayMode);
 
     const std::string& GetColumnsArgs() const
     {
@@ -282,11 +282,11 @@ public:
     void SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId);
     void SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId);
     void SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId);
-    void SetOnGridDragStartId(const OnGridDragStartFunc& onGridDragStartId);
-    void SetOnGridDropId(const OnGridDropFunc& onGridDropId);
-    const OnGridDragEnterFunc& GetOnGridDragEnterId() const;
-    const OnGridDragMoveFunc& GetOnGridDragMoveId() const;
-    const OnGridDragLeaveFunc& GetOnGridDragLeaveId() const;
+    ACE_FORCE_EXPORT void SetOnGridDragStartId(const OnGridDragStartFunc& onGridDragStartId);
+    ACE_FORCE_EXPORT void SetOnGridDropId(const OnGridDropFunc& onGridDropId);
+    ACE_FORCE_EXPORT const OnGridDragEnterFunc& GetOnGridDragEnterId() const;
+    ACE_FORCE_EXPORT const OnGridDragMoveFunc& GetOnGridDragMoveId() const;
+    ACE_FORCE_EXPORT const OnGridDragLeaveFunc& GetOnGridDragLeaveId() const;
     const OnGridDragStartFunc& GetOnGridDragStartId() const;
     const OnGridDropFunc& GetOnGridDropId() const;
 

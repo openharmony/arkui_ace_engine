@@ -261,7 +261,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark
 }
 
 template<>
-void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
 {
     switch (src) {
         case ARK_FOCUS_WRAP_MODE_DEFAULT: dst = FocusWrapMode::DEFAULT; break;
@@ -601,7 +601,7 @@ void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src)
 }
 
 template<>
-void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 {
     switch (src) {
         case ARK_GRID_DIRECTION_ROW: dst = FlexDirection::ROW; break;
@@ -728,7 +728,7 @@ void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& 
 }
 
 template<>
-void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 {
     switch (src) {
         case ARK_EDGE_EFFECT_SPRING: dst = EdgeEffect::SPRING; break;
@@ -1061,7 +1061,7 @@ void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& 
 }
 
 template<>
-void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
 {
     switch (src) {
         case ARK_NESTED_SCROLL_MODE_SELF_ONLY: dst = NestedScrollMode::SELF_ONLY; break;

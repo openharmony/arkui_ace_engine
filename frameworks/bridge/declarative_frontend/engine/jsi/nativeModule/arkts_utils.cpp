@@ -4926,7 +4926,9 @@ std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, A
     return result;
 }
 
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<bool>(const EcmaVM* vm, bool);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<float>(const EcmaVM* vm, float);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<std::u16string>(
     const EcmaVM* vm, std::u16string);
@@ -6326,4 +6328,31 @@ void ArkTSUtils::ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM*
     }
 }
 #endif
+
+Local<ObjectRef> ArkTSUtils::CreateItemDragInfo(const EcmaVM* vm, const ItemDragInfo& info)
+{
+    Local<ObjectRef> dragInfoObj = ObjectRef::New(vm);
+    auto xRef = StringRef::NewFromUtf8(vm, "x");
+    dragInfoObj->Set(vm, xRef, ToJsValueWithVM(vm, PipelineBase::Px2VpWithCurrentDensity(info.GetX())));
+
+    auto yRef = StringRef::NewFromUtf8(vm, "y");
+    dragInfoObj->Set(vm, yRef, ToJsValueWithVM(vm, PipelineBase::Px2VpWithCurrentDensity(info.GetY())));
+
+    return dragInfoObj;
+}
+
+bool ArkTSUtils::SetJSWidth(const Local<JSValueRef>& jsValue)
+{
+    return JSViewAbstract::JsWidth(JSRef<JSVal>::Make(jsValue));
+}
+
+bool ArkTSUtils::SetJSHeight(const Local<JSValueRef>& jsValue)
+{
+    return JSViewAbstract::JsHeight(JSRef<JSVal>::Make(jsValue));
+}
+
+void ArkTSUtils::SetJsBindContextMenu(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    JSViewAbstract::JsBindContextMenu(Framework::JSCallbackInfo(runtimeCallInfo));
+}
 } // namespace OHOS::Ace::NG

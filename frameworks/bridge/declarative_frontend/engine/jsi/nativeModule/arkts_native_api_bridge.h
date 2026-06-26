@@ -75,14 +75,12 @@ private:
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

@@ -35,7 +35,7 @@ public:
     static bool CheckOnUIThread();
     static bool CheckNodeOnValidThread(NG::UINode* node);
     static void SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope);
-    static bool IsThreadSafeNodeScope();
+    ACE_FORCE_EXPORT static bool IsThreadSafeNodeScope();
     static bool IsParallelScope();
     static void SetNeedMarkNodeTreeFree(bool isNeedMarkNodeTreeFree);
     static bool IsNeedMarkNodeTreeFree();

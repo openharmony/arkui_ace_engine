@@ -36,16 +36,39 @@ namespace OHOS::Ace::NG {
 
 #define SCROLLABLE_GRID_ATTRIBUTE "Scrollable.GridAttribute."
 namespace {
-    constexpr Dimension DEFAULT_SCROLL_BAR_WIDTH = 4.0_vp;
-    constexpr Color DEFAULT_SCROLL_BAR_COLOR = Color(0x66182431);
-}
+constexpr Dimension DEFAULT_SCROLL_BAR_WIDTH = 4.0_vp;
+constexpr Color DEFAULT_SCROLL_BAR_COLOR = Color(0x66182431);
+const char GRID_ETS_TAG[] = "Grid";
+} // namespace
 void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GRID_ETS_TAG, nodeId);
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+        FrameNode::GetOrCreateFrameNode(GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+    stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (positionController) {
+        auto controller = AceType::DynamicCast<ScrollableController>(positionController);
+        pattern->SetPositionController(controller);
+    }
+    if (scrollProxy) {
+        auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(scrollProxy);
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
+}
+
+void GridModelNG::CreateGrid(
+    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GRID_ETS_TAG, nodeId);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
@@ -84,11 +107,16 @@ RefPtr<ScrollProxy> GridModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
 RefPtr<FrameNode> GridModelNG::CreateGrid(int32_t nodeId)
 {
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+        FrameNode::GetOrCreateFrameNode(GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
     return frameNode;
 }
 
 void GridModelNG::Pop()
+{
+    NG::ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+void GridModelNG::PopStatic()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
@@ -146,6 +174,11 @@ void GridModelNG::SetGridHeight(const Dimension& value)
     ViewAbstract::SetHeight(NG::CalcLength(value));
 }
 
+void GridModelNG::SetGridHeight(FrameNode* frameNode, const Dimension& value)
+{
+    ViewAbstract::SetHeight(frameNode, NG::CalcLength(value));
+}
+
 void GridModelNG::SetScrollBarMode(DisplayMode value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
@@ -167,6 +200,13 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
     auto scrollBarWidth = StringUtils::StringToDimensionWithUnit(value);
     ACE_CHECK_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth);
+}
+
+void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
+{
+    auto scrollBarWidth = StringUtils::StringToDimensionWithUnit(value);
+    ACE_CHECK_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth, frameNode);
 }
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
@@ -192,6 +232,11 @@ void GridModelNG::SetEditable(bool value)
 void GridModelNG::SetIsRTL(TextDirection direction)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, direction);
+}
+
+void GridModelNG::SetIsRTL(FrameNode* frameNode, TextDirection direction)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, direction, frameNode);
 }
 
 void GridModelNG::SetLayoutDirection(FlexDirection value)
@@ -234,6 +279,8 @@ void GridModelNG::SetSupportAnimation(bool value)
 }
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
+
+void GridModelNG::SetSupportDragAnimation(FrameNode* frameNode, bool value) {}
 
 void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
@@ -308,6 +355,14 @@ GridItemAlignment GridModelNG::GetAlignItems(FrameNode* frameNode)
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollToIndex(std::move(value));
+}
+
+void GridModelNG::SetOnScrollToIndex(FrameNode* frameNode, ScrollToIndexFunc&& value)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -460,8 +515,8 @@ void GridModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 
 RefPtr<FrameNode> GridModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
 
     return frameNode;
 }
@@ -790,9 +845,27 @@ RefPtr<ScrollProxy> GridModelNG::CreateScrollBarProxy()
     return AceType::MakeRefPtr<NG::ScrollBarProxy>();
 }
 
+RefPtr<ScrollControllerBase> GridModelNG::CreatePositionControllerStatic()
+{
+    return AceType::MakeRefPtr<ScrollableController>();
+}
+
+RefPtr<ScrollProxy> GridModelNG::CreateScrollBarProxyStatic()
+{
+    return AceType::MakeRefPtr<NG::ScrollBarProxy>();
+}
+
 DisplayMode GridModelNG::GetDisplayMode() const
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, DisplayMode::AUTO);
+    return pattern->GetDefaultScrollBarDisplayMode();
+}
+
+DisplayMode GridModelNG::GetDisplayMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DisplayMode::AUTO);
+    auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, DisplayMode::AUTO);
     return pattern->GetDefaultScrollBarDisplayMode();
 }

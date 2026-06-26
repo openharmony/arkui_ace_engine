@@ -1168,7 +1168,7 @@ float Convert(const Ark_Float32& src)
 }
 
 template<>
-int Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT int Convert(const Ark_Float64& src)
 {
     return static_cast<int>(src);
 }
@@ -3356,7 +3356,7 @@ ACE_FORCE_EXPORT void AssignTo(std::optional<BorderColorProperty> &dst, const Ar
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 {
     PreviewBadge ret;
     ret.mode = from ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
@@ -3364,7 +3364,7 @@ void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
 {
     PreviewBadge ret;
     if (from >= 0) {

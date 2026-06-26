@@ -662,6 +662,34 @@ if (globalThis.ImageAnimator === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Grid === undefined) {
+  globalThis.Grid = {
+    create: function(scroller, options) {
+      getUINativeModule().loadNativeModule('Grid');
+      let module = globalThis.requireNapi('arkui.components.arkgrid');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().grid.create(scroller, options);
+    },
+    name: 'Grid'
+  }
+}
+
+// @ts-ignore
+if (globalThis.GridItem === undefined) {
+  globalThis.GridItem = {
+    create: function(func, isLazy, style) {
+      getUINativeModule().loadNativeModule('GridItem');
+      let module = globalThis.requireNapi('arkui.components.arkgriditem');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().gridItem.create(func, isLazy, style);
+    },
+    name: 'GridItem'
+  }
+}
+
+// @ts-ignore
 if (globalThis.DatePicker === undefined) {
   globalThis.DatePicker = {
     create: function(params) {

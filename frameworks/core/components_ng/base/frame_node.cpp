@@ -8933,7 +8933,8 @@ template RefPtr<DatePickerColumnAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
 template RefPtr<DialogAccessibilityProperty> FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
 template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;

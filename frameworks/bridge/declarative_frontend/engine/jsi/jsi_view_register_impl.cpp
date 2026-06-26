@@ -63,10 +63,8 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -524,8 +522,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "Grid", JSGrid::JSBind },
-    { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },

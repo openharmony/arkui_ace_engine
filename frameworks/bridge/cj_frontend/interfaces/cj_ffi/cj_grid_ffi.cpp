@@ -21,6 +21,7 @@
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_v2/grid/grid_event.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -37,13 +38,26 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 }
 
+NG::GridModelNG* GetGridModel()
+{
+    static NG::GridModelNG* cachedModel = nullptr;
+    if (!cachedModel) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Grid");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find Grid dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::GridModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+
 extern "C" {
 void FfiOHOSAceFrameworkGridCreate()
 {
     RefPtr<ScrollControllerBase> positionController;
     RefPtr<ScrollProxy> scrollBarProxy;
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->Create(positionController, scrollBarProxy);
+    if (GetGridModel()) {
+        GetGridModel()->Create(positionController, scrollBarProxy);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -60,22 +74,22 @@ void FfiOHOSAceFrameworkGridCreateScroller(int64_t scrollerID)
     RefPtr<ScrollProxy> scrollBarProxy;
     // Init scroll bar proxy.
     scrollBarProxy = scroller->GetScrollBarProxy();
-    if (GridModel::GetInstance()) {
+    if (GetGridModel()) {
         if (!scrollBarProxy) {
-            scrollBarProxy = GridModel::GetInstance()->CreateScrollBarProxy();
+            scrollBarProxy = GetGridModel()->CreateScrollBarProxy();
             scroller->SetScrollBarProxy(scrollBarProxy);
         }
         RefPtr<ScrollControllerBase> positionController;
-        positionController = GridModel::GetInstance()->CreatePositionController();
+        positionController = GetGridModel()->CreatePositionController();
         scroller->SetController(positionController);
-        GridModel::GetInstance()->Create(positionController, scrollBarProxy);
+        GetGridModel()->Create(positionController, scrollBarProxy);
     }
 }
 
 void FfiOHOSAceFrameworkGridSetCachedCount(int32_t cachedCount)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetCachedCount(cachedCount);
+    if (GetGridModel()) {
+        GetGridModel()->SetCachedCount(cachedCount);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -84,8 +98,8 @@ void FfiOHOSAceFrameworkGridSetCachedCount(int32_t cachedCount)
 
 void FfiOHOSAceFrameworkGridColumnsTemplate(const char* value)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetColumnsTemplate(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetColumnsTemplate(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -94,8 +108,8 @@ void FfiOHOSAceFrameworkGridColumnsTemplate(const char* value)
 
 void FfiOHOSAceFrameworkGridRowsTemplate(const char* value)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetRowsTemplate(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetRowsTemplate(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -107,8 +121,8 @@ void FfiOHOSAceFrameworkGridColumnsGapWithString(const char* value)
     Dimension valueFFI;
     // use default 'DimensionUnit::VP', 'vp' -> the value varies with pixel density of device.
     valueFFI = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetColumnsGap(valueFFI);
+    if (GetGridModel()) {
+        GetGridModel()->SetColumnsGap(valueFFI);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -118,8 +132,8 @@ void FfiOHOSAceFrameworkGridColumnsGapWithString(const char* value)
 void FfiOHOSAceFrameworkGridColumnsGapWithNum(int32_t value)
 {
     Dimension valueFFI = Dimension(value, DimensionUnit::VP);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetColumnsGap(valueFFI);
+    if (GetGridModel()) {
+        GetGridModel()->SetColumnsGap(valueFFI);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -131,8 +145,8 @@ void FfiOHOSAceFrameworkGridRowsGapWithString(const char* value)
     Dimension valueFFI;
     // use default 'VP', 'vp' -> the value varies with pixel density of device.
     valueFFI = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetRowsGap(valueFFI);
+    if (GetGridModel()) {
+        GetGridModel()->SetRowsGap(valueFFI);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -142,8 +156,8 @@ void FfiOHOSAceFrameworkGridRowsGapWithString(const char* value)
 void FfiOHOSAceFrameworkGridRowsGapWithNum(int32_t value)
 {
     Dimension valueFFI = Dimension(value, DimensionUnit::VP);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetRowsGap(valueFFI);
+    if (GetGridModel()) {
+        GetGridModel()->SetRowsGap(valueFFI);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -153,8 +167,8 @@ void FfiOHOSAceFrameworkGridRowsGapWithNum(int32_t value)
 void FfiOHOSAceFrameworkGridScrollBar(int32_t value)
 {
     auto displayMode = static_cast<DisplayMode>(value);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetScrollBarMode(displayMode);
+    if (GetGridModel()) {
+        GetGridModel()->SetScrollBarMode(displayMode);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -163,8 +177,8 @@ void FfiOHOSAceFrameworkGridScrollBar(int32_t value)
 
 void FfiOHOSAceFrameworkGridScrollBarColor(uint32_t color)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetScrollBarColor(Color(color).ColorToString());
+    if (GetGridModel()) {
+        GetGridModel()->SetScrollBarColor(Color(color).ColorToString());
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -178,8 +192,8 @@ void FfiOHOSAceFrameworkGridScrollBarWidth(double value, int32_t valueUnit)
     if (scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         return;
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
+    if (GetGridModel()) {
+        GetGridModel()->SetScrollBarWidth(scrollBarWidth.ToString());
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -191,8 +205,8 @@ void FfiOHOSAceFrameworkGridCachedCount(int32_t cacheCount, bool show)
     if (cacheCount < 0) {
         cacheCount = 1;
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetCachedCount(cacheCount, show);
+    if (GetGridModel()) {
+        GetGridModel()->SetCachedCount(cacheCount, show);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -201,8 +215,8 @@ void FfiOHOSAceFrameworkGridCachedCount(int32_t cacheCount, bool show)
 
 void FfiOHOSAceFrameworkGridEditMode(bool isEditMode)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetEditable(isEditMode);
+    if (GetGridModel()) {
+        GetGridModel()->SetEditable(isEditMode);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -214,8 +228,8 @@ void FfiOHOSAceFrameworkGridLayoutDirection(int32_t value)
     if (value < 0 || value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         return;
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetLayoutDirection(LAYOUT_DIRECTION[value]);
+    if (GetGridModel()) {
+        GetGridModel()->SetLayoutDirection(LAYOUT_DIRECTION[value]);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -227,8 +241,8 @@ void FfiOHOSAceFrameworkGridMaxCount(int32_t value)
     if (value < 1) {
         value = Infinity<int32_t>();
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetMaxCount(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetMaxCount(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -240,8 +254,8 @@ void FfiOHOSAceFrameworkGridMinCount(int32_t value)
     if (value < 1) {
         value = 1;
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetMinCount(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetMinCount(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -250,8 +264,8 @@ void FfiOHOSAceFrameworkGridMinCount(int32_t value)
 
 void FfiOHOSAceFrameworkGridCellLength(int32_t value)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetCellLength(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetCellLength(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -260,8 +274,8 @@ void FfiOHOSAceFrameworkGridCellLength(int32_t value)
 
 void FfiOHOSAceFrameworkGridMultiSelectable(bool isSelectable)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetMultiSelectable(isSelectable);
+    if (GetGridModel()) {
+        GetGridModel()->SetMultiSelectable(isSelectable);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -270,8 +284,8 @@ void FfiOHOSAceFrameworkGridMultiSelectable(bool isSelectable)
 
 void FfiOHOSAceFrameworkGridSupportAnimation(bool isSupportAnimation)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetSupportAnimation(isSupportAnimation);
+    if (GetGridModel()) {
+        GetGridModel()->SetSupportAnimation(isSupportAnimation);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -284,8 +298,8 @@ void FfiOHOSAceFrameworkGridEdgeEffect(int32_t value, bool isEnabled)
     if (edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), isEnabled);
+    if (GetGridModel()) {
+        GetGridModel()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), isEnabled);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -294,8 +308,8 @@ void FfiOHOSAceFrameworkGridEdgeEffect(int32_t value, bool isEnabled)
 
 void FfiOHOSAceFrameworkGridEnableScrollInteraction(bool isEnable)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetScrollEnabled(isEnable);
+    if (GetGridModel()) {
+        GetGridModel()->SetScrollEnabled(isEnable);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -318,8 +332,8 @@ void FfiOHOSAceFrameworkGridNestedScroll(int32_t forward, int32_t backward)
     }
     nestedOpt.forward = static_cast<NestedScrollMode>(forward);
     nestedOpt.backward = static_cast<NestedScrollMode>(backward);
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+    if (GetGridModel()) {
+        GetGridModel()->SetNestedScroll(nestedOpt);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -328,8 +342,8 @@ void FfiOHOSAceFrameworkGridNestedScroll(int32_t forward, int32_t backward)
 
 void FfiOHOSAceFrameworkGridFriction(double value)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetFriction(value);
+    if (GetGridModel()) {
+        GetGridModel()->SetFriction(value);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -342,8 +356,8 @@ void FfiOHOSAceFrameworkGridAlignItems(int32_t value)
     if (itemAlign < GridItemAlignment::DEFAULT || itemAlign > GridItemAlignment::STRETCH) {
         itemAlign = GridItemAlignment::DEFAULT;
     }
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetAlignItems(itemAlign);
+    if (GetGridModel()) {
+        GetGridModel()->SetAlignItems(itemAlign);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -360,8 +374,8 @@ void FfiOHOSAceFrameworkGridOnScrollIndex(void (*callback)(uint32_t))
         }
         eventIndex(eventInfo->GetScrollIndex());
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollToIndex(onScrollIndex);
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollToIndex(onScrollIndex);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -372,8 +386,8 @@ void FfiOHOSAceFrameworkGridOnScrollIndex2(void (*callback)(uint32_t first, uint
 {
     auto lambda = CJLambda::Create(callback);
     auto onScrollIndex = [lambda](const int32_t first, const int32_t last) { lambda(first, last); };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollIndex(onScrollIndex);
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollIndex(onScrollIndex);
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -391,8 +405,8 @@ void FfiOHOSAceFrameworkGridOnItemDragStart(void (*callback)(CJItemDragInfo drag
         CJItemDragInfo itemDragInfo = { .x = x, .y = y };
         lambda(itemDragInfo, itemIndex);
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDragStart(std::move(onItemDragStart));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -420,8 +434,8 @@ void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
         PipelineContext::SetCallBackNode(node);
         builderFunc();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDragStart(std::move(onItemDragStart));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -439,8 +453,8 @@ void FfiOHOSAceFrameworkGridOnItemDragEnter(void (*callback)(CJItemDragInfo drag
         CJItemDragInfo itemDragInfo = { .x = x, .y = y };
         lambda(itemDragInfo);
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragEnter(std::move(onItemDragEnter));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDragEnter(std::move(onItemDragEnter));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -460,8 +474,8 @@ void FfiOHOSAceFrameworkGridOnItemDragMove(
         CJItemDragInfo itemDragInfo = { .x = x, .y = y };
         lambda(itemDragInfo, itemIndex, insertIndex);
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragMove(std::move(onItemDragMove));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDragMove(std::move(onItemDragMove));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -479,8 +493,8 @@ void FfiOHOSAceFrameworkGridOnItemDragLeave(void (*callback)(CJItemDragInfo drag
         CJItemDragInfo itemDragInfo = { .x = x, .y = y };
         lambda(itemDragInfo, itemIndex);
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragLeave(std::move(onItemDragLeave));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDragLeave(std::move(onItemDragLeave));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -500,8 +514,8 @@ void FfiOHOSAceFrameworkGridOnItemDrop(
         CJItemDragInfo itemDragInfo = { .x = x, .y = y };
         lambda(itemDragInfo, itemIndex, insertIndex, isSuccess);
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnItemDrop(std::move(onItemDrop));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -519,8 +533,8 @@ void FfiOHOSAceFrameworkGridOnScrollBarUpdate(CJComputedBarAttribute (*callback)
         Dimension totalLength_ = Dimension { result.totalLength, DimensionUnit::VP };
         return std::pair<float, float>(totalOffset_.ConvertToPx(), totalLength_.ConvertToPx());
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -535,8 +549,8 @@ void FfiOHOSAceFrameworkGridOnReachStart(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         lambda();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnReachStart(std::move(onReachStart));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -551,8 +565,8 @@ void FfiOHOSAceFrameworkGridOnReachEnd(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         lambda();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnReachEnd(std::move(onReachEnd));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -570,8 +584,8 @@ void FfiOHOSAceFrameworkGridOnScrollFrameBegin(CJOffsetRemain (*callback)(double
         ScrollFrameResult scrollRes { .offset = Dimension(result.offsetRemain, DimensionUnit::VP) };
         return scrollRes;
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollFrameBegin(std::move(onScrollBegin));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -586,8 +600,8 @@ void FfiOHOSAceFrameworkGridOnScrollStart(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         lambda();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollStart(std::move(onScrollStart));
     } else {
         LOGE("Grid Instance is null");
         return;
@@ -602,8 +616,8 @@ void FfiOHOSAceFrameworkGridOnScrollStop(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         lambda();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    if (GetGridModel()) {
+        GetGridModel()->SetOnScrollStop(std::move(onScrollStop));
     } else {
         LOGE("Grid Instance is null");
         return;
