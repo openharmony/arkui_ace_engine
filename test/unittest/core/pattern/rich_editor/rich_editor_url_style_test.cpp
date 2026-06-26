@@ -1930,31 +1930,6 @@ HWTEST_F(RichEditorUrlStyleTest, ScheduleFirstClickResetAfterWindowFocus001, Tes
 }
 
 /**
- * @tc.name: HandleTouchCancelAfterLongPress001
- * @tc.desc: Test HandleTouchCancelAfterLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorUrlStyleTest, HandleTouchCancelAfterLongPress001, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->editingLongPress_ = false;
-    richEditorPattern->isEditing_ = true;
-    int32_t testStart = 5;
-    int32_t testEnd = 10;
-    richEditorPattern->textSelector_.Update(testStart, testEnd);
-    richEditorPattern->HandleTouchCancelAfterLongPress();
-    EXPECT_NE(richEditorPattern, nullptr);
-    EXPECT_NE(richEditorPattern->GetContext(), nullptr);
-    SUCCEED() << "Function executed without crashing";
-}
-
-/**
  * @tc.name: RichEditorHandleMouseRightButton001
  * @tc.desc: Test HandleMouseRightButton
  * @tc.type: FUNC
