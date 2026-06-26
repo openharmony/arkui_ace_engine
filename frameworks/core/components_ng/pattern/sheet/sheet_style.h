@@ -25,7 +25,7 @@
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/components_ng/pattern/sheet/sheet_theme.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/common/resource/resource_object.h"
 #include "ui/properties/blur_style_option.h"
@@ -88,6 +88,14 @@ enum class SheetEffectEdge {
     START = 1,
     END = 2,
     ALL = 3,
+};
+
+enum class BindSheetDismissReason {
+    BACK_PRESSED = 0,
+    TOUCH_OUTSIDE,
+    CLOSE_BUTTON,
+    SLIDE_DOWN,
+    SLIDE,
 };
 
 struct SheetKey {

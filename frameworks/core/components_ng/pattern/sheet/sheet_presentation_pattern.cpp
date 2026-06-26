@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "overlay_manager.h"
 #include "core/components_ng/syntax/with_theme_node.h"
 
 #include "base/geometry/dimension.h"
@@ -42,10 +41,10 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/overlay/sheet_view.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -81,6 +80,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr char NAVDESTINATION_VIEW_TAG[] = "NavDestination";
+constexpr char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 constexpr int32_t SHEET_DETENTS_ZERO = 0;
 constexpr int32_t SHEET_DETENTS_ONE = 1;
 constexpr int32_t SHEET_DETENTS_TWO = 2;
@@ -586,7 +587,7 @@ RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const R
     // get parent node, if effectComponent exist then skip.
     auto parentNode = AceType::DynamicCast<FrameNode>(node->GetParent());
     CHECK_NULL_RETURN(parentNode, nullptr);
-    if (parentNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+    if (parentNode->GetTag() == EFFECT_COMPONENT_ETS_TAG) {
         auto grandeParentNode = AceType::DynamicCast<FrameNode>(parentNode->GetParent());
         return grandeParentNode;
     }
@@ -666,7 +667,7 @@ bool SheetPresentationPattern::SetBlurUnderEffectComponent(const BlurStyleOption
     CHECK_NULL_RETURN(host, false);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parentNode, false);
-    if (parentNode->GetTag() != V2::EFFECT_COMPONENT_ETS_TAG) {
+    if (parentNode->GetTag() != EFFECT_COMPONENT_ETS_TAG) {
         return false;
     }
     auto renderContext = host->GetRenderContext();
@@ -3093,7 +3094,7 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
         auto pattern = node->GetPattern<PagePattern>();
         CHECK_NULL_RETURN(pattern, nullptr);
         overlay = pattern->GetOverlayManager();
-    } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    } else if (node->GetTag() == NAVDESTINATION_VIEW_TAG) {
         auto pattern = node->GetPattern<NavDestinationPattern>();
         CHECK_NULL_RETURN(pattern, nullptr);
         overlay = pattern->GetOverlayManager();

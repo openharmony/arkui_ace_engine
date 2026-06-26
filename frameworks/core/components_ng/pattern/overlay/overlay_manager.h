@@ -31,7 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/overlay_options.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/picker_utils/dialog_event_types.h"

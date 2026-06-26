@@ -19,7 +19,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetWrapperLayoutAlgorithm : public BoxLayoutAlgorithm {

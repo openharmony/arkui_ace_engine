@@ -18,6 +18,7 @@
 
 #include "refbase.h"
 
+#include "base/utils/macros.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -58,9 +59,9 @@ public:
     void UnRegisterVisibleChangeCallback(int32_t nodeId);
     void HandleVisibleChangeCallback(bool visible);
 
-    void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target);
-    RefPtr<OverlayManager> GetOverlayManager(int32_t targetId);
-    void DeleteOverlayManager(int32_t targetId);
+    ACE_FORCE_EXPORT void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target);
+    ACE_FORCE_EXPORT RefPtr<OverlayManager> GetOverlayManager(int32_t targetId);
+    ACE_FORCE_EXPORT void DeleteOverlayManager(int32_t targetId);
     uint32_t GetWindowPatternType() const override;
 
 protected:

@@ -69,7 +69,6 @@ struct ScrollBarProperty;
 class ScrollBarOverlayModifier;
 class ScrollBarProxy;
 class ScrollEdgeEffect;
-class SheetPresentationPattern;
 class TouchEventImpl;
 enum class DragEventType;
 #ifndef WEARABLE_PRODUCT
@@ -1320,7 +1319,7 @@ private:
         bool isFadingTop, bool isFadingBottom, float fadeFrameSize, const RefPtr<ScrollablePaintMethod>& paint);
 
     RefPtr<NavDestinationPatternBase> navBarPattern_;
-    RefPtr<SheetPresentationPattern> sheetPattern_;
+    RefPtr<Pattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;

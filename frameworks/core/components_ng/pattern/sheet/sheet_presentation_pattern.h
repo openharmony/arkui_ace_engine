@@ -30,9 +30,9 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_layout_algorithm.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.h"
 #include "core/components_ng/pattern/sheet/sheet_object.h"
@@ -49,13 +49,6 @@ template<typename T, typename S>
 class NodeAnimatableProperty;
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 
-enum class BindSheetDismissReason {
-    BACK_PRESSED = 0,
-    TOUCH_OUTSIDE,
-    CLOSE_BUTTON,
-    SLIDE_DOWN,
-    SLIDE,
-};
 enum class SheetMiniDefaultShowPosition {
     LeftTop = 0,
     RightTop,
