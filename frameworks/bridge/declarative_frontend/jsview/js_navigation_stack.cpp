@@ -1984,14 +1984,12 @@ bool JSNavigationStack::CreateNodeFromRecovery(int32_t index, const WeakPtr<NG::
     }
     auto ohmUrl = pathInfo->GetPropertyValue<std::string>("ohmUrl", "");
     auto moduleName = pathInfo->GetPropertyValue<std::string>("moduleName", "");
-    if (ohmUrl.empty() || moduleName.empty()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reovery page ohmUrl or moduleName is empty");
-        return false;
-    }
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    CHECK_NULL_RETURN(runtime, false);
-    if (runtime->LoadDestinationFile("", moduleName, ohmUrl, true) != 0) {
-        return false;
+    if (!ohmUrl.empty() && !moduleName.empty()) {
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        CHECK_NULL_RETURN(runtime, false);
+        if (runtime->LoadDestinationFile("", moduleName, ohmUrl, true) != 0) {
+            return false;
+        }
     }
     return CreateNodeByIndex(index, customNode, node);
 }

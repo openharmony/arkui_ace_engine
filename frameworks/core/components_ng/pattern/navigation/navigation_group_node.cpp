@@ -3452,7 +3452,7 @@ void NavigationGroupNode::UpdateMaskNodeVisibility(bool isLeft, VisibleType type
 
 void NavigationGroupNode::InitNavigationId()
 {
-    if (recoverable_ || !curId_.empty()) {
+    if (!recoverable_ || !curId_.empty()) {
         return;
     }
     // support navigation in navigation
