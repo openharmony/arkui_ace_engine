@@ -117,11 +117,6 @@ void TextPattern::OnDetachFromMainTreeMultiThread()
     if (fontManager) {
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
-#ifdef ENABLE_ROSEN_BACKEND
-        if (Rosen::RSUIDirector::IsHybridRenderEnabled()) {
-            fontManager->RemoveHybridRenderNode(frameNode);
-        }
-#endif
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());

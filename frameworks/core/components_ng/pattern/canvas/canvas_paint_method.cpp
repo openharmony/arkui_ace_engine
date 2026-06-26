@@ -106,6 +106,19 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         TAG_LOGE(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] contentModifier is NULL", GetId());
         return;
     }
+
+    bool needMarkDirty = true;
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rosenRenderContext = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled()
+        ? AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext()) : nullptr;
+    if (rosenRenderContext != nullptr) {
+        rosenRenderContext->FlushContentModifierImmediately(contentModifier_);
+        needMarkDirty = false;
+    }
+#endif // ENABLE_ROSEN_BACKEND
+#endif // ACE_UNITTEST
+    CHECK_EQUAL_VOID(needMarkDirty, false);
     contentModifier_->MarkModifierDirty();
 }
 

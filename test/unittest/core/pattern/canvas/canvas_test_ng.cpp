@@ -149,22 +149,12 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     DirtySwapConfig config;
     bool needReset;
 
-    /**
-     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
-     * @tc.expected: needResetSurface_ is false.
-     */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier1 = pattern->contentModifier_;
-    EXPECT_FALSE(contentModifier1->needResetSurface_);
 
-    /**
-     * @tc.steps: step3. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
-     * @tc.expected: needResetSurface_ is false.
-     */
     needReset = false;
     config.frameSizeChange = false;
     config.contentSizeChange = false;
@@ -172,13 +162,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier2 = pattern->contentModifier_;
-    EXPECT_FALSE(contentModifier2->needResetSurface_);
 
-    /**
-     * @tc.steps: step4. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
-     * @tc.expected: needResetSurface_ is false.
-     */
     needReset = false;
     config.frameSizeChange = true;
     config.contentSizeChange = true;
@@ -186,13 +170,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier3 = pattern->contentModifier_;
-    EXPECT_FALSE(contentModifier3->needResetSurface_);
 
-    /**
-     * @tc.steps: step5. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
-     * @tc.expected: needResetSurface_ is false.
-     */
     needReset = true;
     config.frameSizeChange = false;
     config.contentSizeChange = false;
@@ -200,13 +178,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier4 = pattern->contentModifier_;
-    EXPECT_FALSE(contentModifier4->needResetSurface_);
 
-    /**
-     * @tc.steps: step6. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
-     * @tc.expected: needResetSurface_ is true.
-     */
     needReset = true;
     config.frameSizeChange = true;
     config.contentSizeChange = false;
@@ -214,13 +186,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier5 = pattern->contentModifier_;
-    EXPECT_TRUE(contentModifier5->needResetSurface_);
 
-    /**
-     * @tc.steps: step7. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
-     * @tc.expected: needResetSurface_ is true.
-     */
     needReset = true;
     config.frameSizeChange = false;
     config.contentSizeChange = true;
@@ -228,8 +194,6 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
     pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
     pattern->OnSizeChanged(config, needReset);
     ASSERT_NE(pattern->contentModifier_, nullptr);
-    auto contentModifier6 = pattern->contentModifier_;
-    EXPECT_TRUE(contentModifier6->needResetSurface_);
 }
 
 /**

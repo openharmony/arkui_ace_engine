@@ -661,6 +661,9 @@ public:
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
     void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
 #endif
+
+    void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier);
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;

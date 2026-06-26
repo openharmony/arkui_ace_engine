@@ -41,7 +41,7 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
 #ifdef ENABLE_ROSEN_BACKEND
-    if (Rosen::RSUIDirector::GetHybridRenderSwitch(OHOS::Rosen::ComponentEnableSwitch::CANVAS)) {
+    if (Rosen::RSUIDirector::GetHybridRenderCanvasEnabled()) {
         rsDrawCmdList->SetHybridRenderType(RSHybridRenderType::CANVAS);
     }
 #endif
@@ -68,18 +68,30 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
         dumpInfos_.erase(dumpInfos_.begin());
         dumpInfos_.push_back(dumpInfo);
     }
-    ResetSurface();
+    bool hybridRenderEnabled = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    hybridRenderEnabled = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled();
+#endif
+    if (!hybridRenderEnabled) {
+        ResetSurface(static_cast<int>(drawCmdSize_.Width()), static_cast<int>(drawCmdSize_.Height()));
+    }
     CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
 }
 
-void CanvasModifier::ResetSurface()
+void CanvasModifier::ResetSurface(int width, int height)
 {
-    CHECK_EQUAL_VOID(needResetSurface_, false);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
-    renderContext->ResetSurface(static_cast<int>(drawCmdSize_.Width()), static_cast<int>(drawCmdSize_.Height()));
+#ifdef ENABLE_ROSEN_BACKEND
+    if (Rosen::RSUIDirector::GetHybridRenderCanvasEnabled()) {
+        renderContext->ResetSurface(width, height);
+        return;
+    }
+#endif
+    CHECK_EQUAL_VOID(needResetSurface_, false);
+    renderContext->ResetSurface(width, height);
     needResetSurface_ = false;
 }
 

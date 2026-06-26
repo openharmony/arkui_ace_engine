@@ -132,10 +132,6 @@ public:
     void RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node);
     std::vector<std::string> GetFontNames();
 
-    void AddHybridRenderNode(const WeakPtr<NG::UINode>& node);
-    void RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node);
-    void UpdateHybridRenderNodes();
-
     using StartAbilityOnInstallAppInStoreHandler = std::function<void(const std::string& appName)>;
     void SetStartAbilityOnInstallAppInStoreHandler(StartAbilityOnInstallAppInStoreHandler&& listener)
     {
@@ -192,8 +188,6 @@ private:
     StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
     StartAbilityOnCanlendarHandler startAbilityOnCalendarHandler_;
 
-    std::mutex hybridRenderNodesMutex_;
-    std::set<WeakPtr<NG::UINode>> hybridRenderNodes_;
     std::once_flag load_font_flag_;
     std::shared_mutex mutable formCallbackLock_;
     std::shared_mutex mutable externalCallbackLock_;

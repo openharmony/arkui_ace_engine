@@ -54,8 +54,9 @@ public:
         rsRecordingCanvas_ = rsRecordingCanvas;
     }
 
+    void ResetSurface(int width, int height);
+
 private:
-    void ResetSurface();
     bool needResetSurface_ = false;
     WeakPtr<RenderContext> renderContext_;
     RefPtr<PropertyBool> needRender_;
