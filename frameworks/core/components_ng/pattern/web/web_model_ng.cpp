@@ -1164,6 +1164,10 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
             TAG_LOGE(AceLogTag::ACE_WEB, "NotifyPopupWindowResult not found nweb %{public}d", webId);
         }
     }
+#else
+    if (popupResultCallback_ && webId != -1) {
+        popupResultCallback_(webId, result);
+    }
 #endif
 }
 
@@ -3005,4 +3009,13 @@ void WebModelNG::SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enab
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateFullScreenVideoOverlay(enable);
 }
+
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+WebModelNG::PopupResultCallback WebModelNG::popupResultCallback_;
+
+void WebModelNG::SetPopupResultCallback(PopupResultCallback&& callback)
+{
+    popupResultCallback_ = std::move(callback);
+}
+#endif
 } // namespace OHOS::Ace::NG

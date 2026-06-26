@@ -3567,6 +3567,13 @@ void JSWeb::Create(const JSCallbackInfo& info)
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+            int32_t parentNWebId = -1;
+            auto controllerRef = webviewController;
+            if (JSWebWindowNewHandler::ExistController(controllerRef, parentNWebId) && parentNWebId != -1) {
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, true);
+            }
+#endif
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
