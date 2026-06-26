@@ -7199,6 +7199,8 @@ struct ArkUIToggleModifier {
     void (*setToggleBackgroundColorWithColorSpace)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
     void (*setToggleBackgroundColorByJs)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr, ArkUI_Bool flag);
+    void (*setToggleBackgroundColorForHDR)(ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace,
+        void* colorRawPtr, ArkUI_Bool flag);
     void (*resetToggleBackgroundColor)(ArkUINodeHandle node);
     void (*setToggleHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetToggleHoverEffect)(ArkUINodeHandle node);

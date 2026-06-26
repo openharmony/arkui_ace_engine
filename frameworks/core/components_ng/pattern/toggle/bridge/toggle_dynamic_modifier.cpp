@@ -395,6 +395,20 @@ void SetToggleBackgroundColorByJs(
     }
 }
 
+void SetToggleBackgroundColorForHDR(
+    ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace, void* colorRawPtr, ArkUI_Bool flag)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode && hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(colorSpace));
+    ToggleModelNG::SetBackgroundColorByJs(backgroundColor, static_cast<bool>(flag));
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::BACKGROUND_COLOR, resObj);
+    }
+}
+
 void ResetToggleBackgroundColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
@@ -904,6 +918,7 @@ const ArkUIToggleModifier* GetToggleDynamicModifier()
             .setToggleBackgroundColor = SetToggleBackgroundColor,
             .setToggleBackgroundColorWithColorSpace = SetToggleBackgroundColorWithColorSpace,
             .setToggleBackgroundColorByJs = SetToggleBackgroundColorByJs,
+            .setToggleBackgroundColorForHDR = SetToggleBackgroundColorForHDR,
             .resetToggleBackgroundColor = ResetToggleBackgroundColor,
             .setToggleHoverEffect = SetToggleHoverEffect,
             .resetToggleHoverEffect = ResetToggleHoverEffect,
@@ -959,6 +974,7 @@ const ArkUIToggleModifier* GetToggleDynamicModifier()
             .setToggleBackgroundColor = nullptr,
             .setToggleBackgroundColorWithColorSpace = nullptr,
             .setToggleBackgroundColorByJs = nullptr,
+            .setToggleBackgroundColorForHDR = nullptr,
             .resetToggleBackgroundColor = nullptr,
             .setToggleHoverEffect = SetToggleHoverEffectImpl,
             .resetToggleHoverEffect = nullptr,
