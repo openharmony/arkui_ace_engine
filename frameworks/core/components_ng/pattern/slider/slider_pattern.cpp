@@ -4280,7 +4280,7 @@ void SliderPattern::HandleHighGradeLongPress()
     auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
-    bool useParticle = IsMiddleGradeMaterial() && sliderMode == SliderModel::SliderMode::INSET &&
+    bool useParticle = IsHighGradeMaterial() && sliderMode == SliderModel::SliderMode::INSET &&
                        blockType == SliderModelNG::BlockStyleType::DEFAULT;
     CreateDragFrameNode();
     CreateSelectedTrackFrameNode();

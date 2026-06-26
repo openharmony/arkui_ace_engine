@@ -576,12 +576,15 @@ bool MaterialUtils::IsEmptyMaterial(const RefPtr<UiMaterial>& material)
     return material->IsEmpty();
 }
 
-RefPtr<UiMaterial> MaterialUtils::GetInitMaterial(const UiMaterialStyle style)
+RefPtr<UiMaterial> MaterialUtils::GetInitMaterial(const UiMaterialStyle style, const std::optional<bool>& interactive,
+    const std::optional<LightEffectOptions>& lightEffectOptions)
 {
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
     ImmersiveOptions options {};
     options.style = style;
+    options.interactive = interactive;
+    options.lightEffectOptions = lightEffectOptions;
     material->SetImmersiveOptions(options);
     return material;
 }
