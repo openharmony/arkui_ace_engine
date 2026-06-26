@@ -32,6 +32,7 @@ import {
   import common from '@ohos.app.ability.common';
   import window from '@ohos.window';
   import hilog from '@ohos.hilog';
+  import { BusinessError } from '@ohos.base';
   
   export enum ItemState {
     ENABLE = 1,
@@ -362,6 +363,9 @@ import {
           getStringSync((resource as Resource).id)
           return str as string;
         } catch (error) {
+          let code: number | undefined = (error as BusinessError).code;
+          let message: string | undefined = (error as BusinessError).message;
+          hilog.error(0x3900, 'ToolBar', `getStringSync failed, code: ${code}, message: ${message}`);
           return '';
         }
       }
@@ -378,6 +382,9 @@ import {
           getStringSync((resource as Resource).id)
           return str as string;
         } catch (error) {
+          let code: number | undefined = (error as BusinessError).code;
+          let message: string | undefined = (error as BusinessError).message;
+          hilog.error(0x3900, 'ToolBar', `getStringSync failed, code: ${code}, message: ${message}`);
           return '';
         }
       }

@@ -21,6 +21,8 @@ import {
 import { State, PropRef, Watch } from '@ohos.arkui.stateManagement';
 import { LengthUnit, LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
+import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import { Theme } from '@ohos.arkui.theme';
 
 export interface ProgressButtonColorOptions {
@@ -165,6 +167,9 @@ export struct ProgressButton {
         resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
         getStringSync((this.progressButtonWidth as Resource).id) as string;
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'ProgressButton', `getStringSync failed, code: ${code}, message: ${message}`);
         resourceString = '';
       }
     }

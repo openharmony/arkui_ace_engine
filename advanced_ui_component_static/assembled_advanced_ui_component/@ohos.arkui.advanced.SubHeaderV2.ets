@@ -26,6 +26,7 @@ import {
 import { SymbolGlyphModifier, TextModifier } from '@ohos.arkui.modifier';
 import resourceManager from '@ohos.resourceManager';
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import HashMap from '@ohos.util.HashMap';
 import { LengthMetrics, LengthUnit, ColorMetrics } from '@ohos.arkui.node';
 import { Theme } from '@ohos.arkui.theme';
@@ -630,6 +631,9 @@ export struct SubHeaderV2 {
         return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
           (this.operationItems[0].accessibilityDescription as Resource).id);
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
         return '';
       }
     } else if (this.operationItems[0].accessibilityDescription &&
@@ -1050,6 +1054,9 @@ export struct SubHeaderV2 {
         return (this.getUIContext().getHostContext() as common.Context).resourceManager
           .getStringSync((this.operationItems[0].accessibilityText as Resource).id);
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
         return '';
       }
     } else if (this.operationItems[0].accessibilityText) {
@@ -1101,6 +1108,9 @@ export struct SubHeaderV2 {
         return (this.getUIContext().getHostContext() as common.Context).resourceManager
           .getStringSync((this.title?.titleAccessibilityText as Resource).id);
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
         return '';
       }
     }
@@ -1267,6 +1277,9 @@ struct SingleIconStyle {
         return (this.getUIContext().getHostContext() as common.Context).resourceManager
           .getStringSync((this.item?.accessibilityText as Resource).id);
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
         return '';
       }
     } else if (this.item?.accessibilityText) {
@@ -1288,6 +1301,9 @@ struct SingleIconStyle {
         return (this.getUIContext().getHostContext() as common.Context).resourceManager
           .getStringSync((this.item?.accessibilityDescription as Resource).id);
       } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
         return '';
       }
     } else if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
