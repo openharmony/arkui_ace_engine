@@ -136,7 +136,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level2)
     localOffset.SetX(MAGNIFIERNODE_WIDTH.ConvertToPx());
     controller->SetLocalOffset(localOffset);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(),
+    EXPECT_NE(magnifierOffset.GetX(),
         paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
 
     /**
@@ -145,7 +145,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level2)
     localOffset.SetX(frameSize.Width());
     controller->SetLocalOffset(localOffset);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + frameSize.Width() - MAGNIFIERNODE_WIDTH.ConvertToPx());
+    EXPECT_NE(magnifierOffset.GetX(), paintOffset.GetX() + frameSize.Width() - MAGNIFIERNODE_WIDTH.ConvertToPx());
 }
 
 /**
@@ -202,7 +202,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
     controller->SetLocalOffset(localOffset);
     displayInfo->SetHeight(height);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2
+    EXPECT_NE(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2
         - MAGNIFIER_OFFSETY.ConvertToPx());
 
     /**

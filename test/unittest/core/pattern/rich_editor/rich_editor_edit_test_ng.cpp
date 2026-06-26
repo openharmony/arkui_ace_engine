@@ -769,7 +769,7 @@ HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->InsertValue(INIT_VALUE_4);
+    richEditorPattern->InsertValue(INIT_VALUE_9);
     auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
     EXPECT_EQ(nodes.size(), 0);
     auto range = richEditorPattern->CalcSpansRange(nodes);
