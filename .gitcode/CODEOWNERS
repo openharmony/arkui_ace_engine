@@ -605,6 +605,7 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @ar
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arksymbolspan.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextpicker.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkrefresh.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkselect.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -686,7 +687,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkScrollable.ts @arkui
 frameworks/bridge/declarative_frontend/ark_component/src/ArkScrollBar.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkScroll.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSearch.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkSelect.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkShape.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSideBarContainer.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSlider.ts @arkuipopupwindow_all

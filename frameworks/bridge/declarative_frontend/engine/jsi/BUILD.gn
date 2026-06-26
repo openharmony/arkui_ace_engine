@@ -308,7 +308,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_scroll_bridge.cpp",
       "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
-      "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_selection_container_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",

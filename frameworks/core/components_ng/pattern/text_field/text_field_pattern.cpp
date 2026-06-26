@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/text/text_emoji_processor.h"
+#include "core/interfaces/native/node/select_modifier.h"
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
 #include "adapter/ohos/entrance/ace_container.h"
@@ -10995,9 +10996,9 @@ void TextFieldPattern::UnitResponseKeyEvent()
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
-        auto selectPattern = frameNode->GetPattern<SelectPattern>();
-        CHECK_NULL_VOID(selectPattern);
-        selectPattern->ShowSelectMenu();
+        auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->showSelectMenu(frameNode);
     }
 }
 

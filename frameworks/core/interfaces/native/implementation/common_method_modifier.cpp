@@ -109,6 +109,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -717,9 +718,9 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
-    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
-    if (avoidTargetOpt.has_value()) {
-        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    if (customModifier) {
+        customModifier->setAvoidTarget(popupParam, src.avoidTarget);
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
@@ -2766,7 +2767,9 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
-        SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {

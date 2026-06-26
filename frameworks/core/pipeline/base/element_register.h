@@ -68,7 +68,7 @@ public:
 
     ACE_FORCE_EXPORT RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
     ACE_FORCE_EXPORT std::vector<RefPtr<NG::UINode>> GetUINodesFromItemMap(const std::vector<std::int32_t>& keys);
-    NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
+    ACE_FORCE_EXPORT NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
     ACE_FORCE_EXPORT bool AddUINode(const RefPtr<NG::UINode>& node);
 

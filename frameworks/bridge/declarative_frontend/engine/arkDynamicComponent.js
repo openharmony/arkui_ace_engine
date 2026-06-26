@@ -687,3 +687,17 @@ if (globalThis.LazyVGridLayout === undefined) {
     name: 'JSLazyVGridLayout'
   };
 }
+
+// @ts-ignore
+if (globalThis.Select === undefined) {
+  globalThis.Select = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule('Select');
+      let module = globalThis.requireNapi('arkui.components.arkselect');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().select.create(params);
+    },
+    name: 'JSSelect'
+  }
+}

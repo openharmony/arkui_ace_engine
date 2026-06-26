@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "core/components_ng/pattern/select/bridge/select_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/text_enums.h"
@@ -23,11 +22,26 @@
 #include "core/components/select/select_component.h"
 #include "core/components/select/select_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+RefPtr<SelectTheme> GetSelectTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return node ? themeManager->GetTheme<SelectTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<SelectTheme>();
+}
+} // namespace
+
 void SelectModelImpl::Create(const std::vector<SelectParam>& params)
 {
-    auto selectTheme = JSViewAbstract::GetTheme<SelectTheme>();
+    auto selectTheme = GetSelectTheme();
     auto selectComponent = AceType::MakeRefPtr<SelectComponent>();
     CHECK_NULL_VOID(selectComponent);
     selectComponent->SetTheme(selectTheme);
@@ -36,23 +50,23 @@ void SelectModelImpl::Create(const std::vector<SelectParam>& params)
     selectComponent->SetTipText(tipText);
 
     for (size_t i = 0; i < params.size(); i++) {
-        auto optionTheme = JSViewAbstract::GetTheme<SelectTheme>();
-            if (!optionTheme) {
-                LOGE("JSSelect: Get option theme is null.");
-                continue;
-            }
-            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(params[i].text);
-            if (!params[i].icon.empty()) {
-                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(params[i].icon));
-            }
-            optionComponent->SetTheme(optionTheme);
-            optionComponent->SetText(textComponent);
-            optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
-            optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
-            optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
-            optionComponent->SetValue(params[i].text);
-            selectComponent->AppendSelectOption(optionComponent);
+        auto optionTheme = GetSelectTheme();
+        if (!optionTheme) {
+            LOGE("JSSelect: Get option theme is null.");
+            continue;
+        }
+        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+        auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(params[i].text);
+        if (!params[i].icon.empty()) {
+            optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(params[i].icon));
+        }
+        optionComponent->SetTheme(optionTheme);
+        optionComponent->SetText(textComponent);
+        optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
+        optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
+        optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
+        optionComponent->SetValue(params[i].text);
+        selectComponent->AppendSelectOption(optionComponent);
     }
     ViewStackProcessor::GetInstance()->ClaimElementId(selectComponent);
     ViewStackProcessor::GetInstance()->Push(selectComponent);

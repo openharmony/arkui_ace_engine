@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemConfigurationAccessor {
@@ -43,7 +44,9 @@ void TriggerSelectImpl(Ark_MenuItemConfiguration peer,
     auto node = peer->node_;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::SetChangeValue(frameNode, index, convValue);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setChangeValue(frameNode, index, convValue);
 }
 Ark_Boolean GetEnabledImpl(Ark_MenuItemConfiguration peer)
 {

@@ -1535,7 +1535,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Select', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
-        return new ArkSelectComponent(node, type);
+        getUINativeModule().loadNativeModule('Select');
+        let module = globalThis.requireNapi('arkui.components.arkselect');
+        return module.createComponent(node, type);
       });
     }],
     ['Toggle', (context: UIContext, options?: object): FrameNode => {

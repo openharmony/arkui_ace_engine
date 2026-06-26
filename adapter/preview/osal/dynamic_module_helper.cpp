@@ -130,6 +130,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
+        { "Select", "select" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
