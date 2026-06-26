@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
@@ -156,7 +157,7 @@ ohos_shared_library("ace_ndk") {
 }
 
 if (is_arkui_x) {
-  ohos_source_set("ace_static_ndk") {
+  ohos_shared_library("ace_ndk_cross") {
     include_dirs = [
       "$ace_root",
       "$ace_root/frameworks",
@@ -222,7 +223,11 @@ if (is_arkui_x) {
       "node/progress_option.cpp",
       "node/rich_editor_native_impl.cpp",
       "node/node_node_relative_container.cpp",
+      "$ace_root/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
+      "$ace_root/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
     ]
+
+    output_name = "ace_ndk"
 
     deps = [
       "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",
@@ -231,14 +236,45 @@ if (is_arkui_x) {
 
     cflags_cc = [ "-Wno-missing-braces" ]
 
-    print("ace_static_ndk build.")
+    if (target_os == "android") {
+      version_script = "libace_ndk_android.map"
+
+      deps += [ "$ace_root/adapter/android/build:libarkui_android" ]
+
+      ldflags = [
+          "-Wl,-z,undefs",
+          "-Wl,--warn-unresolved-symbols",
+          "-Wl,--allow-shlib-undefined",
+      ]
+    } else if (target_os == "ios") {
+      exported_symbols_list = "libace_ndk_ios.txt"
+      ldflags = [
+        "-Wl",
+        "-install_name",
+        "@rpath/libace_ndk.framework/libace_ndk",
+        "-Wl,-undefined,dynamic_lookup",
+      ]
+    }
+
     subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
+    if (target_os == "ios") {
+      part_name = "arkui-x"
+    } else {
+      part_name = ace_engine_part
+    }
     external_deps = [
       "c_utils:utils",
       "napi:ace_napi",
       "runtime_core:ani",
     ]
+  }
+
+  if (target_os == "ios") {
+    ohos_combine_darwin_framework("libace_ndk") {
+      deps = [ ":ace_ndk_cross" ]
+      subsystem_name = "arkui"
+      part_name = "arkui-x"
+    }
   }
 }
 
