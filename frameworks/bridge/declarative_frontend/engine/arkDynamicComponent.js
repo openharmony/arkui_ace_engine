@@ -239,6 +239,20 @@ if (globalThis.Refresh === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Navigator === undefined) {
+  globalThis.Navigator = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Navigator');
+      let module = globalThis.requireNapi('arkui.components.arknavigator');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().navigator.create(params);
+    },
+    name: 'JSNavigator'
+  }
+}
+
+// @ts-ignore
 if (globalThis.Radio === undefined) {
   globalThis.Radio = {
     create: function(params) {

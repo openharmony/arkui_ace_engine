@@ -61,7 +61,6 @@ private:
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

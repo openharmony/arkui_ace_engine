@@ -83,6 +83,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Marquee", "marquee" },
         { "Progress", "progress" },
         { "TextTimer", "texttimer" },
+        { "Navigator", "navigator" },
         { "PatternLock", "patternlock" },
         { "QRCode", "qrcode" },
         { "Radio", "radio" },

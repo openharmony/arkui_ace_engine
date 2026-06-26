@@ -105,6 +105,10 @@ interface GaugeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface NavigatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

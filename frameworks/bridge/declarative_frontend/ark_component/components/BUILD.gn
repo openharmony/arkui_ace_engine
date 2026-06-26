@@ -112,6 +112,7 @@ special_components = [
   "arkpatternlock",
   "arksymbolspan",
   "arkcounter",
+  "arknavigator",
   "arktoggle",
   "arkimageanimator",
   "arkdatepicker",
