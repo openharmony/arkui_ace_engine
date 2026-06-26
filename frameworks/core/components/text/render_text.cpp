@@ -22,12 +22,14 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_v2/inspector/utils.h"
 #include "compatible/components/text_field/modifier/text_field_modifier.h"
+
 
 namespace OHOS::Ace {
 

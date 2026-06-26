@@ -17,13 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_DIV_H
 
 #include "base/utils/macros.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/theme/card_theme.h"
 #include "core/components/wrap/wrap_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
+
+namespace OHOS::Ace {
+class FlexComponent;
+}
 
 namespace OHOS::Ace::Framework {
 

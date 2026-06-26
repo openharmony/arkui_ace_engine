@@ -27,6 +27,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef private
 #undef protected

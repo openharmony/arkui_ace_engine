@@ -60,6 +60,7 @@ using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
+class ExportTextureInfo;
 class FocusHub;
 class LayoutWrapperNode;
 class FrameNode;

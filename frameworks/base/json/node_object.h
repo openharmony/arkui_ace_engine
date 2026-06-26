@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_JSON_NODE_OBJECT_H
 
 #include "base/json/json_util.h"
-#include "base/json/uobject.h"
+
+namespace OHOS {
+class UObject;
+}
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT NodeObject : public JsonValue {

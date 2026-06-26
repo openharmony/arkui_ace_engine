@@ -16,8 +16,10 @@
 #include <iterator>
 
 #include "base/json/json_util.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"

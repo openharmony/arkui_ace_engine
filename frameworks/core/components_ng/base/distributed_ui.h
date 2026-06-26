@@ -22,9 +22,12 @@
 
 #include "interfaces/inner_api/ace/serializeable_object.h"
 
-#include "base/json/node_object.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/event/touch_event.h"
+
+namespace OHOS::Ace {
+class NodeObject;
+}
 
 #define CHECK_NULL_BREAK(ptr)                                       \
     if (!(ptr)) {                                                   \

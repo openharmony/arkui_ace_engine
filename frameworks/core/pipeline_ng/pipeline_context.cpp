@@ -127,6 +127,7 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 

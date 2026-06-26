@@ -15,6 +15,7 @@
 
 #include "frameworks/compatible/components/video/dom_video.h"
 
+#include "core/components/mouse_listener/mouse_listener_component.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

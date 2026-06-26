@@ -17,6 +17,5 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_RECT_H
 
 #include "ui/base/geometry/dimension_rect.h"
-#include "base/utils/utils.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_RECT_H

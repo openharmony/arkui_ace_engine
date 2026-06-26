@@ -17,6 +17,7 @@
 
 #include "core/common/builder_util.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 namespace OHOS::Ace::NG {
 
 ContentSlotNode::~ContentSlotNode()

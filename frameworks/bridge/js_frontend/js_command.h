@@ -27,10 +27,9 @@
 #include "frameworks/compatible/components/clock/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
+#include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/compatible/components/input/dom_input.h"
-#include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/compatible/components/stepper/dom_stepper.h"
-#include "frameworks/compatible/components/stepper/dom_stepper_item.h"
 #include "frameworks/compatible/components/canvas/custom_paint_component.h"
 
 namespace OHOS::Ace {
@@ -40,6 +39,7 @@ class XComponentTaskPool;
 namespace OHOS::Ace::Framework {
 
 class JsAcePage;
+class DOMProxy;
 
 // Basic class of command from JS framework
 class ACE_EXPORT JsCommand : public Referenced {
