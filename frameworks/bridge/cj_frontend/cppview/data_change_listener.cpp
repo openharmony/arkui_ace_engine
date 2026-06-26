@@ -36,7 +36,7 @@ void CJDataChangeListener::RemoveListener(const WeakPtr<V2::DataChangeListener>&
 
 void CJDataChangeListener::OnDataReloaded()
 {
-    NotifyAll(&V2::DataChangeListener::OnDataReloaded);
+    NotifyAll(&V2::DataChangeListener::OnDataReloaded, false);
 }
 
 void CJDataChangeListener::OnDataAdded(size_t index)

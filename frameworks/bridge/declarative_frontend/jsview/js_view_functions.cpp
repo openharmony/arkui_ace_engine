@@ -202,6 +202,26 @@ bool ViewFunctions::ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isPr
     }
 }
 
+void ViewFunctions::ExecuteEnableReleaseExpiringNodes(bool enable, const std::vector<std::string>& reuseIds)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteEnableReleaseExpiringNodes");
+    auto func = jsEnableReleaseExpiringNodesFunc_.Lock();
+    if (!func->IsEmpty()) {
+        // Convert std::vector to JS array
+        JSRef<JSArray> jsArray = JSRef<JSArray>::New();
+        for (size_t i = 0; i < reuseIds.size(); ++i) {
+            jsArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(reuseIds.at(i))));
+        }
+        JSRef<JSVal> params[2]; // 2 parampeters: bool enable, std::vector<std::string> reuseIds
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(enable)));
+        params[1] = jsArray;
+        func->Call(jsObject_.Lock(), 2, params); // 2 parampeters: bool enable, std::vector<std::string> reuseIds
+    } else {
+        LOGE("the enable release expiring nodes func is null");
+    }
+}
+
 void ViewFunctions::ExecuteSetActive(bool active, bool isReuse, bool suppressActiveLifecycle)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
@@ -371,6 +391,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsReleaseRecyclePoolFunc = jsObject->GetProperty("__releaseRecyclePool__Internal");
         if (jsReleaseRecyclePoolFunc->IsFunction()) {
             jsReleaseRecyclePoolFunc_ = JSRef<JSFunc>::Cast(jsReleaseRecyclePoolFunc);
+        }
+
+        JSRef<JSVal> jsEnableReleaseExpiringNodesFunc = jsObject->GetProperty("__enableReleaseExpiringNodes__Internal");
+        if (jsEnableReleaseExpiringNodesFunc->IsFunction()) {
+            jsEnableReleaseExpiringNodesFunc_ = JSRef<JSFunc>::Cast(jsEnableReleaseExpiringNodesFunc);
         }
 
         JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");

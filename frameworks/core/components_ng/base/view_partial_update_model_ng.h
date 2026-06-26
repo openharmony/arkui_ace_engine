@@ -31,6 +31,8 @@ public:
 
     bool MarkNeedUpdate(const WeakPtr<AceType>& node) override;
 
+    bool TryReleaseExpiringNode(const WeakPtr<AceType>& node, std::string reuseId) override;
+
     void FlushUpdateTask(const UpdateTask& task) override {}
 
     void FinishUpdate(const WeakPtr<AceType>& viewNode, int32_t id,

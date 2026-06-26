@@ -823,6 +823,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteReleaseRecyclePool(remainingTimeMs, isProgressive, shouldCollect);
     };
 
+    auto enableReleaseExpiringNodesFunc =
+        [weak = AceType::WeakClaim(this)](bool enable, const std::vector<std::string>& reuseIds) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteEnableReleaseExpiringNodes(enable, reuseIds);
+    };
+
     auto triggerLifecycleFunc = [weak = AceType::WeakClaim(this)](int32_t eventId) -> bool {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, false);
@@ -899,6 +908,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .releaseRecyclePoolFunc = std::move(releaseRecyclePoolFunc),
+        .enableReleaseExpiringNodes = std::move(enableReleaseExpiringNodesFunc),
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
@@ -1168,6 +1178,17 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
     needsUpdate_ = ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
+}
+
+void JSViewPartialUpdate::TryReleaseExpiringNode(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsString()) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto reuseId = info[0]->ToString();
+    bool result = ViewPartialUpdateModel::GetInstance()->TryReleaseExpiringNode(viewNode_, reuseId);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 /**
@@ -1729,6 +1750,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
     JSClass<JSViewPartialUpdate>::Method(
         "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);
+    JSClass<JSViewPartialUpdate>::CustomMethod("tryReleaseExpiringNode", &JSViewPartialUpdate::TryReleaseExpiringNode);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

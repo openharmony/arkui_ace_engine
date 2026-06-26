@@ -77,7 +77,7 @@ public:
         std::list<std::optional<std::string>>&& nodeIds,
         std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems);
 
-    void OnDataReloaded() override;
+    void OnDataReloaded(bool reuseImmediately = false) override;
     void OnDataAdded(size_t index) override;
     void OnDataBulkAdded(size_t index, size_t count) override;
     void OnDataDeleted(size_t index) override;
@@ -248,6 +248,9 @@ public:
 
     void SetEnableSyncLoad(bool value) override;
     void SetIsSyncLoad(bool value) override;
+    void EnableParentCustomNodeReleaseExpiringNode(const std::set<std::string>& reuseIds);
+    void DisableParentCustomNodeReleaseExpiringNode();
+    bool ReleaseExpiringNode(std::string reuseId);
 
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
@@ -327,6 +330,7 @@ private:
     int64_t setActiveRangeTime_ = 0;
     int32_t oldCacheStart_ = 0;
     int32_t oldCacheEnd_ = 0;
+    bool isParentCustomNodeReleaseExpiringNodeEnabled_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

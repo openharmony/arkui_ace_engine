@@ -22,6 +22,7 @@
 #include "base/thread/task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace {
 constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
@@ -600,6 +601,44 @@ void CustomNode::PostIdleTask()
         // Call CleanCacheOnIdle with remaining time
         node->CleanCacheOnIdle(static_cast<int32_t>(remainingTimeMs));
     });
+}
+
+bool CustomNode::ReleaseExpiringNode(std::string reuseId)
+{
+    for (auto it = LazyForEachForReleaseExpiringNode_.begin(); it != LazyForEachForReleaseExpiringNode_.end();) {
+        auto node = it->Upgrade();
+        if (!node) {
+            it = LazyForEachForReleaseExpiringNode_.erase(it);
+            continue;
+        }
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+        if (!lazyForEachNode) {
+            it = LazyForEachForReleaseExpiringNode_.erase(it);
+            continue;
+        }
+        if (lazyForEachNode->ReleaseExpiringNode(reuseId)) {
+            return true;
+        }
+        ++it;
+    }
+    return false;
+}
+
+void CustomNode::EnableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node, const std::set<std::string>& reuseIds)
+{
+    CHECK_NULL_VOID(enableReleaseExpiringNodesFunc_);
+    std::vector<std::string> reuseIdVector(reuseIds.begin(), reuseIds.end());
+    enableReleaseExpiringNodesFunc_(true, reuseIdVector);
+    LazyForEachForReleaseExpiringNode_.insert(node);
+}
+
+void CustomNode::DisableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node)
+{
+    LazyForEachForReleaseExpiringNode_.erase(node);
+    CHECK_NULL_VOID(enableReleaseExpiringNodesFunc_);
+    if (LazyForEachForReleaseExpiringNode_.empty()) {
+        enableReleaseExpiringNodesFunc_(false, {});
+    }
 }
 
 } // namespace OHOS::Ace::NG
