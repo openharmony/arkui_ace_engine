@@ -283,6 +283,7 @@ FillMode AnimatedDrawableDescriptor::ToFillMode() const
 
 void AnimatedDrawableDescriptor::RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback)
 {
+    std::unique_lock<std::shared_mutex> lock(callMutx_);
     CreateParamsFromImageSource(nodeId);
     if (GetFrameCount() <= 0) {
         return;
