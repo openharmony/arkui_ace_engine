@@ -319,12 +319,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::GlobalAlpha(ArkU
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::AntiAlias(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     bool enabled = runtimeCallInfo->GetCallArgRef(NUM_1)->ToBoolean(vm)->Value();
     pattern->SetAntiAlias(enabled);
@@ -333,12 +329,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::AntiAlias(ArkUIR
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Arc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     ArcParam param;
@@ -355,12 +347,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Arc(ArkUIRuntime
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillRect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
@@ -373,12 +361,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillRect(ArkUIRu
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::StrokeRect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
@@ -391,12 +375,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::StrokeRect(ArkUI
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ClearRect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
@@ -409,12 +389,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ClearRect(ArkUIR
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillText(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     std::string text;
     RefPtr<ResourceObject> resObj;
@@ -434,12 +410,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillText(ArkUIRu
 // Stub implementations for complex methods
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Scale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     p->Scale(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value(),
         runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value());
@@ -447,24 +419,16 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Scale(ArkUIRunti
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rotate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     p->Rotate(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value());
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Translate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     p->Translate(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density,
@@ -474,12 +438,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Translate(ArkUIR
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     p->AddRect(OHOS::Ace::Rect(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density,
@@ -491,12 +451,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rect(ArkUIRuntim
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Ellipse(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     EllipseParam param;
@@ -515,12 +471,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Ellipse(ArkUIRun
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::BezierCurveTo(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     BezierCurveParam param;
@@ -536,12 +488,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::BezierCurveTo(Ar
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::QuadraticCurveTo(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     QuadraticCurveParam param;
@@ -555,12 +503,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::QuadraticCurveTo
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ArcTo(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     ArcToParam param;
@@ -575,32 +519,38 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ArcTo(ArkUIRunti
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
     double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
     double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
     double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    double r = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value() * density;
-    std::vector<double> radii = { r, r, r, r };
+    // Radius: single number or array of up to 4 values
+    std::vector<double> radii;
+    auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    if (radiusArg->IsArray(vm)) {
+        Local<panda::ArrayRef> arr(radiusArg);
+        size_t arrLen = ArkTSUtils::GetArrayLength(vm, arr);
+        for (size_t i = 0; i < arrLen && i < 4; ++i) {
+            radii.push_back(arr->Get(vm, i)->ToNumber(vm)->Value() * density);
+        }
+    } else if (radiusArg->IsNumber()) {
+        double r = radiusArg->ToNumber(vm)->Value() * density;
+        radii = { r, r, r, r };
+    }
+    if (radii.empty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     p->AddRoundRect(OHOS::Ace::Rect(x, y, w, h), radii);
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Transform(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     TransformParam param;
     double density = PipelineBase::GetCurrentDensity();
@@ -616,12 +566,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Transform(ArkUIR
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::SetTransform(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     TransformParam param;
     double density = PipelineBase::GetCurrentDensity();
@@ -646,12 +592,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ResetTransform(A
 
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::SetLineDash(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> f = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle n = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(n, f, vm), true, panda::JSValueRef::Undefined(vm));
-    auto p = GetOffscreenPattern(n);
+    EcmaVM* vm = nullptr;
+    auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> dashArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::vector<double> segments;
@@ -683,12 +625,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::DrawImage(ArkUIR
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::PutImageData(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto pattern = GetOffscreenPattern(nativeNode);
+    EcmaVM* vm = nullptr;
+    auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> imgArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     if (!imgArg->IsObject(vm)) {
