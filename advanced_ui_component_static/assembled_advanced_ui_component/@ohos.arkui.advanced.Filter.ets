@@ -1123,8 +1123,15 @@ export struct Filter {
         .map((item: FilterResult): ResourceStr => {
           if (typeof item.value !== 'string') {
             let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
-            return (uiContent as common.UIAbilityContext).resourceManager
-              .getStringSync((item.value as Resource).id as Long)
+            try {
+              return (uiContent as common.UIAbilityContext).resourceManager
+                .getStringSync((item.value as Resource).id as Long)
+            } catch (error) {
+              let code: number | undefined = (error as BusinessError).code;
+              let message: string | undefined = (error as BusinessError).message;
+              hilog.error(0x3900, 'Filter', `getStringSync failed, code: ${code}, message: ${message}`);
+              return '';
+            }
           } else {
             return item.value;
           }

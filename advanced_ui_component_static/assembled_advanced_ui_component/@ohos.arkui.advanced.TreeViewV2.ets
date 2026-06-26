@@ -31,6 +31,7 @@ import {
 } from '@ohos.arkui.stateManagement'
 
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
@@ -1656,9 +1657,16 @@ export class TreeControllerV2 {
         } else {
           let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
           if (uiContent) {
-            primaryTitle =
-              (uiContent as common.UIAbilityContext).resourceManager.getStringSync(
-                (nodeParam.primaryTitle as Resource).id as Long)
+            try {
+              primaryTitle =
+                (uiContent as common.UIAbilityContext).resourceManager.getStringSync(
+                  (nodeParam.primaryTitle as Resource).id as Long)
+            } catch (error) {
+              let code: number | undefined = (error as BusinessError).code;
+              let message: string | undefined = (error as BusinessError).message;
+              hilog.error(0x3900, 'TreeViewV2', `getStringSync failed, code: ${code}, message: ${message}`);
+              primaryTitle = '';
+            }
           }
         }
       }
@@ -3000,9 +3008,16 @@ export class ListNodeDataSource extends BasicDataSource {
           } else {
             let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
             if (uiContent) {
-              title =
-                (uiContent as common.UIAbilityContext).resourceManager
-                  .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+              try {
+                title =
+                  (uiContent as common.UIAbilityContext).resourceManager
+                    .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+              } catch (error) {
+                let code: number | undefined = (error as BusinessError).code;
+                let message: string | undefined = (error as BusinessError).message;
+                hilog.error(0x3900, 'TreeViewV2', `getStringSync failed, code: ${code}, message: ${message}`);
+                title = '';
+              }
             }
           }
         }
@@ -3254,9 +3269,16 @@ export class ListNodeDataSource extends BasicDataSource {
                   } else {
                     let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
                     if (uiContent) {
-                      nodeInfo.getNodeItem().mainTitleNode.title =
-                        (uiContent as common.UIAbilityContext).resourceManager
-                          .getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                      try {
+                        nodeInfo.getNodeItem().mainTitleNode.title =
+                          (uiContent as common.UIAbilityContext).resourceManager
+                            .getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                      } catch (error) {
+                        let code: number | undefined = (error as BusinessError).code;
+                        let message: string | undefined = (error as BusinessError).message;
+                        hilog.error(0x3900, 'TreeViewV2', `getStringSync failed, code: ${code}, message: ${message}`);
+                        nodeInfo.getNodeItem().mainTitleNode.title = '';
+                      }
                     }
                   }
                 }

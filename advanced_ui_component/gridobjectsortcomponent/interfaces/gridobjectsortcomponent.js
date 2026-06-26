@@ -1110,6 +1110,7 @@ export class GridObjectSortComponent extends ViewPU {
             ?.off('environment', this.callbackId);
             this.callbackId = void (0);
         }
+        accessibility.off('screenReaderStateChange');
     }
 
     deduplicate(o104) {

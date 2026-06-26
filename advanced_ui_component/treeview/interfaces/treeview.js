@@ -1078,6 +1078,10 @@ export class TreeView extends ViewPU {
         });
     }
 
+    aboutToDisappear() {
+        accessibility.off('screenReaderStateChange');
+    }
+
     decideFontScale() {
         let p26 = this.getUIContext();
         let q26 = p26.getHostContext()?.config?.fontSizeScale ?? 1;

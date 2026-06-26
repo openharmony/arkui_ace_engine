@@ -342,6 +342,7 @@ export struct GridObjectSortComponent {
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
     }
+    accessibility.off('screenReaderStateChange');
   }
 
   // Array deduplication

@@ -28,6 +28,7 @@ import { Param, Local, Monitor, IMonitor, ObservedV2, Trace, Require } from '@oh
 import { Theme } from '@ohos.arkui.theme';
 
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
@@ -848,8 +849,15 @@ export struct ImageMenuItemV2 {
 
   private getAccessibilityDescriptionV2(): string | undefined {
     if (UtilV2.isResourceType(this.itemV2.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'EditableTitleBarV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.itemV2.accessibilityDescription && this.itemV2.accessibilityDescription !== '') {
       return this.itemV2.accessibilityDescription as string;
     }

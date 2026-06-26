@@ -1058,6 +1058,10 @@ export struct TreeViewV2 {
     })
   }
 
+  aboutToDisappear(): void {
+    accessibility.off('screenReaderStateChange');
+  }
+
   decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
     let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;

@@ -26,6 +26,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit, ColorMetrics } from '@ohos.arkui.node';
 import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
 import promptAction from '@ohos.promptAction';
@@ -572,9 +573,16 @@ export struct ToolBarV2 {
     } else if (typeof resource === 'undefined') {
       return this.toStringFormat(this.toolBarList[index]?.content?.text);
     } else {
-      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((resource as Resource).id)
-      return str as string;
+      try {
+        let str: string = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((resource as Resource).id)
+        return str as string;
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'ToolBarV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     }
   }
 
@@ -584,9 +592,16 @@ export struct ToolBarV2 {
     } else if (typeof resource === 'undefined') {
       return '' as string;
     } else {
-      let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-      getStringSync((resource as Resource).id)
-      return str as string;
+      try {
+        let str: string = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+        getStringSync((resource as Resource).id)
+        return str as string;
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'ToolBarV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     }
   }
 
