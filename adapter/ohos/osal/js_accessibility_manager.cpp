@@ -10822,6 +10822,7 @@ bool JsAccessibilityManager::IsDetachFocusCacheClearEvent(AccessibilityEventType
         case AccessibilityEventType::CHANGE:
         case AccessibilityEventType::PAGE_OPEN:
         case AccessibilityEventType::PAGE_CLOSE:
+        case AccessibilityEventType::FOCUS:
             return true;
         case AccessibilityEventType::SCROLLING_EVENT:
         case AccessibilityEventType::SCROLL_END:

@@ -153,9 +153,18 @@ HWTEST_F(JsAccessibilityManagerDetachFocusTest, IsDetachFocusCacheClearEventTest
 {
     EXPECT_FALSE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::CLICK));
     EXPECT_FALSE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::LONG_PRESS));
-    EXPECT_FALSE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::FOCUS));
     EXPECT_FALSE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::TEXT_CHANGE));
     EXPECT_FALSE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED));
+}
+
+/**
+ * @tc.name: IsDetachFocusCacheClearEventTest009
+ * @tc.desc: Test IsDetachFocusCacheClearEvent returns true for FOCUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerDetachFocusTest, IsDetachFocusCacheClearEventTest009, TestSize.Level1)
+{
+    EXPECT_TRUE(manager_->IsDetachFocusCacheClearEvent(AccessibilityEventType::FOCUS));
 }
 
 /**
