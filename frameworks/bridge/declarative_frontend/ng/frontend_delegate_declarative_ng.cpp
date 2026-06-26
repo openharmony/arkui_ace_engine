@@ -782,7 +782,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
+        .onWillDisappear = dialogAttr.onWillDisappear, .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -899,7 +900,9 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -1072,6 +1075,8 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const PromptDialogAttr& dialo
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode,
+        .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
