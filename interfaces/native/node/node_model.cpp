@@ -52,7 +52,7 @@ void* FindFunction(void* library, const char* name)
 #include <dlfcn.h>
 void* FindModule()
 {
-    const char libname[] = "libarkui_ios.dylib";
+    const char libname[] = "libarkui_ios.framework/libarkui_ios";
     void* handle_ = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
     if (!handle_) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libarkui_ios: %{public}s", dlerror());
