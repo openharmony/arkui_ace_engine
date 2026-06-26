@@ -67,7 +67,11 @@ struct Test2 {
     this.data = new MyDataSource(list)
 
     let context = getContext(this) as common.UIAbilityContext
-    this.pix01 = context.resourceManager.getDrawableDescriptor($r('app.media.font1').id).getPixelMap()
+    try {
+      this.pix01 = context.resourceManager.getDrawableDescriptor($r('app.media.font1').id).getPixelMap()
+    } catch (error) {
+      console.error(`aboutToAppear error: ${(error as BusinessError).message}`);
+    }
   }
 
   build() {
