@@ -15,10 +15,13 @@
 
 #include "render_node.h"
 
+#include <cstdlib>
+
 #include "node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "interfaces/native/native_error_message_macros.h"
 
@@ -28,7 +31,6 @@
 extern "C" {
 #endif
 
-std::map<int32_t, ArkUIRenderNodeHandle> g_renderNodeMap;
 std::set<ArkUIRenderModifierHandle> g_modifierSet;
 std::set<ArkUIPropertyHandle> g_propertySet;
 
@@ -140,7 +142,6 @@ ArkUI_RenderNodeHandle OH_ArkUI_RenderNodeUtils_CreateNode()
         return nullptr;
     }
     ArkUI_RenderNode* arkUIRenderNode = new ArkUI_RenderNode({ renderNode });
-    g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
     return arkUIRenderNode;
 }
 
@@ -156,10 +157,6 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
         SET_ERROR_MESSAGE(
             OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    auto it = g_renderNodeMap.find(nodeId);
-    if (it != g_renderNodeMap.end()) {
-        g_renderNodeMap.erase(it);
     }
     impl->getNodeModifiers()->getNDKRenderNodeModifier()->deleteInnerRenderNodeStruct(node->renderNodeHandle);
     // deleteInnerRenderNodeStruct does not set node->renderNodeHandle to nullptr
@@ -240,6 +237,9 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
 
 int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t index, ArkUI_RenderNodeHandle* child)
 {
+    if (!child) {
+        LOGF_ABORT("Render child output parameter is null");
+    }
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (index < 0) {
@@ -250,7 +250,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNode;
+    ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChild(
         node->renderNodeHandle, index, &renderNode, &nodeId);
@@ -258,27 +258,22 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        // Find in map first, try return same handle.
-        auto it = g_renderNodeMap.find(nodeId);
-        if (it != g_renderNodeMap.end()) {
-            // delete renderNode;
-            renderNode = it->second;
-        }
-        // If don't exit, create a new handle.
         *child = new ArkUI_RenderNode({ renderNode });
-        g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
     }
     return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* child)
 {
+    if (!child) {
+        LOGF_ABORT("Render child output parameter is null");
+    }
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNode;
+    ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFirstChild(
         node->renderNodeHandle, &renderNode, &nodeId);
@@ -286,27 +281,22 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkU
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        // Find in map first, try return same handle.
-        auto it = g_renderNodeMap.find(nodeId);
-        if (it != g_renderNodeMap.end()) {
-            // delete renderNode;
-            renderNode = it->second;
-        }
-        // If don't exit, create a new handle.
         *child = new ArkUI_RenderNode({ renderNode });
-        g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
     }
     return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
+    if (!sibling) {
+        LOGF_ABORT("Render sibling output parameter is null");
+    }
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNode;
+    ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getNextSibling(
         node->renderNodeHandle, &renderNode, &nodeId);
@@ -314,27 +304,22 @@ int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, Ark
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        // Find in map first, try return same handle.
-        auto it = g_renderNodeMap.find(nodeId);
-        if (it != g_renderNodeMap.end()) {
-            // delete renderNode;
-            renderNode = it->second;
-        }
-        // If don't exit, create a new handle.
         *sibling = new ArkUI_RenderNode({ renderNode });
-        g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
     }
     return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
+    if (!sibling) {
+        LOGF_ABORT("Render sibling output parameter is null");
+    }
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNode;
+    ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPreviousSibling(
         node->renderNodeHandle, &renderNode, &nodeId);
@@ -342,15 +327,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node,
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        // Find in map first, try return same handle.
-        auto it = g_renderNodeMap.find(nodeId);
-        if (it != g_renderNodeMap.end()) {
-            // delete renderNode;
-            renderNode = it->second;
-        }
-        // If don't exit, create a new handle.
         *sibling = new ArkUI_RenderNode({ renderNode });
-        g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
     }
     return result;
 }
@@ -358,13 +335,19 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node,
 int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle** children, int32_t* count)
 {
+    if (!children) {
+        LOGF_ABORT("Render children output parameter is null");
+    }
+    if (!count) {
+        LOGF_ABORT("Render children count output parameter is null");
+    }
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle* renderNode;
-    uint32_t* nodeId;
+    ArkUIRenderNodeHandle* renderNode = nullptr;
+    uint32_t* nodeId = nullptr;
     int32_t nodeCount = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildren(
         node->renderNodeHandle, &renderNode, &nodeId, &nodeCount);
@@ -376,9 +359,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
         ArkUI_RenderNodeHandle* childrenList = new ArkUI_RenderNodeHandle[nodeCount];
         for (int32_t i = 0; i < nodeCount; i++) {
             childrenList[i] = new ArkUI_RenderNode({ renderNode[i] });
-            g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId[i], renderNode[i]));
         }
         *children = childrenList;
+        delete[] renderNode;
+        delete[] nodeId;
     }
     return result;
 }
@@ -2221,7 +2205,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNodeHandle;
+    ArkUIRenderNodeHandle renderNodeHandle = nullptr;
     int renderNodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNode(
         node->uiNodeHandle, &renderNodeHandle, &renderNodeId);
@@ -2229,10 +2213,6 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        auto iter = g_renderNodeMap.find(renderNodeId);
-        if (iter == g_renderNodeMap.end()) {
-            g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(renderNodeId, renderNodeHandle));
-        }
         *renderNode = new ArkUI_RenderNode({ renderNodeHandle });
     }
     return result;
@@ -2265,7 +2245,7 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    ArkUIRenderNodeHandle renderNode;
+    ArkUIRenderNodeHandle renderNode = nullptr;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNodeAt(
         node->uiNodeHandle, position, &renderNode, &nodeId);
@@ -2273,12 +2253,6 @@ ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
         SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == ARKUI_ERROR_CODE_NO_ERROR) {
-        auto iter = g_renderNodeMap.find(nodeId);
-        if (iter != g_renderNodeMap.end()) {
-            renderNode = iter->second;
-        } else {
-            g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
-        }
         *child = new ArkUI_RenderNode({ renderNode });
     }
     return static_cast<ArkUI_ErrorCode>(result);

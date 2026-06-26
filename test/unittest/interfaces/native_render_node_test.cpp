@@ -32,7 +32,6 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/core/components_ng/base/mixed_mount_registry.h"
-#include "frameworks/core/components_ng/base/ui_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -173,26 +172,46 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest004, TestSize.Level1)
     OH_ArkUI_RenderNodeUtils_SetSize(rsNodeThirdChild, 250, 250); // size 250 marker node.
 
     int w = 0;
-    ArkUI_RenderNodeHandle nodeTemp;
-    result = OH_ArkUI_RenderNodeUtils_GetFirstChild(rootRenderNode, &nodeTemp);
-    OH_ArkUI_RenderNodeUtils_GetSize(nodeTemp, &w, &w);
+    ArkUI_RenderNodeHandle firstChildQuery = nullptr;
+    result = OH_ArkUI_RenderNodeUtils_GetFirstChild(rootRenderNode, &firstChildQuery);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_GetSize(firstChildQuery, &w, &w);
     ASSERT_EQ(w, 100); //100 represents rsNodeFirstChild.
-    result = OH_ArkUI_RenderNodeUtils_GetChild(rootRenderNode, 1, &nodeTemp);
-    OH_ArkUI_RenderNodeUtils_GetSize(nodeTemp, &w, &w);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstChildQuery), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle secondChildQuery = nullptr;
+    result = OH_ArkUI_RenderNodeUtils_GetChild(rootRenderNode, 1, &secondChildQuery);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_GetSize(secondChildQuery, &w, &w);
     ASSERT_EQ(w, 200); //200 represents rsNodeSecondChild.
-    result = OH_ArkUI_RenderNodeUtils_GetNextSibling(rsNodeSecondChild, &nodeTemp);
-    OH_ArkUI_RenderNodeUtils_GetSize(nodeTemp, &w, &w);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondChildQuery), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle nextSibling = nullptr;
+    result = OH_ArkUI_RenderNodeUtils_GetNextSibling(rsNodeSecondChild, &nextSibling);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_GetSize(nextSibling, &w, &w);
     ASSERT_EQ(w, 250); //250 represents rsNodeThirdChild.
-    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(rsNodeSecondChild, &nodeTemp);
-    OH_ArkUI_RenderNodeUtils_GetSize(nodeTemp, &w, &w);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nextSibling), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle previousSibling = nullptr;
+    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(rsNodeSecondChild, &previousSibling);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_GetSize(previousSibling, &w, &w);
     ASSERT_EQ(w, 100); //100 represents rsNodeFirstChild.
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(previousSibling), ARKUI_ERROR_CODE_NO_ERROR);
 
-    ArkUI_RenderNodeHandle* nodeList;
+    ArkUI_RenderNodeHandle* nodeList = nullptr;
     int count = 0;
-    OH_ArkUI_RenderNodeUtils_GetChildren(rootRenderNode, &nodeList, &count);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetChildren(rootRenderNode, &nodeList, &count), ARKUI_ERROR_CODE_NO_ERROR);
     ASSERT_EQ(count, 3); //3 represents the number of sub-nodes that have been added by the sub-nodes.
+    ASSERT_NE(nodeList, nullptr);
     OH_ArkUI_RenderNodeUtils_GetSize(nodeList[0], &w, &w);
     ASSERT_EQ(w, 100); //100 represents rsNodeFirstChild.
+    for (int32_t i = 0; i < count; i++) {
+        EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nodeList[i]), ARKUI_ERROR_CODE_NO_ERROR);
+    }
+    delete[] nodeList;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rsNodeFirstChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rsNodeSecondChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rsNodeThirdChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rootRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1515,6 +1534,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest003, TestSize.Level1)
     result = OH_ArkUI_RenderNodeUtils_GetRenderNode(customNode, &renderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
     ASSERT_NE(renderNode, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1744,14 +1764,19 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest002, TestSize.Level
     ASSERT_NE(queryNode, nullptr);
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(width, secondSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(queryNode), ARKUI_ERROR_CODE_NO_ERROR);
+    queryNode = nullptr;
     ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 1, &queryNode), ARKUI_ERROR_CODE_NO_ERROR);
     ASSERT_NE(queryNode, nullptr);
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(queryNode), ARKUI_ERROR_CODE_NO_ERROR);
+    queryNode = nullptr;
     ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 2, &queryNode), ARKUI_ERROR_CODE_NO_ERROR);
     ASSERT_NE(queryNode, nullptr);
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(width, thirdSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(queryNode), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_RemoveRenderNode(rootCustomNode, firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
@@ -1761,6 +1786,9 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest002, TestSize.Level
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(count, 0);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(thirdRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1922,6 +1950,12 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest006, TestSize.Level
     ASSERT_NE(previousSibling, nullptr);
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildrenCount(previousSibling, &childCount), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(childCount, 2);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(previousSibling), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nextSibling), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstChildRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstLeafRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstSecondLeafRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondLeafRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -1962,6 +1996,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest007, TestSize.Level
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(mixedParentNode, &count),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(count, 0);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(adoptedRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -2258,5 +2293,214 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeBlurTest004, TestSize.Level1)
         ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
 
     OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeRepeatedQueryPureRenderChild
+ * @tc.desc: Test repeated render node child queries return independently disposable render nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeRepeatedQueryPureRenderChild, TestSize.Level1)
+{
+    constexpr int32_t firstSize = 100;
+    constexpr int32_t secondSize = 200;
+    constexpr int32_t thirdSize = 300;
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto firstChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto thirdChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    ASSERT_NE(firstChild, nullptr);
+    ASSERT_NE(secondChild, nullptr);
+    ASSERT_NE(thirdChild, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(firstChild, firstSize, firstSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(secondChild, secondSize, secondSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(thirdChild, thirdSize, thirdSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, firstChild), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, secondChild), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, thirdChild), ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t width = 0;
+    int32_t height = 0;
+    ArkUI_RenderNodeHandle firstQueryOne = nullptr;
+    ArkUI_RenderNodeHandle firstQueryTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetFirstChild(rootRenderNode, &firstQueryOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetFirstChild(rootRenderNode, &firstQueryTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(firstQueryOne, nullptr);
+    ASSERT_NE(firstQueryTwo, nullptr);
+    EXPECT_NE(firstQueryOne, firstQueryTwo);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(firstQueryOne, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(firstQueryTwo, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstQueryOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstQueryTwo), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle secondQueryOne = nullptr;
+    ArkUI_RenderNodeHandle secondQueryTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetChild(rootRenderNode, 1, &secondQueryOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetChild(rootRenderNode, 1, &secondQueryTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(secondQueryOne, nullptr);
+    ASSERT_NE(secondQueryTwo, nullptr);
+    EXPECT_NE(secondQueryOne, secondQueryTwo);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(secondQueryOne, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, secondSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(secondQueryTwo, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, secondSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondQueryOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondQueryTwo), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle nextSiblingOne = nullptr;
+    ArkUI_RenderNodeHandle nextSiblingTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetNextSibling(secondChild, &nextSiblingOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetNextSibling(secondChild, &nextSiblingTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(nextSiblingOne, nullptr);
+    ASSERT_NE(nextSiblingTwo, nullptr);
+    EXPECT_NE(nextSiblingOne, nextSiblingTwo);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(nextSiblingOne, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, thirdSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(nextSiblingTwo, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, thirdSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nextSiblingOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nextSiblingTwo), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle previousSiblingOne = nullptr;
+    ArkUI_RenderNodeHandle previousSiblingTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetPreviousSibling(secondChild, &previousSiblingOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetPreviousSibling(secondChild, &previousSiblingTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(previousSiblingOne, nullptr);
+    ASSERT_NE(previousSiblingTwo, nullptr);
+    EXPECT_NE(previousSiblingOne, previousSiblingTwo);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(previousSiblingOne, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(previousSiblingTwo, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(previousSiblingOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(previousSiblingTwo), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(thirdChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rootRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeGetChildrenIndependentHandles
+ * @tc.desc: Test GetChildren returns independently disposable render node handles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGetChildrenIndependentHandles, TestSize.Level1)
+{
+    constexpr int32_t firstSize = 100;
+    constexpr int32_t secondSize = 200;
+    constexpr int32_t childCount = 2;
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto firstChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    ASSERT_NE(firstChild, nullptr);
+    ASSERT_NE(secondChild, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(firstChild, firstSize, firstSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(secondChild, secondSize, secondSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, firstChild), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, secondChild), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle* children = nullptr;
+    int32_t count = 0;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetChildren(rootRenderNode, &children, &count), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(children, nullptr);
+    ASSERT_EQ(count, childCount);
+
+    int32_t width = 0;
+    int32_t height = 0;
+    ASSERT_NE(children[0], nullptr);
+    ASSERT_NE(children[1], nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(children[0], &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(children[1], &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, secondSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(children[0]), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(children[1]), ARKUI_ERROR_CODE_NO_ERROR);
+    delete[] children;
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(firstChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(secondChild), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(rootRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeRepeatedQueryMixedRenderNodeAt
+ * @tc.desc: Test repeated mixed render node queries return independently disposable render nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeRepeatedQueryMixedRenderNodeAt, TestSize.Level1)
+{
+    constexpr int32_t childSize = 120;
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    auto childRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(childRenderNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(childRenderNode, childSize, childSize), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, childRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t width = 0;
+    int32_t height = 0;
+    ArkUI_RenderNodeHandle queryNodeOne = nullptr;
+    ArkUI_RenderNodeHandle queryNodeTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &queryNodeOne),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &queryNodeTwo),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(queryNodeOne, nullptr);
+    ASSERT_NE(queryNodeTwo, nullptr);
+    EXPECT_NE(queryNodeOne, queryNodeTwo);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNodeOne, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, childSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNodeTwo, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, childSize);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(queryNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(queryNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(childRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeRepeatedQueryAdoptedRenderNode
+ * @tc.desc: Test repeated adopted render node queries return independently disposable render nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeRepeatedQueryAdoptedRenderNode, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto customNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_NE(customNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_NativeModule_AdoptChild(rootCustomNode, customNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle renderNodeOne = nullptr;
+    ArkUI_RenderNodeHandle renderNodeTwo = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNode(customNode, &renderNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNode(customNode, &renderNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(renderNodeOne, nullptr);
+    ASSERT_NE(renderNodeTwo, nullptr);
+    EXPECT_NE(renderNodeOne, renderNodeTwo);
+    auto option = OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption();
+    ASSERT_NE(option, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(option, 6.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(renderNodeOne, option),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(renderNodeTwo, option),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
 }
 } // namespace OHOS::Ace
