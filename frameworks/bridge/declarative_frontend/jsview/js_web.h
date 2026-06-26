@@ -250,10 +250,10 @@ public:
     static void EnableDefaultContextMenu(const JSCallbackInfo& args);
     static void EnableScrollDirectionalLock(const JSCallbackInfo& args);
     static void ScrollbarLayoutPolicy(const JSCallbackInfo& args);
+    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
-    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
     static void ParseJsCustomKeyboardOption(const JsiExecutionContext& context,
         const JSRef<JSVal>& keyboardOpt, WebKeyboardOption& keyboardOption);
 

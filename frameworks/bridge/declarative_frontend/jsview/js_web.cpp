@@ -1433,6 +1433,7 @@ public:
             if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
                 return;
             }
+            JSWeb::ParseRawfileWebSrc(args[0], resourceUrl);
             auto np = resourceUrl.find_first_of("/");
             url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
             response_->SetResourceUrl(url);
