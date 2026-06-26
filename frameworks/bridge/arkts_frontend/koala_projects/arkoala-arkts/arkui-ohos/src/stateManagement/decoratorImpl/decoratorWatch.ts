@@ -95,13 +95,15 @@ export class SubscribedWatches implements ISubscribedWatches {
         return this.subscribers_.delete(id);
     }
     public executeOnSubscribingWatches(propertyName: string): void {
-        this.subscribers_.forEach((watchId: WatchIdType) => {
-            if (!WatchFunc.execWatchById(watchId, propertyName)) {
-                // lazy delete WatchIds from subscribers_ Set
-                // whose watchId has been removed from watchId2WatchFunc by
-                // watchFinalizer
-                this.subscribers_.delete(watchId);
-            }
-        });
+        if (this.subscribers_.size > 0) {
+            this.subscribers_.forEach((watchId: WatchIdType) => {
+                if (!WatchFunc.execWatchById(watchId, propertyName)) {
+                    // lazy delete WatchIds from subscribers_ Set
+                    // whose watchId has been removed from watchId2WatchFunc by
+                    // watchFinalizer
+                    this.subscribers_.delete(watchId);
+                }
+            });
+        }
     }
 }

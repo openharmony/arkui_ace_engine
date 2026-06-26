@@ -29,9 +29,6 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
     protected readonly metaDependency_: IMutableStateMeta;
 
     constructor(propertyName: string, initValue: T) {
-        if (!this.isValueValid(initValue)) {
-            throw new TypeError(`${propertyName} init with non-Observed object. Type error.`);
-        }
         this.propertyName_ = propertyName;
         this.value_ = initValue;
         // Pass `this` as the wildcard LSV target so fireChange()'s addDirtyRef

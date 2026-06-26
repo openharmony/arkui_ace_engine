@@ -223,6 +223,9 @@ export class ObserveSingleton implements IObserve {
         // callback land in a fresh map, so the in-flight drain doesn't
         // double-visit refs from the current pass.
         const pending = this.syncMonitorsPropRefsChanged_;
+        if (pending.size === 0) {
+            return;
+        }
         this.syncMonitorsPropRefsChanged_ =
             new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
         const monitorsToRun = this.notifyDirtyMonitorPaths(pending);

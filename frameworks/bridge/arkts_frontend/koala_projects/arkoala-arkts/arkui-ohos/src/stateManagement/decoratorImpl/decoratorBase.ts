@@ -234,7 +234,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 
     /* compiler BUG: change to protcted */
     public registerWatchForObservedObjectChanges(value: T): void {
-        if (!(value && value instanceof Object)) {
+        if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return;
         }
         if (StateMgmtTool.isIWatchSubscriberRegister(value)) {
@@ -249,7 +249,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 
     /* compiler BUG: change to protcted */
     public unregisterWatchFromObservedObjectChanges(value: T): void {
-        if (!(value && typeof value === 'object')) {
+        if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return;
         }
         if (StateMgmtTool.isIWatchSubscriberRegister(value)) {

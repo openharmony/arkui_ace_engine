@@ -122,7 +122,7 @@ export class StoragePropRefDecoratedVariable<T>
 
     removePrivateWatchSubscription(): void {
         const value = this.backing_.get(false);
-        if (!(value instanceof Object)) {
+        if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return;
         }
         // @Observed/WrappedArray/Map/Set/Date
@@ -136,7 +136,7 @@ export class StoragePropRefDecoratedVariable<T>
 
     addPrivateWatchSubscription(): void {
         const value = this.backing_.get(false);
-        if (!(value instanceof Object)) {
+        if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return;
         }
         // @Observed/WrappedArray/Map/Set/Date
