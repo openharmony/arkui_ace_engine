@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3567,6 +3567,13 @@ void JSWeb::Create(const JSCallbackInfo& info)
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+            int32_t parentNWebId = -1;
+            auto controllerRef = webviewController;
+            if (JSWebWindowNewHandler::ExistController(controllerRef, parentNWebId) && parentNWebId != -1) {
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, true);
+            }
+#endif
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
