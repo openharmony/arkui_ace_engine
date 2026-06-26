@@ -35,6 +35,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
 const char* TOGGLE_NODEPTR_OF_UINODE = "nodePtr_";
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 {
@@ -916,8 +917,19 @@ ArkUINativeModuleValue ToggleBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* ru
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
         bool flag = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo);
         auto colorRawPtr = AceType::RawPtr(colorResObj);
-        toggleModifier->setToggleBackgroundColorByJs(
-            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        auto headRoomOptional = color.GetHeadRoomColor();
+        if (headRoomOptional.has_value()) {
+            auto colorWithHeadRoom = headRoomOptional.value();
+            ArkUI_Float32 hdrValues[NUM_5] = { static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.green), static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom) };
+            toggleModifier->setToggleBackgroundColorForHDR(
+                nativeNode, hdrValues, color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        } else {
+            toggleModifier->setToggleBackgroundColorByJs(
+                nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        }
     } else {
         Color color;
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
