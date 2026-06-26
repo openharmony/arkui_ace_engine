@@ -1245,6 +1245,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     if (fontScale == AGE_SCALE_NUMBER) {
         buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(popupTheme->GetButtonHeight())));
     }
+    auto enablePopupFlexGrow = popupTheme->GetEnablePopupFlexGrow();
+    if (enablePopupFlexGrow) {
+        buttonProp->UpdateFlexGrow(1.0f);
+    }
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
     buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
