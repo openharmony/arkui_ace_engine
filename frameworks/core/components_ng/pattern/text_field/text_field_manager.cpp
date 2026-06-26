@@ -308,6 +308,8 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     if (LessNotEqual(diffTop, 0)) {
         TAG_LOGI(ACE_KEYBOARD, "Scroll:%{public}s Caret:%{public}s Offset=%{public}f DiffTop=%{public}f",
             scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
+        // USER: keyboard show/hide caused by user focusing/blurring the TextField
+        scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return true;
     }
@@ -330,6 +332,8 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         TAG_LOGI(ACE_KEYBOARD, "caret > scroll area, skip");
         return false;
     }
+     // USER: keyboard show/hide caused by user focusing/blurring the TextField
+    scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }

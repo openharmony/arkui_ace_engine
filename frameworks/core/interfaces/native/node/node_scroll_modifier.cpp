@@ -542,6 +542,7 @@ void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->ScrollPage(next, animation);
 }
 

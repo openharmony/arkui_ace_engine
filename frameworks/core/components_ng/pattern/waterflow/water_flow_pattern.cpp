@@ -90,6 +90,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
@@ -969,6 +970,7 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto self = wp.Upgrade();
         CHECK_NULL_RETURN(self, false);
+        self->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             self->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
         } else if (index == FocusHub::SCROLL_TO_TAIL) {
@@ -988,6 +990,7 @@ ScrollOffsetAbility WaterFlowPattern::GetScrollOffsetAbility(bool isAccessibilit
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
                 pattern->ScrollBy(-moveOffset);
                 return true;
             },
@@ -1169,6 +1172,7 @@ void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
 void WaterFlowPattern::ScrollToFocusItem(int32_t itemIdx)
 {
     ScrollAlign align = ScrollAlign::AUTO;
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     ScrollToIndex(itemIdx, false, align);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

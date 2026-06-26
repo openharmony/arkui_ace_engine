@@ -163,6 +163,7 @@ std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             pattern->ScrollToIndex(0, false, ScrollAlign::CENTER);
         } else if (index == FocusHub::SCROLL_TO_TAIL) {
