@@ -106,7 +106,7 @@ typedef enum {
     ARKUI_NODE_TEXT_EDITOR = 22,
     /**
      * ArcAlphabetIndexer.
-     * @since 26.0.0
+     * @since 26.1.0
      */
     ARKUI_NODE_ARC_ALPHABET_INDEXER = 23,
     /** Stack container. */
@@ -175,7 +175,7 @@ typedef enum {
      */
     ARKUI_NODE_ARC_SCROLL_BAR = 1021,
     /** Arc swiper.
-     *  @since 26.0.0
+     *  @since 26.1.0
      */
     ARKUI_NODE_ARC_SWIPER = 1022,
 } ArkUI_NodeType;
@@ -6906,7 +6906,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .object: array of the alphabet index, the type is string array. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_ARRAY = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
 
@@ -6919,7 +6919,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].u32: color of the text,  in 0xARGB format. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_COLOR,
 
@@ -6932,7 +6932,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].u32: color of the text,  in 0xARGB format. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_SELECTED_COLOR,
 
@@ -6945,7 +6945,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].u32: color of the text,  in 0xARGB format. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_POPUP_COLOR,
 
@@ -6958,7 +6958,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].u32: color of the background,  in 0xARGB format. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_SELECTED_BACKGROUND_COLOR,
 
@@ -6971,7 +6971,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].u32: color of the background,  in 0xARGB format. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_POPUP_BACKGROUND_COLOR,
 
@@ -6985,7 +6985,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to use a pop-up. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_USE_POPUP,
 
@@ -7007,7 +7007,7 @@ typedef enum {
      * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
      * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_SELECTED_FONT,
 
@@ -7029,7 +7029,7 @@ typedef enum {
      * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
      * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_POPUP_FONT,
 
@@ -7051,7 +7051,7 @@ typedef enum {
      * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
      * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_FONT,
 
@@ -7065,7 +7065,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].f32: the letter area is a circle, set the diameter of the circle, in vp. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE,
 
@@ -7078,7 +7078,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: the selected index. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_SELECTED,
 
@@ -7093,7 +7093,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to collapse the characters when the indexer bar is not enough to display all characters. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_AUTO_COLLAPSE,
 
@@ -7107,7 +7107,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: blur style of the pop-up window. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_POPUP_BACKGROUND_BLUR_STYLE,
 
@@ -9799,7 +9799,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: index value of the child component. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
 
@@ -9812,11 +9812,11 @@ typedef enum {
      * and <b>0</b> means the opposite. The default value is <b>1</b>. \n
      * .value[1].i32: direction of the ArcSwiper indicator. The parameter type is {@link OH_ArkUI_ArcDirection}. \n
      * The default value is <b>OH_ARKUI_ARCDIRECTION_SIX_CLOCK_DIRECTION</b>. Optional. \n
-     * .value[2].i32: color of the unselected points, in 0xARGB format, \n
+     * .value[2].u32: color of the unselected points, in 0xARGB format, \n
      * and the default value is <b>0xA9FFFFFF</b>. Optional. \n
-     * .value[3].i32: color of the selected point, in 0xARGB format, \n
+     * .value[3].u32: color of the selected point, in 0xARGB format, \n
      * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
-     * .value[4].i32: background color of the ArcSwiper indicator after long pressed, in 0xARGB format, \n
+     * .value[4].u32: background color of the ArcSwiper indicator after long pressed, in 0xARGB format, \n
      * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
      * .object: gradient color for the mask. Optional. \n
      * Array of color stops, each of which consists of a color and its stop position. \n
@@ -9827,12 +9827,12 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to show indicator. \n
      * .value[1].i32: direction of the ArcSwiper indicator. \n
-     * .value[2].i32: color of the unselected points. \n
-     * .value[3].i32: color of the selected point. \n
-     * .value[4].i32: background color of the ArcSwiper indicator after long pressed. \n
+     * .value[2].u32: color of the unselected points. \n
+     * .value[3].u32: color of the selected point. \n
+     * .value[4].u32: background color of the ArcSwiper indicator after long pressed. \n
      * .object: gradient color for the mask. \n
      *
-     * @since 26.0.0 
+     * @since 26.1.0
      *
      */
     NODE_ARC_SWIPER_INDICATOR,
@@ -9846,7 +9846,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: the animation duration. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_DURATION,
 
@@ -9860,7 +9860,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to display vertically. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_VERTICAL,
 
@@ -9874,7 +9874,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to disable the swipe feature. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_DISABLE_SWIPE,
 
@@ -9888,7 +9888,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: the sensitivity of rotating crown. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_DIGITAL_CROWN_SENSITIVITY,
 
@@ -9904,7 +9904,7 @@ typedef enum {
      * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached. \n
      * The parameter type is {@link ArkUI_EdgeEffect}. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_EFFECT_MODE,
 
@@ -9918,7 +9918,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].i32: whether to disable the transition animation. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_DISABLE_TRANSITION_ANIMATION,
 } ArkUI_NodeAttributeType;
@@ -11267,7 +11267,7 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_ALPHABET_INDEXER_EVENT_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
 
@@ -12203,7 +12203,7 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
 
@@ -12221,7 +12221,7 @@ typedef enum {
      * of the swiper along the main axis. \n
      * <b>ArkUI_NodeComponentEvent.data[4].f32</b>: hand-off velocity. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_EVENT_ON_ANIMATION_START,
 
@@ -12235,7 +12235,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
      * start position of the swiper along the main axis. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END,
 
@@ -12250,7 +12250,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
      * start position of the swiper along the main axis. \n
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE,
 } ArkUI_NodeEventType;
@@ -14299,7 +14299,7 @@ int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  * @systemapi
- * @since 26.0.0
+ * @since 26.1.0
  */
 int32_t OH_ArkUI_ArcSwiper_ShowPrevious(ArkUI_NodeHandle node);
 
@@ -14311,7 +14311,7 @@ int32_t OH_ArkUI_ArcSwiper_ShowPrevious(ArkUI_NodeHandle node);
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  * @systemapi
- * @since 26.0.0
+ * @since 26.1.0
  */
 int32_t OH_ArkUI_ArcSwiper_ShowNext(ArkUI_NodeHandle node);
 
@@ -14323,7 +14323,7 @@ int32_t OH_ArkUI_ArcSwiper_ShowNext(ArkUI_NodeHandle node);
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  * @systemapi
- * @since 26.0.0
+ * @since 26.1.0
  */
 int32_t OH_ArkUI_ArcSwiper_FinishAnimation(ArkUI_NodeHandle node);
 

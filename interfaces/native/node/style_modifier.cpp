@@ -23991,7 +23991,8 @@ int32_t SetArcAlphabetIndexerPopupBackgroundBlurStyle(ArkUI_NodeHandle node, con
     auto modifier = GetFullImpl()->getNodeModifiers()->getAlphabetIndexerModifier();
     CHECK_NULL_RETURN(modifier, ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED);
     CHECK_NULL_RETURN(modifier->setPopupBackgroundBlurStyle, ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED);
-    modifier->setPopupBackgroundBlurStyle(node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[NUM_0].i32));
+    modifier->setPopupBackgroundBlurStyle(
+        node->uiNodeHandle, static_cast<ArkUI_Uint32>(ConvertBlurStyle(item->value[NUM_0].i32)));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -23999,8 +24000,9 @@ void ResetArcAlphabetIndexerPopupBackgroundBlurStyle(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getAlphabetIndexerModifier();
     CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->resetPopupBackgroundBlurStyle);
-    modifier->resetPopupBackgroundBlurStyle(node->uiNodeHandle);
+    CHECK_NULL_VOID(modifier->setPopupBackgroundBlurStyle);
+    modifier->setPopupBackgroundBlurStyle(
+        node->uiNodeHandle, static_cast<ArkUI_Uint32>(ConvertBlurStyle(ARKUI_BLUR_STYLE_NONE)));
 }
 
 const ArkUI_AttributeItem* GetArcAlphabetIndexerPopupBackgroundBlurStyle(ArkUI_NodeHandle node)
@@ -24008,7 +24010,7 @@ const ArkUI_AttributeItem* GetArcAlphabetIndexerPopupBackgroundBlurStyle(ArkUI_N
     auto modifier = GetFullImpl()->getNodeModifiers()->getAlphabetIndexerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     CHECK_NULL_RETURN(modifier->getPopupBackgroundBlurStyle, nullptr);
-    g_numberValues[NUM_0].i32 = modifier->getPopupBackgroundBlurStyle(node->uiNodeHandle);
+    g_numberValues[NUM_0].i32 = UnConvertBlurStyle(modifier->getPopupBackgroundBlurStyle(node->uiNodeHandle));
     g_attributeItem.size = RETURN_SIZE_ONE;
     return &g_attributeItem;
 }

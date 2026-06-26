@@ -501,7 +501,7 @@ void SetArcSwiperChange(ArkUINodeHandle node, void* extraParam)
         CHECK_NULL_VOID(weak.Upgrade());
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            LOGE("ArcSwiper onChange callback execute failed.");
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "ArcSwiper onChange callback execute failed.");
             return;
         }
         int32_t index = swiperInfo->GetIndex();

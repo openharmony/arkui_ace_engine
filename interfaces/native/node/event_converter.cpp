@@ -311,7 +311,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
         case NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_ARC_SWIPER_GESTURE_SWIPE;
         case NODE_ARC_ALPHABET_INDEXER_EVENT_ON_SELECT:
-            return ON_ALPHABET_INDEXER_SELECTED;
+            return ON_ARC_ALPHABET_INDEXER_SELECTED;
         case NODE_ON_WILL_SCROLL:
             return ON_WATER_FLOW_WILL_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
@@ -666,7 +666,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END;
         case ON_ARC_SWIPER_GESTURE_SWIPE:
             return NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE;
-        case ON_ALPHABET_INDEXER_SELECTED:
+        case ON_ARC_ALPHABET_INDEXER_SELECTED:
             return NODE_ARC_ALPHABET_INDEXER_EVENT_ON_SELECT;
         case ON_LIST_SCROLL:
             return NODE_SCROLL_EVENT_ON_SCROLL;

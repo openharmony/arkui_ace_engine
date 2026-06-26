@@ -685,7 +685,7 @@ ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
 
 // ArcAlphabetIndexer
 ACE_EXPORT extern const char ARC_INDEXER_COMPONENT_TAG[];
-ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
 
 // Magnifier
 ACE_EXPORT extern const char MAGNIFIER_TAG[];

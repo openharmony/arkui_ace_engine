@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_impl.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
+#include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -560,7 +562,7 @@ const char* GetIndexerFontValue(
     auto layoutProperty = GetIndexerLayoutProperty(node);
     thread_local std::string families;
     if (layoutProperty) {
-        const auto& textStyle = (layoutProperty.GetRawPtr()->*getFont)();
+        const auto& textStyle = ((*layoutProperty).*getFont)();
         if (textStyle.has_value()) {
             if (size) {
                 *size = static_cast<float>(textStyle->GetFontSize().Value());
@@ -889,11 +891,13 @@ void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const int32_t selected) {
+    auto subKind = frameNode->GetTag() == V2::ARC_INDEXER_ETS_TAG ? ON_ARC_ALPHABET_INDEXER_SELECTED :
+        ON_ALPHABET_INDEXER_SELECTED;
+    auto onEvent = [extraParam, subKind](const int32_t selected) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_SELECTED;
+        event.componentAsyncEvent.subKind = subKind;
         event.componentAsyncEvent.data[0].i32 = selected;
         SendArkUISyncEvent(&event);
     };

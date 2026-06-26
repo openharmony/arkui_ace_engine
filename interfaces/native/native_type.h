@@ -6891,25 +6891,25 @@ typedef enum {
 /**
  * @brief Enumerates the ArcDirection.
  *
- * @since 26.0.0
+ * @since 26.1.0
  */
 typedef enum {
     /**
      * 3 o'clock direction.
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     OH_ARKUI_ARCDIRECTION_THREE_CLOCK_DIRECTION = 0,
     /**
      * 6 o'clock direction.
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     OH_ARKUI_ARCDIRECTION_SIX_CLOCK_DIRECTION = 1,
     /**
      * 9 o'clock direction.
      *
-     * @since 26.0.0
+     * @since 26.1.0
      */
     OH_ARKUI_ARCDIRECTION_NINE_CLOCK_DIRECTION = 2
 } OH_ArkUI_ArcDirection;
