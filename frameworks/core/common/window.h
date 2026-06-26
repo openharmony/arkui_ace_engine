@@ -295,6 +295,8 @@ public:
         return ids;
     }
 
+    virtual void GoBackgroundForNodeRelease() {}
+    virtual void NotifyWindowAttachStateChange(bool status) {}
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

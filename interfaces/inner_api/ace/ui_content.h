@@ -163,6 +163,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
+    virtual void NotifyWindowAttachStateChange(bool status) {};
     virtual void Focus() = 0;
     virtual void UnFocus() = 0;
     virtual void Destroy() = 0;

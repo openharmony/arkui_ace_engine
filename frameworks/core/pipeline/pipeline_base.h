@@ -1620,6 +1620,9 @@ public:
     {
         return WindowSizeChangeReason::UNDEFINED;
     }
+
+    void NotifyWindowAttachStateChange(bool status);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

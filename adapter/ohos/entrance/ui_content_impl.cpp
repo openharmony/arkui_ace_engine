@@ -2993,6 +2993,36 @@ void UIContentImpl::Background()
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
 }
 
+void UIContentImpl::NotifyWindowAttachStateChange(bool status)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGW("Fail to NotifyWindowAttachStateChange for invalid %{public}d", instanceId_);
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        pipelineContext->NotifyWindowAttachStateChange(status);
+    } else {
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, status]() {
+                ContainerScope scope(instanceId);
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                auto pipelineContext = container->GetPipelineContext();
+                if (!pipelineContext) {
+                    LOGW("Fail to NotifyWindowAttachStateChange for invalid %{public}d", instanceId);
+                    return;
+                }
+                pipelineContext->NotifyWindowAttachStateChange(status);
+            },
+            TaskExecutor::TaskType::UI, "NotifyWindowAttachStateChange");
+    }
+}
+
 // Posts a task to UI thread to register/unregister the instance for pre-freeze flush.
 // Uses ContainerScope to ensure correct engine context and WillRunOnCurrentThread optimization.
 void UIContentImpl::PostPreFreezeRegisterTask(bool needRegister)
