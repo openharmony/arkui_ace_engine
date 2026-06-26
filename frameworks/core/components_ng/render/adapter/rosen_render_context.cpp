@@ -1718,6 +1718,13 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnSpatialEffectReset()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSpatialEffectPara(nullptr);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnLightUpEffectUpdate(double radio)
 {
     FREE_RS_CONTEXT_CHECK(OnLightUpEffectUpdate, radio);
