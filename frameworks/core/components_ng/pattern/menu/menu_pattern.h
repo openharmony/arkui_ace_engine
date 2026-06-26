@@ -847,6 +847,9 @@ protected:
     virtual void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
 
+    // Whether the default menu shadow should be applied, decided by the system material
+    bool ShouldUpdateShadow() const;
+
 private:
     void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
         const RefPtr<MenuLayoutProperty>& property, int32_t& index);
