@@ -8874,6 +8874,19 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocu
     return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByParams(int64_t accessibilityId,
+    int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    auto accessNode = delegate_->GetAccessibilityNodeInfoByParams(accessibilityId, direction, focusRuleType, params);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
+}
+
 bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     const std::map<std::string, std::string>& actionArguments) const
 {
