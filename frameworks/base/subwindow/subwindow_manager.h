@@ -150,6 +150,7 @@ public:
     ACE_FORCE_EXPORT void OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId);
+    ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);

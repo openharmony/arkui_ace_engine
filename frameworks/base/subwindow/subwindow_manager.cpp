@@ -940,6 +940,13 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
     }
 }
 
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    auto subwindow = GetSubwindow(Container::CurrentId());
+    CHECK_NULL_VOID(subwindow);
+    subwindow->CloseCustomDialogNG(dialogId, std::move(callback));
+}
+
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");

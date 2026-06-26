@@ -515,9 +515,9 @@ class UIContext {
         return this.promptAction_;
     }
 
-    getDialog() {
+    getDialogPresenter() {
         if (this.dialog_ == null) {
-            this.dialog_ = new Dialog(this.instanceId_);
+            this.dialog_ = new DialogPresenter(this.instanceId_);
         }
         return this.dialog_;
     }
@@ -1516,7 +1516,7 @@ class Router {
     }
 }
 
-class Dialog {
+class DialogPresenter {
     constructor(instanceId) {
         this.instanceId_ = instanceId;
         this.ohos_dialog = globalThis.requireNapi('arkui.dialog');

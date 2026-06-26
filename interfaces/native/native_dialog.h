@@ -767,7 +767,7 @@ int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, voi
  *        The dialog cannot be opened due to the modal UEC window.
  * @param dialogId Dialog id. Returns -1 when the dialog cannot be displayed.
  * @param userData Indicates the pointer to the custom data.
- * @since 26.0.0
+ * @since 26.1.0
  */
 typedef void (*ArkUI_OpenDialogCallback)(int32_t errorCode, int32_t dialogId, void* userData);
 
@@ -777,7 +777,7 @@ typedef void (*ArkUI_OpenDialogCallback)(int32_t errorCode, int32_t dialogId, vo
  * @param options Dialog box parameters.
  * @param userData Indicates the pointer to the custom data.
  * @param callback Callback function when the dialog is displayed.
- * @since 26.0.0
+ * @since 26.1.0
  */
 void OH_ArkUI_CustomDialog_OpenDialogWithCallback(ArkUI_CustomDialogOptions* options, void* userData,
     ArkUI_OpenDialogCallback callback);

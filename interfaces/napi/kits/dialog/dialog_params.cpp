@@ -26,6 +26,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "dialog_controller.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 namespace OHOS::Ace {
@@ -36,7 +37,7 @@ using Napi::ParseNapiDimensionNG;
 using Napi::ParseShadowColorStrategy;
 using Napi::ParseStyle;
 
-constexpr int32_t DIALOG_BUTTON_NUM_MAX = 3;
+constexpr int32_t DIALOG_BUTTON_NUM_MAX = INT32_MAX;
 constexpr int32_t CALLBACK_TYPE_SUCCESS = 0;
 constexpr int32_t CALLBACK_TYPE_MOUNT_ERROR = 2;
 
@@ -61,7 +62,10 @@ void ResolvePromise(napi_env env, napi_deferred deferred, int32_t index)
 void ResolvePromiseWithId(napi_env env, napi_deferred deferred, int32_t dialogId)
 {
     napi_value result = nullptr;
-    napi_create_int32(env, dialogId, &result);
+    napi_create_object(env, &result);
+    napi_value dialogIdValue = nullptr;
+    napi_create_int32(env, dialogId, &dialogIdValue);
+    napi_set_named_property(env, result, "dialogId", dialogIdValue);
     napi_resolve_deferred(env, deferred, result);
 }
 
@@ -956,7 +960,7 @@ bool GetDialogOptions(napi_env env, napi_value options, DialogProperties& dialog
     GetDialogButtonDirection(env, options, dialogProps);
     Napi::GetInt32Property(env, options, "gridCount", dialogProps.gridCount);
 
-    dialogProps.type = dialogProps.sheetsInfo.empty() ? DialogType::ALERT_DIALOG : DialogType::ACTION_SHEET;
+    dialogProps.type = DialogType::COMMON;
     GetDialogBaseOptions(env, options, dialogProps);
 
     return true;
@@ -992,6 +996,22 @@ bool GetDialogBaseOptions(napi_env env, napi_value options, DialogProperties& di
     GetDialogOffset(env, options, dialogProps);
     GetDialogMaskRect(env, options, dialogProps);
     GetDialogMaskColor(env, options, dialogProps);
+
+    // DialogController
+    {
+        DialogControllerImpl* controller = nullptr;
+        napi_value controllerNapi = nullptr;
+        napi_get_named_property(env, options, "controller", &controllerNapi);
+        napi_unwrap(env, controllerNapi, (void**)&controller);
+        if (controller) {
+            auto builder = [controller](RefPtr<NG::FrameNode> dialogNode) {
+                if (controller) {
+                    controller->SetDialogNode(dialogNode);
+                }
+            };
+            dialogProps.dialogCallback = builder;
+        }
+    }
 
     // Display mode
     {

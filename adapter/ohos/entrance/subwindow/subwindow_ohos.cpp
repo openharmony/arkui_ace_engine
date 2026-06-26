@@ -1681,6 +1681,12 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
     return overlay->CloseCustomDialog(dialogId);
 }
 
+void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    CloseCustomDialogNG(dialogId);
+    callback(0);
+}
+
 void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter, child container id %{public}d",

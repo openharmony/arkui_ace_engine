@@ -58,9 +58,6 @@ extern "C" __attribute__((visibility("default"))) void NAPI_dialog_GetABCCode(co
 
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
-constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
-
 constexpr size_t PARAM_INDEX_FIRST = 0;
 constexpr size_t PARAM_INDEX_SECOND = 1;
 constexpr size_t MAX_PARAM_COUNT = 2;
@@ -74,23 +71,26 @@ napi_value JSPresentDialog(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
-    if (argc < MIN_PARAM_COUNT) {
-        Napi::NapiThrow(env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-
-    DialogProperties dialogProps;
-    dialogProps.isDialogNapiCall = true;
-    if (!GetDialogOptions(env, argv[PARAM_INDEX_FIRST], dialogProps)) {
-        Napi::NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
 
     auto context = std::make_shared<DialogAsyncContext>();
     context->env = env;
     context->instanceId = Container::CurrentIdSafely();
     napi_value result = CreateDialogPromise(env, context);
-    auto finishCallback = CreatePresentFinishCallback(context);
+
+    if (argc < MIN_PARAM_COUNT) {
+        RejectPromise(env, context->deferred, "The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
+    }
+
+    DialogProperties dialogProps;
+    dialogProps.isDialogNapiCall = true;
+    if (!GetDialogOptions(env, argv[PARAM_INDEX_FIRST], dialogProps)) {
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
+    }
     auto mountCallback = CreatePresentCustomFinishCallback(context);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
@@ -116,12 +116,6 @@ napi_value JSPresentDialog(napi_env env, napi_callback_info info)
     }
 
     {
-        auto callbackForCancel = finishCallback;
-        dialogProps.onSuccess = std::move(finishCallback);
-        dialogProps.onCancel = [cb = std::move(callbackForCancel)]() {
-            cb(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
-        };
-
         auto instanceId = context->instanceId;
         ContainerScope scope(instanceId);
         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -175,9 +169,17 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
+    auto context = std::make_shared<DialogAsyncContext>();
+    context->env = env;
+    context->instanceId = Container::CurrentIdSafely();
+    napi_value result = CreateDialogPromise(env, context);
+
     if (argc < MIN_PARAM_COUNT) {
-        Napi::NapiThrow(env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
+        RejectPromise(env, context->deferred, "The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
 
     DialogProperties dialogProps;
@@ -192,23 +194,20 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
     } else if (valueType == napi_object) {
         WeakPtr<NG::UINode> nodeWk;
         if (!GetFrameNodePtr(env, argv[PARAM_INDEX_FIRST], nodeWk)) {
-            Napi::NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-            return nullptr;
+            RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+            context->deferred = nullptr;
+            return result;
         }
         dialogProps.contentNode = nodeWk;
     } else {
-        Napi::NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
 
     if (argc >= MAX_PARAM_COUNT) {
         GetCustomDialogOptions(env, argv[PARAM_INDEX_SECOND], dialogProps);
     }
-
-    auto context = std::make_shared<DialogAsyncContext>();
-    context->env = env;
-    context->instanceId = Container::CurrentIdSafely();
-    napi_value result = CreateDialogPromise(env, context);
     auto finishCallback = CreatePresentCustomFinishCallback(context);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
@@ -272,15 +271,24 @@ napi_value JSUpdateCustomDialog(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
+    auto context = std::make_shared<DialogAsyncContext>();
+    context->env = env;
+    context->instanceId = Container::CurrentIdSafely();
+    napi_value result = CreateDialogPromise(env, context);
+
     if (argc < MAX_PARAM_COUNT) {
-        Napi::NapiThrow(env, "The number of parameters must be greater than or equal to 2.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
+        RejectPromise(env, context->deferred, "The number of parameters must be greater than or equal to 2.",
+            ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
 
     WeakPtr<NG::UINode> nodeWk;
     if (!GetFrameNodePtr(env, argv[PARAM_INDEX_FIRST], nodeWk)) {
-        Napi::NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
 
     DialogProperties dialogProps;
@@ -288,10 +296,6 @@ napi_value JSUpdateCustomDialog(napi_env env, napi_callback_info info)
         GetDialogBaseOptions(env, argv[PARAM_INDEX_SECOND], dialogProps);
     }
 
-    auto context = std::make_shared<DialogAsyncContext>();
-    context->env = env;
-    context->instanceId = Container::CurrentIdSafely();
-    napi_value result = CreateDialogPromise(env, context);
     auto finishCallback = CreateUpdateFinishCallback(context);
     auto nodePtr = nodeWk.Upgrade();
     CHECK_NULL_RETURN(nodePtr, result);
@@ -316,22 +320,27 @@ napi_value JSDismissDialog(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
-    if (argc < MIN_PARAM_COUNT) {
-        Napi::NapiThrow(env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
 
     auto context = std::make_shared<DialogAsyncContext>();
     context->env = env;
     context->instanceId = Container::CurrentIdSafely();
     napi_value result = CreateDialogPromise(env, context);
 
+    if (argc < MIN_PARAM_COUNT) {
+        RejectPromise(env, context->deferred, "The number of parameters must be greater than or equal to 1.",
+            ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
+    }
+
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[PARAM_INDEX_FIRST], &valueType);
+    TAG_LOGI(AceLogTag::ACE_MENU, "hxw valueType: %{public}d", (int)valueType);
 
     if (valueType == napi_number) {
         int32_t dialogId = 0;
         napi_get_value_int32(env, argv[PARAM_INDEX_FIRST], &dialogId);
+        auto finishCallback = CreateDismissFinishCallback(context);
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             auto container = AceEngine::Get().GetContainer(context->instanceId);
@@ -354,37 +363,18 @@ napi_value JSDismissDialog(napi_env env, napi_callback_info info)
             context = nullptr;
             return result;
         }
-        delegate->CloseCustomDialog(dialogId);
-        auto container = AceEngine::Get().GetContainer(context->instanceId);
-        CHECK_NULL_RETURN(container, result);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, result);
-        taskExecutor->PostTask(
-            [context]() {
-                if (context == nullptr) {
-                    return;
-                }
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(context->env, &scope);
-                if (context->deferred) {
-                    napi_value undefined = nullptr;
-                    napi_get_undefined(context->env, &undefined);
-                    napi_resolve_deferred(context->env, context->deferred, undefined);
-                    context->deferred = nullptr;
-                }
-                napi_close_handle_scope(context->env, scope);
-            },
-            TaskExecutor::TaskType::JS, "ArkUIDialogDismissByIdCallback");
-        context = nullptr;
+        delegate->CloseCustomDialog(dialogId, std::move(finishCallback));
         return result;
     }
 
     // Close by ComponentContent
     WeakPtr<NG::UINode> nodeWk;
     if (!GetFrameNodePtr(env, argv[PARAM_INDEX_FIRST], nodeWk)) {
-        Napi::NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
+    TAG_LOGI(AceLogTag::ACE_MENU, "hxw GetFrameNodePtr success");
 
     auto finishCallback = CreateDismissFinishCallback(context);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();

@@ -896,7 +896,6 @@ void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const
 void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
     std::function<void(int32_t)> mountCallback)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
     ACE_UINODE_TRACE(node);
     auto root = rootNodeWeak_.Upgrade();
@@ -2854,7 +2853,7 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
         dialogProps.dialogCallback(dialog);
     }
 
-    int32_t dialogId = showComponentContent ? 0 : dialog->GetId();
+    int32_t dialogId = dialog->GetId();
     auto mountCallback = std::function<void(int32_t)>(
         [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
@@ -2929,7 +2928,7 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(const DialogProperties& dialo
     return dialog;
 }
 
-void OverlayManager::CloseCustomDialog(const int32_t dialogId)
+void OverlayManager::CloseCustomDialog(const int32_t dialogId, std::function<void(int32_t)> &&callback)
 {
     auto iter = dialogMap_.end();
     if (dialogId == -1) {
@@ -2948,18 +2947,30 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
         if (tmpNode) {
             DeleteDialogHotAreas(tmpNode);
             CloseDialogInner(tmpNode);
+            if (callback) {
+                callback(ERROR_CODE_NO_ERROR);
+            }
         } else {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "not find dialog when no dialog id");
+            if (callback) {
+                callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+            }
         }
     } else {
         iter = dialogMap_.find(dialogId);
         if (iter == dialogMap_.end()) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "not find dialog by id %{public}d", dialogId);
+            if (callback) {
+                callback(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+            }
             return;
         }
         RefPtr<FrameNode> tmpDialog = (*iter).second;
         DeleteDialogHotAreas(tmpDialog);
         CloseDialogInner(tmpDialog);
+        if (callback) {
+            callback(ERROR_CODE_NO_ERROR);
+        }
     }
     return;
 }
