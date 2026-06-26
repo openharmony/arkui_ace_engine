@@ -452,6 +452,12 @@ public:
     static void SetInputMethodAttachedId(
         FrameNode* frameNode, std::function<void()>&& jsCallback);
     static void SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    using PopupResultCallback = std::function<void(int32_t, bool)>;
+    static void SetPopupResultCallback(PopupResultCallback&& callback);
+private:
+    static PopupResultCallback popupResultCallback_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
