@@ -20,26 +20,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        nativeNode = nullptr;
-        return true;
-    }
-    return false;
-}
-
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
-} // namespace
-
 void BlankBridge::RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = {
@@ -94,11 +74,10 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> blankResObj;
-    bool isJsView = IsJsView(firstArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(vm, firstArg);
     if (isJsView) {
         nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (!ArkTSUtils::ParseJsColor(vm, secondArg, color, blankResObj)) {
@@ -132,7 +111,7 @@ ArkUINativeModuleValue BlankBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetColor, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -146,7 +125,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, nodeArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
@@ -182,7 +161,7 @@ ArkUINativeModuleValue BlankBridge::ResetBlankHeight(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, nodeArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -196,7 +175,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankMin(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, nodeArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension blankMin;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, valueArg, blankMin)) {
@@ -219,7 +198,7 @@ ArkUINativeModuleValue BlankBridge::ResetBlankMin(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, nodeArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getBlankModifier()->resetBlankMin, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getBlankModifier()->resetBlankMin(nativeNode);
     return panda::JSValueRef::Undefined(vm);

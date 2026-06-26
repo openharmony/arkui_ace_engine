@@ -22,27 +22,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        auto* frameNode = reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        nativeNode = reinterpret_cast<ArkUINodeHandle>(frameNode);
-        return true;
-    }
-    return false;
-}
-
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
-} // namespace
-
 void DividerBridge::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = {
@@ -79,10 +58,10 @@ ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CalcDimension strokeWidth;
 
-    bool isJsView = IsJsView(nativeNodeArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(nativeNodeArg, vm);
     if (isJsView) {
         auto theme = GetTheme<DividerTheme>();
         CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
@@ -118,7 +97,7 @@ ArkUINativeModuleValue DividerBridge::ResetStrokeWidth(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth(nativeNode);
@@ -132,7 +111,7 @@ ArkUINativeModuleValue DividerBridge::SetLineCap(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> lineCapArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (lineCapArg->IsNumber()) {
         int32_t lineCap = lineCapArg->Int32Value(vm);
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerLineCap,
@@ -152,7 +131,7 @@ ArkUINativeModuleValue DividerBridge::ResetLineCap(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap(nativeNode);
@@ -166,16 +145,25 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> dividerResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-    bool isJsView = IsJsView(nativeNodeArg, vm);
+    bool isJsView = ArkTSUtils::IsJsView(nativeNodeArg, vm);
     if (isJsView) {
         auto theme = GetTheme<DividerTheme>();
         CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
         color = theme->GetColor();
+        if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, dividerResObj)) {
+            CHECK_NULL_RETURN(
+                GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor, panda::JSValueRef::Undefined(vm));
+            GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        auto colorRawPtr = AceType::RawPtr(dividerResObj);
+        GetArkUINodeModifiers()->getDividerModifier()->setDividerColor(nativeNode, color.GetValue(), colorRawPtr);
+        return panda::JSValueRef::Undefined(vm);
     }
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, dividerResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(dividerResObj);
@@ -196,7 +184,7 @@ ArkUINativeModuleValue DividerBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor(nativeNode);
@@ -210,7 +198,7 @@ ArkUINativeModuleValue DividerBridge::SetVertical(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> verticalArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (verticalArg->IsBoolean()) {
         bool value = verticalArg->ToBoolean(vm)->Value();
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->setDividerVertical,
@@ -230,7 +218,7 @@ ArkUINativeModuleValue DividerBridge::ResetVertical(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical(nativeNode);

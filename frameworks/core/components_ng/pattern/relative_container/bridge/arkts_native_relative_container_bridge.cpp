@@ -31,24 +31,6 @@ constexpr int POSITION_DIMENSION = 2;
 constexpr int32_t LOCALIZED_BARRIER_DIRECTION_START = 4;
 constexpr char END_CHAR = '\0';
 
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        nativeNode = nullptr;
-        return true;
-    }
-    return false;
-}
-
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
-}
-
 ArkUI_CharPtr ParseStringToCharPtr(std::string str)
 {
     char* id = static_cast<char*>(malloc((str.length() + 1) * sizeof(char)));
@@ -213,7 +195,7 @@ void JSParseBarrier(EcmaVM* vm, const Local<JSValueRef>& args, BarrierInfo& barr
 bool HandleSetGuideLineForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, const Local<JSValueRef>& idsArg,
     FrameNode* frameNode)
 {
-    if (!IsJsView(firstArg, vm)) {
+    if (!ArkTSUtils::IsJsView(vm, firstArg)) {
         return false;
     }
 
@@ -242,7 +224,7 @@ bool HandleSetGuideLineForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, 
 bool HandleSetBarrierForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, const Local<JSValueRef>& idsArg,
     FrameNode* frameNode)
 {
-    if (!IsJsView(firstArg, vm)) {
+    if (!ArkTSUtils::IsJsView(vm, firstArg)) {
         return false;
     }
 
@@ -264,6 +246,18 @@ bool HandleSetBarrierForJsView(EcmaVM* vm, const Local<JSValueRef>& firstArg, co
     }
 
     RelativeContainerModelNG::SetBarrier(frameNode, jsBarrierInfos);
+    return true;
+}
+
+bool HandleResetBarrierForInvalidArgs(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& idsArg,
+    const Local<JSValueRef>& directionsArg, const Local<JSValueRef>& referenceIdsArg)
+{
+    if (idsArg->IsArray(vm) && directionsArg->IsArray(vm) && referenceIdsArg->IsArray(vm)) {
+        return false;
+    }
+    CHECK_NULL_RETURN(
+        GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier, true);
+    GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
     return true;
 }
 } // namespace
@@ -302,7 +296,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
     Local<JSValueRef> positionsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto* frameNode = nativeNode ? reinterpret_cast<FrameNode*>(nativeNode)
                                  : reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
@@ -352,7 +346,7 @@ ArkUINativeModuleValue RelativeContainerBridge::ResetGuideLine(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline,
         panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline(nativeNode);
@@ -369,22 +363,16 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
     Local<JSValueRef> referenceIdsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     auto* frameNode = nativeNode ? reinterpret_cast<FrameNode*>(nativeNode)
                                  : reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
     CHECK_NE_RETURN(
         HandleSetBarrierForJsView(vm, firstArg, idsArg, frameNode), false, panda::JSValueRef::Undefined(vm));
 
-    if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !referenceIdsArg->IsArray(vm)) {
-        CHECK_NULL_RETURN(
-            GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier, panda::JSValueRef::Undefined(vm));
-        GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
+    if (HandleResetBarrierForInvalidArgs(vm, nativeNode, idsArg, directionsArg, referenceIdsArg)) {
         return panda::JSValueRef::Undefined(vm);
     }
-
-    CHECK_NULL_RETURN(
-        GetArkUINodeModifiers()->getRelativeContainerModifier()->setBarrier, panda::JSValueRef::Undefined(vm));
     std::vector<ArkUIBarrierStyle> barrierInfos;
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
@@ -428,7 +416,7 @@ ArkUINativeModuleValue RelativeContainerBridge::ResetBarrier(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
