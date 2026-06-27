@@ -152,7 +152,7 @@ void SheetPresentationPattern::OnModifyDone()
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         } else if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial) &&
-                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+                   SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::EXQUISITE) {
             renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
     }
@@ -1845,10 +1845,10 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    // - has systemMaterial and not SMOOTH -> return
-    // - has systemMaterial and SMOOTH -> update default backgroundColor
+    // - has systemMaterial and EXQUISITE -> return
+    // - has systemMaterial and not EXQUISITE -> update default backgroundColor
     // - no systemMaterial and sheetStyle.backgroundColor has value -> return
-    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) ||
+    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) ||
         (!sheetStyle.systemMaterial && sheetStyle.backgroundColor.has_value())) {
         return;
     }
@@ -4555,7 +4555,7 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     auto renderContext = sheetNode->GetRenderContext();
     if (!currSheetStyle.systemMaterial) {
         renderContext->UpdateBackgroundColor(backgroundColor);
-    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH &&
+    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::EXQUISITE &&
                sheetTheme) {
         renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
     }
