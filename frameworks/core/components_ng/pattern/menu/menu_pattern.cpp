@@ -1859,11 +1859,16 @@ void MenuPattern::ShowPreviewMenuAnimation()
     ShowPreviewPositionAnimation(option, delay);
 
     // menu position and scale animation
-    if (IsUseDistortionAnimation() || IsUseEdgeLightAnimation()) {
-        TAG_LOGD(AceLogTag::ACE_MENU, "Show preview menu with material animation.");
+    if (IsUseDistortionAnimation()) {
+        TAG_LOGD(AceLogTag::ACE_MENU, "Show preview menu with distort animation.");
         ShowPreviewMenuMaterialAnimation(delay);
     } else {
         ShowPreviewMenuScaleAnimation(menuTheme, option, delay);
+    }
+
+    if (IsUseEdgeLightAnimation()) {
+        TAG_LOGD(AceLogTag::ACE_MENU, "Show preview menu with edgeLight animation.");
+        PlayLightAnimation(delay);
     }
 
     // image and hoverScale animation
@@ -1887,9 +1892,6 @@ void MenuPattern::ShowPreviewMenuMaterialAnimation(int32_t delay)
     if (IsUseDistortionAnimation()) {
         PlayDistortAnimation(menuPosition, delay);
     }
-    if (IsUseEdgeLightAnimation()) {
-        PlayLightAnimation(delay);
-    }
 }
 
 void MenuPattern::ShowMenuAppearAnimation()
@@ -1898,9 +1900,8 @@ void MenuPattern::ShowMenuAppearAnimation()
     CHECK_NULL_VOID(host);
     if (isMenuShow_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         previewMode_ == MenuPreviewMode::NONE) {
-        if (IsUseDistortionAnimation() || IsUseEdgeLightAnimation() ||
-            GetIsExtensionMenuEnableNewAnimation()) {
-            TAG_LOGD(AceLogTag::ACE_MENU, "Show menu with material animation.");
+        if (IsUseDistortionAnimation() || GetIsExtensionMenuEnableNewAnimation()) {
+            TAG_LOGD(AceLogTag::ACE_MENU, "Show menu with distort animation.");
             ShowMenuAppearMaterialAnimation();
             isExtensionMenuShow_ = false;
         } else {
@@ -1942,6 +1943,11 @@ void MenuPattern::ShowMenuAppearAnimation()
                 nullptr, nullptr, host->GetContextRefPtr());
             isExtensionMenuShow_ = false;
         }
+
+        if (IsUseEdgeLightAnimation() && !GetIsExtensionMenuEnableNewAnimation()) {
+            TAG_LOGD(AceLogTag::ACE_MENU, "Show menu with edgeLight animation.");
+            PlayLightAnimation();
+        }
     }
     isMenuShow_ = false;
 }
@@ -1971,9 +1977,6 @@ void MenuPattern::ShowMenuAppearMaterialAnimation()
         renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
         renderContext->UpdateOpacity(1.0f);
         renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-    }
-    if (IsUseEdgeLightAnimation()) {
-        PlayLightAnimation();
     }
 }
 
