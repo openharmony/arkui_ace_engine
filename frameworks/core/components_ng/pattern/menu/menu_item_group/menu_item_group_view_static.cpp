@@ -61,6 +61,7 @@ void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, const std::optiona
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateEnableSmallLanguageTruncation(true);
+    layoutProps->UpdatePunctuationOverflow(true);
     layoutProps->UpdateContent(header.value_or(""));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -95,6 +96,7 @@ void MenuItemGroupViewStatic::SetFooter(FrameNode* frameNode, const std::optiona
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateEnableSmallLanguageTruncation(true);
+    layoutProps->UpdatePunctuationOverflow(true);
     layoutProps->UpdateContent(footer.value_or(""));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);

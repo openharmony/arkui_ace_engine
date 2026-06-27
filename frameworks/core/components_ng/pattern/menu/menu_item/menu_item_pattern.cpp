@@ -2585,6 +2585,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     textProperty->UpdateEnableSmallLanguageTruncation(true);
+    textProperty->UpdatePunctuationOverflow(true);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);

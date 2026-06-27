@@ -975,6 +975,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    layoutProperty->UpdatePunctuationOverflow(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         layoutProperty->UpdateOrphanCharOptimization(true);
     }

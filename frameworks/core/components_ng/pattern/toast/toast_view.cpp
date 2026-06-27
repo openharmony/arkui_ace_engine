@@ -98,6 +98,7 @@ void ToastView::UpdateTextLayoutProperty(
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdatePunctuationOverflow(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textLayoutProperty->UpdateOrphanCharOptimization(true);
     }
