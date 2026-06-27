@@ -15756,6 +15756,7 @@ typedef struct Opt_DepthComponentCompleteEvent {
 typedef struct Ark_DepthComponentOptions {
     /* kind: Interface */
     Opt_DepthSpaceType depthSpace;
+    Opt_Float64 render3DScale;
 } Ark_DepthComponentOptions;
 typedef struct Opt_DepthComponentOptions {
     Ark_Tag tag;
