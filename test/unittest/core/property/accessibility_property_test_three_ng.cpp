@@ -694,4 +694,53 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree024, Te
 
     AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(screenEnableBackup);
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree014
+ * @tc.desc: SetAccessibilityCustomActions triggers NotifyComponentChangeEvent (ELEMENT_INFO_CHANGE).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Attach a host FrameNode with a real pipeline context to the property.
+     * @tc.expected: host and pipeline are valid.
+     */
+    AccessibilityProperty accessibilityProperty;
+    auto node = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(node, nullptr);
+    accessibilityProperty.host_ = AceType::WeakClaim(AceType::RawPtr(node));
+    auto context = NG::MockPipelineContext::GetCurrent();
+    node->context_ = AceType::RawPtr(context);
+
+    /**
+     * @tc.steps: step2. Enable accessibility and clear the pipeline event queue.
+     * @tc.expected: queue is empty before the call.
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    auto pipeline = node->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->accessibilityEvents_.clear();
+
+    /**
+     * @tc.steps: step3. SetAccessibilityCustomActions with one action.
+     * @tc.expected: ELEMENT_INFO_CHANGE event is enqueued on the pipeline.
+     */
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"joinBlacklist", []() {}});
+    accessibilityProperty.SetAccessibilityCustomActions(actions);
+
+    auto expectedEvent = static_cast<uint32_t>(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE);
+    bool found = false;
+    for (const auto& event : pipeline->accessibilityEvents_) {
+        if (event.first == expectedEvent) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+}
 } // namespace OHOS::Ace::NG
