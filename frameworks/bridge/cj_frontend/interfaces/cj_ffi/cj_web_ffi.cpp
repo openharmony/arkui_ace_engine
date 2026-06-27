@@ -210,6 +210,7 @@ void RequestPermissionsFromUserWeb(CJWebPermissionRequest& request)
 
 void ParseScriptItems(VectorScriptItemHandle& handle, ScriptItems& scriptItems)
 {
+    if (handle == nullptr) { return; }
     auto ffiScriptItemVec = *reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
     for (size_t i = 0; i < ffiScriptItemVec.size(); i++) {
         auto script = ffiScriptItemVec[i].script;
@@ -284,19 +285,25 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
 void FfiOHOSAceFrameworkWebHandleCancel(void* result)
 {
+    if (result == nullptr) { return; }
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
+    CHECK_NULL_VOID(res);
     res->Cancel();
 }
 
 void FfiOHOSAceFrameworkWebHandleConfirm(void* result)
 {
+    if (result == nullptr) { return; }
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
+    CHECK_NULL_VOID(res);
     res->Confirm();
 }
 
 void FfiOHOSAceFrameworkWebHandlePromptConfirm(void* result, const char* message)
 {
+    if (result == nullptr) { return; }
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
+    CHECK_NULL_VOID(res);
     res->Confirm(message);
 }
 
@@ -458,6 +465,9 @@ bool WebRequestHeadersToMapToCFFIArray(const RefPtr<WebRequest>& webRequest, Map
         if (value != NULL) {
             free(value);
         }
+        res.size = 0;
+        res.key = nullptr;
+        res.value = nullptr;
         LOGE("FfiOHOSAceFrameworkGetHeaders fail, malloc fail");
         return false;
     }
@@ -466,14 +476,31 @@ bool WebRequestHeadersToMapToCFFIArray(const RefPtr<WebRequest>& webRequest, Map
     res.key = key;
     res.value = value;
     for (auto it = header.begin(); it != header.end(); ++it, ++i) {
-        res.key[i] = it->first.c_str();
-        res.value[i] = it->second.c_str();
+        res.key[i] = strdup(it->first.c_str());
+        res.value[i] = strdup(it->second.c_str());
+        if (res.key[i] == NULL || res.value[i] == NULL) {
+            for (size_t j = 0; j <= i; j++) {
+                free(const_cast<char*>(res.key[j]));
+                free(const_cast<char*>(res.value[j]));
+            }
+            free(res.key);
+            free(res.value);
+            res.size = 0;
+            res.key = nullptr;
+            res.value = nullptr;
+            LOGE("FfiOHOSAceFrameworkGetHeaders fail, strdup fail");
+            return false;
+        }
     }
     return true;
 }
 
 void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 {
+    for (size_t i = 0; i < mapToCFFIArray.size; i++) {
+        free(const_cast<char*>(mapToCFFIArray.key[i]));
+        free(const_cast<char*>(mapToCFFIArray.value[i]));
+    }
     free(mapToCFFIArray.key);
     free(mapToCFFIArray.value);
 }
@@ -536,7 +563,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
             auto wrapper = [lambda = CJLambda::Create(cFunc)](const char* str) -> char* { return lambda(str); };
             cFuncs.push_back(wrapper);
         }
-        std::string cName = std::string(name);
+        std::string cName = std::string(name != nullptr ? name : "");
         auto& methods = *reinterpret_cast<std::vector<std::string>*>(methodList);
         auto jsProxyCallback = [controller, cFuncs, cName, methods]() {
             controller->SetNWebJavaScriptResultCallBack();
@@ -806,12 +833,15 @@ VectorScriptItemHandle FfiVectorScriptItemCreate(int64_t size)
 
 void FfiVectorScriptItemSetElement(VectorScriptItemHandle handle, int64_t index, FfiScriptItem item)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
+    if (index < 0 || static_cast<size_t>(index) >= actualVec->size()) { return; }
     (*actualVec)[index] = item;
 }
 
 void FfiVectorScriptItemDelete(VectorScriptItemHandle handle)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
     delete actualVec;
 }
@@ -874,7 +904,7 @@ void FfiWebRegisterNativeEmbedRule(const char* tag, const char* type)
 
 void FfiWebDefaultTextEncodingFormat(const char* format)
 {
-    std::string textEncodingFormat = std::string(format);
+    std::string textEncodingFormat = std::string(format != nullptr ? format : "");
     EraseSpace(textEncodingFormat);
     if (textEncodingFormat.empty()) {
         WebModel::GetInstance()->SetDefaultTextEncodingFormat("UTF-8");
@@ -901,18 +931,22 @@ VectorExpandedMenuItemOptionsHandle FfiVectorExpandedMenuItemOptionsCreate(int64
 void FfiVectorExpandedMenuItemOptionsSetElement(
     VectorExpandedMenuItemOptionsHandle handle, int64_t index, FfiExpandedMenuItemOptions item)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
+    if (index < 0 || static_cast<size_t>(index) >= actualVec->size()) { return; }
     (*actualVec)[index] = item;
 }
 
 void FfiVectorExpandedMenuItemOptionsDelete(VectorExpandedMenuItemOptionsHandle handle)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
     delete actualVec;
 }
 
 void FfiWebSelectionMenuOptions(VectorExpandedMenuItemOptionsHandle handle)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = *reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     WebMenuOptionsParam optionParam;
@@ -1021,24 +1055,28 @@ void FfiWebOnConsole(bool (*callback)(void* event))
 int32_t FfiWebConsoleGetLineNumber(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, -1);
     return msgPtr->GetLineNumber();
 }
 
 ExternalString FfiWebConsoleGetMessage(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, Utils::MallocCString(""));
     return Utils::MallocCString(msgPtr->GetLog());
 }
 
 int32_t FfiWebConsoleGetMessageLevel(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, -1);
     return static_cast<int32_t>(msgPtr->GetLogLevel());
 }
 
 ExternalString FfiWebConsoleGetSourceId(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, Utils::MallocCString(""));
     return Utils::MallocCString(msgPtr->GetSourceId());
 }
 
@@ -1110,12 +1148,14 @@ void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* 
 ExternalString FfiWebGetErrorInfo(void* error)
 {
     auto errPtr = *reinterpret_cast<RefPtr<WebError>*>(error);
+    CHECK_NULL_RETURN(errPtr, Utils::MallocCString(""));
     return Utils::MallocCString(errPtr->GetInfo());
 }
 
 int32_t FfiWebGetErrorCode(void* error)
 {
     auto errPtr = *reinterpret_cast<RefPtr<WebError>*>(error);
+    CHECK_NULL_RETURN(errPtr, -1);
     return errPtr->GetCode();
 }
 
@@ -1134,18 +1174,24 @@ VectorHeaderHandle FfiVectorHeaderCreate(int64_t size)
 
 FfiHeader FfiVectorHeaderGet(int64_t index, VectorHeaderHandle handle)
 {
+    if (handle == nullptr) { return FfiHeader { .key = Utils::MallocCString(""), .value = Utils::MallocCString("") }; }
     auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
+    if (index < 0 || static_cast<size_t>(index) >= actualVec->size()) {
+        return FfiHeader { .key = Utils::MallocCString(""), .value = Utils::MallocCString("") };
+    }
     return (*actualVec)[index];
 }
 
 int64_t FfiVectorHeaderSize(VectorHeaderHandle handle)
 {
+    if (handle == nullptr) { return 0; }
     auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
     return actualVec->size();
 }
 
 void FfiVectorHeaderDelete(VectorHeaderHandle handle)
 {
+    if (handle == nullptr) { return; }
     auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
     delete actualVec;
 }
@@ -1153,6 +1199,7 @@ void FfiVectorHeaderDelete(VectorHeaderHandle handle)
 VectorHeaderHandle FfiWebGetRequestHeader(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, nullptr);
     auto header = request->GetHeaders();
     auto vecHeader = new std::vector<FfiHeader>(header.size());
     for (const auto& it : header) {
@@ -1166,30 +1213,35 @@ VectorHeaderHandle FfiWebGetRequestHeader(void* ptr)
 ExternalString FfiWebGetRequestUrl(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, Utils::MallocCString(""));
     return Utils::MallocCString(request->GetUrl());
 }
 
 bool FfiWebIsMainFrame(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, false);
     return request->IsMainFrame();
 }
 
 bool FfiWebIsRedirect(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, false);
     return request->IsRedirect();
 }
 
 bool FfiWebIsRequestGesture(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, false);
     return request->HasGesture();
 }
 
 ExternalString FfiWebGetRequestMethod(void* ptr)
 {
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    CHECK_NULL_RETURN(request, Utils::MallocCString(""));
     return Utils::MallocCString(request->GetMethod());
 }
 
@@ -1204,30 +1256,35 @@ void FfiWebFreeResourceRequest(void* ptr)
 ExternalString FfiWebGetReasonMessage(void* prt)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(prt);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetReason());
 }
 
 int32_t FfiWebGetResponseCode(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, -1);
     return response->GetStatusCode();
 }
 
 ExternalString FfiWebGetResponseData(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetData());
 }
 
 ExternalString FfiWebGetResponseEncoding(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetEncoding());
 }
 
 VectorHeaderHandle FfiWebGetResponseHeader(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, nullptr);
     auto header = response->GetHeaders();
     auto vecHeader = new std::vector<FfiHeader>(header.size());
     for (const auto& it : header) {
@@ -1422,6 +1479,7 @@ void FfiWebFileSelectorResultSetHandleFileList(VectorStringHandle listPtr, void*
 ExternalString FfiWebFileSelectorParamGetTitle(void* ptr)
 {
     auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
+    CHECK_NULL_RETURN(param, Utils::MallocCString(""));
     auto title = param->GetTitle();
     return Utils::MallocCString(title);
 }
@@ -1429,12 +1487,14 @@ ExternalString FfiWebFileSelectorParamGetTitle(void* ptr)
 int32_t FfiWebFileSelectorParamGetMode(void* ptr)
 {
     auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
+    CHECK_NULL_RETURN(param, 0);
     return static_cast<int32_t>(param->GetMode());
 }
 
 VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr)
 {
     auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
+    CHECK_NULL_RETURN(param, nullptr);
     auto result = new std::vector<std::string>;
     auto acceptType = param->GetAcceptType();
     for (auto& it : acceptType) {
@@ -1446,6 +1506,7 @@ VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr)
 bool FfiWebFileSelectorParamIsCapture(void* ptr)
 {
     auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
+    CHECK_NULL_RETURN(param, false);
     return param->IsCapture();
 }
 

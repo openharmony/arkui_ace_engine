@@ -26,14 +26,15 @@ using namespace OHOS::Ace::Framework;
 extern "C" {
 void FfiPageTransitionEnterCreate(int type, int duration, char* curve, int delay)
 {
-    PageTransitionOption option = { (RouteType)type, duration, delay, Framework::CreateCurve(std::string(curve)) };
+    PageTransitionOption option = { (RouteType)type, duration, delay,
+        Framework::CreateCurve(std::string(curve != nullptr ? curve : "")) };
     PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::ENTER, option);
 }
 
 void FfiPageTransitionExitCreate(int type, int duration, char* curve, int delay)
 {
     PageTransitionOption option = { static_cast<RouteType>(type), duration, delay,
-        Framework::CreateCurve(std::string(curve)) };
+        Framework::CreateCurve(std::string(curve != nullptr ? curve : "")) };
     PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::EXIT, option);
 }
 

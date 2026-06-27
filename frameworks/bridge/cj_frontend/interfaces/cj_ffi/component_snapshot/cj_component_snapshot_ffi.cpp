@@ -65,7 +65,7 @@ extern "C" {
     {
 #ifdef ENABLE_ROSEN_BACKEND
         NG::ComponentSnapshot::Get(
-            std::string(id),
+            std::string(id != nullptr ? id : ""),
             GetSnapshotCallback(callback),
             NG::SnapshotOptions(options.scale, options.waitUntilRenderFinished));
 #endif
@@ -101,7 +101,7 @@ extern "C" {
     {
 #ifdef ENABLE_ROSEN_BACKEND
         auto pair = NG::ComponentSnapshot::GetSync(
-            std::string(id),
+            std::string(id != nullptr ? id : ""),
             NG::SnapshotOptions(options.scale, options.waitUntilRenderFinished));
         if (pair.first == ERROR_CODE_NO_ERROR) {
             auto nativeImage = FFI::FFIData::Create<Media::PixelMapImpl>(move(pair.second));

@@ -42,6 +42,10 @@ int32_t GetParentContainerIdIfNeeded()
 extern "C" {
 void FfiOHOSAceFrameworkRouterPush(const char* url, const char* param)
 {
+    if (url == nullptr) {
+        LOGE("RouterPush fail, url is null");
+        return;
+    }
     auto containerId = GetParentContainerIdIfNeeded();
     if (containerId < 0) {
         LOGE("RouterPush fail, no valid container");
@@ -58,7 +62,7 @@ void FfiOHOSAceFrameworkRouterPush(const char* url, const char* param)
         LOGE("can not get frontend.");
         return;
     }
-    frontend->PushPage(url, param);
+    frontend->PushPage(url, param != nullptr ? param : "");
 }
 
 void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param)
@@ -79,11 +83,15 @@ void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param)
         LOGE("can not get frontend.");
         return;
     }
-    frontend->Back(url, param);
+    frontend->Back(url != nullptr ? url : "", param != nullptr ? param : "");
 }
 
 void FfiOHOSAceFrameworkRouterReplace(const char* url, const char* param, int32_t modeValue)
 {
+    if (url == nullptr) {
+        LOGE("RouterReplace fail, url is null");
+        return;
+    }
     auto containerId = GetParentContainerIdIfNeeded();
     if (containerId < 0) {
         LOGE("RouterReplace fail, no valid container");
@@ -101,7 +109,7 @@ void FfiOHOSAceFrameworkRouterReplace(const char* url, const char* param, int32_
         return;
     }
     auto mode = static_cast<CJPageRouterAbstract::RouterMode>(modeValue);
-    frontend->Replace(url, param, mode);
+    frontend->Replace(url, param != nullptr ? param : "", mode);
 }
 
 ExternalString FfiOHOSAceFrameworkRouterGetParams()
@@ -143,11 +151,15 @@ void FfiOHOSAceFrameworkRouterBackIndex(int32_t index, const char* param)
         LOGE("can not get frontend.");
         return;
     }
-    frontend->BackIndex(index, param);
+    frontend->BackIndex(index, param != nullptr ? param : "");
 }
 
 void FfiOHOSAceFrameworkRouterPushUrl(const char* url, const char* param, int32_t modeValue, RouterCallback callbackRef)
 {
+    if (url == nullptr) {
+        LOGE("RouterPushUrl fail, url is null");
+        return;
+    }
     auto containerId = GetParentContainerIdIfNeeded();
     if (containerId < 0) {
         LOGE("RouterPushUrl fail, no valid container");
@@ -166,12 +178,16 @@ void FfiOHOSAceFrameworkRouterPushUrl(const char* url, const char* param, int32_
     }
     auto mode = static_cast<CJPageRouterAbstract::RouterMode>(modeValue);
     auto callback = [ffiGetErrcode = CJLambda::Create(callbackRef)](int32_t errorCode) { ffiGetErrcode(errorCode); };
-    frontend->PushPageWithCallback(url, param, mode, std::move(callback));
+    frontend->PushPageWithCallback(url, param != nullptr ? param : "", mode, std::move(callback));
 }
 
 void FfiOHOSAceFrameworkRouterReplaceUrl(
     const char* url, const char* param, int32_t modeValue, RouterCallback callbackRef)
 {
+    if (url == nullptr) {
+        LOGE("RouterReplaceUrl fail, url is null");
+        return;
+    }
     auto containerId = GetParentContainerIdIfNeeded();
     if (containerId < 0) {
         LOGE("RouterReplaceUrl fail, no valid container");
@@ -190,7 +206,7 @@ void FfiOHOSAceFrameworkRouterReplaceUrl(
     }
     auto mode = static_cast<CJPageRouterAbstract::RouterMode>(modeValue);
     auto callback = [ffiGetErrcode = CJLambda::Create(callbackRef)](int32_t errorCode) { ffiGetErrcode(errorCode); };
-    frontend->ReplacePageWithCallback(url, param, mode, std::move(callback));
+    frontend->ReplacePageWithCallback(url, param != nullptr ? param : "", mode, std::move(callback));
 }
 
 void FfiOHOSAceFrameworkRouterClear()
