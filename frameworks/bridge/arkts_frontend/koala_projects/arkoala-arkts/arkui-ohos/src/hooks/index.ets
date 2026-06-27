@@ -93,8 +93,11 @@ import { DataPanelExtender, GaugeExtender } from '#generated';
 import { ArkToggleComponent, ToggleOptions } from "#generated";
 import { ToggleHandWritten } from "./ToggleHandWritten";
 import { ArkDynamicLayoutComponent } from '@ohos.arkui.components.ArkDynamicLayout';
+import { ArkLazyDynamicLayoutComponent } from '@ohos.arkui.components.ArkLazyDynamicLayout';
 import { LayoutAlgorithm } from './../LayoutAlgorithm';
+import { LazyLayoutAlgorithm } from './../LazyLayoutAlgorithm';
 import { DynamicLayoutHandWritten } from './DynamicLayoutHandWritten';
+import { LazyDynamicLayoutHandWritten } from './LazyDynamicLayoutHandWritten';
 
 export function hookId(component: object, value?: string) {}
 
@@ -898,6 +901,16 @@ export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: Chil
 export function hookSetDynamicLayoutOptions(node: ArkDynamicLayoutComponent, value: LayoutAlgorithm): void {
   DynamicLayoutHandWritten.hookSetDynamicLayoutOptionsImpl(node.getPeer(), value)
 }
+
+export function hookSetLazyDynamicLayoutOptions(node: ArkLazyDynamicLayoutComponent, value: LazyLayoutAlgorithm): void {
+  LazyDynamicLayoutHandWritten.hookSetLazyDynamicLayoutOptionsImpl(node.getPeer(), value)
+}
+
+export function hookSetLazyDynamicLayoutOnVisibleIndexesChange(node: ArkLazyDynamicLayoutComponent, callback: ((indexes: Array<int32>) => void) | undefined): void {
+  LazyDynamicLayoutHandWritten.hookSetLazyDynamicLayoutOnVisibleIndexesChangeImpl(node.getPeer(), callback)
+}
+
+export { hookLazyDynamicLayoutAttributeModifierForHandWritten } from './modifiers/index';
 
 export function hookListChildrenMainSizeImpl(peer: ArkListPeer, value: ChildrenMainSize | undefined): void {
   ListHandWritten.hookListChildrenMainSizeImpl(peer, value)
