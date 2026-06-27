@@ -425,6 +425,20 @@ void SetEnableVisibilityLifecycleWithContentCoverImpl(Ark_NativePointer node,
     NavigationModelStatic::SetEnableVisibilityLifecycleWithContentCover(
         frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
+
+void SetConfigurationImpl(Ark_NativePointer node,
+                          const Opt_NavigationConfiguration* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NG::NavigationConfiguration config;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED && value->value.stackSizeLimit.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        config.stackSizeLimit = Converter::Convert<int32_t>(value->value.stackSizeLimit.value);
+    }
+    NavigationModelNG::SetNavigationConfiguration(frameNode, config);
+}
+
 void SetBackButtonIconImpl(Ark_NativePointer node,
                            const Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier* icon,
                            const Opt_ResourceStr* accessibilityText)
@@ -763,6 +777,7 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::SetDividerImpl,
         NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
         NavigationAttributeModifier::SetEnableVisibilityLifecycleWithContentCoverImpl,
+        NavigationAttributeModifier::SetConfigurationImpl,
         NavigationAttributeModifier::SetBackButtonIconImpl,
         NavigationAttributeModifier::SetTitleImpl,
         NavigationAttributeModifier::SetHideTitleBar1Impl,

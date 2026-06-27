@@ -1023,6 +1023,9 @@ typedef struct Opt_UIGridEvent Opt_UIGridEvent;
 typedef struct UIListEventPeer UIListEventPeer;
 typedef struct UIListEventPeer* Ark_UIListEvent;
 typedef struct Opt_UIListEvent Opt_UIListEvent;
+typedef struct uiMaterial_ImmersiveMaterialPeer uiMaterial_ImmersiveMaterialPeer;
+typedef struct uiMaterial_ImmersiveMaterialPeer* Ark_uiMaterial_ImmersiveMaterial;
+typedef struct Opt_uiMaterial_ImmersiveMaterial Opt_uiMaterial_ImmersiveMaterial;
 typedef struct uiMaterial_MaterialPeer uiMaterial_MaterialPeer;
 typedef struct uiMaterial_MaterialPeer* Ark_uiMaterial_Material;
 typedef struct Opt_uiMaterial_Material Opt_uiMaterial_Material;
@@ -1670,6 +1673,8 @@ typedef struct Callback_Opt_CustomNodeBuilder_Void Callback_Opt_CustomNodeBuilde
 typedef struct Opt_Callback_Opt_CustomNodeBuilder_Void Opt_Callback_Opt_CustomNodeBuilder_Void;
 typedef struct Callback_Opt_DrawingRenderingContext_Void Callback_Opt_DrawingRenderingContext_Void;
 typedef struct Opt_Callback_Opt_DrawingRenderingContext_Void Opt_Callback_Opt_DrawingRenderingContext_Void;
+typedef struct Callback_Opt_Map_String_Object_Void Callback_Opt_Map_String_Object_Void;
+typedef struct Opt_Callback_Opt_Map_String_Object_Void Opt_Callback_Opt_Map_String_Object_Void;
 typedef struct Callback_Opt_NavigationAnimatedTransition_Void Callback_Opt_NavigationAnimatedTransition_Void;
 typedef struct Opt_Callback_Opt_NavigationAnimatedTransition_Void Opt_Callback_Opt_NavigationAnimatedTransition_Void;
 typedef struct Callback_Opt_Object_Void Callback_Opt_Object_Void;
@@ -1846,6 +1851,8 @@ typedef struct Map_SourceTool_F64 Map_SourceTool_F64;
 typedef struct Opt_Map_SourceTool_F64 Opt_Map_SourceTool_F64;
 typedef struct Map_String_ComponentContentBase Map_String_ComponentContentBase;
 typedef struct Opt_Map_String_ComponentContentBase Opt_Map_String_ComponentContentBase;
+typedef struct Map_String_Object Map_String_Object;
+typedef struct Opt_Map_String_Object Opt_Map_String_Object;
 typedef struct Map_String_Opt_Object Map_String_Opt_Object;
 typedef struct Opt_Map_String_Opt_Object Opt_Map_String_Opt_Object;
 typedef struct Map_String_String Map_String_String;
@@ -2040,6 +2047,8 @@ typedef struct RadioModifierBuilder RadioModifierBuilder;
 typedef struct Opt_RadioModifierBuilder Opt_RadioModifierBuilder;
 typedef struct RatingModifierBuilder RatingModifierBuilder;
 typedef struct Opt_RatingModifierBuilder Opt_RatingModifierBuilder;
+typedef struct RestoreStateCallback RestoreStateCallback;
+typedef struct Opt_RestoreStateCallback Opt_RestoreStateCallback;
 typedef struct RestrictedWorker_onerror_Callback RestrictedWorker_onerror_Callback;
 typedef struct Opt_RestrictedWorker_onerror_Callback Opt_RestrictedWorker_onerror_Callback;
 typedef struct RestrictedWorker_onexit_Callback RestrictedWorker_onexit_Callback;
@@ -2054,6 +2063,8 @@ typedef struct RouterFinishCallback RouterFinishCallback;
 typedef struct Opt_RouterFinishCallback Opt_RouterFinishCallback;
 typedef struct SaveButtonCallback SaveButtonCallback;
 typedef struct Opt_SaveButtonCallback Opt_SaveButtonCallback;
+typedef struct SaveStateCallback SaveStateCallback;
+typedef struct Opt_SaveStateCallback Opt_SaveStateCallback;
 typedef struct ScrollOnDidZoomCallback ScrollOnDidZoomCallback;
 typedef struct Opt_ScrollOnDidZoomCallback Opt_ScrollOnDidZoomCallback;
 typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
@@ -2502,6 +2513,8 @@ typedef struct Ark_NavContentInfo Ark_NavContentInfo;
 typedef struct Opt_NavContentInfo Opt_NavContentInfo;
 typedef struct Ark_NavDestinationModuleInfo Ark_NavDestinationModuleInfo;
 typedef struct Opt_NavDestinationModuleInfo Opt_NavDestinationModuleInfo;
+typedef struct Ark_NavigationConfiguration Ark_NavigationConfiguration;
+typedef struct Opt_NavigationConfiguration Opt_NavigationConfiguration;
 typedef struct Ark_NavigationInterception Ark_NavigationInterception;
 typedef struct Opt_NavigationInterception Opt_NavigationInterception;
 typedef struct Ark_NavigationModuleInfo Ark_NavigationModuleInfo;
@@ -3378,6 +3391,8 @@ typedef struct Ark_EmitterPropertyInner Ark_EmitterPropertyInner;
 typedef struct Opt_EmitterPropertyInner Opt_EmitterPropertyInner;
 typedef struct Ark_FlexOptions Ark_FlexOptions;
 typedef struct Opt_FlexOptions Opt_FlexOptions;
+typedef struct Ark_FloatingTabBarWidth Ark_FloatingTabBarWidth;
+typedef struct Opt_FloatingTabBarWidth Opt_FloatingTabBarWidth;
 typedef struct Ark_GaugeIndicatorOptions Ark_GaugeIndicatorOptions;
 typedef struct Opt_GaugeIndicatorOptions Opt_GaugeIndicatorOptions;
 typedef struct Ark_GridRowSizeOption Ark_GridRowSizeOption;
@@ -3616,6 +3631,8 @@ typedef struct Ark_EmitterParticleOptions Ark_EmitterParticleOptions;
 typedef struct Opt_EmitterParticleOptions Opt_EmitterParticleOptions;
 typedef struct Ark_EventTarget Ark_EventTarget;
 typedef struct Opt_EventTarget Opt_EventTarget;
+typedef struct Ark_FloatingTabBarStyle Ark_FloatingTabBarStyle;
+typedef struct Opt_FloatingTabBarStyle Opt_FloatingTabBarStyle;
 typedef struct Ark_GeometryInfo Ark_GeometryInfo;
 typedef struct Opt_GeometryInfo Opt_GeometryInfo;
 typedef struct Ark_GutterOption Ark_GutterOption;
@@ -9601,6 +9618,10 @@ typedef struct Opt_UIListEvent {
     Ark_Tag tag;
     Ark_UIListEvent value;
 } Opt_UIListEvent;
+typedef struct Opt_uiMaterial_ImmersiveMaterial {
+    Ark_Tag tag;
+    Ark_uiMaterial_ImmersiveMaterial value;
+} Opt_uiMaterial_ImmersiveMaterial;
 typedef struct Opt_uiMaterial_Material {
     Ark_Tag tag;
     Ark_uiMaterial_Material value;
@@ -12598,6 +12619,16 @@ typedef struct Opt_Callback_Opt_DrawingRenderingContext_Void {
     Ark_Tag tag;
     Callback_Opt_DrawingRenderingContext_Void value;
 } Opt_Callback_Opt_DrawingRenderingContext_Void;
+typedef struct Callback_Opt_Map_String_Object_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Opt_Map_String_Object value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Map_String_Object value);
+} Callback_Opt_Map_String_Object_Void;
+typedef struct Opt_Callback_Opt_Map_String_Object_Void {
+    Ark_Tag tag;
+    Callback_Opt_Map_String_Object_Void value;
+} Opt_Callback_Opt_Map_String_Object_Void;
 typedef struct Callback_Opt_NavigationAnimatedTransition_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13478,6 +13509,16 @@ typedef struct Opt_Map_String_ComponentContentBase {
     Ark_Tag tag;
     Map_String_ComponentContentBase value;
 } Opt_Map_String_ComponentContentBase;
+typedef struct Map_String_Object {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_String* keys;
+    Ark_Object* values;
+} Map_String_Object;
+typedef struct Opt_Map_String_Object {
+    Ark_Tag tag;
+    Map_String_Object value;
+} Opt_Map_String_Object;
 typedef struct Map_String_Opt_Object {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -14446,6 +14487,16 @@ typedef struct Opt_RatingModifierBuilder {
     Ark_Tag tag;
     RatingModifierBuilder value;
 } Opt_RatingModifierBuilder;
+typedef struct RestoreStateCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Opt_Map_String_Object savedState);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Map_String_Object savedState);
+} RestoreStateCallback;
+typedef struct Opt_RestoreStateCallback {
+    Ark_Tag tag;
+    RestoreStateCallback value;
+} Opt_RestoreStateCallback;
 typedef struct RestrictedWorker_onerror_Callback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14516,6 +14567,16 @@ typedef struct Opt_SaveButtonCallback {
     Ark_Tag tag;
     SaveButtonCallback value;
 } Opt_SaveButtonCallback;
+typedef struct SaveStateCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Callback_Opt_Map_String_Object_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_Opt_Map_String_Object_Void continuation);
+} SaveStateCallback;
+typedef struct Opt_SaveStateCallback {
+    Ark_Tag tag;
+    SaveStateCallback value;
+} Opt_SaveStateCallback;
 typedef struct ScrollOnDidZoomCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -16801,6 +16862,14 @@ typedef struct Opt_NavDestinationModuleInfo {
     Ark_Tag tag;
     Ark_NavDestinationModuleInfo value;
 } Opt_NavDestinationModuleInfo;
+typedef struct Ark_NavigationConfiguration {
+    /* kind: Interface */
+    Opt_Int32 stackSizeLimit;
+} Ark_NavigationConfiguration;
+typedef struct Opt_NavigationConfiguration {
+    Ark_Tag tag;
+    Ark_NavigationConfiguration value;
+} Opt_NavigationConfiguration;
 typedef struct Ark_NavigationInterception {
     /* kind: Interface */
     Opt_InterceptionShowCallback willShow;
@@ -21594,6 +21663,16 @@ typedef struct Opt_FlexOptions {
     Ark_Tag tag;
     Ark_FlexOptions value;
 } Opt_FlexOptions;
+typedef struct Ark_FloatingTabBarWidth {
+    /* kind: Interface */
+    Opt_Length smallBarWidth;
+    Opt_Length mediumBarWidth;
+    Opt_Length largeBarWidth;
+} Ark_FloatingTabBarWidth;
+typedef struct Opt_FloatingTabBarWidth {
+    Ark_Tag tag;
+    Ark_FloatingTabBarWidth value;
+} Opt_FloatingTabBarWidth;
 typedef struct Ark_GaugeIndicatorOptions {
     /* kind: Interface */
     Opt_ResourceStr icon;
@@ -21808,6 +21887,7 @@ typedef struct Ark_NavigationTitleOptions {
     Opt_TextModifier subTitleModifier;
     Opt_Boolean enableHoverMode;
     Opt_ScrollEffectOptions scrollEffectOptions;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_NavigationTitleOptions;
 typedef struct Opt_NavigationTitleOptions {
     Ark_Tag tag;
@@ -23278,6 +23358,20 @@ typedef struct Opt_EventTarget {
     Ark_Tag tag;
     Ark_EventTarget value;
 } Opt_EventTarget;
+typedef struct Ark_FloatingTabBarStyle {
+    /* kind: Interface */
+    Opt_FloatingTabBarWidth barWidth;
+    Opt_Length barSideMargin;
+    Opt_Length barBottomMargin;
+    Opt_ResourceColor maskColor;
+    Opt_Length maskHeight;
+    Opt_Boolean adaptToHandedness;
+    Opt_uiMaterial_ImmersiveMaterial systemMaterial;
+} Ark_FloatingTabBarStyle;
+typedef struct Opt_FloatingTabBarStyle {
+    Ark_Tag tag;
+    Ark_FloatingTabBarStyle value;
+} Opt_FloatingTabBarStyle;
 typedef struct Ark_GeometryInfo {
     /* kind: Interface */
     Ark_Float64 width;
@@ -26005,6 +26099,10 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                                          const Opt_Boolean* value);
     void (*setFullScreenOverlay)(Ark_NativePointer node,
                                  const Opt_Boolean* value);
+    void (*setOnSaveState)(Ark_NativePointer node,
+                           const Opt_SaveStateCallback* value);
+    void (*setOnRestoreState)(Ark_NativePointer node,
+                              const Opt_RestoreStateCallback* value);
     void (*setTitle)(Ark_VMContext vmContext,
                      Ark_NativePointer node,
                      const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
@@ -26088,6 +26186,8 @@ typedef struct GENERATED_ArkUINavigationModifier {
                                          const Opt_Boolean* value);
     void (*setEnableVisibilityLifecycleWithContentCover)(Ark_NativePointer node,
                                                          const Opt_Boolean* value);
+    void (*setConfiguration)(Ark_NativePointer node,
+                             const Opt_NavigationConfiguration* value);
     void (*setBackButtonIcon)(Ark_NativePointer node,
                               const Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier* icon,
                               const Opt_ResourceStr* accessibilityText);
@@ -27331,6 +27431,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                                    const Opt_OnTabsContentWillChangeCallback* value);
     void (*setOnContentDidScroll)(Ark_NativePointer node,
                                   const Opt_OnTabsContentDidScrollCallback* value);
+    void (*setBarFloatingStyle)(Ark_NativePointer node,
+                                const Opt_FloatingTabBarStyle* value);
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
