@@ -42,8 +42,8 @@ Matrix4 MatrixUtil::SetMatrixPolyToPoly(
         matrix.Get(1, 1), matrix.Get(POSITION_THREE, 1), matrix.Get(0, POSITION_THREE), matrix.Get(1, POSITION_THREE),
         matrix.Get(POSITION_THREE, POSITION_THREE));
     size_t arrayLength = totalPoint.size() / 2;
-    OHOS::Rosen::Drawing::PointF src[arrayLength];
-    OHOS::Rosen::Drawing::PointF dst[arrayLength];
+    std::vector<OHOS::Rosen::Drawing::PointF> src(arrayLength);
+    std::vector<OHOS::Rosen::Drawing::PointF> dst(arrayLength);
     for (size_t i = 0; i < arrayLength; i++) {
         auto point = totalPoint[i];
         src[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
@@ -52,7 +52,7 @@ Matrix4 MatrixUtil::SetMatrixPolyToPoly(
         auto point = totalPoint[i + arrayLength];
         dst[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
     }
-    matrix3d.SetPolyToPoly(src, dst, arrayLength);
+    matrix3d.SetPolyToPoly(src.data(), dst.data(), arrayLength);
     Matrix4 retMatrix4(matrix3d.Get(0), matrix3d.Get(1), 0, matrix3d.Get(POSITION_TWO), matrix3d.Get(POSITION_THREE),
         matrix3d.Get(POSITION_FOUR), 0, matrix3d.Get(POSITION_FIVE), 0, 0, 1, 0, matrix3d.Get(POSITION_SIX),
         matrix3d.Get(POSITION_SEVEN), 0, matrix3d.Get(POSITION_EIGHT));
@@ -74,8 +74,8 @@ Matrix4 MatrixUtil::SetMatrixPolyToPolyFloat(
         matrix.Get(1, 1), matrix.Get(POSITION_THREE, 1), matrix.Get(0, POSITION_THREE), matrix.Get(1, POSITION_THREE),
         matrix.Get(POSITION_THREE, POSITION_THREE));
     size_t arrayLength = totalPoint.size() / 2;
-    OHOS::Rosen::Drawing::PointF src[arrayLength];
-    OHOS::Rosen::Drawing::PointF dst[arrayLength];
+    std::vector<OHOS::Rosen::Drawing::PointF> src(arrayLength);
+    std::vector<OHOS::Rosen::Drawing::PointF> dst(arrayLength);
     for (size_t i = 0; i < arrayLength; i++) {
         auto point = totalPoint[i];
         src[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
@@ -84,7 +84,7 @@ Matrix4 MatrixUtil::SetMatrixPolyToPolyFloat(
         auto point = totalPoint[i + arrayLength];
         dst[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
     }
-    matrix3d.SetPolyToPoly(src, dst, arrayLength);
+    matrix3d.SetPolyToPoly(src.data(), dst.data(), arrayLength);
     Matrix4 retMatrix4(matrix3d.Get(0), matrix3d.Get(1), 0, matrix3d.Get(POSITION_TWO), matrix3d.Get(POSITION_THREE),
         matrix3d.Get(POSITION_FOUR), 0, matrix3d.Get(POSITION_FIVE), 0, 0, 1, 0, matrix3d.Get(POSITION_SIX),
         matrix3d.Get(POSITION_SEVEN), 0, matrix3d.Get(POSITION_EIGHT));
