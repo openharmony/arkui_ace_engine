@@ -48,8 +48,6 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
     auto columnNode = layoutWrapper->GetHostNode();
@@ -65,6 +63,8 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
 
+    auto dialogTheme = textPickerPattern->GetIsShowInDialog()
+        ? pipeline->GetTheme<DialogTheme>() : nullptr;
     GetColumnSize(layoutProperty, pickerTheme, dialogTheme, frameSize, pickerNode);
 
     textPickerPattern->CheckAndUpdateColumnSize(frameSize, columnNode, NeedAdaptForAging());
@@ -147,7 +147,7 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
     }
     auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
     float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
-    if (textPickerPattern->GetIsShowInDialog()) {
+    if (textPickerPattern->GetIsShowInDialog() && dialogTheme) {
         float dialogButtonHeight =
             static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
                 dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2).ConvertToPx());
