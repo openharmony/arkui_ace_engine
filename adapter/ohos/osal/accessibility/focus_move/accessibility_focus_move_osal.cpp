@@ -78,7 +78,13 @@ FocusMoveResultType FocusStrategyOsal::HandleFocusMoveSearchResult(
         }
         useFinalNode = false;
     } else if (result == AceFocusMoveResult::FIND_FAIL_IN_SCROLL) {
-        finalResult = FocusMoveResultType::SEARCH_FAIL_IN_SCROLL;
+        if ((param.type == Accessibility::FocusRuleType::FOCUS_BY_TITLE) ||
+            (param.type == Accessibility::FocusRuleType::FOCUS_BY_LINK)) {
+            finalResult = FocusMoveResultType::SEARCH_FAIL;
+            finalNode = nullptr;
+        } else {
+            finalResult = FocusMoveResultType::SEARCH_FAIL_IN_SCROLL;
+        }
     } else if (result == AceFocusMoveResult::FIND_FAIL_LOST_NODE) {
         finalResult = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
     } else if (result == AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE) {

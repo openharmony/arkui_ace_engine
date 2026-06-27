@@ -167,10 +167,9 @@ public:
         return checkNode->GetAccessibilityId() == isReadableId_;
     }
 
-    bool CheckIsReadableRulesEnable()
+    bool CheckIsReadableRulesEnable() override
     {
-        // readable rules default enable
-        return true;
+        return readableRulesEnable_;
     }
 public:
     bool updateOriginNodeInfoResult_ = true;
@@ -183,6 +182,7 @@ public:
     int64_t isReadableId_ = -1;
     Accessibility::FocusRuleType lastFocusRuleType_ = Accessibility::FocusRuleType::DEFAULT;
     int32_t checkIsReadableCount_ = 0;
+    bool readableRulesEnable_ = true;
 };
 
 /**
@@ -1108,5 +1108,153 @@ HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest
     EXPECT_EQ(frameNode1->GetAccessibilityId(), targetNode->GetAccessibilityId());
     EXPECT_EQ(strategy.lastFocusRuleType_, Accessibility::FocusRuleType::DEFAULT);
     EXPECT_EQ(strategy.checkIsReadableCount_, 1);
+}
+
+/**
+ * @tc.name: NeedChangeToReadableNodeThroughAncestorTest004
+ * @tc.desc: NeedChangeToReadableNodeThroughAncestor returns false when readable rules are disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, NeedChangeToReadableNodeThroughAncestorTest004, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    ASSERT_NE(checkNode, nullptr);
+
+    MockFocusStrategyOsal strategy(jsAccessibilityManager);
+    strategy.readableRulesEnable_ = false;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+
+    auto result = strategy.NeedChangeToReadableNodeThroughAncestor(
+        checkNode, targetNode, Accessibility::FocusRuleType::FOCUS_BY_LINK);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(targetNode, nullptr);
+    EXPECT_EQ(strategy.checkIsReadableCount_, 0);
+}
+
+/**
+ * @tc.name: FocusStrategyOsalCheckIsReadable001
+ * @tc.desc: CheckIsReadable returns false when focus type does not match.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalCheckIsReadable001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    FocusStrategyOsal strategy(jsAccessibilityManager);
+
+    EXPECT_FALSE(strategy.CheckIsReadable(nullptr, Accessibility::FocusRuleType::FOCUS_BY_TITLE));
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    ASSERT_NE(checkNode, nullptr);
+
+    EXPECT_FALSE(strategy.CheckIsReadable(checkNode, Accessibility::FocusRuleType::FOCUS_BY_LINK));
+}
+
+/**
+ * @tc.name: FocusStrategyOsalNGDetectFocusRuleType001
+ * @tc.desc: DetectElementInfoFocusableThroughAncestor fails when root node or base node is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalNGDetectFocusRuleType001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    Accessibility::AccessibilityElementInfo info;
+    Accessibility::AccessibilityFocusMoveParam param;
+    param.direction = FocusMoveDirection::DETECT_FOCUSABLE_IN_HOVER;
+    param.type = Accessibility::FocusRuleType::FOCUS_BY_TITLE;
+    std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+
+    FocusStrategyOsalNG nullContextStrategy(jsAccessibilityManager, nullptr, context);
+    auto result = nullContextStrategy.DetectElementInfoFocusableThroughAncestor(info, param, targetInfos, 1);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_TRUE(targetInfos.empty());
+
+    FocusStrategyOsalNG strategy(jsAccessibilityManager, context, context);
+    param.parentId = -1;
+    result = strategy.DetectElementInfoFocusableThroughAncestor(info, param, targetInfos, 1);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_TRUE(targetInfos.empty());
+}
+
+/**
+ * @tc.name: FocusStrategyOsalNGDetectFocusRuleType002
+ * @tc.desc: DetectElementInfoFocusableThroughAncestor carries FocusRuleType into readable validation path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalNGDetectFocusRuleType002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    ASSERT_NE(ngPipeline, nullptr);
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    rootNode->AddChild(frameNode);
+    frameNode->MountToParent(rootNode);
+
+    Accessibility::AccessibilityElementInfo info;
+    info.SetAccessibilityId(frameNode->GetAccessibilityId());
+    Accessibility::AccessibilityFocusMoveParam param;
+    param.direction = FocusMoveDirection::DETECT_FOCUSABLE_IN_FOCUS_MOVE;
+    param.parentId = frameNode->GetAccessibilityId();
+    param.type = Accessibility::FocusRuleType::FOCUS_BY_LINK;
+    std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+
+    FocusStrategyOsalNG strategy(jsAccessibilityManager, context, context);
+    auto result = strategy.DetectElementInfoFocusableThroughAncestor(info, param, targetInfos, context->GetWindowId());
+
+    EXPECT_NE(result.resultType, FocusMoveResultType::SEARCH_FAIL_LOST_NODE);
+    EXPECT_FALSE(targetInfos.empty());
+    rootNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: FocusStrategyOsalNGCheckReadableToRoot001
+ * @tc.desc: CheckAndGetReadableInfoToRoot handles null node and unmatched FocusRuleType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalNGCheckReadableToRoot001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    FocusStrategyOsalNG strategy(jsAccessibilityManager, context, context);
+    std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+
+    auto result = strategy.CheckAndGetReadableInfoToRoot(
+        nullptr, targetInfos, context->GetWindowId(), Accessibility::FocusRuleType::FOCUS_BY_TITLE);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_TRUE(targetInfos.empty());
+
+    auto frameNode = CreatFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    result = strategy.CheckAndGetReadableInfoToRoot(
+        frameNode, targetInfos, context->GetWindowId(), Accessibility::FocusRuleType::FOCUS_BY_LINK);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
+    EXPECT_TRUE(targetInfos.empty());
 }
 } // namespace OHOS::Ace::NG

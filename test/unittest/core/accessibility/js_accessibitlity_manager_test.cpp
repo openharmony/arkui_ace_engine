@@ -14,12 +14,12 @@
  */
 
 #include "gmock/gmock.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
 #include "accessibility_system_ability_client.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -5572,6 +5572,106 @@ HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest005, TestSize.
         std::to_string(nodeId), "16"};
 
     jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest001
+ * @tc.desc: Test DumpInfoParams parses set and clear component type modes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    DumpInfoArgument argument;
+    std::vector<std::string> setParams = {"-accessibility", "--set-component-type", "1", "SubHeader"};
+    auto ret = jsAccessibilityManager->GetDumpInfoArgument(setParams, argument);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.mode, DumpMode::SET_COMPONENT_TYPE_TEST);
+
+    argument = DumpInfoArgument();
+    std::vector<std::string> clearParams = {"-accessibility", "--clear-component-type", "1"};
+    ret = jsAccessibilityManager->GetDumpInfoArgument(clearParams, argument);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.mode, DumpMode::CLEAR_COMPONENT_TYPE_TEST);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest002
+ * @tc.desc: Test DumpSetComponentTypeTest and DumpClearComponentTypeTest with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> invalidSetParams = {"-accessibility", "--set-component-type", "1"};
+    jsAccessibilityManager->DumpSetComponentTypeTest(invalidSetParams);
+
+    std::vector<std::string> emptyTypeParams = {"-accessibility", "--set-component-type", "1", ""};
+    jsAccessibilityManager->DumpSetComponentTypeTest(emptyTypeParams);
+
+    std::vector<std::string> invalidClearParams = {"-accessibility", "--clear-component-type"};
+    jsAccessibilityManager->DumpClearComponentTypeTest(invalidClearParams);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest003
+ * @tc.desc: Test component type can be set and cleared through hidumper helpers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto rootNode = context->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = AceType::RawPtr(context);
+    rootNode->AddChild(frameNode);
+    frameNode->MountToParent(rootNode);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    std::vector<std::string> setParams = {
+        "-accessibility", "--set-component-type", std::to_string(frameNode->GetAccessibilityId()), "SubHeader"};
+    jsAccessibilityManager->DumpSetComponentTypeTest(setParams);
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityRole(), "SubHeader");
+
+    std::vector<std::string> clearParams = {
+        "-accessibility", "--clear-component-type", std::to_string(frameNode->GetAccessibilityId())};
+    jsAccessibilityManager->DumpClearComponentTypeTest(clearParams);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    rootNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest004
+ * @tc.desc: Test OnDumpInfoNG routes set and clear component type modes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> setParams = {"-accessibility", "--set-component-type", "0", "SubHeader"};
+    jsAccessibilityManager->OnDumpInfoNG(setParams, 0, false);
+
+    std::vector<std::string> clearParams = {"-accessibility", "--clear-component-type", "0"};
+    jsAccessibilityManager->OnDumpInfoNG(clearParams, 0, false);
 }
 /**
  * @tc.name: NextFocusRelationController_DescendantMode_True
