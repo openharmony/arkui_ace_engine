@@ -1416,17 +1416,22 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
-    if (eventHub && config.interactionInfo) {
-        json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
-        json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
+    if (config.interactionInfo) {
+        if (eventHub) {
+            json->Put("clickable", eventHub->IsAccessibilityClickable());
+            json->Put("longClickable", eventHub->IsAccessibilityLongClickable());
+        }
+        if (focusHub_) {
+            json->Put("focusable", focusHub_->IsFocusable());
+        }
     }
     if (accessibilityProperty_) {
         if (!accessibilityProperty_->GetAccessibilityText().empty() && config.accessibilityInfo) {
             json->Put("accessibilityContent", accessibilityProperty_->GetAccessibilityText().c_str());
         }
         if (config.interactionInfo) {
-            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
-            json->Put(TreeKey::IS_EDITABLE, accessibilityProperty_->IsEditable());
+            json->Put("scrollable", accessibilityProperty_->IsScrollable());
+            json->Put("editable", accessibilityProperty_->IsEditable());
         }
     }
 }

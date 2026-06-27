@@ -41,6 +41,13 @@ constexpr float PARA_OPACITY_VALUE_7 = 0.7f;
 constexpr float PARA_OPACITY_VALUE_8 = 1.0f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
+constexpr char FOCUSABLE_DUMP_TEST_TAG[] = "focusableDumpTest";
+
+RefPtr<FrameNode> CreateFocusableDumpFrameNode()
+{
+    return FrameNode::CreateFrameNode(
+        FOCUSABLE_DUMP_TEST_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+}
 } // namespace
 
 /**
@@ -3084,6 +3091,77 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo006, TestSize.Level1)
     const auto& valueBackgroundColor = json->GetValue("backgroundColor");
     bool hasKeyBackgroundColor = !(valueBackgroundColor->IsNull());
     EXPECT_TRUE(hasKeyBackgroundColor);
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig001
+ * @tc.desc: Test focusable is not dumped when interactionInfo is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig001, TestSize.Level1)
+{
+    auto frameNode = CreateFocusableDumpFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    FocusPattern focusPattern = { FocusType::NODE, true };
+    auto focusHub = frameNode->GetOrCreateFocusHub(focusPattern);
+    ASSERT_NE(focusHub, nullptr);
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ASSERT_NE(json, nullptr);
+    ParamConfig config;
+
+    frameNode->DumpSimplifyCommonInfoOnlyForParamConfig(json, config);
+
+    EXPECT_FALSE(json->Contains("focusable"));
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig002
+ * @tc.desc: Test focusable is not dumped and FocusHub is not created when node has no FocusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig002, TestSize.Level1)
+{
+    auto frameNode = CreateFocusableDumpFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetFocusHub(), nullptr);
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ASSERT_NE(json, nullptr);
+    ParamConfig config;
+    config.interactionInfo = true;
+
+    frameNode->DumpSimplifyCommonInfoOnlyForParamConfig(json, config);
+
+    EXPECT_FALSE(json->Contains("focusable"));
+    EXPECT_EQ(frameNode->GetFocusHub(), nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig003
+ * @tc.desc: Test focusable is dumped from IsFocusable when interactionInfo is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfoOnlyForParamConfig003, TestSize.Level1)
+{
+    auto frameNode = CreateFocusableDumpFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    FocusPattern focusPattern = { FocusType::NODE, true };
+    auto focusHub = frameNode->GetOrCreateFocusHub(focusPattern);
+    ASSERT_NE(focusHub, nullptr);
+    ParamConfig config;
+    config.interactionInfo = true;
+
+    auto focusableJson = JsonUtil::CreateSharedPtrJson(true);
+    ASSERT_NE(focusableJson, nullptr);
+    frameNode->DumpSimplifyCommonInfoOnlyForParamConfig(focusableJson, config);
+    EXPECT_TRUE(focusableJson->Contains("focusable"));
+    EXPECT_TRUE(focusableJson->GetBool("focusable", false));
+
+    focusHub->SetFocusable(false);
+    auto unfocusableJson = JsonUtil::CreateSharedPtrJson(true);
+    ASSERT_NE(unfocusableJson, nullptr);
+    frameNode->DumpSimplifyCommonInfoOnlyForParamConfig(unfocusableJson, config);
+    EXPECT_TRUE(unfocusableJson->Contains("focusable"));
+    EXPECT_FALSE(unfocusableJson->GetBool("focusable", true));
 }
 
 /**
