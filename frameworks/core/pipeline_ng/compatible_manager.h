@@ -45,7 +45,7 @@ private:
 
     void UpdateRawEvent(const TouchEvent& event);
     void UpdateDistance(float target);
-    void SetState(std::unique_ptr<TouchState> newState);
+    void SetState(std::unique_ptr<TouchState> newState); // 不能嵌套调用
     std::optional<TouchEvent> GenerateUpEvent();
     void GenerateMoveEvent();
     void ClearAllState();
@@ -59,7 +59,8 @@ private:
     std::optional<TouchEvent> rawMoveEvent_ { std::nullopt };
     std::optional<TouchEvent> rawUpEvent_ { std::nullopt };
     std::optional<TouchEvent> generatedMoveEvent_ { std::nullopt };
-    std::unique_ptr<TouchState> state_;
+    std::unique_ptr<TouchState> currentState_;
+    std::unique_ptr<TouchState> lastState_;
 
     class TouchState {
     public:
