@@ -190,6 +190,7 @@ private:
     void RemoveBackgroundImageNode();
     bool IsCameraChange();
     void OnPaint3D();
+    void FinishBackgroundSwitch();
 
 #if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     void LoadDepthMap();
@@ -237,6 +238,8 @@ private:
     float lastRender3DScale_ = 1.0f;
     ImageSourceInfo depthMap_;
     std::optional<int32_t> backgroundImageId_;
+    bool pendingCleanupImage_ = false;
+    bool pendingCleanupGltf_ = false;
 
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     BASE_NS::shared_ptr<Render3D::IMrtDepthAdapter> mrtDepthAdapter_;
