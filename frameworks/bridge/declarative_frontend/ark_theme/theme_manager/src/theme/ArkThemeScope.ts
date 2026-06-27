@@ -17,12 +17,11 @@
 
 class ArkThemeScopeItem {
     elmtId: number;
-    ownerId: number;
-    owner: ViewPuInternal;
+    owner?: WeakRef<ViewPuInternal> | undefined = undefined;
     name: string;
     isInWhiteList?: boolean = undefined;
     // the CustomComponent with same elmtId, receives onWillApplyTheme callback
-    listener?: ViewPuInternal | undefined = undefined;
+    listener?: WeakRef<ViewPuInternal> | undefined = undefined;
 }
 
 class ArkThemeScopeArray extends Array<ArkThemeScopeItem> {
@@ -126,7 +125,7 @@ class ArkThemeScope {
         if (!this.components) {
             this.components = new Map();
         }
-        this.components.set(elmtId, { elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
+        this.components.set(elmtId, { elmtId: elmtId, owner: new WeakRef(owner), name: componentName });
     }
 
     /**
@@ -142,7 +141,7 @@ class ArkThemeScope {
         const listenerId = listener.id__();
         let themeScopeItem = this.components.get(listenerId);
         if (themeScopeItem) {
-            themeScopeItem.listener = listener;
+            themeScopeItem.listener = new WeakRef(listener);
         }
     }
 
