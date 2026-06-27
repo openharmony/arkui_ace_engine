@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
@@ -1070,9 +1071,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
 
 void JsUnbindViews()
 {
-#ifdef CROSS_PLATFORM
     JsiClassBase::UnDeclareAll();
-#endif
 }
 
 } // namespace OHOS::Ace::Framework
