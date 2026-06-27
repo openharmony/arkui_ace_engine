@@ -19,12 +19,12 @@
 ### 做什么
 
 1. 扩展 `UIContentImpl::InitUISessionManagerCallbacks`，保存统一翻译 Get/Start/End/Reset callback 到 `UiSessionManagerOhos`。
-2. `UiSessionManagerOhos` 管理统一翻译 session、scope、requestId、processId 和当前 instanceId 的 `UiTranslateManagerImpl` 分发。
-3. `StartPageTranslate` 进入连续翻译状态并触发当前 snapshot；`EndPageTranslate` 停止增量并恢复原文。
+2. `UiSessionManagerOhos` 管理统一翻译 session、scope、requestId、调用方 processId、连续翻译 owner pid 和当前 instanceId 的 `UiTranslateManagerImpl` 分发。
+3. `StartPageTranslate` 进入连续翻译状态并触发当前 snapshot；当前页面没有已实际绘制可翻译文本时仍保持连续翻译状态，等待后续新节点上树或内容变化上报；`EndPageTranslate` 停止增量并恢复原文。
 4. `ARKUI_ARKWEB` 通过 `PageTranslateNode` hook 继续委托 ArkWeb 现有脚本注入路径并同时处理 ArkUI 原生文本，`ARKUI_ONLY` 不进入 ArkWeb；`XCOMPONENT`/`CANVAS_NODE` 仅保留字段，当前不处理。
-5. 扩展 report remote death 监听：SA death 时统一 Reset/End，恢复 Web 和 ArkUI 原文，取消 timeout/watchdog。
+5. 扩展 report remote death 监听：死亡 pid 为当前连续翻译 owner，或 owner 未明确但会话已 started 时，统一 Reset/End，恢复 Web 和 ArkUI 原文，取消 timeout/watchdog；不得依赖 translate process map 中只剩一个 pid 才恢复。
 6. 扩展 `UIContentImpl::InitUISessionManagerCallbacks`，保存当前 Ability 实例语言地区同步读取函数；`UiSessionManagerOhos` 按当前 instanceId 调用并通过同步 IPC reply 返回 `language/region`。
-7. 提供请求 timeout 现场清理入口，供 `UiReportStub::HandlePageTranslateCallbackTimeout` 在 requestId 校验通过后调用，执行 End/Reset 级清理。
+7. 提供单次 Get 请求 timeout 现场清理入口，供 `UiReportStub::HandlePageTranslateCallbackTimeout` 在 requestId 校验通过后调用，清理 snapshot cache 和调用方 translate pid；连续 Start 的初始无文本不通过该入口执行 End/Reset 级清理。
 
 ### 不做什么
 
@@ -48,7 +48,7 @@
 | WEB-COMPAT | `ARKUI_ARKWEB` 复用现有 Web path 并处理 ArkUI 原生文本 |
 | TRANSLATE-NODE-IFACE | `UiTranslateManagerImpl` Web listener 容器保存 `WeakPtr<PageTranslateNode>`；Web 翻译提取/回填/End 通过接口 hook 调用，WebInfo/image 等 Web 专属能力才局部转回 `WebPattern`；不得通过 `Pattern` 基类翻译虚函数分发 |
 | ABILITY-LANGUAGE | language/region 读取只读、无副作用，采用同步 IPC，不进入 translate manager，不改变 Start/End/Reset 状态 |
-| DFX | SA death 清 timeout/watchdog 和 session |
+| DFX | SA death 按 owner pid 清 timeout/watchdog 和 session；单次 Get timeout 只清一次性现场和调用方 pid，连续 Start 初始无文本不自动 End |
 | BUILD-MIN | 编译实际修改的 adapter/entrance 相关 so 目标和 manager/death 单测 |
 | SMALL-FUNCTION-REUSE | scope 判断、instance/manager 查找、UI 线程投递、Web/ArkUI 分发、session 清理和死亡恢复应抽成私有小函数复用，避免 Get/Start/End/Reset 各自复制同类流程 |
 
@@ -68,10 +68,11 @@
 ## 完成判据
 
 - Get/Start/End/Reset 通过 `UiSessionManager` 找到当前 instance 的 translate manager。
-- Start 后初始上报、End 后停止上报、Reset 后恢复原文的 manager 状态可单测验证。
+- Start 后初始上报、End 后停止上报、Reset 后恢复原文的 manager 状态可单测验证；Start 时没有可翻译文本不应触发 timeout End，后续新增或变化节点仍能上报。
 - `GetCurrentAbilityLanguageInfo` 通过当前 instance 返回当前 Ability 生效 `language/region`，空 locale 或 instance 缺失时返回失败/空字段且不影响翻译状态。
-- SA death 时会清理 session、timeout/watchdog，并调用全量恢复。
-- 请求 timeout 时可由 report stub 触发清理：校验 requestId 后清 session、停止增量上报、Reset ArkUI 临时译文、委托 Web 现有 End/Reset，并取消对应 watchdog。
+- SA death 时会按 owner pid 清理 session、timeout/watchdog，并调用全量恢复；translate process map 中存在其他历史 pid 时不得跳过恢复。
+- 单次 Get 请求 timeout 时可由 report stub 触发清理：校验 requestId 后清理 snapshot cache、调用方 translate pid 和一次性状态；连续 Start 初始无文本不得被该路径停止增量上报或 Reset 临时译文。
+- End、参数失败、单次获取完成和 timeout 清理路径必须移除对应 translate pid，避免后续死亡监听误判。
 - 迟到 callback、迟到 timeout 或旧 requestId 不得影响新的 Start/Get 会话。
 - 现有 `GetWebViewTranslateText` / `StartWebViewTranslate` / `EndWebViewTranslate` 行为不回退。
 - Manager 层公共路径复用明确：参数校验、scope bitmask 判断、按 instance 分发、清理现场和 DFX 摘要不得在多个接口中复制实现。
@@ -85,5 +86,6 @@
 
 - [ ] 编译 `adapter/ohos/entrance` 中实际修改文件所属 so/组件目标；必要时补 `ace_engine` 链接验证
 - [ ] Manager 单测覆盖 `ARKUI_ARKWEB`、`ARKUI_ONLY`、`ARKWEB_ONLY`、组合 bitmask，并确认 `XCOMPONENT`/`CANVAS_NODE` 当前不触发处理
-- [ ] DeathRecipient 单测覆盖 SA death 时恢复和状态清理
-- [ ] DFX 单测覆盖 requestId 不匹配时不清理新会话，requestId 匹配时执行 End/Reset 级现场清理
+- [ ] DeathRecipient 单测覆盖 owner pid SA death 时恢复和状态清理，并覆盖 process map 有其他 pid 时仍恢复
+- [ ] DFX 单测覆盖 requestId 不匹配时不清理新会话，单次 Get requestId 匹配时清理一次性现场和调用方 pid
+- [ ] Manager 单测覆盖 Start 初始无可翻译文本时保持连续翻译状态，后续新增/变化文本仍可上报

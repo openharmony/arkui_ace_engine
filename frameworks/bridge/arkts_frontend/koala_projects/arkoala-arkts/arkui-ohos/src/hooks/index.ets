@@ -1,4 +1,4 @@
-import { runtimeType, RuntimeType, KPointer } from "@koalaui/interop";
+import { runtimeType, RuntimeType, KPointer, MaterializedBase } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, LengthMetricsUnit, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
@@ -83,7 +83,7 @@ import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from '#generated';
 import { ListHandWritten } from "./ListHandWritten"
-import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from '#generated';
+import { ArkWebComponent, JavaScriptProxy, CredentialType } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';

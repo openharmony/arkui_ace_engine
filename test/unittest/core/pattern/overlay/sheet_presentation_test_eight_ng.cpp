@@ -98,6 +98,14 @@ void SheetPresentationTestEightNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
                 return nullptr;
             }
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -939,7 +947,7 @@ HWTEST_F(SheetPresentationTestEightNg, UpdateSheetBackgroundColor002, TestSize.L
 
     auto renderContext = sheetNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    EXPECT_FALSE(renderContext->HasBackgroundColor());
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }

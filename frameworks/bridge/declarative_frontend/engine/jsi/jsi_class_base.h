@@ -46,6 +46,10 @@ public:
         FunctionCallback classNativeCallback, JsiFunctionMap& staticFns, JsiFunctionMap& customFns,
         JsiFunctionMap& customGetFns, JsiFunctionMap& customSetFns,
         panda::Global<panda::FunctionRef>& classFn);
+
+    using UnDeclareFunc = void (*)();
+    static void RegisterUnDeclare(UnDeclareFunc func);
+    static void UnDeclareAll();
 };
 } // namespace OHOS::Ace::Framework
 

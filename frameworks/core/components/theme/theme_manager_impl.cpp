@@ -17,6 +17,7 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"

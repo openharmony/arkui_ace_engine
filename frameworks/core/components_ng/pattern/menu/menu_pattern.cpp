@@ -20,6 +20,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/shadow_theme.h"
@@ -606,6 +607,14 @@ void MenuPattern::RegisterOnTouch()
     gesture->AddTouchEvent(onTouch_);
 }
 
+bool MenuPattern::IsOffsetInNodeBounds(const RefPtr<FrameNode>& host, const Offset& offset)
+{
+    CHECK_NULL_RETURN(host, false);
+    const auto& frameSize = host->GetGeometryNode()->GetFrameSize();
+    return GreatOrEqual(offset.GetX(), 0.0) && LessOrEqual(offset.GetX(), frameSize.Width()) &&
+        GreatOrEqual(offset.GetY(), 0.0) && LessOrEqual(offset.GetY(), frameSize.Height());
+}
+
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
     if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsDesktopMenu()|| IsSelectOverlayCustomMenu()) {
@@ -624,12 +633,22 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
+    // Treat the gesture as a click iff the finger stays inside the menu bounds during the whole touch
+    // sequence (down/move/up), mirroring ClickRecognizer::IsPointInRegion instead of the old down->up
+    // straight-line distance check which is stricter than onClick.
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
+        movedOutOfRegion_ = false;
+    } else if (touchType == TouchType::MOVE) {
+        // mirror ClickRecognizer: once the finger leaves the menu bounds, it is no longer a click
+        if (!movedOutOfRegion_ && !IsOffsetInNodeBounds(GetHost(), info.GetTouches().front().GetLocalLocation())) {
+            movedOutOfRegion_ = true;
+        }
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
-        if (lastTouchOffset_.has_value() &&
-            (touchUpOffset - lastTouchOffset_.value()).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+        bool isClick = lastTouchOffset_.has_value() && !movedOutOfRegion_ &&
+            IsOffsetInNodeBounds(GetHost(), touchUpOffset);
+        if (isClick) {
             auto touchGlobalLocation = info.GetTouches().front().GetGlobalLocation();
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
@@ -637,6 +656,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             HideMenu(true, position, HideMenuType::MENU_TOUCH_UP);
         }
         lastTouchOffset_.reset();
+        movedOutOfRegion_ = false;
     }
 }
 
@@ -681,13 +701,13 @@ void MenuPattern::RemoveParentHoverStyle()
     menuItemPattern->OnHover(false);
 }
 
-void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode)
+void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex)
 {
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     const auto& children = host->GetChildren();
-    int32_t index = 0;
+    int32_t index = currentIndex;
     for (auto child : children) {
         auto tag = child->GetTag();
         if (tag == MENU_ITEM_ETS_TAG) {
@@ -727,7 +747,7 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (tag == JS_FOR_EACH_ETS_TAG || tag == JS_SYNTAX_ITEM_ETS_TAG
             ||  tag == JS_IF_ELSE_ETS_TAG || tag == JS_REPEAT_ETS_TAG) {
-            UpdateMenuItemChildren(child, previousNode);
+            UpdateMenuItemChildren(child, previousNode, index);
         }
         index++;
     }
@@ -1393,13 +1413,13 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
     auto pipelineContext = host->GetContextWithCheck();
-    if (resetForDesktopMenu) {
+    if (ShouldUpdateShadow() && resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
         Shadow shadow;
         if (GetShadowFromTheme(ShadowStyle::None, shadow, pipelineContext)) {
             renderContext->UpdateBackShadow(shadow);
         }
-    } else {
+    } else if (ShouldUpdateShadow()) {
         Shadow shadow;
         auto shadowStyle = GetMenuDefaultShadowStyle(pipelineContext);
         if (GetShadowFromTheme(shadowStyle, shadow, pipelineContext)) {
@@ -1431,7 +1451,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTh
     }
     Shadow shadow;
     auto defaultShadowStyle = GetMenuDefaultShadowStyle(pipeline);
-    if (GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
+    if (ShouldUpdateShadow() && GetShadowFromTheme(defaultShadowStyle, shadow, pipeline)) {
         renderContext->UpdateBackShadow(shadow);
     }
     // make menu round rect
@@ -1480,6 +1500,7 @@ void MenuPattern::SetAccessibilityAction()
         if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
             auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             scrollPattern->ScrollPage(false, true);
         }
     });
@@ -1493,6 +1514,7 @@ void MenuPattern::SetAccessibilityAction()
         if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
             auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(scrollPattern);
+            scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
             scrollPattern->ScrollPage(true, true);
         }
     });
@@ -1668,11 +1690,40 @@ MenuParam MenuPattern::GetMenuParam() const
     return menuParam;
 }
 
+bool MenuPattern::ShouldUpdateShadow() const
+{
+    auto systemMaterial = GetMenuParam().systemMaterial;
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial));
+    if (!nativeMaterial) {
+        return true; // No valid material: apply default menu shadow.
+    }
+
+    auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+    if (!materialType.has_value()) {
+        return true; // Unknown material type: apply default menu shadow.
+    }
+
+    // For NONE, SEMI_TRANSPARENT or other (e.g. HDS) types, the material carries its own
+    // visual effect, so don't apply the default menu shadow.
+    if (materialType.value() != MaterialType::IMMERSIVE) {
+        return false;
+    }
+
+    // For IMMERSIVE type, check applyShadow property.
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    if (immersiveOptions && immersiveOptions->applyShadow) {
+        return false; // IMMERSIVE with applyShadow=true: material shadow handles it.
+    }
+
+    // IMMERSIVE with applyShadow=false or no options: apply default menu shadow.
+    return true;
+}
+
 bool MenuPattern::IsUseDistortionAnimation() const
 {
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
-    if (!menuSystemMaterial) {
+    if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
     auto menuSystemMaterialType =
@@ -1696,7 +1747,7 @@ bool MenuPattern::IsUseEdgeLightAnimation() const
 {
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
-    if (!menuSystemMaterial) {
+    if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
     auto menuSystemMaterialType =
@@ -1944,8 +1995,8 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.rbCorner = { 1.0, 1.0 };
 
             param2.luCorner = { 0.0, 0.0 };
-            param2.ruCorner = { 0.2, 0.0 };
-            param2.lbCorner = { 0.0, 1.0 };
+            param2.ruCorner = { 1.0, 0.0 };
+            param2.lbCorner = { 0.0, 0.2 };
             param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
@@ -1966,8 +2017,8 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.rbCorner = { 1.0, 1.0 };
 
             param2.luCorner = { 0.0, 0.0 };
-            param2.ruCorner = { 1.0, 0.0 };
-            param2.lbCorner = { 0.8, 1.0 };
+            param2.ruCorner = { 1.0, 0.8 };
+            param2.lbCorner = { 0.0, 1.0 };
             param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
@@ -1987,10 +2038,10 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
             param1.lbCorner = { 0.0, 1.0 };
             param1.rbCorner = { 0.2, 1.0 };
 
-            param2.luCorner = { 0.0, 0.0 };
+            param2.luCorner = { 0.0, 0.8 };
             param2.ruCorner = { 1.0, 0.0 };
             param2.lbCorner = { 0.0, 1.0 };
-            param2.rbCorner = { 0.2, 1.0 };
+            param2.rbCorner = { 1.0, 1.0 };
 
             param3.luCorner = { 0.0, 0.0 };
             param3.ruCorner = { 1.0, 0.0 };
@@ -3093,7 +3144,7 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
+    if (ShouldUpdateShadow() && GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow, host->GetContextWithCheck())) {
         host->GetRenderContext()->UpdateBackShadow(shadow);
     }
 }
@@ -3184,6 +3235,10 @@ bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
         }
         if (IsSelectOverlayRightClickMenu() || IsExtensionInnerMenu() || IsSelectOverlayExtensionMenu()) {
             styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            if (IsSelectOverlayRightClickMenu()) {
+                renderContext->UpdateBackgroundColor(
+                    menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
+            }
         }
         renderContext->UpdateBackBlurStyle(menuParams.blurStyleOption.value_or(styleOption));
     }

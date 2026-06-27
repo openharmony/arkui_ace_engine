@@ -21,7 +21,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/interfaces/native/node/node_arc_list_modifier.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -29,13 +29,23 @@ namespace OHOS::Ace::NG {
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 
+namespace {
+RefPtr<Pattern> CreateArcListPattern()
+{
+    auto* mod = NodeModifier::GetArcListCustomModifier();
+    CHECK_NULL_RETURN(mod, nullptr);
+    CHECK_NULL_RETURN(mod->createArcListPattern, nullptr);
+    return mod->createArcListPattern();
+}
+} // namespace
+
 RefPtr<FrameNode> ListModelStatic::CreateFrameNode(int32_t nodeId, bool isCreateArc)
 {
     RefPtr<FrameNode> frameNode = nullptr;
     if (!isCreateArc) {
         frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
     } else {
-        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcListPattern>());
+        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, CreateArcListPattern());
     }
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);

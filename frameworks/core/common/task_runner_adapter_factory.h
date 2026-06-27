@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_RUNNER_ADAPTER_FACTORY_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_RUNNER_ADAPTER_FACTORY_H
 
+#include "base/utils/macros.h"
 #include "core/common/task_runner_adapter.h"
 
 namespace OHOS::Ace {
 class TaskRunnerAdapterFactory {
 public:
-    static RefPtr<TaskRunnerAdapter> Create(bool useCurrentEventRunner, const std::string& threadName);
+    static ACE_FORCE_EXPORT RefPtr<TaskRunnerAdapter> Create(
+        bool useCurrentEventRunner, const std::string& threadName);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_RUNNER_ADAPTER_FACTORY_H

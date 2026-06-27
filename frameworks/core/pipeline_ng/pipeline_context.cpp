@@ -21,10 +21,12 @@
 #include <cmath>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -125,6 +127,7 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -623,7 +626,7 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 bool PipelineContext::NeedSoftKeyboard()
 {
     auto needSoftKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch need keyboard %d", needSoftKeyboard);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch needKB=%{public}d", needSoftKeyboard);
     return needSoftKeyboard;
 }
 
@@ -658,7 +661,6 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
         LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
-        LogBacktrace();
     }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
@@ -677,7 +679,6 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
         LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
-        LogBacktrace();
     }
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
@@ -708,7 +709,6 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
-        LogBacktrace();
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -774,7 +774,6 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
-        LogBacktrace();
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -808,7 +807,6 @@ void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
         LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
-        LogBacktrace();
     }
     dirtyFreezeNode_.emplace_back(WeakClaim(node));
     hasIdleTasks_ = true;
@@ -1819,9 +1817,14 @@ void PipelineContext::FlushFocusView()
     ACE_EVENT_SCOPED_TRACE("FlushFocusView:[%s][%d][enable:%d][show:%d]", lastFocusViewHub->GetFrameName().c_str(),
         lastFocusViewHub->GetFrameId(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow());
     auto container = Container::Current();
-    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
-        (!lastFocusView->IsRootScopeCurrentFocus())) {
+    if (container && container->IsDynamicRender() && (!lastFocusView->IsRootScopeCurrentFocus())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
+    }
+    if (container && container->IsUIExtensionWindow() && (!lastFocusView->IsRootScopeCurrentFocus())) {
+        if (focusManager_->GetIsFocusActive() ||
+            !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            lastFocusView->SetIsViewRootScopeFocused(false);
+        }
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
@@ -2616,7 +2619,7 @@ void PipelineContext::PostKeyboardAvoidTask()
             }
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation done, trigger avoid");
             auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
             auto positionY = manager->GetLaterAvoidPositionY();
             auto height = manager->GetLaterAvoidHeight();
@@ -3133,8 +3136,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, "
-            "safeHeight: %{public}f, rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+            "AvoidanceLogic kh=%{public}f posY=%{public}f safeH=%{public}f rootH=%{public}f offset=%{public}f",
             keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
@@ -3202,7 +3204,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
     if (keyboardHeight >= rootHeight_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboard > rootRect, skip avoid");
         return;
     }
 
@@ -3238,12 +3240,12 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
             NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
         prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ignore illegal height change");
         return;
     }
 
     if (manager->UsingCustomKeyboardAvoid()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use customKB avoid");
         return;
     }
 
@@ -3273,8 +3275,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
 
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
-
         float keyboardOffset =
             manager ? manager->GetClickPositionOffset() : context->safeAreaManager_->GetKeyboardOffset();
         float currentPos =
@@ -3289,7 +3289,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         currentPos += adjust;
 
         if (!onFocusField) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use window origin arg");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
             positionY -= keyboardOffset;
@@ -3319,8 +3319,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
+            "DoKeyboardAvoid kh=%{public}f posY=%{public}f textH=%{public}f rootH=%{public}f adjust=%{public}f "
+            "offset=%{public}f",
             keyboardHeight, positionY, height, rootSize.Height(), adjust,
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -3374,7 +3374,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(float keyboard
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (manager->UsingCustomKeyboardAvoid()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use custom avoid");
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
@@ -3419,7 +3419,6 @@ void PipelineContext::DoKeyboardAvoidFunc(
         keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
     }
     SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
     float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
                      GetSafeAreaManager()->GetKeyboardOffset(true);
     auto onFocusField = manager->GetOnFocusTextField().Upgrade();
@@ -3445,9 +3444,8 @@ void PipelineContext::DoKeyboardAvoidFunc(
     }
     manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
     TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-        "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-        "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
-        "final calculate keyboard offset is %{public}f",
+        "CaretAvoid kh=%{public}f caretPos=%{public}f caretH=%{public}f rootH=%{public}f adjust=%{public}f "
+        "lastOffset=%{public}f offset=%{public}f",
         keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
         safeAreaManager_->GetKeyboardOffset());
     SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -4393,15 +4391,24 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             jsParams = std::vector<std::string>(params.begin() + 1, params.end());
         }
 
-        auto stageNode = stageManager_->GetStageNode();
-        CHECK_NULL_RETURN(stageNode, false);
-        auto children = stageNode->GetChildren();
-        for (const auto& pageNode : children) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-            CHECK_NULL_RETURN(frameNode, false);
-            auto pagePattern = frameNode->GetPattern<PagePattern>();
+        bool isHelp = params.size() >= 2 && params[1] == "-h";
+        if (isHelp) {
+            auto pageNode = stageManager_->GetLastPage();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
             CHECK_NULL_RETURN(pagePattern, false);
             pagePattern->FireDumpListener(jsParams);
+        } else {
+            auto stageNode = stageManager_->GetStageNode();
+            CHECK_NULL_RETURN(stageNode, false);
+            auto children = stageNode->GetChildren();
+            for (const auto& pageNode : children) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+                CHECK_NULL_RETURN(frameNode, false);
+                auto pagePattern = frameNode->GetPattern<PagePattern>();
+                CHECK_NULL_RETURN(pagePattern, false);
+                pagePattern->FireDumpListener(jsParams);
+            }
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {

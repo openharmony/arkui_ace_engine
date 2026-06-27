@@ -34,6 +34,7 @@
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -1547,7 +1548,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg175, TestSize.Level1)
     context_->focusNode_ = frameNode_;
     frameNode_->SetPrivacySensitive(true);
     context_->DetachNode(frameNode_);
-    EXPECT_EQ(context_->focusNode_, frameNode_);
+    EXPECT_NE(context_->focusNode_, frameNode_);
 }
 
 /**
@@ -2136,7 +2137,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg193, TestSize.Level1)
      * @tc.expected: children.front() is not nullptr
      */
     context_->EnableContainerModalGesture(isEnable);
-    EXPECT_FALSE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
 
     context_->rootNode_->children_.clear();
     node.Reset();

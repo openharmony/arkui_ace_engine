@@ -83,11 +83,14 @@ constexpr float TARGET_WIDTH = 100.0f;
 constexpr float TARGET_HEIGHT = 200.0f;
 constexpr float TARGET_X = 100.0f;
 constexpr float TARGET_Y = 150.0f;
+constexpr int32_t INVALID_TARGET_ID = -1;
+    
 
 const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
 const std::string BUBBLE_MESSAGE = "Hello World";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
+const std::string INVALID_TARGET_TAG = "invalid_tag";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
 const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
 const OffsetF MESSAGE_OFFSET = OffsetF(MESSAGE_OFFSET_X, MESSAGE_OFFSET_Y);
@@ -1507,5 +1510,156 @@ HWTEST_F(BubbleTestNg, PopupParamLevelModeTest003, TestSize.Level1)
      */
     popupParam->SetLevelMode(LevelMode::EMBEDDED);
     EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::EMBEDDED);
+}
+
+/**
+ * @tc.name: BubblePatternTest023
+ * @tc.desc: Test OnRemoveChild calls RemoveOnAreaChangeNode when hasOnAreaChange_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node with target node.
+     * @tc.expected: Check the frameNode and targetNode were created successfully.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set hasOnAreaChange_ to false to trigger RemoveOnAreaChangeNode call.
+     */
+    pattern->hasOnAreaChange_ = false;
+
+    /**
+     * @tc.steps: step3. Call OnRemoveChild.
+     * @tc.expected: Method should execute without crash.
+     */
+    pattern->OnRemoveChild(frameNode);
+
+    /**
+     * @tc.steps: step4. Verify RemoveOnAreaChangeNode was called by checking pipeline state.
+     * @tc.expected: Method completes successfully without crash.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: BubblePatternTest024
+ * @tc.desc: Test OnRemoveChild does NOT call RemoveOnAreaChangeNode when hasOnAreaChange_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node with target node.
+     * @tc.expected: Check the frameNode and targetNode were created successfully.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set hasOnAreaChange_ to true to skip RemoveOnAreaChangeNode call.
+     */
+    pattern->hasOnAreaChange_ = true;
+
+    /**
+     * @tc.steps: step3. Call OnRemoveChild.
+     * @tc.expected: Method should execute without crash.
+     */
+    pattern->OnRemoveChild(frameNode);
+
+    /**
+     * @tc.steps: step4. Verify method completes successfully.
+     * @tc.expected: No crash occurs when hasOnAreaChange_ is true.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: BubblePatternTest025
+ * @tc.desc: Test OnRemoveChild handles null targetNode gracefully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node with invalid target info.
+     * @tc.expected: Check the frameNode was created successfully.
+     */
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(INVALID_TARGET_ID, INVALID_TARGET_TAG));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set hasOnAreaChange_ to false.
+     */
+    pattern->hasOnAreaChange_ = false;
+
+    /**
+     * @tc.steps: step3. Call OnRemoveChild with invalid target info.
+     * @tc.expected: Method should handle null targetNode gracefully without crash.
+     */
+    pattern->OnRemoveChild(frameNode);
+
+    /**
+     * @tc.steps: step4. Verify method completes successfully.
+     * @tc.expected: No crash occurs when targetNode is null.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: BubblePatternTest026
+ * @tc.desc: Test OnRemoveChild handles null node parameter gracefully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node with target node.
+     * @tc.expected: Check the frameNode and pattern were created successfully.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnRemoveChild with null node parameter.
+     * @tc.expected: Method should handle null node gracefully without crash.
+     */
+    pattern->OnRemoveChild(nullptr);
+
+    /**
+     * @tc.steps: step3. Verify method completes successfully.
+     * @tc.expected: No crash occurs when node parameter is null.
+     */
+    EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <cfloat>
 #include <optional>
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
@@ -34,16 +35,19 @@ public:
           firstPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
           newPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
           unselectedIndicatorWidth_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
-          unselectedIndicatorHeight_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0)))
+          unselectedIndicatorHeight_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
+          indicatorIconOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f))
     {
         AttachProperty(firstPointOpacity_);
         AttachProperty(newPointOpacity_);
         AttachProperty(unselectedIndicatorWidth_);
         AttachProperty(unselectedIndicatorHeight_);
+        AttachProperty(indicatorIconOpacity_);
     }
     ~OverlengthDotIndicatorModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
+    void UpdateCustomIconOffsets(const ContentProperty& contentProperty);
     // paint
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount,
         bool isBindIndicator);
@@ -68,6 +72,11 @@ public:
     void SetMaxDisplayCount(int32_t maxDisplayCount)
     {
         maxDisplayCount_ = maxDisplayCount;
+    }
+
+    void SetIndicatorHost(const WeakPtr<FrameNode>& host)
+    {
+        indicatorHost_ = host;
     }
 
     void PlayIndicatorAnimation(const OffsetF& margin, const LinearVector<float>& itemHalfSizes,
@@ -121,6 +130,28 @@ public:
         return currentOverlongType_;
     }
 
+    int32_t GetVisualSelectedSlot() const;
+    void SetIndicatorIconFadeInSlots(const std::vector<int32_t>& fadeInSlots)
+    {
+        indicatorIconFadeInSlots_ = fadeInSlots;
+    }
+    void SetIndicatorIconOpacity(float opacity)
+    {
+        indicatorIconOpacity_->Set(opacity);
+    }
+    bool IsIndicatorIconFadeInSlot(int32_t slot) const;
+    std::vector<RefPtr<FrameNode>> GetActiveCustomIconWrappers() const;
+
+    LinearVector<float> GetVisibleAnimationStartCenterXOrCurrent() const;
+
+    int32_t GetSelectedSlot() const;
+
+    static std::optional<int32_t> CalcSlotForPage(
+        int32_t pageIndex, int32_t currentIndex, int32_t realItemCount,
+        int32_t maxDisplayCount, OverlongType overlongType);
+
+    std::optional<int32_t> GetSlotForPage(int32_t pageIndex) const;
+
     void SetCurrentOverlongType(OverlongType currentOverlongType)
     {
         currentOverlongType_ = currentOverlongType;
@@ -129,6 +160,11 @@ public:
     void SetAnimationStartIndex(int32_t animationStartIndex)
     {
         animationStartIndex_ = animationStartIndex;
+    }
+
+    void UpdateAnimationStartSelectedIndex()
+    {
+        animationStartSelectedIndex_ = currentSelectedIndex_;
     }
 
     void SetAnimationEndIndex(int32_t animationEndIndex)
@@ -191,6 +227,11 @@ public:
         isDraggingIndicator_ = isDraggingIndicator;
     }
 
+    bool IsDraggingIndicator() const
+    {
+        return isDraggingIndicator_;
+    }
+
     void SetIsHorizontalAndRTL(bool isHorizontalAndRTL)
     {
         isHorizontalAndRTL_ = isHorizontalAndRTL;
@@ -234,8 +275,17 @@ public:
     void CalcTargetSelectedIndexOnBackward(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
     void StopAnimation(bool ifImmediately) override;
+    void SetHasCustomIcon(bool val)
+    {
+        hasCustomIcon_ = val;
+    }
+    bool GetHasCustomIcon() const
+    {
+        return hasCustomIcon_;
+    }
 
 private:
+    void RequestCustomIconRefreshBeforeBlackAnimation();
     void PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes);
     void CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes);
     void CalcTargetStatusOnLongPointMove(const LinearVector<float>& itemHalfSizes);
@@ -263,6 +313,8 @@ private:
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
     RefPtr<AnimatablePropertyVectorFloat> unselectedIndicatorWidth_;
     RefPtr<AnimatablePropertyVectorFloat> unselectedIndicatorHeight_;
+    RefPtr<AnimatablePropertyFloat> indicatorIconOpacity_;
+    std::vector<int32_t> indicatorIconFadeInSlots_;
     int32_t maxDisplayCount_ = 0;
     int32_t realItemCount_ = 0;
     OverlongIndicatorMove moveDirection_ = OverlongIndicatorMove::NONE;
@@ -278,6 +330,7 @@ private:
 
     int32_t animationStartIndex_ = 0;
     int32_t animationEndIndex_ = 0;
+    int32_t animationStartSelectedIndex_ = 0;
     int32_t currentSelectedIndex_ = 0;
     int32_t targetSelectedIndex_ = 0;
     OverlongType currentOverlongType_ = OverlongType::NONE;
@@ -302,6 +355,8 @@ private:
     bool isBindIndicator_ = false;
     bool isLoop_ = true;
     bool isDrawbackground_ = false;
+    bool hasCustomIcon_ = false;
+    WeakPtr<FrameNode> indicatorHost_;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

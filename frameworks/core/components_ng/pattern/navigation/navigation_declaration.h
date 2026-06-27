@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

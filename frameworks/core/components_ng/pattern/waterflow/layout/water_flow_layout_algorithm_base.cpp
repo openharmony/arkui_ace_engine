@@ -18,9 +18,114 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::pair<float, float> GetMainStartEnd(const RectF& rect, Axis axis, bool isReverse, float frameMainSize)
+{
+    const float start = axis == Axis::VERTICAL ? rect.Top() : rect.Left();
+    const float size = rect.GetSize().MainSize(axis);
+    if (isReverse) {
+        const float end = frameMainSize - start;
+        return { end - size, end };
+    }
+    return { start, start + size };
+}
+
+RectF GetPaddingRectInFrame(const RefPtr<GeometryNode>& geo)
+{
+    CHECK_NULL_RETURN(geo, RectF());
+    auto size = geo->GetFrameSize();
+    OffsetF offset;
+    const auto& padding = geo->GetPadding();
+    if (padding) {
+        MinusPaddingToSize(*padding, size);
+        offset = OffsetF(padding->left.value_or(0.0f), padding->top.value_or(0.0f));
+    }
+    return RectF { offset, size };
+}
+
+std::optional<RectF> ResolveCustomClipRect(
+    const RefPtr<ShapeRect>& shape, const ScaleProperty& scale, const SizeF& frameSize, Axis axis)
+{
+    CHECK_NULL_RETURN(shape, std::nullopt);
+    const float mainSize = frameSize.MainSize(axis);
+    if (GreaterOrEqualToInfinity(mainSize)) {
+        return std::nullopt;
+    }
+
+    float x = ConvertToPx(shape->GetOffset().GetX(), scale, frameSize.Width()).value_or(0.0f);
+    float y = ConvertToPx(shape->GetOffset().GetY(), scale, frameSize.Height()).value_or(0.0f);
+    float width = ConvertToPx(shape->GetWidth(), scale, frameSize.Width()).value_or(0.0f);
+    float height = ConvertToPx(shape->GetHeight(), scale, frameSize.Height()).value_or(0.0f);
+    return RectF { x, y, width, height };
+}
+
+std::optional<RectF> ResolveContentClipRect(
+    ContentClipMode mode, const RefPtr<GeometryNode>& geo, const std::optional<ExpandEdges>& safeAreaPad)
+{
+    CHECK_NULL_RETURN(geo, std::nullopt);
+    switch (mode) {
+        case ContentClipMode::CONTENT_ONLY: {
+            return GetPaddingRectInFrame(geo);
+        }
+        case ContentClipMode::SAFE_AREA: {
+            if (!safeAreaPad.has_value()) {
+                return std::nullopt;
+            }
+            auto rect = GetPaddingRectInFrame(geo);
+            auto size = rect.GetSize();
+            AddPaddingToSize(safeAreaPad.value(), size);
+
+            auto offset = rect.GetOffset();
+            offset -= OffsetF(safeAreaPad->left.value_or(0.0f), safeAreaPad->top.value_or(0.0f));
+            return RectF { offset, size };
+        }
+        case ContentClipMode::BOUNDARY: {
+            return RectF { OffsetF(), geo->GetFrameSize() };
+        }
+        default:
+            return std::nullopt;
+    }
+}
+
+std::optional<RectF> ResolveClipRect(const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
+    const RefPtr<GeometryNode>& geometryNode, ContentClipMode mode, const RefPtr<ShapeRect>& clipShapeRect,
+    const std::optional<ExpandEdges>& safeAreaPad)
+{
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    if (mode == ContentClipMode::CUSTOM) {
+        const auto& constraint = layoutProperty->GetLayoutConstraint();
+        CHECK_NULL_RETURN(constraint, std::nullopt);
+        return ResolveCustomClipRect(clipShapeRect, constraint->scaleProperty, geometryNode->GetFrameSize(),
+            layoutProperty->GetAxis());
+    }
+    return ResolveContentClipRect(mode, geometryNode, safeAreaPad);
+}
+
+void ApplyContentClipFixOffset(const RectF& clipRect, const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
+    const RefPtr<GeometryNode>& geometryNode, const RefPtr<WaterFlowLayoutInfoBase>& info)
+{
+    auto contentRect = GetPaddingRectInFrame(geometryNode);
+    const auto axis = layoutProperty->GetAxis();
+    const float frameMainSize = geometryNode->GetFrameSize().MainSize(axis);
+    auto [contentStart, contentEnd] =
+        GetMainStartEnd(contentRect, axis, layoutProperty->IsReverse(), frameMainSize);
+    auto [clipStart, clipEnd] = GetMainStartEnd(clipRect, axis, layoutProperty->IsReverse(), frameMainSize);
+
+    if (GreatNotEqual(contentStart, clipStart)) {
+        info->startFixOffset_ = contentStart - clipStart;
+    }
+    const float contentEndWithExpand = contentEnd + info->expandHeight_;
+    if (GreatNotEqual(clipEnd, contentEndWithExpand)) {
+        info->endFixOffset_ = clipEnd - contentEndWithExpand;
+    }
+}
+} // namespace
+
 void WaterFlowLayoutBase::PreloadItems(
     LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount)
 {
@@ -151,6 +256,64 @@ void WaterFlowLayoutBase::GetExpandArea(
     auto&& safeAreaOpts = layoutProperty->GetSafeAreaExpandOpts();
     expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
     info->expandHeight_ = ScrollableUtils::CheckHeightExpansion(layoutProperty, layoutProperty->GetAxis());
+}
+
+void WaterFlowLayoutBase::CalculateContentClipFixOffset(
+    LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(info);
+    info->startFixOffset_ = 0.0f;
+    info->endFixOffset_ = 0.0f;
+    if (contentClipMode_ == ContentClipMode::CONTENT_ONLY) {
+        return;
+    }
+
+    PostClipContentSafeAreaBundle(layoutWrapper);
+    if (contentClipMode_ == ContentClipMode::SAFE_AREA && !safeAreaPad_.has_value()) {
+        return;
+    }
+
+    auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto clipRect = ResolveClipRect(layoutProperty, geometryNode, contentClipMode_, clipShapeRect_, safeAreaPad_);
+    if (!clipRect.has_value()) {
+        return;
+    }
+    ApplyContentClipFixOffset(clipRect.value(), layoutProperty, geometryNode, info);
+}
+
+void WaterFlowLayoutBase::PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper) const
+{
+    if (contentClipMode_ != ContentClipMode::SAFE_AREA) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
+}
+
+ViewPosReference WaterFlowLayoutBase::CreateLazyChildViewPosReference(const RefPtr<WaterFlowLayoutInfoBase>& info,
+    float mainSize, float referencePos, ReferenceEdge referenceEdge, Axis axis, std::optional<int64_t> deadline,
+    bool useInfinityWhenPositionCalc) const
+{
+    CHECK_NULL_RETURN(info, ViewPosReference {});
+    return {
+        .viewPosStart = 0,
+        // Lazy layout adds viewExtEnd to viewPosEnd internally; keep viewPosEnd at the report bound.
+        .viewPosEnd = useInfinityWhenPositionCalc && info->duringPositionCalc_ ? LayoutInfinity<float>()
+                                                                                : info->GetViewEndBound(mainSize, true),
+        .viewExtStart = info->startFixOffset_,
+        .viewExtEnd = info->endFixOffset_,
+        .referencePos = referencePos,
+        .referenceEdge = referenceEdge,
+        .axis = axis,
+        .deadline = deadline,
+    };
 }
 
 void WaterFlowLayoutBase::InitUnlayoutedItems()

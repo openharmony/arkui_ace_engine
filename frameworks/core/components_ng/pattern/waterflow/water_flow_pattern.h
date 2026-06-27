@@ -91,12 +91,12 @@ public:
 
     int32_t GetBeginIndex() const
     {
-        return layoutInfo_->startIndex_;
+        return layoutInfo_->reportStartIndex_;
     }
 
     int32_t GetEndIndex() const
     {
-        return layoutInfo_->endIndex_;
+        return layoutInfo_->reportEndIndex_;
     }
 
     int32_t GetChildrenCount() const;
@@ -196,6 +196,13 @@ public:
     // ------------------------ Focus ^^^ --------------------------------
     void BeforeCreateLayoutWrapper() override;
 
+    bool PostponedTaskForIgnoreCustomized() override
+    {
+        return true;
+    }
+
+    void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) override;
+
     void AddSectionChangeStartPos(int32_t start)
     {
         sectionChangeStartPos_.emplace_back(start);
@@ -261,6 +268,8 @@ private:
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
+    void SetLayoutAlgorithmContentClip(const RefPtr<WaterFlowLayoutBase>& algorithm);
+    void DumpAdvanceLayoutInfo() const;
     void DumpInfoAddSections();
     void ReportOnItemWaterFlowEvent(const std::string& event);
     void ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
@@ -300,6 +309,7 @@ private:
     RefPtr<WaterFlowLayoutBase> cacheLayout_;
 
     std::vector<int32_t> sectionChangeStartPos_;
+    std::optional<ExpandEdges> safeAreaPad_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

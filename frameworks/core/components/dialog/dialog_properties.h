@@ -278,6 +278,7 @@ struct DialogProperties {
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
     RefPtr<UiMaterial> systemMaterial;
     bool isDefaultMaterial = false;           // init use default Material
+    bool isDialogNapiCall = false;
 };
 
 struct PromptDialogAttr {

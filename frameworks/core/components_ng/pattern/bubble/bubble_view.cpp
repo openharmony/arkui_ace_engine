@@ -975,6 +975,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    layoutProperty->UpdatePunctuationOverflow(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         layoutProperty->UpdateOrphanCharOptimization(true);
     }
@@ -1244,6 +1245,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     auto fontScale = pipelineContext->GetFontScale();
     if (fontScale == AGE_SCALE_NUMBER) {
         buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(popupTheme->GetButtonHeight())));
+    }
+    auto enablePopupFlexGrow = popupTheme->GetEnablePopupFlexGrow();
+    if (enablePopupFlexGrow) {
+        buttonProp->UpdateFlexGrow(1.0f);
     }
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();

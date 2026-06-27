@@ -213,7 +213,7 @@ public:
 
     RefPtr<NG::GestureReferee> GetGestureRefereeNG(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
-        if (recognizer && recognizer->IsPostEventResult()) {
+        if (recognizer && recognizer->IsPostTouchEventResult()) {
             return postEventRefereeNG_;
         }
         return refereeNG_;

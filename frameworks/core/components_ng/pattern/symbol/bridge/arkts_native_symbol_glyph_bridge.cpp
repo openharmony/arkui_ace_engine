@@ -416,11 +416,22 @@ void ClearFontColorContainers(std::vector<Color>& colorArray,
     }
 }
 
+bool GetIsFontColorResource(ArkUINodeHandle nativeNode)
+{
+    CHECK_NULL_RETURN(nativeNode, false);
+    auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->getIsFontColorResource(nativeNode);
+}
+
 void PushFontColorResource(size_t index, const RefPtr<ResourceObject>& resObj,
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr, std::vector<int32_t>* resIndexes,
-    std::vector<RefPtr<ResourceObject>>* resObjects)
+    std::vector<RefPtr<ResourceObject>>* resObjects, ArkUINodeHandle nativeNode)
 {
-    if (!SystemProperties::ConfigChangePerform() || !resObj) {
+    if (!resObj) {
+        return;
+    }
+    if (!SystemProperties::ConfigChangePerform() && !GetIsFontColorResource(nativeNode)) {
         return;
     }
     if (resObjArr) {
@@ -451,7 +462,7 @@ bool BuildFontColors(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::
             return false;
         }
         colorArray.emplace_back(color);
-        PushFontColorResource(index, resObj, resObjArr, resIndexes, resObjects);
+        PushFontColorResource(index, resObj, resObjArr, resIndexes, resObjects, nativeNode);
     }
     return true;
 }

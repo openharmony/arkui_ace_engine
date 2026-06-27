@@ -256,9 +256,7 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
-        "Clock is %{public}s the visible area and clock %{public}s running",
-        visible ? "in" : "out of", visible ? "starts" : "stops");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Clock:%{public}s", visible ? "visible" : "invisible");
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
@@ -309,7 +307,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
-        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime is empty");
+        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime empty");
         return;
     }
     if (currentTime != prevTime_ || isTimeChange) {
@@ -424,7 +422,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         auto host = GetHost();
         CHECK_NULL_RETURN(host, outputDateTime);
         TAG_LOGI(
-            AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s nodeId:%{public}d", outputDateTime.c_str(), host->GetId());
+            AceLogTag::ACE_TEXT_CLOCK, "T:%{public}s ID:%{public}d", outputDateTime.c_str(), host->GetId());
     }
     return outputDateTime;
 }
@@ -862,7 +860,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 
 void TextClockPattern::OnTimeChange()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time is changed and clock updates");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time updated");
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
 }
@@ -912,7 +910,7 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
 
 void TextClockPattern::OnLanguageConfigurationUpdate()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language is changed and clock updates");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language changed, update");
     UpdateTimeText(true);
 }
 

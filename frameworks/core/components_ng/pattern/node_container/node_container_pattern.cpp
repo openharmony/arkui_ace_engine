@@ -19,6 +19,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {

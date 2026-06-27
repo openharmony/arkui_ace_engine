@@ -23,9 +23,26 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+
+NG::SelectModelNG* GetSelectModel()
+{
+    static NG::SelectModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Select");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find select dynamic module");
+        }
+        model = reinterpret_cast<NG::SelectModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 namespace {
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
@@ -60,17 +77,17 @@ void FfiOHOSAceFrameworkSelectCreate(VectorStringPtr vecContent)
     for (size_t i = 0; i < nativeSelectOptionVec.size(); i++) {
         params[i] = { nativeSelectOptionVec[i].value, nativeSelectOptionVec[i].icon };
     }
-    SelectModel::GetInstance()->Create(params);
+    GetSelectModel()->Create(params);
 }
 
 void FfiOHOSAceFrameworkSelectSetSelected(int32_t value)
 {
-    SelectModel::GetInstance()->SetSelected(value);
+    GetSelectModel()->SetSelected(value);
 }
 
 void FfiOHOSAceFrameworkSelectSetValue(const char* value)
 {
-    SelectModel::GetInstance()->SetValue(value);
+    GetSelectModel()->SetValue(value);
 }
 
 void FfiOHOSAceFrameworkSelectSetControlSize(int32_t value)
@@ -79,7 +96,7 @@ void FfiOHOSAceFrameworkSelectSetControlSize(int32_t value)
     if (value >= static_cast<int32_t>(ControlSize::SMALL) && value <= static_cast<int32_t>(ControlSize::NORMAL)) {
         size = static_cast<ControlSize>(value);
     }
-    SelectModel::GetInstance()->SetControlSize(size);
+    GetSelectModel()->SetControlSize(size);
 }
 
 void FfiOHOSAceFrameworkSelectSetDivider(DividerParams params)
@@ -94,31 +111,31 @@ void FfiOHOSAceFrameworkSelectSetDivider(DividerParams params)
     divider.startMargin = startMarginDime;
     divider.endMargin = endMarginDime;
 
-    SelectModel::GetInstance()->SetDivider(divider);
+    GetSelectModel()->SetDivider(divider);
 }
 
 void FfiOHOSAceFrameworkSelectSetFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family)
 {
-    SelectModel::GetInstance()->SetFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
-    SelectModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
-    SelectModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(family));
-    SelectModel::GetInstance()->SetItalicFontStyle(static_cast<FontStyle>(style));
+    GetSelectModel()->SetFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
+    GetSelectModel()->SetFontWeight(ConvertStrToFontWeight(weight));
+    GetSelectModel()->SetFontFamily(ConvertStrToFontFamilies(family));
+    GetSelectModel()->SetItalicFontStyle(static_cast<FontStyle>(style));
 }
 
 void FfiOHOSAceFrameworkSelectSetFontColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetFontColor(Color(color));
+    GetSelectModel()->SetFontColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectResetFontColor()
 {
-    SelectModel::GetInstance()->ResetFontColor();
+    GetSelectModel()->ResetFontColor();
 }
 
 void FfiOHOSAceFrameworkSelectSetSelectedOptionBgColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetSelectedOptionBgColor(Color(color));
+    GetSelectModel()->SetSelectedOptionBgColor(Color(color));
 }
 
 // reset select SelectedOptionBgColor from SelectTheme
@@ -129,21 +146,21 @@ void FfiOHOSAceFrameworkSelectResetSelectedOptionBgColor()
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     Color bgColor = theme->GetSelectedColor();
-    SelectModel::GetInstance()->SetSelectedOptionBgColor(bgColor);
+    GetSelectModel()->SetSelectedOptionBgColor(bgColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetSelectedOptionFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family)
 {
-    SelectModel::GetInstance()->SetSelectedOptionFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
-    SelectModel::GetInstance()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
-    SelectModel::GetInstance()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(family));
-    SelectModel::GetInstance()->SetSelectedOptionItalicFontStyle(static_cast<FontStyle>(style));
+    GetSelectModel()->SetSelectedOptionFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
+    GetSelectModel()->SetSelectedOptionFontWeight(ConvertStrToFontWeight(weight));
+    GetSelectModel()->SetSelectedOptionFontFamily(ConvertStrToFontFamilies(family));
+    GetSelectModel()->SetSelectedOptionItalicFontStyle(static_cast<FontStyle>(style));
 }
 
 void FfiOHOSAceFrameworkSelectSetSelectedOptionFontColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetSelectedOptionFontColor(Color(color));
+    GetSelectModel()->SetSelectedOptionFontColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectResetSelectedOptionFontColor()
@@ -153,26 +170,26 @@ void FfiOHOSAceFrameworkSelectResetSelectedOptionFontColor()
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     Color textColor = theme->GetSelectedColorText();
-    SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
+    GetSelectModel()->SetSelectedOptionFontColor(textColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionBgColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetOptionBgColor(Color(color));
+    GetSelectModel()->SetOptionBgColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family)
 {
-    SelectModel::GetInstance()->SetOptionFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
-    SelectModel::GetInstance()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
-    SelectModel::GetInstance()->SetOptionFontFamily(ConvertStrToFontFamilies(family));
-    SelectModel::GetInstance()->SetOptionItalicFontStyle(static_cast<FontStyle>(style));
+    GetSelectModel()->SetOptionFontSize(Dimension(size, static_cast<DimensionUnit>(sizeUnit)));
+    GetSelectModel()->SetOptionFontWeight(ConvertStrToFontWeight(weight));
+    GetSelectModel()->SetOptionFontFamily(ConvertStrToFontFamilies(family));
+    GetSelectModel()->SetOptionItalicFontStyle(static_cast<FontStyle>(style));
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionFontColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetOptionFontColor(Color(color));
+    GetSelectModel()->SetOptionFontColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectResetOptionFontColor()
@@ -182,13 +199,13 @@ void FfiOHOSAceFrameworkSelectResetOptionFontColor()
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     Color textColor = theme->GetMenuFontColor();
-    SelectModel::GetInstance()->SetOptionFontColor(textColor);
+    GetSelectModel()->SetOptionFontColor(textColor);
 }
 
 void FfiOHOSAceFrameworkSelectSetSpace(double width, int32_t widthUnit)
 {
     Dimension dimStrokeWidth(width, static_cast<DimensionUnit>(widthUnit));
-    SelectModel::GetInstance()->SetSpace(dimStrokeWidth);
+    GetSelectModel()->SetSpace(dimStrokeWidth);
 }
 
 void FfiOHOSAceFrameworkSelectSetArrowPosition(int32_t value)
@@ -197,7 +214,7 @@ void FfiOHOSAceFrameworkSelectSetArrowPosition(int32_t value)
         static_cast<ArrowPosition>(value) != ArrowPosition::END) {
         value = 0;
     }
-    SelectModel::GetInstance()->SetArrowPosition(static_cast<ArrowPosition>(value));
+    GetSelectModel()->SetArrowPosition(static_cast<ArrowPosition>(value));
 }
 
 void FfiOHOSAceFrameworkSelectSetMenuAlign(int32_t value, double dx, int32_t dxUnit, double dy, int32_t dyUnit)
@@ -208,48 +225,48 @@ void FfiOHOSAceFrameworkSelectSetMenuAlign(int32_t value, double dx, int32_t dxU
     MenuAlign menuAlignObj;
     menuAlignObj.alignType = static_cast<MenuAlignType>(value);
     menuAlignObj.offset = DimensionOffset(dimensionX, dimensionY);
-    SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+    GetSelectModel()->SetMenuAlign(menuAlignObj);
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionWidth(double width, int32_t widthUnit)
 {
-    SelectModel::GetInstance()->SetHasOptionWidth(true);
+    GetSelectModel()->SetHasOptionWidth(true);
     Dimension dimStrokeWidth(width, static_cast<DimensionUnit>(widthUnit));
-    SelectModel::GetInstance()->SetOptionWidth(dimStrokeWidth);
+    GetSelectModel()->SetOptionWidth(dimStrokeWidth);
 }
 
 void FfiOHOSAceFrameworkSelectResetOptionWidth()
 {
     CalcDimension value;
-    SelectModel::GetInstance()->SetHasOptionWidth(false);
-    SelectModel::GetInstance()->SetOptionWidth(value);
+    GetSelectModel()->SetHasOptionWidth(false);
+    GetSelectModel()->SetOptionWidth(value);
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionWidthWithMode(const char* value)
 {
-    SelectModel::GetInstance()->SetHasOptionWidth(true);
+    GetSelectModel()->SetHasOptionWidth(true);
     std::string modeFlag(value);
     if (modeFlag.compare("fit_content") == 0) {
-        SelectModel::GetInstance()->SetOptionWidthFitTrigger(false);
+        GetSelectModel()->SetOptionWidthFitTrigger(false);
     } else if (modeFlag.compare("fit_trigger") == 0) {
-        SelectModel::GetInstance()->SetOptionWidthFitTrigger(true);
+        GetSelectModel()->SetOptionWidthFitTrigger(true);
     } else {
         LOGE("OptionWidth is null or undefined");
-        SelectModel::GetInstance()->SetHasOptionWidth(false);
+        GetSelectModel()->SetHasOptionWidth(false);
         CalcDimension dimension;
-        SelectModel::GetInstance()->SetOptionWidth(dimension);
+        GetSelectModel()->SetOptionWidth(dimension);
     }
 }
 
 void FfiOHOSAceFrameworkSelectSetOptionHeight(double height, int32_t heightUnit)
 {
     Dimension dimStrokeWidth(height, static_cast<DimensionUnit>(heightUnit));
-    SelectModel::GetInstance()->SetOptionHeight(dimStrokeWidth);
+    GetSelectModel()->SetOptionHeight(dimStrokeWidth);
 }
 
 void FfiOHOSAceFrameworkSelectSetMenuBackgroundColor(uint32_t color)
 {
-    SelectModel::GetInstance()->SetMenuBackgroundColor(Color(color));
+    GetSelectModel()->SetMenuBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value)
@@ -258,13 +275,13 @@ void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value)
     if (value >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
         value <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
         styleOption.blurStyle = static_cast<BlurStyle>(value);
-        SelectModel::GetInstance()->SetMenuBackgroundBlurStyle(styleOption);
+        GetSelectModel()->SetMenuBackgroundBlurStyle(styleOption);
     }
 }
 
 void FfiOHOSAceFrameworkSelectSetBackgroundColor(uint32_t color)
 {
-    SelectModel::GetInstance()->BackgroundColor(Color(color));
+    GetSelectModel()->BackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -294,13 +311,13 @@ void FfiOHOSAceFrameworkSelectSetDirection(int32_t value)
             direction = static_cast<TextDirection>(value);
         }
     }
-    SelectModel::GetInstance()->SetLayoutDirection(direction);
+    GetSelectModel()->SetLayoutDirection(direction);
 }
 
 void FfiOHOSAceFrameworkSelectOnSelect(void (*callback)(int32_t index, const char* value))
 {
     auto onSelect = [lambda = CJLambda::Create(callback)](
                         int32_t index, const std::string& value) -> void { lambda(index, value.c_str()); };
-    SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
+    GetSelectModel()->SetOnSelect(std::move(onSelect));
 }
 }

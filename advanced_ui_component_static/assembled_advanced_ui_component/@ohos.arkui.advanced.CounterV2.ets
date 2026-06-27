@@ -430,10 +430,12 @@ export struct CounterV2Component {
       this.inputValue = this.value.toString();
     }
     if (this.numberStyleOptions.min !== undefined) {
-      this.min = (this.numberStyleOptions.min as int) >= 0 ? (this.numberStyleOptions.min as int) : CounterConstant.COUNTER_MIN_VALUE;
+      this.min = Number.isFinite(this.numberStyleOptions.min!)
+        ? this.numberStyleOptions.min as int : CounterConstant.COUNTER_MIN_VALUE;
     }
     if (this.numberStyleOptions.max !== undefined) {
-      this.max = (this.numberStyleOptions.max as int) >= 0 ? (this.numberStyleOptions.max as int) : CounterConstant.COUNTER_MAX_VALUE;
+      this.max = Number.isFinite(this.numberStyleOptions.max!)
+        ? this.numberStyleOptions.max as int : CounterConstant.COUNTER_MAX_VALUE;
     }
     if (this.min > this.max) {
       this.min = this.max;
@@ -501,10 +503,12 @@ export struct CounterV2Component {
       this.inputValue = this.value.toString();
     }
     if (this.inlineStyleOptions.min !== undefined) {
-      this.min = (this.inlineStyleOptions.min as int) >= 0 ? (this.inlineStyleOptions.min as int) : CounterConstant.COUNTER_MIN_VALUE;
+      this.min = Number.isFinite(this.inlineStyleOptions.min!)
+        ? this.inlineStyleOptions.min as int : CounterConstant.COUNTER_MIN_VALUE;
     }
     if (this.inlineStyleOptions.max !== undefined) {
-      this.max = (this.inlineStyleOptions.max as int) >= 0 ? (this.inlineStyleOptions.max as int) : CounterConstant.COUNTER_MAX_VALUE;
+      this.max = Number.isFinite(this.inlineStyleOptions.max!)
+        ? this.inlineStyleOptions.max as int : CounterConstant.COUNTER_MAX_VALUE;
     }
     if (this.min > this.max) {
       this.min = this.max;
@@ -2087,6 +2091,7 @@ export struct CounterV2Component {
                   this.validateInlineInput();
                   if (this.value !== oldValue) {
                     this.onChange?.(this.value);
+                    this.updateInlineEnableState();
                   }
                 }
                 this.focusText = FocusText.NONE;
@@ -2193,6 +2198,7 @@ export struct CounterV2Component {
                   this.validateInlineInput();
                   if (this.value !== oldValue) {
                     this.onChange?.(this.value);
+                    this.updateInlineEnableState();
                   }
                 }
                 this.focusText = FocusText.NONE;

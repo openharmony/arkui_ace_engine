@@ -38,10 +38,10 @@ class ACE_EXPORT DrawingColorFilter : public AceType {
     DECLARE_ACE_TYPE(DrawingColorFilter, AceType);
 
 public:
-    static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(void* sptrAddr);
+    ACE_FORCE_EXPORT static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(void* sptrAddr);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(const std::vector<float>& matrix);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(Color color, BlendMode mode);
-    static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);
+    ACE_FORCE_EXPORT static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);
     virtual void* GetDrawingColorFilterSptrAddr() = 0; //define the return value as void is for tdd compilation
     virtual napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) = 0;
 };

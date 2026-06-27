@@ -1684,8 +1684,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
-        panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
+        panda::NumberRef::New(vm, info.GetRawDeltaX()),
+        panda::NumberRef::New(vm, info.GetRawDeltaY()),
         panda::NumberRef::New(vm, info.GetTargetDisplayId()),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };

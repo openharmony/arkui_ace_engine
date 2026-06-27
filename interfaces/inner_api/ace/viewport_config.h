@@ -26,6 +26,19 @@ enum class ForceSplitMode {
     SQUARE_SPLIT
 };
 
+struct ForceSplitDisplayConfig {
+    bool enableForceSplit = false;
+    ForceSplitMode mode = ForceSplitMode::NOT_SPLIT;
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append(enableForceSplit ? "enable" : "disable");
+        str.append(" forceSplit, mode: " + std::to_string(static_cast<int32_t>(mode)));
+        return str;
+    }
+};
+
 struct KeyFrameConfig {
     bool enableKeyFrame_ = false;
     int32_t animationDuration_ = 0;
@@ -139,6 +152,7 @@ public:
         config.append(" position: (" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
         config.append(" transformHint: " + std::to_string(transform_));
         config.append(" displayId: " + std::to_string(displayId_));
+        config.append(" forceSplitDisplayConfig: " + forceSplitDisplayConfig_.ToString());
         return config;
     }
 
@@ -159,6 +173,19 @@ public:
         return keyFrameConfig_;
     }
 
+    void SetForceSplitEnable(bool enable)
+    {
+        forceSplitDisplayConfig_.enableForceSplit = enable;
+    }
+    void SetForceSplitMode(ForceSplitMode mode)
+    {
+        forceSplitDisplayConfig_.mode = mode;
+    }
+    ForceSplitDisplayConfig GetForceSplitDisplayConfig() const
+    {
+        return forceSplitDisplayConfig_;
+    }
+
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;
@@ -169,6 +196,7 @@ private:
     uint32_t transform_ = 0;
     uint64_t displayId_ = 0;
     KeyFrameConfig keyFrameConfig_;
+    ForceSplitDisplayConfig forceSplitDisplayConfig_;
 };
 
 } // namespace OHOS::Ace

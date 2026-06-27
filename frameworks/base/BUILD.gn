@@ -54,6 +54,8 @@ template("ace_base_source_set") {
       "geometry/least_square_impl.cpp",
       "geometry/matrix3.cpp",
       "geometry/matrix4.cpp",
+      "geometry/ng/vector.cpp",
+      "geometry/point.cpp",
       "geometry/quaternion.cpp",
       "geometry/response_region.cpp",
       "geometry/transform_util.cpp",

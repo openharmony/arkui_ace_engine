@@ -70,13 +70,17 @@ struct NavigationIntentInfo {
 struct NavdestinationRecoveryInfo {
     std::string name;
     std::string param;
+    std::string fileName;
+    std::string moduleName;
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
     int32_t launchMode = 0;
+    std::string state;
 
     NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode,
-        int32_t launchMode = 0)
-        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode) {}
+        int32_t launchMode = 0, const std::string& state = "")
+        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode), state(std::move(state))
+    {}
 };
 
 struct SequentialNavdestinationRecoveryInfo {

@@ -87,7 +87,9 @@ public:
 FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern), isLayoutNode_(isLayoutNode)
-{}
+{
+    uiNodeType_ = UINodeType::FRAME_NODE;
+}
 
 FrameNode::~FrameNode() = default;
 
@@ -249,8 +251,10 @@ void FrameNode::ReportSelectedText(bool isRegister)
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    (void)isRoot;
-    return AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
 }
 
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
@@ -309,7 +313,7 @@ bool FrameNode::ShouldDetectAceObjTypeConvertion()
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
-    (void)extraFlag;
+    isLayoutDirtyMarked_ = true;
 }
 
 void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
@@ -334,7 +338,16 @@ void FrameNode::FlushUpdateAndMarkDirty() {}
 
 void FrameNode::DumpInfo() {}
 
-void FrameNode::CreateEventHubInner() {}
+void FrameNode::CreateEventHubInner()
+{
+    if (eventHub_ || !pattern_) {
+        return;
+    }
+    eventHub_ = pattern_->CreateEventHub();
+    if (eventHub_) {
+        eventHub_->AttachHost(WeakClaim(this));
+    }
+}
 
 bool FrameNode::RenderCustomChild(int64_t deadline)
 {
@@ -394,8 +407,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
 
 void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
-    (void)active;
-    (void)needRebuildRenderContext;
+    isActive_ = active;
 }
 
 RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
@@ -449,7 +461,10 @@ bool FrameNode::HasVirtualNodeAccessibilityProperty()
 }
 bool FrameNode::IsVisibleAndActive() const
 {
-    return false;
+    if (layoutProperty_) {
+        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
+    }
+    return IsActive();
 }
 void FrameNode::NotifyWebPattern(bool) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>&) {}
@@ -563,22 +578,28 @@ RectF FrameNode::GetTransformRectRelativeToWindow(bool) const
 const RefPtr<FocusHub>& FrameNode::GetOrCreateFocusHub(
     FocusType, bool, FocusStyleType, const std::unique_ptr<FocusPaintParam>&)
 {
-    static RefPtr<FocusHub> hub = MakeRefPtr<FocusHub>(WeakPtr<FrameNode>());
-    return hub;
+    if (!focusHub_) {
+        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+    }
+    return focusHub_;
 }
 const RefPtr<FocusHub>& FrameNode::GetOrCreateFocusHub(const FocusPattern&)
 {
-    static RefPtr<FocusHub> hub = MakeRefPtr<FocusHub>(WeakPtr<FrameNode>());
-    return hub;
+    if (!focusHub_) {
+        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+    }
+    return focusHub_;
 }
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 {
-    return MakeRefPtr<FocusHub>(WeakPtr<FrameNode>());
+    if (!focusHub_) {
+        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+    }
+    return focusHub_;
 }
 const RefPtr<FocusHub>& FrameNode::GetFocusHub() const
 {
-    static RefPtr<FocusHub> null;
-    return null;
+    return focusHub_;
 }
 RefPtr<InputEventHub> FrameNode::GetOrCreateInputEventHub()
 {
@@ -596,13 +617,17 @@ void FrameNode::MarkNeedRenderOnly() {}
 
 FocusType FrameNode::GetFocusType() const
 {
-    return FocusType::DISABLE;
+    FocusType type = FocusType::DISABLE;
+    if (focusHub_) {
+        type = focusHub_->GetFocusType();
+    }
+    return type;
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
-    return nullptr;
+    return CreateFrameNode(tag, nodeId, pattern, true);
 }
 
 void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint)
@@ -726,6 +751,9 @@ void FrameNode::OnAccessibilityEvent(
 
 std::string FrameNode::ProvideRestoreInfo()
 {
+    if (pattern_) {
+        return pattern_->ProvideRestoreInfo();
+    }
     return "";
 }
 
@@ -764,5 +792,17 @@ ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
 }
 
 template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
+
+void FrameNode::SetGeometryTransitionInRecursive(bool) {}
+void FrameNode::ProcessPropertyDiff() {}
+void FrameNode::SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    layoutProperty_ = layoutProperty;
+    if (layoutProperty_) {
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
+}
+void FrameNode::SetVisibleAreaInnerCallback(const std::vector<double>&, const VisibleCallbackInfo&, bool) {}
+void FrameNode::SetVisibleAreaUserCallback(const std::vector<double>&, const VisibleCallbackInfo&) {}
 
 } // namespace OHOS::Ace::NG

@@ -1,0 +1,42 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+
+config("arc_scroll_bar_bridge_config") { defines = [ "USE_ARK_ENGINE" ] }
+
+build_component_ng("arc_scroll_bar_pattern_ng") {
+  is_component_model = true
+  include_generated_sources = true
+
+  sources = [
+    "arc_scroll_bar_layout_algorithm.cpp",
+    "arc_scroll_bar_paint_method.cpp",
+    "arc_scroll_bar_pattern.cpp",
+    "../arc_scroll/inner/arc_scroll_bar.cpp",
+    "../arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+  ]
+
+  # NAPI + abc in component_ext/arc_scroll_bar/BUILD.gn (libarcscrollbar.z.so)
+  ark_sources = [
+    "bridge/arc_scroll_bar_dynamic_module.cpp",
+    "bridge/arc_scroll_bar_dynamic_modifier.cpp",
+  ]
+
+  configs = [ ":arc_scroll_bar_bridge_config" ]
+
+}
+

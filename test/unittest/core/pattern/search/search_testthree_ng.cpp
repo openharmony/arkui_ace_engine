@@ -1790,6 +1790,54 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_BorderWidthPropertyNotExist, TestSi
 }
 
 /**
+ * @tc.name: CreateSearchNode_BorderWidthIsZero
+ * @tc.desc: Test CreateSearchNode when theme borderWidth is 0.0, verify BorderWidthProperty is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, CreateSearchNode_BorderWidthIsZero, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get mock theme manager and set borderWidth to 0.0
+     * @tc.expected: Mock theme borderWidth should be 0.0
+     */
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto searchTheme = themeManager->GetTheme<SearchTheme>();
+    ASSERT_NE(searchTheme, nullptr);
+    
+    // Set borderWidth to 0.0 to test the false branch: searchTheme->GetBorderWidth().Value() > 0.0
+    searchTheme->borderWidth_ = 0.0_vp;
+
+    /**
+     * @tc.steps: step2. Create Search node
+     * @tc.expected: CreateSearchNode should create SearchNode successfully
+     */
+    int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    std::optional<std::u16string> value = u"test value";
+    std::optional<std::u16string> placeholder = u"placeholder";
+    std::optional<std::string> icon = SEARCH_SVG;
+
+    auto searchNode = SearchModelNG::CreateSearchNode(nodeId, value, placeholder, icon);
+    ASSERT_NE(searchNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify BorderWidthProperty is not set (null pointer)
+     * @tc.expected: Since borderWidth.Value() == 0.0, UpdateSearchNodeBorderProps should not set BorderWidthProperty
+     */
+    auto searchLayoutProperty = searchNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+
+    const auto* currentBorderWidth = searchLayoutProperty->GetBorderWidthProperty().get();
+    EXPECT_EQ(currentBorderWidth, nullptr);
+
+    /**
+     * @tc.steps: step4. Restore borderWidth to default value for subsequent tests
+     * @tc.expected: borderWidth restored to 2.0_vp
+     */
+    searchTheme->borderWidth_ = 2.0_vp;
+}
+
+/**
  * @tc.name: CreateSearchNode_BorderWidthPropertyExists
  * @tc.desc: Test CreateSearchNode when BorderWidthProperty exists, verify UpdateSearchNodeBorderProps false branch
  * @tc.type: FUNC

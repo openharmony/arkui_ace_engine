@@ -11610,10 +11610,10 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method bindContextMenuWithResponse')
     }
-    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponseArray(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
-            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponse(content, options));
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponseArray(content, options));
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
@@ -13549,7 +13549,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setBindContextMenuWithResponse0Attribute(content_casted, options_casted)
         return this
     }
-    public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenuWithResponseArray(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
         const content_casted = content as (CustomBuilderT<ResponseType> | Array<MenuElement> | undefined)
         const options_casted = options as (ContextMenuOptions | undefined)
         this.getPeer()?.setBindContextMenuWithResponse1Attribute(content_casted, options_casted)

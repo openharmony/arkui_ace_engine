@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_QUATERNION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_QUATERNION_H
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 class Quaternion {
@@ -59,48 +57,15 @@ public:
         w_ = w;
     }
 
-    Quaternion operator+(const Quaternion& q) const
-    {
-        auto x = this->x_ + q.x_;
-        auto y = this->y_ + q.y_;
-        auto z = this->z_ + q.z_;
-        auto w = this->w_ + q.w_;
-        return Quaternion(x, y, z, w);
-    }
+    Quaternion operator+(const Quaternion& q) const;
+    Quaternion operator*(const Quaternion& q) const;
+    bool operator==(const Quaternion& q) const;
+    bool operator!=(const Quaternion& q) const;
+    Quaternion inverse() const;
+    Quaternion flip() const;
 
-    Quaternion operator*(const Quaternion& q) const
-    {
-        auto x = w_ * q.x_ + x_ * q.w_ + y_ * q.z_ - z_ * q.y_;
-        auto y = w_ * q.y_ - x_ * q.z_ + y_ * q.w_ + z_ * q.x_;
-        auto z = w_ * q.z_ + x_ * q.y_ - y_ * q.x_ + z_ * q.w_;
-        auto w = w_ * q.w_ - x_ * q.x_ - y_ * q.y_ - z_ * q.z_;
-        return Quaternion(x, y, z, w);
-    }
-
-    bool operator==(const Quaternion& q) const
-    {
-        return NearEqual(x_, q.x_) && NearEqual(y_, q.y_)
-            && NearEqual(z_, q.z_) && NearEqual(w_, q.w_);
-    }
-
-    bool operator!=(const Quaternion& q) const
-    {
-        return !operator==(q);
-    }
-
-    Quaternion inverse() const
-    {
-        return { -x_, -y_, -z_, w_ };
-    }
-
-    Quaternion flip() const
-    {
-        return { -x_, -y_, -z_, -w_ };
-    }
-
-    // Blends with the given quaternion, |q|, via spherical linear interpolation.
-    // Values of |t| in the range [0, 1] will interpolate between |this| and |q|,
-    // and values outside that range will extrapolate beyond in either direction.
+    // Blends with the given quaternion via spherical linear interpolation.
+    // Values of t in the range [0, 1] interpolate between this and q.
     Quaternion Slerp(const Quaternion& q, double t) const;
 
 private:
@@ -110,17 +75,9 @@ private:
     double w_ = 0.0;
 };
 
-// |s| is an arbitrary, real constant.
-inline Quaternion operator*(const Quaternion& q, double s)
-{
-    return Quaternion(q.GetX() * s, q.GetY() * s, q.GetZ() * s, q.GetW() * s);
-}
-
-// |s| is an arbitrary, real constant.
-inline Quaternion operator*(double s, const Quaternion& q)
-{
-    return Quaternion(q.GetX() * s, q.GetY() * s, q.GetZ() * s, q.GetW() * s);
-}
+// Scalar multiplication with quaternion.
+Quaternion operator*(const Quaternion& q, double s);
+Quaternion operator*(double s, const Quaternion& q);
 
 } // namespace OHOS::Ace
 

@@ -15,6 +15,7 @@
 
 #include "martix_modifier.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/point.h"
 #include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 namespace OHOS::Ace::NG {

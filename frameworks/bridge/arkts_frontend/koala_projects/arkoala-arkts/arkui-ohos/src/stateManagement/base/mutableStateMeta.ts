@@ -82,12 +82,13 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     dynamicFireChangeFunc?: () => void;
     private hasFired: boolean;
     // Per-meta wildcard LSV target (the IObservedObject / IBindingSource that
-    // owns this meta). Captured at construction so fireChange() doesn't need
-    // a per-call target argument. Undefined when the meta is created without
-    // an owner (legacy field-initializer pattern); recordMonitorSource skips
-    // undefined sources, so the wildcard LSV check still falls through to
-    // `before !== now` correctly.
-    private readonly target_?: MonitorTarget;
+    // owns this meta). Stored as WeakRef to avoid circular strong reference
+    // from MutableStateMeta back to IObservedObject, which would prevent GC
+    // from collecting the IObservedObject even after all external references
+    // are dropped. All access paths to target_ go through IObservedObject
+    // methods (e.g. WrappedArray.$_set → meta_.fireChange → addDirtyRef),
+    // so the IObservedObject is guaranteed alive when target_ is read.
+    private readonly target_?: WeakRef<Object>;
 
     constructor(info: string, target?: MonitorTarget, metaDependency?: MutableState<int32>) {
         super(info);
@@ -96,7 +97,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
         this.hasFired = false;
-        this.target_ = target;
+        this.target_ = target ? new WeakRef<Object>(target) : undefined;
         MutableStateMeta.registry.register(this, new WeakRef<MutableState<int32>>(this.__metaDependency));
     }
 
@@ -140,7 +141,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                 if (trackedObject) {
                     // we have dependent object to execute: Computed, Monitor...
                     // Collect id of items to run
-                    ObserveSingleton.instance.addDirtyRef(trackedObject, this.target_);
+                    ObserveSingleton.instance.addDirtyRef(trackedObject, this.target_?.deref());
                 } else {
                     this.clearBindingRefs(listener);
                 }
@@ -190,11 +191,11 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
 export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMutableKeyedStateMeta {
     protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
-    private observed: IObservedObject | undefined = undefined;
+    private observed: WeakRef<IObservedObject> | undefined = undefined;
     constructor(info: string = '', observed?: IObservedObject) {
         super(info);
         if (observed) {
-            this.observed = observed;
+            this.observed = new WeakRef<IObservedObject>(observed);
             const observedInfo = ObservedObjectRegistry.getOrRegister(observed!);
             let resolvedKey: string = ''
             if (info.startsWith('__metaBuiltInV1_')) {
@@ -212,20 +213,20 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
 
     public addRef(key: string): void {
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
+        const observedObject = this.observed?.deref();
         if (!metaDependency) {
-            // Pass `this.observed` as the wildcard LSV target so per-key
+            // Pass observedObject as the wildcard LSV target so per-key
             // fireChange routes through addDirtyRef with the owning
             // IObservedObject as the trigger, without needing a per-call
             // target argument. incremental engine does not allow create
             // mutableState while building tree.
             metaDependency = new MutableStateMeta(
                 key,
-                this.observed,
+                observedObject,
                 GlobalStateManager.instance.mutableState<int32>(0, true)
             );
-            if (this.observed) {
-                const observedObject = this.observed as IObservedObject;
-                const info = ObservedObjectRegistry.getOrRegister(observedObject!); // type has been set in ctor
+            if (observedObject) {
+                const info = ObservedObjectRegistry.getOrRegister(observedObject);
                 info.registerMutableStateMeta(metaDependency);
             }
             this.__metaDependencies.set(key, metaDependency);

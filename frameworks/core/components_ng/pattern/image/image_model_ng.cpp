@@ -34,6 +34,7 @@
 #endif
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -228,6 +228,16 @@ public:
     */
     virtual int32_t EndIndex() const = 0;
 
+    float GetViewStartBound(bool ignoreFixOffset = false) const
+    {
+        return ignoreFixOffset ? 0.0f : -startFixOffset_;
+    }
+
+    float GetViewEndBound(float mainSize, bool ignoreFixOffset = false) const
+    {
+        return mainSize + expandHeight_ + (ignoreFixOffset ? 0.0f : endFixOffset_);
+    }
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
@@ -246,6 +256,8 @@ public:
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
+    int32_t reportStartIndex_ = 0;
+    int32_t reportEndIndex_ = -1;
     int32_t footerIndex_ = -1;
 
     float lastMainSize_ = 0.0f;
@@ -255,6 +267,8 @@ public:
     float restoreOffset_ = 0.0f;
 
     float expandHeight_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
 

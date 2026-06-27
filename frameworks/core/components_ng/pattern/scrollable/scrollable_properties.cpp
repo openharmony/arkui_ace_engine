@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
+#include "base/geometry/shape.h"
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace {
@@ -280,3 +281,31 @@ std::string ScrollBarMargin::ToString() const
 }
 
 } // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
+
+ContentClip::ContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
+    : first(mode), second(shape)
+{}
+
+ContentClip::ContentClip(const ContentClip& other) = default;
+
+ContentClip::ContentClip(ContentClip&& other) = default;
+
+ContentClip& ContentClip::operator=(const ContentClip& other) = default;
+
+ContentClip& ContentClip::operator=(ContentClip&& other) = default;
+
+ContentClip::~ContentClip() = default;
+
+bool ContentClip::operator==(const ContentClip& other) const
+{
+    return first == other.first && second == other.second;
+}
+
+bool ContentClip::operator!=(const ContentClip& other) const
+{
+    return first != other.first || second != other.second;
+}
+
+} // namespace OHOS::Ace::NG

@@ -109,6 +109,21 @@ public:
         mockRequestId = requestId;
     }
 
+    void SetUpdateCustomAccessibilityPropertyResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
+
+    void SetAddAccessibilityVirtualNodeResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
+
+    void SetRemoveAccessibilityVirtualNodeResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
+
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
     Accessibility::FocusMoveResult mockResult_;

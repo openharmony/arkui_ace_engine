@@ -73,6 +73,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     onFormRecover(statusData: string): void {
         throw new Error("Not supported yet");
     }
+    ClearParentReusePool(): void {}
+    __getMemOpt__Internal(): int32 { return 0; }
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void { }
     aboutToRecycle(): void {}

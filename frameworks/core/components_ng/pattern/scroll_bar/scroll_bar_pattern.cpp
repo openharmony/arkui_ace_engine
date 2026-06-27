@@ -33,6 +33,16 @@ constexpr uint64_t MIN_VSYNC_DIFF_TIME = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 } // namespace
 
+ScrollBarPattern::~ScrollBarPattern()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterScrollBar(AceType::WeakClaim(this));
+    }
+    scrollBarProxy_ = nullptr;
+    scrollableEvent_ = nullptr;
+    disappearAnimation_ = nullptr;
+}
+
 void ScrollBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();

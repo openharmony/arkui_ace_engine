@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ class TextTimerConfiguration : public CommonConfiguration {
 };
 using TextTimerMakeCallback =
     std::function<RefPtr<FrameNode>(const TextTimerConfiguration& textTimerConfiguration)>;
-class ACE_EXPORT TextTimerModelNG : public OHOS::Ace::TextTimerModel {
+class ACE_FORCE_EXPORT TextTimerModelNG : public OHOS::Ace::TextTimerModel {
 public:
     RefPtr<TextTimerController> Create() override;
     void SetFormat(const std::string& format) override;
@@ -81,6 +81,7 @@ public:
     static void SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser);
     static void SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser);
     static void SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser);
+    static void CreateTextTimerModel();
 
 private:
     static void SetOnTimerMultiThread(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange);

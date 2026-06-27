@@ -125,6 +125,8 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
     if (backgroundSource.IsImage()) {
         setDepthMapWithCallback(backgroundSource.imageSourceInfo);
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set");
+    } else {
+        setDepthMapWithCallback(ImageSourceInfo());
     }
     info.ReturnSelf();
 }
@@ -425,8 +427,12 @@ OHOS::Ace::CameraBufferCrop JSDepthComponent::ParseCameraBufferCrop(const JSRef<
 
 OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();
@@ -446,8 +452,12 @@ OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vecto
 
 OHOS::Ace::DepthVector4 JSDepthComponent::ParseVector4(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector4 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();

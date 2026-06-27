@@ -879,6 +879,23 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
+void JsThirdProviderInteractionOperation::UpdateCustomAccessibilityProperty(
+    const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsThirdProviderInteractionOperation::AddAccessibilityVirtualNode(
+    const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsThirdProviderInteractionOperation::RemoveAccessibilityVirtualNode(const int64_t elementId,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(
     int64_t thirdElementId,
     Accessibility::EventType eventType)

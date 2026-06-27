@@ -17,10 +17,12 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/gestures/tap_gesture.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {

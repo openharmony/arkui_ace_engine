@@ -15,7 +15,7 @@
 
 import image from '@ohos.multimedia.image';
 import drawing from '@ohos.graphics.drawing';
-import { AnimationStatus, ResourceStr, Resource } from '@ohos.arkui.component';
+import { AnimationStatus, ResourceStr, Resource, Rectangle } from '@ohos.arkui.component';
 import { SystemOps } from "#generated"
 import { ArkUIAniModule } from 'arkui.ani';
 
@@ -103,6 +103,13 @@ export class DrawableDescriptor {
 
   isReleased(): boolean {
     return this._isReleased
+  }
+
+  invalidate(): void {
+    if (this._isReleased) {
+      return
+    }
+    ArkUIAniModule._Drawable_Invalidate(this)
   }
 
   static transferStatic(input: Any): Object {
@@ -348,5 +355,39 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
 
   getAnimationController(id?: string): AnimationController | undefined {
     return ArkUIAniModule._Drawable_GetAnimationController(this, id)
+  }
+}
+
+export interface HdrCompositionConfig {
+  rect: Rectangle;
+}
+
+export class PictureDrawableDescriptor extends DrawableDescriptor {
+  constructor(src?: image.Picture) {
+    super()
+    if (src != undefined) {
+      ArkUIAniModule._Drawable_CreatePictureDrawable(this, src)
+    }
+    let finalization = new NativeDestructor(this.nativeObj)
+    this.finalization = finalization
+    finalizerRegister(this, finalization)
+  }
+
+  getPixelMap(): image.PixelMap | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
+    if (this.pixelMap) {
+      return this.pixelMap
+    }
+    this.pixelMap = ArkUIAniModule._Drawable_CreatePixelMap(this)
+    return this.pixelMap
+  }
+
+  setHdrComposition(config: HdrCompositionConfig): void {
+    if (this._isReleased) {
+      return
+    }
+    ArkUIAniModule._Drawable_SetHdrComposition(this, config)
   }
 }

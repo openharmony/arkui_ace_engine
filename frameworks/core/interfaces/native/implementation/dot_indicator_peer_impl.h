@@ -67,6 +67,32 @@ public:
         dimSpace_ = value;
     }
 
+    void SetIndicatorIcon(const std::optional<std::map<int32_t, OHOS::Ace::IndicatorIconParam>>& value)
+    {
+        indicatorIconMap_ = value.value_or(std::map<int32_t, OHOS::Ace::IndicatorIconParam>());
+    }
+
+    static bool IsUserDefinedIndicatorSize(const std::optional<OHOS::Ace::Dimension>& value)
+    {
+        return value && value->Unit() != OHOS::Ace::DimensionUnit::PERCENT && value->Value() > 0.0;
+    }
+
+    void MarkUserDefinedIndicatorSizes(OHOS::Ace::SwiperParameters& params) const
+    {
+        if (IsUserDefinedIndicatorSize(itemWidth_)) {
+            params.parametersByUser.insert("itemWidth");
+        }
+        if (IsUserDefinedIndicatorSize(itemHeight_)) {
+            params.parametersByUser.insert("itemHeight");
+        }
+        if (IsUserDefinedIndicatorSize(selectedItemWidth_)) {
+            params.parametersByUser.insert("selectedItemWidth");
+        }
+        if (IsUserDefinedIndicatorSize(selectedItemHeight_)) {
+            params.parametersByUser.insert("selectedItemHeight");
+        }
+    }
+
     OHOS::Ace::SwiperParameters GetDotParameters()
     {
         OHOS::Ace::SwiperParameters p;
@@ -86,6 +112,8 @@ public:
         p.selectedColorVal = selectedColorVal_;
         p.maxDisplayCountVal = maxDisplayCountVal_;
         p.dimSpace = dimSpace_;
+        p.indicatorIconMap = indicatorIconMap_;
+        MarkUserDefinedIndicatorSizes(p);
         return p;
     }
 protected:
@@ -98,6 +126,7 @@ protected:
     std::optional<OHOS::Ace::Color> selectedColorVal_;
     std::optional<int32_t> maxDisplayCountVal_;
     std::optional<OHOS::Ace::Dimension> dimSpace_;
+    std::map<int32_t, OHOS::Ace::IndicatorIconParam> indicatorIconMap_;
 };
 
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPLEMENTATION_DOT_INDICATOR_PEER_IMPL_H

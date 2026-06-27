@@ -30,7 +30,7 @@ constexpr float WHOLE_CIRCULARITY = 360;
 
 namespace OHOS::Ace {
 
-class ArcRound {
+class ACE_FORCE_EXPORT ArcRound {
 public:
     ArcRound() = default;
     ~ArcRound() = default;

@@ -217,9 +217,10 @@ HWTEST_F(SmartLayoutTypesTest, EdgesSpacesTest002, TestSize.Level1)
 HWTEST_F(SmartLayoutTypesTest, SmartLayoutTypeEnumTest001, TestSize.Level1)
 {
     EXPECT_EQ(static_cast<int>(SmartLayoutType::UNKNOWN), 0);
-    EXPECT_EQ(static_cast<int>(SmartLayoutType::COLUMN), 1);
-    EXPECT_EQ(static_cast<int>(SmartLayoutType::ROW), 2);
-    EXPECT_EQ(static_cast<int>(SmartLayoutType::FLEX), 3);
+    EXPECT_EQ(static_cast<int>(SmartLayoutType::GENERAL), 1);
+    EXPECT_EQ(static_cast<int>(SmartLayoutType::COLUMN), 2);
+    EXPECT_EQ(static_cast<int>(SmartLayoutType::ROW), 3);
+    EXPECT_EQ(static_cast<int>(SmartLayoutType::FLEX), 4);
 }
 
 /**

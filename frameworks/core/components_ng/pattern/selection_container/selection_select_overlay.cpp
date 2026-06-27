@@ -25,11 +25,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
+constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 
 OffsetF GetHandleAnchorPoint(const RectF& rect)
 {
@@ -151,7 +151,7 @@ std::optional<SelectHandleInfo> SelectionSelectOverlay::GetFirstHandleInfo()
 
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = handleRect.value();
-    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
+    handleInfo.isShow = CheckAndAdjustHandle(startChild, handleInfo.paintRect);
     auto localPaintRect = handleRect.value();
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
@@ -193,53 +193,21 @@ bool SelectionSelectOverlay::IsClipHandleWithViewPort()
     return !HasRenderTransform();
 }
 
-bool SelectionSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
+bool SelectionSelectOverlay::CheckAndAdjustHandle(const RefPtr<SelectionContainerChild>& child, RectF& paintRect)
 {
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, false);
-    if (!GetRenderClipValue()) {
-        if (handleLevelMode_ == HandleLevelMode::EMBED) {
-            return true;
-        }
-        auto geoNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geoNode, false);
-        auto frameRect = geoNode->GetFrameRect();
-        RectF containerLocalRect(0.0f, 0.0f, frameRect.Width(), frameRect.Height());
-        auto localPaintRect = paintRect;
-        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
-        localPaintRect.SetOffset(
-            OffsetF(localPaintRect.GetX() + localPaintRect.Width() / 2.0f, localPaintRect.GetY()));
-        auto visibleContentRect = containerLocalRect.CombineRectT(localPaintRect);
-        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + pattern->GetContainerPaintOffsetWithTransform());
-        visibleContentRect = GetVisibleRect(host, visibleContentRect);
-        return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+    CHECK_NULL_RETURN(child, false);
+    RectF visibleContentRect;
+    auto result = child->GetHandleVisibleContentRect(paintRect, visibleContentRect, handleLevelMode_);
+    if (result == HandleVisibleContentResult::VISIBLE) {
+        return true;
     }
-    auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geoNode, false);
-    auto frameRect = geoNode->GetFrameRect();
-    RectF visibleContentRect(pattern->GetContainerPaintOffsetWithTransform(), frameRect.GetSize());
-    if (handleLevelMode_ == HandleLevelMode::OVERLAY) {
-        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    if (result == HandleVisibleContentResult::INVISIBLE) {
+        return false;
     }
     return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
 }
 
-bool SelectionSelectOverlay::GetRenderClipValue() const
-{
-    auto defaultClipValue = false;
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(pattern, defaultClipValue);
-    auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, defaultClipValue);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultClipValue);
-    return renderContext->GetClipEdge().value_or(defaultClipValue);
-}
-
-bool SelectionSelectOverlay::CheckAndAdjustHandleWithContent(
-    const RectF& visibleContentRect, RectF& paintRect)
+bool SelectionSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect)
 {
     if (visibleContentRect.IsEmpty()) {
         return false;
@@ -261,6 +229,43 @@ bool SelectionSelectOverlay::CheckAndAdjustHandleWithContent(
     return bottomInRegion || topInRegion;
 }
 
+std::optional<RectF> SelectionSelectOverlay::GetAncestorNodeViewPort()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, BaseTextSelectOverlay::GetAncestorNodeViewPort());
+    auto startChild = pattern->GetSelectionStartChild();
+    auto endChild = pattern->GetSelectionEndChild();
+    if (!startChild || !endChild) {
+        return BaseTextSelectOverlay::GetAncestorNodeViewPort();
+    }
+
+    if (startChild == endChild) {
+        auto childViewPort = startChild->GetAncestorNodeViewPortForChild();
+        if (childViewPort) {
+            return childViewPort;
+        }
+        return BaseTextSelectOverlay::GetAncestorNodeViewPort();
+    }
+
+    auto startViewPorts = startChild->GetAncestorNodeViewPortInfos();
+    auto endViewPorts = endChild->GetAncestorNodeViewPortInfos();
+    if (startViewPorts.empty() || endViewPorts.empty()) {
+        return BaseTextSelectOverlay::GetAncestorNodeViewPort();
+    }
+    for (const auto& startViewPort : startViewPorts) {
+        auto startAncestor = startViewPort.ancestorNode.Upgrade();
+        CHECK_NULL_CONTINUE(startAncestor);
+        for (const auto& endViewPort : endViewPorts) {
+            auto endAncestor = endViewPort.ancestorNode.Upgrade();
+            CHECK_NULL_CONTINUE(endAncestor);
+            if (startAncestor == endAncestor) {
+                return startViewPort.viewPort;
+            }
+        }
+    }
+    return BaseTextSelectOverlay::GetAncestorNodeViewPort();
+}
+
 std::optional<SelectHandleInfo> SelectionSelectOverlay::GetSecondHandleInfo()
 {
     auto pattern = pattern_.Upgrade();
@@ -272,7 +277,7 @@ std::optional<SelectHandleInfo> SelectionSelectOverlay::GetSecondHandleInfo()
 
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = handleRect.value();
-    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
+    handleInfo.isShow = CheckAndAdjustHandle(endChild, handleInfo.paintRect);
     auto localPaintRect = handleRect.value();
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
@@ -478,8 +483,26 @@ void SelectionSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         UpdateAllHandlesOffset();
         FlushHandleNodeIfNeeded();
     }
-    if (!isDragging) {
-        BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+
+    if (isDragging) {
+        return;
+    }
+
+    auto isStartScroll = IsAncestorNodeStartScroll(flag);
+    auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
+    auto isTransformChanged = IsAncestorNodeTransformChange(flag);
+    auto isStartTransition = IsAncestorNodeHasTransition(flag);
+    auto isScrollEnd = IsAncestorNodeEndScroll(flag) || ((flag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG);
+    UpdateMenuWhileAncestorNodeChanged(
+        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
+
+    if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
+        UpdateViewPort();
+        UpdateAllHandlesOffset();
+        FlushHandleNodeIfNeeded();
+    }
+    if ((flag & FRAME_NODE_CONTENT_CLIP_CHANGE) == FRAME_NODE_CONTENT_CLIP_CHANGE) {
+        UpdateViewPort();
     }
 }
 
@@ -518,6 +541,7 @@ void SelectionSelectOverlay::FlushHandleNodeIfNeeded()
 void SelectionSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
     BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
+    needUpdateViewPortOnMoveDone_ = false;
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -552,8 +576,13 @@ void SelectionSelectOverlay::OnHandleMove(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(overlayRoot);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
+    auto startChild = pattern->GetSelectionStartChild();
+    auto endChild = pattern->GetSelectionEndChild();
     auto movingPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(rect), containerNode);
     pattern->HandleSelectionUpdate(movingPointInContainer);
+    if (startChild != pattern->GetSelectionStartChild() || endChild != pattern->GetSelectionEndChild()) {
+        needUpdateViewPortOnMoveDone_ = true;
+    }
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
 }
 
@@ -573,8 +602,13 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (!pattern->IsSelectedTypeChange()) {
         manager->ShowOptionMenu();
     }
-    manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE | DIRTY_SELECT_AREA |
-                            DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_ASK_CELIA);
+    auto dirtyFlag = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE | DIRTY_SELECT_AREA |
+                     DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_ASK_CELIA;
+    if (needUpdateViewPortOnMoveDone_) {
+        dirtyFlag |= DIRTY_VIEWPORT;
+    }
+    manager->MarkInfoChange(dirtyFlag);
+    needUpdateViewPortOnMoveDone_ = false;
     if (pattern->CheckSelectedTypeChange()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
         ProcessOverlay({ .animation = true });

@@ -1449,7 +1449,7 @@ HWTEST_F(NavigationModelTestNg, NavigationLoadPage003, TestSize.Level1)
      */
     EXPECT_NE(pattern, nullptr);
     RefPtr<UINode> curNode;
-    pattern->GenerateUINodeByIndex(0, curNode);
+    pattern->GenerateUINodeByIndex(0, curNode, false);
     auto destinationNode = AceType::DynamicCast<FrameNode>(curNode);
     EXPECT_NE(destinationNode, nullptr);
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
@@ -1498,7 +1498,7 @@ HWTEST_F(NavigationModelTestNg, NavigationLoadPage004, TestSize.Level1)
      * @tc.expected: step3. navdestination name is pageOne
      */
     RefPtr<UINode> curNode;
-    pattern->GenerateUINodeByIndex(0, curNode);
+    pattern->GenerateUINodeByIndex(0, curNode, false);
     auto destinationNode = AceType::DynamicCast<FrameNode>(curNode);
     EXPECT_NE(destinationNode, nullptr);
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());

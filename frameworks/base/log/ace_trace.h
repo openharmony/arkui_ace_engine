@@ -115,8 +115,8 @@ void ACE_EXPORT AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t*
 // for commercial trace
 void ACE_EXPORT AceTraceBeginCommercial(const char* name);
 void ACE_EXPORT AceTraceEndCommercial();
-void ACE_EXPORT AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
-void ACE_EXPORT AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
+void ACE_FORCE_EXPORT AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
+void ACE_FORCE_EXPORT AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
 
 class ACE_FORCE_EXPORT AceScopedTrace final {
 public:

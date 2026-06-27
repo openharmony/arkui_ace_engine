@@ -22,7 +22,7 @@
 #include "test/unittest/core/pattern/lazy_layout/lazy_edge_test_helper.h"
 
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
 namespace OHOS::Ace::NG {

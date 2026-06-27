@@ -199,6 +199,11 @@ public:
         isLongPressed_ = isLongPressed;
     }
 
+    void SetDisableIndicatorAnimation(bool disableIndicatorAnimation)
+    {
+        disableIndicatorAnimation_ = disableIndicatorAnimation;
+    }
+
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -272,6 +277,7 @@ protected:
     bool IsCustomSizeValue_ = false;
     bool isSwipeByGroup_ = false;
     bool isInBottomTranslate_ = false;
+    bool disableIndicatorAnimation_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
     std::pair<float, float> longPointCenterX_ = { 0, 0 };

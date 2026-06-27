@@ -824,6 +824,10 @@ public:
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -2072,7 +2076,7 @@ extern template RefPtr<DialogAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 extern template RefPtr<GaugeAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-extern template RefPtr<GridAccessibilityProperty>
+extern template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 extern template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;

@@ -30,7 +30,7 @@ class PickerDate;
 }
 namespace OHOS::Ace::NG {
 namespace Validator {
-void ClampByRange(std::optional<float>& opt, const float& left, const float& right);
+ACE_FORCE_EXPORT void ClampByRange(std::optional<float>& opt, const float& left, const float& right);
 ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<Dimension>& opt);
 ACE_FORCE_EXPORT void ValidateNonPercent(std::optional<Dimension>& opt);
 ACE_FORCE_EXPORT void ValidatePositive(std::optional<Dimension>& opt);

@@ -25,12 +25,14 @@ namespace OHOS::Ace::NG {
 
 inline bool UseNewMaterial(const RefPtr<FrameNode>& frameNode = nullptr)
 {
+    bool disableNewMaterialByCCM = MaterialUtils::GetConfiguredMaterialState() == MaterialState::DEFAULT &&
+        !SystemProperties::IsDeviceSystemMaterialSupported();
     if (frameNode) {
         return frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-               !MaterialUtils::IsMaterialDisabled();
+               !MaterialUtils::IsMaterialDisabled() && !disableNewMaterialByCCM;
     }
     return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-           !MaterialUtils::IsMaterialDisabled();
+           !MaterialUtils::IsMaterialDisabled() && !disableNewMaterialByCCM;
 }
 
 inline bool UseNewAnimation(const RefPtr<FrameNode>& frameNode = nullptr)

@@ -307,6 +307,7 @@ void LazyWaterFlowLayoutAlgorithm::ApplyFallbackReferencePos(
     LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef)
 {
     referenceEdge_ = ReferenceEdge::START;
+    startReferenceViewportOffset_ = 0.0f;
     auto hostNode = layoutWrapper->GetHostNode();
     const bool missingDirectWaterFlowRef =
         !posRef.has_value() && LazyLayoutUtils::HasDirectWaterFlowAncestor(hostNode);
@@ -353,6 +354,7 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
 {
     CHECK_NULL_VOID(layoutWrapper);
     headerAdjustOffset_ = 0.0f;
+    startReferenceViewportOffset_ = 0.0f;
     if (!posRef.has_value()) {
         posRef = GetReferencePos(layoutWrapper->GetHostNode());
     }
@@ -368,6 +370,9 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     float referencePos = posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
+    if (posRef.value().referenceEdge == ReferenceEdge::START) {
+        startReferenceViewportOffset_ = referencePos - posRef.value().viewPosStart;
+    }
     stickyTopInset_ = posRef.value().stickyInsetStart;
     stickyBottomInset_ = posRef.value().stickyInsetEnd;
     if (posRef.value().referenceEdge == ReferenceEdge::START) {
@@ -1272,14 +1277,20 @@ void LazyWaterFlowLayoutAlgorithm::FinishMeasureItems(LayoutWrapper* layoutWrapp
         layoutInfo_->ClearDataChanges();
         return;
     }
+    const bool hasDataChange = layoutInfo_->hasDataChange_;
     UpdateAdjustOffset(prevFrameSnapshot);
+    if (!hasDataChange) {
+        layoutInfo_->adjustOffset_ = AdjustOffset();
+    }
+    const auto consumedOffset =
+        referenceEdge_ == ReferenceEdge::END ? layoutInfo_->adjustOffset_.end : layoutInfo_->adjustOffset_.start;
     // Header resize is a section-level shift on top of the body-local anchor diff.
     layoutInfo_->adjustOffset_.start += headerAdjustOffset_;
-    // Parent consumes adjustOffset after Measure; mirror the same delta into this frame's layout range.
-    auto consumedOffset =
-        referenceEdge_ == ReferenceEdge::END ? layoutInfo_->adjustOffset_.end : layoutInfo_->adjustOffset_.start;
-    if (!NearZero(consumedOffset)) {
-        ApplyAdjustedMeasureWindow(layoutWrapper, consumedOffset);
+    // Mirror the exported parent delta into this frame's layout range.
+    // No-data body re-anchor is internal; header resize remains exported.
+    const auto exportedOffset = consumedOffset + headerAdjustOffset_;
+    if (!NearZero(exportedOffset)) {
+        ApplyAdjustedMeasureWindow(layoutWrapper, exportedOffset);
     }
     layoutInfo_->ClearDataChanges();
 }
@@ -1478,6 +1489,16 @@ float LazyWaterFlowLayoutAlgorithm::GetBodyMainSize() const
     return std::max(0.0f, totalMainSize_ - layoutInfo_->headerMainSize_ - layoutInfo_->footerMainSize_);
 }
 
+bool LazyWaterFlowLayoutAlgorithm::ShouldKeepStartBoundaryOnFrontInsert(
+    const PrevFrameSnapshot& prevFrameSnapshot) const
+{
+    CHECK_NULL_RETURN(layoutInfo_, false);
+    const auto& anchor = prevFrameSnapshot.anchor;
+    return referenceEdge_ == ReferenceEdge::START && layoutInfo_->hasDataChange_ && anchor.startIndex >= 0 &&
+        anchor.startPos.has_value() && layoutInfo_->newStartIndex_ == anchor.startIndex &&
+        NearZero(anchor.startPos->startPos) && GreatNotEqual(startReferenceViewportOffset_, 0.0f);
+}
+
 void LazyWaterFlowLayoutAlgorithm::UpdateAdjustOffset(const PrevFrameSnapshot& prevFrameSnapshot)
 {
     layoutInfo_->adjustOffset_ = {};
@@ -1494,6 +1515,10 @@ void LazyWaterFlowLayoutAlgorithm::UpdateAdjustOffset(const PrevFrameSnapshot& p
         return;
     }
     const auto totalDelta = GetBodyMainSize() - anchor.totalMainSize;
+    if (ShouldKeepStartBoundaryOnFrontInsert(prevFrameSnapshot)) {
+        layoutInfo_->adjustOffset_.end = totalDelta;
+        return;
+    }
     if (referenceEdge_ == ReferenceEdge::START && layoutInfo_->hasDataChange_ && anchor.startIndex < 0 &&
         LessNotEqual(totalDelta, 0.0f)) {
         // The previous leading anchor was deleted. Let remaining items move up and avoid parent compensation.

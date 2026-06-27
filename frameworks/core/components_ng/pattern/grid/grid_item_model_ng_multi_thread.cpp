@@ -16,15 +16,18 @@
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
 #include "base/utils/multi_thread.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const char GRID_ITEM_ETS_TAG[] = "GridItem";
+}
 RefPtr<FrameNode> GridItemModelNG::CreateFrameNodeMultiThread(int32_t nodeId)
 {
-    return FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+    return FrameNode::GetOrCreateFrameNode(GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 }
 } // namespace OHOS::Ace::NG

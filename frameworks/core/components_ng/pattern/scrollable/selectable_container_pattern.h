@@ -40,7 +40,7 @@ struct EditModeOptions {
     bool enableFingerMultiSelect = true;
 };
 
-class SelectableContainerPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT SelectableContainerPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(SelectableContainerPattern, ScrollablePattern);
 
 public:
@@ -86,15 +86,15 @@ public:
         return editModeOptions_;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    void OnDetachFromMainTree() override;
+    ACE_FORCE_EXPORT void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    ACE_FORCE_EXPORT void OnDetachFromMainTree() override;
 
-    void MarkSelectedItems();
+    ACE_FORCE_EXPORT void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
     void UpdateMouseStart(float offset);
 
-    void SetEnableEditMode(bool enable);
-    bool GetEnableEditMode() const;
+    ACE_FORCE_EXPORT void SetEnableEditMode(bool enable);
+    ACE_FORCE_EXPORT bool GetEnableEditMode() const;
     void SetEnableEditModeChangeEvent(std::function<void(bool)>&& event)
     {
         enableEditModeChangeEvent_ = std::move(event);
@@ -122,9 +122,9 @@ public:
         return enableEditMode_ && editModeOptions_.useDefaultMultiSelectStyle;
     }
 
-    void InitSwipeSelectEvent();
-    void UninitSwipeSelectEvent();
-    bool ShouldEnableTwoFingerSelect() const;
+    ACE_FORCE_EXPORT void InitSwipeSelectEvent();
+    ACE_FORCE_EXPORT void UninitSwipeSelectEvent();
+    ACE_FORCE_EXPORT bool ShouldEnableTwoFingerSelect() const;
     void TryEnterEditModeForSwipeSelect();
     GestureJudgeResult JudgeSwipeSelectGesture(const RefPtr<NG::GestureInfo>& gestureInfo,
         const std::shared_ptr<BaseGestureEvent>& event);
@@ -162,7 +162,7 @@ public:
     {
         return { index, -1 };
     }
-    virtual RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const;
+    ACE_FORCE_EXPORT virtual RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const;
     virtual RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const
     {
         return GetSelectableItemAtIndex(stateKey.index);
@@ -190,15 +190,15 @@ public:
     void StopSwipeSelectAutoScroll();
     void UpdateSwipeSelectStateKeyForAutoScroll(float offsetPct);
 
-    virtual void ApplyEditModeToVisibleItems();
-    virtual void RemoveEditModeFromItems();
+    ACE_FORCE_EXPORT virtual void ApplyEditModeToVisibleItems();
+    ACE_FORCE_EXPORT virtual void RemoveEditModeFromItems();
 
 protected:
-    virtual void OnEnableEditModeChanged(bool enable);
-    virtual void OnEditModeOptionsChanged();
-    virtual bool NeedBackPressHandler() const;
-    virtual bool HandleBackPress();
-    void UpdateBackPressCallback();
+    ACE_FORCE_EXPORT virtual void OnEnableEditModeChanged(bool enable);
+    ACE_FORCE_EXPORT virtual void OnEditModeOptionsChanged();
+    ACE_FORCE_EXPORT virtual bool NeedBackPressHandler() const;
+    ACE_FORCE_EXPORT virtual bool HandleBackPress();
+    ACE_FORCE_EXPORT void UpdateBackPressCallback();
     void RemoveBackPressCallback();
     bool ExitSwipeSelectModeOnBackPressed();
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
@@ -225,10 +225,10 @@ protected:
             }
         }
     };
-    void InitMouseEvent();
-    void UninitMouseEvent();
-    void DrawSelectedZone(const RectF& selectedZone);
-    void ClearSelectedZone();
+    ACE_FORCE_EXPORT void InitMouseEvent();
+    ACE_FORCE_EXPORT void UninitMouseEvent();
+    ACE_FORCE_EXPORT void DrawSelectedZone(const RectF& selectedZone);
+    ACE_FORCE_EXPORT void ClearSelectedZone();
     bool IsEditModeChanged() const
     {
         return editModeChanged_;
@@ -261,7 +261,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    virtual float GetOffsetWithLimit(float offset) const;
+    ACE_FORCE_EXPORT virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateMouseStartOffset();
 

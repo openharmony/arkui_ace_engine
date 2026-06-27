@@ -141,8 +141,10 @@ struct RationNum {
 
     RationNum operator+(const RationNum& r1) const
     {
-        int64_t newM = std::lcm(this->m, r1.m);
-        int64_t newN = ((newM / this->m) * this->n) + ((newM / r1.m) * r1.n);
+        int64_t m1 = (this->m != 0) ? this->m : 1;
+        int64_t m2 = (r1.m != 0) ? r1.m : 1;
+        int64_t newM = std::lcm(m1, m2);
+        int64_t newN = ((newM / m1) * this->n) + ((newM / m2) * r1.n);
         RationNum rNew(newN, newM);
         rNew.Simplify();
         return rNew;
@@ -156,8 +158,10 @@ struct RationNum {
 
     RationNum operator-(const RationNum& r1) const
     {
-        int64_t newM = std::lcm(this->m, r1.m);
-        int64_t newN = ((newM / this->m) * this->n) - ((newM / r1.m) * r1.n);
+        int64_t m1 = (this->m != 0) ? this->m : 1;
+        int64_t m2 = (r1.m != 0) ? r1.m : 1;
+        int64_t newM = std::lcm(m1, m2);
+        int64_t newN = ((newM / m1) * this->n) - ((newM / m2) * r1.n);
         RationNum rNew(newN, newM);
         rNew.Simplify();
         return rNew;

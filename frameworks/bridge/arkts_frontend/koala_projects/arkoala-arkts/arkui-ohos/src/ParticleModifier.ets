@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { CommonMethodModifier, AttributeUpdaterFlag } from "./CommonMethodModifier"
+import { CommonMethodModifier } from "./CommonMethodModifier"
+import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { ModifierState } from './CommonModifier'
 import { AttributeModifier, CommonMethod } from "./component/common"
 import { ArkParticlePeer, ParticleAttribute, DisturbanceFieldOptions, EmitterProperty, Particles, RippleFieldOptions, VelocityFieldOptions } from "./component/particle"

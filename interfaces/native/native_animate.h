@@ -348,6 +348,7 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateRotationTransitionEffect(ArkUI_RotationOp
 ArkUI_TransitionEffect* OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge move);
 ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
     ArkUI_TransitionEffect* appear, ArkUI_TransitionEffect* disappear);
+ArkUI_TransitionEffect* OH_ArkUI_CreateIdentityTransitionEffect(void);
 void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* effect);
 int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* effect, ArkUI_TransitionEffect* combine);
 int32_t OH_ArkUI_TransitionEffect_SetAnimation(ArkUI_TransitionEffect* effect, ArkUI_AnimateOption* animation);

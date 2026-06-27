@@ -94,6 +94,30 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32* color, int32_t size)
     }
     SymbolModelNG::SetFontColor(frameNode, colorArray);
 }
+
+bool GetIsFontColorResource(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return SymbolModelNG::GetIsFontColorResource(frameNode);
+}
+
+void SetFontColorResource(ArkUINodeHandle node, ArkUI_Int32 resSize, void** resObjects)
+{
+    if (!GetIsFontColorResource(node)) {
+        return;
+    }
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<RefPtr<ResourceObject>> resObjArr;
+    resObjArr.reserve(resSize);
+    for (ArkUI_Int32 i = 0; i < resSize; i++) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjects[i]));
+        resObjArr.emplace_back(resObj);
+    }
+    SymbolModelNG::SetFontColorResource(frameNode, resObjArr);
+}
+
 void SetFontColorJs(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size, ArkUI_Int32* resIndexes,
     void** resObjects, ArkUI_Int32 resSize)
 {
@@ -108,6 +132,7 @@ void SetFontColorJs(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_I
         }
     }
     SymbolModelNG::SetFontColor(frameNode, colorArray);
+    SetFontColorResource(node, resSize, resObjects);
 
     if (!SystemProperties::ConfigChangePerform()) {
         return;
@@ -486,6 +511,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphDynamicModifier()
         .setShaderStyle = SetShaderStyle,
         .resetShaderStyle = ResetShaderStyle,
         .setFontColorJs = SetFontColorJs,
+        .getIsFontColorResource = GetIsFontColorResource,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

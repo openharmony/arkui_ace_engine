@@ -43,14 +43,23 @@
 #endif
 
 #include "drawable_descriptor.h"
+#include "node_attributes/layout.h"
+#include "node_attributes/button.h"
+#include "node_attributes/checkbox.h"
+#include "node_attributes/slider.h"
 #include "node_attributes/text_common.h"
 #include "node_attributes/text.h"
 #include "node_attributes/text_input.h"
 #include "node_attributes/text_area.h"
 #include "node_attributes/rich_editor.h"
 #include "node_attributes/image_span.h"
+#include "node_attributes/image_animator.h"
+#include "node_attributes/image.h"
+#include "node_attributes/picker.h"
 #include "node_attributes/custom_span.h"
 #include "node_attributes/progress.h"
+#include "node_attributes/embedded_component.h"
+#include "node_attributes/xcomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,19 +143,6 @@ typedef struct {
 } ArkUI_GridItemRect;
 
 /**
-
- * @brief Enumerates the selected indicator type of picker.
- *
- * @since 23
- */
-typedef enum {
-    /** background. */
-    ARKUI_PICKER_INDICATOR_BACKGROUND = 0,
-    /** divider. */
-    ARKUI_PICKER_INDICATOR_DIVIDER = 1,
-} ArkUI_PickerIndicatorType;
-
-/**
  * @brief Enumerates the tree operating status for the cross-language option.
  *
  * @since 26.0.0
@@ -174,47 +170,6 @@ typedef enum {
      */
     OH_ARKUI_TREE_OPERATING_STATUS_DISABLE = 2,
 } OH_ArkUI_CrossLanguageOperatingStatus;
-
-/**
- * @brief style parameters of background indicator.
- *
- * @since 23
- */
-typedef struct {
-    /**  background color, in 0xARGB format, for example, <b>0xFF1122FF</b> */
-    uint32_t backgroundColor;
-    /** radius of the top left corner. */
-    float topLeftRadius;
-    /** radius of the top right corner */
-    float topRightRadius;
-    /** radius of the bottom left corner */
-    float bottomLeftRadius;
-    /** radius of the bottom right corner. */
-    float bottomRightRadius;
-} ArkUI_PickerIndicatorBackground;
-
-/**
- * @brief style parameters of divider indicator.
- *
- * @since 23
- */
-typedef struct {
-    /** stroke width */
-    float strokeWidth;
-    /** divider color,in 0xARGB format, for example, <b>0xFF1122FF</b> */
-    uint32_t dividerColor;
-    /** the distance between the divider and the beginning of the side of the picker, unit vp. */
-    float startMargin;
-    /** the distance between the divider and the end of the side of the picker (unit: vp). */
-    float endMargin;
-} ArkUI_PickerIndicatorDivider;
-
-/**
- * @brief Definition of indicator style.
- *
- * @since 23
- */
-typedef struct ArkUI_PickerIndicatorStyle ArkUI_PickerIndicatorStyle;
 
 /**
  * @brief Defines the <b>Grid</b> layout options.
@@ -279,27 +234,6 @@ typedef struct ArkUI_ListItemSwipeActionItem ArkUI_ListItemSwipeActionItem;
 typedef struct ArkUI_ListItemSwipeActionOption ArkUI_ListItemSwipeActionOption;
 
 /**
- * @brief 指定设置在相对容器中子组件的对齐规则。
- *
- * @since 12
- */
-typedef struct ArkUI_AlignmentRuleOption ArkUI_AlignmentRuleOption;
-
-/**
- * @brief guideLine参数，用于定义guideline的id、方向和位置。
- *
- * @since 12
- */
-typedef struct ArkUI_GuidelineOption ArkUI_GuidelineOption;
-
-/**
- * @brief barrier参数，用于定义barrier的id、方向和生成时所依赖的组件。
- *
- * @since 12
- */
-typedef struct ArkUI_BarrierOption ArkUI_BarrierOption;
-
-/**
  * @brief Defines the navigation indicator style for the swiper.
  *
  * @since 12
@@ -326,13 +260,6 @@ typedef struct ArkUI_SwiperArrowStyle ArkUI_SwiperArrowStyle;
  * @since 12
  */
 typedef struct ArkUI_StyledString ArkUI_StyledString;
-
-/**
- * @brief Defines image animator frame infomation.
- *
- * @since 12
-*/
-typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
 
 /**
  * @brief Define the ChildrenMainSize class information for a List.
@@ -370,34 +297,6 @@ typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Declares the Ability base want.
- *
- * @since 20
- */
-typedef struct AbilityBase_Want AbilityBase_Want;
-
-/**
- * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
- *
- * @since 20
- */
-typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
-
-/**
- * @brief Define the Edges describing the position of a component by distances to the container's four edges.
- *
- * @since 21
- */
-typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
-
-/**
- * @brief Defines the PixelRound policy of a component's four edges.
- *
- * @since 21
- */
-typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
-
-/**
  * @brief Defines the matrix4 object.
  *
  * @since 24
@@ -417,62 +316,6 @@ typedef union {
     /** Unsigned integer. */
     uint32_t u32;
 } ArkUI_NumberValue;
-
-/**
- * @brief Enumerates the alignment modes.
- *
- * @since 12
- */
-typedef enum {
-    /** Top start. */
-    ARKUI_ALIGNMENT_TOP_START = 0,
-    /** Top center. */
-    ARKUI_ALIGNMENT_TOP,
-    /** Top end. */
-    ARKUI_ALIGNMENT_TOP_END,
-    /** Vertically centered start. */
-    ARKUI_ALIGNMENT_START,
-    /** Horizontally and vertically centered. */
-    ARKUI_ALIGNMENT_CENTER,
-    /** Vertically centered end. */
-    ARKUI_ALIGNMENT_END,
-    /** Bottom start. */
-    ARKUI_ALIGNMENT_BOTTOM_START,
-    /** Horizontally centered on the bottom. */
-    ARKUI_ALIGNMENT_BOTTOM,
-    /** Bottom end. */
-    ARKUI_ALIGNMENT_BOTTOM_END,
-} ArkUI_Alignment;
-
-/**
- * @brief Enumerates the image repeat patterns.
- *
- * @since 12
- */
-typedef enum {
-    /** The image is not repeatedly drawn. */
-    ARKUI_IMAGE_REPEAT_NONE = 0,
-    /** The image is repeatedly drawn only along the x-axis. */
-    ARKUI_IMAGE_REPEAT_X,
-    /** The image is repeatedly drawn only along the y-axis. */
-    ARKUI_IMAGE_REPEAT_Y,
-    /** The image is repeatedly drawn along both axes. */
-    ARKUI_IMAGE_REPEAT_XY,
-} ArkUI_ImageRepeat;
-
-/**
- * @brief Enumerates the types of the <b><XComponent></b> component.
- *
- * @since 12
- */
-typedef enum {
-    /** The custom content of EGL/OpenGL ES and media data is displayed individually on the screen. */
-    ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
-    /** The custom content of EGL/OpenGL ES and media data is grouped and displayed together with content
-      * of the component.
-      */
-    ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
-} ArkUI_XComponentType;
 
 /**
  * @brief Enumerates the text copy and paste modes.
@@ -501,62 +344,6 @@ typedef enum {
     /** Blur. */
     ARKUI_SHADOW_TYPE_BLUR
 } ArkUI_ShadowType;
-
-/**
- * @brief Enumerates the modes of the date picker.
- *
- * @since 18
- */
-typedef enum {
-    /** A mode that displays the date in months, days of month, and years. */
-    ARKUI_DATEPICKER_MODE_DATE = 0,
-    /** A mode that displays the date in months and years. */
-    ARKUI_DATEPICKER_YEAR_AND_MONTH = 1,
-    /** A mode that displays the date in months and days of the month. */
-    ARKUI_DATEPICKER_MONTH_AND_DAY = 2,
-} ArkUI_DatePickerMode;
-
-/**
- * @brief Enumerates the types of the text picker.
- *
- * @since 12
- */
-typedef enum {
-    /** Single-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_SINGLE = 0,
-    /** Multi-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_MULTI,
-    /** Single-column text picker with image resources. */
-    ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT,
-    /** Interconnected multi-column text picker. */
-    ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT,
-} ArkUI_TextPickerRangeType;
-
-/**
- * @brief Defines the input structure of the single-column text picker with image resources.
- *
- * @since 12
- */
-typedef struct {
-    /** Image resource. */
-    const char* icon;
-    /** Text information. */
-    const char* text;
-} ARKUI_TextPickerRangeContent;
-
-/**
- * @brief Defines the input structure of the interconnected multi-column text picker.
- *
- * @since 12
- */
-typedef struct {
-    /** Text information. */
-    const char* text;
-    /** Interconnected data. */
-    const ARKUI_TextPickerRangeContent* children;
-    /** Size of the interconnected data array. */
-    int32_t size;
-} ARKUI_TextPickerCascadeRangeContent;
 
 /**
  * @brief 定义无障碍复选框状态类型枚举值。
@@ -721,18 +508,6 @@ typedef enum {
     /** High sensitivity. */
     ARKUI_CROWN_SENSITIVITY_HIGH = 2,
 } ArkUI_CrownSensitivity;
-
-/**
- * @brief Enumerates the scroll directions for the <b><List></b> component.
- *
- * @since 12
- */
-typedef enum {
-    /** Only vertical scrolling is supported. */
-    ARKUI_AXIS_VERTICAL = 0,
-    /** Only horizontal scrolling is supported. */
-    ARKUI_AXIS_HORIZONTAL,
-} ArkUI_Axis;
 
 /**
  * @brief Enumerates the modes for pinning the header to the top or the footer to the bottom.
@@ -1019,58 +794,6 @@ typedef enum {
 } ArkUI_ScrollState;
 
 /**
- * @brief Enumerates the types of the slider in the block direction.
- *
- * @since 12
- */
-typedef enum {
-    /** Round slider. */
-    ARKUI_SLIDER_BLOCK_STYLE_DEFAULT = 0,
-    /** Slider with an image background. */
-    ARKUI_SLIDER_BLOCK_STYLE_IMAGE,
-    /** Slider in a custom shape. */
-    ARKUI_SLIDER_BLOCK_STYLE_SHAPE,
-} ArkUI_SliderBlockStyle;
-
-/**
- * @brief Enumerates the scroll directions of the slider.
- *
- * @since 12
- */
-typedef enum {
-    /** Vertical direction. */
-    ARKUI_SLIDER_DIRECTION_VERTICAL = 0,
-    /** Horizontal direction. */
-    ARKUI_SLIDER_DIRECTION_HORIZONTAL,
-} ArkUI_SliderDirection;
-
-/**
- * @brief Enumerates the slider styles.
- *
- * @since 12
- */
-typedef enum {
-    /** The slider is on the slider track. */
-    ARKUI_SLIDER_STYLE_OUT_SET = 0,
-    /** The slider is in the slider track. */
-    ARKUI_SLIDER_STYLE_IN_SET,
-    /** No slider. */
-    ARKUI_SLIDER_STYLE_NONE,
-} ArkUI_SliderStyle;
-
-/**
- * @brief Enumerates the shapes of the check box
- *
- * @since 12
- */
-typedef enum {
-    /** Circle. */
-    ArkUI_CHECKBOX_SHAPE_CIRCLE = 0,
-    /** Rounded square. */
-    ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
-} ArkUI_CheckboxShape;
-
-/**
  * @brief Enumerates the animation playback modes.
  *
  * @since 12
@@ -1089,24 +812,6 @@ typedef enum {
      */
     ARKUI_ANIMATION_PLAY_MODE_ALTERNATE_REVERSE,
 } ArkUI_AnimationPlayMode;
-
-/**
- * @brief Defines the image size.
- *
- * @since 12
- */
-typedef enum {
-    /** The original image aspect ratio is retained. */
-    ARKUI_IMAGE_SIZE_AUTO = 0,
-    /** Default value. The image is scaled with its aspect ratio retained for both sides to be greater than or equal to
-     * the display boundaries.
-     */
-    ARKUI_IMAGE_SIZE_COVER,
-    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
-     * display boundaries.
-     */
-    ARKUI_IMAGE_SIZE_CONTAIN,
-} ArkUI_ImageSize;
 
 /**
  * @brief Enumerates the adaptive color modes.
@@ -1196,140 +901,6 @@ typedef enum {
 } ArkUI_BlurStyle;
 
 /**
- * @brief Enumerates the vertical alignment modes.
- *
- * @since 12
- */
-typedef enum {
-    /** Top aligned. */
-    ARKUI_VERTICAL_ALIGNMENT_TOP = 0,
-    /** Center aligned. This is the default alignment mode. */
-    ARKUI_VERTICAL_ALIGNMENT_CENTER,
-    /** Bottom aligned. */
-    ARKUI_VERTICAL_ALIGNMENT_BOTTOM,
-} ArkUI_VerticalAlignment;
-
-/**
- * @brief Enumerates the alignment mode in the horizontal direction.
- *
- * @since 12
- */
-typedef enum {
-    /** Aligned with the start edge in the same direction as the language in use. */
-    ARKUI_HORIZONTAL_ALIGNMENT_START = 0,
-    /** Center aligned. This is the default alignment mode. */
-    ARKUI_HORIZONTAL_ALIGNMENT_CENTER,
-    /** Aligned with the end edge in the same direction as the language in use. */
-    ARKUI_HORIZONTAL_ALIGNMENT_END,
-} ArkUI_HorizontalAlignment;
-
-/**
- * @brief Defines how the image is resized to fit its container.
- *ImageSpanAlignment
- * @since 12
- */
-typedef enum {
-    /** The image is scaled with its aspect ratio retained for the content to be completely displayed within the
-     * display boundaries.
-     */
-    ARKUI_OBJECT_FIT_CONTAIN = 0,
-    /** The image is scaled with its aspect ratio retained for both sides to be greater than or equal to the
-     * display boundaries.
-     */
-    ARKUI_OBJECT_FIT_COVER,
-    /** The image is scaled automatically to fit the display area. */
-    ARKUI_OBJECT_FIT_AUTO,
-    /** The image is scaled to fill the display area, and its aspect ratio is not retained. */
-    ARKUI_OBJECT_FIT_FILL,
-    /** The image content is displayed with its aspect ratio retained. The size is smaller than or equal to the
-     * original size.
-     */
-    ARKUI_OBJECT_FIT_SCALE_DOWN,
-    /** The original size is retained. */
-    ARKUI_OBJECT_FIT_NONE,
-    /** Not resized, the image is aligned with the start edge of the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_START,
-    /** Not resized, the image is horizontally centered at the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP,
-    /** Not resized, the image is aligned with the end edge at the top of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_END,
-    /** Not resized, the image is vertically centered on the start edge of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_START,
-    /** Not resized, the image is horizontally and vertically centered in the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_CENTER,
-    /** Not resized, the image is vertically centered on the end edge of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_END,
-    /** Not resized, the image is aligned with the start edge at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_START,
-    /** Not resized, the image is horizontally centered at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
-    /** Not resized, the image is aligned with the end edge at the bottom of the container. */
-    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
-    /**
-     * Not resized, and is used in conjunction with NODE_IMAGE_IMAGE_MATRIX.
-     *
-     * @since 21
-     */
-    ARKUI_OBJECT_FIT_NONE_MATRIX,
-} ArkUI_ObjectFit;
-
-/**
- * @brief Enumerates the image interpolation effect.
- *
- * @since 12
- */
-typedef enum {
-    /** No image interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_NONE = 0,
-    /** Low quality interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_LOW,
-    /** Medium quality interpolation. */
-    ARKUI_IMAGE_INTERPOLATION_MEDIUM,
-    /** High quality interpolation. This mode produces scaled images of the highest possible quality. */
-    ARKUI_IMAGE_INTERPOLATION_HIGH,
-} ArkUI_ImageInterpolation;
-
-/**
- * @brief Enumerates the image dynamic range mode.
- *
- * @since 21
- */
-typedef enum {
-    /** high dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_HIGH = 0,
-    /** constraint dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_CONSTRAINT,
-    /** standard dynamic range mode. */
-    ARKUI_DYNAMIC_RANGE_MODE_STANDARD,
-} ArkUI_DynamicRangeMode;
-
-/**
- * @brief Enumerates the image rotate orientation.
- *
- * @since 21
- */
-typedef enum {
-    /** Use EXIF metadata for display orientation, with support for rotation and mirroring. */
-    ARKUI_ORIENTATION_AUTO = 0,
-    /** Display original pixel data without transformation. */
-    ARKUI_ORIENTATION_UP,
-    /** Display the image after rotating it 90 degrees clockwise. */
-    ARKUI_ORIENTATION_RIGHT,
-    /** Display the image after rotating it 180 degrees clockwise. */
-    ARKUI_ORIENTATION_DOWN,
-    /** Display the image after rotating it 270 degrees clockwise. */
-    ARKUI_ORIENTATION_LEFT,
-    /** Display the image after flipping it horizontally. */
-    ARKUI_ORIENTATION_UP_MIRRORED,
-    /** Display the image after flipping it horizontally and then rotating it 90 degrees clockwise. */
-    ARKUI_ORIENTATION_RIGHT_MIRRORED,
-    /** Display the image after flipping it vertically. */
-    ARKUI_ORIENTATION_DOWN_MIRRORED,
-    /** Display the image after flipping it horizontally and then rotating it 270 degrees clockwise. */
-    ARKUI_ORIENTATION_LEFT_MIRRORED,
-} ArkUI_ImageRotateOrientation;
-
-/**
  * @brief Enumerates the blend modes.
  *
  * @since 12
@@ -1416,41 +987,6 @@ typedef enum {
 } ArkUI_BlendMode;
 
 /**
- * @brief Enumerates the modes in which components are laid out along the main axis of the container.
- *
- * @since 12
- */
-typedef enum {
-    /** Components are arranged from left to right. */
-    ARKUI_DIRECTION_LTR = 0,
-    /** Components are arranged from right to left. */
-    ARKUI_DIRECTION_RTL,
-    /** The default layout direction is used. */
-    ARKUI_DIRECTION_AUTO = 3,
-} ArkUI_Direction;
-
-/**
- * @brief Enumerates the modes in which components are laid out along the cross axis of the container.
- *
- * @since 12
- */
-typedef enum {
-    /** The default configuration in the container is used. */
-    ARKUI_ITEM_ALIGNMENT_AUTO = 0,
-    /** The items in the container are aligned with the cross-start edge. */
-    ARKUI_ITEM_ALIGNMENT_START,
-    /** The items in the container are centered along the cross axis. */
-    ARKUI_ITEM_ALIGNMENT_CENTER,
-    /** The items in the container are aligned with the cross-end edge. */
-    ARKUI_ITEM_ALIGNMENT_END,
-    /** The items in the container are stretched and padded along the cross axis. */
-    ARKUI_ITEM_ALIGNMENT_STRETCH,
-    /** The items in the container are aligned in such a manner that their text baselines are aligned along the
-     *  cross axis. */
-    ARKUI_ITEM_ALIGNMENT_BASELINE,
-} ArkUI_ItemAlignment;
-
-/**
  * @brief Enumerates the foreground colors.
  *
  * @since 12
@@ -1465,65 +1001,6 @@ typedef enum {
 } ArkUI_ColorStrategy;
 
 /**
- * @brief Enumerates the vertical alignment modes.
- *
- * @since 12
- */
-typedef enum {
-    /** The child components are aligned with the start edge of the main axis. */
-    ARKUI_FLEX_ALIGNMENT_START = 1,
-    /** The child components are aligned in the center of the main axis. */
-    ARKUI_FLEX_ALIGNMENT_CENTER = 2,
-    /** The child components are aligned with the end edge of the main axis. */
-    ARKUI_FLEX_ALIGNMENT_END = 3,
-    /** The child components are evenly distributed along the main axis. The space between any two adjacent components
-     * is the same. The first component is aligned with the main-start, and the last component is aligned with
-     * the main-end.
-     */
-    ARKUI_FLEX_ALIGNMENT_SPACE_BETWEEN = 6,
-    /** The child components are evenly distributed along the main axis. The space between any two adjacent components
-     * is the same. The space between the first component and main-start, and that between the last component and
-     * cross-main are both half the size of the space between two adjacent components.
-     */
-    ARKUI_FLEX_ALIGNMENT_SPACE_AROUND = 7,
-    /** The child components are evenly distributed along the main axis. The space between the first component
-     * and main-start, the space between the last component and main-end, and the space between any two adjacent
-     * components are the same.
-     */
-    ARKUI_FLEX_ALIGNMENT_SPACE_EVENLY = 8,
-} ArkUI_FlexAlignment;
-
-/**
- * @brief Enumerates the directions of the main axis in the flex container.
- *
- * @since 12
- */
-typedef enum {
-    /** The child components are arranged in the same direction as the main axis runs along the rows. */
-    ARKUI_FLEX_DIRECTION_ROW = 0,
-    /** The child components are arranged in the same direction as the main axis runs down the columns. */
-    ARKUI_FLEX_DIRECTION_COLUMN,
-    /** The child components are arranged opposite to the <b>ROW</b> direction. */
-    ARKUI_FLEX_DIRECTION_ROW_REVERSE,
-    /** The child components are arranged opposite to the <b>COLUMN</b> direction. */
-    ARKUI_FLEX_DIRECTION_COLUMN_REVERSE,
-} ArkUI_FlexDirection;
-
-/**
- * @brief Defines whether the flex container has a single line or multiple lines.
- *
- * @since 12
- */
-typedef enum {
-    /** The child components in the flex container are arranged in a single line, and they cannot overflow. */
-    ARKUI_FLEX_WRAP_NO_WRAP = 0,
-    /** The child components in the flex container are arranged in multiple lines, and they may overflow. */
-    ARKUI_FLEX_WRAP_WRAP,
-    /** The child components in the flex container are reversely arranged in multiple lines, and they may overflow. */
-    ARKUI_FLEX_WRAP_WRAP_REVERSE,
-} ArkUI_FlexWrap;
-
-/**
  * @brief Enumerates the visibility values.
  *
  * @since 12
@@ -1536,20 +1013,6 @@ typedef enum {
     /** The component is hidden. It is not involved in the layout, and no placeholder is used for it. */
     ARKUI_VISIBILITY_NONE,
 } ArkUI_Visibility;
-
-/**
- * @brief Enumerates the alignment modes between the calendar picker and the entry component.
- *
- * @since 12
- */
-typedef enum {
-    /** Left aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_START = 0,
-    /** Center aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_CENTER,
-    /** Right aligned. */
-    ARKUI_CALENDAR_ALIGNMENT_END,
-} ArkUI_CalendarAlignment;
 
 /**
  * @brief Enumerates the mask types.
@@ -1642,18 +1105,6 @@ typedef enum {
     /** Custom direction. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
 } ArkUI_LinearGradientDirection;
-
-/**
- * @brief Enumerates the image rendering modes.
- *
- * @since 12
- */
-typedef enum {
-    /** Render image pixels as they are in the original source image. */
-    ARKUI_IMAGE_RENDER_MODE_ORIGINAL = 0,
-    /** Render image pixels to create a monochrome template image. */
-    ARKUI_IMAGE_RENDER_MODE_TEMPLATE,
-} ArkUI_ImageRenderMode;
 
 /**
  * @brief Enumerates the slide-in and slide-out positions of the component from the screen edge during transition.
@@ -1755,39 +1206,6 @@ typedef enum {
 } ArkUI_FinishCallbackType;
 
 /**
- * @brief defines the direction of the barrier line.
- *
- * @since 12
- */
-typedef enum {
-    /** The barrier is the leftmost of all its referencedIds. */
-    ARKUI_BARRIER_DIRECTION_START = 0,
-    /** The barrier is on the rightmost side of all its referencedIds. */
-    ARKUI_BARRIER_DIRECTION_END,
-    /** The barrier is at the top of all its referencedIds. */
-    ARKUI_BARRIER_DIRECTION_TOP,
-    /** The barrier is at the bottom of all its referencedIds. */
-    ARKUI_BARRIER_DIRECTION_BOTTOM
-} ArkUI_BarrierDirection;
-
-
-/**
-  * @brief defines the style of the chain.
-  *
-  * @since 12
-  */
-typedef enum {
-    /** Components are evenly distributed among constraint anchor points. */
-    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_SPREAD = 0,
-    /** Except for the first and last two sub-components,
-      * other components are evenly distributed between the constraint anchor points. */
-    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_SPREAD_INSIDE,
-    /** No gaps in subcomponents within the chain. */
-    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_PACKED,
-} ArkUI_RelativeLayoutChainStyle;
-
-
-/**
  * @brief Enumerates the alignment modes of items along the cross axis.
   *
  * @since 12
@@ -1881,25 +1299,6 @@ typedef enum {
 } ArkUI_RouterPageState;
 
 /**
- * @brief Enumerates the button types.
- *
- * @since 12
- */
-typedef enum {
-    /** Normal button (without rounded corners by default). */
-    ARKUI_BUTTON_TYPE_NORMAL = 0,
-    /** Capsule-type button (the round corner is half of the height by default). */
-    ARKUI_BUTTON_TYPE_CAPSULE,
-    /** Circle button. */
-    ARKUI_BUTTON_TYPE_CIRCLE,
-    /**
-     * Rounded rectangle button.
-     * @since 19
-     */
-    ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
-} ArkUI_ButtonType;
-
-/**
  * @brief Define the navigation indicator type of the swiper.
  *
  * @since 12
@@ -1966,22 +1365,6 @@ typedef enum {
     /** The sliding distance of the ListItem cannot exceed the size of the scratched component.*/
     ARKUI_LIST_ITEM_SWIPE_EDGE_EFFECT_NONE,
 } ArkUI_ListItemSwipeEdgeEffect;
-
-/**
- * @brief 定义帧动画的播放状态。
- *
- * @since 12
-*/
-typedef enum {
-    /** 动画初始状态。 */
-    ARKUI_ANIMATION_STATUS_INITIAL,
-    /** 动画处于播放状态。*/
-    ARKUI_ANIMATION_STATUS_RUNNING,
-    /** 动画处于暂停状态。*/
-    ARKUI_ANIMATION_STATUS_PAUSED,
-    /** 动画处于停止状态。*/
-    ARKUI_ANIMATION_STATUS_STOPPED,
-} ArkUI_AnimationStatus;
 
 /**
  * @brief Enumerates the states before and after execution of the frame-by-frame animation.
@@ -2259,22 +1642,6 @@ typedef enum {
 }ArkUI_HoverModeAreaType;
 
 /**
- * @brief defines the enumerated value of the direction of the extended security zone.
- *
- * @since 12
- */
-typedef enum {
-    /** Upper area. */
-    ARKUI_SAFE_AREA_EDGE_TOP = 1,
-    /** Lower area. */
-    ARKUI_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
-    /** Front area. */
-    ARKUI_SAFE_AREA_EDGE_START = 1 << 2,
-    /** Tail area. */
-    ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
-} ArkUI_SafeAreaEdge;
-
-/**
  * @brief Enumerates the expand modes.
  *
  * @since 15
@@ -2381,37 +1748,6 @@ typedef enum {
 } ArkUI_CornerDirection;
 
 /**
- * @brief Enumerates the LayoutPolicy.
- *
- * @since 21
- */
-typedef enum {
-    /** The component fills its parent, which means its size is as large as its parent */
-    ARKUI_LAYOUTPOLICY_MATCHPARENT = 0,
-    /**
-     * The component fills its content, which means its size is as large as its children but it is constrained
-     * by its parent.
-     */
-    ARKUI_LAYOUTPOLICY_WRAPCONTENT,
-    /** The component fills its content which means its size is as large as its children. */
-    ARKUI_LAYOUTPOLICY_FIXATIDEALSIZE,
-} ArkUI_LayoutPolicy;
-
-/**
- * @brief Enumerates the PixelRoundPolicy.
- *
- * @since 21
- */
-typedef enum {
-    /** No Force round the component boundary coordinates to integer pixel. */
-    ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND = 0,
-    /** Force ceil the component boundary coordinates to integer pixel. */
-    ARKUI_PIXELROUNDCALCPOLICY_FORCECEIL,
-    /** Force floor the component boundary coordinates to integer pixel. */
-    ARKUI_PIXELROUNDCALCPOLICY_FORCEFLOOR,
-} ArkUI_PixelRoundCalcPolicy;
-
-/**
  * @brief Menu pop-up strategy.
  *
  * @since 23
@@ -2494,20 +1830,6 @@ typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
 /**
-  * @brief TextPicker single column selector, supports mixing text and images.
-  *
-  * @since 19
-  */
-typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArray;
-
- /**
-   * @brief TextPicker multi column selector, supports mixing text and images.
-   *
-   * @since 19
-   */
-typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
-
-/**
  * @brief Defines a two-dimensional point struct, with coordinates stored as float type.
  *
  * @since 24
@@ -2529,25 +1851,6 @@ typedef struct {
   * @since 23
   */
 typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
-
-/**
- * @brief Create the ArkUI_PickerIndicatorStyle instance.
- *
- * @param ArkUI_PickerIndictorType, enumeration type.
- * @return  ArkUI_PickerIndicatorStyle instance. If the instance returns a null pointer,
- *         it indicates creation failure, and the reason for the failure may be that the address space is full or
- *         the type not supported.
- * @since 23
-*/
-ArkUI_PickerIndicatorStyle* OH_ArkUI_PickerIndicatorStyle_Create(ArkUI_PickerIndicatorType type);
-
-/**
-* @brief Destroy the ArkUI_PickerIndicatorStyle instance.
-*
-* @param ArkUI_PickerIndicatorStyle instance to be destroyed.
-* @since 23
-*/
-void OH_ArkUI_PickerIndicatorStyle_Dispose(ArkUI_PickerIndicatorStyle* style);
 
 /**
 * @brief Set the parameters of background style.
@@ -2626,62 +1929,6 @@ typedef enum {
     GRID_ITEM_STYLE_PLAIN = 1,
 } ArkUI_GridItemStyle;
 
-/**
- * @brief Define the types for expanding the safe area in layout.
- *
- * @since 23
- */
-typedef enum {
-    /** Default non-safe area of the system, including the status bar and navigation bar. */
-    ARKUI_LAYOUT_SAFE_AREA_TYPE_SYSTEM = 1,
-} ArkUI_LayoutSafeAreaType;
-/**
- * @brief Define the edges for expanding the safe area in layout.
- *
- * @since 23
- */
-typedef enum {
-    /** Top edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP = 1,
-    /** Bottom edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
-    /** Start edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_START = 1 << 2,
-    /** End edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_END = 1 << 3,
-    /** Vertical edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_TOP | ARKUI_LAYOUT_SAFE_AREA_EDGE_BOTTOM,
-    /** Horizontal edge of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = ARKUI_LAYOUT_SAFE_AREA_EDGE_START | ARKUI_LAYOUT_SAFE_AREA_EDGE_END,
-    /** All edges of the safe area. */
-    ARKUI_LAYOUT_SAFE_AREA_EDGE_ALL = ARKUI_LAYOUT_SAFE_AREA_EDGE_VERTICAL | ARKUI_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
-} ArkUI_LayoutSafeAreaEdge;
-
-/**
- * @brief Enumerates the localizedAlignment modes.
- *
- * @since 23
- */
-typedef enum {
-    /** Top start. */
-    ARKUI_LOCALIZED_ALIGNMENT_TOP_START = 0,
-    /** Top center. */
-    ARKUI_LOCALIZED_ALIGNMENT_TOP,
-    /** Top end. */
-    ARKUI_LOCALIZED_ALIGNMENT_TOP_END,
-    /** Vertically centered start. */
-    ARKUI_LOCALIZED_ALIGNMENT_START,
-    /** Horizontally and vertically centered. */
-    ARKUI_LOCALIZED_ALIGNMENT_CENTER,
-    /** Vertically centered end. */
-    ARKUI_LOCALIZED_ALIGNMENT_END,
-    /** Bottom start. */
-    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_START,
-    /** Horizontally centered on the bottom. */
-    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM,
-    /** Bottom end. */
-    ARKUI_LOCALIZED_ALIGNMENT_BOTTOM_END,
-} ArkUI_LocalizedAlignment;
 /**
  * @brief Enumerates the graphics rendering strategy.
  *
@@ -3096,193 +2343,6 @@ void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithU
     float (*callback)(int32_t itemIndex, void* userData));
 
 /**
- * @brief Create auxiliary line information in the RelativeContaine container.
- *
- * @param size The number of auxiliary lines.
- * @return auxiliary line information.
- * @since 12
- */
-ArkUI_GuidelineOption* OH_ArkUI_GuidelineOption_Create(int32_t size);
-
-/**
- * @brief Destroy auxiliary line information.
- *
- * @param guideline auxiliary line information.
- * @since 12
- */
-void OH_ArkUI_GuidelineOption_Dispose(ArkUI_GuidelineOption* guideline);
-
-/**
- * @brief Set the Id of the auxiliary line.
- *
- * @param guideline auxiliary line information.
- * @param value id, must be unique and cannot have the same name as the component in the container.
- * @param index auxiliary line index value.
- * @since 12
- */
-void OH_ArkUI_GuidelineOption_SetId(ArkUI_GuidelineOption* guideline, const char* value, int32_t index);
-
-/**
- * @brief Set the direction of the auxiliary line.
- *
- * @param guideline auxiliary line information.
- * @param value direction.
- * @param index auxiliary line index value.
- * @since 12
- */
-void OH_ArkUI_GuidelineOption_SetDirection(ArkUI_GuidelineOption* guideline, ArkUI_Axis value, int32_t index);
-
-/**
- * @brief Set the distance from the left or top of the container.
- *
- * @param guideline auxiliary line information.
- * @param value The distance from the left or top of the container.
- * @param index auxiliary line index value.
- * @since 12
- */
-void OH_ArkUI_GuidelineOption_SetPositionStart(ArkUI_GuidelineOption* guideline, float value, int32_t index);
-
-/**
- * @brief Set the distance from the right or bottom of the container.
- *
- * @param guideline auxiliary line information.
- * @param value The distance from the right side or bottom of the container.
- * @param index auxiliary line index value.
- * @since 12
- */
-void OH_ArkUI_GuidelineOption_SetPositionEnd(ArkUI_GuidelineOption* guideline, float value, int32_t index);
-
-/**
- * @brief Get the Id of the auxiliary line.
- *
- * @param guideline auxiliary line information.
- * @param index auxiliary line index value.
- * @return Id.
- * @since 12
- */
-const char* OH_ArkUI_GuidelineOption_GetId(ArkUI_GuidelineOption* guideline, int32_t index);
-
-/**
- * @brief Get the direction of the auxiliary line.
- *
- * @param guideline auxiliary line information.
- * @param index auxiliary line index value.
- * @return direction.
- * @since 12
- */
-ArkUI_Axis OH_ArkUI_GuidelineOption_GetDirection(ArkUI_GuidelineOption* guideline, int32_t index);
-
-/**
- * @brief Get the distance from the left or top of the container.
- *
- * @param guideline auxiliary line information.
- * @param index auxiliary line index value.
- * @return The distance from the left or top of the container.
- * @since 12
- */
-float OH_ArkUI_GuidelineOption_GetPositionStart(ArkUI_GuidelineOption* guideline, int32_t index);
-
-/**
- * @brief Get the distance from the right side or bottom of the container.
- *
- * @param guideline auxiliary line information.
- * @param index auxiliary line index value.
- * @return The distance from the right side or bottom of the container.
- * @since 12
- */
-float OH_ArkUI_GuidelineOption_GetPositionEnd(ArkUI_GuidelineOption* guideline, int32_t index);
-
-/**
- * @brief creates barrier information within the RelativeContaine container.
- *
- * @param size Number of barriers.
- * @return barrier information.
- * @since 12
- */
-ArkUI_BarrierOption* OH_ArkUI_BarrierOption_Create(int32_t size);
-
-/**
- * @brief Destroy barrier information.
- *
- * @param barrierStyle barrier information.
- * @since 12
- */
-void OH_ArkUI_BarrierOption_Dispose(ArkUI_BarrierOption* barrierStyle);
-
-/**
- * @brief Set the Id of the barrier.
- *
- * @param barrierStyle barrier information.
- * @param value id, must be unique and cannot have the same name as the component in the container.
- * @param index Barrier index value.
- * @since 12
- */
-void OH_ArkUI_BarrierOption_SetId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index);
-
-/**
- * @brief Set the direction of the barrier.
- *
- * @param barrierStyle barrier information.
- * @param value direction.
- * @param index Barrier index value.
- * @since 12
- */
-void OH_ArkUI_BarrierOption_SetDirection(
-    ArkUI_BarrierOption* barrierStyle, ArkUI_BarrierDirection value, int32_t index);
-
-/**
- * @brief Sets the dependent component of the barrier.
- *
- * @param barrierStyle barrier information.
- * @param value The ID of the dependent component.
- * @param index Barrier index value.
- * @since 12
- */
-void OH_ArkUI_BarrierOption_SetReferencedId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index);
-
-/**
- * @brief Get the Id of the barrier.
- *
- * @param barrierStyle auxiliary line information.
- * @param index auxiliary line index value.
- * @return The Id of the barrier.
- * @since 12
- */
-const char* OH_ArkUI_BarrierOption_GetId(ArkUI_BarrierOption* barrierStyle, int32_t index);
-
-/**
- * @brief Gets the direction of the barrier.
- *
- * @param barrierStyle auxiliary line information.
- * @param index auxiliary line index value.
- * @return The direction of the barrier.
- * @since 12
- */
-ArkUI_BarrierDirection OH_ArkUI_BarrierOption_GetDirection(ArkUI_BarrierOption* barrierStyle, int32_t index);
-
-/**
- * @brief Get the dependent components of the barrier.
- *
- * @param barrierStyle auxiliary line information.
- * @param index auxiliary line index value.
- * @param referencedIndex dependent component Id index value.
- * @return The barrier's dependent components.
- * @since 12
- */
-const char* OH_ArkUI_BarrierOption_GetReferencedId(
-    ArkUI_BarrierOption* barrierStyle, int32_t index, int32_t referencedIndex);
-
-/**
- * @brief Gets the number of dependent components of the barrier.
- *
- * @param barrierStyle auxiliary line information.
- * @param index auxiliary line index value.
- * @return The number of dependent components of the barrier.
- * @since 12
- */
-int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierStyle, int32_t index);
-
-/**
  * @brief Set the types and parameters related to content transition effects.
  *
  * @since 21
@@ -3297,232 +2357,6 @@ typedef struct ArkUI_ContentTransitionEffect ArkUI_ContentTransitionEffect;
  * @since 21
  */
 ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type);
-
-/**
- * @brief creates alignment rule information for subcomponents in relative containers.
- *
- * @return Alignment rule information.
- * @since 12
- */
-ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create(void);
-
-/**
- * @brief Destroys the alignment rule information of subcomponents in relative containers.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_Dispose(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Set the start alignment parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to the anchor component.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetStart(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
-
-/**
- * @brief Set the end alignment parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to the anchor component.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetEnd(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
-
-/**
- * @brief Set the parameters for horizontal center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to anchor component
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetCenterHorizontal(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
-
-/**
- * @brief Set the parameters for top alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to anchor component
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetTop(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
-
-/**
- * @brief Set the bottom alignment parameters.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to anchor component
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetBottom(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
-
-/**
- * @brief Set the parameters for vertical center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param id The id value of the anchor component.
- * @param value Alignment relative to the anchor component.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetCenterVertical(
-    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
-
-/**
- * @brief Sets the horizontal offset parameter of the component under the anchor point constraint.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param horizontal bias value in the horizontal direction.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetBiasHorizontal(ArkUI_AlignmentRuleOption* option, float horizontal);
-
-/**
- * @brief Set the vertical offset parameter of the component under the anchor point constraint.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @param horizontal bias value in the vertical direction.
- * @since 12
- */
-void OH_ArkUI_AlignmentRuleOption_SetBiasVertical(ArkUI_AlignmentRuleOption* option, float vertical);
-
-/**
- * @brief Get the Id of the start-aligned parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The id value of the anchor component.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetStartId(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Gets the alignment of the start-aligned parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the parameters.
- * @since 12
- */
-ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetStartAlignment(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the end alignment parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return End-aligned parameter id.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetEndId(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the end alignment parameter.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the end-aligned parameter.
- * @since 12
- */
-ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetEndAlignment(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Gets the parameters of horizontal center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The id of the parameter of horizontal center alignment.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetCenterIdHorizontal(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Gets the parameters of horizontal center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the horizontally centered alignment parameter.
- * @since 12
- */
-ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentHorizontal(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the top-aligned parameters.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return Top aligned parameter id.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetTopId(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the top-aligned parameters.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the top-aligned parameter.
- * @since 12
- */
-ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetTopAlignment(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the bottom alignment parameters.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The id of the bottom-aligned parameter.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetBottomId(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the bottom alignment parameters.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the bottom-aligned parameter.
- * @since 12
- */
-ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetBottomAlignment(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Gets the parameters of vertical center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The id of the vertical center alignment parameter.
- * @since 12
- */
-const char* OH_ArkUI_AlignmentRuleOption_GetCenterIdVertical(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Gets the parameters of vertical center alignment.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The alignment of the vertical center alignment parameter.
- * @since 12
- */
-ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentVertical(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the bias value in the horizontal direction.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return The bias value in the horizontal direction.
- * @since 12
- */
-float OH_ArkUI_AlignmentRuleOption_GetBiasHorizontal(ArkUI_AlignmentRuleOption* option);
-
-/**
- * @brief Get the bias value in the vertical direction.
- *
- * @param option Alignment rule information of subcomponents in the relative container.
- * @return bias value in vertical direction.
- * @since 12
-*/
-float OH_ArkUI_AlignmentRuleOption_GetBiasVertical(ArkUI_AlignmentRuleOption* option);
 
 /**
  * @brief Creates a navigation indicator.
@@ -4358,123 +3192,6 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_List
     void* userData, void (*callback)(float offset, void* userData));
 
 /**
- * @brief 使用图片路径创建帧图片信息，图片格式为svg，png和jpg。
- *
- * @param src 图片路径。
- * @return 帧图片对象指针。
- * @since 12
-*/
-ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromString(char* src);
-
-/**
- * @brief 使用 DrawableDescriptor 对象创建帧图片信息，图片格式为Resource和PixelMap。
- *
- * @param drawable 使用Resource或PixelMap创建的ArkUI_DrawableDescriptor对象指针。
- * @return 帧图片对象指针。
- * @since 12
-*/
-ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromDrawableDescriptor(
-    ArkUI_DrawableDescriptor* drawable);
-
-/**
- * @brief 销毁帧图片对象指针。
- *
- * @param imageInfo 帧图片对象指针。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_Dispose(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片宽度。
- *
- * @param imageInfo 帧图片对象指针。
- * @param width 图片宽度，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t width);
-
-/**
- * @brief 获取图片宽度。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片宽度，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片高度。
- *
- * @param imageInfo 帧图片对象指针。
- * @param height 图片高度，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t height);
-
-/**
- * @brief 获取图片高度。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片高度，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片相对于组件左上角的纵向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @param top 图片相对于组件左上角的纵向坐标，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t top);
-
-/**
- * @brief 获取图片相对于组件左上角的纵向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片相对于组件左上角的纵向坐标，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片相对于组件左上角的横向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @param left 图片相对于组件左上角的横向坐标，单位为PX。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t left);
-
-/**
- * @brief 获取图片相对于组件左上角的横向坐标。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片相对于组件左上角的横向坐标，单位为PX，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
- * @brief 设置图片的播放时长。
- *
- * @param imageInfo 帧图片对象指针。
- * @param duration 图片的播放时长，单位为毫秒。
- * @since 12
-*/
-void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t duration);
-
-/**
- * @brief 获取图片的播放时长。
- *
- * @param imageInfo 帧图片对象指针。
- * @return 图片的播放时长，单位为毫秒，imageInfo为空指针时返回0。
- * @since 12
-*/
-int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
-
-/**
  * @brief Create accessibility state.
  *
  * @return accessibility state object. If the object returns a null pointer,
@@ -5090,232 +3807,6 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_Visible
 bool OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(ArkUI_VisibleAreaEventOptions* option);
 
 /**
- *@brief Creates a TextPickerRangeContent instance.
- *
- *@param length The length of the picker array.
- *@return Returns a <b>TextPickerRangeContent</b> instance.
- *@since 19
- */
-ArkUI_TextPickerRangeContentArray* OH_ArkUI_TextPickerRangeContentArray_Create(int32_t length);
-
-/**
- *@brief Sets the icon of items in a text picker ranges.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@param icon Icon address.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex(
-    ArkUI_TextPickerRangeContentArray* handle, char* icon, int32_t index);
-
-/**
- *@brief Sets the text of items in a text picker ranges.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@param text Text content.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex(
-    ArkUI_TextPickerRangeContentArray* handle, char* text, int32_t index);
-
-/**
- *@brief Destroys the TextPickerRangeContent instance.
- *
- *@param handle The TextPickerRangeContent instance for obtaining information.
- *@since 19
- */
-void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentArray* handle);
-
-/**
- *@brief Creates a TextCascadePickerRangeContent instance.
- *
- *@param length The length of the picker arry.
- *@return Returns a <b>TextCascadePickerRangeContent</b> instance.
- *@since 19
- */
-ArkUI_TextCascadePickerRangeContentArray* OH_ArkUI_TextCascadePickerRangeContentArray_Create(int32_t length);
-
-/**
- *@brief Sets the text of items in a multi text picker ranges.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@param text text content.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex(
-    ArkUI_TextCascadePickerRangeContentArray* handle, char* text, int32_t index);
-
-/**
- *@brief Sets the child info of items in a multi text picker ranges.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@param child The child instance.
- *@param index The index position of the value to be obtained.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
-    ArkUI_TextCascadePickerRangeContentArray* handle, ArkUI_TextCascadePickerRangeContentArray* child, int32_t index);
-
-/**
- *@brief Destroys the TextCascadePickerRangeContent instance.
- *
- *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@since 19
- */
-void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
-
-/**
- * @brief Create an object for the EmbeddedComponent option.
- *
- * @return A pointer to the object of the EmbeddedComponent option.
- * @since 20
- */
-ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
-
-/**
- * @brief Destroy the object by EmbeddedComponent option.
- *
- * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
-
-/**
- * @brief Set the onError of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Common error information about the API invoking failure.
- * @param name Common error name information about the API invoking failure.
- * @param message Common error message information about the API invoking failure.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnError(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
-
-/**
- * @brief Set the onTerminated of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
- * @param want Data returned when the EmbeddedUIExtensionAbility exits.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
-
-/**
- * @brief Create an edge object for position attribute.
- *
- * @return A pointer to the edge object.
- * @since 21
- */
-ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Create();
-
-/**
- * @brief Creates a deep copy of an edge object for position attribute.
- *
- * @param edges A pointer to an edge object.
- * @return A pointer to the new edge object.
- * @since 21
- */
-ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Copy(const ArkUI_PositionEdges* edges);
-
-/**
- * @brief Dispose an edge object for position attribute.
- *
- * @param edges Pointer to the edge object to be disposed.
- * @since 21
- */
-void OH_ArkUI_PositionEdges_Dispose(ArkUI_PositionEdges* edges);
-
-/**
- * @brief Sets the top edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of top edge to the corresponding edge of parent container, in vp.
- * @since 21
- */
-void OH_ArkUI_PositionEdges_SetTop(ArkUI_PositionEdges* edges, float value);
-
-/**
- * @brief Gets the top edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of top edge to the corresponding edge of parent container, in vp.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PositionEdges_GetTop(ArkUI_PositionEdges* edges, float* value);
-
-/**
- * @brief Sets the left edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of left edge to the corresponding edge of parent container, in vp.
- * @since 21
- */
-void OH_ArkUI_PositionEdges_SetLeft(ArkUI_PositionEdges* edges, float value);
-
-/**
- * @brief Gets the left edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of left edge to the corresponding edge of parent container, in vp.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PositionEdges_GetLeft(ArkUI_PositionEdges* edges, float* value);
-
-/**
- * @brief Sets the bottom edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
- * @since 21
- */
-void OH_ArkUI_PositionEdges_SetBottom(ArkUI_PositionEdges* edges, float value);
-
-/**
- * @brief Gets the bottom edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PositionEdges_GetBottom(ArkUI_PositionEdges* edges, float* value);
-
-/**
- * @brief Sets the right edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of right edge to the corresponding edge of parent container, in vp.
- * @since 21
- */
-void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value);
-
-/**
- * @brief Gets the right edge of an edge object for position attribute.
- *
- * @param edges Pointer to the edge object.
- * @param value The distance of right edge to the corresponding edge of parent container, in vp.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value);
-
-/**
  * @brief Expand the swipe action.
  *
  * @param node List Item node.
@@ -5339,106 +3830,6 @@ int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListIte
  * @since 21
  */
 int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node);
-
-/**
- * @brief Create a policy object for PixelRound attribute.
- *
- * @return A pointer to the policy object.
- * @since 21
- */
-ArkUI_PixelRoundPolicy* OH_ArkUI_PixelRoundPolicy_Create();
-
-/**
- * @brief Dispose a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object to be disposed.
- * @since 21
- */
-void OH_ArkUI_PixelRoundPolicy_Dispose(ArkUI_PixelRoundPolicy* policy);
-
-/**
- * @brief Sets the top edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of top edge.
- * @since 21
- */
-void OH_ArkUI_PixelRoundPolicy_SetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
-
-/**
- * @brief Gets the top edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of top edge.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PixelRoundPolicy_GetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
-
-/**
- * @brief Sets the start edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of start edge.
- * @since 21
- */
-void OH_ArkUI_PixelRoundPolicy_SetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
-
-/**
- * @brief Gets the start edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of start edge.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PixelRoundPolicy_GetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
-
-/**
- * @brief Sets the bottom edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of bottom edge.
- * @since 21
- */
-void OH_ArkUI_PixelRoundPolicy_SetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
-
-/**
- * @brief Gets the bottom edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of bottom edge.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PixelRoundPolicy_GetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
-
-/**
- * @brief Sets the end edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of end edge.
- * @since 21
- */
-void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
-
-/**
- * @brief Gets the end edge of a policy object for PixelRound attribute.
- *
- * @param edges Pointer to the policy object.
- * @param value The CalcPolicy of end edge.
- * @return Returns the result code.
- *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
- * @since 21
- */
-int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
 
 /**
  * @brief Create selection options.

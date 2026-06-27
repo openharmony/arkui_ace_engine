@@ -51,6 +51,7 @@
 #endif
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1553,12 +1554,24 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
-    // recognize gesture as click if touch up position is close to last touch down position
+    // Treat the gesture as a click iff the finger stays inside the item bounds during the whole touch
+    // sequence (down/move/up). This mirrors ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu closes" share the same hit criterion, instead of the old down->up straight-line distance check
+    // which is stricter than onClick and caused the menu not to close on an in-bounds swipe before lift-up.
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
+        movedOutOfRegion_ = false;
+    } else if (touchType == TouchType::MOVE) {
+        // mirror ClickRecognizer: once the finger leaves the item bounds, it is no longer a click
+        if (!movedOutOfRegion_ &&
+            !MenuPattern::IsOffsetInNodeBounds(GetHost(), touches.front().GetLocalLocation())) {
+            movedOutOfRegion_ = true;
+        }
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = touches.front().GetLocalLocation();
-        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+        bool isClick = lastTouchOffset_ && !movedOutOfRegion_ &&
+            MenuPattern::IsOffsetInNodeBounds(GetHost(), touchUpOffset);
+        if (isClick) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
             }
@@ -1568,6 +1581,7 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
             }
         }
         lastTouchOffset_.reset();
+        movedOutOfRegion_ = false;
     }
 }
 
@@ -2571,6 +2585,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     textProperty->UpdateEnableSmallLanguageTruncation(true);
+    textProperty->UpdatePunctuationOverflow(true);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);
@@ -3813,10 +3828,9 @@ void MenuItemPattern::UpdateOptionStyle()
     CHECK_NULL_VOID(menuPattern);
     auto selectNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(selectNode);
-    auto selectPattern = selectNode->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(selectPattern);
     auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(selectPaintProperty);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
     if (isSelected_) {
         if (SystemProperties::ConfigChangePerform()) {
             ApplySelectedThemeStyles(selectPaintProperty, menuNode);
@@ -3826,7 +3840,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
-        selectPattern->UpdateSelectedOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateSelectedOptionFontFromPattern(menuNode, host);
+        }
     } else {
         if (SystemProperties::ConfigChangePerform()) {
             ApplyOptionThemeStyles(selectPaintProperty);
@@ -3836,7 +3852,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
-        selectPattern->UpdateOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateOptionFontFromPattern(menuNode, host);
+        }
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

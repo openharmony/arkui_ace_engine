@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BADGE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", BADGE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+        BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     CreateByFrameNode(frameNode, badgeParameters);
@@ -38,7 +38,7 @@ RefPtr<FrameNode> BadgeModelNG::CreateBadgeFrameNode()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+        BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
     return frameNode;
 }
@@ -94,6 +94,73 @@ void BadgeModelNG::CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgePa
     if (SystemProperties::ConfigChangePerform()) {
         CreateWithResourceObj(frameNode, badgeParameters);
         CreateWithResourceObjFlag(frameNode, badgeParameters);
+    }
+}
+
+void BadgeModelNG::CreateModel(BadgeParameters& badgeParameters, bool isDefaultFontSize, bool isDefaultBadgeSize)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", BADGE_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    CreateJSBadgeByFrameNode(frameNode, badgeParameters, isDefaultFontSize, isDefaultBadgeSize);
+}
+
+void BadgeModelNG::CreateJSBadgeByFrameNode(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters,
+    bool isDefaultFontSize, bool isDefaultBadgeSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsDefault(isDefaultFontSize, isDefaultBadgeSize);
+
+    if (badgeParameters.badgeValue.has_value()) {
+        layoutProperty->UpdateBadgeValue(badgeParameters.badgeValue.value());
+    }
+    if (badgeParameters.badgeCount.has_value()) {
+        layoutProperty->UpdateBadgeCount(badgeParameters.badgeCount.value());
+    }
+    if (badgeParameters.badgeMaxCount.has_value()) {
+        layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
+    } else {
+        layoutProperty->UpdateBadgeMaxCount(badgeTheme->GetMaxCount());
+    }
+
+    if (badgeParameters.badgePosition.has_value()) {
+        auto badgePosition = static_cast<BadgePosition>(badgeParameters.badgePosition.value());
+        layoutProperty->UpdateBadgePosition(badgePosition);
+    } else {
+        layoutProperty->UpdateBadgePosition(badgeTheme->GetBadgePosition());
+    }
+    if (badgeParameters.badgePositionX.has_value()) {
+        layoutProperty->UpdateBadgePositionX(badgeParameters.badgePositionX.value());
+    } else {
+        layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionX.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_X, frameNode);
+    if (badgeParameters.badgePositionY.has_value()) {
+        layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
+    } else {
+        layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionY.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_Y, frameNode);
+    if (badgeParameters.isPositionXy.has_value()) {
+        layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
+    } else {
+        layoutProperty->UpdateIsPositionXy(badgeTheme->GetIsPositionXy());
+    }
+    UpdateBadgeStyle(badgeParameters, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateWithResObj(frameNode, badgeParameters);
     }
 }
 
@@ -174,7 +241,7 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
 
 RefPtr<FrameNode> BadgeModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::BADGE_ETS_TAG, nodeId, AceType::MakeRefPtr<BadgePattern>());
+    auto frameNode = FrameNode::CreateFrameNode(BADGE_ETS_TAG, nodeId, AceType::MakeRefPtr<BadgePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     return frameNode;
 }
@@ -230,6 +297,41 @@ void BadgeModelNG::SetBadgeParam(
         layoutProperty->UpdateIsPositionXy(badgeTheme->GetIsPositionXy());
     }
     UpdateBadgeStyle(badgeParameters, AceType::Claim(frameNode));
+}
+
+void BadgeModelNG::CreateWithResObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    auto badgePattern = frameNode->GetPattern<BadgePattern>();
+    CHECK_NULL_VOID(badgePattern);
+    ProcessBadgeValueStatic(badgePattern, badgeParameters.resourceBadgeValueObject);
+    ProcessBadgeTextColorStatic(badgePattern, badgeParameters.resourceColorObject, frameNode);
+    ProcessBadgeColorStatic(badgePattern, badgeParameters.resourceBadgeColorObject, frameNode);
+    ProcessBorderColorStatic(badgePattern, badgeParameters.resourceBorderColorObject, frameNode);
+    ProcessOuterBorderColorStatic(badgePattern, badgeParameters.resourceOuterBorderColorObject);
+    ProcessFontWeightStatic(badgePattern, badgeParameters.resourceFontWeightObject);
+    ProcessFontSizeStatic(badgePattern, badgeParameters.resourceFontSizeObject);
+    ProcessBadgeSizeStatic(badgePattern, badgeParameters.resourceBadgeSizeObject);
+    ProcessBadgePositionXStatic(badgePattern, badgeParameters.resourceBadgePositionXObject);
+    ProcessBadgePositionYStatic(badgePattern, badgeParameters.resourceBadgePositionYObject);
+    ProcessBorderWidthStatic(badgePattern, badgeParameters.resourceBorderWidthObject);
+    ProcessOuterBorderWidthStatic(badgePattern, badgeParameters.resourceOuterBorderWidthObject);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateBadgePositionXByuser(badgeParameters.badgePositionXByUser);
+    layoutProperty->UpdateBadgePositionYByuser(badgeParameters.badgePositionYByUser);
+    layoutProperty->UpdateBadgeTextColorByuser(badgeParameters.badgeTextColorByUser);
+    layoutProperty->UpdateBadgeFontSizeByuser(badgeParameters.badgeFontSizeByUser);
+    layoutProperty->UpdateBadgeCircleSizeByuser(badgeParameters.badgeCircleSizeByUser);
+    layoutProperty->UpdateBadgeColorByuser(badgeParameters.badgeColorByUser);
+    layoutProperty->UpdateBadgeBorderWidthByuser(badgeParameters.badgeBorderWidthByUser);
+    layoutProperty->UpdateBadgeBorderColorByuser(badgeParameters.badgeBorderColorByUser);
+    layoutProperty->UpdateBadgeOuterBorderWidthByuser(badgeParameters.badgeOuterBorderWidthByUser);
+    layoutProperty->UpdateBadgeOuterBorderColorByuser(badgeParameters.badgeOuterBorderColorByUser);
 }
 
 void BadgeModelNG::CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters)
@@ -537,6 +639,300 @@ void BadgeModelNG::ProcessBorderWidth(const RefPtr<BadgePattern>& pattern, const
 }
 
 void BadgeModelNG::ProcessOuterBorderWidth(
+    const RefPtr<BadgePattern>& pattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    pattern->RemoveResObj("badge.outerBorderWidth");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            auto pipeline = pattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            CHECK_NULL_VOID(badgeTheme);
+            result = badgeTheme->GetBadgeOuterBorderWidth();
+        }
+        pattern->UpdateOuterBorderWidth(result, isFirstLoad);
+    };
+    pattern->AddResObj("badge.outerBorderWidth", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgeValueStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    const std::string key = "badge.badgeValue";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        std::string badgeValue;
+        ResourceParseUtils::ParseResString(resObj, badgeValue);
+        badgePattern->UpdateBadgeValue(badgeValue, isFirstLoad);
+    };
+    badgePattern->AddResObj(key, resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgeTextColorStatic(const RefPtr<BadgePattern>& badgePattern,
+    RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const std::string key = "badge.textColor";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        bool state = ResourceParseUtils::ParseResColor(resObj, result);
+        if (!state) {
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
+            result = badgeTheme->GetBadgeTextColor();
+        }
+        badgePattern->UpdateColor(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.textColor", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgeColorStatic(const RefPtr<BadgePattern>& badgePattern,
+    RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const std::string key = "badge.Color";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        bool state = ResourceParseUtils::ParseResColor(resObj, result);
+        if (!state) {
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
+            result = badgeTheme->GetBadgeColor();
+        }
+        badgePattern->UpdateBadgeColor(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.Color", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBorderColorStatic(const RefPtr<BadgePattern>& badgePattern,
+    RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const std::string key = "badge.BorderColor";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weakPattern = AceType::WeakClaim(AceType::RawPtr(badgePattern)),
+                          weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        bool state = ResourceParseUtils::ParseResColor(resObj, result);
+        if (!state) {
+            auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
+            result = badgeTheme->GetBadgeBorderColor();
+        }
+        badgePattern->UpdateBorderColor(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.BorderColor", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessOuterBorderColorStatic(
+    const RefPtr<BadgePattern>& badgePattern, RefPtr<ResourceObject>& resourceObject)
+{
+    const std::string key = "badge.outerBorderColor";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        Color result;
+        bool state = ResourceParseUtils::ParseResColor(resObj, result);
+        if (!state) {
+            auto pipeline = badgePattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgeOuterBorderColor();
+        }
+        badgePattern->UpdateOuterBorderColor(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.outerBorderColor", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessFontWeightStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    const std::string key = "badge.FontWeight";
+    badgePattern->RemoveResObj(key);
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        std::optional<FontWeight> badgeFontWeight;
+        std::string result;
+        ResourceParseUtils::ParseResString(resObj, result);
+        badgeFontWeight = Framework::ConvertStrToFontWeight(result);
+        badgePattern->UpdateFontWeight(
+            badgeFontWeight.has_value() ? badgeFontWeight.value() : FontWeight::NORMAL, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.FontWeight", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessFontSizeStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    badgePattern->RemoveResObj("badge.FontSize");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        bool isDefaultFontSize = true;
+        CalcDimension result;
+        bool state = ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
+        if (state && result.IsNonNegative() && result.Unit() != DimensionUnit::PERCENT) {
+            isDefaultFontSize = false;
+        } else {
+            auto pipeline = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgeFontSize();
+        }
+        badgePattern->UpdateFontSize(result, isDefaultFontSize, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.FontSize", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgeSizeStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    badgePattern->RemoveResObj("badge.CircleSize");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        CalcDimension result;
+        bool isDefaultBadgeSize = true;
+        bool state = ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
+        if (state && result.IsNonNegative() && result.Unit() != DimensionUnit::PERCENT) {
+            isDefaultBadgeSize = false;
+        } else {
+            auto pipeline = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgeCircleSize();
+        }
+        badgePattern->UpdateBadgeCircleSize(result, isDefaultBadgeSize, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.CircleSize", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgePositionXStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    badgePattern->RemoveResObj("badge.positionX");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgePositionX();
+        }
+        badgePattern->UpdateBadgePositionX(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.positionX", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBadgePositionYStatic(
+    const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    badgePattern->RemoveResObj("badge.positionY");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(badgePattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto badgePattern = weak.Upgrade();
+        CHECK_NULL_VOID(badgePattern);
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgePositionY();
+        }
+        badgePattern->UpdateBadgePositionY(result, isFirstLoad);
+    };
+    badgePattern->AddResObj("badge.positionY", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessBorderWidthStatic(
+    const RefPtr<BadgePattern>& pattern, const RefPtr<ResourceObject>& resourceObject)
+{
+    pattern->RemoveResObj("badge.borderWidth");
+    if (!resourceObject) {
+        return;
+    }
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                          const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        CalcDimension result;
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+            result = badgeTheme->GetBadgeBorderWidth();
+        }
+        pattern->UpdateBorderWidth(result, isFirstLoad);
+    };
+    pattern->AddResObj("badge.borderWidth", resourceObject, std::move(updateFunc));
+}
+
+void BadgeModelNG::ProcessOuterBorderWidthStatic(
     const RefPtr<BadgePattern>& pattern, const RefPtr<ResourceObject>& resourceObject)
 {
     pattern->RemoveResObj("badge.outerBorderWidth");

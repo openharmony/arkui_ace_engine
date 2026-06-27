@@ -22,13 +22,13 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class PickerIndicatorType { BACKGROUND = 0, DIVIDER };
 static const char* INDICATOR_TYPE_VALUE[] = { "PickerIndicatorType.BACKGROUND", "PickerIndicatorType.DIVIDER" };

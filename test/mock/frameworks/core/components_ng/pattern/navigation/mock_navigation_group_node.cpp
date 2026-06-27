@@ -116,7 +116,23 @@ const RefPtr<UINode>& NavigationGroupNode::GetNavBarOrHomeDestinationNode() cons
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
 {
-    (void)uiNode;
+    if (!uiNode) {
+        return nullptr;
+    }
+    while (uiNode) {
+        if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            return uiNode;
+        }
+        if (AceType::DynamicCast<UINode>(uiNode)) {
+            auto children = uiNode->GetChildren();
+            if (children.empty()) {
+                break;
+            }
+            uiNode = children.front();
+            continue;
+        }
+        break;
+    }
     return nullptr;
 }
 } // namespace OHOS::Ace::NG

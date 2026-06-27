@@ -18,7 +18,7 @@
 #include "interfaces/native/node/node_model.h"
 
 #include "core/components/list/list_theme.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/interfaces/native/node/node_arc_list_modifier.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -803,62 +803,6 @@ void ResetListFlingSpeedLimit(ArkUINodeHandle node)
     ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
 }
 
-void SetDigitalCrownSensitivity(ArkUINodeHandle node, ArkUI_Int32 sensitivity)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<CrownSensitivity>(sensitivity));
-#endif
-}
-
-ArkUI_Int32 GetDigitalCrownSensitivity(ArkUINodeHandle node)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, static_cast<ArkUI_Int32>(CrownSensitivity::MEDIUM));
-    return static_cast<ArkUI_Int32>(ListModelNG::GetDigitalCrownSensitivity(frameNode));
-#else
-    return static_cast<ArkUI_Int32>(CrownSensitivity::MEDIUM);
-#endif
-}
-
-void ResetDigitalCrownSensitivity(ArkUINodeHandle node)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity::MEDIUM);
-#endif
-}
-
-void SetArcListHeader(ArkUINodeHandle node, ArkUINodeHandle header)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto* headerNode = reinterpret_cast<FrameNode*>(header);
-    CHECK_NULL_VOID(headerNode);
-    ListModelNG::SetHeader(frameNode, headerNode);
-}
-
-ArkUINodeHandle GetArcListHeader(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto header = pattern->GetHeader();
-    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(header));
-}
-
-void ResetArcListHeader(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ArcListPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetHeader();
-}
 
 ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
 {
@@ -1317,12 +1261,6 @@ const ArkUIListModifier* GetListModifier()
         .setBackPressCloseSwipeAction = SetBackPressCloseSwipeAction,
         .resetBackPressCloseSwipeAction = ResetBackPressCloseSwipeAction,
         .getBackPressCloseSwipeAction = GetBackPressCloseSwipeAction,
-        .setDigitalCrownSensitivity = SetDigitalCrownSensitivity,
-        .getDigitalCrownSensitivity = GetDigitalCrownSensitivity,
-        .resetDigitalCrownSensitivity = ResetDigitalCrownSensitivity,
-        .setArcListHeader = SetArcListHeader,
-        .getArcListHeader = GetArcListHeader,
-        .resetArcListHeader = ResetArcListHeader,
         .getChainAnimation = GetChainAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

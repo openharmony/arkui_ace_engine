@@ -22,7 +22,6 @@
 
 #include "base/utils/noncopyable.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/common/container_consts.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"

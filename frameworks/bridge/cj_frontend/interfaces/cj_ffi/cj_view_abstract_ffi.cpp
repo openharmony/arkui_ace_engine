@@ -29,6 +29,7 @@
 #include "pixel_map_impl.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/common/color_inverter.h"
+#include "core/components/theme/resource_adapter.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -2804,8 +2805,13 @@ void ParseSheetStyleV2(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
 void ParseSheetTitle(
     NativeOptionCallBack title, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
-    sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = title.hasValue ? CJLambda::Create(title.value) : ([]() -> void {});
+    if (title.hasValue) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = CJLambda::Create(title.value);
+    } else if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = ([]() -> void {});
+    }
 }
 
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)

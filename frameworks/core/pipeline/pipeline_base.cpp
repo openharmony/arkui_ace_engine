@@ -43,6 +43,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/container_window_manager.h"
@@ -1109,6 +1110,13 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
 {
     jsFormVsyncCallbacks_.erase(subWindowId);
+}
+
+void PipelineBase::NotifyWindowAttachStateChange(bool status)
+{
+    if (window_) {
+        window_->NotifyWindowAttachStateChange(status);
+    }
 }
 
 bool PipelineBase::MaybeRelease()

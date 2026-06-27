@@ -25,6 +25,10 @@
 
 namespace OHOS::Ace::NG {
 
+using DepthComponentCompleteEventFunc = std::function<void(const DepthComponentCompleteEvent&)>;
+using DepthComponentErrorEventFunc = std::function<void(const DepthComponentErrorEvent&)>;
+using DepthMapErrorEventFunc = std::function<void(int32_t, const std::string&)>;
+
 class DepthComponentEventHub : public EventHub {
     DECLARE_ACE_TYPE(DepthComponentEventHub, EventHub);
 
@@ -32,6 +36,62 @@ public:
     DepthComponentEventHub() = default;
     ~DepthComponentEventHub() override = default;
     ACE_DISALLOW_COPY_AND_MOVE(DepthComponentEventHub);
+
+    void SetOnComplete(DepthComponentCompleteEventFunc&& onComplete)
+    {
+        onComplete_ = std::move(onComplete);
+    }
+
+    const DepthComponentCompleteEventFunc& GetOnComplete() const
+    {
+        return onComplete_;
+    }
+
+    void FireCompleteEvent(const DepthComponentCompleteEvent& event) const
+    {
+        if (onComplete_) {
+            onComplete_(event);
+        }
+    }
+
+    void SetOnError(DepthComponentErrorEventFunc&& onError)
+    {
+        onError_ = std::move(onError);
+    }
+
+    const DepthComponentErrorEventFunc& GetOnError() const
+    {
+        return onError_;
+    }
+
+    void FireErrorEvent(const DepthComponentErrorEvent& event) const
+    {
+        if (onError_) {
+            onError_(event);
+        }
+    }
+
+    void SetOnDepthMapError(DepthMapErrorEventFunc&& onDepthMapError)
+    {
+        onDepthMapError_ = std::move(onDepthMapError);
+    }
+
+    const DepthMapErrorEventFunc& GetOnDepthMapError() const
+    {
+        return onDepthMapError_;
+    }
+
+    void FireDepthMapErrorEvent(int32_t errorCode, const std::string& errorMessage) const
+    {
+        if (onDepthMapError_) {
+            onDepthMapError_(errorCode, errorMessage);
+        }
+    }
+
+private:
+    DepthComponentCompleteEventFunc onComplete_;
+    DepthComponentErrorEventFunc onError_;
+    DepthMapErrorEventFunc onDepthMapError_;
 };
 
 } // namespace OHOS::Ace::NG

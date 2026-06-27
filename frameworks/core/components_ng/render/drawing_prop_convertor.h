@@ -20,7 +20,6 @@
 #include "base/geometry/ng/point_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "ui/properties/linear_color.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -30,6 +29,7 @@ namespace OHOS::Ace {
 enum class EllipsisMode : int;
 enum class FontWeight : int;
 enum class WordBreak : int;
+class LinearColor;
 class TextStyle;
 
 ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);

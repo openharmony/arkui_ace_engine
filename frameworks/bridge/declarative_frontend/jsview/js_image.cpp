@@ -333,6 +333,14 @@ void JSImage::Create(const JSCallbackInfo& info)
     CreateImage(info);
 }
 
+void JSImage::CreateImageSpan(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    CreateImage(info, true);
+}
+
 void JSImage::CheckIsCard(std::string& src, const JSRef<JSVal>& imageInfo)
 {
     bool isCard = false;
@@ -1168,6 +1176,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::Declare("Image");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSImage>::StaticMethod("create", &JSImage::Create, opt);
+    JSClass<JSImage>::StaticMethod("createImageSpan", &JSImage::CreateImageSpan, opt);
     JSClass<JSImage>::StaticMethod("alt", &JSImage::SetAlt, opt);
     JSClass<JSImage>::StaticMethod("objectFit", &JSImage::SetObjectFit, opt);
     JSClass<JSImage>::StaticMethod("imageMatrix", &JSImage::SetImageMatrix, opt);

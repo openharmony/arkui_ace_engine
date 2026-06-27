@@ -101,4 +101,9 @@ void FocusHub::RemoveSelf(BlurReason reason)
     (void)reason;
 }
 
+void FocusHub::SetFocusType(FocusType type)
+{
+    focusType_ = type;
+}
+
 } // namespace OHOS::Ace::NG

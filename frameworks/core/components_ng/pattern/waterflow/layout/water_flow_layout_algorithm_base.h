@@ -36,6 +36,21 @@ public:
         canOverScrollEnd_ = canOverScroll;
     }
 
+    void SetContentClipMode(ContentClipMode mode)
+    {
+        contentClipMode_ = mode;
+    }
+
+    void SetContentClipShape(const RefPtr<ShapeRect>& shape)
+    {
+        clipShapeRect_ = shape;
+    }
+
+    void SetContentClipSafeAreaPad(const std::optional<ExpandEdges>& safeAreaPad)
+    {
+        safeAreaPad_ = safeAreaPad;
+    }
+
     virtual void StartCacheLayout()
     { /* callback when cache layout starts */
     }
@@ -85,6 +100,12 @@ protected:
     void GetExpandArea(
         const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const RefPtr<WaterFlowLayoutInfoBase>& info);
 
+    void CalculateContentClipFixOffset(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info);
+
+    ViewPosReference CreateLazyChildViewPosReference(const RefPtr<WaterFlowLayoutInfoBase>& info, float mainSize,
+        float referencePos, ReferenceEdge referenceEdge, Axis axis, std::optional<int64_t> deadline,
+        bool useInfinityWhenPositionCalc) const;
+
     bool CheckNeedLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool isCache) const
     {
         return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_ ||
@@ -110,6 +131,9 @@ protected:
     void CalcContentOffset(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, float mainSize);
 
     bool syncLoad_ = false;
+    ContentClipMode contentClipMode_ = ContentClipMode::CONTENT_ONLY;
+    RefPtr<ShapeRect> clipShapeRect_;
+    std::optional<ExpandEdges> safeAreaPad_;
 
 private:
     /**
@@ -123,6 +147,7 @@ private:
     static std::list<int32_t> GeneratePreloadList(
         const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount, bool force);
     static void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    void PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper) const;
 
     bool expandSafeArea_ = false;
 };

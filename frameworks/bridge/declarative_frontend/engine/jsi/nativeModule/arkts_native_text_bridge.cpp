@@ -2533,28 +2533,32 @@ ArkUINativeModuleValue TextBridge::SetTailIndents(ArkUIRuntimeCallInfo* runtimeC
         auto array = Local<panda::ArrayRef>(secondArg);
         auto length = ArkTSUtils::GetArrayLength(vm, array);
         NG::TailIndentsArray indentsArray;
+        indentsArray.reserve(length);
         for (uint32_t i = 0; i < length; i++) {
             auto element = panda::ArrayRef::GetValueAt(vm, array, i);
             CalcDimension dimension;
             RefPtr<ResourceObject> resObj;
-            if (ArkTSUtils::ParseJsLengthMetrics(vm, element, dimension, resObj) ||
-                ArkTSUtils::ParseJsDimensionFpNG(vm, element, dimension, resObj)) {
-                indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            } else {
+            if (!ArkTSUtils::ParseJsLengthMetrics(vm, element, dimension, resObj) &&
+                !ArkTSUtils::ParseJsDimensionFpNG(vm, element, dimension, resObj)) {
                 dimension.Reset();
-                indentsArray.emplace_back(dimension);
+            } else if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+                dimension.Reset();
             }
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
         }
-        tailIndents.indentsArray = indentsArray;
+        tailIndents.indentsArray = std::move(indentsArray);
     } else {
         CalcDimension dimension;
         RefPtr<ResourceObject> resObj;
-        if (ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, dimension, resObj) ||
-            ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, dimension, resObj)) {
-            NG::TailIndentsArray indentsArray;
-            indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            tailIndents.indentsArray = indentsArray;
+        if (!ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, dimension, resObj) &&
+            !ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, dimension, resObj)) {
+            dimension.Reset();
+        } else if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+            dimension.Reset();
         }
+        NG::TailIndentsArray indentsArray;
+        indentsArray.emplace_back(static_cast<Dimension>(dimension));
+        tailIndents.indentsArray = std::move(indentsArray);
     }
 
     TextModelNG::SetTailIndents(frameNode, tailIndents);

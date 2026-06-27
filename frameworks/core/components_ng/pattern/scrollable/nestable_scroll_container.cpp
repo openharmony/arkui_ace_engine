@@ -46,7 +46,7 @@ RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
     return nullptr;
 }
 
-void NestableScrollContainer::UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll)
+ACE_FORCE_EXPORT void NestableScrollContainer::UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll)
 {
     if (!childNestedScroll_) {
         childNestedScroll_ = std::make_unique<NestedScrollOptions>();
@@ -76,7 +76,7 @@ void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedS
     nestedScroll_ = nestedScroll;
 }
 
-void NestableScrollContainer::SetParentScrollable()
+ACE_FORCE_EXPORT void NestableScrollContainer::SetParentScrollable()
 {
     parent_ = SearchParent();
     auto parent = parent_.Upgrade();

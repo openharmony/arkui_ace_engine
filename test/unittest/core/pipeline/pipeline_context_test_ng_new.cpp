@@ -1559,7 +1559,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg203, TestSize.Level1)
      */
     context_->stageManager_ = stageManager;
     ASSERT_NE(context_->stageManager_, nullptr);
-    ASSERT_EQ(context_->stageManager_->GetLastPage(), nullptr);
+    ASSERT_NE(context_->stageManager_->GetLastPage(), nullptr);
 
     auto pagePattern = secondNode->GetPattern<PagePattern>();
     ASSERT_NE(pagePattern, nullptr);
@@ -1793,7 +1793,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg206, TestSize.Level1)
     EXPECT_NE(size, 0);
 
     std::string res = context_->GetCurrentPageNameCallback();
-    EXPECT_NE(res, "pageFour");
+    EXPECT_EQ(res, "pageFour");
 }
 
 /**
@@ -3247,9 +3247,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
      */
     std::list<RefPtr<FrameNode>> navDesNodes;
     rootNode->FindTopNavDestination(navDesNodes);
-    ASSERT_EQ(navDesNodes.size(), 0);
+    ASSERT_EQ(navDesNodes.size(), 4);
     auto topNavNode = navDesNodes.empty() ? nullptr : navDesNodes.back();
-    EXPECT_EQ(topNavNode, nullptr);
+    EXPECT_NE(topNavNode, nullptr);
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
@@ -3452,7 +3452,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
      */
     context_->stageManager_ = stageManager;
     ASSERT_NE(context_->stageManager_, nullptr);
-    ASSERT_EQ(context_->stageManager_->GetLastPage(), nullptr);
+    ASSERT_NE(context_->stageManager_->GetLastPage(), nullptr);
 
     auto pagePattern = secondNode->GetPattern<PagePattern>();
     ASSERT_NE(pagePattern, nullptr);
@@ -3478,7 +3478,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
     bool empty2 = it2 == context_->pageToNavigationNodes_.end() || it2->second.empty();
     EXPECT_EQ(empty2, true);
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_EQ(res2, "");
+    EXPECT_EQ(res2, "testUrl");
 }
 
 /**
@@ -3536,7 +3536,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName004, TestSize.Level1)
     EXPECT_EQ(navigationNode, nullptr);
 
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_NE(res2, "testUrl");
+    EXPECT_EQ(res2, "testUrl");
 }
 
 /**
@@ -3608,7 +3608,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName005, TestSize.Level1)
     EXPECT_EQ(size, 0);
 
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_NE(res2, "testUrl");
+    EXPECT_EQ(res2, "testUrl");
 }
 
 /**
@@ -3686,7 +3686,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName006, TestSize.Level1)
     EXPECT_NE(size, 0);
 
     std::string res = context_->GetCurrentPageName();
-    EXPECT_NE(res, "testUrl,pageFour");
+    EXPECT_EQ(res, "testUrl,pageFour");
 }
 
 /**

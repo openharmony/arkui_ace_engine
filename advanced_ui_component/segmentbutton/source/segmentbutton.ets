@@ -828,7 +828,6 @@ struct SegmentButtonItemArrayComponent {
   @ObjectLink @Watch('onOptionsArrayChange') optionsArray: SegmentButtonItemOptionsArray
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link selectedIndexes: number[]
-  @Link componentSize: SizeOptions
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
   @Consume positionTrigger: number
@@ -1281,9 +1280,6 @@ struct SegmentButtonItemArrayComponent {
       .direction(this.options.direction)
       .focusScopeId(this.groupId, true)
       .padding(this.options.componentPadding)
-      .onSizeChange((_, newValue) => {
-        this.componentSize = { width: newValue.width, height: newValue.height }
-      })
     }
   }
 
@@ -1318,7 +1314,6 @@ export struct SegmentButton {
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
   @Prop maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
-  @State componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
   }, (_: Object, index): LocalizedBorderRadiuses => {
@@ -1352,6 +1347,7 @@ export struct SegmentButton {
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
   private isGestureInProgress: boolean = false;
+  private swipeHandled: boolean = false;
   private isCustomizedCache?: boolean;
   @Provide openSelectedItemSystemMaterial?: boolean = false;
   @Provide selectedItemScale?: ScaleOptions = undefined;
@@ -1559,11 +1555,14 @@ export struct SegmentButton {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
-    return getBackgroundBorderRadius(this.options, this.componentSize.height as number / 2);
+    return getBackgroundBorderRadius(this.options, this.layoutAlgorithm.refSize.height / 2);
   }
 
   private getButtonSystemMaterial(): uiMaterial.Material | undefined {
     if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    if (this.layoutAlgorithm.refSize.height === 0) {
       return undefined;
     }
     return this.options.backgroundSystemMaterial;
@@ -1605,7 +1604,7 @@ export struct SegmentButton {
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(getBackgroundBorderRadius(
               this.options,
-              this.componentSize.height as number / 2
+              this.layoutAlgorithm.refSize.height / 2
             ))
             .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
             .borderWidth(this.options.backgroundSystemMaterial ? undefined
@@ -1613,6 +1612,7 @@ export struct SegmentButton {
             .borderColor(this.options.backgroundSystemMaterial ? undefined
               : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
             .systemMaterial(this.options.backgroundSystemMaterial)
+            .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
           }
           Stack() {
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1634,12 +1634,12 @@ export struct SegmentButton {
           .animation({ duration: 0 })
           .borderRadius(getBackgroundBorderRadius(
             this.options,
-            this.componentSize.height as number / 2
+            this.layoutAlgorithm.refSize.height / 2
           ))
           .translate({ x: this.selectedItemOffsetX })
+          .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
 
           SegmentButtonItemArrayComponent({
-            componentSize: $componentSize,
             pressArray: this.pressArray,
             hoverArray: this.hoverArray,
             hoverColorArray: this.hoverColorArray,
@@ -1685,9 +1685,10 @@ export struct SegmentButton {
     })
     .accessibilityLevel('no')
     .priorityGesture(GestureGroup(GestureMode.Parallel,
-      TapGesture()
+        TapGesture()
         .onAction((event: GestureEvent) => {
-          if (this.isGestureInProgress) {
+          // 拖拽后松手不触发 tap 选中（匹配 V2：非选中项拖拽走 swipe，选中项拖拽走 PanGesture）
+          if (this.isGestureInProgress || this.isPanGestureMoved) {
             return;
           }
           let fingerInfo = event.fingerList.find(Boolean)
@@ -1729,6 +1730,10 @@ export struct SegmentButton {
         }),
       SwipeGesture()
         .onAction((event: GestureEvent) => {
+          // PanGesture 已处理则跳过（Parallel 模式互斥保护）
+          if (this.swipeHandled) {
+            return;
+          }
           if (this.options === void 0 || this.options.buttons === void 0 ||
             event.sourceTool === SourceTool.TOUCHPAD) {
             return
@@ -1756,11 +1761,13 @@ export struct SegmentButton {
           if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
             this.buttonItemsSize.length) - 1) {
             // Move to next
+            this.swipeHandled = true; // 标记已处理，PanGesture 将跳过
             this.doSelectedChangeAnimate = true
             this.selectedIndexes[0] = this.selectedIndexes[0] + 1
             this.doSelectedChangeAnimate = false
           } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
             // Move to previous
+            this.swipeHandled = true; // 标记已处理，PanGesture 将跳过
             this.doSelectedChangeAnimate = true
             this.selectedIndexes[0] = this.selectedIndexes[0] - 1
             this.doSelectedChangeAnimate = false
@@ -1833,6 +1840,7 @@ export struct SegmentButton {
       PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event: GestureEvent) => {
           this.isGestureInProgress = true;
+          this.swipeHandled = false; // 每次触摸开始时重置标志位
           if (this.options === void 0 || this.options.buttons === void 0) {
             return
           }
@@ -1941,6 +1949,54 @@ export struct SegmentButton {
           if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
             fingerInfo.globalY)) {
             this.isPanGestureMoved = true
+          }
+
+          // 非选中项起始的拖拽/swipe：匹配 V2 的 relative ±1 行为
+          if (!this.isCurrentPositionSelected) {
+            // SwipeGesture 已处理则跳过（Parallel 模式互斥保护）
+            if (this.swipeHandled) {
+              animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                this.zoomScaleArray[this.selectedIndexes[0]] = 1
+              })
+              this.isCurrentPositionSelected = false;
+              return;
+            }
+            this.swipeHandled = true; // 标记已处理，SwipeGesture 将跳过
+
+            if (this.isMouseWheelScroll(event)) {
+              let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
+              this.doSelectedChangeAnimate = true
+
+              // Reverse mouse wheel direction in mirrored layout
+              let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+              let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+
+              if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
+                this.selectedIndexes[0] -= 1;
+              } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options.buttons.length,
+                this.buttonItemsSize.length) - 1) {
+                this.selectedIndexes[0] += 1
+              }
+              this.doSelectedChangeAnimate = false
+            } else {
+              // 按手指移动方向计算 ±1（左滑减1，右滑加1），clamp 到有效范围
+              let deltaIndex = fingerInfo.globalX - this.panGestureStartPoint.x < 0 ? -1 : 1;
+              if (this.isShouldMirror()) {
+                deltaIndex = -deltaIndex;
+              }
+              let newIndex = this.selectedIndexes[0] + deltaIndex;
+              let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+              if (newIndex >= 0 && newIndex < buttonLength) {
+                this.doSelectedChangeAnimate = true; // 触发 springMotion 选中过渡动画
+                this.selectedIndexes[0] = newIndex;
+                this.doSelectedChangeAnimate = false;
+              }
+            }
+            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+              this.zoomScaleArray[this.selectedIndexes[0]] = 1
+            })
+            this.isCurrentPositionSelected = false;
+            return;
           }
 
           if (this.isBackgroundSystemMaterialEnabled()) {
@@ -2190,6 +2246,7 @@ function getBackgroundBorderRadius(options: SegmentButtonOptions, defaultRadius:
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
 
+@ObservedV2
 class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   selectedIndex: number = -1
   componentPadding: number = 0
@@ -2200,6 +2257,7 @@ class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   rowSpace: number = 0
   shouldMirror: boolean = false
   buttonCount: number = 0
+  @Trace refSize: Size = { width: 0, height: 0 }
 
   getButtonX(index: number): number {
     const effectiveIndex = this.shouldMirror ? this.buttonCount - 1 - index : index
@@ -2218,7 +2276,9 @@ class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
       buttonLayer.measure(constraint)
     }
     const refSize: Size = buttonLayer ? buttonLayer.getMeasuredSize() : { width: 0, height: 0 }
-
+    if (this.refSize.width !== refSize.width || this.refSize.height !== refSize.height) {
+      this.refSize = refSize
+    }
     // All buttons use layoutWeight(1) in Row({ space: 1 }) — calculate equal width
     let buttonWidth: number = 0
     if (buttonLayer) {

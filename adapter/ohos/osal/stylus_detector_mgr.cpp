@@ -229,7 +229,7 @@ bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
     return IsHitVisibleResponseArea(point, textFieldPattern->GetVoiceResponseArea(), nanoTimestamp);
 }
 
-bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(const std::string& resourceName, float x, float y)
 {
     if (!IsEnable()) {
         TAG_LOGI(AceLogTag::ACE_STYLUS, "IsNeedInterceptedTouchEventForWeb Stylus service is not enable");
@@ -244,6 +244,7 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
     info.x = x;
     info.y = y;
     info.bundleName = bundleName;
+    info.resourceName = resourceName;
     auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
     nodeId_ = 0;
     sInd_ = -1;

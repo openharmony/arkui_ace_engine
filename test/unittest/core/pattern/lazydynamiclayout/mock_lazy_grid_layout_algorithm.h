@@ -22,7 +22,7 @@
 #ifndef protected
     #define protected public
 #endif
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 

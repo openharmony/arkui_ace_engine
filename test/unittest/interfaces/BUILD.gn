@@ -327,6 +327,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/native_styled_string_descriptor.cpp",
     "$ace_root/interfaces/native/node/swiper_option.cpp",
     "$ace_root/interfaces/native/node/textpicker_option.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_styled_string_impl.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
     "native_node_two_part_test.cpp",
@@ -674,6 +675,7 @@ ohos_unittest("node_transition_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -731,6 +733,7 @@ ohos_unittest("animate_impl_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -788,6 +791,7 @@ ohos_unittest("dialog_model_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -845,6 +849,7 @@ ohos_unittest("node_extened_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -902,6 +907,7 @@ ohos_unittest("node_animate_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -1112,6 +1118,7 @@ ohos_unittest("native_node_extended_error_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -1170,6 +1177,7 @@ ohos_unittest("text_native_impl_error_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -1302,6 +1310,7 @@ ohos_unittest("node_model_safely_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -1429,6 +1438,7 @@ ohos_unittest("event_converter_error_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -1488,6 +1498,7 @@ ohos_unittest("node_utils_error_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",

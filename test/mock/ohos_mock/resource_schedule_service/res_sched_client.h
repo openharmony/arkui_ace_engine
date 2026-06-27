@@ -29,9 +29,9 @@ public:
     static ResSchedClient& GetInstance();
 
     void RegisterEventListener(const sptr<ResSchedEventListener>& eventListener, uint32_t eventType,
-        uint32_t listernGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
+        uint32_t listenerGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
     void UnRegisterEventListener(const sptr<ResSchedEventListener>& eventListener, uint32_t eventType,
-        uint32_t listernGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
+        uint32_t listenerGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
 protected:
     ResSchedClient() = default;
     ~ResSchedClient() = default;

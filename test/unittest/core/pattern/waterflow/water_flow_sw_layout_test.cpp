@@ -2580,6 +2580,34 @@ HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ZeroHeightTrailingActiveRange001
+ * @tc.desc: Trailing zero-height items stay inside the active range when SW reaches the end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ZeroHeightTrailingActiveRange001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    for (int32_t i = 0; i < 12; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f);
+    CreateItemWithHeight(0.0f);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    EXPECT_TRUE(info_->itemEnd_);
+    EXPECT_EQ(info_->endIndex_, 13);
+    EXPECT_EQ(info_->reportEndIndex_, 13);
+    ASSERT_TRUE(GetItem(13));
+    EXPECT_TRUE(GetItem(13)->IsActive());
+}
+
+/**
  * @tc.name: FooterFlashOnScrollToIndex001
  * @tc.desc: Verify targetIndex_ early-return path deactivates stale footer in sliding window layout.
  * @tc.type: FUNC

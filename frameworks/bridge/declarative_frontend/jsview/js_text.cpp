@@ -1947,6 +1947,9 @@ void JSText::SetTailIndents(const JSCallbackInfo& info)
             parsed = ParseJsDimensionFpNG(value, dimension, resObj);
         }
         if (parsed) {
+            if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+                dimension.Reset();
+            }
             indentsArray.emplace_back(static_cast<Dimension>(dimension));
             if (isFirst && resObj) {
                 firstResObj = resObj;

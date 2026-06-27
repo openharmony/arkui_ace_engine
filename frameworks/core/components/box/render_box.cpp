@@ -22,6 +22,7 @@
 #include "core/components/box/box_component_helper.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/list/list_compatible_modifier_helper.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components_v2/inspector/inspector_node.h"
 #include "compatible/components/text_field/render_text_field.h"
 #include "compatible/components/list_v2/render_list.h"

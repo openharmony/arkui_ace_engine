@@ -19,10 +19,10 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class TabBarPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(TabBarPaintProperty, PaintProperty);

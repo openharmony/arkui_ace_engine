@@ -44,11 +44,11 @@ public:
     void OnDragMove(const GestureEvent& info);
     void OnDragEnd(const GestureEvent& info, bool isTextDragEnd = false);
     void onDragCancel();
-    void OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode);
-    void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
-    void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
-    void onItemDragCancel();
-    void DestroyDragWindow();
+    ACE_FORCE_EXPORT void OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode);
+    ACE_FORCE_EXPORT void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
+    ACE_FORCE_EXPORT void OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex, DragType dragType);
+    ACE_FORCE_EXPORT void onItemDragCancel();
+    ACE_FORCE_EXPORT void DestroyDragWindow();
 
 private:
     int64_t id_ = -1;

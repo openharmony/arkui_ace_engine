@@ -700,6 +700,8 @@ struct  ArkUICustomNodeInfo {
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<void(bool, bool)> setActiveFunc;
+    std::function<void()> clearParentReusePoolFunc;
+    std::function<int32_t()> getMemOptFunc;
     std::function<std::string()> onGetJsViewNameFunc;
 };
 struct ArkUIAniCustomNodeModifier {

@@ -272,7 +272,7 @@ ace_unittest("focus_event_handler_test_ng") {
 }
 
 ace_unittest("key_event_test_ng") {
-  module_name = "KeyEvent-UnitTest"
+  module_name = "FocusManager"
   type = "new"
   sources = [ "key_event_test_ng.cpp" ]
 }

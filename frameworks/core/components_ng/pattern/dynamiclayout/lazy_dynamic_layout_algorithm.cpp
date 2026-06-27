@@ -35,9 +35,7 @@ void LazyDynamicLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         float prevMainSize = geometry ? geometry->GetPaddingSize().MainSize(axis_) : 0.0f;
         hasCustomMeasured = customParams_->FireOnMeasureSize(layoutWrapper);
         float adjustOffset = customParams_->GetAdjustedOffset();
-        if (!NearZero(adjustOffset)) {
-            ProcessAdjustOffset(layoutWrapper, adjustOffset, prevMainSize);
-        }
+        ProcessAdjustOffset(layoutWrapper, adjustOffset, prevMainSize);
     }
     if (!hasCustomMeasured) {
         BoxLayoutAlgorithm::Measure(layoutWrapper);

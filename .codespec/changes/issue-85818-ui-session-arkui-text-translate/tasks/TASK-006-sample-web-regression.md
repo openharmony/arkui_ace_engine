@@ -19,12 +19,13 @@
 ### 做什么
 
 1. 在 `ui_session_sample` 新增 dump 命令，触发 `GetPageTranslateText`、`StartPageTranslate`、`EndPageTranslate`、`Reset`、`SendPageTranslateResult`。
-2. dump 参数支持 scope bitmask、nodeId、version、译文、安全摘要输出。
+2. dump 参数支持 scope bitmask、nodeId、version、译文、批量 `results` payload、安全摘要输出。
 3. dump 输出只打印 nodeId、version、长度、scope、requestId、状态，不打印原文/译文。
 4. 增加 Web 回归，确认 `ARKUI_ARKWEB` 继续复用现有 Web 脚本注入提取/回填/Reset，并同时获取 ArkUI 原生文本。
 5. 增加 dump 命令触发 `GetCurrentAbilityLanguageInfo`，输出当前 Ability 实例 `language/region` 和状态。
 6. 补充端到端验证记录模板：真机 dump 命令、预期 hilog、异常恢复场景。
 7. dump 参数校验覆盖未知 scope bit：未知 bit 返回参数错误；`XCOMPONENT`/`CANVAS_NODE` 已知保留 bit 可解析但当前不触发处理。
+8. dump 回填校验覆盖批量发送多个节点、缺失 nodeId/version、`nodeId < 0`、译文为空和全批无合法项返回 `PARAM_INVALID`；`nodeId < 0` empty/no-content 哨兵不得触发译文等待 watchdog。
 
 ### 不做什么
 
@@ -46,6 +47,7 @@
 | WEB-COMPAT | Web 脚本注入路径不回退 |
 | DFX | dump 输出安全摘要 |
 | DATA-MIN | sample SA 只按 `nodeId/text/version` 使用节点 payload |
+| RESULT-VALIDATION | sample dump 必须能触发合法批量结果和非法结果 payload，用于验证 `PARAM_INVALID` 与局部成功语义 |
 | ABILITY-LANGUAGE | sample SA dump 输出 language/region，不依赖页面文本回调 |
 | BUILD-MIN | 编译 ui_session_sample 所属目标、Web 相关回归目标和必要 Uisession 测试目标 |
 
@@ -63,6 +65,7 @@
 - 真机可通过 dump 触发单次获取、Start、End、Reset、回填。
 - 真机可通过 dump 触发当前 Ability language/region 查询，并打印当前实例生效的语言和地区。
 - dump 可以指定 `ARKUI_ONLY`、`ARKWEB_ONLY`、`ARKUI_ARKWEB` 和组合 bitmask；`XCOMPONENT`/`CANVAS_NODE` 作为保留 bit 可解析但当前不触发处理。
+- dump 可以使用同一条 `SendPageTranslateResult` 批量回填多个节点，并能验证非法结果 payload 返回 `PARAM_INVALID`、合法项局部成功、`nodeId < 0` 哨兵不作为合法回填节点。
 - dump 传入未知 scope bit 时返回参数错误，不注册 callback、不触发文本上报。
 - Web 旧接口和统一 `ARKUI_ARKWEB` 都能走现有 Web 翻译路径。
 - 输出不包含原文/译文正文。

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_owner.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
@@ -41,6 +42,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -232,8 +234,10 @@ void RefreshPattern::InitOnKeyEvent(const RefPtr<FrameNode>& host)
 void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
-    progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
+    auto* loadingProgressModifier = NodeModifier::GetLoadingProgressModifier();
+    CHECK_NULL_VOID(loadingProgressModifier);
+    progressChild_ = AceType::Claim(reinterpret_cast<FrameNode*>(
+        loadingProgressModifier->createLoadingProgressFrameNode(ElementRegister::GetInstance()->MakeUniqueId())));
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);
     auto gestureHub = progressChild_->GetEventHub<EventHub>();

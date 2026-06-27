@@ -128,7 +128,9 @@ void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameN
     if (searchTheme->GetCancelButtonStyle() != CancelButtonStyle::INPUT) {
         layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
     }
-    if (!layoutProperty->GetBorderWidthProperty()) {
+    // Use searchTheme->GetBorderWidth() to distinguish TV scene
+    // Only the TV scene has to set border properties
+    if (!layoutProperty->GetBorderWidthProperty() && GreatNotEqual(searchTheme->GetBorderWidth().Value(), 0.0)) {
         if (!renderContext->HasBorderWidth()) {
             BorderWidthProperty borderWidth;
             borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
@@ -1195,6 +1197,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdatePunctuationOverflow(true);
     std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());

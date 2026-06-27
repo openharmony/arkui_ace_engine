@@ -20,7 +20,6 @@
 #include "native_engine/native_engine.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 

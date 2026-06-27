@@ -326,6 +326,58 @@ std::filesystem::path WriteSmtToTempFile(const std::string& smt)
     return {};
 }
 
+// Test-only loader: reads an SMT instance from file into the solver. This used to live in the
+// engine (LsSolver::ReadFromFile) but is only needed by tests, so it now resides here.
+void ReadSmtFromFile(niaOverall::LsSolver& solver, const std::string& fileName,
+    const std::vector<std::string>& softCNames = {})
+{
+    std::string inString;
+    uint64_t inputNumLits;
+    std::ifstream ifs(fileName.c_str());
+    if (!ifs.is_open()) {
+        perror("ReadSmtFromFile:open failed");
+        return;
+    }
+    ifs >> inputNumLits;
+    solver.MakeLitsSpace(inputNumLits);
+    getline(ifs, inString);
+    getline(ifs, inString);
+    while (inString != "0") {
+        solver.BuildLits(inString);
+        getline(ifs, inString);
+    }
+    int size;
+    ifs >> size;
+    if (size < 0) {
+        return;
+    }
+    solver.originalVec.resize(size);
+    int sizeNow = 0;
+    while (sizeNow < size) {
+        ifs >> inString;
+        if (inString == "(") {
+            continue;
+        } else if (inString == ")") {
+            sizeNow++;
+        } else {
+            solver.originalVec[sizeNow].push_back(atoi(inString.c_str()));
+        }
+    }
+    solver.DeleteRedundantClauses(solver.originalVec);
+    bool hasBC = solver.name2var.find("BC_width") != solver.name2var.end();
+    solver.basicComponentName = hasBC ? "BC" : "";
+    solver.bcWidthIdx = hasBC ? static_cast<int>(solver.TransferNameToVar("BC_width", true))
+                              : static_cast<int>(solver.TransferNameToVar(".w", true));
+    solver.bcHeightIdx = hasBC ? static_cast<int>(solver.TransferNameToVar("BC_height", true))
+                               : static_cast<int>(solver.TransferNameToVar(".h", true));
+    solver.PrepareComponentsIdx();
+    solver.PrepareSoftComponentsIdx(softCNames);
+    solver.numVars = solver.vars.size();
+    solver.litAppear.resize(solver.numLits);
+    solver.litsInCls = new Array(static_cast<int>(solver.numLits));
+    solver.RecordInfoAfterReadFile();
+}
+
 BuildResult BuildOneCaseFromSmt(
     const std::string& smt, int width, int height, int radius = 0, const std::vector<std::string>& unitLits = {})
 {
@@ -336,7 +388,7 @@ BuildResult BuildOneCaseFromSmt(
     BuildResult result;
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
         solver.BuildInstanceOriginal(unitLits);
         if (!solver.unsatInPreprocess && !solver.buildUnsat) {
             solver.BuildInstanceNewWidth(width, height, radius);
@@ -361,7 +413,7 @@ std::unique_ptr<niaOverall::LsSolver> BuildSearchSolverFromSmt(const std::string
     const auto smtPath = WriteSmtToTempFile(smt);
     auto solver = std::make_unique<niaOverall::LsSolver>(
         TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-    solver->ReadFromFile(smtPath.string());
+    ReadSmtFromFile(*solver, smtPath.string());
     solver->BuildInstanceOriginal();
     if (!solver->unsatInPreprocess && !solver->buildUnsat) {
         solver->BuildInstanceNewWidth(width, height);
@@ -684,7 +736,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest005, TestSize.Level1)
     const auto smtPath = WriteSmtToTempFile(BOOL_PROPAGATION_SMT);
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
         solver.BuildInstanceOriginal();
 
         ASSERT_FALSE(solver.unsatInPreprocess);
@@ -1308,7 +1360,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest025, TestSize.Level1)
     const auto smtPath = WriteSmtToTempFile(EMBEDDED_LAYOUT_SMT);
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
         solver.BuildInstanceOriginal();
         ASSERT_FALSE(solver.unsatInPreprocess);
         ASSERT_FALSE(solver.buildUnsat);
@@ -1335,7 +1387,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest026, TestSize.Level1)
     const auto smtPath = WriteSmtToTempFile(EMBEDDED_LAYOUT_SMT);
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
         solver.BuildInstanceOriginal();
         ASSERT_FALSE(solver.unsatInPreprocess);
         ASSERT_FALSE(solver.buildUnsat);
@@ -1708,7 +1760,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest034, TestSize.Level1)
 
 /**
  * @tc.name: SmartLayoutSmtFileTest035
- * @tc.desc: Test ReadFromFile branch when BC_width is absent and .w/.h are used.
+ * @tc.desc: Test ReadSmtFromFile branch when BC_width is absent and .w/.h are used.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest035, TestSize.Level1)
@@ -1716,7 +1768,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest035, TestSize.Level1)
     const auto smtPath = WriteSmtToTempFile(DOT_COMPONENT_SMT);
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
         ASSERT_TRUE(solver.name2var.find(".w") != solver.name2var.end());
         ASSERT_TRUE(solver.name2var.find(".h") != solver.name2var.end());
         EXPECT_TRUE(solver.basicComponentName == "BC" || solver.basicComponentName.empty());
@@ -1791,7 +1843,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest037, TestSize.Level1)
     const auto smtPath = WriteSmtToTempFile(AUTOLAYOUT_STYLE_SMT);
     {
         niaOverall::LsSolver solver(TEST_RANDOM_SEED, TEST_MAX_STEP, TEST_CUTOFF_SECONDS, TEST_COMPLETE_LS);
-        solver.ReadFromFile(smtPath.string());
+        ReadSmtFromFile(solver, smtPath.string());
 
         ASSERT_TRUE(solver.name2var.find("x") != solver.name2var.end());
         ASSERT_TRUE(solver.name2var.find("y") != solver.name2var.end());

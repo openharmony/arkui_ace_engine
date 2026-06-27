@@ -18,6 +18,8 @@
 
 #include "cj_lambda.h"
 
+#include "core/components/theme/resource_adapter.h"
+
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_abstract.h"

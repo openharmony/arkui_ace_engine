@@ -824,8 +824,7 @@ void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
 void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
 {
     ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::SURFACE || args.Length() < 1 || args.Length() > HDR_BRIGHTNESS_PARAM_SIZE) {
+    if (args.Length() < 1 || args.Length() > HDR_BRIGHTNESS_PARAM_SIZE) {
         return;
     }
     // set hdrBrightness on SurfaceNode when type is SURFACE

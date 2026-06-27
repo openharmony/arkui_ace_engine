@@ -125,9 +125,8 @@ void SetDepthComponentOptionsImpl(Ark_NativePointer node,
             }
         },
         []() {});
-    if (bgSource) {
-        DepthComponentModel::SetBackgroundSource(frameNode, *bgSource);
-    }
+    DepthComponentModel::SetBackgroundSource(frameNode,
+        bgSource.value_or(OHOS::Ace::DepthBackgroundSource()));
     if (options && options->tag != INTEROP_TAG_UNDEFINED) {
         auto depthSpace = Converter::OptConvert<OHOS::Ace::DepthSpaceType>(options->value.depthSpace);
         if (depthSpace) {
@@ -183,7 +182,7 @@ void SetDepthMapImpl(Ark_NativePointer node,
                 applyDepthMap(*info);
             }
         },
-        []() {});
+        [&applyDepthMap]() { applyDepthMap(ImageSourceInfo()); });
 }
 
 void SetCameraImpl(Ark_NativePointer node,

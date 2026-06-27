@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_layout_info.h"
 
 namespace OHOS::Ace {

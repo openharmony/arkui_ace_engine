@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
@@ -109,6 +110,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -717,9 +719,9 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
-    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
-    if (avoidTargetOpt.has_value()) {
-        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    if (customModifier) {
+        customModifier->setAvoidTarget(popupParam, src.avoidTarget);
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
@@ -2762,11 +2764,17 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
+    if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+        ButtonModelStatic::BackgroundColor(frameNode, colorValue);
+        return;
+    }
     if (!colorValue) {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
-        SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -6477,15 +6485,14 @@ void SetBindPopupImpl(Ark_NativePointer node,
 void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
 {
     CHECK_NULL_VOID(uiNode);
-    auto child = uiNode->GetFirstChild();
-    CHECK_NULL_VOID(child);
-    auto menuNode = child->GetFirstChild();
-    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
-        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
-        CHECK_NULL_VOID(menuFrameNode);
-        auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
-        CHECK_NULL_VOID(menuModifier);
-        menuModifier->menuOnModifyDone(menuFrameNode);
+    
+    for (const auto& child : uiNode->GetChildren()) {
+        CallMenuOnModifyDone(child);
+    }
+    
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->MarkModifyDone();
     }
 }
 void BindMenuBase(Ark_NativePointer node,

@@ -15,6 +15,8 @@
 
 #include "core/components/box/rosen_render_box.h"
 
+#include "base/geometry/shape.h"
+
 #ifndef USE_ROSEN_DRAWING
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkParsePath.h"

@@ -15,6 +15,7 @@
 
 #include "shapeUtil.h"
 
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline/pipeline_base.h"
 
 std::unordered_map<int, uint32_t> colorMap = {

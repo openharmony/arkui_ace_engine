@@ -5333,4 +5333,209 @@ HWTEST_F(OverlayManagerTestNg, MountPixelMapToRootNode002, TestSize.Level1)
     rootNode->RemoveChild(containerModalNode);
     pipeline->windowModal_ = WindowModal::NORMAL;
 }
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService001
+ * @tc.desc: Test RemoveChildWithService calls OnRemoveChild for popup nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and popup node with target.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount popup node to rootNode and set up test conditions.
+     */
+    rootNode->AddChild(popupNode);
+    bubblePattern->hasOnAreaChange_ = false;
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash and call OnRemoveChild.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify popup node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have popupNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&popupNode](const RefPtr<UINode>& child) { return child == popupNode; });
+    EXPECT_EQ(it, children.end());
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService002
+ * @tc.desc: Test RemoveChildWithService with null node parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and OverlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveChildWithService with null node.
+     * @tc.expected: Method should handle null node gracefully without crash.
+     */
+    overlayManager->RemoveChildWithService(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify method completes successfully.
+     * @tc.expected: No crash occurs when node is null.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService003
+ * @tc.desc: Test RemoveChildWithService with null rootNode parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create popup node.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create OverlayManager with null rootNode.
+     * @tc.expected: OverlayManager can be created but RemoveChildWithService should handle null gracefully.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call RemoveChildWithService with null rootNode.
+     * @tc.expected: Method should handle null rootNode gracefully without crash.
+     */
+    overlayManager->RemoveChildWithService(nullptr, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify method completes successfully.
+     * @tc.expected: No crash occurs when rootNode is null.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService004
+ * @tc.desc: Test RemoveChildWithService calls OnRemoveChild when hasOnAreaChange is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and popup node with target.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount popup node to rootNode and set hasOnAreaChange to true.
+     */
+    rootNode->AddChild(popupNode);
+    bubblePattern->hasOnAreaChange_ = true;
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash and call OnRemoveChild.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify popup node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have popupNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&popupNode](const RefPtr<UINode>& child) { return child == popupNode; });
+    EXPECT_EQ(it, children.end());
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService005
+ * @tc.desc: Test RemoveChildWithService with non-popup node (no PopupBasePattern).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and regular node (ButtonNode, not a popup).
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto buttonNode = CreateTargetNode();
+    ASSERT_NE(buttonNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount button node to rootNode.
+     */
+    rootNode->AddChild(buttonNode);
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash, OnRemoveChild should not be called.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, buttonNode);
+
+    /**
+     * @tc.steps: step4. Verify button node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have buttonNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&buttonNode](const RefPtr<UINode>& child) { return child == buttonNode; });
+    EXPECT_EQ(it, children.end());
+}
 }

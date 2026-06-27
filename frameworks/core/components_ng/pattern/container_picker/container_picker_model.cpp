@@ -91,12 +91,25 @@ void ContainerPickerModel::SetOnScrollStop(ContainerPickerChangeEvent&& onScroll
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+std::function<void()> ContainerPickerModel::CreateLpxUpdateCallback(FrameNode* frameNode)
+{
+    return [weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+}
+
 void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto lpxUpdateFunc = CreateLpxUpdateCallback(frameNode);
     if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         if (style.strokeWidth.has_value()) {
-            ACE_CHECK_LPX_ATTRIBUTE(style.strokeWidth.value(), LpxAttribute::LPX_DIVIDER_STROKE_WIDTH);
+            ACE_CHECK_LPX_UPDATE_CALLBACK(style.strokeWidth.value(),
+                LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, lpxUpdateFunc);
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth,
                 style.strokeWidth.value());
         }
@@ -105,12 +118,14 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
                 style.dividerColor.value());
         }
         if (style.startMargin.has_value()) {
-            ACE_CHECK_LPX_ATTRIBUTE(style.startMargin.value(), LpxAttribute::LPX_DIVIDER_START_MARGIN);
+            ACE_CHECK_LPX_UPDATE_CALLBACK(style.startMargin.value(),
+                LpxAttribute::LPX_DIVIDER_START_MARGIN, lpxUpdateFunc);
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorStartMargin,
                 style.startMargin.value());
         }
         if (style.endMargin.has_value()) {
-            ACE_CHECK_LPX_ATTRIBUTE(style.endMargin.value(), LpxAttribute::LPX_DIVIDER_END_MARGIN);
+            ACE_CHECK_LPX_UPDATE_CALLBACK(style.endMargin.value(),
+                LpxAttribute::LPX_DIVIDER_END_MARGIN, lpxUpdateFunc);
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin,
                 style.endMargin.value());
         }
@@ -122,18 +137,20 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         if (style.borderRadius.has_value()) {
             const auto& borderRadius = style.borderRadius.value();
             if (borderRadius.radiusTopLeft.has_value()) {
-                ACE_CHECK_LPX_ATTRIBUTE(borderRadius.radiusTopLeft.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT);
+                ACE_CHECK_LPX_UPDATE_CALLBACK(borderRadius.radiusTopLeft.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, lpxUpdateFunc);
             }
             if (borderRadius.radiusTopRight.has_value()) {
-                ACE_CHECK_LPX_ATTRIBUTE(borderRadius.radiusTopRight.value(), LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT);
+                ACE_CHECK_LPX_UPDATE_CALLBACK(borderRadius.radiusTopRight.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT, lpxUpdateFunc);
             }
             if (borderRadius.radiusBottomLeft.has_value()) {
-                ACE_CHECK_LPX_ATTRIBUTE(borderRadius.radiusBottomLeft.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT);
+                ACE_CHECK_LPX_UPDATE_CALLBACK(borderRadius.radiusBottomLeft.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT, lpxUpdateFunc);
             }
             if (borderRadius.radiusBottomRight.has_value()) {
-                ACE_CHECK_LPX_ATTRIBUTE(borderRadius.radiusBottomRight.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT);
+                ACE_CHECK_LPX_UPDATE_CALLBACK(borderRadius.radiusBottomRight.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT, lpxUpdateFunc);
             }
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBorderRadius,
                 style.borderRadius.value());
@@ -143,8 +160,6 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         return;
     }
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->SetIndicatorStyleVal(style);
@@ -242,9 +257,11 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type, frameNode);
+    auto lpxUpdateFunc = CreateLpxUpdateCallback(frameNode);
     if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         if (style.strokeWidth.has_value()) {
-            ACE_CHECK_NODE_LPX_ATTRIBUTE(style.strokeWidth.value(), LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
+            ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(style.strokeWidth.value(),
+                LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, lpxUpdateFunc, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorDividerWidth, style.strokeWidth.value(), frameNode);
         }
@@ -253,12 +270,14 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
                 ContainerPickerLayoutProperty, IndicatorDividerColor, style.dividerColor.value(), frameNode);
         }
         if (style.startMargin.has_value()) {
-            ACE_CHECK_NODE_LPX_ATTRIBUTE(style.startMargin.value(), LpxAttribute::LPX_DIVIDER_START_MARGIN, frameNode);
+            ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(style.startMargin.value(),
+                LpxAttribute::LPX_DIVIDER_START_MARGIN, lpxUpdateFunc, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorStartMargin, style.startMargin.value(), frameNode);
         }
         if (style.endMargin.has_value()) {
-            ACE_CHECK_NODE_LPX_ATTRIBUTE(style.endMargin.value(), LpxAttribute::LPX_DIVIDER_END_MARGIN, frameNode);
+            ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(style.endMargin.value(),
+                LpxAttribute::LPX_DIVIDER_END_MARGIN, lpxUpdateFunc, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorEndMargin, style.endMargin.value(), frameNode);
         }
@@ -270,20 +289,20 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
         if (style.borderRadius.has_value()) {
             const auto& borderRadius = style.borderRadius.value();
             if (borderRadius.radiusTopLeft.has_value()) {
-                ACE_CHECK_NODE_LPX_ATTRIBUTE(borderRadius.radiusTopLeft.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, frameNode);
+                ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(borderRadius.radiusTopLeft.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, lpxUpdateFunc, frameNode);
             }
             if (borderRadius.radiusTopRight.has_value()) {
-                ACE_CHECK_NODE_LPX_ATTRIBUTE(borderRadius.radiusTopRight.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT, frameNode);
+                ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(borderRadius.radiusTopRight.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT, lpxUpdateFunc, frameNode);
             }
             if (borderRadius.radiusBottomLeft.has_value()) {
-                ACE_CHECK_NODE_LPX_ATTRIBUTE(borderRadius.radiusBottomLeft.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT, frameNode);
+                ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(borderRadius.radiusBottomLeft.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT, lpxUpdateFunc, frameNode);
             }
             if (borderRadius.radiusBottomRight.has_value()) {
-                ACE_CHECK_NODE_LPX_ATTRIBUTE(borderRadius.radiusBottomRight.value(),
-                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT, frameNode);
+                ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(borderRadius.radiusBottomRight.value(),
+                    LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT, lpxUpdateFunc, frameNode);
             }
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorBorderRadius, style.borderRadius.value(), frameNode);

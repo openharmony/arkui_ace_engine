@@ -1328,4 +1328,1311 @@ HWTEST_F(NavigationLayoutAlgorithmTest, CheckSizeInSplitWithExtremeValues, TestS
     algorithm->CheckSizeInSplit(frameWidth, userSetNavBarWidth, minNavBarWidth, minContentWidth);
     EXPECT_GT(algorithm->realContentWidth_, 0.0f);
 }
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeNullHost001
+ * @tc.desc: Test MeasurePrimaryContentNode with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeNullHost001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF primaryNodeSize(1000.0f, 1000.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), nullptr, layoutProperty, primaryNodeSize);
+    EXPECT_EQ(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeNullPrimary001
+ * @tc.desc: Test MeasurePrimaryContentNode with null primaryContentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeNullPrimary001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF primaryNodeSize(1000.0f, 1000.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, primaryNodeSize);
+    EXPECT_EQ(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeNotVisible001
+ * @tc.desc: Test MeasurePrimaryContentNode with invisible primaryContentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    primaryContentNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF primaryNodeSize(1000.0f, 1000.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, primaryNodeSize);
+    EXPECT_EQ(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeNullWrapper001
+ * @tc.desc: Test MeasurePrimaryContentNode with null nodeWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeNullWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF primaryNodeSize(1000.0f, 1000.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, primaryNodeSize);
+    EXPECT_EQ(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeAutoHeight001
+ * @tc.desc: Test MeasurePrimaryContentNode with auto height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    hostNode->AddChild(primaryContentNode);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize = CalcSize(CalcLength(1000.0f), CalcLength("auto"));
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = primaryContentNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(primaryContentNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF primaryNodeSize(500.0f, 800.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, primaryNodeSize);
+    EXPECT_GT(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasurePrimaryContentNodeNotAutoHeight001
+ * @tc.desc: Test MeasurePrimaryContentNode with fixed height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasurePrimaryContentNodeNotAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    hostNode->AddChild(primaryContentNode);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = primaryContentNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(primaryContentNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF primaryNodeSize(500.0f, 800.0f);
+    algorithm->MeasurePrimaryContentNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, primaryNodeSize);
+    EXPECT_GT(algorithm->realNavBarHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeNullPh001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode with null phNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeNullPh001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeNullProperty001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode with null phProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeNullProperty001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = FrameNode::CreateFrameNode(
+        "forceSplitPH", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    phNode->layoutProperty_ = nullptr;
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeNotVisible001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode with invisible node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    phNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->AddChild(phNode);
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = phNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(phNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeVisibleNotAutoHeight001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode visible with fixed height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeVisibleNotAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    hostNode->AddChild(phNode);
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = phNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(phNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeVisibleAutoHeight001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode visible with auto height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeVisibleAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    hostNode->AddChild(phNode);
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize = CalcSize(CalcLength(1000.0f), CalcLength("auto"));
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = phNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(phNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureForceSplitPlaceHolderNodeNullWrapper001
+ * @tc.desc: Test MeasureForceSplitPlaceHolderNode with null phWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitPlaceHolderNodeNullWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureForceSplitPlaceHolderNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: LayoutForceSplitPlaceHolderNodeNullPh001
+ * @tc.desc: Test LayoutForceSplitPlaceHolderNode with null phNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitPlaceHolderNodeNullPh001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutForceSplitPlaceHolderNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitPlaceHolderNodeNullWrapper001
+ * @tc.desc: Test LayoutForceSplitPlaceHolderNode with null phWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitPlaceHolderNodeNullWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutForceSplitPlaceHolderNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitPlaceHolderNodeNormal001
+ * @tc.desc: Test LayoutForceSplitPlaceHolderNode normal path
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitPlaceHolderNodeNormal001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto phNode = CreateChildNode("forceSplitPH");
+    hostNode->AddChild(phNode);
+    hostNode->SetForceSplitPlaceHolderNode(phNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = phNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(phNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->LayoutForceSplitPlaceHolderNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+    auto offset = childGeoNode->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(offset.GetX(), 301.0f);
+}
+
+/**
+ * @tc.name: MeasureRelatedPageNodeNullNode001
+ * @tc.desc: Test MeasureRelatedPageNode with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureRelatedPageNodeNullNode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureRelatedPageNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureRelatedPageNodeNotVisible001
+ * @tc.desc: Test MeasureRelatedPageNode with invisible node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureRelatedPageNodeNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    relatedNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureRelatedPageNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureRelatedPageNodeNullWrapper001
+ * @tc.desc: Test MeasureRelatedPageNode with null wrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureRelatedPageNodeNullWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureRelatedPageNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureRelatedPageNodeNotAutoHeight001
+ * @tc.desc: Test MeasureRelatedPageNode with fixed height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureRelatedPageNodeNotAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    hostNode->AddChild(relatedNode);
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = relatedNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(relatedNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureRelatedPageNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: MeasureRelatedPageNodeAutoHeight001
+ * @tc.desc: Test MeasureRelatedPageNode with auto height
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureRelatedPageNodeAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    hostNode->AddChild(relatedNode);
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize = CalcSize(CalcLength(1000.0f), CalcLength("auto"));
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = relatedNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(relatedNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    SizeF phSize(500.0f, 800.0f);
+    algorithm->MeasureRelatedPageNode(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, phSize);
+}
+
+/**
+ * @tc.name: LayoutRelatedPageNodeNullNode001
+ * @tc.desc: Test LayoutRelatedPageNode with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutRelatedPageNodeNullNode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutRelatedPageNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutRelatedPageNodeNotVisible001
+ * @tc.desc: Test LayoutRelatedPageNode with invisible node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutRelatedPageNodeNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    relatedNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutRelatedPageNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutRelatedPageNodeNullWrapper001
+ * @tc.desc: Test LayoutRelatedPageNode with null wrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutRelatedPageNodeNullWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutRelatedPageNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutRelatedPageNodeNormal001
+ * @tc.desc: Test LayoutRelatedPageNode normal path
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutRelatedPageNodeNormal001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto relatedNode = CreateChildNode("relatedPage");
+    hostNode->AddChild(relatedNode);
+    hostNode->SetRelatedPageDestNode(relatedNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = relatedNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(relatedNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->LayoutRelatedPageNode(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 300.0f, 1.0f);
+    auto offset = childGeoNode->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(offset.GetX(), 301.0f);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesNullLayoutWrapper001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with null layoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesNullLayoutWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    algorithm->MeasureForceSplitMaskNodes(nullptr, hostNode, layoutProperty);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesNullHostNode001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesNullHostNode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->MeasureForceSplitMaskNodes(layoutWrapper.GetRawPtr(), nullptr, layoutProperty);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesNullProperty001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with null navigationLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesNullProperty001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->MeasureForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, nullptr);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesNoMask001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with no mask nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesNoMask001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->primaryNodeSize_ = SizeF(400.0f, 800.0f);
+    algorithm->contentSize_ = SizeF(500.0f, 800.0f);
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->MeasureForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, layoutProperty);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesWithMask001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with mask nodes set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesWithMask001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->primaryNodeSize_ = SizeF(400.0f, 800.0f);
+    algorithm->contentSize_ = SizeF(500.0f, 800.0f);
+    auto hostNode = CreateNavigationNode();
+    auto leftMask = CreateChildNode("leftMask");
+    auto rightMask = CreateChildNode("rightMask");
+    hostNode->AddChild(leftMask);
+    hostNode->AddChild(rightMask);
+    hostNode->leftMaskNode_ = leftMask;
+    hostNode->rightMaskNode_ = rightMask;
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto leftGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto leftProp = leftMask->GetLayoutProperty();
+    auto leftWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(leftMask, leftGeoNode, leftProp);
+    layoutWrapper->AppendChild(leftWrapper);
+    auto rightGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto rightProp = rightMask->GetLayoutProperty();
+    auto rightWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(rightMask, rightGeoNode, rightProp);
+    layoutWrapper->AppendChild(rightWrapper);
+    algorithm->MeasureForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, layoutProperty);
+}
+
+/**
+ * @tc.name: MeasureForceSplitMaskNodesLeftNull001
+ * @tc.desc: Test MeasureForceSplitMaskNodes with null left mask but valid right mask
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureForceSplitMaskNodesLeftNull001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->primaryNodeSize_ = SizeF(400.0f, 800.0f);
+    algorithm->contentSize_ = SizeF(500.0f, 800.0f);
+    auto hostNode = CreateNavigationNode();
+    auto rightMask = CreateChildNode("rightMask");
+    hostNode->AddChild(rightMask);
+    hostNode->rightMaskNode_ = rightMask;
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto rightGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto rightProp = rightMask->GetLayoutProperty();
+    auto rightWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(rightMask, rightGeoNode, rightProp);
+    layoutWrapper->AppendChild(rightWrapper);
+    algorithm->MeasureForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, layoutProperty);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesNullLayoutWrapper001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with null layoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesNullLayoutWrapper001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    algorithm->LayoutForceSplitMaskNodes(nullptr, hostNode, layoutProperty, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesNullHostNode001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesNullHostNode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutForceSplitMaskNodes(layoutWrapper.GetRawPtr(), nullptr, layoutProperty, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesNullProperty001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with null navigationLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesNullProperty001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->LayoutForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, nullptr, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesNullGeo001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with null navigationGeometryNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesNullGeo001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, nullptr, layoutProperty);
+    algorithm->LayoutForceSplitMaskNodes(layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesLeftNotVisible001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with left mask not visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesLeftNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto leftMask = CreateChildNode("leftMask");
+    leftMask->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->AddChild(leftMask);
+    hostNode->leftMaskNode_ = leftMask;
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto leftGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    leftGeoNode->SetFrameSize(SizeF(400.0f, 800.0f));
+    auto leftProp = leftMask->GetLayoutProperty();
+    auto leftWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(leftMask, leftGeoNode, leftProp);
+    layoutWrapper->AppendChild(leftWrapper);
+    algorithm->LayoutForceSplitMaskNodes(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesRightNotVisible001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with right mask not visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesRightNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto leftMask = CreateChildNode("leftMask");
+    auto rightMask = CreateChildNode("rightMask");
+    rightMask->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->AddChild(leftMask);
+    hostNode->AddChild(rightMask);
+    hostNode->leftMaskNode_ = leftMask;
+    hostNode->rightMaskNode_ = rightMask;
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto leftGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    leftGeoNode->SetFrameSize(SizeF(400.0f, 800.0f));
+    auto leftProp = leftMask->GetLayoutProperty();
+    auto leftWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(leftMask, leftGeoNode, leftProp);
+    layoutWrapper->AppendChild(leftWrapper);
+    auto rightGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    rightGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto rightProp = rightMask->GetLayoutProperty();
+    auto rightWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(rightMask, rightGeoNode, rightProp);
+    layoutWrapper->AppendChild(rightWrapper);
+    algorithm->LayoutForceSplitMaskNodes(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 400.0f, 1.0f);
+}
+
+/**
+ * @tc.name: LayoutForceSplitMaskNodesBothVisible001
+ * @tc.desc: Test LayoutForceSplitMaskNodes with both masks visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutForceSplitMaskNodesBothVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto leftMask = CreateChildNode("leftMask");
+    auto rightMask = CreateChildNode("rightMask");
+    hostNode->AddChild(leftMask);
+    hostNode->AddChild(rightMask);
+    hostNode->leftMaskNode_ = leftMask;
+    hostNode->rightMaskNode_ = rightMask;
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto leftGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    leftGeoNode->SetFrameSize(SizeF(400.0f, 800.0f));
+    auto leftProp = leftMask->GetLayoutProperty();
+    auto leftWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(leftMask, leftGeoNode, leftProp);
+    layoutWrapper->AppendChild(leftWrapper);
+    auto rightGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    rightGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto rightProp = rightMask->GetLayoutProperty();
+    auto rightWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(rightMask, rightGeoNode, rightProp);
+    layoutWrapper->AppendChild(rightWrapper);
+    algorithm->LayoutForceSplitMaskNodes(
+        layoutWrapper.GetRawPtr(), hostNode, layoutProperty, 400.0f, 1.0f);
+    auto rightOffset = rightGeoNode->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(rightOffset.GetX(), 401.0f);
+}
+
+/**
+ * @tc.name: SetNavigationWidthEmptyStack001
+ * @tc.desc: Test SetNavigationWidth with empty navigation stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, SetNavigationWidthEmptyStack001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->realNavBarWidth_ = 300.0f;
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF size(1000.0f, 1000.0f);
+    algorithm->SetNavigationWidth(layoutWrapper.GetRawPtr(), size);
+    EXPECT_FLOAT_EQ(size.Width(), 300.0f);
+}
+
+/**
+ * @tc.name: SetNavigationWidthStackMode001
+ * @tc.desc: Test SetNavigationWidth with STACK mode and non-empty stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, SetNavigationWidthStackMode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->realNavBarWidth_ = 300.0f;
+    algorithm->realContentWidth_ = 600.0f;
+    auto hostNode = CreateNavigationNode();
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.emplace_back(std::make_pair("page1", nullptr));
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF size(1000.0f, 1000.0f);
+    algorithm->SetNavigationWidth(layoutWrapper.GetRawPtr(), size);
+    EXPECT_FLOAT_EQ(size.Width(), 600.0f);
+}
+
+/**
+ * @tc.name: SetNavigationWidthSplitMode001
+ * @tc.desc: Test SetNavigationWidth with SPLIT mode and non-empty stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, SetNavigationWidthSplitMode001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->realNavBarWidth_ = 300.0f;
+    algorithm->realContentWidth_ = 600.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    auto hostNode = CreateNavigationNode();
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.emplace_back(std::make_pair("page1", nullptr));
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF size(1000.0f, 1000.0f);
+    algorithm->SetNavigationWidth(layoutWrapper.GetRawPtr(), size);
+    EXPECT_FLOAT_EQ(size.Width(), 901.0f);
+}
+
+/**
+ * @tc.name: SetNavigationWidthNullHost001
+ * @tc.desc: Test SetNavigationWidth with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, SetNavigationWidthNullHost001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->realNavBarWidth_ = 300.0f;
+    auto plainNode = FrameNode::CreateFrameNode(
+        "plain", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto layoutProperty = plainNode->GetLayoutProperty();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(plainNode, geometryNode, layoutProperty);
+    SizeF size(1000.0f, 1000.0f);
+    algorithm->SetNavigationWidth(layoutWrapper.GetRawPtr(), size);
+    EXPECT_FLOAT_EQ(size.Width(), 1000.0f);
+}
+
+/**
+ * @tc.name: SetNavigationWidthNullStack001
+ * @tc.desc: Test SetNavigationWidth with null navigationStack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, SetNavigationWidthNullStack001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    algorithm->realNavBarWidth_ = 300.0f;
+    auto hostNode = CreateNavigationNode();
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto savedStack = pattern->GetNavigationStack();
+    pattern->SetNavigationStack(nullptr);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    SizeF size(1000.0f, 1000.0f);
+    algorithm->SetNavigationWidth(layoutWrapper.GetRawPtr(), size);
+    EXPECT_FLOAT_EQ(size.Width(), 1000.0f);
+    pattern->SetNavigationStack(savedStack);
+}
+
+/**
+ * @tc.name: MeasureSplitPlaceholderNullPlaceholder001
+ * @tc.desc: Test MeasureSplitPlaceholder with null placeholderContentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureSplitPlaceholderNullPlaceholder001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(1000.0f, 1000.0f);
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Measure(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: MeasureSplitPlaceholderWithPlaceholder001
+ * @tc.desc: Test MeasureSplitPlaceholder with valid placeholder node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureSplitPlaceholderWithPlaceholder001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(1000.0f, 1000.0f);
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Measure(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: MeasureSplitPlaceholderHideNavBar001
+ * @tc.desc: Test MeasureSplitPlaceholder with hideNavBar true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureSplitPlaceholderHideNavBar001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(1000.0f, 1000.0f);
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    layoutProperty->UpdateHideNavBar(true);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Measure(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: MeasureSplitPlaceholderAutoHeight001
+ * @tc.desc: Test MeasureSplitPlaceholder with auto height and empty stack in SPLIT mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, MeasureSplitPlaceholderAutoHeight001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(1000.0f, 1000.0f);
+    constraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize = CalcSize(CalcLength(1000.0f), CalcLength("auto"));
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Measure(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: LayoutPrimaryContentNodeNullHost001
+ * @tc.desc: Test LayoutPrimaryContentNode with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutPrimaryContentNodeNullHost001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    hostNode->AddChild(primaryContentNode);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = primaryContentNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(primaryContentNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: LayoutPrimaryContentNodeNullPrimary001
+ * @tc.desc: Test LayoutPrimaryContentNode with null primaryContentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutPrimaryContentNodeNullPrimary001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: LayoutPrimaryContentNodeNotVisible001
+ * @tc.desc: Test LayoutPrimaryContentNode with invisible primaryContentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutPrimaryContentNodeNotVisible001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    primaryContentNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    hostNode->AddChild(primaryContentNode);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = primaryContentNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(primaryContentNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: LayoutPrimaryContentNodeNormal001
+ * @tc.desc: Test LayoutPrimaryContentNode normal path with visible node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutPrimaryContentNodeNormal001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto primaryContentNode = CreateChildNode("primaryContent");
+    hostNode->AddChild(primaryContentNode);
+    hostNode->SetPrimaryContentNode(primaryContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = primaryContentNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(primaryContentNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+    auto offset = childGeoNode->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(offset.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: LayoutSplitPlaceholderContentNullHost001
+ * @tc.desc: Test LayoutSplitPlaceholderContent with null hostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutSplitPlaceholderContentNullHost001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: LayoutSplitPlaceholderContentWithPlaceholder001
+ * @tc.desc: Test LayoutSplitPlaceholderContent with valid placeholder in SPLIT mode and empty stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutSplitPlaceholderContentWithPlaceholder001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto navBarNode = CreateChildNode("navBar");
+    hostNode->AddChild(navBarNode);
+    hostNode->navBarNode_ = navBarNode;
+    auto dividerNode = CreateChildNode("divider");
+    hostNode->AddChild(dividerNode);
+    hostNode->dividerNode_ = dividerNode;
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto navBarGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    navBarGeoNode->SetFrameSize(SizeF(500.0f, 1000.0f));
+    auto navBarProp = navBarNode->GetLayoutProperty();
+    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(navBarNode, navBarGeoNode, navBarProp);
+    layoutWrapper->AppendChild(navBarWrapper);
+    auto dividerGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    dividerGeoNode->SetFrameSize(SizeF(1.0f, 1000.0f));
+    auto dividerProp = dividerNode->GetLayoutProperty();
+    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, dividerGeoNode, dividerProp);
+    layoutWrapper->AppendChild(dividerWrapper);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+    auto offset = childGeoNode->GetMarginFrameOffset();
+    EXPECT_FLOAT_EQ(offset.GetX(), 501.0f);
+}
+
+/**
+ * @tc.name: LayoutSplitPlaceholderContentNonEmptyStack001
+ * @tc.desc: Test LayoutSplitPlaceholderContent with non-empty stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutAlgorithmTest, LayoutSplitPlaceholderContentNonEmptyStack001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto hostNode = CreateNavigationNode();
+    auto placeholderNode = CreateChildNode("splitPlaceholder");
+    hostNode->AddChild(placeholderNode);
+    hostNode->SetPlaceholderContentNode(placeholderNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1000.0f, 1000.0f));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    auto childGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeoNode->SetFrameSize(SizeF(500.0f, 800.0f));
+    auto childProp = placeholderNode->GetLayoutProperty();
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(placeholderNode, childGeoNode, childProp);
+    layoutWrapper->AppendChild(childWrapper);
+    algorithm->realNavBarWidth_ = 500.0f;
+    algorithm->realDividerWidth_ = 1.0f;
+    algorithm->primaryNodeSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->contentSize_ = SizeF(499.0f, 1000.0f);
+    algorithm->navBarSize_ = SizeF(500.0f, 1000.0f);
+    algorithm->dividerSize_ = SizeF(1.0f, 1000.0f);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::SPLIT);
+    auto stack = AceType::DynamicCast<MockNavigationStack>(pattern->GetNavigationStack());
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.emplace_back(std::make_pair("page1", nullptr));
+    algorithm->Layout(layoutWrapper.GetRawPtr());
+}
 } // namespace OHOS::Ace::NG

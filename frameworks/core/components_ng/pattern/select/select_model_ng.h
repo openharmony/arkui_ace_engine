@@ -199,8 +199,29 @@ public:
     static void SetMenuEdgeLightMode(FrameNode* frameNode, const std::optional<EdgeLightMode>& mode);
     static void SetDividerPropertiesSetByUser(FrameNode* frameNode,
         bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true);
+    static void CreateSelect(const std::vector<SelectParam>& params, const std::vector<SelectResObjParam>& resObjVec);
+    static void SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent);
+    static void SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent);
+    static void SetPadding(FrameNode* frameNode, const CalcDimension& value);
+    static void SetPaddingTop(FrameNode* frameNode, const CalcDimension& value);
+    static void SetPaddingBottom(FrameNode* frameNode, const CalcDimension& value);
+    static void SetPaddingLeft(FrameNode* frameNode, const CalcDimension& value);
+    static void SetPaddingRight(FrameNode* frameNode, const CalcDimension& value);
+    static void SetTextModifierApply(
+        FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
+    static void SetArrowModifierApply(
+        FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    static void SetOptionTextModifier(
+        FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    static void SetSelectedOptionTextModifier(
+        FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
+    static void ResetShowInSubWindow(FrameNode* frameNode);
+    static void ResetShowDefaultSelectedIcon(FrameNode* frameNode);
+    static void ResetFontColor(FrameNode* frameNode);
 private:
     void AddResObjWithCallBack(
+        std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
+    static void AddResObjWithStaCallBack(
         std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
 
     // multi-thread

@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
-class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
+class ACE_FORCE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(ImageInfoConfig& imageInfoConfig) override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;

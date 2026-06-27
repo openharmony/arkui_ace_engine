@@ -18,10 +18,10 @@
 
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class RadioPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RadioPaintProperty, PaintProperty);

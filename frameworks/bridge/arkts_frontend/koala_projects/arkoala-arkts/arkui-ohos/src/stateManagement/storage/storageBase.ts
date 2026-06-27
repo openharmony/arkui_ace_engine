@@ -139,7 +139,7 @@ export class StorageBase {
             return undefined;
         }
         const storageProperty = sp as StorageProperty<T>;
-        return storageProperty.get();
+        return storageProperty.rawGet();
     }
 
     public ref<T>(key: string): AbstractProperty<T> | undefined {

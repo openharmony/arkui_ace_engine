@@ -6960,11 +6960,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[223]) {
                 case 1:
                 case 3: {
-                    this.bindContextMenuWithResponse((modifier._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (modifier._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
+                    this.bindContextMenuWithResponseArray((modifier._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (modifier._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
                     break;
                 }
                 default: {
-                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenuWithResponseArray((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -9302,7 +9302,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponseArray(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
         if (((this._flagArray[223]) == (0)) || (true) || (true)) {
             this._flagArray[223] = 1
             this._bindContextMenuWithResponse_1_0value = content

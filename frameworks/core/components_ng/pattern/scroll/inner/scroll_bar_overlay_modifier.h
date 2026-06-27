@@ -146,6 +146,7 @@ public:
     void SetNeedPaintTrack(bool needPaintTrack)
     {
         needPaintTrack_ = needPaintTrack;
+        SetOverlayChange();
     }
 
     RefPtr<PropertyColor> GetBarColor()

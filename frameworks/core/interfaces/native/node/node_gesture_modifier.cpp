@@ -222,6 +222,7 @@ void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
     gestureRef->SetDisposeTag(true);
+    gestureRef->SetUserData(nullptr);
     gestureRef->DecRefCount();
 }
 
@@ -724,6 +725,7 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
 
     GesturePriority priority = GesturePriority::Low;

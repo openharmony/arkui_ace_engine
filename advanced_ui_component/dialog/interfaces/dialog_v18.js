@@ -700,8 +700,8 @@ export class TipsDialog extends ViewPU {
                         Text.focusable(false);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(true);
                     }, Text);
                     Text.pop();
                 });
@@ -771,8 +771,8 @@ export class TipsDialog extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.width('100%');
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -808,8 +808,8 @@ export class TipsDialog extends ViewPU {
                             }
                         });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1203,8 +1203,8 @@ export class SelectDialog extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1342,8 +1342,8 @@ export class SelectDialog extends ViewPU {
                             Text.layoutWeight(1);
                             Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                             Text.fallbackLineSpacing(true);
-                            Text.wordBreak(WordBreak.HYPHENATION);
                             Text.orphanCharOptimization(true);
+                            Text.punctuationOverflow(true);
                         }, Text);
                         Text.pop();
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1814,8 +1814,8 @@ export class ConfirmDialog extends ViewPU {
             });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         Column.pop();
@@ -1889,8 +1889,8 @@ export class ConfirmDialog extends ViewPU {
             Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -2268,8 +2268,8 @@ export class AlertDialog extends ViewPU {
                 }
             });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         Scroll.pop();
@@ -3283,8 +3283,8 @@ class CustomDialogContentComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -3326,8 +3326,8 @@ class CustomDialogContentComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -4163,8 +4163,8 @@ export class LoadingDialog extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(true);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {

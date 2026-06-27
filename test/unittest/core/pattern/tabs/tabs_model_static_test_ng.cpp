@@ -924,21 +924,6 @@ HWTEST_F(TabsModelStaticTestNg, SetDivider_NotNull, TestSize.Level1)
     EXPECT_EQ(dividerRenderContext->GetOpacity(), 1.0f);
 }
 
-// ===================== SetDividerColorByUser =====================
-
-/**
- * @tc.name: SetDividerColorByUser_True
- * @tc.desc: SetDividerColorByUser true should update property
- * @tc.type: FUNC
- */
-HWTEST_F(TabsModelStaticTestNg, SetDividerColorByUser_True, TestSize.Level1)
-{
-    auto frameNode = CreateSimpleFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    TabsModelStatic::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
-    EXPECT_TRUE(true);
-}
-
 // ===================== InitDivider =====================
 
 /**

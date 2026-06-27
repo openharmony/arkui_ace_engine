@@ -99,6 +99,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context.cpp",
     "image_provider_test_ng.cpp",
     "image_provider_test_ng_two.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
   ]
 
   deps = [

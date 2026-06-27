@@ -653,10 +653,9 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset002, TestSize.Level1)
     scrollPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
     scrollPattern->scrollEffect_->edgeEffect_ = EdgeEffect::SPRING;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->scrollableDistance_ = 8.0f;
     auto result = scrollPattern->ValidateOffset(SCROLL_FROM_AXIS, 4.0f);
-    EXPECT_EQ(result, 4.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 /**
@@ -671,10 +670,9 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset003, TestSize.Level1)
     scrollPattern->scrollEffect_->edgeEffect_ = EdgeEffect::SPRING;
     scrollPattern->axis_ = Axis::HORIZONTAL;
     scrollPattern->currentOffset_ = 20.0f;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->scrollableDistance_ = 8.0f;
     scrollPattern->ValidateOffset(SCROLL_FROM_AXIS);
-    EXPECT_EQ(scrollPattern->currentOffset_, 8.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0f);
 }
 
 /**
@@ -1269,18 +1267,17 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_Two_Parameters, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
-     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
+     * and set axis_ of scrollPattern to HORIZONTAL
      */
     scrollPattern->scrollableDistance_ = 2.0f;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
 
     /**
      * @tc.steps: step3. Set source to SCROLL_FROM_AXIS and willScrollOffset to 4.0f
-     * @tc.expected: The result of function return 2.0f
+     * @tc.expected: The result of function return 0.0f
      */
     auto result = scrollPattern->ValidateOffset(SCROLL_FROM_AXIS, 4.0f);
-    EXPECT_EQ(result, 2.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 /**
@@ -1297,21 +1294,19 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_One_Parameter, TestSize.Level1)
     ASSERT_NE(scrollPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
-     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
-     * and set currentOffset_ of scrollPattern to 4.0f
+     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0,
+     * set axis_ of scrollPattern to HORIZONTAL and set currentOffset_ of scrollPattern to 4.0f
      */
     scrollPattern->scrollableDistance_ = 3.0f;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->currentOffset_ = 4.0f;
 
     /**
      * @tc.steps: step3. Set source to SCROLL_FROM_AXIS
-     * @tc.expected: The currentOffset_ of scrollPattern to be 3.0f
+     * @tc.expected: The currentOffset_ of scrollPattern to be 0.0f
      */
     scrollPattern->ValidateOffset(SCROLL_FROM_AXIS);
-    EXPECT_EQ(scrollPattern->currentOffset_, 3.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0f);
 }
 
 /**

@@ -176,7 +176,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     CalculateOverlayOffset(dragNode, globalOffset, hostNode);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
-    AdjustHandlers(contentRect, leftHandler, rightHandler);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
     float width = rightHandler.GetX() - leftHandler.GetX();
     float height = rightHandler.GetY() - leftHandler.GetY() + rightHandler.Height();
     auto dragOffset = TEXT_DRAG_OFFSET.ConvertToPx();
@@ -199,13 +199,21 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalDragOffset.GetX()),
         Dimension(globalDragOffset.GetY())));
+    RectF rect(textStartOffset - localDragOffset, SizeF(width, height));
+    return dragPattern->CreateTextDragData(rect, localDragOffset, globalDragOffset, leftHandler, rightHandler);
+}
+
+TextDragData TextDragPattern::CreateTextDragData(const RectF& textRect, const OffsetF& localDragOffset,
+    const OffsetF& globalDragOffset, const RectF& leftHandler, const RectF& rightHandler)
+{
     auto offsetXValue = -localDragOffset.GetX();
     auto offsetYValue = -localDragOffset.GetY();
-    RectF rect(textStartOffset.GetX() + offsetXValue, textStartOffset.GetY() + offsetYValue, width, height);
     SelectPositionInfo info(leftHandler.GetX() + offsetXValue, leftHandler.GetY() + offsetYValue,
         rightHandler.GetX() + offsetXValue, rightHandler.GetY() + offsetYValue);
     info.InitGlobalInfo(globalDragOffset.GetX(), globalDragOffset.GetY());
-    TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
+    float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
+    TextDragData data(textRect, textRect.Width() + bothOffset, textRect.Height() + bothOffset,
+        leftHandler.Height(), rightHandler.Height());
     data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
 }
@@ -239,7 +247,7 @@ RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<Re
     return {handlerX, box.Top() + textStartOffset.GetY(), 0, box.Height()};
 }
 
-void TextDragPattern::AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler)
+void TextDragPattern::AdjustHandlers(const RectF& contentRect, RectF& leftHandler, RectF& rightHandler)
 {
     if (leftHandler.GetY() != rightHandler.GetY()) {
         return;
@@ -258,7 +266,8 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
     auto selectPosition = GetSelectPosition();
     float startX = selectPosition.startX_;
     float startY = selectPosition.startY_;
-    float textStart = GetTextRect().GetX();
+    float textStart = GetContentLeft().has_value() ? std::max(GetContentLeft().value(), GetTextRect().GetX())
+        : GetTextRect().GetX();
     float textEnd = textStart + GetTextRect().Width();
     float endX = selectPosition.endX_;
     float endY = selectPosition.endY_;
@@ -320,7 +329,8 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
     float startY = selectPosition.startY_;
     float endX = selectPosition.endX_;
     float endY = selectPosition.endY_;
-    float textStart = GetTextRect().GetX();
+    float textStart = GetContentLeft().has_value() ? std::max(GetContentLeft().value(), GetTextRect().GetX())
+        : GetTextRect().GetX();
     float textEnd = textStart + GetTextRect().Width();
     auto lineHeight = GetLineHeight();
     if (OneLineSelected()) {

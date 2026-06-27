@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -37,6 +38,7 @@
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
+#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
 #include "ui/base/versions.h"
 
 namespace OHOS::Ace::NG {
@@ -200,7 +202,6 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
         LOGW("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "context instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
@@ -749,7 +750,6 @@ void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addD
         LOGE("AdoptChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
             "child=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, child->GetId(), child->IsIsolatedThread());
-        LogBacktrace();
     }
     auto prevParent = child->GetAdoptParent();
     if (child->IsAdopted() && prevParent && prevParent->GetId() != this->GetId()) {
@@ -802,7 +802,6 @@ void UINode::DoAddChild(
         LOGE("DoAddChild IsolatedThread mismatch: parent=%{public}d isolated=%{public}d, "
             "child=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, child->nodeId_, child->isIsolatedThread_);
-        LogBacktrace();
     }
     children_.insert(it, child);
 
@@ -1923,7 +1922,6 @@ PipelineContext* UINode::GetContext() const
         LOGW("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     return context;
 }
@@ -1936,7 +1934,6 @@ PipelineContext* UINode::GetAttachedContext() const
         LOGW("GetAttachedContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-        LogBacktrace();
     }
     return context_;
 }
@@ -1950,7 +1947,6 @@ PipelineContext* UINode::GetContextWithCheck()
             LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
                 "pipeline instanceId=%{public}d isolated=%{public}d",
                 nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-            LogBacktrace();
         }
         return context_;
     }
@@ -1961,7 +1957,6 @@ PipelineContext* UINode::GetContextWithCheck()
         LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
-        LogBacktrace();
     }
     return context;
 }
@@ -2240,6 +2235,7 @@ void UINode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
             ContainerScope scope(instanceId_);
             ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d", nodeId_, tag_.c_str(), customNode ? true : false);
             customNode->FireClearAllRecycleFunc();
+            customNode->FireClearParentReusePoolIfNeeded();
             SetShouldClearCache(false);
             ACE_LAYOUT_TRACE_END()
         }

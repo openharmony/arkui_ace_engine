@@ -17,9 +17,11 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LAZY_GRID_LAYOUT_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/lazy_grid_layout/bridge/lazy_grid_layout_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier();
+ACE_FORCE_EXPORT const ArkUILazyGridLayoutCustomModifier* GetLazyGridLayoutCustomModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LAZY_GRID_LAYOUT_MODIFIER_H

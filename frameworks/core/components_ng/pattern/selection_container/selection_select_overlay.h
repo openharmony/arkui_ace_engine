@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
+class SelectionContainerChild;
 class SelectionContainerPattern;
 
 class SelectionSelectOverlay : public BaseTextSelectOverlay {
@@ -43,6 +44,7 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
+    std::optional<RectF> GetAncestorNodeViewPort() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
@@ -81,9 +83,8 @@ private:
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
     void UpdateTransformFlag() override;
     bool IsClipHandleWithViewPort() override;
-    bool CheckAndAdjustHandle(RectF& paintRect);
+    bool CheckAndAdjustHandle(const RefPtr<SelectionContainerChild>& child, RectF& paintRect);
     bool CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect);
-    bool GetRenderClipValue() const;
     RectF GetSelectAreaFromHandleFallback();
     void HandleOnAskCelia();
     bool IsAskCeliaSupported() const;
@@ -94,6 +95,7 @@ private:
     OffsetF hostPaintOffset_;
     bool isDraggingFirstHandle_ = true;
     bool isFlushingHandleNode_ = false;
+    bool needUpdateViewPortOnMoveDone_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectionSelectOverlay);
 };
 

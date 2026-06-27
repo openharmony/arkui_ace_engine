@@ -23,6 +23,33 @@ ohos_abc("arkgauge") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkimagespan") {
+  sources = [ "./src/arkimagespan.ts" ]
+  output_name = "arkimagespan"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgrid") {
+  sources = [ "./src/arkgrid.ts" ]
+  output_name = "arkgrid"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgriditem") {
+  sources = [ "./src/arkgriditem.ts" ]
+  output_name = "arkgriditem"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"
@@ -41,9 +68,36 @@ ohos_abc("arktextclock") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkprogress") {
+  sources = [ "./src/arkprogress.ts" ]
+  output_name = "arkprogress"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arktexttimer") {
+  sources = [ "./src/arktexttimer.ts" ]
+  output_name = "arktexttimer"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkpatternlock") {
   sources = [ "./src/arkpatternlock.ts" ]
   output_name = "arkpatternlock"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arksymbolspan") {
+  sources = [ "./src/arksymbolspan.ts" ]
+  output_name = "arksymbolspan"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
@@ -68,9 +122,27 @@ ohos_abc("arkqrcode") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkloadingprogress") {
+  sources = [ "./src/arkloadingprogress.ts" ]
+  output_name = "arkloadingprogress"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkbadge") {
+  sources = [ "./src/arkbadge.ts" ]
+  output_name = "arkbadge"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
@@ -89,6 +161,51 @@ ohos_abc("arkimageanimator") {
 ohos_abc("arkdatepicker") {
   sources = [ "./src/arkdatepicker.ts" ]
   output_name = "arkdatepicker"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arklazygridlayout") {
+  sources = [ "./src/arklazygridlayout.ts" ]
+  output_name = "arklazygridlayout"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+ }
+
+ohos_abc("arknavigator") {
+  sources = [ "./src/arknavigator.ts" ]
+  output_name = "arknavigator"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkrefresh") {
+  sources = [ "./src/arkrefresh.ts" ]
+  output_name = "arkrefresh"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arktextpicker") {
+  sources = [ "./src/arktextpicker.ts" ]
+  output_name = "arktextpicker"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkselect") {
+  sources = [ "./src/arkselect.ts" ]
+  output_name = "arkselect"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

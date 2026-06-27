@@ -17,6 +17,7 @@
 
 // SORTED_SECTION
 #include "base/utils/string_utils.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
@@ -334,7 +335,7 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, 
     dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
 }
 
-void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
     dst.x = ArkValue<Ark_Float64>(static_cast<float>(src.GetX()));
     dst.y = ArkValue<Ark_Float64>(static_cast<float>(src.GetY()));

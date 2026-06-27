@@ -18,6 +18,7 @@
 
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 

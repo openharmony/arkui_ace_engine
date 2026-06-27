@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/common/color_inverter.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::NG {
 

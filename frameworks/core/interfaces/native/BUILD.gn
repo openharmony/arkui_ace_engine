@@ -34,6 +34,9 @@ template("ace_core_interfaces_native_node") {
       "node/alphabet_indexer_modifier.cpp",
       "node/atomic_service_modifier.cpp",
       "node/badge_modifier.cpp",
+      "node/node_arc_list_item_modifier.cpp",
+      "node/node_arc_list_modifier.cpp",
+      "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
@@ -98,7 +101,6 @@ template("ace_core_interfaces_native_node") {
       "node/node_list_item_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_loading_progress_modifier.cpp",
-      "node/node_loading_progress_modifier_multi_thread.cpp",
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
@@ -353,32 +355,6 @@ template("ace_core_interfaces_native_node") {
 }
 
 foreach(item, ace_platforms) {
-  ohos_source_set("ace_core_interfaces_native_checkbox_modifier_" + item.name) {
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
-    configs = [ "$ace_root:ace_config" ]
-
-    config = {
-    }
-    if (defined(item.config)) {
-      config = item.config
-    }
-
-    defines = []
-    if (defined(config.defines)) {
-      defines += config.defines
-    }
-
-    cflags_cc = []
-    if (defined(config.cflags_cc)) {
-      cflags_cc += config.cflags_cc
-    }
-
-    sources = [
-      "node/node_checkbox_modifier.cpp",
-    ]
-  }
-
   platform = item.name
   ace_core_interfaces_native_node(
       "ace_core_interfaces_native_node_" + item.name) {

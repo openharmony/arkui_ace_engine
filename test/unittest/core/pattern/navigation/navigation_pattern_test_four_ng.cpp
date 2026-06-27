@@ -463,7 +463,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex001, TestSize.Level1)
     navDestinationNode->pattern_ = nullptr;
 
     RefPtr<UINode> uiNode = navDestinationNode;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     navDestinationNode->pattern_ = navDestinationPattern;
     EXPECT_NE(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     EXPECT_EQ(navDestinationPattern->GetNavigationNode(), nullptr);
@@ -497,7 +497,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex002, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
 
     RefPtr<UINode> uiNode = navDestinationNode;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     EXPECT_EQ(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     EXPECT_EQ(navDestinationPattern->GetNavigationNode(), nullptr);
     EXPECT_EQ(navDestinationPattern->GetNavigationId(), "");
@@ -535,7 +535,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex003, TestSize.Level1)
     navigationNode->propInspectorId_ = NAVIGATION01;
 
     RefPtr<UINode> uiNode = navDestinationNode;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     EXPECT_EQ(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     EXPECT_NE(navDestinationPattern->GetNavigationNode(), nullptr);
     EXPECT_EQ(navDestinationPattern->GetNavigationId(), NAVIGATION01);
@@ -564,7 +564,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex004, TestSize.Level1)
     MockPipelineContext::pipeline_ = nullptr;
 
     RefPtr<UINode> uiNode = nullptr;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     EXPECT_EQ(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
@@ -606,7 +606,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex005, TestSize.Level1)
     navigationNode->pattern_ = nullptr;
 
     RefPtr<UINode> uiNode = nullptr;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     navigationNode->pattern_ = navigationPattern;
     EXPECT_EQ(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     NavigationPatternTestFourNg::TearDownTestSuite();
@@ -643,7 +643,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex006, TestSize.Level1)
     navigationNode->MountToParent(columnNode);
 
     RefPtr<UINode> uiNode = nullptr;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     EXPECT_EQ(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
@@ -679,7 +679,7 @@ HWTEST_F(NavigationPatternTestFourNg, GenerateUINodeByIndex007, TestSize.Level1)
     navigationNode->MountToParent(jsViewNode);
 
     RefPtr<UINode> uiNode = nullptr;
-    navigationPattern->GenerateUINodeByIndex(0, uiNode);
+    navigationPattern->GenerateUINodeByIndex(0, uiNode, false);
     EXPECT_NE(navigationPattern->GetParentCustomNode(), WeakPtr<UINode>(nullptr));
     NavigationPatternTestFourNg::TearDownTestSuite();
 }

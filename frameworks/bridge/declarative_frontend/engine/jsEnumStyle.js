@@ -567,7 +567,7 @@ let BarState;
   BarState[BarState.On = 2] = 'On';
 })(BarState || (BarState = {}));
 
-var EdgeEffect;
+let EdgeEffect;
 (function (EdgeEffect) {
   EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
   EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
@@ -1135,13 +1135,6 @@ let SwiperDisplayMode;
   SwiperDisplayMode[SwiperDisplayMode.STRETCH = 0] = 'STRETCH';
   SwiperDisplayMode[SwiperDisplayMode.AUTO_LINEAR = 1] = 'AUTO_LINEAR';
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
-
-var EdgeEffect;
-(function (EdgeEffect) {
-  EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
-  EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
-  EdgeEffect[EdgeEffect.None = 2] = 'None';
-})(EdgeEffect || (EdgeEffect = {}));
 
 let DatePickerType;
 (function (DatePickerType) {
@@ -2410,6 +2403,10 @@ class DotIndicator extends Indicator {
   }
   space(value) {
     this.spaceValue = value;
+    return this;
+  }
+  indicatorIcon(value) {
+    this.indicatorIconValue = value;
     return this;
   }
 }

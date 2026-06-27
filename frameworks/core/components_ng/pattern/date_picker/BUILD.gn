@@ -43,13 +43,6 @@ build_component_ng("date_picker_pattern_ng") {
     "bridge/datepickerdialog_dynamic_module.cpp",
   ]
 
-  platform_deps = []
-  if (!ace_engine_feature_wearable) {
-    platform_deps += [
-      "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_checkbox_modifier",
-    ]
-  }
-
   if (!is_arkui_x) {
     if (!ace_engine_feature_wearable) {
       ark_sources += [

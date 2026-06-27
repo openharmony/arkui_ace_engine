@@ -17,6 +17,7 @@
 
 #include "draw/canvas.h"
 
+#include "base/geometry/point.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 

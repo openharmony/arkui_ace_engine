@@ -48,6 +48,7 @@ AnimatorEvent GetAnimatorEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, std::strin
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode, event = std::move(eventName)]() {
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ACE_SCORING_EVENT(event);

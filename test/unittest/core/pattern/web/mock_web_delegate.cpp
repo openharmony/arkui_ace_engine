@@ -1281,6 +1281,18 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
     }
     return nullptr;
 }
+std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByParams(
+    int64_t accessibilityId, int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
+    if (g_setReturnStatus == STATUS_TRUE) {
+        return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
+    }
+    return nullptr;
+}
 bool WebDelegate::CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>&, int32_t)
 {
     return GetAccessibilityNodeInfoByFocusMove(-1, 16) != nullptr;

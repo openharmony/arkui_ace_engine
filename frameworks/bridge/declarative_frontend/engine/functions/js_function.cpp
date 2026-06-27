@@ -83,4 +83,19 @@ JSRef<JSVal> JsFunctionBase::ExecuteJS(int argc, JSRef<JSVal> argv[])
     return jsFunction->Call(This(), argc, argv);
 }
 
+// Differs from ExecuteJS, ExecuteJSWithObjCheck will not throw error and trigger crash when thisObj is empty.
+// ExecuteJSWithObjCheck is used for onMeasure and onDraw of CustomSpan now, usually use ExecuteJS above is enough.
+JSRef<JSVal> JsFunctionBase::ExecuteJSWithObjCheck(int argc, JSRef<JSVal> argv[])
+{
+    JS_CALLBACK_DURATION();
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    ACE_FUNCTION_TRACE();
+    auto jsFunction = GetFunction();
+    if (jsFunction.IsEmpty()) {
+        LOGW("js function is null.");
+        return {};
+    }
+    return jsFunction->CallWithObjCheck(This(), argc, argv);
+}
+
 } // namespace OHOS::Ace::Framework

@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -262,7 +263,8 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     dividerOffset.AddX(padding.left.value_or(0));
     dividerOffset.AddY(padding.top.value_or(0));
-    auto marginStart = navigationLayoutProperty->GetDividerStartMargin()->ConvertToPx();
+    auto dividerStartMargin = navigationLayoutProperty->GetDividerStartMargin();
+    auto marginStart = dividerStartMargin.has_value() ? dividerStartMargin->ConvertToPx() : 0.0f;
     dividerOffset.AddY(marginStart);
     geometryNode->SetMarginFrameOffset(dividerOffset);
     dividerWrapper->Layout();

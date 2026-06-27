@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 
@@ -641,7 +642,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
     auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination),
-                                 navigationWeak = WeakClaim(this)](GestureEvent& /*info*/) -> bool {
+                                 navigationWeak = WeakClaim(this)](GestureEvent& info) -> bool {
         auto navDestination = navDestinationWeak.Upgrade();
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "click navigation back button");
         CHECK_NULL_RETURN(navDestination, false);
@@ -662,8 +663,14 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         }
         auto navigation = navigationWeak.Upgrade();
         CHECK_NULL_RETURN(navigation, false);
-        if (navDestination->IsHomeDestination() ||
-            navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
+        bool isUserClick = info.GetPointerEvent() != nullptr;
+        bool isHomeOrRelatedNav = navDestination->IsHomeDestination() ||
+                                  navDestination->GetNavDestinationType() == NavDestinationType::RELATED;
+        if (isHomeOrRelatedNav) {
+            if (!isUserClick) {
+                // if trigger by onbackPressed and result is false, Home or related navdestination don't consume.
+                return false;
+            }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination or related NavDestination");
             return navigation->HandleBackForHomeOrRelatedDestination();
         }
@@ -2025,7 +2032,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         return false;
     }
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
+    if (pattern && pattern->GetCustomNode() != remainChild) {
         // if curNode is visible, need remove in hideNodes_.
         hideNodes_.erase(
             std::remove_if(hideNodes_.begin(), hideNodes_.end(),
@@ -3441,5 +3448,33 @@ void NavigationGroupNode::UpdateMaskNodeVisibility(bool isLeft, VisibleType type
     auto property = node->GetLayoutProperty();
     CHECK_NULL_VOID(property);
     property->UpdateVisibility(type);
+}
+
+void NavigationGroupNode::InitNavigationId()
+{
+    if (recoverable_ || !curId_.empty()) {
+        return;
+    }
+    // support navigation in navigation
+    curId_ = GetTag();
+    auto parentNode = GetParent();
+    while (parentNode) {
+        if (parentNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto navdestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parentNode);
+            CHECK_NULL_CONTINUE(navdestinationNode);
+            curId_ = navdestinationNode->GetTag() + "-" + std::to_string(navdestinationNode->GetIndex());
+        } else if (parentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parentNode);
+            CHECK_NULL_CONTINUE(navigationNode);
+            auto currentId = navigationNode->GetCurId();
+            if (currentId.empty()) {
+                currentId = navigationNode->GetTag();
+            }
+            curId_ = currentId + "-" + curId_;
+        } else if (parentNode->GetTag() == V2::NAVBAR_ETS_TAG) {
+            curId_ = "navBar-" + curId_;
+        }
+        parentNode = parentNode->GetParent();
+    }
 }
 } // namespace OHOS::Ace::NG

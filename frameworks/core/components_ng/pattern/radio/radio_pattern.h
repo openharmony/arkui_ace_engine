@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_PATTERN_H
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
@@ -31,6 +30,7 @@ class RadioTheme;
 }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class ClickEvent;
 class InputEvent;
 class TouchEventImpl;

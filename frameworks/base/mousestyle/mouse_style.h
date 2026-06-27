@@ -159,6 +159,7 @@ public:
     {
         if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
             mouseStyleNodeId_.reset();
+            windowIdWithNode_.reset();
             return true;
         } else {
             return false;
@@ -169,6 +170,7 @@ public:
     {
         CHECK_NULL_RETURN(mouseStyleNodeId_.has_value(), false);
         mouseStyleNodeId_.reset();
+        windowIdWithNode_.reset();
         return true;
     }
     void SetUserSetCursor(bool userSetCursor)
@@ -184,6 +186,14 @@ public:
         return std::get<MouseFormat>(mouseFormat_);
     }
 
+    int32_t GetWindowIdWithNodeId(int32_t nodeId) const
+    {
+        CHECK_NULL_RETURN(windowIdWithNode_.has_value(), 0);
+        CHECK_NULL_RETURN(mouseStyleNodeId_.has_value(), 0);
+        CHECK_NULL_RETURN(mouseStyleNodeId_.value() == nodeId, 0);
+        return windowIdWithNode_.value();
+    }
+
 private:
     void ProcessVsyncMouseStyleChanges(int32_t& windowId, int32_t& changeNodeId, MouseStyleChangeReason& changeReason);
     bool IsMouseStyleChanged() const;
@@ -191,6 +201,7 @@ private:
 
     bool userSetCursor_ = false;
     std::optional<int32_t> mouseStyleNodeId_;
+    std::optional<int32_t> windowIdWithNode_;
     std::variant<MouseFormat, CustomCursorInfo> lastVsyncMouseFormat_ = MouseFormat::DEFAULT;
     std::variant<MouseFormat, CustomCursorInfo> mouseFormat_ = MouseFormat::DEFAULT;
     std::list<MouseStyleChangeLog> vsyncMouseStyleChanges_;

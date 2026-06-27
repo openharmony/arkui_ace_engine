@@ -13,16 +13,29 @@
  * limitations under the License.
  */
 
-#include "base/log/dump_log.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
     isRepeat ? V2::JS_REPEAT_ETS_TAG : V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId), isRepeat_(isRepeat) {}
+
+ArkoalaLazyNode::~ArkoalaLazyNode()
+{
+    UnregisterWindowStateChangedCallback();
+    UnregisterMemoryLevelChangedCallback();
+}
+
+void ArkoalaLazyNode::RegisterArkoalaLazyNode()
+{
+    auto nodePtr = AceType::Claim(this);
+    ElementRegister::GetInstance()->AddUINode(nodePtr);
+}
 
 void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
@@ -182,6 +195,7 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
         return nullptr;
     }
     node4Index_.Put(index, child);
+    sparedIdx_.insert(index);
 
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "GetChild returns node %{public}s for index %{public}d", DumpUINode(child).c_str(), index);
@@ -538,9 +552,9 @@ void ArkoalaLazyNode::InitDragManager(const RefPtr<FrameNode>& child)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = child->GetPattern<GridItemPattern>();
+        auto pattern = NodeModifier::GetGridItemCustomModifier();
         CHECK_NULL_VOID(pattern);
-        pattern->InitDragManager(AceType::Claim(this));
+        pattern->initDragManager(child, AceType::Claim(this));
     }
 }
 
@@ -572,14 +586,14 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = item->GetPattern<GridItemPattern>();
+            auto pattern = NodeModifier::GetGridItemCustomModifier();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->InitDragManager(AceType::Claim(this));
+                pattern->initDragManager(item, AceType::Claim(this));
             } else {
-                pattern->DeInitDragManager();
+                pattern->deInitDragManager(item);
             }
         }
     }
@@ -693,5 +707,216 @@ std::string ArkoalaLazyNode::DumpUINode(const RefPtr<UINode>& node) const
 {
     return (node == nullptr)
         ? "UINode: nullptr" : "UINode: " + node->GetTag() + "(" + std::to_string(node->GetId()) + ")";
+}
+
+void ArkoalaLazyNode::OnWindowShow()
+{
+    ScheduleRestoreCacheTask();
+}
+
+void ArkoalaLazyNode::OnWindowHide()
+{
+    CleanCache(true);
+}
+
+void ArkoalaLazyNode::OnNotifyMemoryLevel(int32_t level)
+{
+    if (level == MEMORY_LEVEL_LOW || level == MEMORY_LEVEL_CRITICAL) {
+        CleanCache(false);
+    }
+}
+
+void ArkoalaLazyNode::RegisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowStateChangedCallback(GetId());
+}
+
+void ArkoalaLazyNode::UnregisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowStateChangedCallback(GetId());
+}
+
+void ArkoalaLazyNode::RegisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddNodesToNotifyMemoryLevel(GetId());
+}
+
+void ArkoalaLazyNode::UnregisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveNodesToNotifyMemoryLevel(GetId());
+}
+
+bool ArkoalaLazyNode::CheckParentFrameNodeVisibility()
+{
+    auto parent = GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    return !(parent->IsDisappearOrNoVisibleArea(context->GetVsyncTime()));
+}
+
+void ArkoalaLazyNode::ScheduleCleanCacheTask()
+{
+    pendingRestoreCache_ = false;
+    CHECK_EQUAL_VOID(pendingCleanCache_, true);
+    pendingCleanCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void ArkoalaLazyNode::ScheduleRestoreCacheTask()
+{
+    pendingCleanCache_ = false;
+    CHECK_EQUAL_VOID(pendingRestoreCache_, true);
+    pendingRestoreCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+    PostMemOptTask();
+}
+
+void ArkoalaLazyNode::TryExecuteScheduledCacheTask()
+{
+    CHECK_EQUAL_VOID(pendingCleanCache_ || pendingRestoreCache_, false);
+    auto timeStamp = GetSysTimestamp();
+    CHECK_EQUAL_VOID(timeStamp - cacheTaskPostTime_ < CACHE_TASK_DELAY_TIME, true);
+    if (pendingCleanCache_) {
+        CHECK_EQUAL_VOID(timeStamp - setActiveRangeTime_ < CACHE_TASK_DELAY_TIME, true);
+        CleanCache(false);
+    } else if (pendingRestoreCache_) {
+        if (!CheckParentFrameNodeVisibility()) {
+            pendingCleanCache_ = false;
+            pendingRestoreCache_ = false;
+            return;
+        }
+        RestoreCache();
+    }
+}
+
+void ArkoalaLazyNode::CleanCache(bool syncClean)
+{
+    if (isRepeat_ &&
+        repeatMemoryOptimizationStrategy_ == RepeatMemoryOptimizationStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        clearCache_();
+        return;
+    }
+    if (!isRepeat_ && options_.memOptStrategy == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        auto weak = AceType::WeakClaim(this);
+        const auto activeRange = activeRangeParam_;
+        // delete nodes in preload area
+        node4Index_.RemoveIf([weak, activeRange](const uint32_t& k, const auto& _) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_RETURN(node, false);
+            auto willRelease = !node->IsInActiveRange(static_cast<int32_t>(k), activeRange);
+            if (willRelease) {
+                node->releaseItemByIndex_(k);
+            }
+            return willRelease;
+        });
+        if (updateRange_) {
+            // trigger TS-side
+            updateRange_(activeRangeParam_.start, activeRangeParam_.end, 0, 0, isLoop_);
+        }
+    }
+    
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+    if (!syncClean) {
+        PostIdleTask();
+    }
+}
+
+void ArkoalaLazyNode::RestoreCache()
+{
+    if (!isRepeat_ &&
+        options_.memOptStrategy == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        for (auto i = 0;i < totalCount_; i++) {
+            if (IsInCacheRange(i, activeRangeParam_) && !IsInActiveRange(i, activeRangeParam_)) {
+                GetFrameChildByIndex(i, true, true, false);
+            }
+        }
+        return;
+    }
+    if (isRepeat_ &&
+        repeatMemoryOptimizationStrategy_ == RepeatMemoryOptimizationStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        for (auto i: sparedIdx_) {
+            if (!IsInCacheRange(i, activeRangeParam_)) {
+                GetFrameChildByIndex(i, true, true, false);
+            }
+        }
+        if (updateRange_) {
+            // trigger TS-side
+            updateRange_(activeRangeParam_.start, activeRangeParam_.end, activeRangeParam_.cacheStart,
+                activeRangeParam_.cacheEnd, isLoop_);
+        }
+    }
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+    PostIdleTask();
+}
+
+void ArkoalaLazyNode::SetNeedPrebuild(bool needPrebuild)
+{
+    needPreBuild_ = needPrebuild;
+}
+
+bool ArkoalaLazyNode::GetNeedPrebuild()
+{
+    return needPreBuild_;
+}
+
+void ArkoalaLazyNode::SetParentVisibility(bool visibility)
+{
+    isParentVisible_ = visibility;
+}
+bool ArkoalaLazyNode::GetParentVisibility()
+{
+    return isParentVisible_;
+}
+
+void ArkoalaLazyNode::PostMemOptTask()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    const uint32_t delay = 1000; // 1 seconds in milliseconds
+    auto weakNode = AceType::WeakClaim(this);
+    taskExecutor->PostDelayedTask(
+        [weakNode]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto visible = node->CheckParentFrameNodeVisibility();
+            if (visible != node->GetParentVisibility()) {
+                node->SetParentVisibility(visible);
+                visible ? node->ScheduleRestoreCacheTask() : node->ScheduleCleanCacheTask();
+            }
+            node->TryExecuteScheduledCacheTask();
+            node->PostMemOptTask();
+        },
+        TaskExecutor::TaskType::UI,
+        delay,
+        "LazyForEachMemOptTask");
+}
+
+void ArkoalaLazyNode::SetRepeatMemoryOptimizationStrategy(int32_t strategy)
+{
+    if (!isRepeat_) {
+        return;
+    }
+    repeatMemoryOptimizationStrategy_ = strategy == 1?
+        RepeatMemoryOptimizationStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION: RepeatMemoryOptimizationStrategy::DEFAULT;
+    if (options_.memOptStrategy == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION ||
+        repeatMemoryOptimizationStrategy_ == RepeatMemoryOptimizationStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        RegisterWindowStateChangedCallback();
+        RegisterMemoryLevelChangedCallback();
+        PostMemOptTask();
+    }
 }
 } // namespace OHOS::Ace::NG

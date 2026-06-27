@@ -27,11 +27,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const char GRID_ETS_TAG[] = "Grid";
+}
 RefPtr<FrameNode> GridModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
 
     return frameNode;
 }

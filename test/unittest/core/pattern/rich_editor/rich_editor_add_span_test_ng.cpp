@@ -280,6 +280,9 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
     options.value = INIT_VALUE_1;
     options.style = style;
     auto index1 = richEditorController->AddTextSpan(options);
+    /**
+     * @tc.steps: step3. check index
+     */
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index2, 1);
@@ -295,10 +298,16 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. add text span
+     */
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.useThemeFontColor = false;

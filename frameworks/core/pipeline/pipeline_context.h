@@ -23,34 +23,27 @@
 #include <set>
 #include <unordered_map>
 #include <utility>
-#include <thread>
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
-#include "base/resource/asset_manager.h"
-#include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
-#include "core/event/pointer_event.h"
 #include "core/components/box/drag_drop_event.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
+#include "core/event/blur_reason.h"
 #include "core/event/event_trigger.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/factories/render_factory.h"
 #include "core/pipeline/pipeline_base.h"
 #ifndef WEARABLE_PRODUCT
 #include "core/event/multimodal/multimodal_manager.h"
-#include "core/event/multimodal/multimodal_subscriber.h"
 #endif
 
 namespace OHOS::Rosen {
@@ -60,6 +53,7 @@ class RSUIDirector;
 namespace OHOS::Ace {
 struct CrownEvent;
 
+class Color;
 class CardTransitionController;
 class ComposedElement;
 class FocusNode;
@@ -82,6 +76,7 @@ struct PageTarget;
 class DialogComponent;
 class SelectPopupComponent;
 class RenderElement;
+class MultimodalSubscriber;
 
 struct WindowBlurInfo {
     float progress_;

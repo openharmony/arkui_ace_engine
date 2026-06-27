@@ -645,16 +645,36 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseItemWOk = ParseJsDimensionVp(itemWidthValue, dimPosition, resItemWidthObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
-    swiperParameters.itemWidth = parseItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseItemWOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("itemWidth");
+        swiperParameters.itemWidth = dimPosition;
+    } else {
+        swiperParameters.itemWidth = defaultSize;
+    }
     bool parseItemHOk = ParseJsDimensionVp(itemHeightValue, dimPosition, resItemHeightObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.itemHeight = parseItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseItemHOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("itemHeight");
+        swiperParameters.itemHeight = dimPosition;
+    } else {
+        swiperParameters.itemHeight = defaultSize;
+    }
     bool parseSelectedItemWOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition, resSelectedItemWidthObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemWidth = parseSelectedItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSelectedItemWOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("selectedItemWidth");
+        swiperParameters.selectedItemWidth = dimPosition;
+    } else {
+        swiperParameters.selectedItemWidth = defaultSize;
+    }
     bool parseSelectedItemHOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition, resSelectedItemHeightObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSelectedItemHOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("selectedItemHeight");
+        swiperParameters.selectedItemHeight = dimPosition;
+    } else {
+        swiperParameters.selectedItemHeight = defaultSize;
+    }
     if (SystemProperties::ConfigChangePerform()) {
         swiperParameters.resourceDimLeftValueObject = resLeftObj;
         swiperParameters.resourceDimTopValueObject = resTopObj;
@@ -668,6 +688,13 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
+    return swiperParameters;
+}
+
+SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSCallbackInfo& info, const JSRef<JSObject>& obj)
+{
+    auto swiperParameters = GetDotIndicatorInfo(obj);
+    JSIndicator::ParseIndicatorIconList(info, obj, swiperParameters);
     return swiperParameters;
 }
 void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
@@ -1047,7 +1074,7 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
                 SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
             } else {
-                SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                SwiperParameters swiperParameters = GetDotIndicatorInfo(info, obj);
                 JSSwiperTheme::ApplyThemeToDotIndicator(swiperParameters, obj);
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
@@ -1055,13 +1082,13 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         } else if (typeParam->IsUndefined()) {
             SetIndicatorController(info);
         } else {
-            SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            SwiperParameters swiperParameters = GetDotIndicatorInfo(info, obj);
             JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
             SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(info, JSRef<JSObject>::New());
         JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
         SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
@@ -1107,12 +1134,21 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         auto parseOk = ParseJsDimensionVp(sizeValue, dimPosition, resItemSizeObj) &&
             (dimPosition.Unit() != DimensionUnit::PERCENT);
         SetIsIndicatorCustomSize(dimPosition, parseOk);
-        swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemWidth =
-            parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemHeight =
-            parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
+        if (parseOk && dimPosition > 0.0_vp) {
+            swiperParameters.parametersByUser.insert("itemWidth");
+            swiperParameters.parametersByUser.insert("itemHeight");
+            swiperParameters.parametersByUser.insert("selectedItemWidth");
+            swiperParameters.parametersByUser.insert("selectedItemHeight");
+            swiperParameters.itemWidth = dimPosition;
+            swiperParameters.itemHeight = dimPosition;
+            swiperParameters.selectedItemWidth = dimPosition;
+            swiperParameters.selectedItemHeight = dimPosition;
+        } else {
+            swiperParameters.itemWidth = swiperIndicatorTheme->GetSize();
+            swiperParameters.itemHeight = swiperIndicatorTheme->GetSize();
+            swiperParameters.selectedItemWidth = swiperIndicatorTheme->GetSize();
+            swiperParameters.selectedItemHeight = swiperIndicatorTheme->GetSize();
+        }
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;

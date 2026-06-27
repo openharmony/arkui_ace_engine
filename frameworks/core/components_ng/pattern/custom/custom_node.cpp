@@ -47,6 +47,16 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
     UINode::Build(extraInfos);
 }
 
+void CustomNode::OnAttachToMainTree(bool val)
+{
+    UINode::OnAttachToMainTree(val);
+    auto memopt = GetMemOpt();
+    SetStaMemopt(memopt);
+    if (staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        StartMemOpt();
+    }
+}
+
 bool CustomNode::Render(int64_t deadline)
 {
     // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
@@ -311,6 +321,14 @@ void CustomNode::DumpInfo()
     FireOnDumpInfoFunc({ "RecyclePool" });
 }
 
+void CustomNode::FireClearParentReusePoolIfNeeded()
+{
+    if (GetMemOpt() <= 0) {
+        return;
+    }
+    FireClearParentReusePoolFunc();
+}
+
 void CustomNode::FireRecycleRenderFunc()
 {
     if (HasRecycleRenderFunc()) {
@@ -457,6 +475,9 @@ void CustomNode::CleanCache(bool syncClean, bool clearAll)
     TAG_LOGI(AceLogTag::ACE_STATE_MGMT,
         "CustomNode.CleanCache id[%{public}d] syncClean[%{public}d]", GetId(), syncClean);
     ACE_SCOPED_TRACE("CustomNode.CleanCache id[%d] syncClean[%d]", GetId(), syncClean);
+    if (staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        FireClearParentReusePoolIfNeeded();
+    }
     if (!syncClean) {
         needCleanCacheOnIdle_ = true;
         stopMemOptAfterRelease_ = clearAll;
@@ -543,6 +564,14 @@ void CustomNode::PostMemOptTask()
             if (visible != node->GetParentVisibility()) {
                 node->SetParentVisibility(visible);
                 visible ? node->CancelScheduledCleanCacheTask() : node->ScheduleCleanCacheTask();
+            }
+            if (node->staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+                node->CancelScheduledCleanCacheTask();
+                auto parentNode = node->GetParentCustomNode();
+                CHECK_NULL_VOID(parentNode);
+                if (!parentNode->CheckParentFrameNodeVisibility()) {
+                    node->FireClearParentReusePoolIfNeeded();
+                }
             }
             node->TryExecuteScheduledCacheTask();
             node->PostMemOptTask();

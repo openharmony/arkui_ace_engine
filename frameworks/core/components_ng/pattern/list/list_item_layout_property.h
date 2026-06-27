@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT ListItemLayoutProperty : public LayoutProperty {
+class ACE_FORCE_EXPORT ListItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListItemLayoutProperty, LayoutProperty);
 
 public:

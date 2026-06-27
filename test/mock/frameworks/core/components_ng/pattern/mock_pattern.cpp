@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/pattern.h"
 
+#include "core/common/container_consts.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -64,7 +66,7 @@ RefPtr<LayoutAlgorithm> Pattern::CreateLayoutAlgorithm()
 
 RefPtr<EventHub> Pattern::CreateEventHub()
 {
-    return nullptr;
+    return MakeRefPtr<EventHub>();
 }
 
 void Pattern::ReadFontScaleFromEnv()
@@ -179,4 +181,8 @@ bool Pattern::HandleTextBoxComponentCommand(
     CHECK_NULL_RETURN(params && params->IsObject(), false);
     return true;
 }
+
+void Pattern::AttachToFrameNode(const WeakPtr<FrameNode>&) {}
+RefPtr<FrameNode> Pattern::GetHost() const { return nullptr; }
+
 } // namespace OHOS::Ace::NG

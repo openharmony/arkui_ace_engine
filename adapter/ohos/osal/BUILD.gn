@@ -32,6 +32,9 @@ template("ace_osal_ohos_source_set") {
     if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
+    if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [
         "hilog:libhilog",

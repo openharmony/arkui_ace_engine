@@ -20,7 +20,6 @@
 #include <functional>
 #include <unordered_map>
 
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace {
@@ -33,25 +32,9 @@ public:
 
     ~PlatformResRegister() override = default;
 
-    void RegisterEvent(const std::string& eventId, const EventCallback&& eventCallback)
-    {
-        eventMap_[eventId] = std::move(eventCallback);
-    }
-
-    void UnregisterEvent(const std::string& eventId)
-    {
-        eventMap_.erase(eventId);
-    }
-
-    void OnEvent(const std::string& eventId, const std::string& param)
-    {
-        auto event = eventMap_.find(eventId);
-        if (event != eventMap_.end() && event->second) {
-            event->second(param);
-        } else {
-            LOGW("failed to find eventId = %{public}s", eventId.c_str());
-        }
-    }
+    void RegisterEvent(const std::string& eventId, const EventCallback&& eventCallback);
+    void UnregisterEvent(const std::string& eventId);
+    void OnEvent(const std::string& eventId, const std::string& param);
 
     virtual bool OnMethodCall(const std::string& method, const std::string& param, std::string& result) = 0;
     virtual int64_t CreateResource(const std::string& resourceType, const std::string& param) = 0;

@@ -731,11 +731,11 @@ export struct ChipComponent {
     .size(this.getChipSize())
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
-    .systemMaterial(this.getBackgroundSystemMaterial())
-    .backgroundColor(this.getChipBackgroundColor())
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
+    .backgroundColor(this.getChipBackgroundColor())
+    .systemMaterial(this.getBackgroundSystemMaterial())
     .responseRegion(this.getChipResponseRegion())
     .scale(this.chipScale)
     .opacity(this.chipOpacity)
@@ -1340,12 +1340,21 @@ export struct ChipComponent {
     return typeof this.chipSize === 'string' && this.chipSize === ChipSize.SMALL;
   }
 
-  getChipBackgroundColor(): ResourceColor {
+  getChipBackgroundColor(): ResourceColor | undefined {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
+      if (!!this.activatedBackgroundSystemMaterial) {
+        return undefined;
+      }
+
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
         this.getColor(this.chipNodeActivatedBackgroundColor, themeChipNode.activatedBackgroundColor);
     }
+
+    if (!!this.backgroundSystemMaterial) {
+      return undefined;
+    }
+
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }

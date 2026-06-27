@@ -155,6 +155,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected static preRenderingPool_: __ReusePool_Internal__ | undefined;
   protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
   public isPreRendered: boolean = false;
+  private __customComponentContext__Internal?: CustomComponentContext;
   public __isGlobalPoolActive : boolean = false;
   static preRenderCounter: number = 0;
 
@@ -225,6 +226,12 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
 
     this.preRenderedChildren_.delete(reuseId);
+
+    const newId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    preRenderedChild.updateId(newId);
+    preRenderedChild.setParent(this as unknown as IView);
+    this.addChild(preRenderedChild as unknown as IView);
+
     preRenderedChild.isPreRendered = false;
     PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
     return true;
@@ -904,12 +911,38 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    * Returns the current reuse pool for this component
    * API exposed to the application
    * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
-  */
+   */
   getReusePool(): IReusePool | undefined {
-    if(this.___reusePool) {
-      return this.___reusePool;
+    const pool = this.___reusePool ?? this.getReusePoolInternal();
+    if (!pool) {
+      return undefined;
     }
-    return this.getReusePoolInternal();
+    // Pass `this` (the calling component) into the pool so preRender() can
+    // bind the builder to it — no .bind(this) needed by the app.
+    pool.setCallerContext(this);
+    return pool;
+  }
+
+  /**
+   * @function __getCustomComponentContext__Internal
+   * @description
+   * Returns a per-instance ICustomComponentContext that captures `this` in a
+   * closure. Called by UIUtils.getCustomComponentContext(). Returning a
+   * dedicated context object (rather than the component itself) isolates the
+   * framework API from any same-named methods an app component may define.
+   * Built once per component instance.
+   * @returns {ICustomComponentContext} The custom component context.
+  */
+  __getCustomComponentContext__Internal(): CustomComponentContext {
+    // Build once; the closure permanently captures `this` (thizz).
+    if (!this.__customComponentContext__Internal) {
+      this.__customComponentContext__Internal = ((thizz: PUV2ViewBase): CustomComponentContext => ({
+        getReusePool(): IReusePool | undefined {
+          return PUV2ViewBase.prototype.getReusePool.call(thizz);
+        }
+      }))(this);
+    }
+    return this.__customComponentContext__Internal;
   }
 
   /**
@@ -1217,10 +1250,25 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         case 'RecyclePool':
           DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
+        case '-h':
+          view.printDFXHeader('JS DFX Dump Help', command);
+          DumpLog.print(0, this.__debugInfoDumpHelp__Internal());
+          break;
         default:
-          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\nRun with -h to see supported commands.\n`);
       }
     });
+  }
+
+  private __debugInfoDumpHelp__Internal(): string {
+    const fmt = (entries: Array<[string, string]>): string => {
+      const width = Math.max(...entries.map((e: [string, string]) => e[0].length));
+      return entries
+        .map(([k, v]: [string, string]) => `  ${k.padEnd(width)}  ${v}`)
+        .join('\n');
+    };
+    return `\nJS DFX Dump Commands:\n${fmt(stateMgmtDFX.DUMP_HELP_COMMANDS)}` +
+           `\n\nModifiers:\n${fmt(stateMgmtDFX.DUMP_HELP_MODIFIERS)}\n`;
   }
 
   private printDFXHeader(header: string, command: DFXCommand): void {

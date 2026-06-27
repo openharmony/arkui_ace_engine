@@ -48,6 +48,15 @@ public:
     }
     void ApplyColumnConstraints() override {}
     void ApplyRowConstraints() override {}
+    void ApplyGeneralConstraints() override {}
+    void SetBoundingBox(const SmartLayoutRect& box) override
+    {
+        boundingBox_ = box;
+    }
+    const SmartLayoutRect& GetBoundingBox() const override
+    {
+        return boundingBox_;
+    }
     int64_t GetNodeId() const override
     {
         return 0;
@@ -83,6 +92,7 @@ private:
     NodePosition position_ = {};
     NodeSize size_ = {};
     ScaleInfo scaleInfo_ = {};
+    SmartLayoutRect boundingBox_ = {};
     LayoutContext context_;
     std::vector<std::shared_ptr<ISmartLayoutNode>> children_;
 };

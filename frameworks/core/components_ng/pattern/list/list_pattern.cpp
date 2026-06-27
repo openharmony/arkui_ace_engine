@@ -415,9 +415,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     predictSnapEndPos_ = predictSnapEndPos;
 
     if (isScrollEnd_) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        FireAccessibilityScrollEndEvent();
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
@@ -479,6 +477,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    if (scrollStop_) {
+        // Reset accessibilityScrollSource_ when scrolling stops or a single-frame jump layout completes
+        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    }
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
@@ -1370,6 +1372,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     SetScrollSource(source);
+    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
@@ -1905,6 +1908,7 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1915,11 +1919,15 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility ListPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    (void)isAccessibility;
     return {
-        [wp = WeakClaim(this)](float moveOffset) -> bool {
+        [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
             auto pattern = wp.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
+            if (isAccessibility) {
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
+            } else {
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
+            }
             pattern->ScrollBy(-moveOffset);
             return true;
         },
@@ -1934,6 +1942,7 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             // When the focus framework calls to find Head and Tail, it should reset. Otherwise, due to scrolling, the
             // newly acquired focus will immediately lose focus and set depend to SELF.
@@ -1954,6 +1963,7 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     bool isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
     bool needFindNextFocusNode = ScrollListItemGroupForFocus(
         nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
@@ -5142,6 +5152,7 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -5400,6 +5411,7 @@ void ListPattern::ScrollToFocusNodeIndex(int32_t index)
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
+        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         auto pipeline = host->GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();

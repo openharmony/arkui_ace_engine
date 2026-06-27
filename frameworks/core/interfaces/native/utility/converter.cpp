@@ -28,6 +28,7 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
@@ -1167,7 +1168,7 @@ float Convert(const Ark_Float32& src)
 }
 
 template<>
-int Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT int Convert(const Ark_Float64& src)
 {
     return static_cast<int>(src);
 }
@@ -2461,7 +2462,8 @@ template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Op
     const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
@@ -2961,7 +2963,7 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 }
 
 template<>
-BorderColorProperty Convert(const Ark_EdgeColors& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_EdgeColors& src)
 {
     BorderColorProperty dst;
     dst.leftColor = OptConvert<Color>(src.left);
@@ -2990,7 +2992,7 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 
 
 template<>
-BorderColorProperty Convert(const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_ResourceColor& src)
 {
     BorderColorProperty dst;
     if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
@@ -3109,7 +3111,7 @@ BorderRadiusPropertyOpt Convert(const Ark_Resource& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 {
     BorderWidthProperty dst;
     dst.leftDimen = OptConvert<Dimension>(src.left);
@@ -3125,7 +3127,7 @@ BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3147,37 +3149,37 @@ static BorderWidthProperty BorderWidthPropertyFromDimension(std::optional<Dimens
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LengthMetrics& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Number& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Float64& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_String& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_String& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Resource& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3343,7 +3345,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
 }
 
 template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
 {
     if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
         if (!dst) {
@@ -3354,7 +3356,7 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 {
     PreviewBadge ret;
     ret.mode = from ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
@@ -3362,7 +3364,7 @@ void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
 {
     PreviewBadge ret;
     if (from >= 0) {
@@ -3406,13 +3408,13 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
 }
 
 template<>
-PickerValueType Convert(const Ark_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_String& src)
 {
     return Converter::Convert<std::string>(src);
 }
 
 template<>
-PickerValueType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_Resource& src)
 {
     auto value = Converter::OptConvert<std::string>(src);
     if (value) {
@@ -3422,20 +3424,20 @@ PickerValueType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerValueType Convert(const Array_ResourceStr& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_ResourceStr& src)
 {
     auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
     return Squash(value);
 }
 
 template<>
-PickerValueType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_String& src)
 {
     return Converter::Convert<std::vector<std::string>>(src);
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3445,7 +3447,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_I32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3594,7 +3596,7 @@ void AssignCast(
 }
 
 template<>
-PickerRangeType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_String& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     std::vector<std::string> tmp;
@@ -3610,7 +3612,7 @@ PickerRangeType Convert(const Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_Array_String& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     std::vector<std::vector<std::string>> tmp;
@@ -3627,7 +3629,7 @@ PickerRangeType Convert(const Array_Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Ark_Resource& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
@@ -3644,7 +3646,7 @@ PickerRangeType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
@@ -3653,7 +3655,7 @@ PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);

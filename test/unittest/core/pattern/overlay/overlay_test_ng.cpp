@@ -1824,7 +1824,8 @@ HWTEST_F(OverlayTestNg, DialogTest011, TestSize.Level1)
      * @tc.steps: step3. call OpenCustomDialog for contentNode.
      * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
      */
-    overlayManager->OpenCustomDialog(dialogParam, nullptr);
+    std::function<void(int32_t)> openCallbackFst = nullptr;
+    overlayManager->OpenCustomDialog(dialogParam, std::move(openCallbackFst));
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 
     /**

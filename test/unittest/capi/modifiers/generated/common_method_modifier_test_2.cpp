@@ -14,6 +14,7 @@
  */
 
 #include "common_method_modifier_test.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 using namespace TestConst::CommonMethod;

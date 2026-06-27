@@ -14,7 +14,7 @@
  */
 import {
   Resource, ResourceColor, FontWeight, ResourceStr, ShadowOptions, Component, Builder, Padding,
-  LocalizedPadding, LocalizedMargin, EditableTextOnChangeCallback, Callback, UIContext, Row, Text, SymbolGlyph,
+  LocalizedPadding, LocalizedMargin, EditableTextOnChangeCallback, Callback, Row, Text, SymbolGlyph,
   SymbolEffectStrategy, SymbolEffect, Image, ImageFit, TextOverflow, TouchEvent, TouchType, List, LazyForEach, ListItem,
   DragItemInfo, Alignment, DragEvent, IDataSource, DataChangeListener, Visibility, GestureModifier,
   CustomDialogController, UIGestureEvent, LongPressGestureHandler, Margin, ShadowStyle, Stack, Column, Divider,
@@ -29,6 +29,7 @@ import {
 } from '@ohos.arkui.stateManagement'
 
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
@@ -427,6 +428,7 @@ export class NodeInfo {
   public fontColor: ResourceColor = '';
 
   constructor(node: NodeItem, nodeParam: NodeParam) {
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.node = node;
     this.nodeParam = nodeParam;
     this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(nodeParam);
@@ -441,22 +443,22 @@ export class NodeInfo {
     this.nodeHeight = NODE_HEIGHT;
     this.nodeLeftPadding = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET; // calculate left padding
     this.nodeColor = $r('sys.color.ohos_id_color_background');
-    this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
-    this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
+    this.nodeIsShow = (node.nodeLevel > 0) ? false : true;
+    this.listItemHeight = (node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
     this.isShowTitle = true;
     this.isShowInputText = false;
     this.isSelected = false;
     this.status = {
       normal: $r('sys.color.ohos_id_color_background_transparent'),
-      hover: this.treeViewTheme.itemHoverBgColor,
-      press: this.treeViewTheme.itemPressedBgColor,
-      selected: this.treeViewTheme.itemSelectedBgColor,
+      hover: treeViewThemeTemp.itemHoverBgColor,
+      press: treeViewThemeTemp.itemPressedBgColor,
+      selected: treeViewThemeTemp.itemSelectedBgColor,
       highLight: $r('sys.color.ohos_id_color_activated')
     };
 
     this.nodeBorder = {
       borderWidth: BORDER_WIDTH_NONE,
-      borderColor: this.treeViewTheme.borderFocusedColor,
+      borderColor: treeViewThemeTemp.borderFocusedColor,
       borderRadius: $r('sys.float.ohos_id_corner_radius_clicked')
     };
     this.flagLineLeftMargin = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
@@ -2075,8 +2077,16 @@ export class TreeController {
         } else {
           let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
           if (uiContent) {
-            primaryTitle =
-              (uiContent as common.UIAbilityContext).resourceManager.getStringSync((nodeParam.primaryTitle as Resource).id as Long)
+            try {
+              primaryTitle =
+                (uiContent as common.UIAbilityContext).resourceManager
+                  .getStringSync((nodeParam.primaryTitle as Resource).id as Long)
+            } catch (error) {
+              let code: number | undefined = (error as BusinessError).code;
+              let message: string | undefined = (error as BusinessError).message;
+              hilog.error(0x3900, 'TreeView', `getStringSync failed, code: ${code}, message: ${message}`);
+              primaryTitle = '';
+            }
           }
         }
       }
@@ -3428,9 +3438,16 @@ export class ListNodeDataSource extends BasicDataSource {
           } else {
             let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
             if (uiContent) {
-              title =
-                (uiContent as common.UIAbilityContext).resourceManager
-                  .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+              try {
+                title =
+                  (uiContent as common.UIAbilityContext).resourceManager
+                    .getStringSync((this.nodeIdAndSubtitleMap.get(currentNodeId) as Resource).id as Long) as string
+              } catch (error) {
+                let code: number | undefined = (error as BusinessError).code;
+                let message: string | undefined = (error as BusinessError).message;
+                hilog.error(0x3900, 'TreeView', `getStringSync failed, code: ${code}, message: ${message}`);
+                title = '';
+              }
             }
           }
         }
@@ -3678,8 +3695,16 @@ export class ListNodeDataSource extends BasicDataSource {
                   } else {
                     let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
                     if (uiContent) {
-                      nodeInfo.getNodeItem().mainTitleNode.title =
-                        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                      try {
+                        nodeInfo.getNodeItem().mainTitleNode.title =
+                          (uiContent as common.UIAbilityContext).resourceManager
+                            .getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
+                      } catch (error) {
+                        let code: number | undefined = (error as BusinessError).code;
+                        let message: string | undefined = (error as BusinessError).message;
+                        hilog.error(0x3900, 'TreeView', `getStringSync failed, code: ${code}, message: ${message}`);
+                        nodeInfo.getNodeItem().mainTitleNode.title = '';
+                      }
                     }
                   }
                 }
@@ -5476,12 +5501,13 @@ export class MainTitleNode extends NodeBaseInfo {
 
   constructor(mainTitleName: ResourceStr) {
     super();
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.mainTitleName = mainTitleName;
     this.itemWidth = ITEM_WIDTH;
     this.itemHeight = ITEM_HEIGHT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.mainTitleSetting = {
-      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontColor: treeViewThemeTemp.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };
@@ -5559,11 +5585,12 @@ export class InputText extends NodeBaseInfo {
 
   constructor() {
     super();
+    const treeViewThemeTemp: TreeViewTheme = TreeViewTheme.getInstance();
     this.itemWidth = ITEM_WIDTH;
     this.itemHeight = ITEM_HEIGHT_INPUT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.inputTextSetting = {
-      fontColor: this.treeViewTheme.primaryTitleFontColor,
+      fontColor: treeViewThemeTemp.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };

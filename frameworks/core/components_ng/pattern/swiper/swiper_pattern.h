@@ -19,7 +19,6 @@
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
@@ -34,6 +33,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #endif
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class JSIndicatorControllerBase;
 struct SwiperItemInfoNG;
 
@@ -1624,6 +1624,8 @@ private:
     VelocityTracker velocityTracker_;
     Offset offsetXY_;
     std::optional<float> lastDragByOffset_;
+
+    bool lastSetRenderGroup_ = false;
 };
 } // namespace OHOS::Ace::NG
 

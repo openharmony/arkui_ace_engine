@@ -205,6 +205,8 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const;
     void SetIsPostEventResult(bool isPostEventResult);
     bool IsPostEventResult() const;
+    void SetIsPostTouchEventResult(bool isPostTouchEventResult);
+    bool IsPostTouchEventResult() const;
 
 private:
     virtual bool ShouldResponse()
@@ -224,6 +226,7 @@ protected:
     int32_t nodeId_ = -1;
     Axis direction_ = Axis::NONE;
     bool isPostEventResult_ = false;
+    bool isPostTouchEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

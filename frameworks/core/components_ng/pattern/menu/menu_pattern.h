@@ -38,7 +38,6 @@
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 constexpr double MENU_ANIMATION_MAX_SCALE = 1.0f;
 constexpr double MENU_ANIMATION_MIN_OPACITY = 0.0f;
@@ -81,6 +80,12 @@ public:
         : targetId_(targetId), targetTag_(std::move(tag)), type_(type)
     {}
     ~MenuPattern() override = default;
+
+    // Whether a touch point (given in the host node's local coordinate space) is still inside the host's
+    // frame bounds. Shared hit criterion for touch-up-to-dismiss used by both MenuPattern and
+    // CustomMenuItemPattern, mirroring ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu dismisses" share the same criterion.
+    static bool IsOffsetInNodeBounds(const RefPtr<FrameNode>& host, const Offset& offset);
 
     bool IsAtomicNode() const override
     {
@@ -828,7 +833,7 @@ public:
 
     OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
-    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex = 0);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -841,6 +846,9 @@ protected:
     }
     virtual void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
+
+    // Whether the default menu shadow should be applied, decided by the system material
+    bool ShouldUpdateShadow() const;
 
 private:
     void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
@@ -927,6 +935,8 @@ private:
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
+    // true once the finger has moved out of the menu bounds during the current touch sequence
+    bool movedOutOfRegion_ = false;
     const int32_t targetId_ = -1;
     const std::string targetTag_;
     MenuType type_ = MenuType::MENU;

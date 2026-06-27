@@ -23,8 +23,11 @@
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -181,6 +184,90 @@ bool TextSelectionChild::GetClipHandleViewPortForChild(const RefPtr<FrameNode>& 
     BaseTextSelectGeometryUtils::UpdateClipHandleViewPort(host, GetRenderClipValue(), contentRect);
     rect = contentRect;
     return true;
+}
+
+std::optional<RectF> TextSelectionChild::GetAncestorNodeViewPortForChild()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    if (CanClipHandleWithViewPort()) {
+        RectF viewPort;
+        if (GetClipHandleViewPortForChild(host, viewPort)) {
+            return viewPort;
+        }
+    }
+
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
+        if (scrollableContainer) {
+            return parent->GetTransformRectRelativeToWindow();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
+std::vector<AncestorNodeViewPortInfo> TextSelectionChild::GetAncestorNodeViewPortInfos()
+{
+    std::vector<AncestorNodeViewPortInfo> infos;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, infos);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, infos);
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
+        if (scrollableContainer) {
+            auto viewPort = parent->GetTransformRectRelativeToWindow();
+            AncestorNodeViewPortInfo info;
+            info.ancestorNode = parent;
+            info.viewPort = viewPort;
+            infos.emplace_back(info);
+        }
+        auto renderContext = parent->GetRenderContext();
+        if (renderContext && renderContext->GetClipEdge().value_or(false)) {
+            RectF visibleRect;
+            RectF frameRect;
+            parent->GetVisibleRect(visibleRect, frameRect);
+            AncestorNodeViewPortInfo info;
+            info.ancestorNode = parent;
+            info.viewPort = visibleRect;
+            infos.emplace_back(info);
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return infos;
+}
+
+HandleVisibleContentResult TextSelectionChild::GetHandleVisibleContentRect(
+    const RectF& paintRect, RectF& visibleContentRect, HandleLevelMode handleLevelMode)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, HandleVisibleContentResult::INVISIBLE);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, HandleVisibleContentResult::INVISIBLE);
+    auto contentRect = pattern->GetTextContentRect();
+    if (!GetRenderClipValue()) {
+        if (handleLevelMode == HandleLevelMode::EMBED) {
+            return HandleVisibleContentResult::VISIBLE;
+        }
+        auto localPaintRect = paintRect;
+        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetChildPaintOffsetWithoutTransform());
+        localPaintRect.SetOffset(
+            OffsetF(localPaintRect.GetX() + localPaintRect.Width() / 2.0f, localPaintRect.GetY()));
+        visibleContentRect = contentRect.CombineRectT(localPaintRect);
+        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + pattern->GetTextPaintOffset());
+        visibleContentRect = BaseTextSelectGeometryUtils::GetVisibleRect(host, visibleContentRect);
+        return HandleVisibleContentResult::NEED_CHECK;
+    }
+    visibleContentRect = RectF(contentRect.GetOffset() + pattern->GetTextPaintOffset(), contentRect.GetSize());
+    if (handleLevelMode == HandleLevelMode::OVERLAY) {
+        visibleContentRect = BaseTextSelectGeometryUtils::GetVisibleRect(host, visibleContentRect);
+    }
+    return HandleVisibleContentResult::NEED_CHECK;
 }
 
 void TextSelectionChild::SelectTextByIndex(int32_t startIndex, int32_t endIndex)
@@ -383,6 +470,11 @@ bool TextSelectionChild::HasOrUpdateRenderTransform()
 {
     UpdateTransformFlag();
     return childHasTransform_;
+}
+
+bool TextSelectionChild::CanClipHandleWithViewPort()
+{
+    return !HasOrUpdateRenderTransform();
 }
 
 void TextSelectionChild::UpdateTransformFlag()

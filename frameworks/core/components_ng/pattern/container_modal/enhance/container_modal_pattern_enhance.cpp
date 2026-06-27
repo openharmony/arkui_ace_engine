@@ -39,6 +39,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 namespace OHOS::Ace::NG {
 namespace {
 

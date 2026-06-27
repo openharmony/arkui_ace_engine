@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/particle_property.h"
@@ -83,6 +84,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/render/adapter/transition_modifier.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -342,11 +344,57 @@ void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier, Rosen::Mod
     CHECK_NULL_VOID(property);
     property->RequestCancelAnimation();
 }
+
+std::optional<RectF> GetContentFrameRect(const RefPtr<FrameNode>& host, RectF rect, bool adjustRSFrameByContentRect)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    if (adjustRSFrameByContentRect) {
+        auto contentRect = geometryNode->GetContentRect();
+        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
+        rect.SetSize(contentRect.GetSize());
+        return rect;
+    }
+    auto&& padding = geometryNode->GetPadding();
+    if (padding) {
+        rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
+        auto size = rect.GetSize();
+        MinusPaddingToSize(*padding, size);
+        rect.SetSize(size);
+    }
+    return rect;
+}
+
+std::optional<RectF> GetRSFrameRect(const RefPtr<FrameNode>& host, const RectF& boundsRect,
+    const std::optional<OffsetF>& frameOffset, bool useContentRectForRSFrame, bool adjustRSFrameByContentRect)
+{
+    if (frameOffset.has_value()) {
+        return RectF(boundsRect.GetX() + frameOffset->GetX(), boundsRect.GetY() + frameOffset->GetY(),
+            boundsRect.Width(), boundsRect.Height());
+    }
+    if (useContentRectForRSFrame) {
+        return GetContentFrameRect(host, boundsRect, adjustRSFrameByContentRect);
+    }
+    return boundsRect;
+}
+
+void SetBoundsAndFrameToRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, const RectF& boundsRect, const RectF& frameRect)
+{
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetBoundsAndFrame({boundsRect.GetX(), boundsRect.GetY(), boundsRect.Width(), boundsRect.Height()},
+        {frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height()});
+}
 } // namespace
 
 std::timed_mutex RosenRenderContext::taskMtx_;
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
+
+RosenRenderContext::RosenRenderContext()
+    : mixedRenderChildList_(std::make_unique<RosenMixedRenderChildList>())
+{}
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
@@ -364,7 +412,7 @@ RosenRenderContext::~RosenRenderContext()
     auto host = GetHost();
     if (host) {
         host->RemoveExtraCustomProperty("RS_NODE");
-        mixedRenderChildList_.Reset(host);
+        mixedRenderChildList_->Reset(host);
     }
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
 }
@@ -845,21 +893,20 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode, bool
 void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (rsTextureExport_) {
         rsTextureExport_->UpdateBufferInfo(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     }
     if (handleChildBounds_) {
         SetChildBounds(paintRect);
     }
-    if (useContentRectForRSFrame_) {
-        SetContentRectToFrame(paintRect);
+    auto frameHost = frameOffset_.has_value() || !useContentRectForRSFrame_ ? nullptr : GetHost();
+    auto frameRect = GetRSFrameRect(frameHost, paintRect, frameOffset_, useContentRectForRSFrame_,
+        adjustRSFrameByContentRect_);
+    if (frameRect.has_value()) {
+        SetBoundsAndFrameToRSNode(rsNode_, paintRect, frameRect.value());
     } else {
-        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    }
-    if (frameOffset_.has_value()) {
-        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
-            paintRect.Width(), paintRect.Height());
+        rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        SetContentRectToFrame(paintRect);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2821,12 +2868,13 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         gRect = rect;
         return rect;
     }
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
-    auto skew = rsNode_->GetStagingProperties().GetSkew();
-    auto perspective = rsNode_->GetStagingProperties().GetPersp();
-    auto scale = rsNode_->GetStagingProperties().GetScale();
-    auto center = rsNode_->GetStagingProperties().GetPivot();
-    auto degree = rsNode_->GetStagingProperties().GetRotation();
+    auto transform = rsNode_->GetStagingProperties().GetAllTransformPropertyValues();
+    const auto& translate = transform.translate;
+    const auto& skew = transform.skew;
+    const auto& perspective = transform.persp;
+    const auto& scale = transform.scale;
+    const auto& center = transform.pivot;
+    auto degree = transform.rotation;
     // calculate new pos.
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -3110,11 +3158,12 @@ RectF RosenRenderContext::GetPaintRectWithTransformWithoutDegree()
     if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         return rect;
     }
-    auto translate = rsNode_->GetStagingProperties().GetTranslate();
-    auto skew = rsNode_->GetStagingProperties().GetSkew();
-    auto perspective = rsNode_->GetStagingProperties().GetPersp();
-    auto scale = rsNode_->GetStagingProperties().GetScale();
-    auto center = rsNode_->GetStagingProperties().GetPivot();
+    auto transform = rsNode_->GetStagingProperties().GetAllTransformPropertyValues();
+    const auto& translate = transform.translate;
+    const auto& skew = transform.skew;
+    const auto& perspective = transform.persp;
+    const auto& scale = transform.scale;
+    const auto& center = transform.pivot;
     auto degree = 0;
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -4522,15 +4571,13 @@ void RosenRenderContext::SetPositionToRSNode()
                 rect.Height(), frameNode->GetId(), frameNode->GetTag().c_str());
         }
     }
-    rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    if (useContentRectForRSFrame_) {
-        SetContentRectToFrame(rect);
+    auto frameRect = GetRSFrameRect(frameNode, rect, frameOffset_, useContentRectForRSFrame_,
+        adjustRSFrameByContentRect_);
+    if (frameRect.has_value()) {
+        SetBoundsAndFrameToRSNode(rsNode_, rect, frameRect.value());
     } else {
-        rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    }
-    if (frameOffset_.has_value()) {
-        rsNode_->SetFrame(
-            rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(), rect.Width(), rect.Height());
+        rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        SetContentRectToFrame(rect);
     }
     frameNode->OnSyncGeometryFrameFinish(rect);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
@@ -4986,7 +5033,7 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNod
 
 bool RosenRenderContext::IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode)
 {
-    return mixedRenderChildList_.IsFrameRenderChild(rsNode);
+    return mixedRenderChildList_->IsFrameRenderChild(rsNode);
 }
 
 void RosenRenderContext::NotifyMixedListChanged()
@@ -4999,81 +5046,112 @@ void RosenRenderContext::NotifyMixedListChanged()
 
 int32_t RosenRenderContext::GetMixedRenderChildCount()
 {
-    return mixedRenderChildList_.GetChildCount();
+    return mixedRenderChildList_->GetChildCount();
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderChildAt(int32_t index)
 {
-    return mixedRenderChildList_.GetChildAt(index);
+    return mixedRenderChildList_->GetChildAt(index);
 }
 
 int32_t RosenRenderContext::GetMixedRenderChildIndexByRSNode(
     const std::shared_ptr<Rosen::RSNode>& rsNode)
 {
-    return mixedRenderChildList_.GetChildIndexByRSNode(rsNode);
+    return mixedRenderChildList_->GetChildIndexByRSNode(rsNode);
 }
 
 std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderSibling(
     const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset)
 {
-    return mixedRenderChildList_.GetSibling(rsNode, offset);
+    return mixedRenderChildList_->GetSibling(rsNode, offset);
 }
 
 bool RosenRenderContext::GetMixedRenderChildInsertIndexAfterRSNode(
     const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex)
 {
-    return mixedRenderChildList_.GetInsertIndexAfterRSNode(rsNode, mixedIndex);
+    return mixedRenderChildList_->GetInsertIndexAfterRSNode(rsNode, mixedIndex);
 }
 
 void RosenRenderContext::InsertPureRenderChildAt(
     const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
 {
-    if (mixedRenderChildList_.InsertPureRenderChildAt(GetHost(), childRSNode, index)) {
+    if (mixedRenderChildList_->InsertPureRenderChildAt(WeakPtr<FrameNode>(GetHost()), childRSNode, index)) {
         NotifyMixedListChanged();
     }
 }
 
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const
+{
+    CHECK_NULL_RETURN(child, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(child);
+    if (frameNode) {
+        return GetRsNodeByFrame(frameNode);
+    }
+    std::list<RefPtr<FrameNode>> frameNodes;
+    child->GenerateSelfVisibleFrameWithTransition(frameNodes);
+    if (frameNodes.empty()) {
+        return nullptr;
+    }
+    return GetRsNodeByFrame(frameNodes.front());
+}
+
 void RosenRenderContext::InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
 {
-    if (mixedRenderChildList_.InsertFrameChildBefore(GetHost(), child, nextSibling)) {
+    CHECK_NULL_VOID(child);
+    mixedRenderChildList_->RemoveFrameChild(child);
+    auto childRSNode = ResolveMixedFrameChildRSNode(child);
+    if (mixedRenderChildList_->InsertFrameChildBefore(
+        WeakPtr<FrameNode>(GetHost()), child, childRSNode, nextSibling)) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode)
 {
-    if (mixedRenderChildList_.RemovePureRenderChild(childRSNode)) {
+    if (mixedRenderChildList_->RemovePureRenderChild(childRSNode)) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::RemoveMixedFrameChild(const RefPtr<UINode>& child)
 {
-    if (mixedRenderChildList_.RemoveFrameChild(child)) {
+    if (mixedRenderChildList_->RemoveFrameChild(child)) {
         NotifyMixedListChanged();
     }
 }
 
 bool RosenRenderContext::CanSwitchToSingleIfRenderNode()
 {
-    return mixedRenderChildList_.CanSwitchToSingleIfRenderNode();
+    return mixedRenderChildList_->CanSwitchToSingleIfRenderNode();
 }
 
 void RosenRenderContext::ResetMixedRenderChildren()
 {
-    mixedRenderChildList_.Reset(GetHost());
+    mixedRenderChildList_->Reset(GetHost());
 }
 
 void RosenRenderContext::ClearMixedPureRenderChildren()
 {
-    if (mixedRenderChildList_.ClearPureRenderChildren()) {
+    if (mixedRenderChildList_->ClearPureRenderChildren()) {
         NotifyMixedListChanged();
     }
 }
 
 void RosenRenderContext::SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children)
 {
-    if (mixedRenderChildList_.SyncFrameChildren(GetHost(), children)) {
+    bool changed = false;
+    RefPtr<UINode> nextSibling;
+    auto host = WeakPtr<FrameNode>(GetHost());
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto child = *iter;
+        if (child) {
+            mixedRenderChildList_->RemoveFrameChild(child);
+        }
+        auto childRSNode = ResolveMixedFrameChildRSNode(child);
+        changed |= mixedRenderChildList_->InsertFrameChildBefore(host, child, childRSNode, nextSibling);
+        nextSibling = child;
+    }
+    if (changed) {
         NotifyMixedListChanged();
     }
 }
@@ -5092,7 +5170,7 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::BuildMixedTarget
         }
     };
 
-    auto targetRSNodes = mixedRenderChildList_.BuildTargetRSNodes(GetHost());
+    auto targetRSNodes = mixedRenderChildList_->BuildTargetRSNodes(WeakPtr<FrameNode>(GetHost()));
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> targetNodeMap;
     for (const auto& childRSNode : targetRSNodes) {
         if (childRSNode) {
@@ -7690,22 +7768,9 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (adjustRSFrameByContentRect_) {
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto contentRect = geometryNode->GetContentRect();
-        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
-        rect.SetSize(contentRect.GetSize());
-    } else {
-        auto&& padding = host->GetGeometryNode()->GetPadding();
-        // minus padding to get contentRect
-        if (padding) {
-            rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
-            auto size = rect.GetSize();
-            MinusPaddingToSize(*padding, size);
-            rect.SetSize(size);
-        }
-    }
+    auto frameRect = GetContentFrameRect(host, rect, adjustRSFrameByContentRect_);
+    CHECK_NULL_VOID(frameRect.has_value());
+    rect = frameRect.value();
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
 }
 
@@ -9101,6 +9166,7 @@ void RosenRenderContext::SetMaterialWithQualityLevel(
     FREE_RS_CONTEXT_CHECK(SetMaterialWithQualityLevel, materialFilter, quality);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetMaterialWithQualityLevel(materialFilter, static_cast<Rosen::FilterQuality>(quality));
+    RequestNextFrame();
 }
 
 void RosenRenderContext::ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,

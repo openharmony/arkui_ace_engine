@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_TEXTPICKER_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
@@ -28,7 +28,7 @@ class JSTextPickerTheme {
 public:
     static void ApplyTheme()
     {
-        auto themePicker = JSViewAbstract::GetTheme<PickerTheme>();
+        auto themePicker = NG::ArkTSUtils::GetTheme<PickerTheme>();
         CHECK_NULL_VOID(themePicker);
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {

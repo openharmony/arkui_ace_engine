@@ -46,6 +46,9 @@ public:
 
     virtual void ApplyColumnConstraints() = 0;
     virtual void ApplyRowConstraints() = 0;
+    virtual void ApplyGeneralConstraints() = 0;
+    virtual void SetBoundingBox(const SmartLayoutRect& box) = 0;
+    virtual const SmartLayoutRect& GetBoundingBox() const = 0;
 
     virtual int64_t GetNodeId() const = 0;
     virtual const std::string& GetName() const = 0;

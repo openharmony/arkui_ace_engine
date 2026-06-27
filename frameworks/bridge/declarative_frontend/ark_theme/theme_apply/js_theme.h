@@ -18,6 +18,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/base/log/log.h"
 #include "ui/view/theme/token_theme.h"
 
 #define COLORS_NUMBER (::OHOS::Ace::TokenColors::TOTAL_NUMBER)

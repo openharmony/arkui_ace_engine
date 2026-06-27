@@ -113,6 +113,19 @@ ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
     return option;
 }
 
+ArkUI_TransitionEffect* OH_ArkUI_CreateIdentityTransitionEffect()
+{
+    ArkUI_TransitionEffect* option = new ArkUI_TransitionEffect { ARKUI_TRANSITION_EFFECT_IDENTITY };
+    option->translate = nullptr;
+    option->scale = nullptr;
+    option->rotate = nullptr;
+    option->appear = nullptr;
+    option->disappear = nullptr;
+    option->combine = nullptr;
+    option->animation = nullptr;
+    return option;
+}
+
 void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* option)
 {
     CHECK_NULL_VOID(option);

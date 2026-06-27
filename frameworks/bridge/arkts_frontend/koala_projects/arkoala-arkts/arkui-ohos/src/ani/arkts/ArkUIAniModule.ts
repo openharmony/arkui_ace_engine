@@ -31,9 +31,10 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
-import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
-import { Resource } from '#generated';
+import { KeyboardAvoidMode, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
+import { AnimationStatus, Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
@@ -280,6 +281,7 @@ export class ArkUIAniModule {
         resourceObjectKPointer: KPointer, options?: AnimationOptions): void
     native static _Drawable_CreateAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
         src: string, options?: AnimationOptions): void
+    native static _Drawable_CreatePictureDrawable(value: PictureDrawableDescriptor, picture: image.Picture): void
     native static _Drawable_CreatePixelMap(value: DrawableDescriptor): image.PixelMap
     native static _Drawable_CreateForeground(value: LayeredDrawableDescriptor): DrawableDescriptor
     native static _Drawable_CreateBackground(value: LayeredDrawableDescriptor): DrawableDescriptor
@@ -289,6 +291,8 @@ export class ArkUIAniModule {
     native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
     native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
     native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_SetHdrComposition(value: PictureDrawableDescriptor, config: HdrCompositionConfig): void
+    native static _Drawable_Invalidate(value: DrawableDescriptor): void
     native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor
     native static _Drawable_DestructDrawable(ptr: KPointer): void
     native static _Drawable_AnimationControllerStart(value: AnimationController): void

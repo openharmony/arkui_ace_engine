@@ -18,6 +18,7 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/render_context.h"
@@ -420,6 +421,9 @@ void ControlInteractionBase::UpdateLightPositionAndColor(RefPtr<FrameNode>& targ
     renderContext->UpdateLightPosition(TranslateOptions(Dimension(Dimension(x).ConvertToVp(), DimensionUnit::VP),
         Dimension(Dimension(y).ConvertToVp(), DimensionUnit::VP),
         Dimension(LIGHT_EFFECT_POSITION_Z, DimensionUnit::VP)));
+    auto colorMode = MaterialUtils::GetNodeColorMode(targetNode);
+    ResourceParseUtilsBase::ParseResColorWithColorMode(
+        lightEffectOptions->colorResObj, lightEffectOptions->color, colorMode);
     renderContext->UpdateLightColor(lightEffectOptions->color);
 }
 

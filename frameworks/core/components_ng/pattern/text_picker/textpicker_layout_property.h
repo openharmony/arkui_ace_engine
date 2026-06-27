@@ -19,7 +19,6 @@
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
@@ -29,6 +28,45 @@
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
+namespace {
+inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
+{
+    static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
+        { FontWeight::W100, "100" },
+        { FontWeight::W200, "200" },
+        { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" },
+        { FontWeight::W500, "500" },
+        { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" },
+        { FontWeight::W800, "800" },
+        { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "FontWeight.Bold" },
+        { FontWeight::NORMAL, "FontWeight.Normal" },
+        { FontWeight::BOLDER, "FontWeight.Bolder" },
+        { FontWeight::LIGHTER, "FontWeight.Lighter" },
+        { FontWeight::MEDIUM, "FontWeight.Medium" },
+        { FontWeight::REGULAR, "FontWeight.Regular" },
+    };
+
+    auto index = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
+    return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
+}
+inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
+{
+    static const LinearEnumMapNode<TextOverflow, std::string> textOverflowTable[] = {
+        { TextOverflow::NONE, "TextOverflow.None" },
+        { TextOverflow::CLIP, "TextOverflow.Clip" },
+        { TextOverflow::ELLIPSIS, "TextOverflow.Ellipsis" },
+        { TextOverflow::MARQUEE, "TextOverflow.Marquee" },
+    };
+
+    auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
+    return index < 0 ? "TextOverflow.Clip" : textOverflowTable[index].value;
+}
+}
 class ACE_EXPORT TextPickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(TextPickerLayoutProperty, LinearLayoutProperty);
 
@@ -157,7 +195,7 @@ public:
 
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
-        disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+        disappearFont->Put("weight", ConvertWrapFontWeightToStirng(
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
@@ -165,24 +203,24 @@ public:
         disappearTextStyle->Put("minFontSize", GetDisappearMinFontSize().value_or(Dimension()).ToString().c_str());
         disappearTextStyle->Put("maxFontSize", GetDisappearMaxFontSize().value_or(Dimension()).ToString().c_str());
         disappearTextStyle->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(GetDisappearTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+            ConvertWrapTextOverflowToString(GetDisappearTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
-        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        normalFont->Put("weight", ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
         normalTextStyle->Put("minFontSize", GetMinFontSize().value_or(Dimension()).ToString().c_str());
         normalTextStyle->Put("maxFontSize", GetMaxFontSize().value_or(Dimension()).ToString().c_str());
         normalTextStyle->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+            ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("textStyle", normalTextStyle, filter);
 
         auto selectedFont = JsonUtil::Create(true);
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
-        selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+        selectedFont->Put("weight", ConvertWrapFontWeightToStirng(
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
@@ -190,7 +228,7 @@ public:
         selectedTextStyle->Put("minFontSize", GetSelectedMinFontSize().value_or(Dimension()).ToString().c_str());
         selectedTextStyle->Put("maxFontSize", GetSelectedMaxFontSize().value_or(Dimension()).ToString().c_str());
         selectedTextStyle->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(GetSelectedTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+            ConvertWrapTextOverflowToString(GetSelectedTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto canLoop = GetCanLoopValue(true);
         json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
@@ -200,14 +238,14 @@ public:
 
         auto defaultFont = JsonUtil::Create(true);
         defaultFont->Put("size", GetDefaultFontSizeValue(Dimension(0)).ToString().c_str());
-        defaultFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+        defaultFont->Put("weight", ConvertWrapFontWeightToStirng(
             GetDefaultWeight().value_or(FontWeight::NORMAL)).c_str());
         auto defaultTextStyle = JsonUtil::Create(true);
         defaultTextStyle->Put("color", GetDefaultColor().value_or(Color::BLACK).ColorToString().c_str());
         defaultTextStyle->Put("minFontSize", GetDefaultMinFontSize().value_or(Dimension()).ToString().c_str());
         defaultTextStyle->Put("maxFontSize", GetDefaultMaxFontSize().value_or(Dimension()).ToString().c_str());
         defaultTextStyle->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+            ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         defaultTextStyle->Put("font", defaultFont);
         json->PutExtAttr("defaultTextStyle", defaultTextStyle, filter);
         auto crownSensitivity = GetDigitalCrownSensitivity();

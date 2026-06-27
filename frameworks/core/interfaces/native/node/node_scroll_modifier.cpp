@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/interfaces/native/node/grid_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -374,7 +375,11 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
         CHECK_NULL_RETURN(controller, nullptr);
         return AceType::Claim(controller);
     } else if (frameNode->GetTag() == V2::GRID_ETS_TAG) {
-        return GridModelNG::GetOrCreateController(frameNode);
+        auto* modifier = NodeModifier::GetGridModifier();
+        CHECK_NULL_RETURN(modifier, nullptr);
+        auto* controller = reinterpret_cast<ScrollControllerBase*>(modifier->getController(node));
+        CHECK_NULL_RETURN(controller, nullptr);
+        return AceType::Claim(controller);
     }
     return nullptr;
 }
@@ -537,6 +542,7 @@ void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->ScrollPage(next, animation);
 }
 

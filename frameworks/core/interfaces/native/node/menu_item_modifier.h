@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier();
 const CJUIMenuItemModifier* GetCJUIMenuItemModifier();
-const ArkUIMenuItemInnerModifier* GetMenuItemInnerModifier();
+ACE_FORCE_EXPORT const ArkUIMenuItemInnerModifier* GetMenuItemInnerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_ITEM_MODIFIER_H

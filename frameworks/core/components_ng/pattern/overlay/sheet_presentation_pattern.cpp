@@ -76,6 +76,8 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
+#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -150,7 +152,7 @@ void SheetPresentationPattern::OnModifyDone()
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         } else if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial) &&
-                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+                   SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::EXQUISITE) {
             renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
     }
@@ -591,6 +593,52 @@ RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const R
     return parentNode;
 }
 
+void SheetPresentationPattern::SetSheetCloseIconMaterial()
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::ULTRA_THIN;
+    options.applyShadow = true;
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        options.colorInvert = true;
+        options.interactive = true;
+        LightEffectOptions lightEffectOptions;
+        options.lightEffectOptions = lightEffectOptions;
+    }
+    material->SetImmersiveOptions(options);
+
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto closeIconSymbolColor = sheetTheme->GetCloseIconSymbolColor();
+    closeIconSymbolColor.SetPlaceholder(ColorPlaceholder::ICON_PRIMARY);
+    auto iconSymbol = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(iconSymbol);
+    auto symbolLayoutProperty = iconSymbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolLayoutProperty);
+    symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+}
+
+void SheetPresentationPattern::ClearSheetCloseIconMaterial()
+{
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), nullptr);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto renderContext = sheetCloseIcon->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+}
+
 void SheetPresentationPattern::SetSheetRenderMaterial()
 {
     auto host = GetHost();
@@ -607,6 +655,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
         } else {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
         }
+        SetSheetCloseIconMaterial();
     }
 }
 
@@ -640,6 +689,7 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
+        ClearSheetCloseIconMaterial();
     }
 }
 
@@ -1795,10 +1845,10 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    // - has systemMaterial and not SMOOTH -> return
-    // - has systemMaterial and SMOOTH -> update default backgroundColor
+    // - has systemMaterial and EXQUISITE -> return
+    // - has systemMaterial and not EXQUISITE -> update default backgroundColor
     // - no systemMaterial and sheetStyle.backgroundColor has value -> return
-    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) ||
+    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) ||
         (!sheetStyle.systemMaterial && sheetStyle.backgroundColor.has_value())) {
         return;
     }
@@ -2806,6 +2856,8 @@ void SheetPresentationPattern::ScrollTo(float height)
         layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
             CalcLength(GetScrollHeight() - maxScrollDecreaseHeight)));
         auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+        // ScrollTo is only invoked from keyboard-avoid / rotation paths (user-triggered), classify as USER
+        scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     }
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2846,6 +2898,8 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
         CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
     // And then scroll move the content with '-height' offset
     auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+    // Same passive keyboard-avoid pan as ScrollTo — only reached from internal ScrollTo call, classify as USER
+    scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
     scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     return true;
 }
@@ -4501,7 +4555,7 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     auto renderContext = sheetNode->GetRenderContext();
     if (!currSheetStyle.systemMaterial) {
         renderContext->UpdateBackgroundColor(backgroundColor);
-    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH &&
+    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::EXQUISITE &&
                sheetTheme) {
         renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
     }

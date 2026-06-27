@@ -114,6 +114,9 @@ constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
 constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
+constexpr uint32_t MIN_FRAME_RATE = 60;
+constexpr uint32_t MAX_FRAME_RATE = 120;
+constexpr uint32_t EXPECTED_FRAME_RATE = 120;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
 const DistortionParam TERMINAL_DISTORTION_PARAM {
     .luCorner = { 0, 0 },
@@ -739,6 +742,23 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
+    UpdateDrawFocusLevel();
+}
+
+void DialogPattern::UpdateDrawFocusLevel()
+{
+    std::list<DialogContentNode> textNodeList = {
+        DialogContentNode::TITLE,
+        DialogContentNode::SUBTITLE,
+        DialogContentNode::MESSAGE,
+    };
+    for (const auto& textNode : textNodeList) {
+        auto node = contentNodeMap_[textNode];
+        CHECK_NULL_CONTINUE(node);
+        auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_CONTINUE(accessibilityProperty);
+        accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    }
 }
 
 void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
@@ -795,6 +815,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -863,6 +884,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -930,6 +952,7 @@ void DialogPattern::UpdateContentTextProperty(
     const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
 {
     contentProp->UpdateEnableSmallLanguageTruncation(true);
+    contentProp->UpdatePunctuationOverflow(true);
     if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         contentProp->UpdateOrphanCharOptimization(true);
     }
@@ -1332,6 +1355,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateEnableSmallLanguageTruncation(true);
+    textProps->UpdatePunctuationOverflow(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1428,6 +1452,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateEnableSmallLanguageTruncation(true);
+    props->UpdatePunctuationOverflow(true);
     if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         props->UpdateOrphanCharOptimization(true);
     }
@@ -2393,17 +2418,23 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(contentNode, false);
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (NeedDistortion() && isDistortAnimationExecuting_.value_or(false)) {
+    if (NeedDistortion() && !isDialogShow_) {
         renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
-    CHECK_NULL_RETURN(!isDistortAnimationExecuting_.has_value(), false);
-
-    if (NeedDistortion()) {
-        PlayDistortion();
-    }
-    if (NeedEdgeLight()) {
-        PlayFlowLight();
-    }
+    CHECK_EQUAL_RETURN(isDialogShow_, false, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto dialogPattern = weak.Upgrade();
+        CHECK_NULL_VOID(dialogPattern);
+        if (dialogPattern->NeedDistortion()) {
+            dialogPattern->PlayDistortion();
+        }
+        if (dialogPattern->NeedEdgeLight()) {
+            dialogPattern->PlayFlowLight();
+        }
+    });
+    isDialogShow_ = false;
     return true;
 }
 
@@ -3544,6 +3575,9 @@ void DialogPattern::PlayDistortion()
         .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
     };
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+        AceType::MakeRefPtr<FrameRateRange>(MIN_FRAME_RATE, MAX_FRAME_RATE, EXPECTED_FRAME_RATE);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(1000);
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
     AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
@@ -3553,7 +3587,6 @@ void DialogPattern::PlayDistortion()
         }
     });
 
-    isDistortAnimationExecuting_ = true;
     /**
      * Stage 5: Add barrel distortion
      * Add slight barrel distortion effect, parameter {0.5, 0.5}
@@ -3592,15 +3625,6 @@ void DialogPattern::PlayDistortion()
         for (const auto& childContext : childContexts) {
             childContext->UpdateForegroundFilterDistortionParam(param3);
         }
-    }, [weakRender = WeakPtr<RenderContext>(renderContext), weak = WeakClaim(this)]() {
-        // Clear SDF shape after animation completes
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "dialog completes distortion animation.");
-        auto render = weakRender.Upgrade();
-        CHECK_NULL_VOID(render);
-        render->SetSDFShape(nullptr);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isDistortAnimationExecuting_ = false;
     });
 
     /**

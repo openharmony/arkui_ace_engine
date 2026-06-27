@@ -1144,7 +1144,8 @@ void NavDestinationPattern::SetPendingToClean(bool pendingToClean)
         navigationPattern->DecreasePendingToCleanCount();
         auto navigationStack = navigationPattern->GetNavigationStack();
         if (navigationStack) {
-            navigationStack->MarkAutoCleanedFlag(GetNavDestinationId());
+            auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+            navigationStack->MarkAutoCleanedFlag(GetNavDestinationId(), hostNode ? hostNode->CanRecovery() : true);
         }
     }
 }

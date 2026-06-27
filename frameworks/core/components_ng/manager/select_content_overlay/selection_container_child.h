@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 #include "base/geometry/offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -50,9 +51,20 @@ enum class SelectionAreaResultType {
     CLIPPED_OUT,
 };
 
+enum class HandleVisibleContentResult {
+    INVISIBLE,
+    VISIBLE,
+    NEED_CHECK,
+};
+
 struct ScrollableParentResult {
     WeakPtr<ScrollablePattern> scrollable;
     bool isInsideContainer = false;
+};
+
+struct AncestorNodeViewPortInfo {
+    WeakPtr<FrameNode> ancestorNode;
+    RectF viewPort;
 };
 
 struct SelectionIndexRange {
@@ -173,6 +185,13 @@ public:
 
     virtual std::optional<RectF> GetFirstHandleRect() = 0;
     virtual std::optional<RectF> GetSecondHandleRect() = 0;
+    virtual HandleVisibleContentResult GetHandleVisibleContentRect(
+        const RectF& paintRect, RectF& visibleContentRect, HandleLevelMode handleLevelMode) = 0;
+    virtual std::optional<RectF> GetAncestorNodeViewPortForChild() = 0;
+    virtual std::vector<AncestorNodeViewPortInfo> GetAncestorNodeViewPortInfos()
+    {
+        return {};
+    }
     virtual RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType)
     {
         resultType = SelectionAreaResultType::NONE;
