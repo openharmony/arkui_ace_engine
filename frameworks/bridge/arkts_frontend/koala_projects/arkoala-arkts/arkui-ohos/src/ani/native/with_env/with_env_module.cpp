@@ -34,6 +34,7 @@ constexpr ani_size KEY_VALUE_ARGC = 2;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_LTR = 0;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_RTL = 1;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_AUTO = 2;
+constexpr char DIRECTION_ENUM_NAME[] = "arkui.component.enums.Direction";
 
 ani_ref GetUndefinedRef(ani_env* env)
 {
@@ -266,6 +267,41 @@ ani_object CreateCustomEnvValueResultObject(ani_env* env, bool isFind, ani_ref o
     return res;
 }
 
+std::optional<ani_ref> ConvertCustomUpdateValueToAniRef(ani_env* env,
+    const std::optional<ArkUIAniEnvironmentQueryResult>& value)
+{
+    if (!value) {
+        return std::nullopt;
+    }
+    return ConvertQueryResultToAniRef(env, *value);
+}
+
+std::optional<ani_ref> ConvertSystemValueToAniRef(ani_env* env,
+    const std::string& key, const std::optional<ArkUIAniEnvironmentQueryResult>& value)
+{
+    if (key == NG::ENV_KEY_DIRECTION) {
+        if (value) {
+            if (value->type != ARKUI_ANI_ENV_VALUE_TYPE_ENUM) {
+                return GetUndefinedRef(env);
+            }
+            return ConvertQueryResultToAniRef(env, *value);
+        }
+        ArkUIAniEnvironmentQueryResult result;
+        result.type = ARKUI_ANI_ENV_VALUE_TYPE_ENUM;
+        result.intValue = FRONTEND_DIRECTION_AUTO;
+        result.enumName = DIRECTION_ENUM_NAME;
+        return ConvertQueryResultToAniRef(env, result);
+    }
+    if (key == NG::ENV_KEY_FONT_SCALE) {
+        CHECK_NULL_RETURN(value, std::nullopt);
+        if (value->type != ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE) {
+            return GetUndefinedRef(env);
+        }
+        return ConvertQueryResultToAniRef(env, *value);
+    }
+    return std::nullopt;
+}
+
 void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm, const std::string& key,
     const std::optional<ArkUIAniEnvironmentQueryResult>& value, bool isCustom, const char* warning)
 {
@@ -289,8 +325,10 @@ void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, 
         params[0] = reinterpret_cast<ani_ref>(keyString.value());
     }
     ani_size argc = 1;
-    if (value) {
-        params[1] = ConvertQueryResultToAniRef(env, *value);
+    auto valueArg = isCustom ? ConvertCustomUpdateValueToAniRef(env, value)
+                             : ConvertSystemValueToAniRef(env, key, value);
+    if (valueArg) {
+        params[1] = *valueArg;
         CHECK_NULL_VOID(params[1]);
         argc = KEY_VALUE_ARGC;
     }
@@ -387,11 +425,14 @@ ani_ref CustomNodeFindSystemEnvValueByKey(
     const auto* withEnvModifier = GetWithEnvModifier();
     CHECK_NULL_RETURN(withEnvModifier, GetUndefinedRef(env));
     CHECK_NULL_RETURN(withEnvModifier->findSystemEnvValueByKey, GetUndefinedRef(env));
+    auto keyValue = KeyToString(env, key);
     ArkUIAniEnvironmentQueryResult result;
-    if (!withEnvModifier->findSystemEnvValueByKey(ToNodeHandle(ptr), KeyToString(env, key), result)) {
-        return GetUndefinedRef(env);
+    std::optional<ArkUIAniEnvironmentQueryResult> queryResult;
+    if (withEnvModifier->findSystemEnvValueByKey(ToNodeHandle(ptr), keyValue, result)) {
+        queryResult.emplace(std::move(result));
     }
-    return ConvertQueryResultToAniRef(env, result);
+    auto aniValue = ConvertSystemValueToAniRef(env, keyValue, queryResult);
+    return aniValue ? *aniValue : GetUndefinedRef(env);
 }
 
 void CustomNodeRegisterOnCustomEnvUpdate(
