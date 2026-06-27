@@ -122,6 +122,10 @@ export struct DatePickerComponent {
   @State endMonth: int = DatePickerConstant.MAX_MONTH;
   @State startDay: int = DatePickerConstant.MIN_DAY;
   @State endDay: int = 31;
+  @State lunarStartMonth: int = DatePickerConstant.MIN_MONTH;
+  @State lunarEndMonth: int = DatePickerConstant.MAX_MONTH;
+  @State lunarStartDay: int = DatePickerConstant.MIN_DAY;
+  @State lunarEndDay: int = 30;
   @State startHour: int = DatePickerConstant.MIN_HOUR;
   @State endHour: int = DatePickerConstant.MAX_HOUR;
   @State startMinute: int = DatePickerConstant.MIN_MINUTE;
@@ -165,7 +169,7 @@ export struct DatePickerComponent {
     this.formatter = new intl.NumberFormat();
     this.yearFormatter = new intl.NumberFormat(this.localeID, { useGrouping: false });
     
-    // Issue 2: Save user-set lunar value, decide whether to apply based on current language
+    // Save user-set lunar value, decide whether to apply based on current language
     this.userLunar = this.lunar;
     const isChinese: boolean = this.isChineseLocale();
     if (!isChinese) {
@@ -301,7 +305,17 @@ export struct DatePickerComponent {
     }
   
     this.monthArray = [];
-    for (let i: int = DatePickerConstant.MIN_MONTH; i <= DatePickerConstant.MAX_MONTH; i++) {
+    let startLunarMonthIndex: int = DatePickerConstant.MIN_MONTH;
+    let endLunarMonthIndex: int = DatePickerConstant.MAX_MONTH;
+    
+    if (this.selectedYear === this.startYear) {
+      startLunarMonthIndex = this.lunarStartMonth;
+    }
+    if (this.selectedYear === this.endYear) {
+      endLunarMonthIndex = this.lunarEndMonth;
+    }
+    
+    for (let i: int = startLunarMonthIndex; i <= endLunarMonthIndex; i++) {
       this.monthArray.push(this.formatLunarMonth(i, false));
     }
   
@@ -311,7 +325,18 @@ export struct DatePickerComponent {
   private initLunarDayArray(): void {
     this.dayArray = [];
     const lunarDays: int = this.getLunarDaysInMonth(this.selectedYear, this.selectedMonth);
-    for (let i: int = DatePickerConstant.MIN_DAY; i <= lunarDays; i++) {
+    
+    let startLunarDayIndex: int = DatePickerConstant.MIN_DAY;
+    let endLunarDayIndex: int = lunarDays;
+    
+    if (this.selectedYear === this.startYear && this.selectedMonth === this.lunarStartMonth) {
+      startLunarDayIndex = this.lunarStartDay;
+    }
+    if (this.selectedYear === this.endYear && this.selectedMonth === this.lunarEndMonth) {
+      endLunarDayIndex = Math.min(this.lunarEndDay, lunarDays).toInt();
+    }
+    
+    for (let i: int = startLunarDayIndex; i <= endLunarDayIndex; i++) {
       this.dayArray.push(this.formatLunarDay(i));
     }
   }
@@ -378,16 +403,41 @@ export struct DatePickerComponent {
     
     try {
       // Find the gregorian date for the given lunar date
-      // Iterate through gregorian dates to find matching lunar month and day
+      // First search in gregorianYear (most likely match)
+      // Then expand to neighboring years if needed
+      
+      // Priority 1: Search in gregorianYear
       for (let month: int = 0; month < 12; month++) {
         for (let day: int = 1; day <= 31; day++) {
           const testDate: Date = new Date(gregorianYear, month, day);
           calendar.setTime(testDate);
+          const currentLunarYear: int = calendar.get('year').toInt();
           const currentLunarMonth: int = calendar.get('month').toInt();
           const currentLunarDay: int = calendar.get('date').toInt();
           
+          // Match lunar month and day
           if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
             return testDate;
+          }
+        }
+      }
+      
+      // Priority 2: Search in gregorianYear-1 and gregorianYear+1
+      for (let yearOffset: int = -1; yearOffset <= 1; yearOffset += 2) {
+        const year: int = gregorianYear + yearOffset;
+        for (let month: int = 0; month < 12; month++) {
+          for (let day: int = 1; day <= 31; day++) {
+            const testDate: Date = new Date(year, month, day);
+            calendar.setTime(testDate);
+            const currentLunarMonth: int = calendar.get('month').toInt();
+            const currentLunarDay: int = calendar.get('date').toInt();
+            
+            if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
+              // Verify this date is within our valid range
+              if (testDate.getFullYear() >= this.startYear && testDate.getFullYear() <= this.endYear) {
+                return testDate;
+              }
+            }
           }
         }
       }
@@ -866,7 +916,7 @@ export struct DatePickerComponent {
   }
   
   private onOptionsChange(str: string): void {
-    // Issue 4: Restore defaults for undefined/null values
+    // Restore defaults for undefined/null values
     if (this.options.displayMode !== undefined && this.options.displayMode !== null) {
       this.displayMode = this.options.displayMode!;
     } else {
@@ -912,7 +962,7 @@ export struct DatePickerComponent {
   }
   
   private updateDateOptions(dateOptions: DateOptions): void {
-    // Issue 4: Restore defaults for undefined/null values
+    // Restore defaults for undefined/null values
     if (dateOptions.mode !== undefined && dateOptions.mode !== null) {
       this.dateMode = dateOptions.mode!;
     } else {
@@ -920,7 +970,7 @@ export struct DatePickerComponent {
     }
   
     if (dateOptions.lunar !== undefined && dateOptions.lunar !== null) {
-      // Issue 2: Save user-set value first, then decide based on current language
+      // Save user-set value first, then decide based on current language
       this.userLunar = dateOptions.lunar!;
       const isChinese: boolean = this.isChineseLocale();
       if (isChinese) {
@@ -1074,6 +1124,24 @@ export struct DatePickerComponent {
       this.endMonth = DatePickerConstant.MAX_MONTH;
       this.endDay = 31;
     }
+    
+    // Calculate lunar date range when in lunar mode
+    if (this.lunar && this.lunarCalendar !== null) {
+      const startGregorian: Date = new Date(this.startYear, this.startMonth, this.startDay);
+      this.lunarCalendar!.setTime(startGregorian);
+      this.lunarStartMonth = this.lunarCalendar!.get('month').toInt();
+      this.lunarStartDay = this.lunarCalendar!.get('date').toInt();
+      
+      const endGregorian: Date = new Date(this.endYear, this.endMonth, this.endDay);
+      this.lunarCalendar!.setTime(endGregorian);
+      this.lunarEndMonth = this.lunarCalendar!.get('month').toInt();
+      this.lunarEndDay = this.lunarCalendar!.get('date').toInt();
+    } else {
+      this.lunarStartMonth = DatePickerConstant.MIN_MONTH;
+      this.lunarEndMonth = DatePickerConstant.MAX_MONTH;
+      this.lunarStartDay = DatePickerConstant.MIN_DAY;
+      this.lunarEndDay = 30;
+    }
   
     const now = new Date();
     let selectedDate: Date | undefined = undefined;
@@ -1108,12 +1176,27 @@ export struct DatePickerComponent {
     // Extract year, month, day from adjusted date
     if (this.lunar && this.lunarCalendar !== null) {
       this.lunarCalendar!.setTime(targetDate);
-      const lunarMonth: int = this.lunarCalendar!.get('month');
-      const lunarDay: int = this.lunarCalendar!.get('date');
-    
       this.selectedYear = targetDate.getFullYear().toInt();
-      this.selectedMonth = lunarMonth;
-      this.selectedDay = lunarDay;
+      this.selectedMonth = this.lunarCalendar!.get('month').toInt();
+      this.selectedDay = this.lunarCalendar!.get('date').toInt();
+      
+      // Ensure selected date is within lunar range based on gregorian year
+      if (this.selectedYear === this.startYear) {
+        if (this.selectedMonth < this.lunarStartMonth) {
+          this.selectedMonth = this.lunarStartMonth;
+          this.selectedDay = this.lunarStartDay;
+        } else if (this.selectedMonth === this.lunarStartMonth && this.selectedDay < this.lunarStartDay) {
+          this.selectedDay = this.lunarStartDay;
+        }
+      }
+      if (this.selectedYear === this.endYear) {
+        if (this.selectedMonth > this.lunarEndMonth) {
+          this.selectedMonth = this.lunarEndMonth;
+          this.selectedDay = this.lunarEndDay;
+        } else if (this.selectedMonth === this.lunarEndMonth && this.selectedDay > this.lunarEndDay) {
+          this.selectedDay = this.lunarEndDay;
+        }
+      }
     } else {
       this.selectedYear = targetDate.getFullYear().toInt();
       this.selectedMonth = targetDate.getMonth().toInt();
@@ -1136,7 +1219,7 @@ export struct DatePickerComponent {
   }
   
   private updateTimeOptions(timeOptions: TimeOptions): void {
-    // Issue 4: Restore defaults for undefined/null values
+    // Restore defaults for undefined/null values
     if (timeOptions.format !== undefined && timeOptions.format !== null) {
       this.timeFormat = timeOptions.format!;
     } else {
@@ -1286,9 +1369,24 @@ export struct DatePickerComponent {
   private getResult(): DatePickerComponentResult {
     const result = new DatePickerComponentResult();
   
-    result.year = this.selectedYear;
-    result.month = this.selectedMonth;
-    result.day = this.selectedDay;
+    if (this.lunar && this.lunarCalendar !== null) {
+      // Convert lunar date to gregorian date for return value
+      const gregorianDate: Date | undefined = this.convertLunarToGregorian(this.selectedYear, this.selectedMonth, this.selectedDay);
+      if (gregorianDate !== undefined) {
+        result.year = gregorianDate.getFullYear().toInt();
+        result.month = gregorianDate.getMonth().toInt();
+        result.day = gregorianDate.getDate().toInt();
+      } else {
+        // Fallback if conversion fails
+        result.year = this.selectedYear;
+        result.month = this.selectedMonth;
+        result.day = this.selectedDay;
+      }
+    } else {
+      result.year = this.selectedYear;
+      result.month = this.selectedMonth;
+      result.day = this.selectedDay;
+    }
   
     // Always return 24-hour format (selectedHour is always 0-23)
     result.hour = this.selectedHour;
@@ -1301,47 +1399,146 @@ export struct DatePickerComponent {
 private onYearChange(selectedIndex: int): void {
     this.selectedYear = this.startYear + selectedIndex;
     
-    // Update month array based on new year
-    this.initMonthArray();
+    if (this.lunar) {
+      // Calculate valid month range first
+      let startLunarMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      let endLunarMonthIndex: int = DatePickerConstant.MAX_MONTH;
+      
+      if (this.selectedYear === this.startYear) {
+        startLunarMonthIndex = this.lunarStartMonth;
+      }
+      if (this.selectedYear === this.endYear) {
+        endLunarMonthIndex = this.lunarEndMonth;
+      }
+      
+      // Adjust selectedMonth BEFORE changing monthArray
+      if (this.selectedMonth < startLunarMonthIndex) {
+        this.selectedMonth = startLunarMonthIndex;
+      }
+      if (this.selectedMonth > endLunarMonthIndex) {
+        this.selectedMonth = endLunarMonthIndex;
+      }
+      
+      // Now update month array
+      this.monthArray = [];
+      for (let i: int = startLunarMonthIndex; i <= endLunarMonthIndex; i++) {
+        this.monthArray.push(this.formatLunarMonth(i, false));
+      }
+      
+      // Adjust selectedDay BEFORE generating day array
+      const lunarDays: int = this.getLunarDaysInMonth(this.selectedYear, this.selectedMonth);
+      let startLunarDayIndex: int = DatePickerConstant.MIN_DAY;
+      let endLunarDayIndex: int = lunarDays;
+      
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.lunarStartMonth) {
+        startLunarDayIndex = this.lunarStartDay;
+      }
+      if (this.selectedYear === this.endYear && this.selectedMonth === this.lunarEndMonth) {
+        endLunarDayIndex = Math.min(this.lunarEndDay, lunarDays).toInt();
+      }
+      
+      if (this.selectedDay < startLunarDayIndex) {
+        this.selectedDay = startLunarDayIndex;
+      }
+      if (this.selectedDay > endLunarDayIndex) {
+        this.selectedDay = endLunarDayIndex;
+      }
+      
+      // Generate day array
+      this.dayArray = [];
+      for (let i: int = startLunarDayIndex; i <= endLunarDayIndex; i++) {
+        this.dayArray.push(this.formatLunarDay(i));
+      }
+    } else {
+      // Calculate valid month range first
+      let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      let endMonthIndex: int = DatePickerConstant.MAX_MONTH;
+      if (this.selectedYear === this.startYear) {
+        startMonthIndex = this.startMonth;
+      }
+      if (this.selectedYear === this.endYear) {
+        endMonthIndex = this.endMonth;
+      }
+      
+      // Adjust selectedMonth first
+      if (this.selectedMonth < startMonthIndex) {
+        this.selectedMonth = startMonthIndex;
+      }
+      if (this.selectedMonth > endMonthIndex) {
+        this.selectedMonth = endMonthIndex;
+      }
+      
+      // Then update month and day arrays
+      this.initMonthArray();
+      this.updateDaysArray();
+    }
     
-    // Adjust selectedMonth to be within new month range
-    let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-    let endMonthIndex: int = DatePickerConstant.MAX_MONTH;
-    if (this.selectedYear === this.startYear) {
-      startMonthIndex = this.startMonth;
-    }
-    if (this.selectedYear === this.endYear) {
-      endMonthIndex = this.endMonth;
-    }
-    
-    if (this.selectedMonth < startMonthIndex) {
-      this.selectedMonth = startMonthIndex;
-    }
-    if (this.selectedMonth > endMonthIndex) {
-      this.selectedMonth = endMonthIndex;
-    }
-    
-    // Update day array based on new year and adjusted month
-    this.updateDaysArray();
     this.dateOnChange(this.getResult());
   }
   
   private onMonthChange(selectedIndex: int): void {
-    let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-    if (this.selectedYear === this.startYear) {
-      startMonthIndex = this.startMonth;
+    if (this.lunar) {
+      let startLunarMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      if (this.selectedYear === this.startYear) {
+        startLunarMonthIndex = this.lunarStartMonth;
+      }
+      this.selectedMonth = startLunarMonthIndex + selectedIndex;
+      
+      // Adjust selectedDay BEFORE generating day array
+      const lunarDays: int = this.getLunarDaysInMonth(this.selectedYear, this.selectedMonth);
+      let startLunarDayIndex: int = DatePickerConstant.MIN_DAY;
+      let endLunarDayIndex: int = lunarDays;
+      
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.lunarStartMonth) {
+        startLunarDayIndex = this.lunarStartDay;
+      }
+      if (this.selectedYear === this.endYear && this.selectedMonth === this.lunarEndMonth) {
+        endLunarDayIndex = Math.min(this.lunarEndDay, lunarDays).toInt();
+      }
+      
+      if (this.selectedDay < startLunarDayIndex) {
+        this.selectedDay = startLunarDayIndex;
+      }
+      if (this.selectedDay > endLunarDayIndex) {
+        this.selectedDay = endLunarDayIndex;
+      }
+      
+      // Generate day array without adjusting selectedDay
+      this.dayArray = [];
+      for (let i: int = startLunarDayIndex; i <= endLunarDayIndex; i++) {
+        this.dayArray.push(this.formatLunarDay(i));
+      }
+    } else {
+      let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      if (this.selectedYear === this.startYear) {
+        startMonthIndex = this.startMonth;
+      }
+      this.selectedMonth = startMonthIndex + selectedIndex;
+      this.updateDaysArray();
+      }
+     this.dateOnChange(this.getResult());
+   }
+   
+   private onDayChange(selectedIndex: int): void {
+    if (this.lunar) {
+      let startLunarDayIndex: int = DatePickerConstant.MIN_DAY;
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.lunarStartMonth) {
+        startLunarDayIndex = this.lunarStartDay;
+      }
+      this.selectedDay = startLunarDayIndex + selectedIndex;
+      
+      // Ensure selectedDay doesn't exceed lunar days in month
+      const lunarDays: int = this.getLunarDaysInMonth(this.selectedYear, this.selectedMonth);
+      if (this.selectedDay > lunarDays) {
+        this.selectedDay = lunarDays;
+      }
+    } else {
+      let startDayIndex: int = DatePickerConstant.MIN_DAY;
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+        startDayIndex = this.startDay;
+      }
+      this.selectedDay = startDayIndex + selectedIndex;
     }
-    this.selectedMonth = startMonthIndex + selectedIndex;
-    this.updateDaysArray();
-    this.dateOnChange(this.getResult());
-  }
-  
-  private onDayChange(selectedIndex: int): void {
-    let startDayIndex: int = DatePickerConstant.MIN_DAY;
-    if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
-      startDayIndex = this.startDay;
-    }
-    this.selectedDay = startDayIndex + selectedIndex;
     this.dateOnChange(this.getResult());
   }
   
@@ -1499,10 +1696,6 @@ private onHourChange(selectedIndex: int): void {
   
   private updateDaysArray(): void {
     if (this.lunar) {
-      const lunarDays: int = this.getLunarDaysInMonth(this.selectedYear, this.selectedMonth);
-      if (this.selectedDay > lunarDays) {
-        this.selectedDay = lunarDays;
-      }
       this.initLunarDayArray();
     } else {
       const daysInMonth: int = this.getDaysInMonth(this.selectedYear, this.selectedMonth);
@@ -1535,19 +1728,35 @@ private onHourChange(selectedIndex: int): void {
   }
   
   private getMonthSelectedIndex(): int {
-    let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-    if (this.selectedYear === this.startYear) {
-      startMonthIndex = this.startMonth;
+    if (this.lunar) {
+      let startLunarMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      if (this.selectedYear === this.startYear) {
+        startLunarMonthIndex = this.lunarStartMonth;
+      }
+      return this.selectedMonth - startLunarMonthIndex;
+    } else {
+      let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
+      if (this.selectedYear === this.startYear) {
+        startMonthIndex = this.startMonth;
+      }
+      return this.selectedMonth - startMonthIndex;
     }
-    return this.selectedMonth - startMonthIndex;
   }
   
   private getDaySelectedIndex(): int {
-    let startDayIndex: int = DatePickerConstant.MIN_DAY;
-    if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
-      startDayIndex = this.startDay;
+    if (this.lunar) {
+      let startLunarDayIndex: int = DatePickerConstant.MIN_DAY;
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.lunarStartMonth) {
+        startLunarDayIndex = this.lunarStartDay;
+      }
+      return this.selectedDay - startLunarDayIndex;
+    } else {
+      let startDayIndex: int = DatePickerConstant.MIN_DAY;
+      if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+        startDayIndex = this.startDay;
+      }
+      return this.selectedDay - startDayIndex;
     }
-    return this.selectedDay - startDayIndex;
   }
   
   private getHourSelectedIndex(): int {
@@ -1801,8 +2010,7 @@ private onHourChange(selectedIndex: int): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.selectedYear = this.startYear + selectedIndex;
-            this.updateDaysArray();
+            this.onYearChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -1829,11 +2037,7 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-            if (this.selectedYear === this.startYear) {
-              startMonthIndex = this.startMonth;
-            }
-            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           
@@ -1854,11 +2058,7 @@ private onHourChange(selectedIndex: int): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            let startDayIndex: int = DatePickerConstant.MIN_DAY;
-            if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
-              startDayIndex = this.startDay;
-            }
-            this.selectedDay = startDayIndex + selectedIndex;
+            this.onDayChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -1887,8 +2087,7 @@ private onHourChange(selectedIndex: int): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            this.selectedYear = this.startYear + selectedIndex;
-            this.updateDaysArray();
+            this.onYearChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -1915,11 +2114,7 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-            if (this.selectedYear === this.startYear) {
-              startMonthIndex = this.startMonth;
-            }
-            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -1949,11 +2144,7 @@ private onHourChange(selectedIndex: int): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            let startMonthIndex: int = DatePickerConstant.MIN_MONTH;
-            if (this.selectedYear === this.startYear) {
-              startMonthIndex = this.startMonth;
-            }
-            this.selectedMonth = startMonthIndex + selectedIndex;
+            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -1980,11 +2171,7 @@ private onHourChange(selectedIndex: int): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: int) => {
-            let startDayIndex: int = DatePickerConstant.MIN_DAY;
-            if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
-              startDayIndex = this.startDay;
-            }
-            this.selectedDay = startDayIndex + selectedIndex;
+            this.onDayChange(selectedIndex);
             this.dateOnScrollStop(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
