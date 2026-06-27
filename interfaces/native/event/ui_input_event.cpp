@@ -5353,6 +5353,11 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressedButtons(
             }
             mouseEvent->pressedButtons = new int[length]();
             for (int i = 0; i < length; ++i) {
+                if (pressedButtons[i] < static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE) ||
+                    pressedButtons[i] > static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_FORWARD)) {
+                    delete[] mouseEvent->pressedButtons;
+                    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+                }
                 mouseEvent->pressedButtons[i] = pressedButtons[i];
             }
             break;
