@@ -113,11 +113,6 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
             style.tailIndents.push_back(indent.ConvertToPx());
         }
     }
-#if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
-    // keep WordBreak define same with WordBreakType in minikin
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
-    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
-#endif
 }
 
 void TxtParagraph::PushStyle(const TextStyle& style)
