@@ -255,7 +255,7 @@ public:
     RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
     RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
-    void CloseCustomDialog(const int32_t dialogId);
+    void CloseCustomDialog(const int32_t dialogId, std::function<void(int32_t)> &&callback = nullptr);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)> &&callback);

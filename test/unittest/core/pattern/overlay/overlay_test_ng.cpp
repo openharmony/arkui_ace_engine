@@ -1622,12 +1622,12 @@ HWTEST_F(OverlayTestNg, DialogTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step5. call CloseCustomDialog for contentNodeNew.
-     * @tc.expected: contentNodeNew has not been open before, so CloseCustomDialog failed.
+     * @tc.expected: contentNodeNew has not been open before, so CloseCustomDialog failed, content not found.
      */
     auto closeCallbackFst = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     };
-    overlayManager->CloseCustomDialog(contentNodeNew, closeCallbackFst);
+    overlayManager->CloseCustomDialog(WeakPtr<NG::UINode>(contentNodeNew), closeCallbackFst);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
@@ -1637,7 +1637,7 @@ HWTEST_F(OverlayTestNg, DialogTest007, TestSize.Level1)
     auto closeCallbackSnd = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
     };
-    overlayManager->CloseCustomDialog(contentNode, closeCallbackSnd);
+    overlayManager->CloseCustomDialog(WeakPtr<NG::UINode>(contentNode), closeCallbackSnd);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 
@@ -1832,7 +1832,7 @@ HWTEST_F(OverlayTestNg, DialogTest011, TestSize.Level1)
      * @tc.steps: step4. call CloseCustomDialog for contentNode.
      * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
      */
-    overlayManager->CloseCustomDialog(contentNode, nullptr);
+    overlayManager->CloseCustomDialog(WeakPtr<NG::UINode>(contentNode), nullptr);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 
@@ -1959,12 +1959,12 @@ HWTEST_F(OverlayTestNg, DialogTest014, TestSize.Level1)
 
     /**
      * @tc.steps: step5. call CloseCustomDialog for contentNode.
-     * @tc.expected: CloseCustomDialog succeed.
+     * @tc.expected: CloseCustomDialog succeed, return ERROR_CODE_NO_ERROR.
      */
     auto closeCallbackSnd = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
     };
-    overlayManager->CloseCustomDialog(contentNode, closeCallbackSnd);
+    overlayManager->CloseCustomDialog(WeakPtr<NG::UINode>(contentNode), closeCallbackSnd);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 }
 
