@@ -1210,4 +1210,21 @@ HWTEST_F(RepeatVirtual2TestNg, ModelIsChildOnMainTree001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Finish();
 }
 
+/**
+* @tc.name: SetEnableSyncLoadTest001
+* @tc.desc: Test RepeatVirtualScroll2Caches::SetEnableSyncLoad
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, SetEnableSyncLoadTest001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->caches_.SetEnableSyncLoad(true);
+    EXPECT_EQ(repeatNode->caches_.enableSyncLoad_, true);
+
+    repeatNode->caches_.SetEnableSyncLoad(false);
+    EXPECT_EQ(repeatNode->caches_.enableSyncLoad_, false);
+}
+
 } // namespace OHOS::Ace::NG
