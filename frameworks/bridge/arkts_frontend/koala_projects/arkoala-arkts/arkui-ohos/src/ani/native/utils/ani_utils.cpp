@@ -16,7 +16,7 @@
 #include "ani_utils.h"
 #include <sstream>
 #include <iostream>
-
+#include <charconv>
 #include <string>
 
 namespace OHOS::Ace::Ani {
@@ -240,7 +240,11 @@ std::optional<ani_int> AniUtils::StdStringToANIInt(ani_env *env, std::string str
 {
     ani_int arg_int{};
     CHECK_NULL_RETURN(env, arg_int);
-    int32_t intValue = std::stoi(str);
+    int32_t intValue = 0;
+    auto result = std::from_chars(str.data(), str.data() + str.size(), intValue);
+    if (result.ec != std::errc() || result.ptr != str.data() + str.size()) {
+        return {};
+    }
     arg_int = static_cast<ani_int>(intValue);
     return arg_int;
 }
