@@ -116,4 +116,23 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest003, TestSize.Level1)
     viewConfig.SetKeyFrameConfigCacheState(true);
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().fromAnimateCache_, true);
 }
+
+/**
+* @tc.name: ViewportConfigTest004
+* @tc.desc: Verify SetForceSplitEnable, SetForceSplitMode and GetForceSplitDisplayConfig api for ViewportConfig
+* @tc.type: FUNC
+*/
+HWTEST_F(ViewportConfigTest, ViewportConfigTest004, TestSize.Level1)
+{
+    ViewportConfig viewConfig;
+    auto config = viewConfig.GetForceSplitDisplayConfig();
+    ASSERT_EQ(config.enableForceSplit, false);
+    ASSERT_EQ(config.mode, ForceSplitMode::NOT_SPLIT);
+
+    viewConfig.SetForceSplitEnable(true);
+    viewConfig.SetForceSplitMode(ForceSplitMode::WIDE_SPLIT);
+    config = viewConfig.GetForceSplitDisplayConfig();
+    ASSERT_EQ(config.enableForceSplit, true);
+    ASSERT_EQ(config.mode, ForceSplitMode::WIDE_SPLIT);
+}
 } // namespace OHOS::Ace
