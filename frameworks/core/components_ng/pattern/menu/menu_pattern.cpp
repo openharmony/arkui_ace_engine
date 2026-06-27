@@ -72,10 +72,22 @@ const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const RefPtr<InterpolatingSpring> STACK_SUB_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 26.0f);
+const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_1 =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 322.0f, 28.0f);
+const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_2 =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 273.0f, 26.0f);
+const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_3 =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 363.0f, 29.0f);
+const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_FINISH =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 158.0f, 17.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
+const float EDGELIGHT_LENGTH_RATIO = 0.4f;
+const float EDGELIGHT_INTENSITY = 0.2f;
+const float EDGELIGHT_THICKNESS = 250.0f;
 
 constexpr int32_t MATERIAL_DISTORT_ANIMATION_DURATION = 1000;
 constexpr int32_t MATERIAL_ANIMATION_DELAY_MEDIUM = 120;
+constexpr int32_t MATERIAL_ANIMATION_DELAY_LIGHT_DISAPPEAR = 150;
 constexpr int32_t MATERIAL_ANIMATION_DELAY_LONG = 200;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
@@ -83,6 +95,14 @@ constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
 constexpr double HALF = 2.0;
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
+
+const DistortionParam TERMINAL_DISTORTION_PARAM {
+    .luCorner = { 0.0, 0.0 },
+    .ruCorner = { 1.0, 0.0 },
+    .lbCorner = { 0.0, 1.0 },
+    .rbCorner = { 1.0, 1.0 },
+    .barrelDistortion = { 0.0, 0.0, 0.0, 0.0 },
+};
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -1570,6 +1590,7 @@ RefPtr<FrameNode> MenuPattern::DuplicateMenuNode(const RefPtr<FrameNode>& menuNo
         UpdateBorderRadius(duplicateMenuNode, borderRadius);
     }
     SetMenuBackGroundStyle(duplicateMenuNode, menuParam);
+    MenuView::SetMenuSystemMaterial(duplicateMenuNode, menuParam);
     return duplicateMenuNode;
 }
 
@@ -1840,7 +1861,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
     // menu position and scale animation
     if (IsUseDistortionAnimation() || IsUseEdgeLightAnimation()) {
         TAG_LOGD(AceLogTag::ACE_MENU, "Show preview menu with material animation.");
-        ShowPreviewMenuMaterialAnimation();
+        ShowPreviewMenuMaterialAnimation(delay);
     } else {
         ShowPreviewMenuScaleAnimation(menuTheme, option, delay);
     }
@@ -1851,7 +1872,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
     isFirstShow_ = false;
 }
 
-void MenuPattern::ShowPreviewMenuMaterialAnimation()
+void MenuPattern::ShowPreviewMenuMaterialAnimation(int32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1864,10 +1885,10 @@ void MenuPattern::ShowPreviewMenuMaterialAnimation()
     CHECK_NULL_VOID(renderContext);
     auto menuPosition = renderContext->GetPaintRectWithoutTransform().GetOffset();
     if (IsUseDistortionAnimation()) {
-        PlayDistortAnimation(menuPosition);
+        PlayDistortAnimation(menuPosition, delay);
     }
     if (IsUseEdgeLightAnimation()) {
-        PlayLightAnimation();
+        PlayLightAnimation(delay);
     }
 }
 
@@ -2136,7 +2157,7 @@ void ConfigDistortParam(const Placement& placement, DistortionParam& param, Dist
     }
 }
 
-void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition)
+void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2194,52 +2215,61 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition)
     auto finalPlacement = GetFinalPlacement();
     ConfigDistortParam(finalPlacement, param, param1, param2, param3);
     OffsetF offset = GetDistortionMenuOffset(finalPlacement);
-    PlayTranslateAnimation(renderContext, offset);
+    PlayTranslateAnimation(renderContext, offset, delay);
     AnimationOption option;
     option.SetDuration(MATERIAL_DISTORT_ANIMATION_DURATION);
+    if (isShowHoverImage_) {
+        option.SetDelay(delay);
+    }
     renderContext->UpdateDistortionParam(param);
     if (menuChildRenderContext) {
         menuChildRenderContext->UpdateForegroundFilterDistortionParam(param);
     }
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 200, 20));
+    option.SetCurve(DISTORT_ANIMATION_CURVE_STAGE_1);
     AnimationUtils::Animate(option, [renderContext, param1, menuChildRenderContext]() {
         renderContext->UpdateDistortionParam(param1);
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param1);
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 20));
+    option.SetCurve(DISTORT_ANIMATION_CURVE_STAGE_2);
     AnimationUtils::Animate(option, [renderContext, param2, menuChildRenderContext]() {
         renderContext->UpdateDistortionParam(param2);
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param2);
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 20));
+    option.SetCurve(DISTORT_ANIMATION_CURVE_STAGE_3);
     AnimationUtils::Animate(option, [renderContext, param3, menuChildRenderContext]() {
         renderContext->UpdateDistortionParam(param3);
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param3);
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 110, 18));
+    option.SetCurve(DISTORT_ANIMATION_CURVE_STAGE_3);
     AnimationUtils::Animate(option, [renderContext, param4, menuChildRenderContext]() {
         renderContext->UpdateDistortionParam(param4);
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param4);
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
-    option.SetDelay(MATERIAL_ANIMATION_DELAY_MEDIUM);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
+    int32_t finishDelay = MATERIAL_ANIMATION_DELAY_MEDIUM;
+    if (isShowHoverImage_) {
+        finishDelay += delay;
+    }
+    option.SetDelay(finishDelay);
+    option.SetCurve(DISTORT_ANIMATION_CURVE_FINISH);
     AnimationUtils::Animate(option, [renderContext, param5, menuChildRenderContext]() {
         renderContext->UpdateDistortionParam(param5);
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param5);
         }
     }, nullptr, nullptr, host->GetContextRefPtr());
+    // for menu disappear animation
+    renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
     renderContext->UpdateOpacity(1.0f);
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-    renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+    isShowDistortion_ = true;
 }
 
 Placement MenuPattern::GetFinalPlacement() const
@@ -2278,19 +2308,27 @@ Placement MenuPattern::GetFinalPlacement() const
     return finalPlacement;
 }
 
-void MenuPattern::PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& offset)
+void MenuPattern::PlayTranslateAnimation(
+    const RefPtr<RenderContext>& renderContext, const OffsetF& offset, int32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetDuration(MATERIAL_DISTORT_ANIMATION_DURATION);
+    if (isShowHoverImage_) {
+        option.SetDelay(delay);
+    }
     renderContext->UpdateTranslateInXY(OffsetF());
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
     AnimationUtils::Animate(option, [renderContext, offset]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTranslateInXY(offset);
     }, nullptr, nullptr, host->GetContextRefPtr());
-    option.SetDelay(MATERIAL_ANIMATION_DELAY_LONG);
+    int32_t finishDelay = MATERIAL_ANIMATION_DELAY_LONG;
+    if (isShowHoverImage_) {
+        finishDelay += delay;
+    }
+    option.SetDelay(finishDelay);
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
     AnimationUtils::Animate(option, [renderContext]() {
         CHECK_NULL_VOID(renderContext);
@@ -2298,24 +2336,28 @@ void MenuPattern::PlayTranslateAnimation(const RefPtr<RenderContext>& renderCont
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void MenuPattern::PlayLightAnimation()
+void MenuPattern::PlayLightAnimation(int32_t delay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto menuRect = renderContext->GetPaintRectWithoutTransform();
+    auto menuWidth = menuRect.Width();
+    auto menuHeight = menuRect.Height();
+    auto edgeLightLength = std::max(menuWidth, menuHeight) * EDGELIGHT_LENGTH_RATIO;
     EdgeLightParam param1 {
         .edgeLightPosition = EdgeLightPosition::BOTTOM_RIGHT,
-        .length = 150,
-        .intensity = 0.1,
-        .thickness = 250.0,
+        .length = edgeLightLength,
+        .intensity = EDGELIGHT_INTENSITY,
+        .thickness = EDGELIGHT_THICKNESS,
         .color = Color::WHITE
     };
     EdgeLightParam param2 {
         .edgeLightPosition = EdgeLightPosition::TOP_LEFT,
-        .length = 150,
-        .intensity = 0.1,
-        .thickness = 250.0,
+        .length = edgeLightLength,
+        .intensity = EDGELIGHT_INTENSITY,
+        .thickness = EDGELIGHT_THICKNESS,
         .color = Color::WHITE
     };
     auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm();
@@ -2369,20 +2411,45 @@ void MenuPattern::PlayLightAnimation()
     renderContext->UpdateEdgeLightParam(param1);
     AnimationOption option;
     option.SetDuration(MATERIAL_DISTORT_ANIMATION_DURATION);
-    option.SetCurve(Curves::FRICTION);
-    option.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
-        auto renderContext = weakRender.Upgrade();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetEdgeLightParam();
-    });
+    if (isShowHoverImage_) {
+        option.SetDelay(delay);
+    }
+    option.SetCurve(Curves::LINEAR);
     AnimationUtils::Animate(
         option,
         [renderContext, param2]() {
             renderContext->UpdateEdgeLightParam(param2);
         },
-        option.GetOnFinishEvent(), nullptr, host->GetContextRefPtr());
-}
+        nullptr, nullptr, host->GetContextRefPtr());
+    
+    EdgeLightParam param3 {
+        .edgeLightPosition = param2.edgeLightPosition,
+        .length = edgeLightLength,
+        .intensity = 0.0,
+        .thickness = 0.0,
+        .color = Color::WHITE
+    };
 
+    AnimationOption option1;
+    option1.SetDuration(MATERIAL_ANIMATION_DELAY_LIGHT_DISAPPEAR);
+    option1.SetCurve(Curves::LINEAR);
+    int32_t finalDelay = MATERIAL_ANIMATION_DELAY_MEDIUM;
+    if (isShowHoverImage_) {
+        finalDelay += delay;
+    }
+    option1.SetDelay(finalDelay);
+    option1.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
+        auto renderContext = weakRender.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetEdgeLightParam();
+    });
+    AnimationUtils::Animate(
+        option1,
+        [renderContext, param3]() {
+            renderContext->UpdateEdgeLightParam(param3);
+        },
+        option1.GetOnFinishEvent(), nullptr, host->GetContextRefPtr());
+}
 
 OffsetF MenuPattern::GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition)
 {
@@ -2425,8 +2492,10 @@ void MenuPattern::PlayExtensionMenuDistortAnimation(const OffsetF& menuPosition)
     CHECK_NULL_VOID(host);
     if (beforeExtensionMenuDistortAnimationCallback_) {
         beforeExtensionMenuDistortAnimationCallback_(host, menuPosition);
+        isShowDistortion_ = true;
     }
 }
+
 
 RefPtr<FrameNode> MenuPattern::GetTitleContentNode(const RefPtr<FrameNode>& subMenuNode) const
 {
@@ -2968,11 +3037,19 @@ void MenuPattern::UpdateClipPath(const RefPtr<LayoutWrapper>& dirty)
 
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto menuRenderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(menuRenderContext, false);
+
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackMenuAppearAnimation();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    
+    if ((GetIsExtensionMenuEnableNewAnimation() || IsUseDistortionAnimation()) && isShowDistortion_) {
+        menuRenderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
+    }
+    
     auto menuPosition = host->GetPaintRectOffset(false, true);
     SetEndOffset(menuPosition);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {

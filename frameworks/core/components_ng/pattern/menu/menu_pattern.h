@@ -701,6 +701,16 @@ public:
         return isGridMenu_;
     }
 
+    void SetIsArrayGridMenu(bool isArrayGridMenu)
+    {
+        isArrayGridMenu_ = isArrayGridMenu;
+    }
+
+    bool GetIsArrayGridMenu() const
+    {
+        return isArrayGridMenu_;
+    }
+
     void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
     void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
 
@@ -879,16 +889,17 @@ private:
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
     void ShowPreviewMenuAnimation();
-    void ShowPreviewMenuMaterialAnimation();
+    void ShowPreviewMenuMaterialAnimation(int32_t delay = 0);
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     Placement GetFinalPlacement() const;
     OffsetF GetDistortionMenuOffset(Placement placement) const;
     MenuParam GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
-    void PlayDistortAnimation(const OffsetF& menuPosition);
-    void PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement);
-    void PlayLightAnimation();
+    void PlayDistortAnimation(const OffsetF& menuPosition, int32_t delay = 0);
+    void PlayTranslateAnimation(
+        const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement, int32_t delay = 0);
+    void PlayLightAnimation(int32_t delay = 0);
     void ShowMenuAppearAnimation();
     void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
@@ -964,6 +975,8 @@ private:
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
     bool isGridMenu_ = false;
+    bool isArrayGridMenu_ = false;
+    bool isShowDistortion_ = false;
 
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;
