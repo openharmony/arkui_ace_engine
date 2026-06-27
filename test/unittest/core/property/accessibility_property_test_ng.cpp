@@ -1510,4 +1510,91 @@ HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom007, TestSize.Level1)
     props.ResetAccessibilityCustomActions();
     EXPECT_FALSE(props.ActActionCustom("action1"));
 }
+
+/**
+ * @tc.name: SetAccessibilityCustomActions001
+ * @tc.desc: Test actions exceeding ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT are truncated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, SetAccessibilityCustomActions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a vector larger than ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT.
+     * @tc.expected: Set truncates to ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT and Get returns the truncated size.
+     */
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions;
+    for (size_t i = 0; i <= ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT; i++) {
+        actions.push_back({"action" + std::to_string(i), []() {}});
+    }
+    props.SetAccessibilityCustomActions(actions);
+    auto result = props.GetAccessibilityCustomActions();
+    EXPECT_EQ(result.size(), ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT);
+}
+
+/**
+ * @tc.name: SetAccessibilityCustomActions002
+ * @tc.desc: Test actionName exceeding ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES is truncated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, SetAccessibilityCustomActions002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build an action whose actionName exceeds NAME_MAX_BYTES.
+     * @tc.expected: Set truncates the name to NAME_MAX_BYTES and Get returns the truncated name.
+     */
+    AccessibilityProperty props;
+    std::string longName(ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES + 10, 'x');
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({longName, []() {}});
+    props.SetAccessibilityCustomActions(actions);
+    auto result = props.GetAccessibilityCustomActions();
+    ASSERT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].actionName.size(), ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES);
+}
+
+/**
+ * @tc.name: SetAccessibilityCustomActions003
+ * @tc.desc: Test GetAccessibilityCustomActions returns the set values correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, SetAccessibilityCustomActions003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set two custom actions and read them back.
+     * @tc.expected: Get returns both actions with the correct actionName.
+     */
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"action1", []() {}});
+    actions.push_back({"action2", []() {}});
+    props.SetAccessibilityCustomActions(actions);
+    auto result = props.GetAccessibilityCustomActions();
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0].actionName, "action1");
+    EXPECT_EQ(result[1].actionName, "action2");
+}
+
+/**
+ * @tc.name: SetAccessibilityCustomActions004
+ * @tc.desc: Test SetAccessibilityCustomActions overwrites the previously stored actions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, SetAccessibilityCustomActions004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set actions, then set a different list.
+     * @tc.expected: Get returns only the latest list, the old one is fully replaced.
+     */
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions1;
+    actions1.push_back({"old", []() {}});
+    props.SetAccessibilityCustomActions(actions1);
+    std::vector<AccessibilityCustomAction> actions2;
+    actions2.push_back({"new", []() {}});
+    props.SetAccessibilityCustomActions(actions2);
+    auto result = props.GetAccessibilityCustomActions();
+    ASSERT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].actionName, "new");
+}
 } // namespace OHOS::Ace::NG

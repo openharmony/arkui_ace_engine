@@ -2845,20 +2845,48 @@ class AccessibilityCustomActionsModifier extends ModifierWithKey<Array<object>> 
       getUINativeModule().common.setAccessibilityCustomActions(node, this.value);
     }
   }
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true);
+      return true;
+    }
+    if (component && component._needDiff) {
+      const stageTypeInfo: string = typeof this.stageValue;
+      const valueTypeInfo: string = typeof this.value;
+      let different: boolean = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      } else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      } else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue.map((item: Record<string, object>) => ({ ...item }));
+        this.applyPeer(node, false);
+      }
+    } else {
+      this.value = this.stageValue.map((item: Record<string, object>) => ({ ...item }));
+      this.applyPeer(node, false);
+    }
+    return false;
+  }
   checkObjectDiff(): boolean {
     if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
-      return false;
+      return true;
     }
     if (this.value.length !== this.stageValue.length) {
-      return false;
+      return true;
     }
     for (let i = 0; i < this.value.length; i++) {
-      if ((this.value[i] as Record<string, string>).actionName !==
-        (this.stageValue[i] as Record<string, string>).actionName) {
-        return false;
+      const currentValue = this.value[i] as Record<string, object>;
+      const stageValue = this.stageValue[i] as Record<string, object>;
+      if (currentValue.name !== stageValue.name || currentValue.onAction !== stageValue.onAction) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 }
 
