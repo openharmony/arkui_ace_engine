@@ -111,34 +111,14 @@ RefPtr<NG::EnvironmentManager> GetEnvironmentManager(const RefPtr<NG::UINode>& n
     return pipeline->GetEnvironmentManager();
 }
 
-void SetSystemEnvQueryReturnValue(const JSCallbackInfo& info, const NG::SystemEnvValue& result)
+std::optional<JSRef<JSVal>> MakeSystemEnvValue(const std::string& key, const std::optional<NG::SystemEnvValue>& value)
 {
-    if (auto direction = result.GetDirection()) {
-        switch (*direction) {
-            case TextDirection::LTR:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Ltr"))));
-                return;
-            case TextDirection::RTL:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Rtl"))));
-                return;
-            case TextDirection::AUTO:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Auto"))));
-                return;
-            default:
-                info.SetReturnValue(JSVal::Undefined());
-                return;
+    if (key == NG::ENV_KEY_DIRECTION) {
+        if (!value) {
+            return JSRef<JSVal>::Make(ToJSValue(std::string("Auto")));
         }
-    }
-    if (auto doubleValue = result.GetDouble()) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(*doubleValue)));
-        return;
-    }
-    info.SetReturnValue(JSVal::Undefined());
-}
-
-JSRef<JSVal> MakeSystemEnvUpdateValue(const NG::SystemEnvValue& result)
-{
-    if (auto direction = result.GetDirection()) {
+        auto direction = value->GetDirection();
+        CHECK_NULL_RETURN(direction, JSVal::Undefined());
         switch (*direction) {
             case TextDirection::LTR:
                 return JSRef<JSVal>::Make(ToJSValue(std::string("Ltr")));
@@ -150,10 +130,13 @@ JSRef<JSVal> MakeSystemEnvUpdateValue(const NG::SystemEnvValue& result)
                 return JSVal::Undefined();
         }
     }
-    if (auto doubleValue = result.GetDouble()) {
+    if (key == NG::ENV_KEY_FONT_SCALE) {
+        CHECK_NULL_RETURN(value, std::nullopt);
+        auto doubleValue = value->GetDouble();
+        CHECK_NULL_RETURN(doubleValue, JSVal::Undefined());
         return JSRef<JSVal>::Make(ToJSValue(*doubleValue));
     }
-    return JSVal::Undefined();
+    return std::nullopt;
 }
 } // namespace
 
@@ -1571,12 +1554,16 @@ void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)
     }
 
     NG::SystemEnvValue queryResult;
-    bool found = environmentManager->FindSystemEnvValueByKey(node, key, queryResult);
-    if (!found) {
-        info.SetReturnValue(JSVal::Undefined());
+    std::optional<NG::SystemEnvValue> queryValue;
+    if (environmentManager->FindSystemEnvValueByKey(node, key, queryResult)) {
+        queryValue.emplace(queryResult);
+    }
+    auto jsValue = MakeSystemEnvValue(key, queryValue);
+    if (jsValue) {
+        info.SetReturnValue(*jsValue);
         return;
     }
-    SetSystemEnvQueryReturnValue(info, queryResult);
+    info.SetReturnValue(JSVal::Undefined());
 }
 
 void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc)
@@ -1650,10 +1637,7 @@ void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>&
         [weak = WeakClaim(this)](const std::string& key, const std::optional<NG::SystemEnvValue>& value) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self);
-            std::optional<JSRef<JSVal>> jsValue;
-            if (value) {
-                jsValue = MakeSystemEnvUpdateValue(*value);
-            }
+            auto jsValue = MakeSystemEnvValue(key, value);
             if (self->updateEnvCallback_) {
                 self->updateEnvCallback_(key, jsValue);
             }
