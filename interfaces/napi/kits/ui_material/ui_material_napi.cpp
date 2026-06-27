@@ -338,7 +338,7 @@ napi_value UiMaterialNapi::JSGetEmpty(napi_env env, napi_callback_info info)
 void UiMaterialNapi::ConvertToImmersiveOptionsEC(ImmersiveOptions& newOptions)
 {
     newOptions.style = ConvertToECStyle(newOptions.style);
-    newOptions.materialColor = Color::TRANSPARENT;
+    newOptions.materialColor = std::nullopt;
     newOptions.applyShadow = false;
     newOptions.disableLightEffect = true;
     newOptions.interactive = false;

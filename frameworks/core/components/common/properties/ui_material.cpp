@@ -17,6 +17,7 @@
 
 #include "interfaces/inner_api/ace/utils.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/color_inverter.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
@@ -287,9 +288,14 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ?
-                                    colorMode : options->colorMode,
+            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ? colorMode : options->colorMode,
         };
+        result.materialColor = options->materialColor;
+        Color materialColor;
+        if (ResourceParseUtilsBase::ParseResColorWithColorMode(
+                options->colorResObj, materialColor, result.key.colorMode)) {
+            result.materialColor = materialColor;
+        }
         return result;
     }
     int32_t transparency = TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel));
@@ -307,6 +313,10 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
         .transparency = static_cast<UiMaterialTransparency>(transparency),
         .colorMode = colorMode,
     };
+    Color materialColor;
+    if (ResourceParseUtilsBase::ParseResColorWithColorMode(options->colorResObj, materialColor, result.key.colorMode)) {
+        result.materialColor = materialColor;
+    }
     return result;
 }
 

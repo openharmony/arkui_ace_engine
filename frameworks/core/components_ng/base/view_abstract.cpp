@@ -177,7 +177,7 @@ void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
 {
     CHECK_NULL_VOID(newOptions);
     newOptions->style = ConvertToECStyle(newOptions->style);
-    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->materialColor = std::nullopt;
     newOptions->applyShadow = false;
     newOptions->disableLightEffect = true;
     newOptions->interactive = false;
@@ -6939,6 +6939,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
             return;
+        }
+        if (config->materialColor.has_value()) {
+            params->backgroundColor = config->materialColor.value();
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);

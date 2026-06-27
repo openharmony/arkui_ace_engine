@@ -63,7 +63,7 @@ struct UiMaterialParam {
 
 struct ImmersiveMaterialConfig {
     UiMaterialMapKey key {};
-    Color materialColor;
+    std::optional<Color> materialColor = std::nullopt;
     bool colorInvert = false;
     bool applyShadow = true;
     float dipScale = 1.0f;

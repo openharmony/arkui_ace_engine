@@ -740,7 +740,7 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
     }
     auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
     CHECK_NULL_RETURN(glassFilter, nullptr);
-    auto& materialColor = params.materialColor;
+    auto materialColor = params.materialColor.value_or(Color::TRANSPARENT);
     if (materialColor.GetAlpha() > 0) {
         glassFilter->Setter<Rosen::FrostedGlassWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
         glassFilter->Setter<Rosen::FrostedGlassDarkModeWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
@@ -788,7 +788,7 @@ std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMater
 #else
     auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(shader);
     CHECK_NULL_RETURN(glassEffect, nullptr);
-    auto& materialColor = newConfig.materialColor;
+    auto materialColor = newConfig.materialColor.value_or(Color::TRANSPARENT);
     if (materialColor.GetAlpha() > 0) {
         glassEffect->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(EMPTY_ROSEN_VECTOR2F);
         // no darkmode param till now
