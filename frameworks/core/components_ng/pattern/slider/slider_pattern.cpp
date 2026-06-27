@@ -68,7 +68,7 @@ constexpr float DRAG_FRAME_PRESS_START_SCALE = 1.1f;
 constexpr float DRAG_FRAME_PRESS_END_SCALE = 1.0f;
 constexpr float DRAG_DEFORM_SCALE_X = 1.06f;
 constexpr float DRAG_DEFORM_SCALE_Y = 0.95f;
-constexpr int32_t DRAG_DEFORM_RESTORE_DELAY_MS = 500;
+constexpr int32_t DRAG_DEFORM_RESTORE_DELAY_MS = 150;
 constexpr int32_t DRAG_FRAME_ANIMATION_DURATION = 150;
 constexpr int32_t LONG_PRESS_DELAY_MS = 400;
 
@@ -4156,6 +4156,7 @@ void SliderPattern::ApplyDragFrameNodeSystemMaterial()
     auto filter = renderContext->CreateFrostedGlassFilter(dragFrameMaterialParam, dipScale);
     if (filter) {
         renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+        renderContext->UpdateBackShadow(MaterialUtils::GetImmersiveShadow(dipScale));
     }
     ResetHostMaterialEffects();
 }
