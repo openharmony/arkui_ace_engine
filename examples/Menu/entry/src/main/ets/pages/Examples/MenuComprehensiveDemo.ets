@@ -261,7 +261,7 @@ struct MenuComprehensiveDemo {
               Text('用户头像')
                 .fontSize(14)
                 .fontWeight(FontWeight.Medium)
-              Text('user@example.com')
+              Text('user email')
                 .fontSize(12)
                 .fontColor(Color.Gray)
             }
@@ -1391,7 +1391,7 @@ struct MenuComprehensiveDemo {
             Text('用户名')
               .fontSize(16)
               .fontWeight(FontWeight.Medium)
-            Text('user@example.com')
+            Text('user email')
               .fontSize(12)
               .fontColor(Color.Gray)
           }

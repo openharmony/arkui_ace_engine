@@ -56,16 +56,6 @@ struct SelectLevel6Example {
     }
   }
 
-  aboutToAppear() {
-    let stateChangeEvent: events_emitter.InnerEvent = {
-      eventId: 181,
-      priority: events_emitter.EventPriority.LOW
-    }
-    events_emitter.on(stateChangeEvent, this.stateChangCallBack);
-    hilog.isLoggable(0x0000, 'testTag', hilog.LogLevel.INFO);
-    hilog.info(0x0000, 'testTag', '%{public}s', 'start run testcase!!!');
-  }
-
   build() {
     NavDestination() {
       Column() {
