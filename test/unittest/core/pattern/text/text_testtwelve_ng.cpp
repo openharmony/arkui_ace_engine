@@ -754,17 +754,27 @@ HWTEST_F(TextTwelveTestNg, ConvertHoverInfoFromMouseInfo_001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set tiltX of MouseInfo to 2.0f
+     * @tc.steps: step2. Set tiltX of MouseInfo to 2.0f.
      */
     MouseInfo info;
     info.SetTiltX(2.0f);
 
     /**
-     * @tc.steps: step3. Calling the ConvertHoverInfoFromMouseInfo function
+     * @tc.steps: step3. SetSourceTool to SourceTool::MOUSE.
+     */
+    info.SetSourceTool(SourceTool::MOUSE);
+
+    /**
+     * @tc.steps: step4. Calling the ConvertHoverInfoFromMouseInfo function
      * @tc.expected: The tiltX of result return 2.0f
      */
     auto result = pattern->ConvertHoverInfoFromMouseInfo(info);
     EXPECT_EQ(result.GetTiltX().value(), 2.0f);
+
+    /**
+     * @tc.steps: step5. Verify the sourceTool of result
+     */
+    EXPECT_EQ(result.GetSourceTool(), SourceTool::MOUSE);
 }
 
 /**

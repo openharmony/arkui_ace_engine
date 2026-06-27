@@ -2671,6 +2671,8 @@ HoverInfo TextPattern::ConvertHoverInfoFromMouseInfo(const MouseInfo& info) cons
     result.SetDeviceId(info.GetDeviceId());
     result.SetTargetDisplayId(info.GetTargetDisplayId());
     result.SetSourceDevice(info.GetSourceDevice());
+    result.SetSourceTool(info.GetSourceTool());
+    result.SetPressedKeyCodes(info.GetPressedKeyCodes());
     if (info.GetTiltX().has_value()) {
         result.SetTiltX(info.GetTiltX().value());
     }
