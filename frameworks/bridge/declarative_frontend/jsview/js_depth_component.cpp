@@ -169,19 +169,6 @@ void JSDepthComponent::SetCamera(const JSCallbackInfo& info)
     auto cameraBufferCropValue = jsObject->GetProperty("cameraBufferCrop");
     if (cameraBufferCropValue->IsObject()) {
         cameraParams.cameraBufferCrop = ParseCameraBufferCrop(cameraBufferCropValue);
-    } else {
-        OHOS::Ace::CameraBufferCrop defaultCrop;
-        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        if (frameNode) {
-            auto geoNode = frameNode->GetGeometryNode();
-            if (geoNode) {
-                defaultCrop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
-                defaultCrop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
-            }
-        }
-        defaultCrop.cropOffset = {0.0f, 0.0f};
-        defaultCrop.cropScale = 1.0f;
-        cameraParams.cameraBufferCrop = defaultCrop;
     }
 
     NG::DepthComponentModel::SetCamera(cameraParams);

@@ -230,6 +230,7 @@ private:
         float yOffset;
     };
     TiltShiftResult ComputeTiltShift(const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH);
+    std::optional<OHOS::Ace::CameraBufferCrop> GetEffectiveCameraBufferCrop() const;
 
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
     float render3DScale_ = 1.0f;
