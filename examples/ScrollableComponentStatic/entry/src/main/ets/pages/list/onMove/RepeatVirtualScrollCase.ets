@@ -48,7 +48,7 @@ struct ForEachSort {
     Row() {
       List() {
         Repeat<string>(this.arr)
-        // 通过设置onMove，使能拖拽排序。
+        // Enable drag-and-drop sorting by setting onMove.
           .onMove((from: number, to: number) => {
             let temp = this.arr.splice(from as int, 1);
             this.arr.splice(to as int, 0, temp[0]);

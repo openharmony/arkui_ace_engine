@@ -125,4 +125,14 @@ void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
     isTpFlushFrameDisplayPeriod_ = false;
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
+
+bool ResSchedTouchOptimizer::IsTouchDownNotifiedToClick() const
+{
+    return touchDownNotifiedToClick_;
+}
+
+void ResSchedTouchOptimizer::SetTouchDownNotifiedToClick(bool notified)
+{
+    touchDownNotifiedToClick_ = notified;
+}
 } // namespace OHOS::Ace

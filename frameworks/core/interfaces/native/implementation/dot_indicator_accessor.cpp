@@ -16,8 +16,49 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "dot_indicator_peer_impl.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<std::map<int32_t, IndicatorIconParam>>& dst,
+    const Array_IndicatorIconInfo& src)
+{
+    std::map<int32_t, IndicatorIconParam> indicatorIconMap;
+    for (Ark_Int32 i = 0; i < src.length; ++i) {
+        const auto& iconInfo = src.array[i];
+        if (iconInfo.index < 0) {
+            continue;
+        }
+        IndicatorIconParam iconParam;
+        if (iconInfo.icon.selector == 0) {
+            auto iconSrc = Converter::OptConvert<std::string>(iconInfo.icon.value0);
+            if (!iconSrc || iconSrc->empty()) {
+                continue;
+            }
+            iconParam.sourceType = IndicatorIconParam::SourceType::MEDIA;
+            iconParam.iconSrc = *iconSrc;
+            if (iconInfo.icon.value0.selector == 1) {
+                iconParam.bundleName = Converter::Convert<std::string>(iconInfo.icon.value0.value1.bundleName);
+                iconParam.moduleName = Converter::Convert<std::string>(iconInfo.icon.value0.value1.moduleName);
+            }
+        } else if (iconInfo.icon.selector == 1) {
+            auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(iconInfo.icon.value1);
+            if (!symbolIcon || !*symbolIcon || !(*symbolIcon)->symbolApply) {
+                continue;
+            }
+            iconParam.sourceType = IndicatorIconParam::SourceType::SYMBOL;
+            iconParam.symbolApply = (*symbolIcon)->symbolApply;
+            PeerUtils::DestroyPeer(*symbolIcon);
+        } else {
+            continue;
+        }
+        indicatorIconMap[iconInfo.index] = std::move(iconParam);
+    }
+    dst = std::move(indicatorIconMap);
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DotIndicatorAccessor {
@@ -97,6 +138,14 @@ void SpaceImpl(Ark_DotIndicator peer,
     auto optSpace = Converter::OptConvertPtr<Dimension>(space);
     peer->SetSpace(optSpace);
 }
+
+void IndicatorIconImpl(Ark_DotIndicator peer,
+                       const Opt_Array_IndicatorIconInfo* iconList)
+{
+    CHECK_NULL_VOID(peer);
+    auto optIndicatorIconMap = Converter::OptConvertPtr<std::map<int32_t, IndicatorIconParam>>(iconList);
+    peer->SetIndicatorIcon(optIndicatorIconMap);
+}
 } // DotIndicatorAccessor
 const GENERATED_ArkUIDotIndicatorAccessor* GetDotIndicatorAccessor()
 {
@@ -113,6 +162,7 @@ const GENERATED_ArkUIDotIndicatorAccessor* GetDotIndicatorAccessor()
         DotIndicatorAccessor::SelectedColorImpl,
         DotIndicatorAccessor::MaxDisplayCountImpl,
         DotIndicatorAccessor::SpaceImpl,
+        DotIndicatorAccessor::IndicatorIconImpl,
     };
     return &DotIndicatorAccessorImpl;
 }

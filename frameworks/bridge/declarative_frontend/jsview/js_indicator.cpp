@@ -181,6 +181,48 @@ std::optional<Dimension> JSIndicator::ParseIndicatorDimension(const JSRef<JSVal>
     return indicatorDimension;
 }
 
+void JSIndicator::ParseIndicatorIconList(
+    const JSCallbackInfo& info, const JSRef<JSObject>& obj, SwiperParameters& swiperParameters)
+{
+    auto iconListValue = obj->GetProperty("indicatorIconValue");
+    if (!iconListValue->IsArray()) {
+        return;
+    }
+    auto iconList = JSRef<JSArray>::Cast(iconListValue);
+    for (size_t index = 0; index < iconList->Length(); ++index) {
+        auto iconInfoValue = iconList->GetValueAt(index);
+        if (!iconInfoValue->IsObject()) {
+            continue;
+        }
+        auto iconInfoObject = JSRef<JSObject>::Cast(iconInfoValue);
+        auto itemIndexValue = iconInfoObject->GetProperty("index");
+        int32_t itemIndex = -1;
+        if (!ParseJsInt32(itemIndexValue, itemIndex) || itemIndex < 0) {
+            continue;
+        }
+        auto iconValue = iconInfoObject->GetProperty("icon");
+        IndicatorIconParam iconParam;
+        if (iconValue->IsObject() && JSRef<JSObject>::Cast(iconValue)->HasProperty("fontColor")) {
+            SetSymbolOptionApply(info, iconParam.symbolApply, iconValue);
+            if (!iconParam.symbolApply) {
+                continue;
+            }
+            iconParam.sourceType = IndicatorIconParam::SourceType::SYMBOL;
+            swiperParameters.indicatorIconMap[itemIndex] = std::move(iconParam);
+            continue;
+        }
+        RefPtr<ResourceObject> resourceObject;
+        std::string iconSrc;
+        if (!ParseJsMedia(iconValue, iconSrc, resourceObject) || iconSrc.empty()) {
+            continue;
+        }
+        iconParam.sourceType = IndicatorIconParam::SourceType::MEDIA;
+        iconParam.iconSrc = iconSrc;
+        GetJsMediaBundleInfo(iconValue, iconParam.bundleName, iconParam.moduleName);
+        swiperParameters.indicatorIconMap[itemIndex] = std::move(iconParam);
+    }
+}
+
 SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT_VALUE));
@@ -217,16 +259,36 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseItemWOk = ParseJsDimensionVpNG(itemWidthValue, dimPosition, resItemWidthObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
-    swiperParameters.itemWidth = parseItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseItemWOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("itemWidth");
+        swiperParameters.itemWidth = dimPosition;
+    } else {
+        swiperParameters.itemWidth = defaultSize;
+    }
     bool parseItemHOk = ParseJsDimensionVpNG(itemHeightValue, dimPosition, resItemHeightObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.itemHeight = parseItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseItemHOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("itemHeight");
+        swiperParameters.itemHeight = dimPosition;
+    } else {
+        swiperParameters.itemHeight = defaultSize;
+    }
     bool parseSelectedItemWOk = ParseJsDimensionVpNG(selectedItemWidthValue, dimPosition, resSelectedItemWidthObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemWidth = parseSelectedItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSelectedItemWOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("selectedItemWidth");
+        swiperParameters.selectedItemWidth = dimPosition;
+    } else {
+        swiperParameters.selectedItemWidth = defaultSize;
+    }
     bool parseSelectedItemHOk = ParseJsDimensionVpNG(selectedItemHeightValue, dimPosition, resSelectedItemHeightObj) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSelectedItemHOk && dimPosition > 0.0_vp) {
+        swiperParameters.parametersByUser.insert("selectedItemHeight");
+        swiperParameters.selectedItemHeight = dimPosition;
+    } else {
+        swiperParameters.selectedItemHeight = defaultSize;
+    }
     if (SystemProperties::ConfigChangePerform()) {
         swiperParameters.resourceItemWidthValueObject = resItemWidthObj;
         swiperParameters.resourceItemHeightValueObject = resItemHeightObj;
@@ -236,6 +298,13 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     IndicatorModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
+    return swiperParameters;
+}
+
+SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSCallbackInfo& info, const JSRef<JSObject>& obj)
+{
+    auto swiperParameters = GetDotIndicatorInfo(obj);
+    ParseIndicatorIconList(info, obj, swiperParameters);
     return swiperParameters;
 }
 void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
@@ -333,17 +402,17 @@ void JSIndicator::SetStyle(const JSCallbackInfo& info)
                 IndicatorModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
             } else {
-                SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                SwiperParameters swiperParameters = GetDotIndicatorInfo(info, obj);
                 IndicatorModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
         } else {
-            SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            SwiperParameters swiperParameters = GetDotIndicatorInfo(info, obj);
             IndicatorModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(info, JSRef<JSObject>::New());
         IndicatorModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         IndicatorModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }

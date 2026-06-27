@@ -18,7 +18,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/unittest/capi/stubs/mock_date_picker_dialog.h"
 
-#include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/date_picker/picker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

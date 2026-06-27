@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
@@ -44,13 +45,10 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
-
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
@@ -65,15 +63,28 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         useSystemMaterial ? false : paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
+    dotIndicatorModifier_->SetDisableIndicatorAnimation(disableIndicatorAnimation_);
+    auto renderContext = paintWrapper->GetRenderContext();
+    auto host = renderContext ? renderContext->GetHost() : nullptr;
+    auto indicatorPattern = host ? host->GetPattern<SwiperIndicatorPattern>() : nullptr;
+    bool needCustomIconLayout = indicatorPattern && indicatorPattern->NeedCustomDotIndicatorLayout();
+    LinearVector<float> oldCustomIconCenters;
+    if (needCustomIconLayout) {
+        oldCustomIconCenters = dotIndicatorModifier_->GetBlackPointCenterX();
+        dotIndicatorModifier_->SetCustomIconIndexes(indicatorPattern->GetIndicatorIconIndexes());
+    }
     dotIndicatorModifier_->SetIndicatorDotItemSpace(
         paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace()));
     dotIndicatorModifier_->SetIsLongPressed(isLongPressed_);
-
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
     dotIndicatorModifier_->SetCenterY(centerY_);
     UpdateIsPressedOrIsHover(paintWrapper);
-
+    if (needCustomIconLayout) {
+        if (oldCustomIconCenters != dotIndicatorModifier_->GetBlackPointCenterX() && host) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        }
+    }
     auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
     RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
     auto origin = dotIndicatorModifier_->GetBoundsRect();
@@ -196,6 +207,22 @@ void DotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
+    if (disableIndicatorAnimation_) {
+        auto savedGestureState = gestureState_;
+        auto savedTurnPageRate = turnPageRate_;
+        auto savedGroupTurnPageRate = groupTurnPageRate_;
+        gestureState_ = GestureState::GESTURE_STATE_INIT;
+        turnPageRate_ = 0.0f;
+        groupTurnPageRate_ = 0.0f;
+        auto [finalLongPointCenterX, finalItemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
+        gestureState_ = savedGestureState;
+        turnPageRate_ = savedTurnPageRate;
+        groupTurnPageRate_ = savedGroupTurnPageRate;
+        dotIndicatorModifier_->StopAnimation(true);
+        dotIndicatorModifier_->UpdateNormalPaintProperty(
+            normalMargin_, finalItemHalfSizes, vectorBlackPointCenterX_, finalLongPointCenterX);
+        return;
+    }
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         std::vector<std::pair<float, float>> pointCenterX({ longPointCenterX_ });
@@ -309,8 +336,13 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
                 static_cast<float>(indicatorDotItemSpace.ConvertToPx()), mouseClickIndex);
         }
-        dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
-            gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
+        if (disableIndicatorAnimation_) {
+            dotIndicatorModifier_->StopAnimation(true);
+            dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+        } else {
+            dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
+                gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
+        }
         mouseClickIndex_ = std::nullopt;
     }
     if (dotIndicatorModifier_->GetLongPointIsHover() != longPointIsHover_) {
@@ -590,6 +622,9 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
     itemHalfSizes.emplace_back(selectedItemWidth * HALF * indicatorScale);
     itemHalfSizes.emplace_back(selectedItemHeight * HALF * indicatorScale);
     if (touchBottomType_ != TouchBottomType::NONE) {
+        if (disableIndicatorAnimation_ && vectorBlackPointCenterX_.empty()) {
+            vectorBlackPointCenterX_ = dotIndicatorModifier_->GetBlackPointCenterX();
+        }
         Dimension indicatorDotItemSpace = paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
         float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
         if (IsCustomSizeValue_) {

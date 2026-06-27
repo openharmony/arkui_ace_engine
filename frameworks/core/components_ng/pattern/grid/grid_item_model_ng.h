@@ -38,6 +38,8 @@ public:
     void SetOnSelect(SelectFunc&& onSelect) override;
     void BindContextMenu() override;
 
+    static void CreateStatic(GridItemStyle gridItemStyle);
+    static void CreateStatic(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, GridItemStyle gridItemStyle);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static RefPtr<FrameNode> CreateGridItem(int32_t nodeId);
@@ -54,6 +56,7 @@ public:
     static GridItemStyle GetGridItemStyle(FrameNode* frameNode);
     static void SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect);
     static void SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent);
+    static void BindContextMenu(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_MODEL_NG_H

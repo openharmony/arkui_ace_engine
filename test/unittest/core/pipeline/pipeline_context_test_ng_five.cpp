@@ -1658,7 +1658,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg103, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), pageNodeId);
+    EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
 }
 
 /**
@@ -1693,7 +1695,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg104, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }
@@ -1737,7 +1739,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg105, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }
@@ -1782,7 +1784,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg106, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }
@@ -1862,7 +1864,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg108, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }
@@ -1952,7 +1954,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg110, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }
@@ -2030,7 +2032,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg112, TestSize.Level
     context_->stageManager_ = stageManager;
 
     auto result = context_->GetPageRootNode();
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
     if (result == nullptr) {
         return;
     }

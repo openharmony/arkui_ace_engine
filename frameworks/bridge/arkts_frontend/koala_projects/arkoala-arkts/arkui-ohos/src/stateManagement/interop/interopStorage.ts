@@ -288,11 +288,11 @@ export class InteropStorageBase extends StorageBase {
             return undefined;
         }
         if (interopValue.value) {
-            return (interopValue.value as StorageProperty<T>).get();
+            return (interopValue.value as StorageProperty<T>).rawGet();
         }
         // initialize interop value by ArkTS1.1
         interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
-        return (interopValue.value as StorageProperty<T>).get();
+        return (interopValue.value as StorageProperty<T>).rawGet();
     }
 
     /**

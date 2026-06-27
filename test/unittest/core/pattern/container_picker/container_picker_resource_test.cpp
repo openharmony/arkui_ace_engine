@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

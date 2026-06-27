@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-06-01
+> 更新时间：2026-06-12
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -37,20 +37,20 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：74
-- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：59
+- `docs/` 下 Markdown 文档总数：76
+- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：60
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计（`knowledge_base_INDEX.json`）
 
-- 索引条目总数：60
-- 索引路径有效性：60/60（全部存在）
+- 索引条目总数：61
+- 索引路径有效性：61/61（全部存在）
 - 类型分布：
   - `component`: 37
   - `sdk`: 4
-  - `feature`: 19
+  - `feature`: 20
 - 分类分布：
   - `basic`: 5
   - `advanced`: 5
@@ -61,13 +61,13 @@ rg -n "<关键字>" docs
   - `rich_text`: 3
   - `shape`: 1
   - `sdk`: 6
-  - `system`: 15
-- 关键词总数（索引内）：536
-- 别名总数（索引内）：189
+  - `system`: 16
+- 关键词总数（索引内）：551
+- 别名总数（索引内）：193
 
 ### 2.3 覆盖现状
 
-- 命名符合 `*_Knowledge_Base*` 的 59 个文档已全部纳入索引（59/59）。
+- 命名符合 `*_Knowledge_Base*` 的 60 个文档已全部纳入索引（60/60）。
 - 另有 1 个非 `*_Knowledge_Base*` 命名文档在索引中：
   - `docs/architecture/ThemeManager_Architecture_CN.md`
 
@@ -80,9 +80,11 @@ docs/
 ├── kb_search.py
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
-├── architecture/ (1 KB + 1 非 `*_Knowledge_Base*` 命名架构文档)
+├── architecture/ (2 KB + 2 非 `*_Knowledge_Base*` 命名架构文档)
 ├── cj_frontend/ (1 KB)
 ├── common/ (4 KB)
+├── entrance/ (1 MD)
+├── focus/ (2 MD)
 ├── layout/ (3 KB)
 ├── pattern/ (39 KB)
 ├── sdk/ (3 KB)
@@ -154,3 +156,4 @@ PY
 - 2026-05-23：补齐未索引知识库条目（+25），索引覆盖 `*_Knowledge_Base*` 文档达到 100%。
 - 2026-05-23：按当前仓库实际重刷本文件，更新统计、目录快照和维护命令。
 - 2026-06-01：修正统计漂移（索引 60 条、selector=8、system 分类保留），补充路径规范与统计复算命令。
+- 2026-06-12：新增 UISession 知识库，索引更新至 61 条，系统功能分类更新至 16 条。

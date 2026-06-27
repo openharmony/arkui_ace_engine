@@ -19,6 +19,8 @@
 #include <vector>
 
 #include "base/log/log_wrapper.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -415,7 +417,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     ConvertIllegalStr(jsonNodeStr);
     auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
     if (jsonNodeNew == nullptr || !jsonNodeNew->IsValid()) {
-        LOGW("inspector info of %{public}s-%{public}d is illegal", parent->GetTag().c_str(), parent->GetId());
+        LOGW("inspector info of %{public}s-%{private}d is illegal", parent->GetTag().c_str(), parent->GetId());
         return;
     }
     std::vector<RefPtr<NG::UINode>> children;
@@ -452,7 +454,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             }
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
             CHECK_NULL_BREAK(navDestinationNode);
-            TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node: %{public}d is NavDestinationGroupNode",
+            TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node: %{private}d is NavDestinationGroupNode",
                 uiNode->GetId());
             auto navCustomNode = navDestinationNode->GetPattern<NavDestinationPattern>()->GetCustomNode();
             CHECK_NULL_BREAK(navCustomNode);
@@ -558,7 +560,7 @@ RefPtr<UINode> GetRoot(const RefPtr<UINode>& uiNode)
     }
     if (const auto& parent = uiNode->GetParent()) {
         if (parent->GetChildIndex(uiNode) == -1) {
-            LOGW("parent [%{public}d %{public}s] do not contain child [%{public}d %{public}s]",
+            LOGW("parent [%{private}d %{public}s] do not contain child [%{private}d %{public}s]",
                 parent->GetId(), parent->GetTag().c_str(), uiNode->GetId(), uiNode->GetTag().c_str());
             return uiNode;
         }
@@ -695,7 +697,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
     if (!context) {
-        LOGW("Internal error! Component(id=%{public}d, tag=%{public}s) is null",
+        LOGW("Internal error! Component(id=%{private}d, tag=%{public}s) is null",
             frameNode->GetId(), frameNode->GetTag().c_str());
         return;
     }
@@ -710,9 +712,9 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
             pipeline->GetHostParentOffsetToWindow().GetY());
     }
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
-    ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
-        frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());
-    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
+    ACE_SCOPED_TRACE("Inspector::GetRectangleById_Tag=%s", frameNode->GetTag().c_str());
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{private}d key:%{private}s "
+         "localOffset:%{public}s"
          "screenRect:%{public}s",
         frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
         rectangle.screenRect.ToString().c_str());

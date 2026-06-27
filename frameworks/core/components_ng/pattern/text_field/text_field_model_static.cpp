@@ -25,6 +25,7 @@
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -36,6 +37,21 @@ constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_ALPHA = 255;
+
+RefPtr<FrameNode> NormalizeShowUnitNode(const RefPtr<UINode>& unitNode)
+{
+    CHECK_NULL_RETURN(unitNode, nullptr);
+    auto unitFrameNode = AceType::DynamicCast<FrameNode>(unitNode);
+    if (unitFrameNode) {
+        return unitFrameNode;
+    }
+
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_RETURN(wrapperNode, nullptr);
+    unitNode->MountToParent(wrapperNode);
+    return wrapperNode;
+}
 }
 
 RefPtr<FrameNode> TextFieldModelStatic::CreateTextInputNode(
@@ -84,10 +100,11 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
         unitNode = builder();
     }
     CHECK_NULL_VOID(unitNode);
-    pattern->SetUnitNode(unitNode);
 
-    auto unitFrameNode = AceType::DynamicCast<FrameNode>(unitNode);
+    auto unitFrameNode = NormalizeShowUnitNode(unitNode);
     CHECK_NULL_VOID(unitFrameNode);
+    pattern->SetUnitNode(unitFrameNode);
+
     auto renderContext = unitFrameNode->GetRenderContext();
     if (renderContext && !renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);

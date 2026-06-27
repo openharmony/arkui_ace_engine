@@ -1071,7 +1071,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
-    UpdateTabBarOverlap(tabsLayoutProperty);
+    UpdateBackBlurStyle(tabBarNode);
     UpdateBgMaskNode();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1103,25 +1103,12 @@ bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
-void TabsPattern::UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty)
+void TabsPattern::UpdateBackBlurStyle(const RefPtr<FrameNode>& tabBarNode)
 {
-    CHECK_NULL_VOID(tabsLayoutProperty);
-    if (!tabsLayoutProperty->HasBarOverlap()) {
-        return;
-    }
-    bool barOverlap = tabsLayoutProperty->GetBarOverlapValue();
-    BlurStyleOption styleOption;
-    if (barOverlap) {
-        styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
     auto target = tabBarNode->GetRenderContext();
-    if (target) {
+    CHECK_NULL_VOID(target);
+    if (target->GetBackBlurStyle().has_value()) {
+        BlurStyleOption styleOption = target->GetBackBlurStyle().value();
         target->UpdateBackBlurStyle(styleOption);
     }
 }

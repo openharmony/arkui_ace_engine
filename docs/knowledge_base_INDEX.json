@@ -1851,6 +1851,51 @@
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.static.d.ets"
       },
       "last_updated": "2026-05-31"
+    },
+    {
+      "name": "UISession",
+      "name_cn": "UI会话",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "UISession",
+        "UI Session",
+        "ui_session",
+        "UiSessionManager",
+        "IUiContentService",
+        "InspectorTree",
+        "ReportService",
+        "组件事件上报",
+        "内容变化检测",
+        "ContentChangeManager",
+        "页面翻译",
+        "Web翻译",
+        "AI文本",
+        "HitTest",
+        "状态管理信息"
+      ],
+      "aliases": [
+        "UiSession",
+        "UI会话",
+        "ui_session内部接口",
+        "UISession通道"
+      ],
+      "file_path": "architecture/UISession_Knowledge_Base_CN.md",
+      "source_paths": {
+        "ipc_interface": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_content_service_interface.h",
+        "manager_interface": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_manager.h",
+        "param_config": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/param_config.h",
+        "manager_ohos": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp",
+        "content_stub": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
+        "content_stub_impl": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
+        "ui_content_impl": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/entrance/ui_content_impl.cpp",
+        "content_change_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
+        "sample_build": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/BUILD.gn",
+        "sample_service": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
+        "sample_config": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/16666.json"
+      },
+      "api_paths": {},
+      "last_updated": "2026-06-13"
     }
   ],
   "categories": {
@@ -1942,7 +1987,8 @@
         "DragDrop",
         "Layout Framework",
         "Safe Area Mechanism",
-        "Ignore Layout Safe Area"
+        "Ignore Layout Safe Area",
+        "UISession"
       ]
     }
   }

@@ -14,103 +14,36 @@
  */
 #include "core/interfaces/native/node/navigator_modifier.h"
 
-#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "ui/base/utils/utils.h"
 
+#include "core/common/dynamic_module_helper.h"
 namespace OHOS::Ace::NG {
-void SetTarget(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string uri = value;
-    NavigatorModelNG::SetUri(frameNode, uri);
-}
-
-void ResetTarget(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetUri(frameNode, "");
-}
-
-void SetType(ArkUINodeHandle node, int32_t value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto barMode = static_cast<OHOS::Ace::NavigatorType>(value);
-    NavigatorModelNG::SetType(frameNode, barMode);
-}
-
-void ResetType(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::PUSH);
-}
-
-void SetActive(ArkUINodeHandle node, ArkUI_Bool active)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetActive(frameNode, active);
-}
-
-void ResetActive(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetActive(frameNode, false);
-}
-
-void SetParams(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string args = value;
-    NavigatorModelNG::SetParams(frameNode, args);
-}
-
-void ResetParams(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetParams(frameNode, "");
-}
 
 namespace NodeModifier {
 const ArkUINavigatorModifier* GetNavigatorModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUINavigatorModifier modifier = {
-        .setTarget = SetTarget,
-        .resetTarget = ResetTarget,
-        .setType = SetType,
-        .resetType = ResetType,
-        .setActive = SetActive,
-        .resetActive = ResetActive,
-        .setParams = SetParams,
-        .resetParams = ResetParams,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUINavigatorModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Navigator");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find navigator dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUINavigatorModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUINavigatorModifier* GetCJUINavigatorModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUINavigatorModifier modifier = {
-        .setTarget = SetTarget,
-        .resetTarget = ResetTarget,
-        .setType = SetType,
-        .resetType = ResetType,
-        .setActive = SetActive,
-        .resetActive = ResetActive,
-        .setParams = SetParams,
-        .resetParams = ResetParams,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const CJUINavigatorModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Navigator");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find navigator dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const CJUINavigatorModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

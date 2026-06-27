@@ -15,7 +15,9 @@
 
 #include "core/components/common/properties/clip_path.h"
 
+#include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
@@ -338,5 +340,35 @@ RefPtr<ClipPath> ClipPath::CreateShape(const std::string& value)
     }
     return nullptr;
 }
+
+bool ClipPath::NeedClip() const
+{
+    return (basicShape_ && basicShape_->GetBasicShapeType() != BasicShapeType::NONE) ||
+           geometryBoxType_ != GeometryBoxType::NONE;
+}
+
+void ClipPath::SetBasicShape(const RefPtr<BasicShape>& basicShape)
+{
+    basicShape_ = basicShape;
+}
+
+ClipPath::ClipPath() = default;
+ClipPath::ClipPath(const RefPtr<BasicShape>& basicShape) : basicShape_(basicShape) {}
+ClipPath::ClipPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape)
+    : geometryBoxType_(geometryBoxType), basicShape_(basicShape)
+{}
+ClipPath::~ClipPath() = default;
+
+void MaskPath::SetBasicShape(const RefPtr<BasicShape>& basicShape)
+{
+    basicShape_ = basicShape;
+}
+
+MaskPath::MaskPath() = default;
+MaskPath::MaskPath(const RefPtr<BasicShape>& basicShape) : basicShape_(basicShape) {}
+MaskPath::MaskPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape)
+    : geometryBoxType_(geometryBoxType), basicShape_(basicShape)
+{}
+MaskPath::~MaskPath() = default;
 
 } // namespace OHOS::Ace

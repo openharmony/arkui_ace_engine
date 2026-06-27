@@ -20,7 +20,7 @@
 #include "generated/test_fixtures.h"
 #include "core/components/theme/theme_style.h"
 #include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"

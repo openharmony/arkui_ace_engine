@@ -25,6 +25,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

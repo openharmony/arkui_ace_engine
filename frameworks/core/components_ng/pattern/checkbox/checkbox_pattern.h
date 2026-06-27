@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
@@ -27,8 +26,9 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/picker/picker_checkbox_setting.h"
+#include "core/components_ng/pattern/date_picker/picker_checkbox_setting.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class CheckBoxGroupPaintProperty;
 class GroupManager;
 class CheckBoxPattern : public ToggleBasePattern {

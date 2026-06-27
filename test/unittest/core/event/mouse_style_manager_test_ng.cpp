@@ -574,4 +574,80 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager011, TestSize.Level1)
     EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusX, 32);
     EXPECT_EQ(std::get<CustomCursorInfo>(mouseStyleManager->mouseFormat_).focusY, 32);
 }
+
+/**
+ * @tc.name: MouseStyleManager012
+ * @tc.desc: Test SetMouseFormat when reason is INNER_SET_MOUSESTYLE and mouseStyleNodeId_ has no value.
+ *           Branch: line 40-41, !mouseStyleNodeId_.has_value() returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager012, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    mouseStyleManager->userSetCursor_ = false;
+    mouseStyleManager->mouseStyleNodeId_ = std::nullopt;
+
+    auto result = mouseStyleManager->SetMouseFormat(
+        1, 100, MouseFormat::EAST, false, MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: MouseStyleManager013
+ * @tc.desc: Test SetMouseFormat when reason is INNER_SET_MOUSESTYLE and nodeId does not match mouseStyleNodeId_.
+ *           Branch: line 40-41, mouseStyleNodeId_.value() != nodeId returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager013, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    mouseStyleManager->userSetCursor_ = false;
+    mouseStyleManager->mouseStyleNodeId_ = 100;
+
+    auto result = mouseStyleManager->SetMouseFormat(
+        1, 200, MouseFormat::EAST, false, MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: MouseStyleManager014
+ * @tc.desc: Test SetMouseFormat when reason is INNER_SET_MOUSESTYLE and nodeId matches mouseStyleNodeId_.
+ *           Branch: line 40-44, passes both conditions and sets windowIdWithNode_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager014, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    mouseStyleManager->userSetCursor_ = false;
+    mouseStyleManager->mouseStyleNodeId_ = 100;
+    mouseStyleManager->windowIdWithNode_ = -1;
+
+    auto result = mouseStyleManager->SetMouseFormat(
+        42, 100, MouseFormat::EAST, false, MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(mouseStyleManager->windowIdWithNode_, 42);
+}
+
+/**
+ * @tc.name: MouseStyleManager015
+ * @tc.desc: Test SetMouseFormat when reason is not INNER_SET_MOUSESTYLE, line 40 condition is false.
+ *           Branch: line 40, reason != INNER_SET_MOUSESTYLE skips inner if block.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager015, TestSize.Level0)
+{
+    auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    mouseStyleManager->userSetCursor_ = false;
+    mouseStyleManager->mouseStyleNodeId_ = std::nullopt;
+    mouseStyleManager->windowIdWithNode_ = -1;
+
+    auto result = mouseStyleManager->SetMouseFormat(
+        1, 100, MouseFormat::EAST, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(mouseStyleManager->windowIdWithNode_, -1);
+}
 } // namespace OHOS::Ace::NG

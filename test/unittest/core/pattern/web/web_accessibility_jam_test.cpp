@@ -16,6 +16,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "nweb_handler.h"
+
 #define private public
 #define protected public
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -57,7 +60,69 @@ constexpr int64_t TEST_ELEMENT_ID_POSITIVE = 100;
 constexpr int64_t TEST_ELEMENT_ID_LARGE = 0x100000000LL;
 constexpr int32_t TEST_WINDOW_ID = 1;
 constexpr int32_t TEST_INVALID_WINDOW_ID = 999;
+constexpr int32_t TEST_FOCUS_DIRECTION_FORWARD = 1 << 4;
 const std::string WEB_SRC_TEST = "web_test";
+
+class MockJamNWebAccessibilityNodeInfo : public OHOS::NWeb::NWebAccessibilityNodeInfo {
+public:
+    MOCK_METHOD(std::string, GetHint, (), (override));
+    MOCK_METHOD(std::string, GetError, (), (override));
+    MOCK_METHOD(int32_t, GetRectX, (), (override));
+    MOCK_METHOD(int32_t, GetRectY, (), (override));
+    MOCK_METHOD(void, SetPageId, (int32_t pageId), (override));
+    MOCK_METHOD(int32_t, GetPageId, (), (override));
+    MOCK_METHOD(std::vector<uint32_t>, GetActions, (), (override));
+    MOCK_METHOD(std::string, GetContent, (), (override));
+    MOCK_METHOD(std::vector<int64_t>, GetChildIds, (), (override));
+    MOCK_METHOD(void, SetParentId, (int64_t parentId), (override));
+    MOCK_METHOD(int64_t, GetParentId, (), (override));
+    MOCK_METHOD(bool, GetIsHeading, (), (override));
+    MOCK_METHOD(bool, GetIsChecked, (), (override));
+    MOCK_METHOD(bool, GetIsEnabled, (), (override));
+    MOCK_METHOD(bool, GetIsFocused, (), (override));
+    MOCK_METHOD(int32_t, GetRectWidth, (), (override));
+    MOCK_METHOD(int32_t, GetRectHeight, (), (override));
+    MOCK_METHOD(bool, GetIsVisible, (), (override));
+    MOCK_METHOD(bool, GetIsHinting, (), (override));
+    MOCK_METHOD(bool, GetIsEditable, (), (override));
+    MOCK_METHOD(bool, GetIsSelected, (), (override));
+    MOCK_METHOD(size_t, GetItemCounts, (), (override));
+    MOCK_METHOD(int32_t, GetLiveRegion, (), (override));
+    MOCK_METHOD(bool, GetIsPassword, (), (override));
+    MOCK_METHOD(bool, GetIsCheckable, (), (override));
+    MOCK_METHOD(bool, GetIsClickable, (), (override));
+    MOCK_METHOD(bool, GetIsFocusable, (), (override));
+    MOCK_METHOD(bool, GetIsScrollable, (), (override));
+    MOCK_METHOD(bool, GetIsDeletable, (), (override));
+    MOCK_METHOD(int64_t, GetAccessibilityId, (), (override));
+    MOCK_METHOD(bool, GetIsPopupSupported, (), (override));
+    MOCK_METHOD(bool, GetIsContentInvalid, (), (override));
+    MOCK_METHOD(int32_t, GetSelectionEnd, (), (override));
+    MOCK_METHOD(int32_t, GetSelectionStart, (), (override));
+    MOCK_METHOD(float, GetRangeInfoMin, (), (override));
+    MOCK_METHOD(float, GetRangeInfoMax, (), (override));
+    MOCK_METHOD(float, GetRangeInfoCurrent, (), (override));
+    MOCK_METHOD(int32_t, GetInputType, (), (override));
+    MOCK_METHOD(std::string, GetComponentType, (), (override));
+    MOCK_METHOD(std::string, GetDescriptionInfo, (), (override));
+    MOCK_METHOD(int32_t, GetGridRows, (), (override));
+    MOCK_METHOD(int32_t, GetGridItemRow, (), (override));
+    MOCK_METHOD(int32_t, GetGridColumns, (), (override));
+    MOCK_METHOD(int32_t, GetGridItemColumn, (), (override));
+    MOCK_METHOD(int32_t, GetGridItemRowSpan, (), (override));
+    MOCK_METHOD(int32_t, GetGridSelectedMode, (), (override));
+    MOCK_METHOD(int32_t, GetGridItemColumnSpan, (), (override));
+    MOCK_METHOD(bool, GetIsAccessibilityFocus, (), (override));
+    MOCK_METHOD(bool, GetIsPluralLineSupported, (), (override));
+    MOCK_METHOD(bool, GetIsAccessibilityGroup, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityLevel, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityDescription, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityText, (), (override));
+    MOCK_METHOD(std::string, GetComponentTypeDescription, (), (override));
+    MOCK_METHOD(int32_t, GetCheckboxGroupSelectedStatus, (), (override));
+    MOCK_METHOD(std::string, GetExpandedState, (), (override));
+    MOCK_METHOD(std::string, GetHtmlElementId, (), (override));
+};
 } // namespace
 
 class WebAccessibilityJamTest : public testing::Test {
@@ -65,6 +130,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     static RefPtr<WebPattern> CreateWebPattern();
+    void TearDown() override;
     static RefPtr<WebPattern> webPattern_;
 };
 
@@ -99,6 +165,13 @@ void WebAccessibilityJamTest::TearDownTestCase()
     webPattern_ = nullptr;
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void WebAccessibilityJamTest::TearDown()
+{
+    OHOS::Ace::SetReturnStatus("");
+    OHOS::Ace::SetReturnNode(nullptr);
+    OHOS::Ace::SetComponentType("");
 }
 
 // ==================== ConvertToSplitElementId ====================
@@ -651,6 +724,132 @@ HWTEST_F(WebAccessibilityJamTest, DumpWebInfoParams005, TestSize.Level1)
     EXPECT_TRUE(manager->DumpWebInfoParams({ "dump", "-webAccFun", "node" }, argument));
     EXPECT_TRUE(manager->DumpWebInfoParams({ "dump", "-webAccFun", "pre" }, argument));
     EXPECT_TRUE(manager->DumpWebInfoParams({ "dump", "-webAccFun", "next" }, argument));
+}
+
+/**
+ * @tc.name: DumpWebInfoParams006
+ * @tc.desc: Test pre/next optional focusMoveRule parsing
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityJamTest, DumpWebInfoParams006, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(manager, nullptr);
+
+    DumpInfoArgument argument;
+    EXPECT_TRUE(manager->DumpWebInfoParams({ "dump", "-webAccFun", "pre", "2" }, argument));
+    EXPECT_EQ(argument.webAccFun, "pre");
+    EXPECT_EQ(argument.focusMoveRule, 2);
+
+    DumpInfoArgument nextArgument;
+    EXPECT_TRUE(manager->DumpWebInfoParams({ "dump", "-webAccFun", "next", "1" }, nextArgument));
+    EXPECT_EQ(nextArgument.webAccFun, "next");
+    EXPECT_EQ(nextArgument.focusMoveRule, 1);
+}
+
+/**
+ * @tc.name: GetAccessibilityNodeByParams001
+ * @tc.desc: Test WebPattern GetAccessibilityNodeByParams with accessibility state and mock delegate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityJamTest, GetAccessibilityNodeByParams001, TestSize.Level1)
+{
+    auto webPattern = CreateWebPattern();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+
+    std::map<std::string, std::string> params;
+    auto ret = webPattern->GetAccessibilityNodeByParams(TEST_ELEMENT_ID_POSITIVE, TEST_FOCUS_DIRECTION_FORWARD,
+        static_cast<int32_t>(FocusRuleType::FOCUS_BY_LINK), params);
+    EXPECT_EQ(ret, nullptr);
+
+    webPattern->SetAccessibilityState(true);
+    OHOS::Ace::SetReturnStatus("true");
+    ret = webPattern->GetAccessibilityNodeByParams(TEST_ELEMENT_ID_POSITIVE, TEST_FOCUS_DIRECTION_FORWARD,
+        static_cast<int32_t>(FocusRuleType::FOCUS_BY_LINK), params);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: WebFocusMoveSearchWithConditionNG001
+ * @tc.desc: Test default focus embeddedObject branch returns success before params search
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityJamTest, WebFocusMoveSearchWithConditionNG001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(manager, nullptr);
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    manager->SetPipelineContext(context);
+
+    auto webPattern = CreateWebPattern();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->SetAccessibilityState(true);
+
+    auto node = std::make_shared<NiceMock<MockJamNWebAccessibilityNodeInfo>>();
+    ON_CALL(*node, GetComponentType()).WillByDefault(Return("embeddedObject"));
+    ON_CALL(*node, GetAccessibilityId()).WillByDefault(Return(TEST_ELEMENT_ID_POSITIVE));
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetReturnNode(node);
+
+    AccessibilityElementInfo info;
+    auto result = manager->WebFocusMoveSearchWithConditionNG(TEST_ELEMENT_ID_POSITIVE, TEST_FOCUS_DIRECTION_FORWARD,
+        static_cast<int32_t>(FocusRuleType::FOCUS_BY_LINK), info, context, webPattern);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_SUCCESS);
+    EXPECT_EQ(info.GetComponentType(), "embeddedObject");
+}
+
+/**
+ * @tc.name: WebFocusMoveSearchWithConditionNG002
+ * @tc.desc: Test params search branch returns success for non-embedded default focus node
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityJamTest, WebFocusMoveSearchWithConditionNG002, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(manager, nullptr);
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    manager->SetPipelineContext(context);
+
+    auto webPattern = CreateWebPattern();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->SetAccessibilityState(true);
+
+    auto node = std::make_shared<NiceMock<MockJamNWebAccessibilityNodeInfo>>();
+    ON_CALL(*node, GetComponentType()).WillByDefault(Return("link"));
+    ON_CALL(*node, GetAccessibilityId()).WillByDefault(Return(TEST_ELEMENT_ID_POSITIVE));
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetReturnNode(node);
+
+    AccessibilityElementInfo info;
+    auto result = manager->WebFocusMoveSearchWithConditionNG(TEST_ELEMENT_ID_POSITIVE, TEST_FOCUS_DIRECTION_FORWARD,
+        static_cast<int32_t>(FocusRuleType::FOCUS_BY_LINK), info, context, webPattern);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_SUCCESS);
+    EXPECT_EQ(info.GetComponentType(), "link");
+}
+
+/**
+ * @tc.name: WebFocusMoveSearchByComponent001
+ * @tc.desc: Test non-embedded web focus move component search keeps result unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityJamTest, WebFocusMoveSearchByComponent001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(manager, nullptr);
+
+    AccessibilityElementInfo nodeInfo;
+    nodeInfo.SetComponentType("link");
+    nodeInfo.SetAccessibilityId(TEST_ELEMENT_ID_POSITIVE);
+    FocusMoveResult result;
+    result.resultType = FocusMoveResultType::SEARCH_SUCCESS;
+    manager->WebFocusMoveSearchByComponent(nodeInfo, nullptr, TEST_FOCUS_DIRECTION_FORWARD, nullptr, result);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_SUCCESS);
+    EXPECT_EQ(nodeInfo.GetAccessibilityId(), TEST_ELEMENT_ID_POSITIVE);
 }
 
 /**

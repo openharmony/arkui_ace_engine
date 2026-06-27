@@ -18,6 +18,7 @@
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
@@ -25,11 +26,14 @@
 
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 
 int32_t MULTI_FINGER_TIMEOUT = 300;
@@ -308,6 +312,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     UpdateInfoWithDownEvent(event);
+    ReportTouchDownToResSched(event, pipeline);
 }
 
 void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
@@ -387,6 +392,7 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    ResetTouchDownNotifiedToClickFlag();
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
         : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -469,6 +475,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    ResetTouchDownNotifiedToClickFlag();
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
         : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
@@ -741,6 +748,9 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
 
 GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -922,5 +932,37 @@ std::string ClickRecognizer::GetGestureInfoString() const
     gestureInfoStr.append(",CTPN:");
     gestureInfoStr.append(std::to_string(currentTouchPointsNum_));
     return gestureInfoStr;
+}
+
+void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline)
+{
+    auto frameNode = GetAttachedNode();
+    if (frameNode.Invalid()) {
+        return;
+    }
+    auto ngPipeline = DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto clickOptimizer = ngPipeline->GetClickOptimizer();
+    bool isClickExtEnabled = clickOptimizer ? clickOptimizer->GetClickExtEnabled() : false;
+    ReportConfig config;
+#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
+    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
+    config.isReportTid = container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    config.tid = config.isReportTid ? static_cast<uint64_t>(pthread_self()) : config.tid;
+#endif
+    if (shouldReportTouchDown_) {
+        ResSchedReport::GetInstance().OnTouchEvent(event, config, frameNode, isClickExtEnabled);
+    }
+}
+
+void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()
+{
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto ngContext = DynamicCast<PipelineContext>(context);
+    CHECK_NULL_VOID(ngContext);
+    const auto& touchOptimizer = ngContext->GetTouchOptimizer();
+    CHECK_NULL_VOID(touchOptimizer);
+    touchOptimizer->SetTouchDownNotifiedToClick(false);
 }
 } // namespace OHOS::Ace::NG

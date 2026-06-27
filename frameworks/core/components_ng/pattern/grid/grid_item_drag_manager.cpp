@@ -62,6 +62,7 @@ constexpr int32_t LONG_PRESS_ANIMATION_DURATION = 300;
 constexpr int32_t SWAP_ANIMATION_DURATION = 30;
 constexpr int32_t POWER_FOR_DISTANCE = 2;
 constexpr float NEARBY_SCALE_RATIO = 0.05f;
+const char GRID_ETS_TAG[] = "Grid";
 
 int32_t GetForEachIndexInGrid(const RefPtr<ForEachBaseNode>& forEach)
 {
@@ -87,7 +88,7 @@ RefPtr<FrameNode> GridItemDragManager::GetGridFrameNode() const
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParentFrameNode();
     CHECK_NULL_RETURN(parent, nullptr);
-    if (parent->GetTag() == V2::GRID_ETS_TAG) {
+    if (parent->GetTag() == GRID_ETS_TAG) {
         return parent;
     }
     return nullptr;

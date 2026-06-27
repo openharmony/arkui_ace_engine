@@ -39,12 +39,14 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -390,8 +392,14 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
         return nullptr;
     }
     auto fileSize = statBuf.st_size;
+    if (fileSize < 0) {
+        close(fd);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "file is empty, %{private}s", realPath);
+        errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        return nullptr;
+    }
     auto buffer = std::unique_ptr<void, decltype(&std::free)>(std::malloc(fileSize), std::free);
-    if (!buffer || fileSize < 0) {
+    if (!buffer) {
         close(fd);
         TAG_LOGW(AceLogTag::ACE_IMAGE, "malloc memory failed, %{private}s", realPath);
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };

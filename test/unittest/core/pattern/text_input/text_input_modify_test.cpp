@@ -218,11 +218,19 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
     OffsetF localOffset1(1.0f, 1.0f);
     EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true), 0);
 
+    /**
+     * @tc.steps: step3. Create localoffset.
+     * tc.expected: step3. Check if the value is right.
+     */
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(720.0f, 1.0f);
     EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true), 26);
 
+    /**
+     * @tc.steps: step4. Create localoffset.
+     * tc.expected: step4. Check if the value is right.
+     */
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 1.0f);

@@ -17,6 +17,7 @@
 
 #include <unordered_map>
 
+#include "base/json/node_object.h"
 #include "base/ressched/ressched_report.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"

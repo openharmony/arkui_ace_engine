@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/radio/bridge/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -128,9 +129,14 @@ panda::Local<panda::JSValueRef> JsRadioChangeCallback(panda::JsiRuntimeCallInfo*
     if (obj->GetNativePointerFieldCount(vm) < NUM_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    if (weak->Invalid()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    RadioModelNG::SetChangeValue(frameNode, value);
+    RadioModelNG::SetChangeValue(AceType::RawPtr(frameNode), value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -799,7 +805,8 @@ ArkUINativeModuleValue RadioBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
             auto radio = panda::ObjectRef::NewWithNamedProperties(vm,
                 ArraySize(keysOfRadio), keysOfRadio, valuesOfRadio);
             radio->SetNativePointerFieldCount(vm, 1);
-            radio->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
+            radio->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, radio };
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);

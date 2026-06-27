@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_mode.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -79,8 +81,10 @@ public:
 
     void CreateScroll();
     void CreateHorizontalScroll();
+    void CreateWaterFlow(WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN);
     void CreateLazyDynamicLayout(Axis axis);
     void CreateStack(Axis axis);
+    void CreateContent(int32_t count = 20);
     RefPtr<FrameNode> GetMainFrameNode();
 private:
     RefPtr<FrameNode> frameNode_;
@@ -153,6 +157,17 @@ void LazyDynamicLayoutTest::CreateHorizontalScroll()
     scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
 }
 
+void LazyDynamicLayoutTest::CreateWaterFlow(WaterFlowLayoutMode mode)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    model.SetLayoutMode(mode);
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+}
+
 RefPtr<FrameNode> LazyDynamicLayoutTest::GetMainFrameNode()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -169,6 +184,14 @@ void LazyDynamicLayoutTest::CreateStack(Axis axis)
     } else {
         ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
         ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+    }
+}
+
+void LazyDynamicLayoutTest::CreateContent(int32_t count)
+{
+    for (int32_t i = 0; i < count; i++) {
+        CreateStack(Axis::VERTICAL);
+        ViewStackProcessor::GetInstance()->Pop();
     }
 }
 
@@ -351,5 +374,60 @@ HWTEST_F(LazyDynamicLayoutTest, RepeatVirtualScrollTest001, TestSize.Level1)
     EXPECT_EQ(*(pattern_->prevVisibleIndexes_.begin()), 0);
     EXPECT_EQ(*(pattern_->prevVisibleIndexes_.rbegin()), 9);
     EXPECT_EQ(scrollablePattern_->GetTotalOffset(), 20);
+}
+
+/**
+ * @tc.name: WaterFlowSlidingWindowTest001
+ * @tc.desc: Test LazyDynamicLayout in WaterFlow SLIDING_WINDOW mode, scroll to bottom and decrease child height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutTest, WaterFlowSlidingWindowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with SLIDING_WINDOW mode and one LazyDynamicLayout
+     * @tc.expected: layout visible items and verify initial state
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    
+    constexpr int32_t itemCount = 30;
+    constexpr float newHeight = 50.f;
+    
+    CreateLazyDynamicLayout(Axis::VERTICAL);
+    CreateContent(itemCount);
+    CreateDone();
+    
+    auto pattern = GetChildPattern<LazyDynamicLayoutPattern>(scrollableFrameNode_, 0);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), itemCount * ITEM_HEIGHT);
+    EXPECT_EQ(pattern->prevVisibleIndexes_.size(), 5u);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 0);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 4);
+
+    /**
+     * @tc.steps: step2. Scroll to bottom
+     * @tc.expected: visible indexes updated
+     */
+    for (int32_t i = 0; i < 5; i++) {
+        scrollablePattern_->UpdateCurrentOffset(-500, SCROLL_FROM_UPDATE);
+        FlushUITasks(scrollableFrameNode_);
+    }
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 24);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 29);
+
+    /**
+     * @tc.steps: step3. Decrease all children height
+     * @tc.expected: children height updated
+     */
+    auto frameNode = GetChildFrameNode(scrollableFrameNode_, 0);
+    for (auto& child : frameNode->GetChildren()) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(child);
+        if (frameChild) {
+            auto property = frameChild->GetLayoutProperty();
+            property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(SCROLL_WIDTH), CalcLength(newHeight)));
+        }
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.begin()), 20);
+    EXPECT_EQ(*(pattern->prevVisibleIndexes_.rbegin()), 29);
 }
 } // namespace OHOS::Ace::NG

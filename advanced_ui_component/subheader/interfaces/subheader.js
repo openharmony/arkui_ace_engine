@@ -169,8 +169,8 @@ function __Text__secondaryTitleStyles(l11) {
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
     Text.align(l11?.alignment);
     Text.fallbackLineSpacing(true);
-    Text.wordBreak(WordBreak.HYPHENATION);
     Text.orphanCharOptimization(true);
+    Text.punctuationOverflow(true);
 }
 
 function __Text__primaryTitleStyles(k11) {
@@ -187,8 +187,8 @@ function __Text__primaryTitleStyles(k11) {
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
     Text.align(k11?.alignment);
     Text.fallbackLineSpacing(true);
-    Text.wordBreak(WordBreak.HYPHENATION);
     Text.orphanCharOptimization(true);
+    Text.punctuationOverflow(true);
 }
 
 class SubHeaderModifier {

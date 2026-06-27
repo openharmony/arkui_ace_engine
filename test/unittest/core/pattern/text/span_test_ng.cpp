@@ -20,9 +20,9 @@
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "core/components_ng/pattern/text/span/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 using namespace testing;
 using namespace testing::ext;
@@ -1259,6 +1259,9 @@ HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create image span node
+     */
     ImageModelNG imageSpan;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
@@ -1268,9 +1271,18 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     imageInfoConfig.pixelMap = pixMap;
     imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
+
+    /**
+     * @tc.steps: step2. set onComplete event
+     */
     bool isTrigger = false;
     auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
     imageSpan.SetOnComplete(std::move(onComplete));
+
+    /**
+     * @tc.steps: step3. trigger onComplete event
+     * @tc.expected: onComplete event is triggered
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);

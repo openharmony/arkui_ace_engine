@@ -15,6 +15,8 @@
 
 #include "border_property.h"
 
+#include "base/json/json_util.h"
+
 namespace OHOS::Ace::NG {
 void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
     const InspectorFilter& filter, bool isOutline) const

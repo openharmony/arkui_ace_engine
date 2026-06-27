@@ -24,15 +24,17 @@ constexpr int32_t DEFAULT_DURATION { 1000 };
 constexpr int32_t DEFAULT_STATUS { static_cast<int32_t>(ControlledAnimator::ControlStatus::IDLE) };
 constexpr int32_t DEFAULT_FILL_MODE { static_cast<int32_t>(FillMode::FORWARDS) };
 constexpr int32_t DEFAULT_ITERATIONS { 1 };
+const char IMAGE_ETS_TAG[] = "Image";
+const char IMAGE_ANIMATOR_ETS_TAG[] = "ImageAnimator";
 } // namespace
 
 RefPtr<FrameNode> ImageAnimatorModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<ImageAnimatorPattern>());
+    auto frameNode =
+        FrameNode::CreateFrameNode(IMAGE_ANIMATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<ImageAnimatorPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        auto imageNode = FrameNode::CreateFrameNode(IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(imageNode, nullptr);
         auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
         CHECK_NULL_RETURN(imagePattern, nullptr);

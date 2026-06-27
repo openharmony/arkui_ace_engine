@@ -41,9 +41,9 @@ void RefreshModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::REFRESH_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", REFRESH_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
+        REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
     if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -61,7 +61,7 @@ void RefreshModelNG::Create()
 
 RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
     if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
@@ -109,9 +109,19 @@ void RefreshModelNG::SetFriction(int32_t friction)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction);
 }
 
+void RefreshModelNG::SetFriction(FrameNode* frameNode, int32_t friction)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction, frameNode);
+}
+
 void RefreshModelNG::SetLoadingText(const std::string& loadingText)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
+}
+
+void RefreshModelNG::SetLoadingText(FrameNode* frameNode, const std::string& loadingText)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText, frameNode);
 }
 
 void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
@@ -135,9 +145,34 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
     pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }
 
+void RefreshModelNG::CreateWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("refresh.promptText");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(resObj, result)) {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, AceType::RawPtr(node));
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
+        }
+    };
+    pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
+}
+
 void RefreshModelNG::ResetLoadingText()
 {
     ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText);
+}
+
+void RefreshModelNG::ResetLoadingText(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, frameNode);
 }
 
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
@@ -235,6 +270,11 @@ void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, isCustomBuilderExist);
 }
 
+void RefreshModelNG::SetIsCustomBuilderExist(FrameNode* frameNode, bool isCustomBuilderExist)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, isCustomBuilderExist, frameNode);
+}
+
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
 {
     // call SetCustomBuilderMultiThread by multi thread
@@ -293,6 +333,11 @@ void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& off
 {
     ACE_CHECK_NODE_LPX_ATTRIBUTE(offset, LpxAttribute::LPX_REFRESH_OFFSET, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
+}
+
+void RefreshModelNG::SetIndicatorOffset(FrameNode* frameNode, const Dimension& indicatorOffset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IndicatorOffset, indicatorOffset, frameNode);
 }
 
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)

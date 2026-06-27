@@ -102,16 +102,6 @@ thread_local int32_t currentLocalId_(DEFAULT_ID);
 thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
-std::atomic<ContainerScope::CheckRunOnUIThreadFunc> checkThreadFunc_ = nullptr;
-
-bool CheckRunOnUIThread(int32_t currentId, bool defaultRes)
-{
-    auto checkFunc = checkThreadFunc_.load(std::memory_order_acquire);
-    if (checkFunc == nullptr) {
-        return defaultRes;
-    }
-    return checkFunc(currentId, defaultRes);
-}
 
 // Isolated thread state: used in dc (dynamic component) and card (Form) scenarios.
 // In these scenarios, multiple instances run in the same process but on different threads,
@@ -330,11 +320,6 @@ int32_t ContainerScope::CurrentId()
     return currentId_;
 }
 
-void ContainerScope::RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc)
-{
-    checkThreadFunc_.store(checkFunc, std::memory_order_release);
-}
-
 void ContainerScope::UpdateLocalCurrent(int32_t id)
 {
     currentLocalId_ = id;
@@ -395,7 +380,7 @@ int32_t ContainerScope::RecentForegroundId()
     return recentForegroundId_.load(std::memory_order_relaxed);
 }
 
-int32_t ContainerScope::SafelyId(bool checkThread)
+int32_t ContainerScope::SafelyId()
 {
     uint32_t containerCount = ContainerCount();
     if (containerCount == 0) {
@@ -405,22 +390,17 @@ int32_t ContainerScope::SafelyId(bool checkThread)
         return SingletonId();
     }
     int32_t currentId = RecentActiveId();
-    if (currentId < 0) {
-        currentId = RecentForegroundId();
-    }
     if (currentId >= 0) {
-        if (checkThread && currentLocalId_ != DEFAULT_ID &&
-            !CheckRunOnUIThread(currentId, true) &&
-            CheckRunOnUIThread(currentLocalId_, true)) {
-            return currentLocalId_;
-        } else {
-            return currentId;
-        }
+        return currentId;
+    }
+    currentId = RecentForegroundId();
+    if (currentId >= 0) {
+        return currentId;
     }
     return DefaultId();
 }
 
-std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool checkThread)
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
 {
     int32_t currentId = CurrentId();
     if (currentId >= 0) {
@@ -434,19 +414,12 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool
         return { SingletonId(), InstanceIdGenReason::SINGLETON };
     }
     currentId = ContainerScope::RecentActiveId();
-    InstanceIdGenReason reason = InstanceIdGenReason::ACTIVE;
-    if (currentId < 0) {
-        currentId = RecentForegroundId();
-        reason = InstanceIdGenReason::FOREGROUND;
-    }
     if (currentId >= 0) {
-        if (checkThread && currentLocalId_ != DEFAULT_ID &&
-            !CheckRunOnUIThread(currentId, true) &&
-            CheckRunOnUIThread(currentLocalId_, true)) {
-            return { currentLocalId_, InstanceIdGenReason::LOCAL };
-        } else {
-            return { currentId, reason };
-        }
+        return { currentId, InstanceIdGenReason::ACTIVE };
+    }
+    currentId = ContainerScope::RecentForegroundId();
+    if (currentId >= 0) {
+        return { currentId, InstanceIdGenReason::FOREGROUND };
     }
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
 }
@@ -464,8 +437,6 @@ const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason
             return "No specific instance was specified, return the only remaining instance";
         case InstanceIdGenReason::FOREGROUND:
             return "No specific instance was specified, return the foreground instance";
-        case InstanceIdGenReason::LOCAL:
-            return "No specific instance was specified, return the local thread instance";
         case InstanceIdGenReason::UNDEFINED:
             return "No valid instance exists";
         default:
@@ -481,6 +452,13 @@ const std::set<int32_t> ContainerScope::GetAllUIContexts()
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
+}
+
+void ContainerScope::RestoreCurrent(int32_t id)
+{
+    // id parameter is unused, kept to match ContainerScopeCallback typedef signature.
+    // Resets currentId_ to INSTANCE_ID_UNDEFINED(-1) for FinishContainerScopeFunc callback.
+    UpdateCurrent(-1);
 }
 
 // Mark the current thread as an isolated thread (dc/card scenario).

@@ -14,7 +14,7 @@
  */
 
 import { int32 } from "@koalaui/common";
-import { Disposable, scheduleCallback } from "@koalaui/runtime";
+import { Disposable, scheduleCallback, callScheduledCallbacks } from "@koalaui/runtime";
 
 export class ReusablePool implements Disposable {
     private _maxSize: int32 = Number.POSITIVE_INFINITY.toInt()
@@ -48,6 +48,7 @@ export class ReusablePool implements Disposable {
             value.dispose();
         }
         this._cache = [];
+        callScheduledCallbacks();
     }
 
     setMaxSize(value: int32) {

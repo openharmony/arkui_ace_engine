@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
+#include "core/components_ng/pattern/text/span/image_span_view_static.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;

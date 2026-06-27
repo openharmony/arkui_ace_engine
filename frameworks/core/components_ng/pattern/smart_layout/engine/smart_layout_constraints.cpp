@@ -248,4 +248,69 @@ ChildStatistics SmartLayoutConstraints::CalculateChildStatistics(const SmartLayo
     return stats;
 }
 
+void SmartLayoutConstraints::AddGeneralConstraints(SmartLayoutNode& parent)
+{
+    auto* engine = parent.GetEngine();
+    if (engine == nullptr || parent.GetChildren().empty()) {
+        return;
+    }
+
+    const auto& boundingBox = parent.GetBoundingBox();
+    if (!boundingBox.IsValid()) {
+        return;
+    }
+
+    // Compute sizeScale from bounding box vs container size (same approach as Column/Row)
+    double containerWidth = parent.GetContext().size.Width();
+    double containerHeight = parent.GetContext().size.Height();
+
+    double sizeScale = 1.0;
+    bool widthOverflow = GreatNotEqual(boundingBox.width, containerWidth);
+    bool heightOverflow = GreatNotEqual(boundingBox.height, containerHeight);
+    if (widthOverflow && !heightOverflow) {
+        sizeScale = containerWidth / boundingBox.width;
+    } else if (!widthOverflow && heightOverflow) {
+        sizeScale = containerHeight / boundingBox.height;
+    } else if (widthOverflow && heightOverflow) {
+        double widthScale = containerWidth / boundingBox.width;
+        double heightScale = containerHeight / boundingBox.height;
+        sizeScale = std::min(widthScale, heightScale);
+    }
+
+    // Fix sizeScale as constant (same as Column/Row)
+    engine->Add(parent.GetScaleInfo().sizeScale.expr == sizeScale);
+
+    // Fix boxOffset = originalOffset * axisSpaceScale
+    engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr >= 0.0);
+    engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr <= 1.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr >= 0.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr <= 1.0);
+    const auto& boxPos = parent.GetPosition();
+    engine->Add(boxPos.offsetX.expr == boundingBox.offsetX * parent.GetScaleInfo().mainAxisSpaceScale.expr);
+    engine->Add(boxPos.offsetY.expr == boundingBox.offsetY * parent.GetScaleInfo().crossAxisSpaceScale.expr);
+
+    // Boundary constraints
+    engine->Add(boxPos.offsetX.expr >= 0.0);
+    engine->Add(boxPos.offsetY.expr >= 0.0);
+    engine->Add(boxPos.offsetX.expr + boundingBox.width * sizeScale <= containerWidth);
+    engine->Add(boxPos.offsetY.expr + boundingBox.height * sizeScale <= containerHeight);
+
+    // Constrain each child
+    for (const auto& child : parent.GetChildren()) {
+        if (child == nullptr) {
+            continue;
+        }
+
+        // Child size = original size * sizeScale
+        engine->Add(child->GetSize().width.expr == child->GetSize().width.value * sizeScale);
+        engine->Add(child->GetSize().height.expr == child->GetSize().height.value * sizeScale);
+
+        // Child position = relativePos * sizeScale + boxOffset
+        double relX = child->GetPosition().offsetX.value - boundingBox.offsetX;
+        double relY = child->GetPosition().offsetY.value - boundingBox.offsetY;
+        engine->Add(child->GetPosition().offsetX.expr == relX * sizeScale + boxPos.offsetX.expr);
+        engine->Add(child->GetPosition().offsetY.expr == relY * sizeScale + boxPos.offsetY.expr);
+    }
+}
+
 } // namespace OHOS::Ace::NG

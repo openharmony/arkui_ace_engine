@@ -14,6 +14,7 @@
  */
 
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_click_optimizer.h"
 
 #include "core/common/container.h"
 #include "core/event/key_event.h"
@@ -32,6 +33,7 @@ constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
+constexpr uint32_t RES_TYPE_FLOAT_START_FROM_SIDEBAR = 216;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST = 511;
 #ifdef FFRT_EXISTS
@@ -63,6 +65,9 @@ constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 4;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
+constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -102,6 +107,8 @@ constexpr char TO_COMPONENT_NAME[] = "to_component_name";
 constexpr char WINDOW_ID[] = "window_id";
 constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
 constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
+constexpr char FLOAT_START_FROM_SIDEBAR_START[] = "float_start_from_sidebar_start";
+constexpr char FLOAT_START_FROM_SIDEBAR_END[] = "float_start_from_sidebar_end";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -292,6 +299,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_BACKPRESSED_EVENT, 0, payload);
                 }
             },
+            { FLOAT_START_FROM_SIDEBAR_START,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 0, payload);
+                }
+            },
+            { FLOAT_START_FROM_SIDEBAR_END,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 1, payload);
+                }
+            },
         };
     auto it = functionMap.find(name);
     if (it == functionMap.end()) {
@@ -356,6 +375,12 @@ bool ResSchedReport::AppSwiperReportEnableCheck(const std::unordered_map<std::st
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
 {
+    OnTouchEvent(touchEvent, config, nullptr, false);
+}
+
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
+                                  const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled)
+{
     if (!triggerExecuted) {
         auto curContainer = Container::Current();
         CHECK_NULL_VOID(curContainer);
@@ -374,7 +399,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
     }
     switch (touchEvent.type) {
         case TouchType::DOWN:
-            HandleTouchDown(touchEvent, config);
+            HandleTouchDown(touchEvent, config, weakNode, isClickExtEnabled);
             break;
         case TouchType::UP:
             HandleTouchUp(touchEvent, config);
@@ -468,14 +493,42 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
     }
 }
 
-void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config)
+void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
+                                     const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled)
 {
     std::unordered_map<std::string, std::string> payload;
     payload[Ressched::NAME] = TOUCH;
     LoadReportConfig(config, payload);
+
+    if (!weakNode.Invalid() && isClickExtEnabled) {
+        CollectComponentInfo(weakNode, payload);
+    }
+
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
     isInTouch_ = true;
+}
+
+void ResSchedReport::CollectComponentInfo(const WeakPtr<NG::FrameNode>& weakNode,
+                                          std::unordered_map<std::string, std::string>& payload)
+{
+    auto node = weakNode.Upgrade();
+    CHECK_NULL_VOID(node);
+
+    auto& aceInfo = AceApplicationInfo::GetInstance();
+    payload["pid"] = std::to_string(aceInfo.GetPid());
+    payload["uid"] = std::to_string(aceInfo.GetUid());
+    payload["bundleName"] = aceInfo.GetPackageName();
+    payload["abilityName"] = aceInfo.GetAbilityName();
+    payload["text"] = "";
+    std::string path = node->GetPath();
+    payload["path"] = path.substr(0, MAX_UPDATE_TEXT_LENGTH);
+
+    std::string text;
+    ResSchedClickOptimizer::GetComponentTextRecursive(weakNode, text, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
+        MAX_TOUCH_DOWN_RECURSIVE_NODES);
+    CHECK_EQUAL_VOID(text.empty(), true);
+    payload["text"] = text.substr(0, MAX_UPDATE_TEXT_LENGTH);
 }
 
 void ResSchedReport::HandleKeyDown(const KeyEvent& event)

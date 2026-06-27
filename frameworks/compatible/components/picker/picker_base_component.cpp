@@ -15,7 +15,7 @@
 
 #include "compatible/components/picker/picker_base_component.h"
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "compatible/components/picker/picker_base_element.h"
 #include "compatible/components/picker/render_picker_base.h"
 

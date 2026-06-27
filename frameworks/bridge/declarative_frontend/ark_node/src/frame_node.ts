@@ -32,8 +32,12 @@ interface InteractionEventBindingInfo {
 
 interface ArkComponentCreator {
   createSearchComponent?:(node: NodePtr, type: ModifierType) => ArkSearchComponent;
+  createLoadingProgressComponent?: (node: NodePtr, type: ModifierType) => ArkLoadingProgressComponent;
   createMarqueeComponent?: (node: NodePtr, type: ModifierType) => ArkMarqueeComponent;
   createSymbolGlyphComponent?: (node: NodePtr, type: ModifierType) => ArkSymbolGlyphComponent;
+  createBadgeComponent?: (node: NodePtr, type: ModifierType) => ArkBadgeComponent;
+  createProgressComponent?: (node: NodePtr, type: ModifierType) => ArkProgressComponent;
+  createTextTimerComponent?: (node: NodePtr, type: ModifierType) => ArkTextTimerComponent;
 }
 
 const __componentCreator__ : ArkComponentCreator = {};
@@ -1343,7 +1347,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Progress', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Progress', (node: NodePtr, type: ModifierType): ArkProgressComponent => {
-        return new ArkProgressComponent(node, type);
+        if (__componentCreator__.createProgressComponent === undefined) {
+          getUINativeModule().loadNativeModule('Progress');
+          let module = globalThis.requireNapi('arkui.components.arkprogress');
+          __componentCreator__.createProgressComponent = module.createComponent;
+        }
+        return __componentCreator__.createProgressComponent!(node, type);
       })
     }],
     ['Scroll', (context: UIContext): FrameNode => {
@@ -1373,7 +1382,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['LoadingProgress', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'LoadingProgress', (node: NodePtr, type: ModifierType): ArkLoadingProgressComponent => {
-        return new ArkLoadingProgressComponent(node, type);
+        if (__componentCreator__.createLoadingProgressComponent === undefined) {
+          getUINativeModule().loadNativeModule('LoadingProgress');
+          let module = globalThis.requireNapi('arkui.components.arkloadingprogress');
+          __componentCreator__.createLoadingProgressComponent = module.createComponent;
+        }
+        return __componentCreator__.createLoadingProgressComponent!(node, type);
       })
     }],
     ['Search', (context: UIContext): FrameNode => {
@@ -1434,17 +1448,26 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Badge', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Badge', (node: NodePtr, type: ModifierType): ArkBadgeComponent => {
-        return new ArkBadgeComponent(node, type);
+       if (__componentCreator__.createBadgeComponent === undefined) {
+          getUINativeModule().loadNativeModule('Badge');
+          let module = globalThis.requireNapi('arkui.components.arkbadge');
+          __componentCreator__.createBadgeComponent = module.createComponent;
+        }
+        return __componentCreator__.createBadgeComponent!(node, type);
       })
     }],
     ['Grid', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
-        return new ArkGridComponent(node, type);
+        getUINativeModule().loadNativeModule('Grid');
+        let module = globalThis.requireNapi('arkui.components.arkgrid');
+        return module.createComponent(node, type);
       })
     }],
     ['GridItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
-        return new ArkGridItemComponent(node, type);
+        getUINativeModule().loadNativeModule('GridItem');
+        let module = globalThis.requireNapi('arkui.components.arkgriditem');
+        return module.createComponent(node, type);
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
@@ -1456,7 +1479,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['TextTimer', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
-        return new ArkTextTimerComponent(node, type);
+        if (__componentCreator__.createTextTimerComponent === undefined) {
+          getUINativeModule().loadNativeModule('TextTimer');
+          let module = globalThis.requireNapi('arkui.components.arktexttimer');
+          __componentCreator__.createTextTimerComponent = module.createComponent;
+        }
+        return __componentCreator__.createTextTimerComponent!(node, type);
       })
     }],
     ['Marquee', (context: UIContext): FrameNode => {
@@ -1511,7 +1539,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Select', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
-        return new ArkSelectComponent(node, type);
+        getUINativeModule().loadNativeModule('Select');
+        let module = globalThis.requireNapi('arkui.components.arkselect');
+        return module.createComponent(node, type);
       });
     }],
     ['Toggle', (context: UIContext, options?: object): FrameNode => {
@@ -1607,7 +1637,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Grid');
+      let module = globalThis.requireNapi('arkui.components.arkgrid');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['GridItem', (node: FrameNode): ArkGridItemComponent => {
@@ -1617,7 +1649,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('GridItem');
+      let module = globalThis.requireNapi('arkui.components.arkgriditem');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Text', (node: FrameNode): ArkTextComponent => {
@@ -1775,7 +1809,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Progress');
+      let module = globalThis.requireNapi('arkui.components.arkprogress');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['LoadingProgress', (node: FrameNode): ArkLoadingProgressComponent => {
@@ -1785,7 +1821,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('LoadingProgress');
+      let module = globalThis.requireNapi('arkui.components.arkloadingprogress');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Image', (node: FrameNode): ArkImageComponent => {

@@ -112,8 +112,8 @@ private:
         TextDirection layoutDirection, const SizeF& size, const SizeF& viewPortExtent);
     SizeF MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
         LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize, bool isMainFix);
-    void MeasureLazyChildAgain(const RefPtr<LayoutWrapper>& childWrapper,
-        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& selfSize, bool hasLazyLayoutChild);
+    void MeasureLazyChildAgain(const RefPtr<LayoutWrapper>& childWrapper, LayoutConstraintF& childLayoutConstraint,
+        Axis axis, SizeF selfSize, const PaddingPropertyF& padding, bool hasLazyLayoutChild);
 
     float crossOffset_;
     double currentOffset_ = 0.0f;

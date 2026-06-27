@@ -22,7 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 #include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"

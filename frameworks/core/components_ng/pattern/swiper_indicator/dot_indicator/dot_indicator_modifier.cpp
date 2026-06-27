@@ -351,6 +351,9 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
+        if (HasCustomIconAtIndex(static_cast<int32_t>(i))) {
+            continue;
+        }
         if (static_cast<int32_t>(i) != currentIndex_) {
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(originalUnselectColor_));
         } else {
@@ -368,8 +371,10 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
     leftCenter -= (centerDilateDistance - centerDistance) * 0.5;
     rightCenter += (centerDilateDistance - centerDistance) * 0.5;
-    PaintSelectedIndicator(canvas, leftCenter, rightCenter,
-        contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+    if (!HasCustomIconAtIndex(currentIndex_)) {
+        PaintSelectedIndicator(canvas, leftCenter, rightCenter,
+            contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+    }
 
     bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
@@ -585,6 +590,10 @@ void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(
     const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
     const std::pair<float, float>& longPointCenterX)
 {
+    if (disableIndicatorAnimation_) {
+        UpdateHoverPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -602,6 +611,10 @@ void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(
     const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
+    if (disableIndicatorAnimation_) {
+        UpdateNormalPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -619,6 +632,10 @@ void DotIndicatorModifier::UpdateNormalToPressPaintProperty(
     const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
     const std::pair<float, float>& longPointCenterX)
 {
+    if (disableIndicatorAnimation_) {
+        UpdatePressPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -636,6 +653,10 @@ void DotIndicatorModifier::UpdatePressToNormalPaintProperty(
     const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
+    if (disableIndicatorAnimation_) {
+        UpdateNormalPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -652,6 +673,10 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     Color backgroundColor = isPressed_ ? swiperTheme->GetPressedColor() : swiperTheme->GetHoverColor();
+    if (disableIndicatorAnimation_) {
+        UpdateBackgroundColor(backgroundColor);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(MOUSE_PRESS_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -664,6 +689,10 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
 
 void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
 {
+    if (disableIndicatorAnimation_) {
+        normalToHoverPointDilateRatio_->Set(scaleIndicator_);
+        return;
+    }
     normalToHoverPointDilateRatio_->Set(1.0f);
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -677,6 +706,10 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
 
 void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
 {
+    if (disableIndicatorAnimation_) {
+        hoverToNormalPointDilateRatio_->Set(1.0f);
+        return;
+    }
     hoverToNormalPointDilateRatio_->Set(normalToHoverPointDilateRatio_->Get());
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -690,6 +723,10 @@ void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
 
 void DotIndicatorModifier::UpdateLongPointDilateRatio()
 {
+    if (disableIndicatorAnimation_) {
+        longPointDilateRatio_->Set(longPointIsHover_ ? scaleIndicator_ : 1.0f);
+        return;
+    }
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);

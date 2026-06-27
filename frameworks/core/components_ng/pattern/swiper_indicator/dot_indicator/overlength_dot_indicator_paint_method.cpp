@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,7 +62,9 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         useSystemMaterial ? false : paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
+    dotIndicatorModifier_->SetDisableIndicatorAnimation(disableIndicatorAnimation_);
     dotIndicatorModifier_->SetAnimationStartIndex(animationStartIndex_);
+    dotIndicatorModifier_->UpdateAnimationStartSelectedIndex();
     dotIndicatorModifier_->SetAnimationEndIndex(animationEndIndex_);
     dotIndicatorModifier_->SetKeepStatus(keepStatus_);
     dotIndicatorModifier_->SetIsHorizontalAndRTL(isHorizontalAndRightToLeft_);
@@ -69,7 +72,17 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetForceStopPageRate(FLT_MAX);
     dotIndicatorModifier_->SetIndicatorDotItemSpace(paintProperty->GetSpaceValue(
         swiperTheme->GetIndicatorDotItemSpace()));
-    
+    auto renderContext = paintWrapper->GetRenderContext();
+    auto host = renderContext ? renderContext->GetHost() : nullptr;
+    auto indicatorPattern = host ? host->GetPattern<SwiperIndicatorPattern>() : nullptr;
+    bool needCustomIconLayout = indicatorPattern && indicatorPattern->NeedCustomDotIndicatorLayout();
+    LinearVector<float> oldCustomIconCenters;
+    if (needCustomIconLayout) {
+        oldCustomIconCenters = dotIndicatorModifier_->GetBlackPointCenterX();
+        dotIndicatorModifier_->SetIndicatorHost(AceType::WeakClaim(AceType::RawPtr(host)));
+        dotIndicatorModifier_->SetCustomIconIndexes(indicatorPattern->GetIndicatorIconIndexes());
+    }
+    dotIndicatorModifier_->SetHasCustomIcon(needCustomIconLayout);
     dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
     dotIndicatorModifier_->SetGestureState(gestureState_);
     dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
@@ -97,10 +110,17 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         dotIndicatorModifier_->SetIsPressed(true);
     }
 
+    auto wasPressed = dotIndicatorModifier_->GetIsPressed();
     if (touchBottomType_ == TouchBottomType::NONE && !isPressed_ && !isHover_) {
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
+    }
+    if (needCustomIconLayout) {
+        auto newCustomIconCenters = dotIndicatorModifier_->GetBlackPointCenterX();
+        if (!wasPressed && oldCustomIconCenters != newCustomIconCenters && host) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        }
     }
     auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
     RectF boundsRect(rectX, rectY, rectWidth, rectHeight);

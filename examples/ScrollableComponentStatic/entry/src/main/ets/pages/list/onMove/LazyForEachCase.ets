@@ -37,7 +37,8 @@ import {
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
 
-// BasicDataSource实现了IDataSource接口，用于管理listener监听，以及通知LazyForEach数据更新
+// BasicDataSource implements the IDataSource interface, used for managing listener monitoring and
+// notifying LazyForEach of data updates
 class BasicDataSource<string> implements IDataSource<string> {
   private listeners: Array<DataChangeListener> = Array<DataChangeListener>();
   private originDataArray: Array<string> = [];
@@ -50,14 +51,16 @@ class BasicDataSource<string> implements IDataSource<string> {
     return this.originDataArray[index.toInt()];
   }
 
-  // 该方法为框架侧调用，为LazyForEach组件向其数据源处添加listener监听
+  // This method is called by the framework to add listener monitoring to the data source for the
+  // LazyForEach component
   registerDataChangeListener(listener: DataChangeListener) {
     if (this.listeners.indexOf(listener) < 0) {
       this.listeners.push(listener);
     }
   }
 
-  // 该方法为框架侧调用，为对应的LazyForEach组件在数据源处去除listener监听
+  // This method is called by the framework to remove listener monitoring from the data source for
+  // the corresponding LazyForEach component
   unregisterDataChangeListener(listener: DataChangeListener) {
     const pos = this.listeners.indexOf(listener);
     if (pos >= 0) {
@@ -65,35 +68,38 @@ class BasicDataSource<string> implements IDataSource<string> {
     }
   }
 
-  // 通知LazyForEach组件需要重载所有子组件
+  // Notify the LazyForEach component that all child components need to be reloaded
   notifyDataReload(): void {
     this.listeners.forEach(listener => {
       listener.onDataReloaded();
     });
   }
 
-  // 通知LazyForEach组件需要在index对应索引处添加子组件
+  // Notify the LazyForEach component that a child component needs to be added at the corresponding
+  // index
   notifyDataAdd(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataAdd(index);
     });
   }
 
-  // 通知LazyForEach组件在index对应索引处数据有变化，需要重建该子组件
+  // Notify the LazyForEach component that data has changed at the corresponding index and the child
+  // component needs to be rebuilt
   notifyDataChange(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataChange(index);
     });
   }
 
-  // 通知LazyForEach组件需要在index对应索引处删除该子组件
+  // Notify the LazyForEach component that the child component at the corresponding index needs to be
+  // deleted
   notifyDataDelete(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataDelete(index);
     });
   }
 
-  // 通知LazyForEach组件将from索引和to索引处的子组件进行交换
+  // Notify the LazyForEach component to swap child components at the from and to indices
   notifyDataMove(from: number, to: number): void {
     this.listeners.forEach(listener => {
       listener.onDataMove(from, to);

@@ -68,6 +68,9 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
     }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_start");
+    }
 }
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
@@ -93,6 +96,9 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     PerfInterfaces::End(sceneId, isRsRender);
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
+    }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_end");
     }
 }
 

@@ -2582,6 +2582,18 @@ void JSViewPopups::ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG
     }
 }
 
+void JSViewPopups::ParseSheetEnableBlurSnapshot(
+    const JSRef<JSVal>& enableBlurSnapshot, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    if (enableBlurSnapshot->IsBoolean()) {
+        sheetStyle.enableBlurSnapshot = enableBlurSnapshot->ToBoolean();
+    } else if (isPartialUpdate) {
+        sheetStyle.enableBlurSnapshot.reset();
+    } else {
+        sheetStyle.enableBlurSnapshot = false;
+    }
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -2602,12 +2614,14 @@ void JSViewAbstract::ParseSheetStyle(
     auto uiContextObj = paramObj->GetProperty("uiContext");
     auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
     auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
+    auto enableBlurSnapshot = paramObj->GetProperty("enableBlurSnapshot");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
     }
 
     JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
+    JSViewPopups::ParseSheetEnableBlurSnapshot(enableBlurSnapshot, sheetStyle, isPartialUpdate);
 
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);

@@ -17,7 +17,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"

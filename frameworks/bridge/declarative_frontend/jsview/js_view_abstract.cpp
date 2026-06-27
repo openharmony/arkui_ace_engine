@@ -91,6 +91,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -105,6 +106,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/common/color_inverter.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -145,8 +147,8 @@ ViewAbstractModel* ViewAbstractModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
+constexpr int32_t DEFAULT_DURATION = 1000; // ms
+constexpr int32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -4125,11 +4127,12 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
 
 DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
 {
-    if (!vectorValue->IsObject()) {
-        return DepthVector3();
-    }
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();

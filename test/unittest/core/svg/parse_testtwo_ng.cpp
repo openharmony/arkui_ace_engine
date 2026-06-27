@@ -2661,4 +2661,71 @@ HWTEST_F(ParseTestTwoNg, SvgClipPath001, TestSize.Level1)
     auto result = clipPath->AsPath(clipPathRule);
     EXPECT_TRUE(result.BuildFromSVGString(""));
 }
+
+/**
+ * @tc.name: ParseStyleTest003
+ * @tc.desc: Test ParseCssStyle with oversized input and SplitString with maxCount limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseStyleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test ParseCssStyle rejects style exceeding MAX_CSS_STYLE_LENGTH (1MB).
+     * @tc.expected: callback is not invoked when style is too long.
+     */
+    int callCount = 0;
+    PushAttr callback = [&callCount](const std::string& key, const std::pair<std::string, std::string>& value) {
+        callCount++;
+    };
+    std::string hugeStyle(1024 * 1024 + 1, 'a');
+    SvgStyle::ParseCssStyle(hugeStyle, callback);
+    EXPECT_EQ(callCount, 0);
+
+    /**
+     * @tc.steps: step2. test SplitString with maxCount hit inside while loop.
+     * @tc.expected: returns at most maxCount elements, remaining parts are dropped.
+     */
+    auto result1 = SvgStyle::SplitString("a,b,c,d,e", ",", 3);
+    ASSERT_EQ(result1.size(), 3u);
+    EXPECT_EQ(result1[0], "a");
+    EXPECT_EQ(result1[1], "b");
+    EXPECT_EQ(result1[2], "c");
+
+    /**
+     * @tc.steps: step3. test SplitString with maxCount preventing the trailing element.
+     * @tc.expected: last element after final delimiter is not appended when limit reached.
+     */
+    auto result2 = SvgStyle::SplitString("a,b", ",", 1);
+    ASSERT_EQ(result2.size(), 1u);
+    EXPECT_EQ(result2[0], "a");
+
+    /**
+     * @tc.steps: step4. test SplitString with maxCount not reached (normal behavior).
+     * @tc.expected: all elements are returned.
+     */
+    auto result3 = SvgStyle::SplitString("a,b,c", ",", 1024);
+    ASSERT_EQ(result3.size(), 3u);
+    EXPECT_EQ(result3[0], "a");
+    EXPECT_EQ(result3[1], "b");
+    EXPECT_EQ(result3[2], "c");
+
+    /**
+     * @tc.steps: step5. test SplitString with no delimiter found and maxCount not reached.
+     * @tc.expected: returns single element equal to the source.
+     */
+    auto result4 = SvgStyle::SplitString("abc", ",", 1024);
+    ASSERT_EQ(result4.size(), 1u);
+    EXPECT_EQ(result4[0], "abc");
+
+    /**
+     * @tc.steps: step6. test SplitString with maxCount equal to total split count.
+     * @tc.expected: all elements returned, boundary condition passes.
+     */
+    auto result5 = SvgStyle::SplitString("x,y,z", ",", 3);
+    ASSERT_EQ(result5.size(), 3u);
+    EXPECT_EQ(result5[0], "x");
+    EXPECT_EQ(result5[1], "y");
+    EXPECT_EQ(result5[2], "z");
+}
+
 } // namespace OHOS::Ace::NG

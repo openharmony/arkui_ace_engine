@@ -15,9 +15,12 @@
 
 import { int32 } from '@koalaui/common';
 import { ExtendableComponent } from './extendableComponent';
+import { ArkCustomComponentRootPeer } from './staticComponents';
 import { CustomComponentV2 } from './customComponent';
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
+import { PeerNode, PeerNodeType } from '../PeerNode';
+
 import {
     IVariableOwner,
     StateMgmtDFX,
@@ -112,9 +115,14 @@ export class ExtendableComponentDFX {
                   ArkUIAniModule._DumpLogPrint(0, 'RecyclePool: [Not supported on static side]\n');
                   break;
               }
+              case '-h': {
+                  ExtendableComponentDFX.printDFXHeader('JS DFX Dump Help', command);
+                  ExtendableComponentDFX.printHelpInfo();
+                  break;
+              }
               default:
                   if (command.what) {
-                      ArkUIAniModule._DumpLogPrint(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+                      ArkUIAniModule._DumpLogPrint(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\nRun with -h to see supported commands.\n`);
                   }
                   break;
             }
@@ -177,6 +185,43 @@ export class ExtendableComponentDFX {
         const half = Math.floor(remainder / 2);
         ArkUIAniModule._DumpLogPrint(0, `\n${StringUtils.repeat('-', half)}${header}${StringUtils.repeat('-', half)}`);
         ArkUIAniModule._DumpLogPrint(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+    }
+
+    private static readonly DUMP_HELP_COMMANDS: Array<[string, string]> = [
+        ['-dumpAll',              'Print all component info (hierarchy + state vars + element ids)'],
+        ['-viewHierarchy',        'Print the view hierarchy tree'],
+        ['-stateVariables',       'Print state variables and dependencies'],
+        ['-registeredElementIds', 'Print registered element IDs and their update functions'],
+        ['-inactiveComponents',   'Print list of inactive components'],
+        ['-h',                    'Print this help message'],
+    ];
+
+    private static readonly DUMP_HELP_MODIFIERS: Array<[string, string]> = [
+        ['-r',           'Apply command recursively to child views'],
+        ['-viewId=<id>', 'Apply command to a specific view by ID'],
+    ];
+
+    private static printHelpInfo(): void {
+        const renderEntries = (entries: Array<[string, string]>): string => {
+            let width: int = 0;
+            for (let i = 0; i < entries.length; i++) {
+                const keyLen: int = entries[i][0].length;
+                if (keyLen > width) {
+                    width = keyLen;
+                }
+            }
+            const lines: string[] = [];
+            for (let i = 0; i < entries.length; i++) {
+                const entry: [string, string] = entries[i];
+                const padding: string = StringUtils.repeat(' ', width - entry[0].length);
+                lines.push(`  ${entry[0]}${padding}  ${entry[1]}`);
+            }
+            return lines.join('\n');
+        };
+        const helpText: string =
+            `\nJS DFX Dump Commands:\n${renderEntries(ExtendableComponentDFX.DUMP_HELP_COMMANDS)}` +
+            `\n\nModifiers:\n${renderEntries(ExtendableComponentDFX.DUMP_HELP_MODIFIERS)}\n`;
+        ArkUIAniModule._DumpLogPrint(0, helpText);
     }
 
     private static debugInfoViewHierarchy(component: ExtendableComponent, depth: number, isRecursive: boolean): void {
@@ -258,17 +303,42 @@ export class ExtendableComponentDFX {
         isRecursive: boolean, counter: ElementCounter): void {
         const componentName = Class.of(component).getName();
         let output = `\n${StringUtils.repeat('  ', depth)}|--${componentName}[${component.getUniqueId()}]: {`;
-        const childrenMap = component.__getChildrenWeakRefMap__Internal();
-        childrenMap.forEach((weak: WeakRef<ExtendableComponent>, key: int32) => {
-            const child = weak.deref();
-            if (child) {
-                output += `\n${StringUtils.repeat('  ', depth + 2)}${Class.of(child).getName()}[${key}]`;
+        const peerNode = component.__getPeerNode__Internal();
+        let directCount = 0;
+        const collect = (rootPeer: PeerNode): void => {
+            const stack: PeerNode[] = [rootPeer];
+            while (stack.length > 0) {
+                const peer: PeerNode = stack.pop() as PeerNode;
+                output += `\n${StringUtils.repeat('  ', depth + 2)}${peer.name}[${peer.getId()}]`;
+                directCount++;
+                counter.total++;
+                const children: PeerNode[] = [];
+                for (let child = peer.firstChild; child; child = child!.nextSibling) {
+                    if (child!.isKind(PeerNodeType)) {
+                        children.push(child as PeerNode);
+                    }
+                }
+                for (let i = children.length - 1; i >= 0; i--) {
+                    stack.push(children[i]);
+                }
             }
-        });
-        counter.total += childrenMap.size;
-        output += `\n${StringUtils.repeat('  ', depth + 1)}}[${childrenMap.size}]`;
+        };
+        if (peerNode instanceof ArkCustomComponentRootPeer) {
+            const registeredPeers = peerNode.getRegisteredElementPeers();
+            for (let i = 0; i < registeredPeers.length; i++) {
+                collect(registeredPeers[i]);
+            }
+        } else if (peerNode) {
+            for (let child = peerNode.firstChild; child; child = child!.nextSibling) {
+                if (child!.isKind(PeerNodeType)) {
+                    collect(child as PeerNode);
+                }
+            }
+        }
+        output += `\n${StringUtils.repeat('  ', depth + 1)}}[${directCount}]`;
         ArkUIAniModule._DumpLogPrint(0, output);
         if (isRecursive) {
+            const childrenMap = component.__getChildrenWeakRefMap__Internal();
             childrenMap.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
                 const child = weak.deref();
                 if (child) {

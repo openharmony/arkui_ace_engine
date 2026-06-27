@@ -1034,6 +1034,58 @@ HWTEST_F(NavigationPatternTestThreeNg, GetNavdestinationJsonArray004, TestSize.L
 }
 
 /**
+ * @tc.name: GetNavdestinationJsonArray005
+ * @tc.desc: Backup recovery info contains onSaveState and autoCleanedState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, GetNavdestinationJsonArray005, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+
+    auto page01Info = AceType::MakeRefPtr<MockNavPathInfo>(PAGE01);
+    auto page02Info = AceType::MakeRefPtr<MockNavPathInfo>(PAGE02);
+    navigationStack->MockPushPath(page01Info);
+    navigationStack->MockPushPath(page02Info);
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->SetIndex(0);
+    auto navdestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navdestinationPattern, nullptr);
+    navdestinationPattern->SetNavDestinationContext(AceType::MakeRefPtr<NavDestinationContext>());
+    navdestinationPattern->SetNavPathInfo(AceType::MakeRefPtr<NavPathInfo>());
+    navdestinationPattern->SetName(PAGE01);
+    navdestinationPattern->SetNavigationNode(navigationNode);
+    navdestinationPattern->SetNavigationStack(navigationStack);
+    page01Info->SetNavDestinationId(std::to_string(navdestinationPattern->GetNavDestinationId()));
+
+    const std::string activeState = "{\"active\":1}";
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnSaveState([activeState]() { return activeState; });
+
+    const std::string autoCleanedState = "{\"cleaned\":1}";
+    page02Info->autoCleaned = true;
+    page02Info->autoCleanedState = autoCleanedState;
+    page02Info->canRecovery = true;
+    navigationStack->navPathList_.emplace_back(std::make_pair(PAGE01, navDestinationNode));
+    navigationStack->navPathList_.emplace_back(std::make_pair(PAGE02, nullptr));
+
+    auto allNavdestinationInfo = navigationPattern->GetNavdestinationJsonArray();
+    ASSERT_EQ(allNavdestinationInfo->GetArraySize(), 2);
+    auto activeInfo = allNavdestinationInfo->GetArrayItem(0);
+    ASSERT_NE(activeInfo, nullptr);
+    EXPECT_EQ(activeInfo->GetString("name"), PAGE01);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: GetProxyById001
  * @tc.desc: Branch: if (proxy && proxy->GetProxyId() == id) = false
  *           Condition: proxy = false

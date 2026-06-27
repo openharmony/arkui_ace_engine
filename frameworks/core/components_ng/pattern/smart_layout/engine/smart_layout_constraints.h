@@ -57,6 +57,15 @@ public:
     void AddRowConstraints(SmartLayoutNode& parent);
 
     /**
+     * @brief Add general (bounding-box based) constraints
+     * @param parent Parent (root) node
+     *
+     * Uses bounding box stored in parent node. sizeScale is computed from
+     * bounding box vs container size. boxOffset uses axisSpaceScale variables.
+     */
+    void AddGeneralConstraints(SmartLayoutNode& parent);
+
+    /**
      * @brief Add default constraints (non-negative sizes, boundary constraints)
      * @param parent Parent node
      */

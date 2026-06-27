@@ -17,8 +17,24 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/refresh/bridge/refresh_dynamic_module.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const ArkUIRefreshModifier* GetRefreshModifier()
+{
+    static const ArkUIRefreshModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Refresh");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIRefreshModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
+}
+} // namespace
+
 RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
 {
     auto scrollableNode = scrollableNode_.Upgrade();
@@ -36,6 +52,32 @@ RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
     return nullptr;
 }
 
+bool RefreshCoordination::UpdateRefreshNode()
+{
+    auto refreshNode = FindRefreshNode();
+    refreshNode_ = WeakClaim(RawPtr(refreshNode));
+    coordinationEvent_ = nullptr;
+    if (!refreshNode) {
+        return false;
+    }
+    coordinationEvent_ = CreateCoordinationEvent();
+    return !!coordinationEvent_;
+}
+
+bool RefreshCoordination::IsValid() const
+{
+    auto scrollableNode = scrollableNode_.Upgrade();
+    auto refreshNode = refreshNode_.Upgrade();
+    CHECK_NULL_RETURN(scrollableNode && refreshNode, false);
+    CHECK_NULL_RETURN(refreshNode->GetPattern<RefreshPattern>(), false);
+    for (auto parent = scrollableNode->GetParent(); parent; parent = parent->GetParent()) {
+        if (parent == refreshNode) {
+            return true;
+        }
+    }
+    return false;
+}
+
 RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent()
 {
     if (coordinationEvent_) {
@@ -43,10 +85,11 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     }
     auto refreshNode = refreshNode_.Upgrade();
     CHECK_NULL_RETURN(refreshNode, nullptr);
-    auto refreshPattern = DynamicCast<RefreshPattern>(refreshNode->GetPattern());
-    CHECK_NULL_RETURN(refreshPattern, nullptr);
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    refreshPattern->InitCoordinationEvent(coordinationEvent);
+    auto refreshModifier = GetRefreshModifier();
+    CHECK_NULL_RETURN(refreshModifier, nullptr);
+    refreshModifier->initCoordinationEvent(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(refreshNode)), &coordinationEvent);
     return coordinationEvent;
 }
 

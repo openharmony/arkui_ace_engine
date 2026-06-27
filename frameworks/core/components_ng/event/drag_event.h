@@ -63,7 +63,7 @@ public:
     const GestureEventFunc& GetActionEndEventFunc() const;
     const GestureEventNoParameter& GetActionCancelEventFunc() const;
     const GestureEventFunc& GetLongPressEventFunc() const;
-    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress);
+    ACE_FORCE_EXPORT void SetLongPressEventFunc(GestureEventFunc&& actionLongPress);
     const std::vector<KeyCode>& GetPressedKeyCodes() const;
     void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
 
@@ -182,7 +182,7 @@ public:
 
     const OptionsAfterApplied& GetOptionsAfterApplied();
 
-    void SetIsForDragDrop(bool isForDragDrop);
+    ACE_FORCE_EXPORT void SetIsForDragDrop(bool isForDragDrop);
 
     void SetRestartDrag(bool isRestartDrag);
 

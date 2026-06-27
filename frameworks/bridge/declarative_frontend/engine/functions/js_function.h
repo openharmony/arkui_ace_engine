@@ -47,6 +47,7 @@ public:
     }
 
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal> argv[]);
+    JSRef<JSVal> ExecuteJSWithObjCheck(int argc, JSRef<JSVal> argv[]);
 
 protected:
     JSRef<JSVal> This()

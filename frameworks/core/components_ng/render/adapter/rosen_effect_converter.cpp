@@ -83,7 +83,7 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGla
 std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGlassFilterEC(
     const FrostedGlassParam& param, float oneVpValue)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
     auto filter = std::make_shared<Rosen::RSNGFrostedGlassBlurFilter>();
     auto blurParams = ConvertToVector2f(param.blurParams, oneVpValue, maskBlurParams);
     auto envLightParams = ConvertToVector3f(param.envLightParams, oneVpValue, maskEnvLightParams);
@@ -100,7 +100,7 @@ std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGla
 std::shared_ptr<Rosen::RSNGShaderBase> RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(
     const FrostedGlassParam& param, float oneVpValue)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
     auto filter = std::make_shared<Rosen::RSNGFrostedGlassEffect>();
     auto envLightParams = ConvertToVector3f(param.envLightParams, oneVpValue, maskEnvLightParams);
     filter->Setter<Rosen::FrostedGlassEffectWeightsEmbossTag>(ConvertToVector2f(param.weightsEmboss));

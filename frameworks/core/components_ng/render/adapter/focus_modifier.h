@@ -75,9 +75,23 @@ private:
     void InitOverlayRect(const RoundRect& rect, float borderWidth)
     {
         RSScalar halfDenominator = 2.0f;
-        overlayRect_ = std::make_shared<Rosen::RectF>(rect.GetRect().Left() - borderWidth / halfDenominator,
-            rect.GetRect().Top() - borderWidth / halfDenominator, rect.GetRect().Width() + borderWidth,
-            rect.GetRect().Height() + borderWidth);
+        float halfBorder = borderWidth / halfDenominator;
+        float newLeft = rect.GetRect().Left() - halfBorder;
+        float newTop = rect.GetRect().Top() - halfBorder;
+        float newRight = rect.GetRect().Left() + rect.GetRect().Width() + halfBorder;
+        float newBottom = rect.GetRect().Top() + rect.GetRect().Height() + halfBorder;
+        if (overlayRect_) {
+            float oldLeft = overlayRect_->GetLeft();
+            float oldTop = overlayRect_->GetTop();
+            float oldRight = overlayRect_->GetLeft() + overlayRect_->GetWidth();
+            float oldBottom = overlayRect_->GetTop() + overlayRect_->GetHeight();
+            newLeft = std::min(newLeft, oldLeft);
+            newTop = std::min(newTop, oldTop);
+            newRight = std::max(newRight, oldRight);
+            newBottom = std::max(newBottom, oldBottom);
+        }
+        overlayRect_ = std::make_shared<Rosen::RectF>(
+            newLeft, newTop, newRight - newLeft, newBottom - newTop);
         paintWidthPx_ = borderWidth;
     }
 

@@ -20,11 +20,11 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/date_picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_type_define.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -40,7 +40,16 @@ std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
 
 DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 {
-    std::call_once(onceFlag_, []() { datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG()); });
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/date_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DatePickerDialog");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find DatePickerDialog dynamic module");
+    }
+    auto* model = reinterpret_cast<const NG::DatePickerDialogModelNG*>(module->GetModel());
+    CHECK_NULL_RETURN(model, nullptr);
+    std::call_once(
+        onceFlag_, [model]() { datePickerDialogInstance_.reset(const_cast<NG::DatePickerDialogModelNG*>(model)); });
 
     return datePickerDialogInstance_.get();
 }
@@ -72,6 +81,17 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
 const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+
+NG::DatePickerModelNG* GetDatePickerModel()
+{
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/date_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DatePicker");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find DatePicker dynamic module");
+    }
+    return reinterpret_cast<NG::DatePickerModelNG*>(module->GetModel());
+}
 
 PickerDate ParseDate(FfiTime data)
 {
@@ -116,11 +136,11 @@ FFiDatePickerResult DatePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerCh
 void IsUserDefinedFontFamily(const std::string& pos)
 {
     if (pos == "disappearTextStyle") {
-        DatePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+        GetDatePickerModel()->HasUserDefinedDisappearFontFamily(true);
     } else if (pos == "textStyle") {
-        DatePickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+        GetDatePickerModel()->HasUserDefinedNormalFontFamily(true);
     } else if (pos == "selectedTextStyle") {
-        DatePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+        GetDatePickerModel()->HasUserDefinedSelectedFontFamily(true);
     } else if (pos == "disappearTextStyleTime") {
         TimePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
     } else if (pos == "textStyleTime") {
@@ -591,10 +611,10 @@ void FfiOHOSAceFrameworkDatePickerCreate(FfiTime startDate, FfiTime endDate, Ffi
         parseSelectedDate = parseStartDate;
     }
 
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
-    DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
-    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+    GetDatePickerModel()->CreateDatePicker(theme);
+    GetDatePickerModel()->SetStartDate(parseStartDate);
+    GetDatePickerModel()->SetEndDate(parseEndDate);
+    GetDatePickerModel()->SetSelectedDate(parseSelectedDate);
     FfiOHOSAceFrameworkDatePickerSetDefaultAttributes();
 }
 
@@ -628,29 +648,29 @@ void FfiOHOSAceFrameworkDatePickerCreateWithChangeEvent(
         parseSelectedDate = parseStartDate;
     }
 
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
-    DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
-    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+    GetDatePickerModel()->CreateDatePicker(theme);
+    GetDatePickerModel()->SetStartDate(parseStartDate);
+    GetDatePickerModel()->SetEndDate(parseEndDate);
+    GetDatePickerModel()->SetSelectedDate(parseSelectedDate);
 
     auto changeEvent = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
         auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = DatePickerChangeEventToFfi(*eventInfo);
         lambda(FfiTime { infoResult.year, infoResult.month, infoResult.day });
     };
-    DatePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+    GetDatePickerModel()->SetChangeEvent(std::move(changeEvent));
 
     FfiOHOSAceFrameworkDatePickerSetDefaultAttributes();
 }
 
 void FfiOHOSAceFrameworkDatePickerSetLunar(bool isLunar)
 {
-    DatePickerModel::GetInstance()->SetShowLunar(isLunar);
+    GetDatePickerModel()->SetShowLunar(isLunar);
 }
 
 void FfiOHOSAceFrameworkDatePickerUseMilitaryTime(bool isUseMilitaryTime)
 {
-    DatePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+    GetDatePickerModel()->SetHour24(isUseMilitaryTime);
 }
 
 void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int64_t month, int64_t day))
@@ -666,7 +686,7 @@ void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int
     auto getMainFrameNode = getInstance->GetMainFrameNode();
     CHECK_NULL_VOID(getMainFrameNode);
 
-    DatePickerModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetDatePickerModel()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkDatePickerSetOnDateChange(void (*callback)(int64_t year, int64_t month, int64_t day))
@@ -682,7 +702,7 @@ void FfiOHOSAceFrameworkDatePickerSetOnDateChange(void (*callback)(int64_t year,
     auto getMainFrameNode = getInstance->GetMainFrameNode();
     CHECK_NULL_VOID(getMainFrameNode);
 
-    DatePickerModel::GetInstance()->SetOnDateChange(std::move(onDateChange));
+    GetDatePickerModel()->SetOnDateChange(std::move(onDateChange));
 }
 
 void FfiOHOSAceFrameworkDatePickerSetDefaultAttributes(void)
@@ -694,24 +714,24 @@ void FfiOHOSAceFrameworkDatePickerSetDefaultAttributes(void)
     textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
-    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
     textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
-    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
     textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
-    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetNormalTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkDatePickerSetBackgroundColor(uint32_t color)
 {
-    DatePickerModel::GetInstance()->SetBackgroundColor(Color(color));
+    GetDatePickerModel()->SetBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkDatePickerSetDisappearTextStyle(
@@ -732,7 +752,7 @@ void FfiOHOSAceFrameworkDatePickerSetDisappearTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkDatePickerSetTextStyle(
@@ -753,7 +773,7 @@ void FfiOHOSAceFrameworkDatePickerSetTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetNormalTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(
@@ -774,13 +794,13 @@ void FfiOHOSAceFrameworkDatePickerSetSelectedTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    GetDatePickerModel()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkDatePickerSetOpacity(double opacity)
 {
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
-    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+    GetDatePickerModel()->HasUserDefinedOpacity();
 }
 
 void FfiOHOSAceFrameworkDatePickerDialogShow(NativeDateDialogOptions options)

@@ -780,4 +780,14 @@ void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
 }
+
+void ResSchedTouchOptimizer::SetTouchDownNotifiedToClick(bool notified)
+{
+    touchDownNotifiedToClick_ = notified;
+}
+
+bool ResSchedTouchOptimizer::IsTouchDownNotifiedToClick() const
+{
+    return touchDownNotifiedToClick_;
+}
 }

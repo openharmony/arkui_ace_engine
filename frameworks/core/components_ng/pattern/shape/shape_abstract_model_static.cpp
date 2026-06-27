@@ -29,7 +29,7 @@ void ShapeAbstractModelStatic::SetWidth(FrameNode* frameNode, const std::optiona
         }
         ViewAbstract::SetWidth(frameNode, CalcLength(val));
     } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, false);
+        ViewAbstract::ClearWidthOrHeight(frameNode, true);
     }
 }
 
@@ -42,7 +42,7 @@ void ShapeAbstractModelStatic::SetHeight(FrameNode* frameNode, const std::option
         }
         ViewAbstract::SetHeight(frameNode, CalcLength(val));
     } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, true);
+        ViewAbstract::ClearWidthOrHeight(frameNode, false);
     }
 }
 

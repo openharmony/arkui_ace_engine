@@ -41,7 +41,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -1606,6 +1606,54 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->currentOffset_ = -5;
     topSheetPattern->HandleDragUpdate(info);
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
+}
+
+/**
+ * @tc.name: SheetMaterial001
+ * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadow;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::NONE);
+    material->SetType(type);
+    sheetStyle.systemMaterial = nullptr;
+
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
 /**
@@ -4502,54 +4550,6 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern4, TestSize.Level1)
 }
 
 /**
- * @tc.name: SheetMaterial001
- * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    auto targetNode = CreateTargetNode();
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    stageNode->MountToParent(rootNode);
-    targetNode->MountToParent(stageNode);
-    rootNode->MarkDirtyNode();
-    /**
-     * @tc.steps: step2. create sheetNode, get sheetPattern.
-     */
-    SheetStyle sheetStyle;
-    bool isShow = true;
-    CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-
-    Shadow shadow = ShadowConfig::DefaultShadowL;
-    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
-    sheetStyle.borderColor = BORDER_COLOR_TEST;
-    sheetStyle.borderStyle = BORDER_STYLE_TEST;
-    sheetStyle.shadow = shadow;
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    auto type = static_cast<int32_t>(MaterialType::NONE);
-    material->SetType(type);
-    sheetStyle.systemMaterial = nullptr;
-
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    ASSERT_NE(sheetNode, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
-    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
-    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
-    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
-}
-
-/**
  * @tc.name: TestSheetPage001
  * @tc.desc: Test CreateSheetPage.
  * @tc.type: FUNC
@@ -5332,5 +5332,210 @@ HWTEST_F(OverlayManagerTestNg, MountPixelMapToRootNode002, TestSize.Level1)
     EXPECT_EQ(column->GetParent(), containerModalNode);
     rootNode->RemoveChild(containerModalNode);
     pipeline->windowModal_ = WindowModal::NORMAL;
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService001
+ * @tc.desc: Test RemoveChildWithService calls OnRemoveChild for popup nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and popup node with target.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount popup node to rootNode and set up test conditions.
+     */
+    rootNode->AddChild(popupNode);
+    bubblePattern->hasOnAreaChange_ = false;
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash and call OnRemoveChild.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify popup node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have popupNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&popupNode](const RefPtr<UINode>& child) { return child == popupNode; });
+    EXPECT_EQ(it, children.end());
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService002
+ * @tc.desc: Test RemoveChildWithService with null node parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and OverlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveChildWithService with null node.
+     * @tc.expected: Method should handle null node gracefully without crash.
+     */
+    overlayManager->RemoveChildWithService(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify method completes successfully.
+     * @tc.expected: No crash occurs when node is null.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService003
+ * @tc.desc: Test RemoveChildWithService with null rootNode parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create popup node.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create OverlayManager with null rootNode.
+     * @tc.expected: OverlayManager can be created but RemoveChildWithService should handle null gracefully.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call RemoveChildWithService with null rootNode.
+     * @tc.expected: Method should handle null rootNode gracefully without crash.
+     */
+    overlayManager->RemoveChildWithService(nullptr, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify method completes successfully.
+     * @tc.expected: No crash occurs when rootNode is null.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService004
+ * @tc.desc: Test RemoveChildWithService calls OnRemoveChild when hasOnAreaChange is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and popup node with target.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount popup node to rootNode and set hasOnAreaChange to true.
+     */
+    rootNode->AddChild(popupNode);
+    bubblePattern->hasOnAreaChange_ = true;
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash and call OnRemoveChild.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, popupNode);
+
+    /**
+     * @tc.steps: step4. Verify popup node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have popupNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&popupNode](const RefPtr<UINode>& child) { return child == popupNode; });
+    EXPECT_EQ(it, children.end());
+}
+
+/**
+ * @tc.name: OverlayManagerTest_RemoveChildWithService005
+ * @tc.desc: Test RemoveChildWithService with non-popup node (no PopupBasePattern).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OverlayManagerTest_RemoveChildWithService005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rootNode and regular node (ButtonNode, not a popup).
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto buttonNode = CreateTargetNode();
+    ASSERT_NE(buttonNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount button node to rootNode.
+     */
+    rootNode->AddChild(buttonNode);
+
+    /**
+     * @tc.steps: step3. Create OverlayManager and call RemoveChildWithService.
+     * @tc.expected: Method should execute without crash, OnRemoveChild should not be called.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveChildWithService(rootNode, buttonNode);
+
+    /**
+     * @tc.steps: step4. Verify button node is removed from rootNode.
+     * @tc.expected: rootNode should no longer have buttonNode as child.
+     */
+    auto children = rootNode->GetChildren();
+    auto it = std::find_if(children.begin(), children.end(),
+        [&buttonNode](const RefPtr<UINode>& child) { return child == buttonNode; });
+    EXPECT_EQ(it, children.end());
 }
 }

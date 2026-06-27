@@ -632,6 +632,32 @@ void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
     }
 }
 
+void openCustomDialogWithNewPipeline(std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline with error callback.");
+    auto dialogProperties = g_dialogProperties;
+    dialogProperties.customCNode = g_dialogProperties.customCNode;
+    auto task = [callback, dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
+            dialogProperties.isShowInSubWindow);
+        if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
+            if (dialogProperties.isModal) {
+                TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
+            }
+        } else {
+            overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+        }
+    };
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+    }
+}
+
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
 {
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
@@ -910,6 +936,35 @@ ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 OpenCustomDialogWithErrorCallback(
+    ArkUIDialogHandle handle, void* userData, void (*callback)(int32_t errorCode, int32_t dialogId, void* userData))
+{
+    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+
+    g_dialogProperties.maskRect = std::nullopt;
+    g_dialogProperties.borderRadius = std::nullopt;
+    g_dialogProperties.width = std::nullopt;
+    g_dialogProperties.height = std::nullopt;
+    ParseDialogProperties(g_dialogProperties, handle);
+    g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
+
+    auto adaptedCallback = [callback, userData](int32_t errorCode, int32_t dialogId) {
+        callback(errorCode, dialogId, userData);
+    };
+
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            openCustomDialogWithNewPipeline(std::move(adaptedCallback));
+        } else {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "not support old pipeline");
+        }
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->OpenCustomDialogNG(g_dialogProperties, std::move(adaptedCallback));
+    }
+
     return ERROR_CODE_NO_ERROR;
 }
 

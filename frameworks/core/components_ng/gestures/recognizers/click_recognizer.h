@@ -103,6 +103,12 @@ public:
     void CleanRecognizerState() override;
     GestureEvent GetGestureEventInfo();
     ClickInfo GetClickInfo();
+
+    void SetShouldReportTouchDown(bool shouldReport)
+    {
+        shouldReportTouchDown_ = shouldReport;
+    }
+
 protected:
     std::string GetGestureInfoString() const override;
 
@@ -116,6 +122,10 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void UpdateInfoWithDownEvent(const TouchEvent& event);
     void ResetStatusInHandleOverdueDeadline();
+
+    // recognizer report touch down event
+    void ResetTouchDownNotifiedToClickFlag();
+    void ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline);
 
     void OnResetStatus() override
     {
@@ -175,6 +185,8 @@ private:
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 
     InteractiveSoundEffectsFunc interactiveSoundEffectsFunc_ = nullptr;
+
+    bool shouldReportTouchDown_ {false};
 };
 
 } // namespace OHOS::Ace::NG

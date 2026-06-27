@@ -25,6 +25,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/xbar_proxy_wrapper.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"

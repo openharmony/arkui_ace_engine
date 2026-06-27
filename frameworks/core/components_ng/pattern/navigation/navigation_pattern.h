@@ -797,7 +797,6 @@ private:
     NavigationTransition ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
-    void DoAnimation(NavigationMode usrNavigationMode);
     void HandleForceSplitDragStart();
     void HandleForceSplitDragUpdate(float xOffset);
     void HandleForceSplitDragEnd(bool isDragCanceled = false);
@@ -814,7 +813,7 @@ private:
     void OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio);
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
-    bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
+    bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node, bool isRecovery);
     int32_t GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetNavigationNode() const;
@@ -831,6 +830,7 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void UpdateRealNavBarWidth();
     void OnHover(bool isHover);
     float GetPaintRectHeight(const RefPtr<FrameNode>& node)
     {
@@ -850,7 +850,7 @@ private:
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     int32_t GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const;
-    bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreMinIndex) const;
+    bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreStartIndex, int32_t cleanMinIndex) const;
     bool RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex = -1);
     void RefreshNavDestination();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
@@ -925,6 +925,8 @@ private:
     {
         return false;
     }
+
+    bool CheckNeedHandleIntent(bool needTransition);
 
     void RegisterForceSplitListener(PipelineContext* context, int32_t nodeId);
     void UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId);
@@ -1110,7 +1112,7 @@ private:
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
-    int32_t lastPreIndex_ = false;
+    int32_t lastPreIndex_ = 0;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;

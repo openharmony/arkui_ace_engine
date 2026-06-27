@@ -1576,7 +1576,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& 
 void WebSelectOverlay::InitMenuAvoidStrategyAboutKeyboard(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
 {
     auto& safeAreaManager = tools.safeAreaManager;
-    auto keyboardInset = safeAreaManager->GetKeyboardInset().Combine(safeAreaManager->GetKeyboardWebInset());
+    auto keyboardInset =
+        safeAreaManager->GetKeyboardInsetWithoutProcess().Combine(safeAreaManager->GetKeyboardWebInsetWithoutProcess());
 
     member.keyboardInsetStart = static_cast<double>(keyboardInset.start);
     member.keyboardHeight = static_cast<double>(keyboardInset.Length());

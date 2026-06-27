@@ -237,6 +237,18 @@ void AccessibilityFocusStrategyTest::TearDownTestCase()
     MockContainer::TearDown();
 }
 
+/**
+ * @tc.name: CheckNodeMatchedFocusType001
+ * @tc.desc: CheckNodeMatchedFocusType returns false when node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, CheckNodeMatchedFocusType001, TestSize.Level1)
+{
+    auto result = CheckNodeMatchedFocusType(nullptr, Accessibility::FocusRuleType::FOCUS_BY_TITLE);
+
+    EXPECT_FALSE(result);
+}
+
 
 /**
  * @tc.name: FindLastNodeWithoutCheck001

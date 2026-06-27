@@ -83,6 +83,15 @@ public:
     {
         sheetMaskNode_ = node;
     }
+    
+    void SetSheetECNode(RefPtr<FrameNode> node)
+    {
+        sheetECNode_ = node;
+    }
+    RefPtr<FrameNode> GetSheetECNode() const
+    {
+        return sheetECNode_;
+    }
     void OnAttachToFrameNode() override;
     void InitSubWindowId();
     void InitMainWindowRect(int32_t subwindowId);
@@ -126,6 +135,7 @@ private:
 
     RefPtr<FrameNode> sheetPageNode_;
     RefPtr<FrameNode> sheetMaskNode_;
+    RefPtr<FrameNode> sheetECNode_;
     RectF mainWindowRect_;
     bool isShowInUEC_ = false;
     int32_t subWindowId_ = -1;

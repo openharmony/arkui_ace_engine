@@ -61,9 +61,9 @@
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
+#include "core/components_ng/pattern/date_picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -2358,6 +2358,42 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_ModifyDone_ArrowSyst
 
     container->SetApiTargetVersion(backupContainerApi);
     pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest040
+ * @tc.desc: HandleTabKeyEvent with <=1 children should return false to avoid divide-by-zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest040, TestSize.Level0)
+{
+    // Case 1: 0 children
+    RefPtr<CalendarDialogPattern> pattern;
+    auto dialogNode = CreateMountedCalendarDialogHost(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), pattern);
+    ASSERT_NE(dialogNode, nullptr);
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEventTab;
+    keyEventTab.code = KeyCode::KEY_TAB;
+    keyEventTab.action = KeyAction::DOWN;
+
+    bool result = pattern->HandleTabKeyEvent(keyEventTab);
+    EXPECT_FALSE(result);
+
+    // Case 2: 1 child — childSize would be 0 after subtraction, also guard-triggered
+    RefPtr<CalendarDialogPattern> pattern2;
+    auto dialogNode2 = CreateMountedCalendarDialogHost(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), pattern2);
+    ASSERT_NE(dialogNode2, nullptr);
+    ASSERT_NE(pattern2, nullptr);
+    auto dummyChild = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(dummyChild, nullptr);
+    dialogNode2->AddChild(dummyChild);
+
+    result = pattern2->HandleTabKeyEvent(keyEventTab);
+    EXPECT_FALSE(result);
 }
 
 } // namespace OHOS::Ace::NG

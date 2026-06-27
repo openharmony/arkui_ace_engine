@@ -35,10 +35,8 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.h"
-#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 #include "core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.h"
-#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {
@@ -362,6 +360,9 @@ public:
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
+
+    void ClearSheetCloseIconMaterial();
+    void SetSheetCloseIconMaterial();
 
     void ClearSheetRenderMaterial();
     void SetSheetRenderMaterial();
@@ -1127,6 +1128,24 @@ public:
     {
         return needDoubleAvoidAfterLayout_;
     }
+
+    bool CheckIfUseEffectComponent(const SheetStyle& sheetStyle)
+    {
+        // Use effectComponent blur snapshot, when the following conditions are met simultaneously:
+        // 1. enableBlurSnapshot is enabled.
+        // 2. sheetType is not popup.
+        // 3. have blur or immersive material.
+        if (sheetStyle.systemMaterial &&
+            sheetStyle.systemMaterial->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            return false;
+        }
+        bool result = sheetStyle.enableBlurSnapshot.value_or(false) &&
+                      GetSheetTypeNoProcess() != SheetType::SHEET_POPUP &&
+                      (sheetStyle.backgroundBlurStyle.has_value() || sheetStyle.systemMaterial);
+        return result;
+    }
+    bool SetBlurUnderEffectComponent(const BlurStyleOption& bgBlurStyle);
+    static RefPtr<FrameNode> GetParentSkipEffectComponent(const RefPtr<FrameNode>& node);
 
     void SetSheetEdgeLightMode(const SheetStyle& sheetStyle)
     {

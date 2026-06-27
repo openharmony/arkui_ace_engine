@@ -28,6 +28,7 @@ class ACE_EXPORT RichEditorBaseController : virtual public RichEditorBaseControl
 
 public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
+    WeakPtr<RichEditorPattern> GetPattern() const { return pattern_; }
     int32_t GetCaretOffset() override;
     RectF GetCaretRect() override;
     bool SetCaretOffset(int32_t caretPosition) override;

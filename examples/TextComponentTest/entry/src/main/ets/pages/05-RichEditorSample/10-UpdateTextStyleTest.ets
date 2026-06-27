@@ -56,7 +56,7 @@ struct Index {
           this.controller.getSpans({
             start: this.start,
             end: this.end
-          }).forEach(item => {
+          })?.forEach(item => {
             if(typeof(item as RichEditorImageSpanResult)['imageStyle'] != 'undefined'){
               this.content += (item as RichEditorImageSpanResult).valueResourceStr;
               this.content += "\n";

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_matrix4_module.h"
 
 #include "base/geometry/matrix4.h"
+#include "base/geometry/point.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"

@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_H
 
+#include <functional>
 #include <mutex>
+#include <string>
+#include <unordered_map>
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
@@ -38,9 +41,24 @@ class JSIndicatorController;
 
 namespace OHOS::Ace::NG {
 class JSIndicatorControllerBase;
+class FrameNode;
 }
 
 namespace OHOS::Ace {
+
+struct IndicatorIconParam {
+    enum class SourceType {
+        NONE,
+        SYMBOL,
+        MEDIA,
+    };
+
+    SourceType sourceType = SourceType::NONE;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
+    std::string iconSrc;
+    std::string bundleName;
+    std::string moduleName;
+};
 
 struct SwiperParameters {
     std::optional<Dimension> dimLeft;
@@ -72,6 +90,7 @@ struct SwiperParameters {
     RefPtr<ResourceObject> resourceSelectedItemWidthValueObject;
     RefPtr<ResourceObject> resourceSelectedItemHeightValueObject;
     RefPtr<ResourceObject> resourceItemSizeValueObject;
+    std::map<int32_t, IndicatorIconParam> indicatorIconMap;
     std::unordered_set<std::string> parametersByUser;
 };
 

@@ -152,6 +152,17 @@ public:
         }
     }
 
+    void SetIsPostTouchEventResultRecursively(bool isPostTouchEventResult)
+    {
+        for (const auto& item : recognizers_) {
+            item->SetIsPostTouchEventResult(isPostTouchEventResult);
+            auto group = AceType::DynamicCast<RecognizerGroup>(item);
+            if (group) {
+                group->SetIsPostTouchEventResultRecursively(isPostTouchEventResult);
+            }
+        }
+    }
+
     void SetResponseLinkRecognizersRecursively(const ResponseLinkResult& responseLinkResult)
     {
         for (const auto& item : recognizers_) {

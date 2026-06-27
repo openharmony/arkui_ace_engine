@@ -14,7 +14,7 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, scheduleCallback } from '@koalaui/runtime'
+    rememberDisposable, scheduleCallback, callScheduledCallbacks, IncrementalNode } from '@koalaui/runtime'
 import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
@@ -49,7 +49,8 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
     options?: LazyForEachOptions,
-    isRepeat: boolean = false
+    isRepeat: boolean = false,
+    repeatMemoryOptimizationStrategy: int32 = 0,
 ) {
     const node = createLazyNode(isRepeat)
 
@@ -104,7 +105,8 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     if (options !== undefined) {
         LazyForEachOps.SetOptions(node.getPeerPtr(), options as LazyForEachOptions)
     }
-    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange,
+        node.clearReusePool, repeatMemoryOptimizationStrategy as int32, pool.releaseItemByIndex)
 
     /**
      * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
@@ -174,6 +176,22 @@ class LazyItemPool implements Disposable {
         return this._activeItems.size as int32
     }
 
+    releaseItemByIndex(idx: int32): void {
+        const state = this._activeItems.get(idx)
+        if (!state) {
+            return
+        }
+
+        const lazyItemRoot = state.value
+        this.markForbidRecycle((lazyItemRoot as IncrementalNode).firstChild, true)
+        scheduleCallback(() => {
+            state.dispose()
+            this._activeItems.delete(idx)
+            globalLazyItems.delete(state)
+        })
+        callScheduledCallbacks()
+    }
+
     getOrCreate<T>(
         index: int32,
         data: T,
@@ -226,6 +244,17 @@ class LazyItemPool implements Disposable {
                 globalLazyItems.delete(node)
             }
         })
+    }
+
+    private markForbidRecycle(node: IncrementalNode | undefined, forbid: boolean): void {
+        let current = node
+        while (current != undefined) {
+            current!.forbidRecycle = forbid
+            if (current!.firstChild != undefined) {
+                this.markForbidRecycle(current!.firstChild, forbid)
+            }
+            current = current!.nextSibling
+        }
     }
 
     /**

@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 
 #include "core/components/calendar/calendar_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
@@ -775,7 +775,11 @@ bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
     hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childSize = static_cast<int32_t>(host->GetChildren().size()) - 1;
+    auto childrenSize = host->GetChildren().size();
+    if (childrenSize <= 1) {
+        return false;
+    }
+    auto childSize = static_cast<int32_t>(childrenSize) - 1;
     if (event.IsShiftWith(KeyCode::KEY_TAB)) {
         focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + childSize - 1) % childSize;
     } else {

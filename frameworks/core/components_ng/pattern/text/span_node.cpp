@@ -605,7 +605,7 @@ void SpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObj
     AddResObj(key, resObj, std::move(updateFunc));
 }
 
-template void SpanNode::RegisterResource<CalcDimension>(
+template ACE_FORCE_EXPORT void SpanNode::RegisterResource<CalcDimension>(
     const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
 template void SpanNode::RegisterResource<Color>(
     const std::string&, const RefPtr<ResourceObject>&, Color);
@@ -741,7 +741,7 @@ void SpanNode::UnregisterResource(const std::string& key)
     BaseSpan::UnregisterResource(key);
 }
 
-void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
+ACE_FORCE_EXPORT void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
     std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     for (auto i = 0; i < static_cast<int32_t>(resObjArr.size()); ++i) {

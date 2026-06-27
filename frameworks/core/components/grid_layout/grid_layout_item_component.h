@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 using OnSelectFunc = std::function<void(bool)>;
 using DeepRenderFunc = std::function<RefPtr<Component>()>;
 
-class ACE_EXPORT GridLayoutItemComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT GridLayoutItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(GridLayoutItemComponent, SoleChildComponent);
 
 public:
@@ -37,10 +37,10 @@ public:
 
     RefPtr<Element> CreateElement() override;
 
-    void SetColumnIndex(int32_t columnIndex);
-    void SetRowIndex(int32_t rowIndex);
-    void SetColumnSpan(int32_t columnSpan);
-    void SetRowSpan(int32_t rowSpan);
+    ACE_FORCE_EXPORT void SetColumnIndex(int32_t columnIndex);
+    ACE_FORCE_EXPORT void SetRowIndex(int32_t rowIndex);
+    ACE_FORCE_EXPORT void SetColumnSpan(int32_t columnSpan);
+    ACE_FORCE_EXPORT void SetRowSpan(int32_t rowSpan);
     void SetForceRebuild(bool forceRebuild)
     {
         forceRebuild_ = forceRebuild;

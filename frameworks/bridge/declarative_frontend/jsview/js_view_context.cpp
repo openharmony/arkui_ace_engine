@@ -82,8 +82,8 @@ ViewContextModel* ViewContextModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
+constexpr int32_t DEFAULT_DURATION = 1000; // ms
+constexpr int32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t INVALID_ID = -1;
 constexpr int32_t INDEX_ONE = 1;

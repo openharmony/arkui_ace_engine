@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
-#include "core/components_ng/pattern/picker/picker_text_style.h"
+#include "core/components_ng/pattern/date_picker/picker_text_style.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {

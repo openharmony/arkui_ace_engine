@@ -97,8 +97,8 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
-#include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
-#include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
+#include "core/components_ng/pattern/date_picker/datepicker_accessibility_property.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
@@ -161,6 +161,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/base/mount_policy.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -418,9 +419,21 @@ public:
     bool EnableCachePredictNodes() const
     {
         CHECK_NULL_RETURN(hostNode_, false);
-        auto pattern = hostNode_->GetPattern();
+        const auto& pattern = hostNode_->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
         return pattern->EnableCachePredictNodes();
+    }
+
+    bool NeedReacquireFrameNode(const RefPtr<LayoutWrapper>& child, bool isCache) const
+    {
+        CHECK_NULL_RETURN(child, false);
+        const bool isActive = child->IsActive();
+        bool needReacquire = isActive == isCache;
+        if (!needReacquire && isActive) {
+            const auto hostNode = child->GetHostNode();
+            needReacquire = hostNode && !hostNode->IsOnMainTree();
+        }
+        return needReacquire && EnableCachePredictNodes();
     }
 
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
@@ -433,7 +446,7 @@ public:
                 partFrameNodeChildren_[index] = child;
             }
             return child;
-        } else if (itor->second && (itor->second->IsActive() == isCache) && EnableCachePredictNodes()) {
+        } else if (NeedReacquireFrameNode(itor->second, isCache)) {
             // Re-acquire the node when entering the viewport.
             // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
@@ -2778,7 +2791,7 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
 
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
-        if (tag_ == V2::WEB_ETS_TAG) {
+        if (tag_ == V2::WEB_ETS_TAG || tag_ == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
                 isVisible, std::to_string(currentVisibleRatio).c_str(), nodeId_,
                 std::to_string(accessibilityId_).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
@@ -5375,6 +5388,20 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, const std
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = accessibilityId_;
+        event.extraEventInfo = extraEventInfo;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {
@@ -6097,7 +6124,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
-        if (CheckIfHasMeasured()) {
+        if (SystemProperties::GetSkipSecondaryMeasuredEnabled() && CheckIfHasMeasured()) {
             ACE_SCOPED_TRACE(
                 "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
             ACE_LAYOUT_TRACE_END()
@@ -8552,7 +8579,12 @@ void FrameNode::CleanupPipelineResources()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(nodeId_);
         pipeline->RemoveVisibleAreaChangeNode(nodeId_);
-        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT);
+        auto eventManager = pipeline->GetEventManager();
+        int32_t windowId = 0;
+        if (eventManager && eventManager->GetMouseStyleManager()) {
+            windowId = eventManager->GetMouseStyleManager()->GetWindowIdWithNodeId(nodeId_);
+        }
+        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(nodeId_);
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
@@ -8567,7 +8599,6 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
-        auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
         }
@@ -8917,7 +8948,8 @@ template RefPtr<DatePickerColumnAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
 template RefPtr<DialogAccessibilityProperty> FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
 template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;
@@ -8936,7 +8968,8 @@ template RefPtr<ProgressAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
 template RefPtr<RadioAccessibilityProperty> FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
 template RefPtr<RatingAccessibilityProperty> FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
-template RefPtr<RefreshAccessibilityProperty> FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<RefreshAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
 template RefPtr<RichEditorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
 template RefPtr<ScrollAccessibilityProperty> FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;

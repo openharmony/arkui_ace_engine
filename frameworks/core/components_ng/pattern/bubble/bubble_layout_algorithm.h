@@ -293,6 +293,12 @@ private:
     void UpdateBubbleMaxSize(
         const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
+    // Arrow calculation helper functions (moved from global to member functions)
+    void GetEndP2P4(const Dimension& radius);
+    void GetP2(const Dimension& radius);
+    void CalculateArrowPoint(Dimension height, Dimension width, LayoutWrapper* layoutWrapper);
+    void SetArrowSize(float& width, float& height);
+
     std::string ClipBubbleWithPath();
     float GetArrowOffset(const Placement& placement);
     void InitEdgeSize(Edge& edge);
@@ -467,6 +473,71 @@ private:
     double cornerAngleSideX_ = 0.0;
     double cornerAngleSideY_ = 0.0;
     double cornerAngleHeight_ = 0.0;
+
+    // Arrow-related variables (moved from global to per-instance to support multiple bubbles)
+    Dimension bubbleArrowWidth_ = 16.0_vp;
+    Dimension bubbleArrowHeight_ = 8.0_vp;
+    std::optional<float> bubbleArrowWidthF_ = std::nullopt;
+    std::optional<float> bubbleArrowHeightF_ = std::nullopt;
+
+    // Calculated arrow point parameters
+    Dimension defaultP2Height_ = 7.32_vp;
+    Dimension defaultP2Width_ = 1.5_vp;
+    Dimension defaultP4EndY_ = 6.0_vp;
+    Dimension defaultP2EndX_ = 12.8_vp;
+    Dimension defaultP2EndY_ = 7.6_vp;
+
+    // Arrow angle calculation results
+    double typeOneBeta_ = 0.0;
+    double typeTwoBeta_ = 0.0;
+
+    // Vertical arrow offset parameters
+    Dimension arrowVerticalP1OffsetX_ = 8.0_vp;
+    Dimension arrowVerticalP2OffsetX_ = 1.5_vp;
+    Dimension arrowVerticalP2OffsetY_ = 7.32_vp;
+    Dimension arrowVerticalP4OffsetX_ = 1.5_vp;
+    Dimension arrowVerticalP4OffsetY_ = 7.32_vp;
+    Dimension arrowVerticalP5OffsetX_ = 8.0_vp;
+
+    // Horizon arrow offset parameters
+    Dimension arrowHorizonP1OffsetY_ = 8.0_vp;
+    Dimension arrowHorizonP2OffsetX_ = 7.32_vp;
+    Dimension arrowHorizonP2OffsetY_ = 1.5_vp;
+    Dimension arrowHorizonP4OffsetX_ = 7.32_vp;
+    Dimension arrowHorizonP4OffsetY_ = 1.5_vp;
+    Dimension arrowHorizonP5OffsetY_ = 8.0_vp;
+
+    // Replace start vertical arrow offset parameters
+    Dimension arrowReplaceStartVerticalP1OffsetX_ = 8.0_vp;
+    Dimension arrowReplaceStartVerticalP2OffsetX_ = 8.0_vp;
+    Dimension arrowReplaceStartVerticalP2OffsetY_ = 6.0_vp;
+    Dimension arrowReplaceStartVerticalP4OffsetX_ = 4.8_vp;
+    Dimension arrowReplaceStartVerticalP4OffsetY_ = 7.6_vp;
+    Dimension arrowReplaceStartVerticalP5OffsetX_ = 8.0_vp;
+
+    // Replace end vertical arrow offset parameters
+    Dimension arrowReplaceEndVerticalP1OffsetX_ = 8.0_vp;
+    Dimension arrowReplaceEndVerticalP2OffsetX_ = 4.8_vp;
+    Dimension arrowReplaceEndVerticalP2OffsetY_ = 7.6_vp;
+    Dimension arrowReplaceEndVerticalP4OffsetX_ = 8.0_vp;
+    Dimension arrowReplaceEndVerticalP4OffsetY_ = 6.0_vp;
+    Dimension arrowReplaceEndVerticalP5OffsetX_ = 8.0_vp;
+
+    // Replace start horizon arrow offset parameters
+    Dimension arrowReplaceStartHorizonP1OffsetY_ = 8.0_vp;
+    Dimension arrowReplaceStartHorizonP2OffsetX_ = 6.0_vp;
+    Dimension arrowReplaceStartHorizonP2OffsetY_ = 8.0_vp;
+    Dimension arrowReplaceStartHorizonP4OffsetX_ = 7.6_vp;
+    Dimension arrowReplaceStartHorizonP4OffsetY_ = 4.8_vp;
+    Dimension arrowReplaceStartHorizonP5OffsetY_ = 8.0_vp;
+
+    // Replace end horizon arrow offset parameters
+    Dimension arrowReplaceEndHorizonP1OffsetY_ = 8.0_vp;
+    Dimension arrowReplaceEndHorizonP2OffsetX_ = 7.6_vp;
+    Dimension arrowReplaceEndHorizonP2OffsetY_ = 4.8_vp;
+    Dimension arrowReplaceEndHorizonP4OffsetX_ = 6.0_vp;
+    Dimension arrowReplaceEndHorizonP4OffsetY_ = 8.0_vp;
+    Dimension arrowReplaceEndHorizonP5OffsetY_ = 8.0_vp;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

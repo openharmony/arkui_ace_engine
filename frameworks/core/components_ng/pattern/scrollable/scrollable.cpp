@@ -1683,7 +1683,8 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
     }
 #endif
     // spring effect special process
-    if ((canOverScroll_ && source != SCROLL_FROM_AXIS) || needScrollSnapChange_) {
+    const bool isRefreshScroll = isRefreshScrollCallback_ && isRefreshScrollCallback_();
+    if (((canOverScroll_ && source != SCROLL_FROM_AXIS) && !isRefreshScroll) || needScrollSnapChange_) {
         ACE_SCOPED_TRACE("scrollPause set true to stop ProcessScrollMotion, canOverScroll:%u, needScrollSnapChange:%u, "
                          "nodeId:%d, tag:%s",
             canOverScroll_, needScrollSnapChange_, nodeId_, nodeTag_.c_str());

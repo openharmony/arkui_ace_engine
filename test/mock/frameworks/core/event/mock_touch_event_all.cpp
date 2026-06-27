@@ -455,6 +455,16 @@ bool TouchEventTarget::IsPostEventResult() const
     return isPostEventResult_;
 }
 
+void TouchEventTarget::SetIsPostTouchEventResult(bool isPostTouchEventResult)
+{
+    isPostTouchEventResult_ = isPostTouchEventResult;
+}
+
+bool TouchEventTarget::IsPostTouchEventResult() const
+{
+    return isPostTouchEventResult_;
+}
+
 void TouchEventInfo::AddTouchLocationInfo(TouchLocationInfo&& info)
 {
     touches_.emplace_back(info);

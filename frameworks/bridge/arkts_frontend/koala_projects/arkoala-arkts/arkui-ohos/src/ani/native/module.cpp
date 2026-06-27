@@ -118,12 +118,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_WithEnv_setSystemEnvProperty",
-            "lC{std.core.String}d:",
+            "lC{std.core.String}Y:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
         },
         ani_native_function {
             "_WithEnv_setCustomEnvProperty",
-            nullptr,
+            "liY:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
         },
         ani_native_function {
@@ -143,12 +143,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CustomNode_registerOnCustomEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
         },
         ani_native_function {
             "_CustomNode_registerOnSystemEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
         },
         ani_native_function {
@@ -792,6 +792,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "_Drawable_CreateAnimatedDrawableByString", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawableByString)
         },
+        ani_native_function { "_Drawable_CreatePictureDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePictureDrawable)
+        },
         ani_native_function { "_Drawable_CreatePixelMap", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMap)
         },
@@ -818,6 +821,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_SetBlendMode", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetBlendMode)
+        },
+        ani_native_function { "_Drawable_SetHdrComposition", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetHdrComposition)
+        },
+        ani_native_function { "_Drawable_Invalidate", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableInvalidate)
         },
         ani_native_function { "_Drawable_NativeTransferStatic", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableNativeTransferStatic)

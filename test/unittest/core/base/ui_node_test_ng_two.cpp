@@ -31,6 +31,7 @@
 #include "core/common/builder_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"

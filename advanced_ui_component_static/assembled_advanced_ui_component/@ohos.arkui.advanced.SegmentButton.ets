@@ -81,7 +81,8 @@ import {
   CustomBuilder,
   PanDirection,
   ScaleOptions,
-  LongPressGesture
+  LongPressGesture,
+  Visibility
 } from '@ohos.arkui.component';
 import {
   Observed,
@@ -93,7 +94,9 @@ import {
   Require,
   Provide,
   UIUtils,
-  PropRef
+  PropRef,
+  ObservedV2,
+  Trace
 } from '@ohos.arkui.stateManagement';
 import { EnvironmentCallback } from '@kit.AbilityKit';
 import deviceInfo from '@ohos.deviceInfo';
@@ -1093,7 +1096,6 @@ struct SegmentButtonItemArrayComponent {
   @ObjectLink @Watch('onOptionsArrayChange') optionsArray: SegmentButtonItemOptionsArray;
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions;
   @Link selectedIndexes: int[];
-  @Consume componentSize: SizeOptions;
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[];
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[];
   @Consume positionTrigger: int
@@ -1510,9 +1512,6 @@ struct SegmentButtonItemArrayComponent {
       .direction(this.options.direction)
       .focusScopeId(this.groupId, true)
       .padding(this.options.componentPadding)
-      .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-        this.componentSize = { width: newValue.width, height: newValue.height }
-      } as SizeChangeCallback)
     }
   }
 
@@ -1547,7 +1546,6 @@ export struct SegmentButton {
   @Link @Watch('onSelectedChange') selectedIndexes: int[]
   public onItemClicked?: Callback<int>
   @State maxFontScale: double | Resource = DEFAULT_MAX_FONT_SCALE
-  @Provide componentSize: SizeOptions = { width: 0.0, height: 0.0 } as SizeOptions
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = (() => {
     let array = new Array<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, (): LocalizedBorderRadiuses => {
       return {
@@ -1807,6 +1805,9 @@ export struct SegmentButton {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
+    if (this.layoutAlgorithm.refSize.height === 0) {
+      return undefined;
+    }
     return this.options.backgroundSystemMaterial;
   }
 
@@ -1837,6 +1838,7 @@ export struct SegmentButton {
             .borderRadius(this.getBackgroundBorderRadius())
             .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
             .systemMaterial(this.options.backgroundSystemMaterial)
+            .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
           }
           Stack() {
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1858,6 +1860,7 @@ export struct SegmentButton {
           .animation({ duration: 0 })
           .borderRadius(this.getBackgroundBorderRadius())
           .translate({ x: this.selectedItemOffsetX })
+          .visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None)
 
           SegmentButtonItemArrayComponent({
             pressArray: this.pressArray,
@@ -2328,7 +2331,7 @@ export struct SegmentButton {
       }
     }
 
-    const defaultRadius = this.componentSize.height as double / 2;
+    const defaultRadius = this.layoutAlgorithm.refSize.height / 2;
     if (this.isMultiply()) {
       return this.options.iconTextRadius ?? this.options.iconTextBackgroundRadius ?? defaultRadius;
     }
@@ -2442,6 +2445,7 @@ function numberToShadowStyle(num: int): ShadowStyle {
   }
 }
 
+@ObservedV2
 export class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   selectedIndex: int = -1
   componentPadding: double = 0
@@ -2452,6 +2456,7 @@ export class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   rowSpace: double = 0
   shouldMirror: boolean = false
   buttonCount: int = 0
+  @Trace refSize: Size = { width: 0, height: 0 } as Size
 
   getButtonX(index: int): double {
     const effectiveIndex = this.shouldMirror ? this.buttonCount - 1 - index : index
@@ -2469,6 +2474,9 @@ export class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
       buttonLayer.measure(constraint)
     }
     const refSize: Size = buttonLayer ? buttonLayer.getMeasuredSize() : { width: 0, height: 0 } as Size
+    if (this.refSize.width !== refSize.width || this.refSize.height !== refSize.height) {
+      this.refSize = refSize
+    }
 
     let buttonWidth: double = 0
     if (buttonLayer) {

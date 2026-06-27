@@ -21,12 +21,12 @@
 #include "base/image/image_resizable_slice.h"
 #include "base/geometry/matrix4.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 namespace RenderConstants {
     constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;

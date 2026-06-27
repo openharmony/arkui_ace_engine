@@ -14,6 +14,7 @@
  */
 
 #include "core/components/plugin/plugin_sub_container.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 
 #include "ability_info.h"
@@ -26,6 +27,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"

@@ -15,11 +15,13 @@
 
 #include "core/components_ng/event/click_event.h"
 
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/gestures/click_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include <algorithm>
 
 namespace OHOS::Ace::NG {
@@ -54,6 +56,15 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     }
     result.emplace_back(clickRecognizer_);
     responseLinkResult.emplace_back(clickRecognizer_);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    const auto& touchOptimizer = pipeline->GetTouchOptimizer();
+    CHECK_NULL_VOID(touchOptimizer);
+    if (!touchOptimizer->IsTouchDownNotifiedToClick()) {
+        clickRecognizer_->SetShouldReportTouchDown(true);
+        touchOptimizer->SetTouchDownNotifiedToClick(true);
+    }
 }
 
 std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const

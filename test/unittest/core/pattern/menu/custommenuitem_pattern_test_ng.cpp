@@ -1063,4 +1063,109 @@ HWTEST_F(CustomMenuItemPatternTestNg, StackModeNoHeader001, TestSize.Level1)
     // CustomMenuItem should not have stack header added
     EXPECT_NE(subMenuFrame->GetChildren().size(), 2);
 }
+
+/**
+ * @tc.name: CustomMenuItemPatternTestNg_OnTouchRegionInBoundsClick001
+ * @tc.desc: Test CustomMenuItem OnTouch recognizes an in-bounds swipe as a click and fires onChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemPatternTestNg_OnTouchRegionInBoundsClick001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    itemNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    bool onChangeFired = false;
+    auto hub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_TRUE(hub);
+    hub->SetOnChange([&onChangeFired](bool /*selected*/) { onChangeFired = true; });
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    // DOWN inside the item bounds
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    ASSERT_TRUE(pattern->lastTouchOffset_);
+    EXPECT_FALSE(pattern->movedOutOfRegion_);
+
+    // a swipe that stays inside the item keeps it a click candidate (the reported bug scenario)
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(40.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_FALSE(pattern->movedOutOfRegion_);
+
+    // UP inside the item bounds -> recognized as a click -> onChange fires
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(70.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_TRUE(onChangeFired);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: CustomMenuItemPatternTestNg_OnTouchRegionMoveOutNoClick001
+ * @tc.desc: Test CustomMenuItem OnTouch drops the click once the finger leaves the item bounds on MOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemPatternTestNg_OnTouchRegionMoveOutNoClick001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(12);
+
+    MenuItemModelNG model;
+    auto customNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    model.Create(customNode);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(itemNode);
+    itemNode->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_TRUE(pattern);
+
+    bool onChangeFired = false;
+    auto hub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_TRUE(hub);
+    hub->SetOnChange([&onChangeFired](bool /*selected*/) { onChangeFired = true; });
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+
+    locationInfo.SetTouchType(TouchType::DOWN);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+
+    // MOVE out of the item bounds marks the gesture as no longer a click
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(Offset(200.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_TRUE(pattern->movedOutOfRegion_);
+
+    // UP -> not a click, onChange must not fire
+    info.touches_.pop_front();
+    locationInfo.SetTouchType(TouchType::UP);
+    locationInfo.SetLocalLocation(Offset(10.0, 10.0));
+    info.touches_.emplace_back(locationInfo);
+    pattern->OnTouch(info);
+    EXPECT_FALSE(onChangeFired);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
 } // namespace OHOS::Ace::NG

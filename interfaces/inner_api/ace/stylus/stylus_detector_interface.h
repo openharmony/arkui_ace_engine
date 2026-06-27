@@ -27,6 +27,7 @@ struct NotifyInfo {
     int x;
     int y;
     std::string bundleName;
+    std::string resourceName;
 };
 
 struct ResultData {

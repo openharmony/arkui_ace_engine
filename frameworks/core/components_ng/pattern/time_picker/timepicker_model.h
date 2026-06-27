@@ -21,9 +21,9 @@
 
 #include "base/i18n/time_format.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_change_event.h"
-#include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_model.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 namespace OHOS::Ace {
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;

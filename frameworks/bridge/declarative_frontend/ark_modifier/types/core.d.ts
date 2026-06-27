@@ -59,6 +59,21 @@ declare enum ScrollSource {
   SCROLLER_ANIMATION,
 }
 
+declare enum StickyStyle {
+  None = 0,
+  Header = 1,
+  Footer = 2,
+  Both = 3,
+}
+
+declare enum FocusWrapMode {}
+
+declare enum GridItemAlignment
+{
+    DEFAULT = 0,
+    STRETCH = 1,
+}
+
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}
@@ -168,6 +183,11 @@ interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
 interface LazyColumnLayoutAttribute extends CommonAttribute {}
 interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
+interface DividerOptions extends CommonAttribute {}
+interface PickerBackgroundStyle extends CommonAttribute {}
+interface ItemFillPolicy {}
+interface EditModeOptions {}
+interface OffsetResult {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;
@@ -291,6 +311,7 @@ type SelectionOptions = object;
 type TextDataDetectorType = 'phoneNumber' | 'url' | 'email' | 'address' | 'dateTime' | 'currency';
 type TextDataDetectorConfig = object;
 type LineSpacingOptions = object;
+type FontWeightConfigs = object;
 
 type VoidCallback = () => void;
 type Callback<T = object, R = void> = (value: T) => R;
@@ -360,6 +381,9 @@ type SliderInteraction = object;
 type SlideRange = object;
 type SliderPrefixOptions = object;
 type SliderSuffixOptions = object;
+type TextBackgroundStyle = object;
+type ColorFilter = object;
+type DrawingColorFilter = object;
 
 type ToggleType = 'checkbox' | 'switch' | 'button';
 type SwitchStyle = object;
@@ -368,6 +392,10 @@ type ToggleConfiguration = object;
 type ArrowPosition = 'end' | 'start' | 'center';
 type OptionWidthMode = 'default' | 'fit_content' | 'fit_trigger';
 type DividerStyleOptions = object;
+type MenuAlignType = 'start' | 'center' | 'end';
+type MenuKeyboardAvoidMode = 'none' | 'translate_and_resize';
+type DistortionMode = 'distortion_auto' | 'distortion_enabled' | 'distortion_disabled';
+type EdgeLightMode = 'edgeLight_auto' | 'edgeLight_enabled' | 'edgeLight_disabled';
 
 type CalendarAlign = 'start' | 'center' | 'end';
 type CalendarTextStyle = object;
@@ -476,9 +504,12 @@ type CheckboxGroupOptions = object;
 type RadioOptions = object;
 type CheckBoxConfiguration = object;
 type RadioConfiguration = object;
+type MenuItemConfiguration = object;
+type SelectOption = object;
 type DataPanelConfiguration = object;
 type DataPanelShadowOptions = object;
 type GaugeConfiguration = object;
+type LoadingProgressConfiguration = object;
 type GaugeIndicatorOptions = object;
 type StarStyleOptions = object;
 type ShaderStyle = object;
@@ -537,6 +568,10 @@ type SliderBlockType = 'default' | 'image' | 'shape';
 type AnimationStatus = 'initial' | 'running' | 'paused' | 'stopped';
 type FillMode = 'forwards' | 'backwards' | 'both' | 'none';
 
+type SystemUiMaterial = object;
+type MenuOutlineOptions = object;
+type DividerOptions = object;
+type OnSelectCallback = object;
 type RatingConfiguration = object;
 type RichEditorRange = object;
 type PasteEventCallback = object;

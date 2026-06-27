@@ -323,6 +323,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkcanvas",
             "arkui.components.arkpanel",
             "arkui.components.arkgridcontainer",
+            "arkui.components.arkrefresh",
         };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {

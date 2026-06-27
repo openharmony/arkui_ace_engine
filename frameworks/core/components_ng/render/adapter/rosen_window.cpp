@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include <string>
 
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/event_report.h"
@@ -28,6 +29,7 @@
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
+constexpr int32_t NODE_RELEASE_DELAY_MILLISECOND = 1000;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000; // if vsync not received in 3s,report an system warning.
@@ -52,6 +54,12 @@ std::shared_ptr<OHOS::Rosen::RSUIContext> GetRSUIContextByContainerId(int32_t in
     auto rsUIDirector = pipelineWindow->GetRSUIDirector();
     CHECK_NULL_RETURN(rsUIDirector, nullptr);
     return rsUIDirector->GetRSUIContext();
+}
+
+bool IsDisabledGoStopAndGoResume(const OHOS::Ace::RefPtr<OHOS::Ace::Container>& container)
+{
+    CHECK_NULL_RETURN(container, true);
+    return container->IsSubContainer() || container->IsFormRender() || container->IsSceneBoardWindow();
 }
 } // namespace
 
@@ -257,6 +265,7 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
 
 void RosenWindow::RequestFrame()
 {
+    // Hidden window skips vsync; forceVsync_ overrides for animations.
     if (!forceVsync_ && !onShow_) {
         return;
     }
@@ -292,6 +301,10 @@ void RosenWindow::OnShow()
 {
     Window::OnShow();
     CHECK_NULL_VOID(rsUIDirector_);
+    // Detached node → GoResume before GoForeground to restore STOP state.
+    if (IsWindowDetached()) {
+        NotifyForegroundForNodeGoResume();
+    }
     rsUIDirector_->GoForeground();
     if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector_) {
         FlushImplicitTransaction(rsUIDirector_);
@@ -304,6 +317,10 @@ void RosenWindow::OnHide()
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
+    // Detached + hidden → schedule GoStop to release resources.
+    if (IsWindowDetached()) {
+        NotifyBackgroundForNodeRelease();
+    }
 }
 
 void RosenWindow::FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
@@ -502,4 +519,93 @@ void RosenWindow::FlushVsync()
     CHECK_NULL_VOID(rsWindow_);
     rsWindow_->FlushVsync();
 }
+
+void RosenWindow::NotifyBackgroundForNodeRelease()
+{
+    ACE_SCOPED_TRACE("NotifyBackgroundForNodeRelease attachedStatus:%d hasPost:[%d]",
+        GetWindowAttachedStatusForLog(), hasPost_);
+    if (hasPost_) {
+        return;
+    }
+    auto container = Container::GetContainer(id_);
+    CHECK_NULL_VOID(container);
+    if (IsDisabledGoStopAndGoResume(container)) {
+        ACE_SCOPED_TRACE("NotifyBackgroundForNodeRelease return");
+        return;
+    }
+    auto taskExecutor = taskExecutor_.Upgrade();
+    CHECK_NULL_VOID(taskExecutor);
+    auto taskName = "GoBackgroundForNodeRelease" + std::to_string(id_);
+    taskExecutor->PostDelayedTask(
+        [weak = weak_from_this()]() {
+            auto self = weak.lock();
+            CHECK_NULL_VOID(self);
+            self->GoBackgroundForNodeRelease();
+        },
+        TaskExecutor::TaskType::UI, NODE_RELEASE_DELAY_MILLISECOND, taskName);
+    hasPost_ = true;
+}
+
+void RosenWindow::GoBackgroundForNodeRelease()
+{
+    CHECK_NULL_VOID(rsUIDirector_);
+    ACE_SCOPED_TRACE("GoBackgroundForNodeRelease attachedStatus:%d IsHide:%d",
+        GetWindowAttachedStatusForLog(), IsHide());
+    // GoStop only when hidden AND detached; foreground must never GoStop.
+    if (IsHide() && IsWindowDetached()) {
+        ACE_SCOPED_TRACE("GoStop");
+        rsUIDirector_->GoStop();
+        rsUIDirector_->SendMessages();
+    }
+    hasPost_ = false;
+}
+
+void RosenWindow::NotifyWindowAttachStateChange(bool status)
+{
+    // Lifecycle: onShow_=false + detached → GoStop; onShow_=false + attached → GoResume;
+    // onShow_=true → no action (foreground rendering active, cannot GoStop).
+    ACE_SCOPED_TRACE("NotifyWindowAttachStateChange status:%d onShow:%d attachedStatus:%d",
+        status, onShow_, GetWindowAttachedStatusForLog());
+    auto container = Container::GetContainer(id_);
+    CHECK_NULL_VOID(container);
+    bool statusEqualsCurrent = windowAttachedStatus_.has_value() && (windowAttachedStatus_.value() == status);
+    if (IsDisabledGoStopAndGoResume(container) || statusEqualsCurrent || rsUIDirector_ == nullptr) {
+        ACE_SCOPED_TRACE("NotifyWindowAttachStateChange skip [subContainer:%d][statusEquals:%d]",
+            container->IsSubContainer(), statusEqualsCurrent);
+        return;
+    }
+    windowAttachedStatus_ = status;
+    if (onShow_) {
+        return;
+    }
+    // Window hidden: action depends on node attach status (mutually exclusive after assignment)
+    if (IsWindowDetached()) {
+        NotifyBackgroundForNodeRelease();
+    } else {
+        NotifyForegroundForNodeGoResume();
+        if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector_) {
+            FlushImplicitTransaction(rsUIDirector_);
+        }
+    }
+}
+
+void RosenWindow::NotifyForegroundForNodeGoResume()
+{
+    if (rsUIDirector_) {
+        rsUIDirector_->GoResume();
+    } else {
+        LOGW("fail to GoResume");
+    }
+    if (hasPost_) {
+        auto taskExecutor = taskExecutor_.Upgrade();
+        if (taskExecutor) {
+            auto taskName = "GoBackgroundForNodeRelease" + std::to_string(id_);
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
+            hasPost_ = false;
+        } else {
+            LOGW("GoResume: taskExecutor is null, delayed GoStop task may remain in queue");
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

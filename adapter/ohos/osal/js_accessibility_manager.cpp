@@ -86,6 +86,18 @@ constexpr uint64_t WEB_MAX_ELEMENT_ID = 0xFFFFFFFFFF;
 constexpr int32_t WEB_TREE_MODE = 8;
 constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 constexpr char DETACH_FOCUS_LOG_PREFIX[] = "[DetachFocusFallback]";
+constexpr char WEB_ACC_ID_PARAM[] = "-webAccId";
+constexpr char WEB_ACC_FUN_PARAM[] = "-webAccFun";
+constexpr char WEB_ACC_FUN_GET_ACC[] = "getAcc";
+constexpr char WEB_ACC_FUN_ON_ACC[] = "onAcc";
+constexpr char WEB_ACC_FUN_OFF_ACC[] = "offAcc";
+constexpr char WEB_ACC_FUN_TREE[] = "tree";
+constexpr char WEB_ACC_FUN_NODE[] = "node";
+constexpr char WEB_ACC_FUN_PRE[] = "pre";
+constexpr char WEB_ACC_FUN_NEXT[] = "next";
+constexpr char WEB_ACC_FUN_EXE_ACTION[] = "exeAction";
+constexpr char WEB_ACC_FUN_SEND_EVENT[] = "sendEvent";
+constexpr char WEB_ACC_FUN_HOVER[] = "hover";
 const std::string CANDIDATE_IDS = "candidateIds";
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -97,9 +109,142 @@ const std::set<std::string> TAGS_EMBED_COMPONENT = {
     "embeddedObject",
 };
 
-std::map<std::string, WebAccFun> webAccFunMap = { { "getAcc", WEB_GET_ACC }, { "onAcc", WEB_ON_ACC },
-    { "offAcc", WEB_OFF_ACC }, { "tree", WEB_TREE }, { "node", WEB_NODE }, { "pre", WEB_PRE }, { "next", WEB_NEXT },
-    { "exeAction", WEB_EXE_ACTION }, { "sendEvent", WEB_SEND_EVENT }, { "hover", WEB_HOVER } };
+std::map<std::string, WebAccFun> webAccFunMap = { { WEB_ACC_FUN_GET_ACC, WEB_GET_ACC },
+    { WEB_ACC_FUN_ON_ACC, WEB_ON_ACC }, { WEB_ACC_FUN_OFF_ACC, WEB_OFF_ACC }, { WEB_ACC_FUN_TREE, WEB_TREE },
+    { WEB_ACC_FUN_NODE, WEB_NODE }, { WEB_ACC_FUN_PRE, WEB_PRE }, { WEB_ACC_FUN_NEXT, WEB_NEXT },
+    { WEB_ACC_FUN_EXE_ACTION, WEB_EXE_ACTION }, { WEB_ACC_FUN_SEND_EVENT, WEB_SEND_EVENT },
+    { WEB_ACC_FUN_HOVER, WEB_HOVER } };
+
+
+FocusMoveResult BuildWebFocusMoveResult(FocusMoveResultType resultType)
+{
+    return {
+        .resultType = resultType,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = true,
+    };
+}
+
+void SetWebFocusMoveSearchWithConditionFailResult(
+    AccessibilityElementOperatorCallback& callback, FocusMoveResultType resultType, int32_t requestId)
+{
+    AccessibilityElementInfo elementInfo;
+    elementInfo.SetValidElement(false);
+    std::list<AccessibilityElementInfo> infos = { elementInfo };
+    callback.SetFocusMoveSearchWithConditionResult(infos, BuildWebFocusMoveResult(resultType), requestId);
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetFocusMoveSearchWithConditionResult, requestId: %{public}d", requestId);
+}
+
+bool IsWebFocusRuleTypeSupported(FocusRuleType type)
+{
+    switch (type) {
+        case FocusRuleType::DEFAULT:
+        case FocusRuleType::FOCUS_BY_LINK:
+        case FocusRuleType::FOCUS_BY_TITLE:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool GetWebComponentSearchSurfaceIdType(int32_t direction, int32_t focusRuleType, SearchSurfaceIdType& searchType)
+{
+    if (direction != FocusMoveDirection::FORWARD && direction != FocusMoveDirection::BACKWARD) {
+        return false;
+    }
+
+    bool isBackward = direction == FocusMoveDirection::BACKWARD;
+    switch (static_cast<FocusRuleType>(focusRuleType)) {
+        case FocusRuleType::FOCUS_BY_LINK:
+            searchType = isBackward ? SearchSurfaceIdType::SEARCH_TAIL_LINK : SearchSurfaceIdType::SEARCH_HEAD_LINK;
+            break;
+        case FocusRuleType::FOCUS_BY_TITLE:
+            searchType = isBackward ? SearchSurfaceIdType::SEARCH_TAIL_TITLE : SearchSurfaceIdType::SEARCH_HEAD_TITLE;
+            break;
+        default:
+            searchType = isBackward ? SearchSurfaceIdType::SEARCH_TAIL : SearchSurfaceIdType::SEARCH_HEAD;
+            break;
+    }
+    return true;
+}
+
+bool IsWebDumpParamKey(const std::string& param)
+{
+    return param == WEB_ACC_ID_PARAM || param == WEB_ACC_FUN_PARAM;
+}
+
+bool IsWebFocusMoveDumpFun(const std::string& webAccFun)
+{
+    return webAccFun == WEB_ACC_FUN_PRE || webAccFun == WEB_ACC_FUN_NEXT;
+}
+
+bool IsWebActionDumpFun(const std::string& webAccFun)
+{
+    return webAccFun == WEB_ACC_FUN_EXE_ACTION || webAccFun == WEB_ACC_FUN_SEND_EVENT ||
+        webAccFun == WEB_ACC_FUN_HOVER;
+}
+
+bool ParseWebAccIdParam(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>::const_iterator& end, DumpInfoArgument& argument)
+{
+    if (++arg == end) {
+        return false;
+    }
+    argument.mode = DumpMode::WEB_ACC_DUMP;
+    argument.webAccId = StringUtils::StringToLongInt(*arg);
+    return true;
+}
+
+bool ParseWebFocusMoveDumpParam(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>::const_iterator& end, DumpInfoArgument& argument)
+{
+    if (!IsWebFocusMoveDumpFun(argument.webAccFun)) {
+        return false;
+    }
+    if (++arg != end) {
+        argument.focusMoveRule = StringUtils::StringToInt(*arg);
+    }
+    return true;
+}
+
+bool ParseWebAccFunParam(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>::const_iterator& end, DumpInfoArgument& argument)
+{
+    if (++arg == end) {
+        return false;
+    }
+    argument.mode = DumpMode::WEB_ACC_DUMP;
+    argument.webAccFun = *arg;
+    return true;
+}
+
+bool ParseWebActionDumpParam(std::vector<std::string>::const_iterator& arg,
+    const std::vector<std::string>::const_iterator& end, DumpInfoArgument& argument)
+{
+    if (!IsWebActionDumpFun(argument.webAccFun)) {
+        return true;
+    }
+    if (++arg == end) {
+        return false;
+    }
+    if (argument.webAccFun == WEB_ACC_FUN_HOVER && arg + 1 == end) {
+        return false;
+    }
+    if (argument.webAccFun == WEB_ACC_FUN_EXE_ACTION) {
+        argument.action = StringUtils::StringToInt(*arg);
+        return true;
+    }
+    if (argument.webAccFun == WEB_ACC_FUN_SEND_EVENT) {
+        argument.eventId = StringUtils::StringToInt(*arg);
+        return true;
+    }
+    argument.pointX = StringUtils::StringToInt(*arg);
+    ++arg;
+    argument.pointY = StringUtils::StringToInt(*arg);
+    return true;
+}
 
 const std::map<Accessibility::ActionType, std::function<bool(const AccessibilityActionParam& param)>> ACTIONS = {
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
@@ -4457,6 +4602,57 @@ void JsAccessibilityManager::DumpCustomActionTest(const std::vector<std::string>
     AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
 
+void JsAccessibilityManager::DumpSetComponentTypeTest(const std::vector<std::string>& params)
+{
+    constexpr size_t setComponentTypeParamSize = 4;
+    constexpr size_t nodeIdIndex = 2;
+    constexpr size_t componentTypeIndex = 3;
+    if (params.size() != setComponentTypeParamSize || params[componentTypeIndex].empty()) {
+        DumpLog::GetInstance().Print(
+            "Usage: -accessibility --set-component-type <accessibilityId> <componentType>");
+        return;
+    }
+
+    auto nodeId = StringUtils::StringToLongInt(params[nodeIdIndex]);
+    RefPtr<NG::FrameNode> frameNode;
+    auto pipeline = FindPipelineByElementId(nodeId, frameNode);
+    if (!pipeline || !frameNode) {
+        DumpLog::GetInstance().Print("Error: can't find node with ID " + params[nodeIdIndex]);
+        return;
+    }
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityRole(params[componentTypeIndex]);
+    DumpLog::GetInstance().Print(
+        "Set accessibility componentType success. nodeId: " + std::to_string(frameNode->GetAccessibilityId()) +
+        ", componentType: " + params[componentTypeIndex]);
+}
+
+void JsAccessibilityManager::DumpClearComponentTypeTest(const std::vector<std::string>& params)
+{
+    constexpr size_t clearComponentTypeParamSize = 3;
+    constexpr size_t nodeIdIndex = 2;
+    if (params.size() != clearComponentTypeParamSize) {
+        DumpLog::GetInstance().Print("Usage: -accessibility --clear-component-type <accessibilityId>");
+        return;
+    }
+
+    auto nodeId = StringUtils::StringToLongInt(params[nodeIdIndex]);
+    RefPtr<NG::FrameNode> frameNode;
+    auto pipeline = FindPipelineByElementId(nodeId, frameNode);
+    if (!pipeline || !frameNode) {
+        DumpLog::GetInstance().Print("Error: can't find node with ID " + params[nodeIdIndex]);
+        return;
+    }
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityRole();
+    DumpLog::GetInstance().Print(
+        "Clear accessibility componentType success. nodeId: " + std::to_string(frameNode->GetAccessibilityId()));
+}
+
 void JsAccessibilityManager::DumpEmbedSearchTest(const std::vector<std::string>& params)
 {
     int64_t nodeId = 0;
@@ -4750,6 +4946,8 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         { "--set-whitelist", DumpMode::SET_CHECKLIST_TEST },
         { "--get-whitelist", DumpMode::GET_CHECKLIST_TEST },
         { "--execute-action", DumpMode::EXECUTE_ACTION_TEST },
+        { "--set-component-type", DumpMode::SET_COMPONENT_TYPE_TEST },
+        { "--clear-component-type", DumpMode::CLEAR_COMPONENT_TYPE_TEST },
         { "-json", DumpMode::TREE },
     };
 
@@ -4776,7 +4974,7 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         } else if (*arg == "-v") {
             argument.verbose = true;
 #ifdef WEB_SUPPORTED
-        } else if (*arg == "-webAccId" || *arg == "-webAccFun") {
+        } else if (*arg == WEB_ACC_ID_PARAM || *arg == WEB_ACC_FUN_PARAM) {
             return DumpWebInfoParams(params, argument);
 #endif
         } else if (HandleNodeModeParam(*arg, argument)) {
@@ -4871,6 +5069,12 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
 #endif
         case DumpMode::CUSTOM_ACTION_TEST:
             DumpCustomActionTest(params);
+            break;
+        case DumpMode::SET_COMPONENT_TYPE_TEST:
+            DumpSetComponentTypeTest(params);
+            break;
+        case DumpMode::CLEAR_COMPONENT_TYPE_TEST:
+            DumpClearComponentTypeTest(params);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -5184,30 +5388,34 @@ int64_t JsAccessibilityManager::ConvertToSplitElementId(int64_t elementId)
     return elementId;
 }
 
-bool JsAccessibilityManager::DumpElementInfosIfNeed(const DumpInfoArgument& argument,
-    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern, uint32_t windowId)
+bool JsAccessibilityManager::GetWebDumpQueryType(const std::string& webAccFun, int32_t& mode, int32_t& direction)
 {
-    auto funIt = webAccFunMap.find(argument.webAccFun);
+    auto funIt = webAccFunMap.find(webAccFun);
     WebAccFun fun = (funIt != webAccFunMap.end()) ? funIt->second : WEB_ACC_INVALID;
-    int32_t direction = -1;
-    int32_t mode = -1;
     switch (fun) {
         case WEB_TREE:
             mode = WEB_TREE_MODE;
-            break;
+            return true;
         case WEB_NODE:
             mode = 0;
-            break;
+            return true;
         case WEB_PRE:
             direction = FocusMoveDirection::BACKWARD;
-            break;
+            return true;
         case WEB_NEXT:
             direction = FocusMoveDirection::FORWARD;
-            break;
+            return true;
         default:
-            break;
+            return false;
     }
-    if (direction == -1 && mode == -1) {
+}
+
+bool JsAccessibilityManager::DumpElementInfosIfNeed(const DumpInfoArgument& argument,
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern, uint32_t windowId)
+{
+    int32_t direction = -1;
+    int32_t mode = -1;
+    if (!GetWebDumpQueryType(argument.webAccFun, mode, direction)) {
         return true;
     }
 
@@ -5221,8 +5429,15 @@ bool JsAccessibilityManager::DumpElementInfosIfNeed(const DumpInfoArgument& argu
     if (mode != -1) {
         SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
     } else if (direction != -1) {
-        WebFocusMoveSearchNG(elementId, direction, nodeInfo, pipeline, webPattern);
-        WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, pipeline);
+        if (argument.focusMoveRule == -1) {
+            WebFocusMoveSearchNG(elementId, direction, nodeInfo, pipeline, webPattern);
+            auto result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
+            WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, pipeline, result);
+        } else {
+            auto result = WebFocusMoveSearchWithConditionNG(
+                elementId, direction, argument.focusMoveRule, nodeInfo, pipeline, webPattern);
+            WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, pipeline, result, argument.focusMoveRule);
+        }
         infos.push_back(nodeInfo);
     }
 
@@ -5391,33 +5606,26 @@ void JsAccessibilityManager::ChooseWebDumpEvent(DumpInfoArgument& argument, uint
 bool JsAccessibilityManager::DumpWebInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
-        if ((*arg == "-webAccId" || *arg == "-webAccFun") && (arg + 1 == params.end())) {
+        if (IsWebDumpParamKey(*arg) && (arg + 1 == params.end())) {
             return false;
-        } else if (*arg == "-webAccId" && ++arg != params.end()) {
-            argument.mode = DumpMode::WEB_ACC_DUMP;
-            argument.webAccId = StringUtils::StringToLongInt(*arg);
-        } else if (*arg == "-webAccFun" && ++arg != params.end()) {
-            argument.mode = DumpMode::WEB_ACC_DUMP;
-            argument.webAccFun = *arg;
-            if (argument.webAccFun != "exeAction" && argument.webAccFun != "sendEvent" &&
-                argument.webAccFun != "hover") {
-                continue;
-            }
-            if (++arg == params.end()) {
+        }
+        if (*arg == WEB_ACC_ID_PARAM) {
+            if (!ParseWebAccIdParam(arg, params.end(), argument)) {
                 return false;
             }
-            if (argument.webAccFun == "hover" && arg + 1 == params.end()) {
-                return false;
-            }
-            if (argument.webAccFun == "exeAction") {
-                argument.action = StringUtils::StringToInt(*arg);
-            } else if (argument.webAccFun == "sendEvent") {
-                argument.eventId = StringUtils::StringToInt(*arg);
-            } else if (argument.webAccFun == "hover") {
-                argument.pointX = StringUtils::StringToInt(*arg);
-                ++arg;
-                argument.pointY = StringUtils::StringToInt(*arg);
-            }
+            continue;
+        }
+        if (*arg != WEB_ACC_FUN_PARAM) {
+            continue;
+        }
+        if (!ParseWebAccFunParam(arg, params.end(), argument)) {
+            return false;
+        }
+        if (ParseWebFocusMoveDumpParam(arg, params.end(), argument)) {
+            return true;
+        }
+        if (!ParseWebActionDumpParam(arg, params.end(), argument)) {
+            return false;
         }
     }
     return true;
@@ -6126,18 +6334,56 @@ void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearchWithConditi
     const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
-    std::list<AccessibilityElementInfo> infos;
-    Accessibility::AccessibilityElementInfo elementInfo;
-    elementInfo.SetValidElement(false);
-    infos.emplace_back(elementInfo);
-    FocusMoveResult result = {
-        .resultType = FocusMoveResultType::NOT_SUPPORT,
-        .nowLevelBelongTreeId = -1,
-        .parentWindowId = 0,
-        .changeToNewInfo = false,
-        .needTerminate = true,
-    };
-    callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        info.GetAccessibilityId(), splitElementId, splitTreeId);
+
+    auto jsAccessibilityManager = GetHandler().Upgrade();
+    if (!jsAccessibilityManager) {
+        SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::SEARCH_FAIL, requestId);
+        return;
+    }
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    if (!context) {
+        SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::SEARCH_FAIL, requestId);
+        return;
+    }
+    auto web = webPattern_;
+    context->GetTaskExecutor()->PostTask(
+        [weak = GetHandler(), splitElementId, param, requestId, &callback, web] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            if (!jsAccessibilityManager) {
+                SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::SEARCH_FAIL, requestId);
+                return;
+            }
+            auto webPattern = web.Upgrade();
+            if (!webPattern) {
+                SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::SEARCH_FAIL, requestId);
+                return;
+            }
+            ACE_SCOPED_TRACE("WebFocusMoveSearchWithCondition");
+            jsAccessibilityManager->WebFocusMoveSearchWithCondition(
+                splitElementId, param, requestId, callback, webPattern);
+        },
+        TaskExecutor::TaskType::UI, "ArkWebFocusMoveSearchWithCondition");
+}
+
+void JsAccessibilityManager::WebInteractionOperation::UpdateCustomAccessibilityProperty(
+    const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::WebInteractionOperation::AddAccessibilityVirtualNode(
+    const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::WebInteractionOperation::RemoveAccessibilityVirtualNode(
+    const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
 }
 
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
@@ -7680,7 +7926,8 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
     }
 
     WebFocusMoveSearchNG(elementId, direction, nodeInfo, context, webPattern);
-    WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context);
+    auto result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
+    WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context, result);
     TAG_LOGD(AceLogTag::ACE_WEB,
         "JsAccessibilityManager WebFocusMoveSearch AccessibilityId: %{public}" PRId64
         ", ComponentType: %{public}s, ParentNodeId: %{public}" PRId64
@@ -7695,12 +7942,14 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
 }
 
 void JsAccessibilityManager::WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo,
-    const RefPtr<NG::WebPattern>& webPattern, const int32_t direction, RefPtr<PipelineBase> context)
+    const RefPtr<NG::WebPattern>& webPattern, const int32_t direction, RefPtr<PipelineBase> context,
+    FocusMoveResult& result, int32_t focusRuleType)
 {
     if (!IsTagInEmbedComponent(nodeInfo.GetComponentType())) {
         return;
     }
     int64_t accessibilityId = nodeInfo.GetAccessibilityId();
+    result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL);
     CHECK_NULL_VOID(webPattern);
     std::shared_ptr<NG::TransitionalNodeInfo> transitionalNodeInfo =
         webPattern->GetTransitionalNodeById(accessibilityId);
@@ -7712,17 +7961,17 @@ void JsAccessibilityManager::WebFocusMoveSearchByComponent(AccessibilityElementI
     std::list<AccessibilityElementInfo> embedNodeTreeInfo;
     int32_t windowId = nodeInfo.GetWindowId();
     SearchSurfaceIdRet searchSurfaceIdRet = SearchSurfaceIdRet::NO_MATCH_NODE;
-    if (direction == FocusMoveDirection::FORWARD) {
-        searchSurfaceIdRet =
-            SearchElementInfoBySurfaceId(surfaceId, windowId, SearchSurfaceIdType::SEARCH_HEAD, embedNodeTreeInfo);
-    } else if (direction == FocusMoveDirection::BACKWARD) {
-        searchSurfaceIdRet =
-            SearchElementInfoBySurfaceId(surfaceId, windowId, SearchSurfaceIdType::SEARCH_TAIL, embedNodeTreeInfo);
+    SearchSurfaceIdType searchType = SearchSurfaceIdType::SEARCH_ALL;
+    if (GetWebComponentSearchSurfaceIdType(direction, focusRuleType, searchType)) {
+        searchSurfaceIdRet = SearchElementInfoBySurfaceId(surfaceId, windowId, searchType, embedNodeTreeInfo);
     }
     if (searchSurfaceIdRet != SearchSurfaceIdRet::SEARCH_SUCCESS || embedNodeTreeInfo.empty()) {
-        WebFocusMoveSearchNG(accessibilityId, direction, nodeInfo, context, webPattern);
+        result = WebFocusMoveSearchWithConditionNG(
+            accessibilityId, direction, focusRuleType, nodeInfo, context, webPattern);
+        WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context, result, focusRuleType);
     } else {
         nodeInfo = embedNodeTreeInfo.front();
+        result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
     }
 }
 
@@ -7759,6 +8008,102 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
             UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
         }
     }
+}
+
+void JsAccessibilityManager::WebFocusMoveSearchWithCondition(const int64_t elementId,
+    const Accessibility::AccessibilityFocusMoveParam& param, const int32_t requestId,
+    Accessibility::AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern)
+{
+    AccessibilityElementInfo nodeInfo;
+    CHECK_NULL_VOID(webPattern);
+    auto frameNode = webPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    uint32_t realWindowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
+    auto context = GetPipelineByWindowId(realWindowId);
+    if (!context) {
+        SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::SEARCH_FAIL, requestId);
+        return;
+    }
+
+    if (!IsWebFocusRuleTypeSupported(param.type)) {
+        SetWebFocusMoveSearchWithConditionFailResult(callback, FocusMoveResultType::NOT_SUPPORT, requestId);
+        return;
+    }
+
+    auto result = WebFocusMoveSearchWithConditionNG(
+        elementId, param.direction, static_cast<int32_t>(param.type), nodeInfo, context, webPattern);
+    WebFocusMoveSearchByComponent(
+        nodeInfo, webPattern, param.direction, context, result, static_cast<int32_t>(param.type));
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "JsAccessibilityManager WebFocusMoveSearchWithCondition AccessibilityId: %{public}" PRId64
+        ", ComponentType: %{public}s, ParentNodeId: %{public}" PRId64
+        ", TreeId: %{public}d, WindowId: %{public}d, ParentWindowId: %{public}d"
+        ", requestId: %{public}d, focusRuleType: %{public}d",
+        nodeInfo.GetAccessibilityId(),
+        nodeInfo.GetComponentType().c_str(),
+        nodeInfo.GetParentNodeId(),
+        nodeInfo.GetBelongTreeId(),
+        nodeInfo.GetWindowId(),
+        nodeInfo.GetParentWindowId(),
+        requestId,
+        static_cast<int32_t>(param.type));
+    if (IsRegister()) {
+        UpdateElementInfoTreeId(nodeInfo);
+        std::list<AccessibilityElementInfo> infos = { nodeInfo };
+        callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
+    }
+}
+
+FocusMoveResult JsAccessibilityManager::WebFocusMoveSearchWithConditionNG(int64_t elementId,
+    int32_t direction, int32_t focusRuleType, Accessibility::AccessibilityElementInfo& info,
+    const RefPtr<PipelineBase>& context, const RefPtr<NG::WebPattern>& webPattern)
+{
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_RETURN(mainContext, BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL));
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL));
+    CHECK_NULL_RETURN(webPattern, BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL));
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_RETURN(webNode, BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL));
+    CommonProperty commonProperty;
+    GenerateCommonPropertyForWeb(ngPipeline, commonProperty, mainContext, webNode);
+
+    auto defaultNode = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
+    if (defaultNode && IsTagInEmbedComponent(defaultNode->GetComponentType())) {
+        UpdateWebAccessibilityElementInfo(defaultNode, commonProperty, info, webPattern);
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "WebFocusMoveSearchWithConditionNG default focus hit embed, accessibilityId: %{public}" PRId64
+            ", direction: %{public}d, focusRuleType: %{public}d, componentType: %{public}s",
+            info.GetAccessibilityId(), direction, focusRuleType, info.GetComponentType().c_str());
+        return BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
+    }
+
+    std::map<std::string, std::string> params;
+    auto node = webPattern->GetAccessibilityNodeByParams(elementId, direction, focusRuleType, params);
+    if (node) {
+        UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "WebFocusMoveSearchWithConditionNG params focus hit node, accessibilityId: %{public}" PRId64
+            ", direction: %{public}d, focusRuleType: %{public}d, componentType: %{public}s",
+            info.GetAccessibilityId(), direction, focusRuleType, info.GetComponentType().c_str());
+        return BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
+    }
+
+    int64_t webId = webNode->GetAccessibilityId();
+    int32_t mode = 0;
+    std::list<AccessibilityElementInfo> infos;
+    SearchElementInfoByAccessibilityIdNG(webId, mode, infos, context, NG::UI_EXTENSION_OFFSET_MAX);
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "JsAccessibilityManager WebFocusMoveSearchWithConditionNG infos.size: %{public}zu, webId:  %{public}" PRId64,
+        infos.size(), webId);
+    if (!infos.empty()) {
+        info = infos.front();
+    } else {
+        UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+    }
+    return BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL);
 }
 
 bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
@@ -8461,8 +8806,8 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
 {
     HILOG_INFO_FOCUS(
         "focus move search with condition %{public}" PRId64 ", "
-        "direction: %{public}d, condition %{public}d parentId %{public}" PRId64 ", requestId %{public}d",
-        info.GetAccessibilityId(), param.direction, param.condition, param.parentId, requestId);
+        "direction: %{public}d, condition %{public}d, focusRuleType %{public}d, parentId %{public}" PRId64 ", requestId %{public}d",
+        info.GetAccessibilityId(), param.direction, param.condition, param.type, param.parentId, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     std::list<AccessibilityElementInfo> infos;
     FocusMoveResult errorResult = {
@@ -8502,6 +8847,23 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
             jsAccessibilityManager->FocusMoveSearchWithCondition(elementInfo, param, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityFocusMoveSearchWithCondition");
+}
+
+void JsAccessibilityManager::JsInteractionOperation::UpdateCustomAccessibilityProperty(
+    const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::JsInteractionOperation::AddAccessibilityVirtualNode(
+    const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::JsInteractionOperation::RemoveAccessibilityVirtualNode(
+    const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
 }
 
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)

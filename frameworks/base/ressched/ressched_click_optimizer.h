@@ -51,10 +51,10 @@ public:
         depth_ = std::clamp(value, 0, MAX_DEPTH);
     }
 
-private:
-    static void GetComponentTextRecursive(
-        const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain);
+    static void GetComponentTextRecursive(const WeakPtr<NG::FrameNode> weakNode, std::string& text,
+        const int32_t remain, const int32_t maxNodes = INT_MAX);
 
+private:
     bool isInit_ = false;
     std::atomic_bool clickExtEnabled_ = false;
     std::atomic<int32_t> depth_ = DEFAULT_DEPTH;

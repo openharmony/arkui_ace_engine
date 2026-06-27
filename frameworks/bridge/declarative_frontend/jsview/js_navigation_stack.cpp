@@ -1523,6 +1523,9 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
+        navPathInfo->SetProperty<std::string>("ohmUrl", navdestinationsInfo[index].fileName.c_str());
+        navPathInfo->SetProperty<std::string>("moduleName", navdestinationsInfo[index].moduleName.c_str());
+        navPathInfo->SetProperty<std::string>("autoCleanedState", navdestinationsInfo[index].state);
         newPathArray->SetValueAt(index, navPathInfo);
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
@@ -1608,6 +1611,17 @@ bool JSNavigationStack::IsAutoCleaned(int32_t index) const
     return autoCleaned->IsBoolean() && autoCleaned->ToBoolean();
 }
 
+bool JSNavigationStack::GetAutoCleanedCanRecovery(int32_t index) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto canRecovery = pathInfo->GetProperty("canRecovery");
+    return canRecovery->IsBoolean() ? canRecovery->ToBoolean() : true;
+}
+
 void JSNavigationStack::ClearAutoCleanedState(int32_t index)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
@@ -1617,6 +1631,7 @@ void JSNavigationStack::ClearAutoCleanedState(int32_t index)
     }
     pathInfo->SetPropertyObject("autoCleaned", JsiValue::Undefined());
     pathInfo->SetPropertyObject("autoCleanedState", JsiValue::Undefined());
+    pathInfo->SetPropertyObject("canRecovery", JsiValue::Undefined());
 }
 
 std::string JSNavigationStack::GetAutoCleanedState(int32_t index) const
@@ -1630,7 +1645,7 @@ std::string JSNavigationStack::GetAutoCleanedState(int32_t index) const
     return state->IsString() ? state->ToString() : "";
 }
 
-void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId)
+void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
 
@@ -1648,6 +1663,7 @@ void JSNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId)
         auto navDestinationIdValue = info->GetProperty("navDestinationId");
         if (navDestinationIdValue->IsString() && navDestinationIdValue->ToString() == id) {
             info->SetProperty<bool>("autoCleaned", true);
+            info->SetProperty<bool>("canRecovery", canRecovery);
             return;
         }
     }
@@ -1934,5 +1950,49 @@ bool JSNavigationStack::IsPushOperation()
     auto func = JSRef<JSFunc>::Cast(indexes);
     auto result = func->Call(dataSourceObj_, {});
     return result->ToBoolean();
+}
+
+bool JSNavigationStack::GetOhmUrl(const RefPtr<NG::UINode>& customNode, std::string& moduleName, std::string& fileName)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto targetCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode);
+    CHECK_NULL_RETURN(targetCustomNode, false);
+    auto thisObjTmp = targetCustomNode->FireThisFunc();
+    CHECK_NULL_RETURN(thisObjTmp, false);
+    auto thisVal = (JSRef<JSObject>*)(thisObjTmp);
+    CHECK_NULL_RETURN(thisVal, false);
+    JSRef<JSObject> thisObj = *(thisVal);
+    auto constructor = thisObj->GetProperty("constructor");
+    if (constructor->IsUndefined()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination file custom node is undefined");
+        return false;
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    return res;
+}
+
+bool JSNavigationStack::CreateNodeFromRecovery(int32_t index, const WeakPtr<NG::UINode>& customNode,
+    RefPtr<NG::UINode>& node)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "recover page(%{public}d) failed", index);
+        return false;
+    }
+    auto ohmUrl = pathInfo->GetPropertyValue<std::string>("ohmUrl", "");
+    auto moduleName = pathInfo->GetPropertyValue<std::string>("moduleName", "");
+    if (ohmUrl.empty() || moduleName.empty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reovery page ohmUrl or moduleName is empty");
+        return false;
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    if (runtime->LoadDestinationFile("", moduleName, ohmUrl, true) != 0) {
+        return false;
+    }
+    return CreateNodeByIndex(index, customNode, node);
 }
 } // namespace OHOS::Ace::Framework

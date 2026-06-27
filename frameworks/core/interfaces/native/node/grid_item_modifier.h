@@ -15,14 +15,13 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H
 
+#include "core/components_ng/pattern/grid/bridge/griditem/grid_item_utils_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier();
 const CJUIGridItemModifier* GetCJUIGridItemModifier();
-
-void SetOnGridItemSelect(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemSelect(ArkUINodeHandle node);
+const NG::GridItemCustomModifier* GetGridItemCustomModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H

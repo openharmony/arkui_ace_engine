@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <iterator>
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"

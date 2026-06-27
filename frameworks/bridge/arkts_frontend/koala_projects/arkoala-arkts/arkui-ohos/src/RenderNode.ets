@@ -334,7 +334,7 @@ export class RenderNode implements MaterializedBase {
         }
         const blurValueCast = blurValue as (BackgroundBlur)
         let radius = blurValueCast.radius
-        if (radius < 0) {
+        if (radius < 0 || !Number.isFinite(radius)) {
             radius = 0
         }
         const grayscale = blurValueCast.grayscale
@@ -362,7 +362,7 @@ export class RenderNode implements MaterializedBase {
         }
         const blurValueCast = blurValue as (ContentBlur)
         let radius = blurValueCast.radius
-        if (radius < 0) {
+        if (radius < 0 || !Number.isFinite(radius)) {
             radius = 0
         }
         const grayscale = blurValueCast.grayscale
@@ -390,7 +390,7 @@ export class RenderNode implements MaterializedBase {
         }
         const blurValueCast = blurValue as (ForegroundBlur)
         let radius = blurValueCast.radius
-        if (radius < 0) {
+        if (radius < 0 || !Number.isFinite(radius)) {
             radius = 0
         }
         this.foregroundBlurValue = { radius: radius }

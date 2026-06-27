@@ -21,8 +21,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;

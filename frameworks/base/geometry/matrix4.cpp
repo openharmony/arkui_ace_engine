@@ -14,6 +14,10 @@
  */
 
 #include "base/geometry/matrix4.h"
+
+#include <algorithm>
+
+#include "base/geometry/point.h"
 #include "core/pipeline/base/constants.h"
 
 #if defined(__aarch64__) && defined(__ARM_NEON)
@@ -469,6 +473,27 @@ double Matrix4::operator[](int32_t index) const
     return matrix4x4_[row][col];
 }
 
+double Matrix4::Get(int32_t row, int32_t col) const
+{
+    ACE_DCHECK((unsigned)row < DIMENSION);
+    ACE_DCHECK((unsigned)col < DIMENSION);
+    return matrix4x4_[col][row];
+}
+
+void Matrix4::Set(int32_t row, int32_t col, double value)
+{
+    ACE_DCHECK((unsigned)row < DIMENSION);
+    ACE_DCHECK((unsigned)col < DIMENSION);
+    matrix4x4_[col][row] = value;
+}
+
+void Matrix4::MapScalars(double vec[DIMENSION], int length) const
+{
+    if (length == DIMENSION) {
+        this->MapScalars(vec, vec);
+    }
+}
+
 double Matrix4::operator()(int32_t row, int32_t col) const
 {
     // Caller guarantee row and col in range of [0, 3].
@@ -561,6 +586,29 @@ Matrix4N::Matrix4N(int32_t columns) : columns_(columns)
     matrix4n_.resize(DIMENSION, std::vector<double>(columns_, 0));
 }
 
+Matrix4N& Matrix4N::operator*(double num)
+{
+    for (auto& vector : matrix4n_) {
+        std::for_each(vector.begin(), vector.end(), [num](auto& item) { item = item * num; });
+    }
+    return *this;
+}
+
+std::vector<double>& Matrix4N::operator[](int32_t index)
+{
+    return matrix4n_[index];
+}
+
+const std::vector<double>& Matrix4N::operator[](int32_t index) const
+{
+    return matrix4n_[index];
+}
+
+double Matrix4N::operator()(int32_t row, int32_t col) const
+{
+    return matrix4n_[row][col];
+}
+
 bool Matrix4N::SetEntry(int32_t row, int32_t col, double value)
 {
     if (row < 0 || row >= DIMENSION || col < 0 || col >= columns_) {
@@ -634,6 +682,29 @@ bool Matrix4N::MapScalars(const std::vector<double>& src, std::vector<double>& r
 MatrixN4::MatrixN4(int32_t rows) : rows_(rows)
 {
     matrixn4_.resize(rows, std::vector<double>(DIMENSION, 0));
+}
+
+MatrixN4& MatrixN4::operator*(double num)
+{
+    for (auto& vector : matrixn4_) {
+        std::for_each(vector.begin(), vector.end(), [num](auto& item) { item = item * num; });
+    }
+    return *this;
+}
+
+std::vector<double>& MatrixN4::operator[](int32_t index)
+{
+    return matrixn4_[index];
+}
+
+const std::vector<double>& MatrixN4::operator[](int32_t index) const
+{
+    return matrixn4_[index];
+}
+
+double MatrixN4::operator()(int32_t row, int32_t col) const
+{
+    return matrixn4_[row][col];
 }
 
 bool MatrixN4::SetEntry(int32_t row, int32_t col, double value)

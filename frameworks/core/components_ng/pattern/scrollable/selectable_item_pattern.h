@@ -21,12 +21,12 @@
 namespace OHOS::Ace::NG {
 class InputEvent;
 class TouchEventImpl;
-class SelectableItemPattern : public virtual Pattern {
+class ACE_FORCE_EXPORT SelectableItemPattern : public virtual Pattern {
     DECLARE_ACE_TYPE(SelectableItemPattern, Pattern);
 
 public:
     SelectableItemPattern() = default;
-    ~SelectableItemPattern() override = default;
+    ACE_FORCE_EXPORT ~SelectableItemPattern() override = default;
 
     bool IsSelected() const
     {
@@ -58,8 +58,8 @@ public:
         return isPressed_;
     }
 
-    void SetEditModeEnabled(bool enabled);
-    void SyncCheckBoxFromItem();
+    ACE_FORCE_EXPORT void SetEditModeEnabled(bool enabled);
+    ACE_FORCE_EXPORT void SyncCheckBoxFromItem();
     virtual void MarkIsSelectedWithoutCheckbox(bool isSelected) {}
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
@@ -68,7 +68,7 @@ public:
         return false;
     }
 
-    void BeforeCreateLayoutWrapper() override;
+    ACE_FORCE_EXPORT void BeforeCreateLayoutWrapper() override;
 
 protected:
     bool isSelected_ = false;
@@ -79,7 +79,7 @@ protected:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<FrameNode> editModeCheckBoxNode_;
 
-    virtual void UpdateEditModeCheckBoxPosition();
+    ACE_FORCE_EXPORT virtual void UpdateEditModeCheckBoxPosition();
 
 private:
     void CreateEditModeCheckBox();

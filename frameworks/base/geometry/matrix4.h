@@ -16,12 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_MATRIX4_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_MATRIX4_H
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
-#include "base/geometry/point.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
+class Point;
 class Matrix4N;
 class MatrixN4;
 
@@ -83,27 +86,12 @@ public:
     Point operator*(const Point& point);
     Matrix4& operator=(const Matrix4& matrix);
     double operator[](int32_t index) const;
-    inline double Get(int32_t row, int32_t col) const
-    {
-        ACE_DCHECK((unsigned)row < DIMENSION);
-        ACE_DCHECK((unsigned)col < DIMENSION);
-        return matrix4x4_[col][row];
-    }
-    inline void Set(int32_t row, int32_t col, double value)
-    {
-        ACE_DCHECK((unsigned)row < DIMENSION);
-        ACE_DCHECK((unsigned)col < DIMENSION);
-        matrix4x4_[col][row] = value;
-    }
+    double Get(int32_t row, int32_t col) const;
+    void Set(int32_t row, int32_t col, double value);
     double Determinant() const;
     void Transpose();
     void MapScalars(const double src[DIMENSION], double dst[DIMENSION]) const;
-    inline void MapScalars(double vec[DIMENSION], int length = DIMENSION) const
-    {
-        if (length == DIMENSION) {
-            this->MapScalars(vec, vec);
-        }
-    }
+    void MapScalars(double vec[DIMENSION], int length = DIMENSION) const;
     std::string ToString() const;
     void CopyMatrix(double (&matrix)[4][4]);
 
@@ -134,34 +122,15 @@ public:
 
     bool SetEntry(int32_t row, int32_t col, double value);
 
-    inline Matrix4N& operator*(double num)
-    {
-        for (auto& vector : matrix4n_) {
-            std::for_each(vector.begin(), vector.end(), [num](auto& item) { item = item * num; });
-        }
-        return *this;
-    }
+    Matrix4N& operator*(double num);
 
     // Make sure that the rows of matrixN4 is equal than the columns of matrix4N.
     Matrix4 operator*(const MatrixN4& matrix) const;
 
-    // Make sure that the value of index is less than 4.
-    inline std::vector<double>& operator[](int32_t index)
-    {
-        return matrix4n_[index];
-    }
+    std::vector<double>& operator[](int32_t index);
+    const std::vector<double>& operator[](int32_t index) const;
 
-        // Make sure that the value of index is less than 4.
-    inline const std::vector<double>& operator[](int32_t index) const
-    {
-        return matrix4n_[index];
-    }
-
-    // Make sure that the value of row is less than 4 and col is less than columns.
-    inline double operator()(int32_t row, int32_t col) const
-    {
-        return matrix4n_[row][col];
-    }
+    double operator()(int32_t row, int32_t col) const;
 
     MatrixN4 Transpose() const;
 
@@ -198,31 +167,11 @@ public:
 
     bool SetEntry(int32_t row, int32_t col, double value);
 
-    inline MatrixN4& operator*(double num)
-    {
-        for (auto& vector : matrixn4_) {
-            std::for_each(vector.begin(), vector.end(), [num](auto& item) { item = item * num; });
-        }
-        return *this;
-    }
+    MatrixN4& operator*(double num);
 
-    // Make sure that the value of index is less than rows.
-    inline std::vector<double>& operator[](int32_t index)
-    {
-        return matrixn4_[index];
-    }
-
-    // Make sure that the value of index is less than rows.
-    inline const std::vector<double>& operator[](int32_t index) const
-    {
-        return matrixn4_[index];
-    }
-
-    // Make sure that the value of row is less than rows and col is less than 4.
-    inline double operator()(int32_t row, int32_t col) const
-    {
-        return matrixn4_[row][col];
-    }
+    std::vector<double>& operator[](int32_t index);
+    const std::vector<double>& operator[](int32_t index) const;
+    double operator()(int32_t row, int32_t col) const;
 
     Matrix4N Transpose() const;
 

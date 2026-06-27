@@ -161,7 +161,7 @@ HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_FromFrameNo
     ASSERT_NE(context_, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
-    frameNode->AttachToMainTree(context_);
+    frameNode->AttachToMainTree(false, AceType::RawPtr(context_));
 
     int callbackCount = 0;
     void* receivedData = nullptr;
@@ -210,7 +210,7 @@ HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_NoCallback0
     ASSERT_NE(context_, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("test", 2, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
-    frameNode->AttachToMainTree(context_);
+    frameNode->AttachToMainTree(false, AceType::RawPtr(context_));
 
     auto* nodeContext = frameNode->GetContext();
     ASSERT_NE(nodeContext, nullptr);

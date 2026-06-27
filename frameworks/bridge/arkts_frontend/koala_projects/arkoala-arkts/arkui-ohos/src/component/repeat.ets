@@ -26,6 +26,11 @@ export interface RepeatItem<T> {
     readonly index: int32;
 }
 
+export enum RepeatMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1,
+  }
+
 export type RepeatArray<T> = Array<T> | ReadonlyArray<T> | Readonly<Array<T>>;
 export type RepeatItemBuilder<T> =
     /** @memo */
@@ -38,6 +43,7 @@ export interface VirtualScrollOptions {
     onLazyLoading?: (index: int32) => void;
     onTotalCount?: () => int32;
     disableVirtualScroll?: boolean;
+    memoryOptimizationStrategy?: RepeatMemOptStrategy;
 }
 
 export interface TemplateOptions {

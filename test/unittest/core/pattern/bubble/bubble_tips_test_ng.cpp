@@ -78,6 +78,9 @@ constexpr float BUBBLE_HEIGHT = 50.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF WRAPPER_SIZE = { 1000.0f, 1000.0f };
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
+// Button number constants matching those in bubble_view.cpp
+constexpr int32_t PRIMARY_BUTTON_NUMBER = 1;
+constexpr int32_t SECONDARY_BUTTON_NUMBER = 2;
 } // namespace
 class BubbleTipsTestNg : public testing::Test {
 public:
@@ -879,51 +882,6 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: FitMouseOffset001
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const double offset = 10.0;
-    const double size = 20.0;
-    const int32_t parentId = 1;
-    const Rect subWindow(offset, offset, size, size);
-    const OffsetF targetPosition(75.0, 75.0);
-    RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
-    auto containerId = pipelineContext->GetInstanceId();
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = true;
-    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    SubwindowManager::GetInstance()->parentContainerMap_[MockContainer::CurrentId()] = parentId;
-    AceEngine::Get().AddContainer(parentId, AceType::MakeRefPtr<MockContainer>());
-    auto parentContainer = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(parentId));
-    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    EXPECT_CALL(*parentContainer, GetGlobalScaledRect()).WillOnce(Return(subWindow));
-    layoutAlgorithm->targetOffset_ = OffsetF((offset + size) * HALF, (offset + size) * HALF);
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = false;
-}
-
-/**
  * @tc.name: FitMouseOffset002
  * @tc.desc: Test FitMouseOffset.
  * @tc.type: FUNC
@@ -1190,4 +1148,148 @@ HWTEST_F(BubbleTipsTestNg, PopBubble003, TestSize.Level0)
     EXPECT_EQ(bubbleLayoutAlgorithm->showArrow_, false);
     pipeline->designWidthScale_ = designWidthScale;
 }
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowEnabled001
+ * @tc.desc: Test BubbleView::CreateButton with enablePopupFlexGrow enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowEnabled001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. set enablePopupFlexGrow to 1 (enabled).
+     */
+    popupTheme->enablePopupFlexGrow_ = 1;
+
+    /**
+     * @tc.steps: step2. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step3. create a button with button properties.
+     */
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step4. create button using BubbleView::CreateButton.
+     */
+    auto buttonNode = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode);
+
+    /**
+     * @tc.steps: step5. verify button has flexGrow set to 1.0f.
+     * @tc.expected: step5. button layout property should have flexGrow as 1.0f.
+     */
+    auto buttonLayoutProp = buttonNode->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp, nullptr);
+    const auto& property = buttonLayoutProp->GetFlexItemProperty();
+    ASSERT_NE(property, nullptr);
+    auto flexGrow = property->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow.value_or(0.0f), 1.0f);
+}
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowDisabled001
+ * @tc.desc: Test BubbleView::CreateButton with enablePopupFlexGrow disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowDisabled001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. set enablePopupFlexGrow to 0 (disabled).
+     */
+    popupTheme->enablePopupFlexGrow_ = 0;
+
+    /**
+     * @tc.steps: step2. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step3. create a button with button properties.
+     */
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step4. create button using BubbleView::CreateButton.
+     */
+    auto buttonNode = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode);
+
+    /**
+     * @tc.steps: step5. verify button does not have flexGrow set.
+     * @tc.expected: step5. button layout property should have flexGrow as default (0.0f).
+     */
+    auto buttonLayoutProp = buttonNode->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp, nullptr);
+    const auto& property = buttonLayoutProp->GetFlexItemProperty();
+    ASSERT_NE(property, nullptr);
+    auto flexGrow = property->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow.value_or(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowToggle001
+ * @tc.desc: Test BubbleView::CreateButton toggling enablePopupFlexGrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowToggle001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step2. test with enablePopupFlexGrow disabled (0).
+     */
+    popupTheme->enablePopupFlexGrow_ = 0;
+    auto buttonNode1 = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode1);
+    auto buttonLayoutProp1 = buttonNode1->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp1, nullptr);
+    const auto& property1 = buttonLayoutProp1->GetFlexItemProperty();
+    ASSERT_NE(property1, nullptr);
+    auto flexGrow1 = property1->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow1.value_or(0.0f), 0.0f);
+
+    /**
+     * @tc.steps: step3. test with enablePopupFlexGrow enabled (1).
+     */
+    popupTheme->enablePopupFlexGrow_ = 1;
+    auto buttonNode2 = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        SECONDARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode2);
+    auto buttonLayoutProp2 = buttonNode2->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp2, nullptr);
+    const auto& property2 = buttonLayoutProp2->GetFlexItemProperty();
+    ASSERT_NE(property2, nullptr);
+    auto flexGrow2 = property2->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow2.value_or(0.0f), 1.0f);
+}
+
 } // namespace OHOS::Ace::NG

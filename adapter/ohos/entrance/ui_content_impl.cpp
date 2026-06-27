@@ -647,6 +647,9 @@ void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
     if (type != WindowChangeType::RECT_CHANGE) {
         overlay->HideAllMenusWithoutAnimation(false);
         overlay->HideAllPopupsWithoutAnimation();
+        if (container->IsSubContainer()) {
+            SubwindowManager::GetInstance()->HideSubWindowNG(instanceId);
+        }
     }
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
@@ -1589,7 +1592,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
-        } else {
+        }
+        // Initialize DC components from the context to avoid temporary dark-mode updates
+        // on the main thread affecting their initialization.
+        if (resourceManager == nullptr || uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             auto config = context->GetConfiguration();
             if (config) {
                 auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
@@ -2987,6 +2993,36 @@ void UIContentImpl::Background()
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
 }
 
+void UIContentImpl::NotifyWindowAttachStateChange(bool status)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGW("Fail to NotifyWindowAttachStateChange for invalid %{public}d", instanceId_);
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        pipelineContext->NotifyWindowAttachStateChange(status);
+    } else {
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, status]() {
+                ContainerScope scope(instanceId);
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                auto pipelineContext = container->GetPipelineContext();
+                if (!pipelineContext) {
+                    LOGW("Fail to NotifyWindowAttachStateChange for invalid %{public}d", instanceId);
+                    return;
+                }
+                pipelineContext->NotifyWindowAttachStateChange(status);
+            },
+            TaskExecutor::TaskType::UI, "NotifyWindowAttachStateChange");
+    }
+}
+
 // Posts a task to UI thread to register/unregister the instance for pre-freeze flush.
 // Uses ContainerScope to ensure correct engine context and WillRunOnCurrentThread optimization.
 void UIContentImpl::PostPreFreezeRegisterTask(bool needRegister)
@@ -4084,6 +4120,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto updateForceSplitRuntimeConfigTask =
+        [weakContext = WeakPtr(context), config = config.GetForceSplitDisplayConfig()]() {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->SetForceSplitEnable(config.enableForceSplit, config.mode);
+    };
     auto updateforceSplitTask = [weakContext = WeakPtr(context)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -4126,11 +4170,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateForceSplitRuntimeConfigTask();
         updateforceSplitTask();
         updateDensityTask(); // ensure density has been updated before load first page
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
+        taskExecutor->PostTask(std::move(updateForceSplitRuntimeConfigTask),
+            TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplitRuntimeConfigTask");
         taskExecutor->PostTask(
             std::move(updateforceSplitTask), TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplit");
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
@@ -5857,32 +5904,6 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport)
-{
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-             "UIContent SetForceSplitEnable isForceSplit:%{public}d mode:%{public}d needUpdateViewport:%{public}d",
-             isForceSplit, static_cast<int32_t>(mode), needUpdateViewport);
-    ContainerScope scope(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, mode, needUpdateViewport]() {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto forceSplitMgr = context->GetForceSplitManager();
-        CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, mode, needUpdateViewport);
-    };
-    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
-        forceSplitTask();
-        return;
-    }
-    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
-}
-
 void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig)
 {
     ContainerScope scope(instanceId_);
@@ -5910,6 +5931,11 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& s
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
     }
+    /**
+     * As long as the application supports force split, regardless of whether it is enabled or not,
+     * the SetForceSplitEnable interface will be called.
+     */
+    forceSplitMgr->SetForceSplitSupported(true);
     NG::ForceSplitUtils::LogForceSplitParam(splitConfig->isRouter, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     forceSplitMgr->SetIsRouter(splitConfig->isRouter);

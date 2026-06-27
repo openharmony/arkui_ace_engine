@@ -172,6 +172,7 @@ private:
      * @brief Translate totalDelta into AdjustOffset. Prefer end-anchor when valid, else start-anchor.
      */
     void UpdateAdjustOffset(const PrevFrameSnapshot& prevFrameSnapshot);
+    bool ShouldKeepStartBoundaryOnFrontInsert(const PrevFrameSnapshot& prevFrameSnapshot) const;
     bool TryUpdateEndAnchorAdjust(const PrevFrameSnapshot& prevFrameSnapshot, float totalDelta);
     void UpdateStartAnchorAdjust(const PrevFrameSnapshot& prevFrameSnapshot);
     void UpdateVisibleAdjustOffset(float totalDelta);
@@ -222,6 +223,8 @@ private:
     float viewEnd_ = Infinity<float>();
     float viewExtStart_ = 0.0f;
     float viewExtEnd_ = 0.0f;
+    // START reference relative to the parent viewport start; >0 means visible content exists before this host.
+    float startReferenceViewportOffset_ = 0.0f;
     // Real viewport plus parent-provided viewExt. Kept separate from the half-screen cache window.
     float extendedViewStart_ = 0.0f;
     float extendedViewEnd_ = Infinity<float>();

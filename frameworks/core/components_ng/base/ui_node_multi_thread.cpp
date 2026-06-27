@@ -16,6 +16,7 @@
 #include "core/components_ng/base/ui_node.h"
 
 #include "core/common/multi_thread_build_manager.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 

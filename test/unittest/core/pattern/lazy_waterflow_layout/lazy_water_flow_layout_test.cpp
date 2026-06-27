@@ -159,7 +159,9 @@ RefPtr<ArkoalaLazyNode> CreateArkoalaContent(int32_t totalCount, int32_t* update
             if (updateRangeCount != nullptr) {
                 ++(*updateRangeCount);
             }
-        });
+        },
+        []() {},
+        [](int32_t) {});
     ViewStackProcessor::GetInstance()->Push(arkoalaNode);
     ViewStackProcessor::GetInstance()->Pop();
     return arkoalaNode;
@@ -1180,6 +1182,50 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, EndAnchorAdjustOffset_AnchorLocated_001, 
     EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.end, 50.0f);
     // adjustOffset_.start absorbs the residual totalDelta. totalDelta = 50, end took 50, start = 0.
     EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 0.0f);
+}
+
+/**
+ * @tc.name: StartReferenceViewportOffsetFrontInsertDoesNotExportStartAdjust_001
+ * @tc.desc: Front insert keeps the host boundary when the transformed pending anchor starts at the body origin
+ *           and START reference is inside the parent viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, StartReferenceViewportOffsetFrontInsertDoesNotExportStartAdjust_001,
+    TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->totalItemCount_ = 3;
+    layoutInfo->startIndex_ = 0;
+    layoutInfo->endIndex_ = 0;
+    layoutInfo->lanes_.resize(1);
+    layoutInfo->lanes_[0].startPos = 0.0f;
+    layoutInfo->lanes_[0].endPos = 100.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->idxToLane_[0] = 0;
+    layoutInfo->totalMainSize_ = 100.0f;
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+
+    layoutInfo->NotifyDataChange(0, 1);
+    EXPECT_TRUE(layoutInfo->hasDataChange_);
+    EXPECT_EQ(layoutInfo->newStartIndex_, 1);
+    EXPECT_EQ(layoutInfo->pendingAnchor_.startIndex, 1);
+    ASSERT_TRUE(layoutInfo->pendingAnchor_.startPos.has_value());
+
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 100.0f, .endPos = 200.0f });
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.referenceEdge_ = ReferenceEdge::START;
+    algorithm.startReferenceViewportOffset_ = 1.0f;
+    algorithm.totalMainSize_ = 200.0f;
+
+    auto prevFrameSnapshot = algorithm.CapturePrevFrameSnapshot();
+    EXPECT_TRUE(algorithm.ShouldKeepStartBoundaryOnFrontInsert(prevFrameSnapshot));
+
+    algorithm.UpdateAdjustOffset(prevFrameSnapshot);
+
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 0.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.end, 100.0f);
 }
 
 /**

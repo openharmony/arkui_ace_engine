@@ -214,7 +214,10 @@ struct SheetStyle {
     std::optional<ModalTransition> modalTransition;
     std::optional<RenderStrategy> radiusRenderStrategy;
     RefPtr<UiMaterial> systemMaterial;
+    RefPtr<UiMaterial> systemMaterialEC;
+    RefPtr<UiMaterial> systemMaterialECSub;
     std::optional<EdgeLightMode> sheetEdgeLightMode;
+    std::optional<bool> enableBlurSnapshot;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -225,8 +228,7 @@ struct SheetStyle {
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        return (sheetHeight == sheetStyle.sheetHeight &&
-                enableFloatingDragBar == sheetStyle.enableFloatingDragBar &&
+        return (sheetHeight == sheetStyle.sheetHeight && enableFloatingDragBar == sheetStyle.enableFloatingDragBar &&
                 showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
@@ -243,7 +245,8 @@ struct SheetStyle {
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
                 showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
                 radiusRenderStrategy == sheetStyle.radiusRenderStrategy &&
-                systemMaterial == sheetStyle.systemMaterial && sheetEdgeLightMode == sheetStyle.sheetEdgeLightMode);
+                systemMaterial == sheetStyle.systemMaterial && sheetEdgeLightMode == sheetStyle.sheetEdgeLightMode &&
+                enableBlurSnapshot == sheetStyle.enableBlurSnapshot);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -294,6 +297,8 @@ struct SheetStyle {
             sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
         systemMaterial = sheetStyle.systemMaterial ? sheetStyle.systemMaterial : systemMaterial;
         sheetEdgeLightMode = sheetStyle.sheetEdgeLightMode ? sheetStyle.sheetEdgeLightMode : sheetEdgeLightMode;
+        enableBlurSnapshot =
+            sheetStyle.enableBlurSnapshot.has_value() ? sheetStyle.enableBlurSnapshot : enableBlurSnapshot;
     }
 
     // Register the set/get method of the resource.

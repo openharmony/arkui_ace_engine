@@ -104,8 +104,8 @@ struct ListOnlyItemChildrenMainSizeTest {
         .width('100%')
         .height('20%')
         .onClick((e: ClickEvent) => {
-          // 300: 跳转到item 1顶部与List顶部平齐的位置。
-          // 如果不设置childrenMainSize，item高度不一致时scrollTo会不准确。
+          // 300: Jump to the position where the top of item 1 is aligned with the top of the List.
+          // If childrenMainSize is not set, scrollTo will be inaccurate when item heights are inconsistent.
           this.listScroller.scrollTo({xOffset: 0, yOffset: 300})
         })
     }

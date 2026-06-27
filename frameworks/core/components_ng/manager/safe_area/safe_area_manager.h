@@ -206,6 +206,11 @@ public:
         return keyboardWebInset_;
     }
 
+    SafeAreaInsets::Inset GetKeyboardWebInsetWithoutProcess() const
+    {
+        return keyboardWebInset_;
+    }
+
     void UpdateKeyboardOffset(float offset)
     {
         keyboardOffset_ = offset;

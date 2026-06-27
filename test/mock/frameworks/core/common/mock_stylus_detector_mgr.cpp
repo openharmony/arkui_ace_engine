@@ -52,7 +52,7 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     return false;
 }
 
-bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(const std::string& resourceName, float x, float y)
 {
     return false;
 }

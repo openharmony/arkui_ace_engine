@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 constexpr int32_t HINGES_OFFSET_UP = 16;
 constexpr int32_t HINGES_OFFSET_DOWN = 16;
 class ACE_EXPORT FolderStackLayoutProperty : public StackLayoutProperty {

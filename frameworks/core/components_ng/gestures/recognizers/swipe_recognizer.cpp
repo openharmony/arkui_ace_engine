@@ -515,6 +515,9 @@ void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
 
 GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

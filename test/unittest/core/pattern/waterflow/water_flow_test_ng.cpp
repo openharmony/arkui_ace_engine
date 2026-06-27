@@ -1884,6 +1884,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      * @tc.expected: function ProvideRestoreInfo is called.
      */
     pattern_->layoutInfo_->startIndex_ = 1;
+    pattern_->layoutInfo_->reportStartIndex_ = 1;
     pattern_->layoutInfo_->storedOffset_ = 1.0f;
     std::string ret = pattern_->ProvideRestoreInfo();
 

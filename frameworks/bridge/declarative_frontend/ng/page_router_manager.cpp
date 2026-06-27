@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/common/event_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
@@ -621,9 +622,9 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
             pageRouterManager->RestorePageWithTargetInner(info, RestorePageDestination::BELLOW_TOP);
         };
         /**
-         * Always check if the namedRoute page needs to be preloaded.
-         * @sa PageRouterManager::RestoreRouterStack() & PageRouterManager::GetStackInfo()
-         */
+          * Always check if the namedRoute page needs to be preloaded.
+          * @sa PageRouterManager::RestoreRouterStack() & PageRouterManager::GetStackInfo()
+          */
         if (TryPreloadNamedRouter(info.url, std::move(callback))) {
             return;
         }
@@ -1053,6 +1054,29 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo(ContentInfoType type)
 
 std::unique_ptr<JsonValue> PageRouterManager::GetNamedRouterInfo()
 {
+    if (ohmUrlCallback_) {
+        for (auto curNode : pageRouterStack_) {
+            auto pageNode = curNode.Upgrade();
+            CHECK_NULL_CONTINUE(pageNode);
+            auto pagePattern = AceType::DynamicCast<PagePattern>(pageNode->GetPattern());
+            CHECK_NULL_CONTINUE(pagePattern);
+            auto pageInfo = AceType::DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_CONTINUE(pageInfo);
+            if (!pageInfo->IsCreateByNamedRouter()) {
+                continue;
+            }
+            auto pageName = pageInfo->GetRouteName();
+            if (!pageName.has_value()) {
+                TAG_LOGI(AceLogTag::ACE_ROUTER, "restore page(%{public}s) failed", pageInfo->GetPageUrl().c_str());
+                continue;
+            }
+            // get custom view
+            auto node = AceType::DynamicCast<CustomNode>(pageNode->GetFirstChild());
+            CHECK_NULL_CONTINUE(node);
+            auto thisObject = node->FireThisFunc();
+            ohmUrlCallback_(thisObject, pageName.value_or(""));
+        }
+    }
     if (getNamedRouterInfo_) {
         return getNamedRouterInfo_();
     }
@@ -1100,6 +1124,7 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> PageRouterManager::RestoreRou
         std::string url = item->GetValue("url")->ToString();
         // remove 2 useless character, as "XXX" to XXX
         url = url.substr(1, url.size() - 2);
+
         if (index < stackSize - 1) {
             restorePageStack_.emplace_back(url, params, isNamedRoute);
         } else {

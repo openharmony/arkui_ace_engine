@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "interfaces/native/native_node.h"
 #include "interfaces/native/node/node_model.h"
+#include "native_interface.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -144,6 +145,12 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperIsFakeDraggingTestNullNode, TestSize.Leve
 {
     bool isFakeDragging = false;
     auto ret = OH_ArkUI_Swiper_IsFakeDragging(nullptr, &isFakeDragging);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Swiper_IsFakeDragging"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: current node is null"), std::string::npos);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
 
@@ -159,6 +166,12 @@ HWTEST_F(CapiSwiperOptionTestNg, SwiperIsFakeDraggingTestZeroNodeType, TestSize.
     node.uiNodeHandle = nullptr;
     bool isFakeDragging = false;
     auto ret = OH_ArkUI_Swiper_IsFakeDragging(&node, &isFakeDragging);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Swiper_IsFakeDragging"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node type is not ARKUI_NODE_SWIPER"), std::string::npos);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
 

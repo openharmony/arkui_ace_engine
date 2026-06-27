@@ -487,7 +487,12 @@ RefPtr<FrameNode> SheetView::CreateSheetMaskShowInSubwindow(const RefPtr<FrameNo
     auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(sheetNodePattern, nullptr);
     TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet page node");
-    sheetPageNode->MountToParent(sheetWrapperNode);
+    auto ecNode = sheetWrapperPattern->GetSheetECNode();
+    if (ecNode) {
+        sheetPageNode->MountToParent(ecNode);
+    } else {
+        sheetPageNode->MountToParent(sheetWrapperNode);
+    }
     // Update sheet type needs to get subwindow messages which is updated
     // after sheetWrapper MountToParent root, after sheetPage MountToParent sheetWrapper.
     sheetNodePattern->UpdateSheetType();

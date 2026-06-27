@@ -312,9 +312,9 @@ ArkUI_Int32 InsertRenderNodeInner(
         SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto renderChildCount = isMixed ? rsContext->GetMixedRenderChildCount() : rsNode->GetChildren().size();
-    auto childCountForCheck = static_cast<int32_t>(renderChildCount);
-    if (usePosition && (position < 0 || position > childCountForCheck)) {
+    int32_t renderChildCount = isMixed ? rsContext->GetMixedRenderChildCount()
+                                       : static_cast<int32_t>(rsNode->GetChildren().size());
+    if (usePosition && (position < 0 || position > renderChildCount)) {
         SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child position is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -505,7 +505,7 @@ int32_t GetChildIndex(std::shared_ptr<RSNode> parent, std::shared_ptr<RSNode> ch
 int32_t GetRSNodeChildCount(std::shared_ptr<RSNode> node)
 {
     CHECK_NULL_RETURN(node, -1);
-    return node->GetChildren().size();
+    return static_cast<int32_t>(node->GetChildren().size());
 }
 
 inline void SetRenderNodeFromFrameError()

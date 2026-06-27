@@ -331,4 +331,32 @@ bool ThemeConstants::GetRawFD(const std::string& rawfileName, RawfileDescription
 {
     return false;
 }
+
+template<class T>
+bool ThemeConstants::GetMediaResource(T& resId, std::ostream& dest) const
+{
+    return false;
+}
+
+template<class T>
+bool ThemeConstants::GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    return false;
+}
+
+template<class T>
+bool ThemeConstants::GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return false;
+}
+
+template bool ThemeConstants::GetMediaResource<uint32_t>(uint32_t&, std::ostream&) const;
+template bool ThemeConstants::GetMediaResource<std::string>(std::string&, std::ostream&) const;
+template bool ThemeConstants::GetMediaData<uint32_t>(uint32_t&, size_t&, std::unique_ptr<uint8_t[]>&);
+template bool ThemeConstants::GetMediaData<std::string>(std::string&, size_t&, std::unique_ptr<uint8_t[]>&);
+template bool ThemeConstants::GetMediaData<uint32_t>(uint32_t&, size_t&, std::unique_ptr<uint8_t[]>&,
+    const std::string&, const std::string&);
+template bool ThemeConstants::GetMediaData<std::string>(std::string&, size_t&, std::unique_ptr<uint8_t[]>&,
+    const std::string&, const std::string&);
 } // namespace OHOS::Ace

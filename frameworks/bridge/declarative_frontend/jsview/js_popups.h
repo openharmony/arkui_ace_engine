@@ -60,6 +60,8 @@ public:
     static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
     static void SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static void ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG::SheetStyle& sheetStyle);
+    static void ParseSheetEnableBlurSnapshot(
+        const JSRef<JSVal>& enableBlurSnapshot, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     static void ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,

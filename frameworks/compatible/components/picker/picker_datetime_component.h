@@ -18,7 +18,7 @@
 
 #include "compatible/components/picker/picker_date_component.h"
 #include "compatible/components/picker/picker_time_component.h"
-#include "core/components_ng/pattern/picker/picker_date_time.h"
+#include "core/components_ng/pattern/date_picker/picker_date_time.h"
 
 namespace OHOS::Ace {
 

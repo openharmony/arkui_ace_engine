@@ -21,6 +21,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"

@@ -22,8 +22,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -351,6 +351,76 @@ HWTEST_F(LazyGridLayoutTest, RowsGapTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 11);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 11);
+}
+
+/**
+ * @tc.name: RowsGapTest002
+ * @tc.desc: Shrink rowGap repeatedly while scrolled to the bottom; the last row stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, RowsGapTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyVGrid with 20 items (2 lanes) and rowGap = 30
+     * @tc.expected: 10 rows, totalMainSize = 10 * ITEM_HEIGHT + 9 * 30 = 1270
+     */
+    CreateScroll();
+    CreateLazyGridLayout();
+    auto rowGap = 30.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    CreateContent(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: last row (index 18/19) bottom-aligned, on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350
+     */
+    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step3. Shrink rowGap 30 -> 20
+     * @tc.expected: last row stays bottom-pinned, on-screen top y stays 350 (no jump)
+     */
+    rowGap = 20.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step4. Shrink rowGap 20 -> 10
+     * @tc.expected: last row on-screen top y stays 350
+     */
+    rowGap = 10.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step5. Shrink rowGap 10 -> 0
+     * @tc.expected: last row on-screen top y stays 350
+     */
+    rowGap = 0.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
 }
 
 /**
@@ -1172,6 +1242,55 @@ HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
     EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: AddDelChildrenTest003
+ * @tc.desc: Delete 10 bottom children while scrolled to the bottom; the last row stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyVGrid with 20 items (2 lanes)
+     * @tc.expected: 10 rows, totalMainSize = 10 * ITEM_HEIGHT = 1000, scrollable range = 1000 - SCROLL_HEIGHT = 550
+     */
+    CreateScroll();
+    CreateLazyGridLayout();
+    CreateContent(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: visible range covers the last row (index 18/19), scroll offset = -550,
+     *               last row bottom-aligned (on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350)
+     */
+    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -550);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step3. Delete the last 10 (bottom) children, then flush once
+     * @tc.expected: the remaining 10 top items become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 10, offset = -(550 - 5 * ITEM_HEIGHT) = -50,
+     *               last row on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -50);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
 }
 
 /**

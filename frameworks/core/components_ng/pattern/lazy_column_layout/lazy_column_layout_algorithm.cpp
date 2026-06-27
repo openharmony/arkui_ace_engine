@@ -327,6 +327,11 @@ void LazyColumnLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (LessOrEqual(it->second.startPos - space_, startPos_)) {
+        if (it->first >= totalItemCount_) {
+            index = totalItemCount_;
+            pos = prevBodyMainSize_ + space_;
+            return;
+        }
         index = it->first;
         pos = it->second.startPos;
         return;
@@ -527,6 +532,7 @@ void LazyColumnLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, in
 
 void LazyColumnLayoutAlgorithm::CheckRecycle()
 {
+    FixIndexRange(layoutInfo_->startIndex_, layoutInfo_->endIndex_);
     auto it = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     while (it != layoutInfo_->posMap_.end()) {
         if (LessNotEqual(it->second.endPos, startPos_)) {
@@ -790,13 +796,16 @@ void LazyColumnLayoutAlgorithm::PredictLayoutForward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedEndIndex_;
+    float currPos = layoutInfo_->layoutedEnd_;
     // Allow forward prediction when not yet laid out (currIndex<0) with forward layout,
     // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && !forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
+        layoutedEndIndex_ = currIndex;
+        cachedEndIndex_ = std::max(layoutInfo_->cachedEndIndex_, currIndex);
+        layoutedEnd_ = currPos;
         return;
     }
-    float currPos = layoutInfo_->layoutedEnd_;
     auto deadline = layoutInfo_->deadline_.value();
     while (currIndex < totalItemCount_ - 1 && LessNotEqual(currPos, layoutInfo_->cacheEndPos_)) {
         if (GetSysTimestamp() > deadline) {
@@ -833,16 +842,21 @@ void LazyColumnLayoutAlgorithm::PredictLayoutBackward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedStartIndex_;
+    float currPos = layoutInfo_->layoutedStart_;
     // Allow backward prediction when not yet laid out (currIndex<0) with backward layout,
     // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
+        layoutedStartIndex_ = currIndex;
+        cachedStartIndex_ = layoutInfo_->cachedStartIndex_ >= 0
+            ? std::min(layoutInfo_->cachedStartIndex_, currIndex)
+            : currIndex;
+        layoutedStart_ = currPos;
         return;
     }
     if (currIndex < 0 && !forwardLayout_) {
         currIndex = totalItemCount_;
     }
-    float currPos = layoutInfo_->layoutedStart_;
     auto deadline = layoutInfo_->deadline_.value();
     while (currIndex > 0 && (GreatNotEqual(currPos, layoutInfo_->cacheStartPos_))) {
         if (GetSysTimestamp() > deadline) {

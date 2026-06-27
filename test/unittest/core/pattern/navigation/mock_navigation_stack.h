@@ -67,6 +67,7 @@ public:
     bool isForceSet = false;
     bool isReplaced = false;
     bool autoCleaned = false;
+    bool canRecovery = true;
     std::string autoCleanedState;
 
 private:
@@ -226,11 +227,12 @@ public:
 
     int32_t GetRecoveredDestinationMode(int32_t index);
     bool IsAutoCleaned(int32_t index) const override;
+    bool GetAutoCleanedCanRecovery(int32_t index) const override;
     void ClearAutoCleanedState(int32_t index) override;
     std::string GetAutoCleanedState(int32_t index) const override;
     void SaveStateToJsCallback(
         int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state) override;
-    void MarkAutoCleanedFlag(uint64_t navDestinationId) override;
+    void MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery = true) override;
     uint64_t GetNavDestinationIdInt(int32_t index);
     bool GetIsForceSet(int32_t index);
     void ResetIsForceSetFlag(int32_t index);
@@ -239,6 +241,25 @@ public:
     void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) override;
 
     MOCK_METHOD2(CreateHomeDestination, bool(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node));
+
+    bool GetOhmUrl(const RefPtr<UINode>& customNode, std::string& moduleName, std::string& fileName) override
+    {
+        moduleName = mockModuleName_;
+        fileName = mockFileName_;
+        return mockGetOhmUrlResult_;
+    }
+
+    bool CreateNodeFromRecovery(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node) override
+    {
+        return CreateNodeByIndex(index, customNode, node);
+    }
+
+    void SetMockGetOhmUrlResult(bool result, const std::string& moduleName = "", const std::string& fileName = "")
+    {
+        mockGetOhmUrlResult_ = result;
+        mockModuleName_ = moduleName;
+        mockFileName_ = fileName;
+    }
 
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
@@ -252,6 +273,9 @@ private:
     std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
     std::vector<NavdestinationRecoveryInfo> recoveryPushCalls_;
     std::map<int32_t, bool> mockIsEntryMap_;
+    bool mockGetOhmUrlResult_ = false;
+    std::string mockModuleName_;
+    std::string mockFileName_;
     int32_t size_ = 0;
 };
 } // namespace NG

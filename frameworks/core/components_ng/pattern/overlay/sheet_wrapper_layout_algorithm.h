@@ -64,7 +64,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     void MeasureSheetMask(LayoutWrapper* layoutWrapper);
+    void MeasureSheetEC(LayoutWrapper* layoutWrapper);
     void LayoutMaskNode(LayoutWrapper* layoutWrapper);
+    void LayoutECNode(LayoutWrapper* layoutWrapper);
 
 private:
     void InitParameter(LayoutWrapper* layoutWrapper);

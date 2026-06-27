@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
-#include "core/components_ng/pattern/picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/pipeline/container_window_manager.h"
 #include <cstdint>
@@ -28,7 +28,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"

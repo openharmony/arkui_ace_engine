@@ -22,6 +22,8 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/drawable_descriptor_info.h"
 #include "core/drawable/layered_drawable_descriptor.h"

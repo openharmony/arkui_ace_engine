@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class IndexerPatternTestThreeNg : public IndexerTestNg {
@@ -1686,6 +1687,124 @@ HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest004, TestSize.
     EXPECT_EQ(bubbleRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_REGULAR);
     EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupBackgroundColor());
 
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest005
+ * @tc.desc: Test UpdateBubbleBackgroundView with MaterialState DEFAULT and device not supporting system material.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest005, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetUIMaterialState("default");
+    EXPECT_EQ(MaterialUtils::GetConfiguredMaterialState(), MaterialState::DEFAULT);
+    EXPECT_FALSE(MaterialUtils::IsMaterialDisabled());
+
+    bool originalSupported = g_isDeviceSystemMaterialSupported;
+    g_isDeviceSystemMaterialSupported = false;
+    EXPECT_FALSE(SystemProperties::IsDeviceSystemMaterialSupported());
+
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_TRUE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_REGULAR);
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupBackgroundColor());
+
+    g_isDeviceSystemMaterialSupported = originalSupported;
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest006
+ * @tc.desc: Test UpdateBubbleBackgroundView with MaterialState DEFAULT and device supporting system material.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest006, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetUIMaterialState("default");
+    EXPECT_EQ(MaterialUtils::GetConfiguredMaterialState(), MaterialState::DEFAULT);
+    EXPECT_FALSE(MaterialUtils::IsMaterialDisabled());
+
+    bool originalSupported = g_isDeviceSystemMaterialSupported;
+    g_isDeviceSystemMaterialSupported = true;
+    EXPECT_TRUE(SystemProperties::IsDeviceSystemMaterialSupported());
+
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_FALSE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupLowMaterialBgColor());
+
+    g_isDeviceSystemMaterialSupported = originalSupported;
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest007
+ * @tc.desc: Test UpdateBubbleBackgroundView with MaterialState ENABLE and device not supporting system material.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest007, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalApiVersion = AceApplicationInfo::GetInstance().apiVersion_;
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetUIMaterialState("enable");
+    EXPECT_EQ(MaterialUtils::GetConfiguredMaterialState(), MaterialState::ENABLE);
+    EXPECT_TRUE(MaterialUtils::IsMaterialEnabled());
+
+    bool originalSupported = g_isDeviceSystemMaterialSupported;
+    g_isDeviceSystemMaterialSupported = false;
+    EXPECT_FALSE(SystemProperties::IsDeviceSystemMaterialSupported());
+
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_FALSE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupLowMaterialBgColor());
+
+    g_isDeviceSystemMaterialSupported = originalSupported;
+    AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
     Container::Current()->SetApiTargetVersion(originalTargetVersion);
 }
 } // namespace OHOS::Ace::NG

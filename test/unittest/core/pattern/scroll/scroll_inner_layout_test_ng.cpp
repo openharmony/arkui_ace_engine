@@ -15,6 +15,7 @@
 
 #include "mock_task_executor.h"
 #include "scroll_test_ng.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
@@ -63,10 +64,10 @@ HWTEST_F(ScrollInnerLayoutTestNg, DrawScrollBar001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. No barWidth
-     * @tc.expected: Draw scrollBar
+     * @tc.expected: No Draw ScrollBar
      */
     scrollBar_->SetNormalWidth(Dimension(0));
-    VerifyDrawScrollBar(1);
+    VerifyDrawScrollBar(0);
 
     /**
      * @tc.steps: step3. No barHeight
@@ -813,6 +814,103 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight002, TestSize.Level1)
     EXPECT_EQ(scrollBar_->barRegionSize_, 8.0);
     EXPECT_EQ(scrollBar_->trackRect_.Height(), 8.0);
     EXPECT_EQ(scrollBar_->activeRect_.Height(), 8.0);
+}
+
+/**
+ * @tc.name: SetRectTrickRegionHeight003
+ * @tc.desc: Test large scrollbar region still uses 48vp default minimum height instead of minHeight_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight003, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(300.0, 300.0);
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+    scrollBar_->SetMinHeight(Dimension(79.0));
+
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 3000.0, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 300.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 48.0);
+    EXPECT_NE(scrollBar_->activeRect_.Height(), 79.0);
+}
+
+/**
+ * @tc.name: SetBarRegionTrackWidth001
+ * @tc.desc: Test normalBackgroundWidth controls track thickness and aligns with active bar center
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegionTrackWidth001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    constexpr double trackThickness = 20.0;
+    constexpr double estimatedHeight = 3000.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(300.0, 300.0);
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+    scrollBar_->SetNormalBackgroundWidth(Dimension(trackThickness));
+
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->trackRect_.Width(), trackThickness);
+    EXPECT_EQ(scrollBar_->trackRect_.Left() + scrollBar_->trackRect_.Width() * 0.5,
+        scrollBar_->activeRect_.Left() + scrollBar_->activeRect_.Width() * 0.5);
+
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->trackRect_.Height(), trackThickness);
+    EXPECT_EQ(scrollBar_->trackRect_.Top() + scrollBar_->trackRect_.Height() * 0.5,
+        scrollBar_->activeRect_.Top() + scrollBar_->activeRect_.Height() * 0.5);
+}
+
+/**
+ * @tc.name: SetBarRegionTrackAlignment001
+ * @tc.desc: Test trackRect keeps center aligned with activeRect in LEFT, RIGHT and BOTTOM modes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegionTrackAlignment001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    constexpr double estimatedHeight = 3000.0;
+    constexpr double trackThickness = 24.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(300.0, 300.0);
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+    scrollBar_->SetNormalBackgroundWidth(Dimension(trackThickness));
+
+    scrollBar_->SetPositionMode(PositionMode::LEFT);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->trackRect_.Left() + scrollBar_->trackRect_.Width() * 0.5,
+        scrollBar_->activeRect_.Left() + scrollBar_->activeRect_.Width() * 0.5);
+
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->trackRect_.Left() + scrollBar_->trackRect_.Width() * 0.5,
+        scrollBar_->activeRect_.Left() + scrollBar_->activeRect_.Width() * 0.5);
+
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->trackRect_.Top() + scrollBar_->trackRect_.Height() * 0.5,
+        scrollBar_->activeRect_.Top() + scrollBar_->activeRect_.Height() * 0.5);
 }
 
 /**

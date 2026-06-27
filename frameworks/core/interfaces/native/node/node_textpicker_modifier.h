@@ -18,26 +18,17 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text_picker/bridge/textpicker_util.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
+
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier();
 const CJUITextPickerModifier* GetCJUITextPickerModifier();
-void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle);
-void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
-void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
-void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
-    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues);
-void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptions>& options, uint32_t count,
-    uint32_t& selectedValue, std::vector<uint32_t>& selectedValues);
-void SetSelectedInternal(
-    uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues);
-void ProcessCascadeSelected(
-    const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues);
+const NG::TextPickerUtil::TextPickerCustomModifier* GetTextPickerCustomModifier();
 void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam);
 void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam);
-void SetTextPickerEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool isEnableHapticFeedback);
-void ResetTextPickerEnableHapticFeedback(ArkUINodeHandle node);
-ArkUI_Bool GetTextPickerEnableHapticFeedback(ArkUINodeHandle node);
-}
+} // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TEXT_PICKER_MODIFIER_H

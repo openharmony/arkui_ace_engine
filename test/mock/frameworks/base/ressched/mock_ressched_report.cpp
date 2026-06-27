@@ -47,6 +47,9 @@ void ResSchedReport::ResSchedDataReport(
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
 
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
+                                  const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled) {}
+
 void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
 
 void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)

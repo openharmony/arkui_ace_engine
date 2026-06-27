@@ -18,11 +18,13 @@
 #include <regex>
 
 #include "base/network/download_manager.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 

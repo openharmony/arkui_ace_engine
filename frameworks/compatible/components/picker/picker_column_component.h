@@ -19,7 +19,7 @@
 #include "compatible/components/picker/toss_animation_controller.h"
 
 #include "core/accessibility/accessibility_manager.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"
 

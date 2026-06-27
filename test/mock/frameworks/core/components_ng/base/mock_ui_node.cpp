@@ -16,8 +16,10 @@
 #include <iterator>
 
 #include "base/json/json_util.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -96,7 +98,11 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::AttachToMainTree(bool recursive) {}
 
-void UINode::AttachToMainTree(bool recursive, PipelineContext* context) {}
+void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
+{
+    AttachContext(context, false);
+    onMainTree_ = true;
+}
 
 HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult)
@@ -190,26 +196,37 @@ void UINode::DumpViewDataPageNodes(
 
 void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
 {
-    if (result.empty()) {
-        auto frame = AceType::DynamicCast<FrameNode>(Claim(this));
-        if (frame && frame->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-            auto navGroup = AceType::DynamicCast<NavigationGroupNode>(frame);
-            auto pattern = navGroup ? navGroup->GetPattern<NavigationPattern>() : nullptr;
-            auto stack = pattern ? pattern->GetNavigationStack() : nullptr;
-            if (stack && !stack->GetAllNavDestinationNodes().empty()) {
-                const auto& top = stack->GetAllNavDestinationNodes().back().second;
-                auto topFrame = AceType::DynamicCast<FrameNode>(top);
-                if (topFrame) {
-                    result.emplace_back(topFrame);
-                }
+    auto currentNode = AceType::DynamicCast<FrameNode>(Claim(this));
+    if (currentNode) {
+        if (!currentNode->IsVisibleAndActive()) {
+            return;
+        } else if (currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
+            CHECK_NULL_VOID(navigationGroupNode);
+            auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(navigationPattern);
+            auto navigationStack = navigationPattern->GetNavigationStack();
+            CHECK_NULL_VOID(navigationStack);
+            auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
+            int32_t startIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
+            int32_t endIndex = navigationStack->Size();
+            auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
+            if (navBarNode) {
+                result.emplace_back(navBarNode);
             }
+            for (int32_t i = startIndex; i < endIndex; ++i) {
+                result.emplace_back(AceType::DynamicCast<FrameNode>(
+                    NavigationGroupNode::GetNavDestinationNode(navigationStack->Get(i))));
+            }
+            return;
         }
     }
-    for (const auto& child : children_) {
-        if (!child) {
-            continue;
+
+    for (const auto& item : GetChildren()) {
+        item->FindTopNavDestination(result);
+        if (!result.empty()) {
+            return;
         }
-        child->FindTopNavDestination(result);
     }
 }
 
@@ -447,4 +464,11 @@ void UINode::UpdateSelectionContainerId(int32_t selectionContainerId)
 }
 
 #pragma clang diagnostic pop
+
+void UINode::FlushUpdateAndMarkDirty() {}
+void UINode::SetGeometryTransitionInRecursive(bool) {}
+RefPtr<UINode> UINode::GetFirstChild() const { return nullptr; }
+void UINode::MarkForceMeasure() {}
+void UINode::SetHostPageId(int) {}
+
 } // namespace OHOS::Ace::NG

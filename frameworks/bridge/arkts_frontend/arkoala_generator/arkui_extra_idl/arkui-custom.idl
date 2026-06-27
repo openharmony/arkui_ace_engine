@@ -26,6 +26,8 @@ import arkui.component.enums.CompetitionStrategy as CompetitionStrategy;
 callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
 callback Callback_CreateItem = pointer (i32 index);
 callback Callback_OnMoveFromTo = void (i32 from, i32 to);
+callback Callback_ClearCache = void ();
+callback Callback_ReleaseItemByIndex = void(i32 index);
 
 [Entity=Class]
 interface ForEachOps {
@@ -37,7 +39,8 @@ interface ForEachOps {
 interface LazyForEachOps {
     // provide necessary info and callbacks to the ScrollView in the backend
     static void NotifyChange(pointer node, i32 startIndex, i32 endIndex, i32 count);
-    static void Sync(pointer node, i32 totalCount, Callback_CreateItem creator, Callback_RangeUpdate updater);
+    static void Sync(pointer node, i32 totalCount, Callback_CreateItem creator, Callback_RangeUpdate updater,
+        Callback_ClearCache clear, i32 repeatMemOptStrategy, Callback_ReleaseItemByIndex release);
     static void SyncOnMoveOps(pointer node, Callback_OnMoveFromTo onMoveFromToOps,
         (OnMoveHandler or undefined) onMoveOps, (ItemDragEventHandler or undefined) onMoveDragEventOps);
     static void SetOptions(pointer node, LazyForEachOptions options);

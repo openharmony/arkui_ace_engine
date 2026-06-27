@@ -15,12 +15,11 @@
 
 import { ArkUIAniSecurityUiextensionModal, ArkUIAniUIExtensionOptions } from "arkui.ani"
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
-import { RecordData } from "./pluginComponent"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent } from "./common"
-import { ErrorCallback, BusinessError } from "@ohos.base"
+import { ErrorCallback, BusinessError, RecordData } from "@ohos.base"
 import { AttributeModifier } from "#handwritten"
 import { default as Want } from "@ohos.app.ability.Want"
 import { ComponentContent } from "arkui.ComponentContent"

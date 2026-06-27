@@ -114,8 +114,11 @@ int32_t OH_ArkUI_Swiper_IsFakeDragging(ArkUI_NodeHandle node, bool* isFakeDraggi
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "current node is null");
-    CHECK_NULL_RETURN_WITH_MESSAGE(node->type, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
-        __FUNCTION__, "current type is nullptr");
+    if (node->type != ARKUI_NODE_SWIPER) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Node type is not ARKUI_NODE_SWIPER");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "current fullImpl is null");

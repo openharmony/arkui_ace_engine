@@ -30,14 +30,14 @@ public:
     RefreshCoordination(RefPtr<FrameNode> scrollableNode)
     {
         scrollableNode_ = WeakClaim(RawPtr(scrollableNode));
-        auto refreshNode = FindRefreshNode();
-        refreshNode_ = WeakClaim(RawPtr(refreshNode));
-        coordinationEvent_ = CreateCoordinationEvent();
+        UpdateRefreshNode();
     };
     ~RefreshCoordination() = default;
     void OnScrollStart(bool isDrag, float mainVelocity) const;
     bool OnScroll(float offset, float mainVelocity) const;
     void OnScrollEnd(float mainVelocity) const;
+    bool UpdateRefreshNode();
+    bool IsValid() const;
     bool InCoordination()
     {
         auto refreshNode = refreshNode_.Upgrade();

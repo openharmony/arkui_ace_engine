@@ -27,7 +27,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"

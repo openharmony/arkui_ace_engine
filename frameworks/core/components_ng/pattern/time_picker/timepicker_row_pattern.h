@@ -23,7 +23,7 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_types.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/picker_text_style.h"
+#include "core/components_ng/pattern/date_picker/picker_text_style.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"

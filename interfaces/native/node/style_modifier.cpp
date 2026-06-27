@@ -19,6 +19,7 @@
 #include <regex>
 #include <utility>
 
+#include "base/geometry/shape.h"
 #include "frame_information.h"
 #include "grid_layout_option.h"
 #include "native_material_impl.h"
@@ -10243,7 +10244,7 @@ void ResetLoadingProgressColor(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetColor(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetColor(node->uiNodeHandle, false);
 }
 
 const ArkUI_AttributeItem* GetLoadingProgressEnableLoading(ArkUI_NodeHandle node)
@@ -11751,13 +11752,16 @@ const ArkUI_AttributeItem* GetDatePickerCanLoop(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
-int32_t SetDatePickerCanLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+int32_t SetDatePickerCanLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto fullImpl = GetFullImpl();
-    if (!fullImpl || !fullImpl->getNodeModifiers() || !fullImpl->getNodeModifiers()->getDatePickerModifier()) {
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    CHECK_NULL_RETURN(fullImpl->getNodeModifiers(), ERROR_CODE_INTERNAL_ERROR);
     auto datePickerModifier = fullImpl->getNodeModifiers()->getDatePickerModifier();
+    CHECK_NULL_RETURN(datePickerModifier, ERROR_CODE_INTERNAL_ERROR);
+
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         datePickerModifier->resetCanLoop(node->uiNodeHandle);
         return ERROR_CODE_PARAM_INVALID;
@@ -12985,6 +12989,8 @@ void ResetLayoutRect(ArkUI_NodeHandle node)
 
 int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -12996,12 +13002,14 @@ int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 void ResetFocusOnTouch(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusOnTouch(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetFocusOnTouch(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getFocusOnTouch(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
@@ -15267,7 +15275,7 @@ int32_t SetImageSpanBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeI
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -22219,7 +22227,7 @@ int32_t SetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node, const ArkUI_Att
     if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getListModifier()->setDigitalCrownSensitivity(
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->setDigitalCrownSensitivity(
         node->uiNodeHandle, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -22227,14 +22235,14 @@ int32_t SetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node, const ArkUI_Att
 const ArkUI_AttributeItem* GetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node)
 {
     g_numberValues[NUM_0].i32 =
-        GetFullImpl()->getNodeModifiers()->getListModifier()->getDigitalCrownSensitivity(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getArcListModifier()->getDigitalCrownSensitivity(node->uiNodeHandle);
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
 void ResetArcListDigitalCrownSensitivity(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListModifier()->resetDigitalCrownSensitivity(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->resetDigitalCrownSensitivity(node->uiNodeHandle);
 }
 
 int32_t SetArcListChainAnimation(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -22267,20 +22275,20 @@ int32_t SetArcListHeader(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
     auto headerNode = reinterpret_cast<ArkUI_NodeHandle>(item->object);
     CHECK_NULL_RETURN(headerNode, ERROR_CODE_PARAM_INVALID);
-    GetFullImpl()->getNodeModifiers()->getListModifier()->setArcListHeader(node->uiNodeHandle, headerNode->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->setArcListHeader(node->uiNodeHandle, headerNode->uiNodeHandle);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetArcListHeader(ArkUI_NodeHandle node)
 {
-    auto header = GetFullImpl()->getNodeModifiers()->getListModifier()->getArcListHeader(node->uiNodeHandle);
+    auto header = GetFullImpl()->getNodeModifiers()->getArcListModifier()->getArcListHeader(node->uiNodeHandle);
     g_attributeItem.object = GetArkUINode(header);
     return &g_attributeItem;
 }
 
 void ResetArcListHeader(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListModifier()->resetArcListHeader(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListModifier()->resetArcListHeader(node->uiNodeHandle);
 }
 
 int32_t SetArcListScrollBar(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -22519,7 +22527,7 @@ int32_t SetArcListItemAutoScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     if (actualSize < 0 || !CheckAttributeIsBool(item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getListItemModifier()->setAutoScale(
+    GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->setAutoScale(
         node->uiNodeHandle, static_cast<bool>(item->value[NUM_0].i32));
     return ERROR_CODE_NO_ERROR;
 }
@@ -22527,14 +22535,14 @@ int32_t SetArcListItemAutoScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem
 const ArkUI_AttributeItem* GetArcListItemAutoScale(ArkUI_NodeHandle node)
 {
     g_numberValues[NUM_0].i32 =
-        GetFullImpl()->getNodeModifiers()->getListItemModifier()->getAutoScale(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->getAutoScale(node->uiNodeHandle);
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
 void ResetArcListItemAutoScale(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getListItemModifier()->resetAutoScale(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getArcListItemModifier()->resetAutoScale(node->uiNodeHandle);
 }
 
 int32_t SetArcListItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)

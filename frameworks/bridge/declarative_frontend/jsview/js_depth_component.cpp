@@ -65,7 +65,7 @@ void JSDepthComponent::Create(const JSCallbackInfo& info)
 
         NG::DepthComponentModel::Create(background);
         if (info.Length() > 1) {
-            ParseAndSetDepthSpace(info[1]);
+            ParseAndSetOptions(info[1]);
         }
         return;
     }
@@ -73,7 +73,7 @@ void JSDepthComponent::Create(const JSCallbackInfo& info)
     auto background = ParseBackgroundSource(info[0]);
     NG::DepthComponentModel::Create(background);
     if (info.Length() > 1) {
-        ParseAndSetDepthSpace(info[1]);
+        ParseAndSetOptions(info[1]);
     }
 }
 
@@ -125,6 +125,8 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
     if (backgroundSource.IsImage()) {
         setDepthMapWithCallback(backgroundSource.imageSourceInfo);
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set");
+    } else {
+        setDepthMapWithCallback(ImageSourceInfo());
     }
     info.ReturnSelf();
 }
@@ -355,7 +357,7 @@ bool JSDepthComponent::SetOhosPath(const std::string& uri, std::string& ohosPath
     return true;
 }
 
-void JSDepthComponent::ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue)
+void JSDepthComponent::ParseAndSetOptions(const JSRef<JSVal>& optionsValue)
 {
     if (!optionsValue->IsObject()) {
         return;
@@ -367,6 +369,14 @@ void JSDepthComponent::ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue)
         int32_t depthSpace = depthSpaceValue->ToNumber<int32_t>();
         OHOS::Ace::DepthSpaceType depthSpaceEnum = static_cast<OHOS::Ace::DepthSpaceType>(depthSpace);
         NG::DepthComponentModel::SetDepthSpace(depthSpaceEnum);
+    }
+
+    auto render3DScaleValue = jsObject->GetProperty("render3DScale");
+    if (render3DScaleValue->IsNumber()) {
+        float render3DScale = render3DScaleValue->ToNumber<float>();
+        if (GreatNotEqual(render3DScale, 0.0f) && LessOrEqual(render3DScale, 1.0f)) {
+            NG::DepthComponentModel::SetRender3DScale(render3DScale);
+        }
     }
 }
 
@@ -417,8 +427,12 @@ OHOS::Ace::CameraBufferCrop JSDepthComponent::ParseCameraBufferCrop(const JSRef<
 
 OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();
@@ -438,8 +452,12 @@ OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vecto
 
 OHOS::Ace::DepthVector4 JSDepthComponent::ParseVector4(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector4 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();

@@ -21,6 +21,12 @@ interface XComponentParam {
   libraryname?: string;
   controller?: XComponentController;
 }
+
+interface XComponentHdrBrightnessParam {
+  brightness: number;
+  hdrType?: HdrType;
+}
+
 class ArkXComponentComponent extends ArkComponent implements XComponentAttribute {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   nativePtr: KNode;
@@ -399,8 +405,14 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
-  hdrBrightness(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+  hdrBrightness(value: number, hdrType?: HdrType): this {
+    if (isUndefined(value) || isNull(value)) {
+      modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity,
+        XComponentHdrBrightnessModifier, undefined);
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity,
+      XComponentHdrBrightnessModifier, { brightness: value, hdrType: hdrType });
     return this;
   }
   enableTransparentLayer(value: boolean): this {
@@ -549,8 +561,8 @@ class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class XComponentHdrBrightnessModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class XComponentHdrBrightnessModifier extends ModifierWithKey<XComponentHdrBrightnessParam> {
+  constructor(value: XComponentHdrBrightnessParam) {
     super(value);
   }
   static identity: Symbol = Symbol('xComponentHdrBrightness');
@@ -558,12 +570,13 @@ class XComponentHdrBrightnessModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().xComponent.resetHdrBrightness(node);
     } else {
-      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value.brightness, this.value.hdrType);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.brightness, this.value.brightness) ||
+      !isBaseOrResourceEqual(this.stageValue.hdrType, this.value.hdrType);
   }
 }
 

@@ -15,8 +15,12 @@
 
 #include "core/components_ng/pattern/toggle/bridge/arkts_native_toggle_bridge.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -31,6 +35,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
 const char* TOGGLE_NODEPTR_OF_UINODE = "nodePtr_";
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 {
@@ -60,8 +65,10 @@ void ParseToggleIsOnObject(const EcmaVM* vm, Local<JSValueRef>& jsVal)
     panda::Local<panda::FunctionRef> func = jsVal->ToObject(vm);
     std::function<void(bool)> callback = [node = targetNode, func = panda::CopyableGlobal(vm, func)](bool param) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("Toggle.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, param) };
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
@@ -198,9 +205,14 @@ panda::Local<panda::JSValueRef> JsToggleChangeCallback(panda::JsiRuntimeCallInfo
     if (obj->GetNativePointerFieldCount(vm) < 1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    if (weak->Invalid()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    ToggleModelNG::SetChangeValue(frameNode, value);
+    ToggleModelNG::SetChangeValue(AceType::RawPtr(frameNode), value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -503,7 +515,8 @@ ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             auto toggle =
                 panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfToggle), keysOfToggle, valuesOfToggle);
             toggle->SetNativePointerFieldCount(vm, 1);
-            toggle->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
+            toggle->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, toggle };
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
@@ -555,15 +568,20 @@ ArkUINativeModuleValue ToggleBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(bool)> callback = [isJsView, node = targetNode, func = panda::CopyableGlobal(vm, func)](
                                              bool isOnchange) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        ACE_SCORING_EVENT("Toggle.onChange");
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, isOnchange) };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+                "event", "Toggle.onChange", ComponentEventType::COMPONENT_EVENT_SELECT);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
     };
@@ -899,8 +917,19 @@ ArkUINativeModuleValue ToggleBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* ru
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
         bool flag = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo);
         auto colorRawPtr = AceType::RawPtr(colorResObj);
-        toggleModifier->setToggleBackgroundColorByJs(
-            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        auto headRoomOptional = color.GetHeadRoomColor();
+        if (headRoomOptional.has_value()) {
+            auto colorWithHeadRoom = headRoomOptional.value();
+            ArkUI_Float32 hdrValues[NUM_5] = { static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.green), static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom) };
+            toggleModifier->setToggleBackgroundColorForHDR(
+                nativeNode, hdrValues, color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        } else {
+            toggleModifier->setToggleBackgroundColorByJs(
+                nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr, static_cast<ArkUI_Bool>(flag));
+        }
     } else {
         Color color;
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {

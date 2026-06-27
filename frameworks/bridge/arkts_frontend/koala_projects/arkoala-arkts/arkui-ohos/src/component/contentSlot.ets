@@ -48,9 +48,7 @@ export class ArkContentSlotPeer extends PeerNode {
         return _peer
     }
     setContentSlotOptionsAttribute(content?: Content): void {
-        let content_type: int32 = RuntimeType.UNDEFINED
-        content_type = runtimeType(content)
-        if ((RuntimeType.UNDEFINED) != (content_type)) {
+        if (content instanceof NodeContent) {
             const content_value = content as NodeContent
             ArkUIAniModule._ContentSlotInterface_setContentSlotOptions(this.peer.ptr, toPeerPtr(content_value))
         } else {
@@ -68,15 +66,7 @@ export class ArkContentSlotComponent extends ComponentBase implements ContentSlo
     }
 
     public setContentSlotOptions(content?: Content): this {
-        if (this.checkPriority("setContentSlotOptions")) {
-            const content_type = runtimeType(content)
-            if ((RuntimeType.OBJECT == content_type) || (RuntimeType.UNDEFINED == content_type)) {
-                const content_casted = content as (Content | undefined)
-                this.getPeer()?.setContentSlotOptionsAttribute(content_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
-        }
+        this.getPeer()?.setContentSlotOptionsAttribute(content)
         return this
     }
     

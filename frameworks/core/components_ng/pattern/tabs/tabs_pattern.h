@@ -212,7 +212,7 @@ private:
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
     void FireTabChangeCallback(int32_t preIndex, int32_t nextIndex);
-    void UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
+    void UpdateBackBlurStyle(const RefPtr<FrameNode>& tabBarNode);
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     // Information on TabChange event
     struct TabChangeInfo {

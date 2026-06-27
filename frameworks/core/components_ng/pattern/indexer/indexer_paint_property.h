@@ -19,13 +19,14 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT IndexerPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(IndexerPaintProperty, PaintProperty);
 

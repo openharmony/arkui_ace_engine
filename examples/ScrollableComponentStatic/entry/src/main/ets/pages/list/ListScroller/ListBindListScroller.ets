@@ -168,7 +168,13 @@ struct MyStateSample {
           Button(`getItemRect(1)`)
             .fontSize(20)
             .onClick((e: ClickEvent) => {
-              let tmp = this.listScroller.getItemRect(1);
+              let tmp: RectResult;
+              try {
+                tmp = this.listScroller.getItemRect(1);
+              } catch (error) {
+                console.error('Failed to get item rect for index 1:', error);
+                return;
+              }
               console.info(`listTest getItemRect x: ${tmp.x}, y: ${tmp.y}, width: ${tmp.width}, height: ${tmp.height}`)
             })
           Button(`getItemRectInGroup(0, 4)`)

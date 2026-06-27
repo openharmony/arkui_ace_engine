@@ -888,7 +888,11 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
         style.radialGradient = paragraphStyle->radialGradient.value();
     }
     if (paragraphStyle->tailIndents.has_value()) {
-        style.tailIndents = paragraphStyle->tailIndents.value();
+        std::vector<float> indents;
+        for (const auto& indent : paragraphStyle->tailIndents.value()) {
+            indents.push_back(indent < 0.0f ? 0.0f : indent);
+        }
+        style.tailIndents = indents;
     }
     spanStyle->paragraphStyle = style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -1073,6 +1077,7 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineHeightStyle(
     CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     lineHeightStyle->lineHeight = spanStyle->lineHeightStyle.lineHeight;
+    lineHeightStyle->lineHeightMultiple = spanStyle->lineHeightStyle.lineHeightMultiple;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1487,7 +1492,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetWordBreak(
 ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(OH_ArkUI_ParagraphStyle* paragraphStyle,
     struct OH_PixelmapNative* pixelmap)
 {
-    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(paragraphStyle && pixelmap, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     delete paragraphStyle->leadingMarginPixelMap;
@@ -1668,7 +1673,11 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
 {
     CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     if (size > 0 && tailIndents != nullptr) {
-        std::vector<float> indents(tailIndents, tailIndents + size);
+        std::vector<float> indents;
+        indents.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            indents.push_back(tailIndents[i] < 0.0f ? 0.0f : tailIndents[i]);
+        }
         paragraphStyle->tailIndents = indents;
     } else {
         paragraphStyle->tailIndents.reset();
@@ -2151,7 +2160,7 @@ ArkUI_ErrorCode OH_ArkUI_UserDataSpan_GetUserData(const OH_ArkUI_UserDataSpan* u
 OH_ArkUI_CustomSpan* OH_ArkUI_CustomSpan_Create()
 {
     OH_ArkUI_CustomSpan* customSpan = new OH_ArkUI_CustomSpan();
-    customSpan->onDraw = nullptr;
+    customSpan->onMeasure = nullptr;
     customSpan->onDraw = nullptr;
     return customSpan;
 }

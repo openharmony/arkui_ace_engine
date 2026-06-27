@@ -148,8 +148,8 @@
         "mapping": {}
     },
     {
-        "file": "frameworks/core/components_ng/pattern/picker/datepicker_pattern_multi_thread.cpp",
-        "normal_file": "frameworks/core/components_ng/pattern/picker/datepicker_pattern.cpp",
+        "file": "frameworks/core/components_ng/pattern/date_picker/datepicker_pattern_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/date_picker/datepicker_pattern.cpp",
         "mapping": {
             "DatePickerPattern::OnThemeScopeUpdate": "DatePickerPattern::OnThemeScopeUpdateMultiThread"
         }
@@ -538,7 +538,7 @@
     },
     {
         "file": "frameworks/core/interfaces/native/node/node_loading_progress_modifier_multi_thread.cpp",
-        "normal_file": "frameworks/core/interfaces/native/node/node_loading_progress_modifier.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/loading_progress/bridge/loading_progress_dynamic_modifier.cpp",
         "mapping": {
             "ResetLoadingProgressColor": "ResetLoadingProgressColorMultiThread"
         }

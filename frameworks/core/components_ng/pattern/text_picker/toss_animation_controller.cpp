@@ -20,7 +20,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/render_context.h"

@@ -19,7 +19,7 @@
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common'
 import { KPointer } from '@koalaui/interop'
 import { __context, __id, memoEntry2, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime'
-import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat'
+import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions, RepeatMemOptStrategy } from '../component/repeat'
 import { IDataSource, DataChangeListener } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { LazyForEachImplForOptions } from './LazyForEachImpl'
@@ -174,6 +174,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     reusable_: boolean = true;
     disableVirtualScroll_: boolean = false;
+    memoryOptimizationStrategy_: int32 = 0;
 
     useTemplate_: boolean = false; // whether use template function
 
@@ -201,6 +202,8 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
         this.onLazyLoading_ = options?.onLazyLoading;
 
         this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
+        this.memoryOptimizationStrategy_ =
+            (options?.memoryOptimizationStrategy ?? RepeatMemOptStrategy.DEFAULT).valueOf() as int32;
         return this;
     }
 
@@ -298,7 +301,7 @@ function virtualRender<T>(
         }
     };
     LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_,
-        attributes.onMove_, attributes.itemDragEvent_, undefined, true);
+        attributes.onMove_, attributes.itemDragEvent_, undefined, true, attributes.memoryOptimizationStrategy_);
 }
 
 /** @memo */

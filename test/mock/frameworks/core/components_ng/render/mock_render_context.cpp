@@ -244,4 +244,25 @@ OffsetF MockRenderContext::GetTranslateXYProperty()
 }
 void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset) {}
 #endif
+
+bool RenderContext::HasTransitionOutAnimation() const { return false; }
+bool RenderContext::HasDisappearTransition() const { return false; }
+bool RenderContext::IsSynced() const { return false; }
+RectF RenderContext::GetPaintRectWithTransform() { return {}; }
+std::pair<RectF, bool> RenderContext::GetPaintRectWithTranslate() { return {}; }
+Matrix4 RenderContext::GetLocalTransformMatrix() { return Matrix4::CreateIdentity(); }
+Matrix4 RenderContext::GetMatrixWithTransformRotate() { return Matrix4::CreateIdentity(); }
+RectF RenderContext::GetPaintRectWithoutTransform() { return {}; }
+RectF RenderContext::GetPaintRectWithTransformWithoutDegree() { return {}; }
+RectF RenderContext::GetPropertyOfPosition() { return {}; }
+OffsetF RenderContext::GetShowingTranslateProperty() { return {}; }
+OffsetF RenderContext::GetTranslateXYProperty() { return {}; }
+int32_t RenderContext::CalcExpectedFrameRate(const std::string&, float) { return 0; }
+bool RenderContext::IsUniRenderEnabled() { return false; }
+bool RenderContext::DoTextureExport(uint64_t) { return false; }
+std::optional<Dimension> RenderContext::GetBackBlurRadius() const { return std::nullopt; }
+std::optional<BlurStyleOption> RenderContext::GetBackBlurStyle() const { return std::nullopt; }
+std::optional<EffectOption> RenderContext::GetBackgroundEffect() const { return std::nullopt; }
+void RenderContext::SetIsFree(bool) {}
+
 } // namespace OHOS::Ace::NG

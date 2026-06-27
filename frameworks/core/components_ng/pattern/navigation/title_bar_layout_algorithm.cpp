@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "base/utils/measure_util.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 

@@ -22,6 +22,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetCallbacksForTest(const RefPtr<ArkoalaLazyNode>& node, ArkoalaLazyNode::CreateItemCb create,
+    ArkoalaLazyNode::UpdateRangeCb update)
+{
+    node->SetCallbacks(create, update, []() {}, [](int32_t) {});
+}
+} // namespace
+
 class TestUINode : public UINode {
     DECLARE_ACE_TYPE(TestUINode, UINode);
 
@@ -42,7 +50,7 @@ public:
         auto* stack = ViewStackProcessor::GetInstance();
         auto lazyForEachNode = AceType::MakeRefPtr<ArkoalaLazyNode>(nodeId);
         stack->Push(lazyForEachNode);
-        lazyForEachNode->SetCallbacks(createItemCb_, updateRangeCb_);
+        SetCallbacksForTest(lazyForEachNode, createItemCb_, updateRangeCb_);
         return lazyForEachNode;
     }
 
@@ -51,7 +59,7 @@ public:
         auto* stack = ViewStackProcessor::GetInstance();
         auto repeatNode = AceType::MakeRefPtr<ArkoalaLazyNode>(nodeId, true);
         stack->Push(repeatNode);
-        repeatNode->SetCallbacks(createItemCb_, updateRangeCb_);
+        SetCallbacksForTest(repeatNode, createItemCb_, updateRangeCb_);
         return repeatNode;
     }
 
@@ -121,7 +129,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
     };
     ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {};
-    lazyNode->SetCallbacks(createItemCb, updateRangeCb);
+    SetCallbacksForTest(lazyNode, createItemCb, updateRangeCb);
 
     /**
      * @tc.steps: step2. Test LazyForEach node GetChildByIndex and GetFrameChildByIndex
@@ -154,7 +162,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
     };
     ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {};
-    lazyNode->SetCallbacks(createItemCb, updateRangeCb);
+    SetCallbacksForTest(lazyNode, createItemCb, updateRangeCb);
     lazyNode->SetTotalCount(TOTAL_COUNT);
 
     EXPECT_TRUE(lazyNode->GetFrameChildByIndex(INDEX_1, true, false, true));
@@ -796,5 +804,59 @@ TEST_F(ArkoalaLazyNodeTest, NeedBuildAll001)
     repeatNode->SetTotalCount(totalCount);
     repeatNode->BuildAllChildren();
     EXPECT_EQ(repeatNode->GetChildren().size(), totalCount);
+}
+
+/**
+ * @tc.name: CleanCache001
+ * @tc.desc: Test ArkoalaLazyNode CleanCache.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, CleanCache001)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    int32_t releaseCount = 0;
+    int32_t releasedIndex = -1;
+    int32_t updateStart = -1;
+    int32_t updateEnd = -1;
+    int32_t updateCacheStart = -1;
+    int32_t updateCacheEnd = -1;
+    bool updateIsLoop = true;
+    lazyNode->SetCallbacks(
+        [this](int32_t) { return CreateFrameNode(GetNextId()); },
+        [&updateStart, &updateEnd, &updateCacheStart, &updateCacheEnd, &updateIsLoop](
+            int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
+            updateStart = start;
+            updateEnd = end;
+            updateCacheStart = cacheStart;
+            updateCacheEnd = cacheEnd;
+            updateIsLoop = isLoop;
+        },
+        []() {},
+        [&releaseCount, &releasedIndex](int32_t index) {
+            ++releaseCount;
+            releasedIndex = index;
+        });
+
+    lazyNode->options_.memOptStrategy = LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    lazyNode->activeRangeParam_ = { 0, 0, 1, 1 };
+    lazyNode->node4Index_.Put(0, CreateFrameNode(GetNextId()));
+    lazyNode->node4Index_.Put(1, CreateFrameNode(GetNextId()));
+    lazyNode->pendingCleanCache_ = true;
+    lazyNode->pendingRestoreCache_ = true;
+
+    lazyNode->CleanCache(true);
+
+    EXPECT_EQ(lazyNode->node4Index_.Size(), 1);
+    EXPECT_TRUE(lazyNode->node4Index_.ContainsKey(0));
+    EXPECT_FALSE(lazyNode->node4Index_.ContainsKey(1));
+    EXPECT_EQ(releaseCount, 1);
+    EXPECT_EQ(releasedIndex, 1);
+    EXPECT_EQ(updateStart, 0);
+    EXPECT_EQ(updateEnd, 0);
+    EXPECT_EQ(updateCacheStart, 0);
+    EXPECT_EQ(updateCacheEnd, 0);
+    EXPECT_FALSE(updateIsLoop);
+    EXPECT_FALSE(lazyNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyNode->pendingRestoreCache_);
 }
 } // namespace OHOS::Ace::NG

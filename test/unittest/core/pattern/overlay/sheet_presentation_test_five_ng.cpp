@@ -1817,4 +1817,119 @@ HWTEST_F(SheetPresentationTestFiveNg, UpdateMaskBackgroundColorRender001, TestSi
 
     SheetPresentationTestFiveNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetSheetCloseIconMaterial001
+ * @tc.desc: Test SetSheetCloseIconMaterial when systemMaterial is set to sheetCloseIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, SetSheetCloseIconMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page with close icon.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    SheetPresentationTestFiveNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 102,
+        AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. create close icon button node and symbol node.
+     */
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 104,
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto symbolNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 105,
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    symbolLayoutProperty->UpdateSymbolColorList({Color::BLACK});
+    symbolNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step3. set closeButtonNode to sheetPattern and set sheetTheme.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconColor_ = Color(0x0c182431);
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+
+    /**
+     * @tc.steps: step4. call SetSheetCloseIconMaterial and verify systemMaterial.
+     * @tc.expected: systemMaterial should be set on sheetCloseIcon renderContext.
+     */
+    sheetPattern->SetSheetCloseIconMaterial();
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto systemMaterial = renderContext->GetSystemMaterial();
+    EXPECT_NE(systemMaterial, nullptr);
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ClearSheetCloseIconMaterial001
+ * @tc.desc: Test ClearSheetCloseIconMaterial when systemMaterial is cleared and backgroundColor is restored.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, ClearSheetCloseIconMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page with close icon.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    SheetPresentationTestFiveNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto rootNode = FrameNode::CreateFrameNode("Root", 201, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 202,
+        AceType::MakeRefPtr<SheetPresentationPattern>(203, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. create close icon button node and symbol node.
+     */
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 204,
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    auto symbolNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 205,
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    symbolLayoutProperty->UpdateSymbolColorList({Color::BLACK});
+    symbolNode->MountToParent(buttonNode);
+    buttonNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step3. set closeButtonNode to sheetPattern and set sheetTheme.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->closeIconColor_ = Color(0x0c182431);
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+
+    /**
+     * @tc.steps: step4. call ClearSheetCloseIconMaterial and verify backgroundColor.
+     * @tc.expected: backgroundColor should be sheetTheme->GetCloseIconColor().
+     */
+    sheetPattern->ClearSheetCloseIconMaterial();
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backgroundColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(backgroundColor.has_value());
+    EXPECT_EQ(backgroundColor.value(), sheetTheme->GetCloseIconColor());
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

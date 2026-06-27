@@ -1022,6 +1022,9 @@ export class TouchEventHandwritten implements TouchEvent {
         return
     }
     public preventDefault(): void {
+        if (!TouchEventExtender.isPreventDefaultAllowed(this.ptr)) {
+            throw new Error('Component does not support prevent function.')
+        }
         TouchEventExtender.preventDefault(this.ptr)
         return
     }

@@ -67,6 +67,7 @@
 #endif
 
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"

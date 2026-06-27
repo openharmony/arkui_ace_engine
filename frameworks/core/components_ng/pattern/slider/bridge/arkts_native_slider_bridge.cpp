@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/slider/bridge/arkts_native_slider_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -389,9 +390,14 @@ panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo
     if (obj->GetNativePointerFieldCount(vm) < NUM_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    if (weak->Invalid()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    SliderModelNG::SetChangeValue(frameNode, value, mode);
+    SliderModelNG::SetChangeValue(AceType::RawPtr(frameNode), value, mode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1237,7 +1243,8 @@ ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             auto slider =
                 panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keyOfSlider), keyOfSlider, valuesOfSlider);
             slider->SetNativePointerFieldCount(vm, 1);
-            slider->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
+            slider->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, slider };
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);

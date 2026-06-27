@@ -758,6 +758,31 @@ int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* e
 int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId));
 
 /**
+ * @brief Callback function when the dialog is displayed.
+ *
+ * @param errorCode the error code.
+ *        {@link ARKUI_ERROR_CODE_NO_ERROR} The operation is successful.
+ *        {@link ARKUI_ERROR_CODE_PARAM_INVALID} A parameter error occurs.
+ *        {@link ARKUI_ERROR_CODE_DIALOG_CANNOT_BE_OPENED_BY_MODAL_UEC_WINDOW}
+ *        The dialog cannot be opened due to the modal UEC window.
+ * @param dialogId Dialog id. Returns -1 when the dialog cannot be displayed.
+ * @param userData Indicates the pointer to the custom data.
+ * @since 26.0.0
+ */
+typedef void (*ArkUI_OpenDialogCallback)(int32_t errorCode, int32_t dialogId, void* userData);
+
+/**
+ * @brief Displays a custom dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param userData Indicates the pointer to the custom data.
+ * @param callback Callback function when the dialog is displayed.
+ * @since 26.0.0
+ */
+void OH_ArkUI_CustomDialog_OpenDialogWithCallback(ArkUI_CustomDialogOptions* options, void* userData,
+    ArkUI_OpenDialogCallback callback);
+
+/**
  * @brief Updates a custom dialog box.
  *
  * @param options Dialog box parameters.

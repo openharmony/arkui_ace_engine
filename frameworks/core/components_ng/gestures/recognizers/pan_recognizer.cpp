@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -991,6 +992,9 @@ void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType 
 
 GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

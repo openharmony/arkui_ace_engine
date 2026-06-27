@@ -18,9 +18,9 @@
 
 #include "base/i18n/localization.h"
 #include "compatible/components/picker/picker_base_component.h"
-#include "core/components_ng/pattern/picker/picker_date.h"
-#include "core/components_ng/pattern/picker/picker_string_formatter.h"
-#include "core/components_ng/pattern/picker/picker_types.h"
+#include "core/components_ng/pattern/date_picker/picker_date.h"
+#include "core/components_ng/pattern/date_picker/picker_string_formatter.h"
+#include "core/components_ng/pattern/date_picker/picker_types.h"
 
 namespace OHOS::Ace {
 

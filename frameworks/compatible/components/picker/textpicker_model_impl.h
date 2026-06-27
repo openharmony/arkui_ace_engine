@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TEXTPICKER_MODEL_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TEXTPICKER_MODEL_IMPL_H
 
+#include "ui/base/macros.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 
 namespace OHOS::Ace {
@@ -23,7 +24,7 @@ class TextTheme;
 }
 
 namespace OHOS::Ace::Framework {
-class TextPickerModelImpl : public TextPickerModel {
+class ACE_FORCE_EXPORT TextPickerModelImpl : public TextPickerModel {
 public:
     TextPickerModelImpl() = default;
     ~TextPickerModelImpl() override = default;
@@ -90,7 +91,7 @@ public:
     void UpdateUserSetSelectColor() override {};
 };
 
-class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {
+class ACE_FORCE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {
 public:
     RefPtr<AceType> CreateObject() override;
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,

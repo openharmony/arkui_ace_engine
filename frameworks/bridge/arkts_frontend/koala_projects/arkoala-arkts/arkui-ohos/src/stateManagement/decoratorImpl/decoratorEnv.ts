@@ -605,7 +605,7 @@ export class EnvUtils {
     public static windowStaticEnvMap: Map<int32, WindowStaticEnv> = new Map<int32, WindowStaticEnv>();
  
  
-    public static isSimpleEnvKey(key: string): boolean {
+    public static isReadonlyEnvKey(key: string): boolean {
         return key === 'system.window.focused' || key === 'system.window.highlighted' ||
                key === 'system.window.density.system' || key === 'system.window.displayid' ||
                key === 'system.window.avoidarea' || key === 'system.window.avoidarea.px' ||
@@ -655,7 +655,7 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
     private finalResultBackingValue?: IBackingValue<IEnvironmentValue<T> | undefined>;
     private systemEnvKeyBackingValue?: IBackingValue<T> | undefined;
     // need to register to view's dispatch function
-    private systemEnvKeyCallback: ((value: Any) => void) | undefined;
+    private systemEnvValueCallback: ((value: Any) => void) | undefined;
 
     constructor(owningView: IVariableOwner, envValue: string | SystemEnvKey<T>, varName: string, envOptions?: EnvOptions<T>) {
         super('@Env', owningView, varName);
@@ -665,11 +665,17 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         const isSystemEnvKey = !(typeof envValue === 'string');
 
         if (isSystemEnvKey) {
-            const envkey: SystemEnvKey<T> =  this.envValue as SystemEnvKey<T>;
-            this.envSystemEnvString = envkey.key;
-            const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+            const envKey: SystemEnvKey<T> = this.envValue as SystemEnvKey<T>;
+            this.envSystemEnvString = envKey.key;
+            let initialValue: T | undefined = undefined;
+            if (this.isReadonlyEnvKey()) {
+                const windowStaticEnv =
+                    EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+                initialValue =
+                    windowStaticEnv.getEnvValueByKey(this.envSystemEnvString as string) as T;
+            }
             this.systemEnvKeyBackingValue = FactoryInternal.mkDecoratorValue<T>(
-                `SystemEnvKey`, windowStaticEnv.getEnvValueByKey(this.envSystemEnvString as string) as T
+                `SystemEnvKey`, (initialValue as T)
             );
         } else {
             this.finalResultBackingValue = FactoryInternal.mkDecoratorValue<IEnvironmentValue<T> | undefined>(
@@ -683,7 +689,7 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         const tempInstanceId: int32 = instanceId? instanceId : UIContextUtil.getCurrentInstanceId();
 
         if (this.envSystemEnvString) {
-            this.registerSimpleEnv(tempInstanceId, instanceId === undefined);
+            this.registerSystemEnv(tempInstanceId, instanceId === undefined);
             this.latestInstanceId = tempInstanceId;
             return;
         }
@@ -709,40 +715,74 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         this.latestInstanceId = tempInstanceId;
     }
 
-    private registerSimpleEnv(instanceId: int32, shouldAddToSet: boolean): void {
-        this.systemEnvKeyCallback = (value: Any): void => {
-            const oldValue = this.systemEnvKeyBackingValue!.get(false);
-            if (oldValue !== (value as T)) {
-                this.systemEnvKeyBackingValue!.setNoCheck(value as T);
-                EnvDecoratedVariable.instanceIdSet.add(instanceId);
-            }
-        };
-
-        const isFirst = this.owningViewInternal.__addSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
-
-        if (isFirst) {
-            const callbackSet = this.owningViewInternal.__getSimpleEnvCallbackSet__Internal(this.envSystemEnvString!);
-            const dispatchFunc = (value: Any): void => {
-                if (callbackSet !== undefined) {
-                    for (const cb of callbackSet) {
-                        cb(value);
-                    }
-                }
-            };
-
-            this.owningViewInternal.__setSimpleEnvDispatchFunc__Internal(this.envSystemEnvString!, dispatchFunc);
-
-            const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
-            const unregisterFunc = EnvUtils.registerCallbackOnWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
-            if (unregisterFunc !== undefined) {
-                this.owningViewInternal.__setSimpleEnvUnregisterFunc__Internal(this.envSystemEnvString!, unregisterFunc);
-            }
-        }
-
+    private registerSystemEnv(instanceId: int32, shouldAddToSet: boolean): void {
         if (shouldAddToSet) {
             this.owningViewInternal.__addEnvInstance__Internal(this as IEnvVariable);
+        } else {
+            if (!this.isReadonlyEnvKey()) {
+                const writableQueryResult =
+                    this.owningViewInternal.__findWritableSystemEnvValueByKey__Internal(this.envSystemEnvString!);
+                this.setSystemEnvBackingValue(writableQueryResult);
+            }
+
+            this.systemEnvValueCallback = ((value: Any): void => {
+                try {
+                    Promise.resolve().then(() => this.setSystemEnvBackingValue(value));
+                } catch (error) {
+                    console.error(`EnvDecoratedVariable.setSystemEnvBackingValue error: ${error}`);
+                }
+            });
+
+            this.owningViewInternal.__addSystemEnvValueCallback__Internal(
+                this.envSystemEnvString!,
+                this.systemEnvValueCallback!
+            );
+
+            this.registerSystemEnvCallback();
         }
         EnvDecoratedVariable.instanceIdSet.add(instanceId);
+    }
+
+    public registerSystemEnvCallback(): void {
+        if (this.isReadonlyEnvKey()) {
+            const callbacks = this.owningViewInternal.__getSystemEnvValueCallbacks__Internal(this.envSystemEnvString!)
+            if (callbacks !== undefined && callbacks.size === 1) {
+                this.registerReadonlySystemEnvCallback();
+            }
+        } else {
+            if (!this.owningViewInternal.__getHasRegisteredWritableEnvCallback__Internal()) {
+                this.registerWritableSystemEnvCallback();
+            }
+        }
+    }
+
+    public registerReadonlySystemEnvCallback(): void {
+        const dispatchFunc = (value: Any): void => {
+            const callbacks = this.owningViewInternal.__getSystemEnvValueCallbacks__Internal(this.envSystemEnvString!);
+            if (callbacks !== undefined) {
+                for (const cb of callbacks!) {
+                    cb(value);
+                }
+            }
+        };
+        this.owningViewInternal.__setReadonlyEnvDispatchFunc__Internal(this.envSystemEnvString!, dispatchFunc);
+        const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+        const unregisterFunc =
+            EnvUtils.registerCallbackOnWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
+        if (unregisterFunc !== undefined) {
+            this.owningViewInternal.__setReadonlyEnvUnregisterFunc__Internal(this.envSystemEnvString!, unregisterFunc);
+        }
+    }
+
+    public registerWritableSystemEnvCallback(): void {
+        this.owningViewInternal.__registerWritableEnvUpdateCallback__Internal((key: string, value: Any) => {
+            const callbacks = this.owningViewInternal.__getSystemEnvValueCallbacks__Internal(key);
+            if (callbacks !== undefined) {
+                for (const callback of callbacks!) {
+                    callback(value);
+                }
+            }
+        });
     }
 
     public unRegisterEnv(instanceId?: int32): void {
@@ -754,12 +794,14 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
     }
 
     private unregisterSystemEnvKey(): void {
-        if (this.systemEnvKeyCallback === undefined) {
+        if (this.systemEnvValueCallback === undefined) {
             return;
         }
-
-        this.owningViewInternal.__removeSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
-        this.systemEnvKeyCallback = undefined;
+        this.owningViewInternal.__removeSystemEnvValueCallback__Internal(
+            this.envSystemEnvString!,
+            this.systemEnvValueCallback!
+        );
+        this.systemEnvValueCallback = undefined;
     }
 
     public resetOnReuse(newValue: T): void {
@@ -793,7 +835,21 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         return this.finalResult!.get();
     }
 
+    private setSystemEnvBackingValue(value: Any): void {
+        const oldValue = this.systemEnvKeyBackingValue!.get(false);
+        if (value === undefined) {
+            const ownerId = this.owningViewInternal.getUniqueId();
+            const envKey = this.envSystemEnvString ?? 'undefined';
+            throw new Error(`Get value from backend is undefined. Current message: owningViewId: ${ownerId}, envKey: ${envKey}, varName: ${this.varName}.`);
+        }
+        if (oldValue !== (value as T)) {
+            this.systemEnvKeyBackingValue!.setNoCheck(value as T);
+        }
+    }
 
+    private isReadonlyEnvKey(): boolean {
+        return EnvUtils.isReadonlyEnvKey(this.envSystemEnvString!);
+    }
 
     private windowSizeLayoutBreakpointActivate(instanceId: int32): IEnvironmentValue<T> {
         return new WindowSizeLayoutBreakpoint(instanceId) as IEnvironmentValue<T>;

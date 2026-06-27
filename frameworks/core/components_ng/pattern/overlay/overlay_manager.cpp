@@ -23,6 +23,9 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/with_theme_node.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include <string>
@@ -34,7 +37,9 @@
 #endif
 
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/ng/offset_t.h"
@@ -85,12 +90,13 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/text_picker/bridge/textpicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
@@ -103,6 +109,9 @@
 #endif
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -715,7 +724,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
 }
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
-    bool isReadFirstNode)
+    bool isReadFirstNode, std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
@@ -731,6 +740,23 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     CHECK_NULL_VOID(root);
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed, parent is null.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     OpenDialogAnimationInner(node, dialogProps, isReadFirstNode);
@@ -867,7 +893,8 @@ void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const
     }
 }
 
-void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
+void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+    std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
@@ -913,6 +940,23 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 
     CHECK_NULL_VOID(root);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed in SetDialogTransitionEffect, parent is null.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     if (isTopOrder) {
@@ -1219,7 +1263,7 @@ void OverlayManager::PopToast(int32_t toastId)
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();
             } else {
-                SubwindowManager::GetInstance()->HideToastSubWindowNG(context->GetInstanceId());
+                SubwindowManager::GetInstance()->HideSubWindowNG(context->GetInstanceId());
             }
         }
     });
@@ -1733,6 +1777,11 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     // TargetNode may be destroyed when MontPopup is thrown thread.
     auto targetNode = popupInfo.target.Upgrade();
     CHECK_NULL_VOID(targetNode);
+    auto popupInfoInMap = GetPopupInfo(targetId);
+    if (popupInfoInMap.popupNode && popupInfoInMap.popupNode->IsOnMainTree()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Popup Node is already on main tree, stop mounting");
+        return;
+    }
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     ACE_UINODE_TRACE(popupNode);
@@ -2505,6 +2554,89 @@ RefPtr<FrameNode> OverlayManager::GetDialogNodeWithExistContent(const RefPtr<UIN
     return nullptr;
 }
 
+RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps,
+    std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    RefPtr<UINode> customNode;
+    if (buildFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to build customNode");
+            return nullptr;
+        }
+    }
+
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to create dialog node");
+        return nullptr;
+    }
+    ACE_UINODE_TRACE(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
+}
+
+
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dialogProps,
+    const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    ACE_UINODE_TRACE(dialog);
+    BeforeShowDialog(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
+}
+
 void OverlayManager::RegisterDialogLifeCycleCallback(
     const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps)
 {
@@ -2694,6 +2826,97 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
         if (GetDialogNodeWithExistContent(contentNode)) {
             TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
             callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+            return nullptr;
+        }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+        customNode = RebuildCustomBuilder(contentNode);
+        showComponentContent = true;
+    }
+    auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
+    ACE_UINODE_TRACE(dialog);
+    OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
+    return dialog;
+}
+
+void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback, const RefPtr<FrameNode> dialog,
+    bool showComponentContent)
+{
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
+        callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : ERROR_CODE_INTERNAL_ERROR, -1);
+        return;
+    }
+
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+    if (dialogProps.dialogCallback) {
+        dialogProps.dialogCallback(dialog);
+    }
+
+    int32_t dialogId = showComponentContent ? 0 : dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    CustomDialogRecordEvent(dialogProps);
+}
+
+RefPtr<FrameNode> OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    RefPtr<UINode> customNode;
+    bool showComponentContent = false;
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
+        return nullptr;
+    }
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    if (dialogProps.customBuilderWithId) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder with id.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilderWithId(nodeId);
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customBuilder) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilder();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customCNode.Upgrade()) {
+        auto contentNode = dialogProps.customCNode.Upgrade();
+        customNode = RebuildCustomBuilder(contentNode);
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom cnode.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else {
+        auto contentNode = dialogProps.contentNode.Upgrade();
+        if (!contentNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+        if (GetDialogNodeWithExistContent(contentNode)) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, -1);
             return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
@@ -3075,8 +3298,15 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto* modifier = NG::NodeModifier::GetDatepickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    DatePickerUtil::DatePickerDialogInfo dialogInfo = { .dialogProperties = dialogProps,
+        .settingData = settingData,
+        .buttonInfos = buttonInfos,
+        .datePickerNode = nullptr };
+    modifier->setDatePickerDialogViewShow(dialogInfo, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RefPtr<FrameNode> dialogNode = dialogInfo.datePickerNode;
+    CHECK_NULL_VOID(dialogNode);
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
@@ -3114,7 +3344,9 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = TextPickerDialogView::Show(
+    auto* modifier = NG::NodeModifier::GetTextPickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    auto dialogNode = modifier->setTextPickerDialogViewShow(
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
@@ -4997,7 +5229,7 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetWrapper = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     auto wrapperParent = sheetWrapper->GetParent();
     CHECK_NULL_VOID(wrapperParent);
@@ -5157,7 +5389,8 @@ void OverlayManager::UpdateSheetRender(
 
     sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
+    // if use effectComponent, set blur on effectComponent, not on sheetpage
+    if (sheetStyle.backgroundBlurStyle.has_value() && !sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
     sheetNodePattern->SetSheetBorderWidth();
@@ -5254,7 +5487,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
@@ -5284,7 +5517,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ComputeSheetOffset(sheetStyle, sheetNode);
@@ -5407,7 +5640,7 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
-    auto sheetWrapper = sheetNode->GetParent();
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
         (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
         auto context = sheetNode->GetContext();
@@ -5440,6 +5673,51 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     }
 }
 
+RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
+    const RefPtr<FrameNode>& sheetWrapperNode, NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetPageNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
+    CHECK_NULL_RETURN(sheetPageNode, nullptr);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetNodePattern, nullptr);
+
+    if (!sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
+        return nullptr;
+    }
+    auto sheetECNode = FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<EffectComponentPattern>());
+    CHECK_NULL_RETURN(sheetECNode, nullptr);
+    sheetECNode->MountToParent(sheetWrapperNode);
+    auto eventHub = sheetECNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, nullptr);
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->SetSheetECNode(sheetECNode);
+
+    if (sheetStyle.systemMaterial) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
+    }
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_RETURN(ecRSContext, nullptr);
+        SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
+        auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
+        CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
+        sheetNodeRSContext->UpdateUseEffect(true);
+    }
+    return sheetECNode;
+#else
+    return nullptr;
+#endif
+}
+
 RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<FrameNode>& sheetNode,
     const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle)
 {
@@ -5455,12 +5733,17 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         sheetWrapperNode->SetThemeScopeId(targetNode->GetThemeScopeId());
         sheetWrapperNode->AllowUseParentTheme(false);
     }
+    auto sheetECNode = MountSheetEffectComponent(sheetWrapperNode, sheetStyle, sheetNode);
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
         return SheetView::CreateSheetMaskShowInSubwindow(sheetNode, sheetWrapperNode, targetNode, sheetStyle);
     }
-    sheetNode->MountToParent(sheetWrapperNode);
+    if (!sheetECNode) {
+        sheetNode->MountToParent(sheetWrapperNode);
+    } else {
+        sheetNode->MountToParent(sheetECNode);
+    }
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
@@ -5917,7 +6200,7 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChang
         CHECK_NULL_VOID(sheetNode);
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         if (sheetPattern->IsShowInSubWindow()) {
-            auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+            auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetParent);
             auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
             CHECK_NULL_VOID(sheetWrapperPattern);
@@ -6052,7 +6335,7 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProp, nullptr);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
-    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+    auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_RETURN(sheetParent, nullptr);
     if (showInSubWindow) {
         auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
@@ -6655,6 +6938,9 @@ void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filte
         CHECK_NULL_VOID(filterNode);
         overlayManager->RemoveFilterWithNode(filterNode);
         overlayManager->RemoveFilterOnDisappear(filterNode->GetId());
+        auto context = filterNode->GetContext();
+        CHECK_NULL_VOID(context);
+        SubwindowManager::GetInstance()->HideSubWindowNG(context->GetInstanceId());
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
@@ -8021,6 +8307,11 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     }
     FocusNextOrderNode(topFocusableNode);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+    // Call OnRemoveChild for popup nodes to trigger RemoveOnAreaChangeNode
+    auto pattern = node->GetPattern<PopupBasePattern>();
+    if (pattern) {
+        pattern->OnRemoveChild(node);
+    }
 }
 
 RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)

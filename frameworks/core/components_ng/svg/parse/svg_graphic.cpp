@@ -24,6 +24,8 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double HALF = 0.5;
+    // Upper bound for stroke-dasharray entries; prevents oversized allocations from malformed SVG input.
+    constexpr size_t MAX_LINE_DASH_SIZE = 1024;
 
     RSCMSMatrixType ToRSCMSMatrixType(ColorSpace colorSpace)
     {
@@ -689,7 +691,7 @@ void SvgGraphic::SetPenStyle(RSPen& rsPen)
     rsPen.SetMiterLimit(static_cast<RSScalar>(attributes_.strokeState.GetMiterLimit()));
     rsPen.SetAntiAlias(true);
     auto lineDashState = attributes_.strokeState.GetLineDash().lineDash;
-    if (lineDashState.empty()) {
+    if (lineDashState.empty() || lineDashState.size() > MAX_LINE_DASH_SIZE) {
         return;
     }
 
@@ -751,6 +753,10 @@ void SvgGraphic::UpdateLineDash()
     const auto& strokeState = attributes_.strokeState;
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
+        if (lineDashState.size() > MAX_LINE_DASH_SIZE) {
+            LOGW("line dash size is too long, size:%{public}zu", lineDashState.size());
+            return;
+        }
         if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             RSScalar intervals[lineDashState.size()];
             for (size_t i = 0; i < lineDashState.size(); ++i) {

@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/shape.h"
 #include "base/image/image_resizable_slice.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/background_image.h"
@@ -32,7 +33,8 @@
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components_ng/base/inspector_filter.h"
+#include "core/components/common/properties/sys_options.h"
+#include "base/image/pixel_map.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -48,6 +50,7 @@ class BorderImage;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 // backdropBlur backgroundBlurStyle backgroundEffect
 struct BackgroundProperty {

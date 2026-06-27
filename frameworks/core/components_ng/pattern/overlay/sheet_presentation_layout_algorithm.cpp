@@ -74,7 +74,7 @@ float SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(
     float maxDownSheetHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
     NG::RectF floatButtons;
     if (isWaterfallWindowMode_) {
-        auto sheetWrapper = host->GetParent();
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_RETURN(sheetWrapper, height);
         auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
         CHECK_NULL_RETURN(sheetWrapperNode, height);
@@ -110,7 +110,7 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
     float topStartOffsetY = SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
     NG::RectF floatButtons;
     if (isWaterfallWindowMode_) {
-        auto sheetWrapper = host->GetParent();
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);
         auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
         CHECK_NULL_VOID(sheetWrapperNode);
@@ -133,7 +133,7 @@ void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layo
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_VOID(sheetWrapper);
     auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_VOID(sheetWrapperPattern);
@@ -151,7 +151,7 @@ void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layo
     if (showInSubWindow && !sheetWrapperPattern->ShowInUEC()) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
-        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);
         auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
         CHECK_NULL_VOID(sheetWrapperPattern);
@@ -308,7 +308,7 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterStyleOffset(LayoutWrapper* l
     }
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_VOID(sheetWrapper);
     auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_VOID(sheetWrapperPattern);
@@ -345,7 +345,7 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForNotUECSubwindow(Lay
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
     CHECK_NULL_VOID(sheetWrapper);
     auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_VOID(sheetWrapperPattern);
@@ -398,7 +398,7 @@ void SheetPresentationLayoutAlgorithm::ComputePopupStyleOffset(LayoutWrapper* la
     if (showInSubWindow) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
-        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);
         auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
         CHECK_NULL_VOID(sheetWrapperPattern);
@@ -728,7 +728,7 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
         maxHeight = sheetMaxHeight - DOUBLE_SIZE *
             (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
     } else if (sheetStyle_.showInSubWindow.value_or(false)) {
-        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_RETURN(sheetWrapper, 0.0f);
         auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
         CHECK_NULL_RETURN(sheetWrapperPattern, 0.0f);

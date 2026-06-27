@@ -15,7 +15,7 @@
 
 #include "compatible/components/picker/picker_column_component.h"
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "compatible/components/picker/picker_column_element.h"
 #include "compatible/components/picker/picker_option_component.h"
 #include "compatible/components/picker/render_picker_column.h"

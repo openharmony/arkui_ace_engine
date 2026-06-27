@@ -58,7 +58,7 @@ export class WithEnvComponent extends ComponentBase implements WithEnvAttribute 
 
     public env<T>(key: WritableSystemEnvKey<T>, value: T): this {
         const ptr = this.getPeer().peer.ptr
-        ArkUIAniModule._WithEnv_setSystemEnvProperty(ptr, key.key, value as number)
+        ArkUIAniModule._WithEnv_setSystemEnvProperty(ptr, key.key, value as Any)
         return this
     }
 

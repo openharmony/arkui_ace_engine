@@ -436,6 +436,42 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     return JsiRef<JsiValue>::Make(result);
 }
 
+// Differs from Call, Call will not throw error and trigger crash when thisObj is empty.
+// CallWithObjCheck is used for onMeasure and onDraw of CustomSpan now, usually use Call above is enough.
+JsiRef<JsiValue> JsiFunction::CallWithObjCheck(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
+{
+    JS_CALLBACK_DURATION();
+    auto vm = GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
+    LocalScope scope(vm);
+    panda::TryCatch trycatch(vm);
+    bool traceEnabled = false;
+    if (SystemProperties::GetDebugEnabled()) {
+        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString(vm).c_str());
+    }
+    std::vector<panda::Local<panda::JSValueRef>> arguments;
+    for (int i = 0; i < argc; ++i) {
+        arguments.emplace_back(argv[i].Get().GetLocalHandle());
+    }
+    auto thisObj = thisVal.Get().GetLocalHandle();
+    auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
+    JSNApi::ExecutePendingJob(vm);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (result.IsEmpty() || trycatch.HasCaught()) {
+        LOGW("after call jsFunction hasError, empty: %{public}d, caught: %{public}d, thisObj.IsEmpty(): %{public}d",
+            result.IsEmpty(), trycatch.HasCaught(), thisObj.IsEmpty());
+        // Skip HandleUncaughtException when trycatch.HasCaught() and thisObj.IsEmpty()
+        if (!(trycatch.HasCaught() && thisObj.IsEmpty())) {
+            runtime->HandleUncaughtException(trycatch);
+        }
+        result = JSValueRef::Undefined(vm);
+    }
+    if (traceEnabled) {
+        AceTraceEnd();
+    }
+    return JsiRef<JsiValue>::Make(result);
+}
+
 panda::Local<panda::FunctionRef> JsiFunction::New(JsiFunctionCallback func)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());

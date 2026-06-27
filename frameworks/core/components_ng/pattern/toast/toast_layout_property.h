@@ -18,10 +18,10 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/ui_material.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 enum class ToastShowMode {
     DEFAULT = 0,
     TOP_MOST = 1,

@@ -255,7 +255,6 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(TraverseInfo& info, TraverseR
             GetWindowName(info).c_str(), width, height);
         return;
     }
-    auto matrix = globalGeometry->GetAbsMatrix();
     if (info.isAncestorRecent) {
         uiParam.rect_ = { localGeometry->GetX(), localGeometry->GetY(), width, height };
     } else {
@@ -263,11 +262,16 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(TraverseInfo& info, TraverseR
         uiParam.rect_ = { absRect.GetLeft(), absRect.GetTop(), width, height };
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
-        uiParam.rsScaleX_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
-        uiParam.rsScaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
+        bool isDirectionConsistent = (absRect.GetWidth() < absRect.GetHeight() && width < height) ||
+            (absRect.GetWidth() > absRect.GetHeight() && width > height);
+        uiParam.ignoreRotateScaleX_ =
+            isDirectionConsistent ? absRect.GetWidth() / width : absRect.GetWidth() / height;
+        uiParam.ignoreRotateScaleY_ =
+            isDirectionConsistent ? absRect.GetHeight() / height : absRect.GetHeight() / width;
     }
     uiParam.needSync_ = info.notSyncPosition ? false : true;
     // based on transform scene coordinate system to compute trans pos
+    auto matrix = globalGeometry->GetAbsMatrix();
     uiParam.transX_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
         (rsNode->GetGlobalPositionX() - info.transScenePosX));
     uiParam.transY_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -

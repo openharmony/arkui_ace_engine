@@ -16,7 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 
-#include "base/geometry/shape.h"
+namespace OHOS::Ace {
+class BasicShape;
+}
+
 #include "core/components_ng/base/view_abstract_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -49,10 +52,7 @@ public:
         return basicShape_;
     }
 
-    void SetBasicShape(const RefPtr<BasicShape>& basicShape)
-    {
-        basicShape_ = basicShape;
-    }
+    void SetBasicShape(const RefPtr<BasicShape>& basicShape);
     void ObjectOffsetUpdate(const RefPtr<ResourceObject>& xResObj, RefPtr<ResourceObject> yResObj);
     void ObjectFillUpdate(const RefPtr<ResourceObject>& fillResObj);
     void ObjectHeightUpdate(const RefPtr<ResourceObject>& heightResObj);

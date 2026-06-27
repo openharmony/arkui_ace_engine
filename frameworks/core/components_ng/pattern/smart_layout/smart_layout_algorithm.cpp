@@ -60,7 +60,7 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
         if (hostNode) {
             auto flexPattern = hostNode->GetPattern<FlexLayoutPattern>();
             if (flexPattern && flexPattern->GetIsWrap()) {
-                return SmartLayoutType::UNKNOWN;
+                return SmartLayoutType::GENERAL;
             }
         }
         auto layoutProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -72,7 +72,7 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
         }
         return SmartLayoutType::ROW;
     }
-    return SmartLayoutType::UNKNOWN;
+    return SmartLayoutType::GENERAL;
 }
 
 bool SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
@@ -88,7 +88,6 @@ bool SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
 bool SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
 
     auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
     CHECK_NULL_RETURN(engine, false);
@@ -102,11 +101,15 @@ bool SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayo
     }
     ProcessLayoutChildren(layoutWrapper);
 
-    auto currentLayoutType = rootNode_->GetLayoutType();
-    if (currentLayoutType == SmartLayoutType::COLUMN) {
+    if (layoutType == SmartLayoutType::ROW) {
+        rootNode_->ApplyRowConstraints();
+    } else if (layoutType == SmartLayoutType::COLUMN) {
         rootNode_->ApplyColumnConstraints();
     } else {
-        rootNode_->ApplyRowConstraints();
+        if (!rootNode_->GetBoundingBox().IsValid()) {
+            return false;
+        }
+        rootNode_->ApplyGeneralConstraints();
     }
 
     if (!rootNode_->SolveLayout()) {
@@ -158,6 +161,14 @@ void SmartLayoutAlgorithm::ProcessLayoutChildren(LayoutWrapper* layoutWrapper)
     }
 
     rootNode_->CreateChildrenFromInfos(childInfos);
+
+    // For flex wrap, compute and store bounding box
+    if (rootNode_->GetLayoutType() == SmartLayoutType::GENERAL) {
+        SmartLayoutRect boundingBox = rootNode_->GetChildrenBoundingBox();
+        if (boundingBox.IsValid()) {
+            rootNode_->SetBoundingBox(boundingBox);
+        }
+    }
 }
 
 std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> SmartLayoutAlgorithm::BuildNodeIdMap(

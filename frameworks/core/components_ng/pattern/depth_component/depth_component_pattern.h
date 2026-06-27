@@ -49,8 +49,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-using OHOS::Ace::DepthComponentCompleteEvent;
-using OHOS::Ace::DepthComponentErrorEvent;
 
 class DepthComponentPaintMethod;
 
@@ -128,7 +126,7 @@ public:
         return GetBackgroundSource().IsGltf();
     }
 
-#if defined(KIT_3D_ENABLE)  && !defined(PREVIEW)
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
     {
         transformHintChangedCallbackId_ = id;
@@ -150,6 +148,16 @@ public:
         return depthSpace_;
     }
 
+    void SetRender3DScale(float render3DScale)
+    {
+        render3DScale_ = render3DScale;
+    }
+
+    float GetRender3DScale() const
+    {
+        return render3DScale_;
+    }
+
     int32_t GetBackgroundImageId()
     {
         if (!backgroundImageId_.has_value()) {
@@ -168,20 +176,6 @@ public:
         depthMap_ = depthMap;
     }
 
-    void SetOnComplete(std::function<void(const DepthComponentCompleteEvent&)>&& callback)
-    {
-        onComplete_ = std::move(callback);
-    }
-    void SetOnError(std::function<void(const DepthComponentErrorEvent&)>&& callback)
-    {
-        onError_ = std::move(callback);
-    }
-
-    void SetOnDepthMapError(std::function<void(int32_t, const std::string&)>&& callback)
-    {
-        onDepthMapError_ = std::move(callback);
-    }
-
     const ImageSourceInfo& GetDepthMap() const
     {
         return depthMap_;
@@ -190,17 +184,17 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DepthComponentPattern);
     void SetupBackgroundImageNode();
-    void RemoveBackgroundImageNode();
     void ApplyOnCompleteCallback(const RefPtr<FrameNode>& backgroundImageNode);
     void ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode);
-    std::function<void(bool)> CreateGltfLoadCallback();
     void ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode);
-    void PropagateCropToChildren();
-    void OnPaint3D();
+    void RemoveBackgroundImageNode();
     bool IsCameraChange();
+    void OnPaint3D();
 
 #if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     void LoadDepthMap();
+    void ClearDepthMap();
+    LoadNotifier CreateDepthMapLoadNotifier();
     void OnDepthMapDataReady();
     void OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& canvasImage);
     void TransferDataToRosen();
@@ -209,18 +203,16 @@ private:
     void TransferCameraParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferLightParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
+    void Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
+    void Get3DImageMatrix(OHOS::Rosen::Matrix3f& matrix);
+    void PropagateCropToChildren();
 #endif
 
-    struct TiltShiftResult {
-        float fov;
-        float xOffset;
-        float yOffset;
-    };
-    TiltShiftResult ComputeTiltShift(const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH);
-
-#if defined(KIT_3D_ENABLE)  && !defined(PREVIEW)
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     void InitGltfAdapter();
     void UpdateGltfScene();
+    std::function<void(bool)> CreateGltfLoadCallback();
+    void FireGltfLoadCallback();
     void UpdateGltfCamera();
     void UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
     void CleanupGltfResources(bool clearAdapter = false);
@@ -232,12 +224,18 @@ private:
     void MarkRender3D();
 #endif
 
+    struct TiltShiftResult {
+        float fov;
+        float xOffset;
+        float yOffset;
+    };
+    TiltShiftResult ComputeTiltShift(const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH);
+
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
+    float render3DScale_ = 1.0f;
+    float lastRender3DScale_ = 1.0f;
     ImageSourceInfo depthMap_;
     std::optional<int32_t> backgroundImageId_;
-    std::function<void(const DepthComponentCompleteEvent&)> onComplete_;
-    std::function<void(const DepthComponentErrorEvent&)> onError_;
-    std::function<void(int32_t, const std::string&)> onDepthMapError_;
 
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     BASE_NS::shared_ptr<Render3D::IMrtDepthAdapter> mrtDepthAdapter_;
@@ -258,13 +256,14 @@ private:
     float height3d_ = 0.0;
     float lastWidth3d_ = 0.0;
     float lastHeight3d_ = 0.0;
+    bool isGltfLoaded_ = false;
+    std::optional<bool> pendingGltfLoadSuccess_;
 #endif
 
     RefPtr<ImageLoadingContext> depthMapLoadingCtx_;
     std::string lastLoadedDepthMapKey_;
     float depthMapWidth_ = 0.0f;
     float depthMapHeight_ = 0.0f;
-    bool isGltfLoaded_ = false;
     bool isNeedRender_ = false;
     std::optional<OHOS::Ace::DepthCameraParams> preCameraParams_;
 };

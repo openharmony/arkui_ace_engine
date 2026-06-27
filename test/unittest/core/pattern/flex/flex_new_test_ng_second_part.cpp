@@ -557,7 +557,7 @@ HWTEST_F(FlexNewTestNG, UpdatePercentSensitiveTest, TestSize.Level0)
     algorithm.UpdatePercentSensitive(Referenced::RawPtr(flexNode));
     /**
      * @tc.expected: isUsingPercentReference_ == true means flexAlgorithm use percentReference
-     *               to initialize horizontal mainAxis size so heightPercent_ == true
+     *               to initialize vertical mainAxis size so heightPercent_ == true
      */
     EXPECT_TRUE(layoutAlgorithmWrapper->GetPercentHeight());
 }
@@ -687,7 +687,7 @@ HWTEST_F(FlexNewTestNG, WrapAndFixTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: WrapAndFixTest003
+ * @tc.name: WrapAndFixTest002
  * @tc.desc: test wrap layout algorithm use wrap and fix correctly
  * @tc.type: FUNC
  */

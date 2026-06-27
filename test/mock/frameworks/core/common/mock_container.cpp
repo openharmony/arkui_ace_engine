@@ -29,6 +29,7 @@
 namespace OHOS::Ace {
 namespace {
 int32_t g_id = 0;
+constexpr int32_t API_VERSION_MODULUS = 1000;
 } // namespace
 
 Container::Container() = default;
@@ -398,5 +399,15 @@ int32_t Container::GetCurrentApiTargetVersion()
 int32_t Container::GetApiTargetVersion() const
 {
     return apiTargetVersion_;
+}
+
+void Container::SetApiTargetVersion(int32_t apiTargetVersion)
+{
+    apiTargetVersion_ = apiTargetVersion % API_VERSION_MODULUS;
+}
+
+bool Container::IsUseNewPipeline() const
+{
+    return true;
 }
 } // namespace OHOS::Ace

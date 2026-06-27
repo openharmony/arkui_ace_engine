@@ -272,6 +272,43 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelSystemDirection001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WithEnvModelSystemDirectionAllValues001
+ * @tc.desc: WithEnvModelNG accepts all supported system direction values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelSystemDirectionAllValues001, TestSize.Level1)
+{
+    WithEnvModelNG model;
+    model.Create();
+
+    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(node, nullptr);
+
+    model.SetSystemEnvProperty(ENV_KEY_DIRECTION, TextDirection::LTR);
+    auto value = node->GetSystemEnvProperty(ENV_KEY_DIRECTION);
+    ASSERT_TRUE(value.has_value());
+    auto direction = value->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::LTR);
+
+    model.SetSystemEnvProperty(ENV_KEY_DIRECTION, TextDirection::RTL);
+    value = node->GetSystemEnvProperty(ENV_KEY_DIRECTION);
+    ASSERT_TRUE(value.has_value());
+    direction = value->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::RTL);
+
+    model.SetSystemEnvProperty(ENV_KEY_DIRECTION, TextDirection::AUTO);
+    value = node->GetSystemEnvProperty(ENV_KEY_DIRECTION);
+    ASSERT_TRUE(value.has_value());
+    direction = value->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::AUTO);
+
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
  * @tc.name: WithEnvModelSystemDirectionInvalidKey001
  * @tc.desc: WithEnvModelNG ignores direction value when system key is unsupported.
  * @tc.type: FUNC

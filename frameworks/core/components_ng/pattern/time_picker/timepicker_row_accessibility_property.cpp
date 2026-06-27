@@ -16,15 +16,35 @@
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 
 #include "base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::string COLON = ":";
+
+const DatePickerUtil::DatepickerCustomModifier* GetDatepickerCustomModifier()
+{
+    static const DatePickerUtil::DatepickerCustomModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+#ifdef ACE_UNITTEST
+        cachedModifier = DatePickerUtil::GetDatePickerCustomModifier();
+#else
+        // Dynamically load the independently compiled so library
+        // from frameworks/core/components_ng/pattern/picker directory
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DatePicker");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const DatePickerUtil::DatepickerCustomModifier*>(
+            module->GetCustomModifier("customModifier"));
+#endif
+    }
+    return cachedModifier;
+}
 } // namespace
 
 std::string TimePickerRowAccessibilityProperty::GetText() const
@@ -105,7 +125,10 @@ std::string TimePickerRowAccessibilityProperty::GetShowDatePickerText() const
     auto it = options.find(monthDaysColumnNode);
     if (it != options.end() && index >= 0 && index < it->second.size()) {
         auto date = it->second.at(index);
-        result = DatePickerPattern::GetFormatString(date);
+        auto* modifier = GetDatepickerCustomModifier();
+        CHECK_NULL_RETURN(modifier, "");
+        CHECK_NULL_RETURN(modifier->getFormatString, "");
+        result = modifier->getFormatString(date);
         result.append(" ");
     }
     return result;

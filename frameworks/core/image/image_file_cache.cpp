@@ -77,12 +77,10 @@ void ImageFileCache::SetImageCacheFilePath(const std::string& cacheFilePath)
 #else
         if (mkdir(cacheFilePath_.c_str())) {
 #endif
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path failed.");
             return;
         }
 #ifndef WINDOWS_PLATFORM
         if (chmod(cacheFilePath_.c_str(), DIRECTORY_PERMISSION) != 0) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path chmod failed.");
             return;
         }
 #endif

@@ -19,7 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
-#include "core/components_ng/pattern/picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 
 namespace OHOS::Ace {
 class ButtonTheme;

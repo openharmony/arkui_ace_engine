@@ -21,11 +21,12 @@
 1. 在 `ContentChangeManager` 中新增 translate 专用入口和待翻译文本容器，例如 `ReportTranslateTextNode`、节点弱引用集合、version/hash、pending、scope、active flag；容器存储类型必须是 `WeakPtr<PageTranslateNode>` 等抽象接口类型，不保存具体 Pattern 或 `FrameNode` 翻译业务对象。
 2. Text/RichEditor/TextField Pattern 在上树、离树、只读展示资格变化、placeholder 展示资格变化、文本实际绘制变化时通过 `PageTranslateNode` 接口调用 translate 专用入口；不得通过 `AddOnContentChangeNode` / `RemoveOnContentChangeNode` 这类纯内容变化监听接口接入翻译节点。
 3. 只有 translate active 时才允许写入 translate 专用容器；未 StartTranslate 时触发点只做常量级开关判断后返回。
-4. 增加 ArkUI 文本 snapshot 接口，收集 `Text`、Span/styled string、readonly `RichEditor`、空内容 `TextInput` 当前实际展示的 placeholder，排除输入类控件用户可编辑文本、自绘、Canvas、OCR；单次 Get 必须使用局部临时结果，不写入连续翻译容器。
+4. 增加 ArkUI 文本 snapshot 接口，收集 `Text`、Span/styled string、readonly `RichEditor`、空内容 `TextInput` 当前实际展示的 placeholder，排除输入类控件用户可编辑文本、自绘、Canvas、OCR；单次 Get 必须使用隔离 snapshot cache 保存 node 弱引用、snapshot version 和 source hash，不写入连续翻译容器。
 5. Start 后根据 translate 专用入口收到的文本实际绘制和文本变化事件生成 `NODE_ADDED` / `CONTENT_CHANGED` 内部原因，对 SA 只发 `nodeId/text/version`。
 6. 过滤仅占位布局、未实际绘制文本的节点；后续首次实际绘制时再上报。
-7. End/Reset/SA death/timeout 时只清理 translate 专用容器中的节点版本、pending 和临时译文状态，不清理纯 content change 容器。
-8. 单次 `GetPageTranslateText` 只做临时快照收集，不开启 translate active，不留下连续监听状态；不得通过临时置 `textTranslateActive_ = true` 复用 `ReportTranslateTextNode()` 写入 `translateTextNodes_` / `translateTextVersions_`。
+7. End/Reset/SA death/连续会话结束时只清理 translate 专用容器中的节点版本、pending 和临时译文状态，不清理纯 content change 容器；单次 Get timeout 只清理 snapshot cache 和一次性状态，不误清连续监听容器。
+8. 单次 `GetPageTranslateText` 只做快照收集并写隔离 snapshot cache，不开启 translate active，不留下连续监听状态；不得通过临时置 `textTranslateActive_ = true` 复用 `ReportTranslateTextNode()` 写入 `translateTextNodes_` / `translateTextVersions_`。
+9. 单次 snapshot 回填必须同时校验 nodeId、snapshot version 和 source hash；当前源文本已变化时忽略迟到译文，避免旧译文覆盖新文本。
 
 ### 不做什么
 
@@ -50,7 +51,7 @@
 | RUNTIME-ONLY | 清理只影响运行时临时状态 |
 | TRANSLATE-NODE-IFACE | manager 只保存 `WeakPtr<PageTranslateNode>`，回填和 Reset 只调用接口方法；`FrameNode` 仅用于页面遍历和可见区域判断 |
 | LISTENER-ISOLATION | 翻译监听使用 `ContentChangeManager` 内独立注册/反注册入口和待翻译文本容器；纯内容变化监听和翻译监听的 start/stop/config/cleanup 不得互相影响 |
-| ON-DEMAND-WRITE | 未处于连续翻译状态时不写 translate 容器、不提取文本、不计算 hash/version、不维护 pending、不投递 translate 延迟任务 |
+| ON-DEMAND-WRITE | 未处于连续翻译状态时不写连续 translate 容器、不维护 pending、不投递 translate 延迟任务；单次 Get 仅写隔离 snapshot cache，并在请求边界清理 |
 | SMALL-FUNCTION-REUSE | 与纯 content change 共享的节点判断、实际绘制过滤、version/hash 更新、弱引用清理和 DFX dump 摘要生成必须抽成私有小函数复用，避免复制粘贴 |
 | BUILD-MIN | 编译 content_change_manager 所属组件/so 目标和 content_change_manager unittest |
 
@@ -61,7 +62,8 @@
 | `IsValidTranslateTextNode` | 统一判断 Text / readonly RichEditor / 空内容 TextInput placeholder 是否可进入翻译容器 | 不读取或修改纯 content change 容器状态 |
 | `HasActualTextPaintContent` | 统一实际文本绘制过滤 | 未 StartTranslate 时不得触发文本提取的重计算 |
 | `BuildTranslateTextSnapshot` | 生成 nodeId/text/version 的内部快照 | 对 SA payload 只输出 `nodeId/text/version` |
-| `CollectTranslateTextSnapshotToLocal` | 单次 Get 的局部临时收集 | 不修改 active flag、translate 容器、版本缓存或 pending |
+| `CollectTranslateTextSnapshot` | 单次 Get 的隔离快照收集 | 不修改 active flag、连续 translate 容器、连续版本缓存或 pending；可写 snapshot cache 的 node 弱引用、snapshot version 和 source hash |
+| `CleanupTranslateSnapshotCache` | 清理单次 Get 的隔离快照缓存 | 在新请求开始、单次完成、失败、timeout、End/Reset/SA death 时调用，不清理纯 content change 容器 |
 | `UpdateTranslateVersionIfNeeded` | 比较文本摘要并维护 version/hash | 仅 translate active 时调用 |
 | `CleanupTranslateNodeState` | 清理弱引用、pending、临时译文状态 | 不清理纯 content change 容器 |
 | `BuildSafeTranslateDumpInfo` | 生成非正文 DFX 摘要 | 禁止输出原文/译文 |
@@ -84,11 +86,12 @@
 - 翻译节点注册/反注册通过 translate 专用入口完成，不调用 `AddOnContentChangeNode` / `RemoveOnContentChangeNode`。
 - 相同 nodeId 相同文本不重复上报，文本变化 version 增加。
 - 节点离树只做 UI 内部清理，不生成 `NODE_REMOVED`。
-- Reset/End/SA death/timeout 可清理所有翻译状态。
+- Reset/End/SA death 可清理连续翻译状态和临时译文；单次 Get timeout 可清理 snapshot cache 和一次性状态，不误清纯 content change 容器。
 - 纯 content change 监听开启/停止不改变 translate 容器；translate Start/End/Reset 不改变纯 content change 容器。
 - 未 StartTranslate 时，上树/离树/文本变化触发点不会写 translate 容器、不会计算 translate version/hash、不会投递 translate 任务。
 - 单次 GetPageTranslateText 不留下连续监听状态。
-- 单次 GetPageTranslateText 完成后 `translateTextNodes_`、版本缓存、pending 和 active flag 与调用前一致。
+- 单次 GetPageTranslateText 完成后 `translateTextNodes_`、连续版本缓存、pending 和 active flag 与调用前一致；snapshot cache 在请求完成、失败或 timeout 后清空。
+- 单次 snapshot 译文回填在 nodeId/version 匹配但 source hash 已变化时忽略该条结果。
 - 共用逻辑通过私有小函数复用，任务实现中不得出现多处分叉复制同一段节点过滤、version/hash 或清理逻辑。
 
 ## 停止条件
@@ -99,5 +102,6 @@
 
 ## 验证检查清单
 
-- [ ] content_change_manager 单测覆盖 snapshot、增量、实际绘制过滤、version 去重、reset 清理、翻译监听与纯 content change 监听隔离、未 Start 时无 translate 容器写入、单次 Get 不改变 active flag/版本缓存/节点缓存/pending
+- [ ] content_change_manager 单测覆盖 snapshot、增量、实际绘制过滤、version 去重、reset 清理、翻译监听与纯 content change 监听隔离、未 Start 时无连续 translate 容器写入、单次 Get 不改变 active flag/连续版本缓存/连续节点缓存/pending
+- [ ] content_change_manager 单测覆盖 snapshot cache 请求边界清理、snapshot version/source hash 防迟到译文回填
 - [ ] 编译 content_change_manager 所属组件/so 目标；必要时补相关 unittest 目标

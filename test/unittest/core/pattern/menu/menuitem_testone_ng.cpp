@@ -922,4 +922,251 @@ HWTEST_F(MenuItemTestOneNg, MeasureItemViews001, TestSize.Level1)
     auto childConstraint = props->CreateChildConstraint();
     algorithm->MeasureItemViews(childConstraint, layoutConstraint, AceType::RawPtr(layoutWrapper));
 }
+
+RefPtr<FrameNode> CreateSelectOverlayExtensionMenuNode(const std::u16string& contentText,
+    const std::u16string& labelText)
+{
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1, ""));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, "", MenuType::SELECT_OVERLAY_EXTENSION_MENU));
+    menuNode->MountToParent(menuWrapperNode);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>(false, 0));
+    menuItemNode->MountToParent(menuNode);
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto leftText = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto leftTextProp = leftText->GetLayoutProperty<TextLayoutProperty>();
+    if (leftTextProp && !contentText.empty()) {
+        leftTextProp->UpdateContent(contentText);
+    }
+    leftText->MountToParent(leftRow);
+    leftRow->MountToParent(menuItemNode);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rightText = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto rightTextProp = rightText->GetLayoutProperty<TextLayoutProperty>();
+    if (rightTextProp && !labelText.empty()) {
+        rightTextProp->UpdateContent(labelText);
+    }
+    rightText->MountToParent(rightRow);
+    rightRow->MountToParent(menuItemNode);
+    return menuWrapperNode;
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentLTRLeft001, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::LTR);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::LEFT);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::LEFT), TextAlign::LEFT);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentRTLLeft002, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::RTL);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::LEFT);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::LEFT), TextAlign::RIGHT);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentRTLRight003, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::RTL);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::RIGHT);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::RIGHT), TextAlign::LEFT);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentRTLStart004, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::RTL);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::START);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::START), TextAlign::END);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentRTLEnd005, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::RTL);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::END);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::END), TextAlign::START);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentRTLCenter006, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::RTL);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::CENTER);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::CENTER), TextAlign::CENTER);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentLTRRight007, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::LTR);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::RIGHT);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::RIGHT), TextAlign::RIGHT);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateTextAlignmentAutoLTR008, TestSize.Level1)
+{
+    auto textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProp->UpdateLayoutDirection(TextDirection::AUTO);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuItemContentAlign_ = static_cast<uint32_t>(TextAlign::LEFT);
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    pattern->UpdateTextAlignment(textProp, theme);
+    EXPECT_EQ(textProp->GetTextAlignValue(TextAlign::LEFT), TextAlign::LEFT);
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateContentIfSelectOverlayExtensionMenu001, TestSize.Level1)
+{
+    auto menuWrapper = CreateSelectOverlayExtensionMenuNode(u"hello_content", u"");
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string content;
+    pattern->UpdateContentIfSelectOverlayExtensionMenu(content);
+    EXPECT_EQ(content, "hello_content");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateContentIfSelectOverlayExtensionMenu002, TestSize.Level1)
+{
+    auto menuWrapper = CreateSelectOverlayExtensionMenuNode(u"", u"");
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string content = "original";
+    pattern->UpdateContentIfSelectOverlayExtensionMenu(content);
+    EXPECT_EQ(content, "original");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateContentIfSelectOverlayExtensionMenuNullHost003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    std::string content = "original";
+    pattern->UpdateContentIfSelectOverlayExtensionMenu(content);
+    EXPECT_EQ(content, "original");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateContentIfSelectOverlayExtensionMenuNotSelectOverlay004, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.type = MenuType::MENU;
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string content = "original";
+    pattern->UpdateContentIfSelectOverlayExtensionMenu(content);
+    EXPECT_EQ(content, "original");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateLabelIfSelectOverlayExtensionMenu001, TestSize.Level1)
+{
+    auto menuWrapper = CreateSelectOverlayExtensionMenuNode(u"", u"hello_label");
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string label;
+    pattern->UpdateLabelIfSelectOverlayExtensionMenu(label);
+    EXPECT_EQ(label, "hello_label");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateLabelIfSelectOverlayExtensionMenu002, TestSize.Level1)
+{
+    auto menuWrapper = CreateSelectOverlayExtensionMenuNode(u"", u"");
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string label = "original";
+    pattern->UpdateLabelIfSelectOverlayExtensionMenu(label);
+    EXPECT_EQ(label, "original");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateLabelIfSelectOverlayExtensionMenuNullHost003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<MenuItemPattern>(false, 0);
+    std::string label = "original";
+    pattern->UpdateLabelIfSelectOverlayExtensionMenu(label);
+    EXPECT_EQ(label, "original");
+}
+
+HWTEST_F(MenuItemTestOneNg, UpdateLabelIfSelectOverlayExtensionMenuNotSelectOverlay004, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.type = MenuType::MENU;
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string label = "original";
+    pattern->UpdateLabelIfSelectOverlayExtensionMenu(label);
+    EXPECT_EQ(label, "original");
+}
 } // namespace OHOS::Ace::NG

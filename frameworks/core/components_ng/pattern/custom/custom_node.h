@@ -24,7 +24,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
@@ -49,6 +48,8 @@ public:
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+
+    void OnAttachToMainTree(bool) override;
 
     bool IsAtomicNode() const override
     {
@@ -160,6 +161,8 @@ public:
     std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
     void FireCustomDisappear() override;
+
+    void FireClearParentReusePoolIfNeeded();
 
     // called for DFX
     void DumpInfo() override;

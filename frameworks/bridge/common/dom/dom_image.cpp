@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/common/dom/dom_image.h"
 
+#include "core/components/flex/flex_item_component.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
 

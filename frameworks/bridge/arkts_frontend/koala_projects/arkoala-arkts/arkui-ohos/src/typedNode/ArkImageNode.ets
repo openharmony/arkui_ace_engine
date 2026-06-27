@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import { ArkImageComponent, ColorContent, ImageContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageCompleteEvent, ImageErrorCallback, ResizableOptions, ImageRotateOrientation, ImageAttribute, ImageAlt, ContentTransitionEffect } from "../component/image";
+import { ArkImageComponent, ColorContent, ImageContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageCompleteEvent, ImageErrorCallback, ResizableOptions, ImageRotateOrientation, ImageAttribute, ImageAlt } from "../component/image";
 import { ImageAnalyzerConfig, ImageAIOptions } from "../component/imageCommon"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "../component/enums"
 import { ArkBaseNode } from "./ArkBaseNode";
 import { PointLightStyle } from "../component/common"
+import { ContentTransitionEffect } from "#generated"
 import { ColorMetrics } from "../Graphics"
 import { PixelMap, DrawableDescriptor, AnimatedDrawableDescriptor, LayeredDrawableDescriptor } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr } from "../component/units"
@@ -201,4 +202,4 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
         // we call this function outside of class, so need to make it public
         super.markDirty()
     }
-}                  
+}

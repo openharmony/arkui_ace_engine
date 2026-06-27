@@ -3020,4 +3020,136 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerPlayClickSoundEffectTest001, Test
     clickRecognizer->PlayClickSoundEffect(static_cast<int32_t>(TEST_X), static_cast<int32_t>(TEST_Y));
     EXPECT_EQ(clickRecognizer->time_.time_since_epoch().count(), oldTimeCount);
 }
+
+/**
+ * @tc.name: ClickRecognizerSetShouldReportTouchDownTest001
+ * @tc.desc: Test SetShouldReportTouchDown modifies shouldReportTouchDown_ flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSetShouldReportTouchDownTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    EXPECT_FALSE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->SetShouldReportTouchDown(true);
+    EXPECT_TRUE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->SetShouldReportTouchDown(false);
+    EXPECT_FALSE(clickRecognizer->shouldReportTouchDown_);
+}
+
+/**
+ * @tc.name: ReportTouchDownToResSchedFrameNodeInvalidTest001
+ * @tc.desc: Test ReportTouchDownToResSched returns early when frameNode is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ReportTouchDownToResSchedFrameNodeInvalidTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    clickRecognizer->ReportTouchDownToResSched(touchEvent, pipeline);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::PENDING);
+}
+
+/**
+ * @tc.name: ReportTouchDownToResSchedShouldReportTrueTest001
+ * @tc.desc: Test ReportTouchDownToResSched calls ResSchedReport when shouldReportTouchDown_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ReportTouchDownToResSchedShouldReportTrueTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    clickRecognizer->SetShouldReportTouchDown(true);
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    clickRecognizer->ReportTouchDownToResSched(touchEvent, pipeline);
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: ReportTouchDownToResSchedShouldReportFalseTest001
+ * @tc.desc: Test ReportTouchDownToResSched does not report when shouldReportTouchDown_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ReportTouchDownToResSchedShouldReportFalseTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    clickRecognizer->SetShouldReportTouchDown(false);
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    clickRecognizer->ReportTouchDownToResSched(touchEvent, pipeline);
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    clickRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    clickRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    clickRecognizer->gestureInfo_ = nullptr;
+    auto result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG

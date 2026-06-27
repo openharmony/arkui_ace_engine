@@ -235,12 +235,13 @@ public:
     virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
     virtual int32_t GetSize() const { return -1; }
     virtual bool IsAutoCleaned(int32_t index) const { return false; }
+    virtual bool GetAutoCleanedCanRecovery(int32_t index) const { return false; }
     virtual void ClearAutoCleanedState(int32_t index) {}
     virtual std::string GetAutoCleanedState(int32_t index) const { return ""; }
     virtual void SaveStateToJsCallback(
         int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
     {}
-    virtual void MarkAutoCleanedFlag(uint64_t navDestinationId) {}
+    virtual void MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery = true) {}
     virtual uint64_t GetNavDestinationIdInt(int32_t index) { return -1; }
     virtual bool GetIsForceSet(int32_t index) { return false; }
     virtual void ResetIsForceSetFlag(int32_t index) {}
@@ -335,6 +336,16 @@ public:
     RefPtr<NavigationStackExtend> GetNavigationStackExtend() const
     {
         return navigationStackExtend_;
+    }
+
+    virtual bool GetOhmUrl(const RefPtr<UINode>& customNode, std::string& moduleName, std::string& fileName)
+    {
+        return false;
+    }
+
+    virtual bool CreateNodeFromRecovery(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
+    {
+        return false;
     }
 
 protected:

@@ -19,11 +19,11 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
-#include "core/event/multimodal/ace_multimodal_event.h"
 #include "core/event/multimodal/voice_event.h"
 
 namespace OHOS::Ace {
 
+class AceMultimodalEvent;
 using MultimodalEventCallback = std::function<void(const AceMultimodalEvent&)>;
 
 class MultimodalSubscriber : public AceType {

@@ -267,7 +267,20 @@ class ObserveV2 {
       }
       PUV2ViewBase.endPreRender();
     };
-    setTimeout(() => createPreRenderTask(), 5);
+    // Defer the build to a macrotask (runs after the current render flush). Record
+    // a promise so preRender() waits for the pool push before resolving, otherwise
+    // the consumer renders against an empty pool and creates a fresh node.
+    pool.preRenderTasks_.push(new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          createPreRenderTask();
+        } catch(e) {
+          reject(e);
+          return;
+        }
+        resolve();
+      }, 5);
+    }));
   }
 
   /**

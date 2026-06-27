@@ -338,6 +338,40 @@ void DumpItemPosition(const SwiperLayoutAlgorithm::PositionMap& positions)
                                            .append(",endPos:" + std::to_string(item.second.endPos)));
     }
 }
+
+const char* ConvertIndicatorIconSourceTypeToString(IndicatorIconParam::SourceType sourceType)
+{
+    switch (sourceType) {
+        case IndicatorIconParam::SourceType::SYMBOL:
+            return "SYMBOL";
+        case IndicatorIconParam::SourceType::MEDIA:
+            return "MEDIA";
+        case IndicatorIconParam::SourceType::NONE:
+        default:
+            return "NONE";
+    }
+}
+
+std::unique_ptr<JsonValue> BuildIndicatorIconMapJson(
+    const std::map<int32_t, IndicatorIconParam>& indicatorIconMap)
+{
+    auto iconArray = JsonUtil::CreateArray(true);
+    CHECK_NULL_RETURN(iconArray, nullptr);
+    for (const auto& [index, iconParam] : indicatorIconMap) {
+        if (iconParam.sourceType == IndicatorIconParam::SourceType::NONE) {
+            continue;
+        }
+        auto iconJson = JsonUtil::Create(true);
+        CHECK_NULL_CONTINUE(iconJson);
+        iconJson->Put("index", index);
+        iconJson->Put("sourceType", ConvertIndicatorIconSourceTypeToString(iconParam.sourceType));
+        if (iconParam.sourceType == IndicatorIconParam::SourceType::MEDIA) {
+            iconJson->Put("iconSrc", iconParam.iconSrc.c_str());
+        }
+        iconArray->Put(iconJson);
+    }
+    return iconArray;
+}
 } // namespace
 
 void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
@@ -487,6 +521,12 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
         "maxDisplayCount", (params->maxDisplayCountVal.has_value()) ? params->maxDisplayCountVal.value() : 0);
     jsonValue->Put("space", params->dimSpace.value_or(8.0_vp).ToString().c_str());
     jsonValue->Put("ignoreSize", params->ignoreSizeValue.value_or(false) ? "true" : "false");
+    auto indicatorIconJson = BuildIndicatorIconMapJson(params->indicatorIconMap);
+    if (indicatorIconJson) {
+        jsonValue->PutRef("indicatorIcon", std::move(indicatorIconJson));
+    } else {
+        jsonValue->PutRef("indicatorIcon", JsonUtil::CreateArray(true));
+    }
     return jsonValue->ToString();
 }
 

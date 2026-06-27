@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::V2 {
 
-class ACE_EXPORT GridPositionController : public ScrollController {
+class ACE_FORCE_EXPORT GridPositionController : public ScrollController {
     DECLARE_ACE_TYPE(GridPositionController, ScrollController);
 
 public:

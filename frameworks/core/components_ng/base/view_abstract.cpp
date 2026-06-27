@@ -96,6 +96,7 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
 
 #ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
@@ -136,6 +137,58 @@ bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
     return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
 }
 
+UiMaterialStyle ConvertToECStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
+        return static_cast<UiMaterialStyle>(style - UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+UiMaterialStyle ConvertToECSubStyle(UiMaterialStyle from)
+{
+    int32_t style = static_cast<int32_t>(from);
+    if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT + UI_MATERIAL_STYLES_COUNT);
+    } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
+               style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
+        return static_cast<UiMaterialStyle>(style + UI_MATERIAL_STYLES_COUNT);
+    }
+    return from;
+}
+
+bool CheckNotLegalStyle(UiMaterialStyle from)
+{
+    if (static_cast<int32_t>(from) < static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) ||
+        static_cast<int32_t>(from) > static_cast<int32_t>(UiMaterialStyle::MAX)) {
+        return true;
+    }
+    return false;
+}
+
+void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECStyle(newOptions->style);
+    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->applyShadow = false;
+    newOptions->disableLightEffect = true;
+    newOptions->interactive = false;
+    newOptions->lightEffectOptions = std::nullopt;
+    newOptions->colorResObj = nullptr;
+}
+
+void ConvertToImmersiveOptionsECSub(std::shared_ptr<ImmersiveOptions>& newOptions)
+{
+    CHECK_NULL_VOID(newOptions);
+    newOptions->style = ConvertToECSubStyle(newOptions->style);
+}
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -6506,6 +6559,44 @@ void ViewAbstract::SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter)
 void ViewAbstract::SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(UiMaterialFilter, materialFilter, frameNode);
+}
+
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveEC(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return nullptr;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return nullptr;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, nullptr);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, nullptr);
+    ConvertToImmersiveOptionsEC(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
+    return newMaterial;
+}
+
+RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_RETURN(material, nullptr);
+    auto options = material->GetImmersiveOptions();
+    if (material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE) || !options) {
+        return material;
+    }
+    if (CheckNotLegalStyle(options->style)) {
+        return material;
+    }
+    auto newMaterial = material->Copy();
+    CHECK_NULL_RETURN(newMaterial, material);
+    auto newOptions = newMaterial->GetImmersiveOptions();
+    CHECK_NULL_RETURN(newOptions, material);
+    ConvertToImmersiveOptionsECSub(options);
+    newMaterial->SetImmersiveOptions(*options);
+    return newMaterial;
 }
 
 void ViewAbstract::SetSystemMaterial(const UiMaterial* material)

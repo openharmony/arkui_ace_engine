@@ -20,7 +20,8 @@
 #include "base/utils/utils.h"
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_item_model.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 
@@ -28,88 +29,104 @@ using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
+namespace {
+
+NG::GridItemModelNG* GetGridItemModel()
+{
+    static NG::GridItemModelNG* cachedModel = nullptr;
+    if (!cachedModel) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridItem");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find GridItem dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::GridItemModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
+
 extern "C" {
 void FfiOHOSAceFrameworkGridItemCreate()
 {
     NG::GridItemStyle style {};
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->Create(style);
+    GetGridItemModel()->Create(style);
 }
 
 void FfiOHOSAceFrameworkGridItemCreateWithOptions(int32_t value)
 {
     auto style = static_cast<NG::GridItemStyle>(value);
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->Create(style);
+    GetGridItemModel()->Create(style);
 }
 
 void FfiOHOSAceFrameworkGridItemSetColumnStart(int32_t columnStart)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetColumnStart(columnStart);
+    GetGridItemModel()->SetColumnStart(columnStart);
 }
 
 void FfiOHOSAceFrameworkGridItemSetColumnEnd(int32_t columnEnd)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetColumnEnd(columnEnd);
+    GetGridItemModel()->SetColumnEnd(columnEnd);
 }
 
 void FfiOHOSAceFrameworkGridItemSetRowStart(int32_t rowStart)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetRowStart(rowStart);
+    GetGridItemModel()->SetRowStart(rowStart);
 }
 
 void FfiOHOSAceFrameworkGridItemSetRowEnd(int32_t rowEnd)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetRowEnd(rowEnd);
+    GetGridItemModel()->SetRowEnd(rowEnd);
 }
 
 void FfiOHOSAceFrameworkGridItemForceRebuild(bool forceRebuild)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetForceRebuild(forceRebuild);
+    GetGridItemModel()->SetForceRebuild(forceRebuild);
 }
 
 void FfiOHOSAceFrameworkGridItemSelectable(bool value)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetSelectable(value);
+    GetGridItemModel()->SetSelectable(value);
 }
 
 void FfiOHOSAceFrameworkGridItemSelected(bool value)
 {
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetSelected(value);
+    GetGridItemModel()->SetSelected(value);
 }
 
 void FfiOHOSAceFrameworkGridItemOnSelect(void (*callback)(bool isSelected))
@@ -120,10 +137,10 @@ void FfiOHOSAceFrameworkGridItemOnSelect(void (*callback)(bool isSelected))
         PipelineContext::SetCallBackNode(node);
         lambda(isSelected);
     };
-    if (GridItemModel::GetInstance() == nullptr) {
+    if (GetGridItemModel() == nullptr) {
         LOGE("GridItem Instance is null");
         return;
     }
-    GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
+    GetGridItemModel()->SetOnSelect(std::move(onSelectId));
 }
 }

@@ -16,8 +16,11 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H
 
+#include "core/interfaces/arkoala/arkoala_api.h"
+
 typedef struct ArkUIStyledStringAPI ArkUIStyledStringAPI;
 namespace OHOS::Ace::StyledStringAdapter {
 const ArkUIStyledStringAPI* GetStyledStringAPI();
+void DestroySpanString(ArkUI_StyledString_Descriptor* descriptor);
 } // namespace OHOS::Ace::StyledStringAdapter
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_STYLED_STRING_IMPL_H

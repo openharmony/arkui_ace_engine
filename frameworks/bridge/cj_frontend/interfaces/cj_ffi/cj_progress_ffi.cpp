@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG;
@@ -31,6 +32,22 @@ const std::vector<NG::ProgressType> PROGRESS_TYPES_NG = { NG::ProgressType::LINE
     NG::ProgressType::MOON, NG::ProgressType::SCALE, NG::ProgressType::CAPSULE };
 
 } // namespace
+
+namespace OHOS::Ace {
+
+NG::ProgressModelNG* GetProgressModel()
+{
+    static NG::ProgressModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Progress");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find progress dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::ProgressModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkProgressCreate(double value, double total, int32_t type)
@@ -48,7 +65,7 @@ void FfiOHOSAceFrameworkProgressCreate(double value, double total, int32_t type)
         realValue = 0;
     }
 
-    ProgressModel::GetInstance()->Create(0.0, realValue, 0.0, realTotal, PROGRESS_TYPES_NG[type]);
+    GetProgressModel()->Create(0.0, realValue, 0.0, realTotal, PROGRESS_TYPES_NG[type]);
 }
 
 void FfiOHOSAceFrameworkProgressSetValue(double value)
@@ -58,12 +75,12 @@ void FfiOHOSAceFrameworkProgressSetValue(double value)
         realValue = 0;
     }
 
-    ProgressModel::GetInstance()->SetValue(realValue);
+    GetProgressModel()->SetValue(realValue);
 }
 
 void FfiOHOSAceFrameworkProgressSetColor(uint32_t color)
 {
-    ProgressModel::GetInstance()->SetColor(Color(color));
+    GetProgressModel()->SetColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkProgressResetColor(int32_t type)
@@ -93,13 +110,13 @@ void FfiOHOSAceFrameworkProgressResetColor(int32_t type)
     beginSideColor.SetDimension(Dimension(1.0f));
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
-    ProgressModel::GetInstance()->SetGradientColor(gradient);
-    ProgressModel::GetInstance()->SetColor(colorVal);
+    GetProgressModel()->SetGradientColor(gradient);
+    GetProgressModel()->SetColor(colorVal);
 }
 
 void FfiOHOSAceFrameworkProgressSetBackgroundColor(uint32_t color)
 {
-    ProgressModel::GetInstance()->SetBackgroundColor(Color(color));
+    GetProgressModel()->SetBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkProgressResetBackgroundColor(int32_t type)
@@ -114,7 +131,7 @@ void FfiOHOSAceFrameworkProgressResetBackgroundColor(int32_t type)
     colorVal = (PROGRESS_TYPES[type] == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
                : (PROGRESS_TYPES[type] == ProgressType::RING)  ? theme->GetRingProgressBgColor()
                                                                : theme->GetTrackBgColor();
-    ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
+    GetProgressModel()->SetBackgroundColor(colorVal);
 }
 
 void FfiOHOSAceFrameworkProgressSetGradientColor(
@@ -129,7 +146,7 @@ void FfiOHOSAceFrameworkProgressSetGradientColor(
         gradientColor.SetDimension(colorDimension);
         gradient.AddColor(gradientColor);
         gradient.AddColor(gradientColor);
-        ProgressModel::GetInstance()->SetGradientColor(gradient);
+        GetProgressModel()->SetGradientColor(gradient);
         return;
     }
 
@@ -140,7 +157,7 @@ void FfiOHOSAceFrameworkProgressSetGradientColor(
         gradientColor.SetDimension(colorDimension);
         gradient.AddColor(gradientColor);
     }
-    ProgressModel::GetInstance()->SetGradientColor(gradient);
+    GetProgressModel()->SetGradientColor(gradient);
 }
 
 void FfiOHOSAceFrameworkProgressSetStyle(
@@ -149,69 +166,69 @@ void FfiOHOSAceFrameworkProgressSetStyle(
     Dimension strokeWidthValue(strokeWidth, static_cast<DimensionUnit>(strokeWidthUnit));
     Dimension scaleWidthValue(scaleWidth, static_cast<DimensionUnit>(scaleWidthUnit));
 
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthValue);
-    ProgressModel::GetInstance()->SetScaleCount(scaleCount);
-    ProgressModel::GetInstance()->SetScaleWidth(scaleWidthValue);
+    GetProgressModel()->SetStrokeWidth(strokeWidthValue);
+    GetProgressModel()->SetScaleCount(scaleCount);
+    GetProgressModel()->SetScaleWidth(scaleWidthValue);
 }
 
 void FfiOHOSAceFrameworkProgressSetLinearStyle(LinearStyle linearStyle)
 {
     CalcDimension strokeWidthDimension(linearStyle.widthValue, static_cast<DimensionUnit>(linearStyle.widthUnitType));
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
-    ProgressModel::GetInstance()->SetLinearSweepingEffect(linearStyle.enableScanEffect);
+    GetProgressModel()->SetStrokeWidth(strokeWidthDimension);
+    GetProgressModel()->SetLinearSweepingEffect(linearStyle.enableScanEffect);
     CalcDimension strokeRadiusDimension(
         linearStyle.radiusValue, static_cast<DimensionUnit>(linearStyle.radiusUnitType));
     if (LessNotEqual(strokeRadiusDimension.Value(), 0.0f) || strokeRadiusDimension.Unit() == DimensionUnit::PERCENT) {
-        ProgressModel::GetInstance()->ResetStrokeRadius();
+        GetProgressModel()->ResetStrokeRadius();
         return;
     }
-    ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
+    GetProgressModel()->SetStrokeRadius(strokeRadiusDimension);
 }
 
 void FfiOHOSAceFrameworkProgressSetCapsuleStyle(CapsuleStyle capsuleStyle, const char* family)
 {
     CalcDimension borderWidth(capsuleStyle.borderWidthValue, static_cast<DimensionUnit>(capsuleStyle.borderWidthUnit));
-    ProgressModel::GetInstance()->SetBorderWidth(borderWidth);
-    ProgressModel::GetInstance()->SetBorderColor(static_cast<const OHOS::Ace::Color>(capsuleStyle.borderColor));
-    ProgressModel::GetInstance()->SetSweepingEffect(capsuleStyle.enableScanEffect);
-    ProgressModel::GetInstance()->SetShowText(capsuleStyle.showDefaultPercentage);
-    capsuleStyle.content == NULL ? ProgressModel::GetInstance()->SetText(std::nullopt)
-                                 : ProgressModel::GetInstance()->SetText(capsuleStyle.content);
-    ProgressModel::GetInstance()->SetFontColor(Color(capsuleStyle.fontColor));
+    GetProgressModel()->SetBorderWidth(borderWidth);
+    GetProgressModel()->SetBorderColor(static_cast<const OHOS::Ace::Color>(capsuleStyle.borderColor));
+    GetProgressModel()->SetSweepingEffect(capsuleStyle.enableScanEffect);
+    GetProgressModel()->SetShowText(capsuleStyle.showDefaultPercentage);
+    capsuleStyle.content == NULL ? GetProgressModel()->SetText(std::nullopt)
+                                 : GetProgressModel()->SetText(capsuleStyle.content);
+    GetProgressModel()->SetFontColor(Color(capsuleStyle.fontColor));
     CalcDimension fontSize(capsuleStyle.fontSizeValue, static_cast<DimensionUnit>(capsuleStyle.fontSizeUnit));
-    ProgressModel::GetInstance()->SetFontSize(fontSize);
-    ProgressModel::GetInstance()->SetFontWeight(static_cast<FontWeight>(capsuleStyle.fontWeight));
-    ProgressModel::GetInstance()->SetFontFamily(ConvertStrToFontFamilies(family));
-    ProgressModel::GetInstance()->SetItalicFontStyle(static_cast<OHOS::Ace::FontStyle>(capsuleStyle.fontStyle));
-    ProgressModel::GetInstance()->SetSmoothEffect(capsuleStyle.enableSmoothEffect);
+    GetProgressModel()->SetFontSize(fontSize);
+    GetProgressModel()->SetFontWeight(static_cast<FontWeight>(capsuleStyle.fontWeight));
+    GetProgressModel()->SetFontFamily(ConvertStrToFontFamilies(family));
+    GetProgressModel()->SetItalicFontStyle(static_cast<OHOS::Ace::FontStyle>(capsuleStyle.fontStyle));
+    GetProgressModel()->SetSmoothEffect(capsuleStyle.enableSmoothEffect);
 }
 
 void FfiOHOSAceFrameworkProgressSetScaleRingStyle(ScaleRingStyle scaleRingStyle)
 {
     CalcDimension strokeWidthDimension(
         scaleRingStyle.strokeWidthValue, static_cast<DimensionUnit>(scaleRingStyle.strokeWidthUnit));
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
-    ProgressModel::GetInstance()->SetScaleCount(scaleRingStyle.scaleCount);
+    GetProgressModel()->SetStrokeWidth(strokeWidthDimension);
+    GetProgressModel()->SetScaleCount(scaleRingStyle.scaleCount);
 
-    ProgressModel::GetInstance()->SetSmoothEffect(scaleRingStyle.enableSmoothEffect);
+    GetProgressModel()->SetSmoothEffect(scaleRingStyle.enableSmoothEffect);
     CalcDimension scaleWidthDimension(
         scaleRingStyle.scaleWidthValue, static_cast<DimensionUnit>(scaleRingStyle.scaleWidthUnit));
-    ProgressModel::GetInstance()->SetScaleWidth(scaleWidthDimension);
+    GetProgressModel()->SetScaleWidth(scaleWidthDimension);
 }
 
 void FfiOHOSAceFrameworkProgressSetRingStyle(RingStyle ringStyle)
 {
     CalcDimension strokeWidthDimension(ringStyle.value, static_cast<DimensionUnit>(ringStyle.unitType));
-    ProgressModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
-    ProgressModel::GetInstance()->SetPaintShadow(ringStyle.shadow);
+    GetProgressModel()->SetStrokeWidth(strokeWidthDimension);
+    GetProgressModel()->SetPaintShadow(ringStyle.shadow);
 
-    ProgressModel::GetInstance()->SetProgressStatus(static_cast<ProgressStatus>(ringStyle.status));
-    ProgressModel::GetInstance()->SetRingSweepingEffect(ringStyle.enableScanEffect);
-    ProgressModel::GetInstance()->SetSmoothEffect(ringStyle.enableSmoothEffect);
+    GetProgressModel()->SetProgressStatus(static_cast<ProgressStatus>(ringStyle.status));
+    GetProgressModel()->SetRingSweepingEffect(ringStyle.enableScanEffect);
+    GetProgressModel()->SetSmoothEffect(ringStyle.enableSmoothEffect);
 }
 
 void FfiOHOSAceFrameworkProgressSetEclipseStyle(bool enableSmoothEffect)
 {
-    ProgressModel::GetInstance()->SetSmoothEffect(enableSmoothEffect);
+    GetProgressModel()->SetSmoothEffect(enableSmoothEffect);
 }
 }

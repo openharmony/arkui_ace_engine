@@ -19,7 +19,10 @@
 
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/text/span/image_span_view.h"
+#include "core/components_ng/pattern/text/span/bridge/image_span/image_span_dynamic_module.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 #ifndef __NON_OHOS__
 #include "pixel_map_impl.h"
@@ -30,6 +33,16 @@ using namespace OHOS::Ace;
 namespace {
 const std::vector<VerticalAlign> VERTICAL_ALIGNS = { VerticalAlign::TOP, VerticalAlign::CENTER, VerticalAlign::BOTTOM,
     VerticalAlign::BASELINE };
+const CJUIImageSpanModifier* GetImageSpanModifier()
+{
+    static const CJUIImageSpanModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ImageSpan");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIImageSpanModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 TextBackgroundStyle ParseTextBackgroundStyle(uint32_t color, double radiusDouble, int32_t unit)
@@ -79,7 +92,7 @@ void FfiOHOSAceFrameworkImageSpanCreateWithUrl(const char* url)
     imageInfoConfig.isUriPureNumber = false;
     imageInfoConfig.isImageSpan = true;
     ImageModel::GetInstance()->Create(imageInfoConfig);
-    NG::ImageSpanView::Create();
+    GetImageSpanModifier()->createImageSpan();
 }
 
 void FfiOHOSAceFrameworkImageSpanCreateWithPixelMap(int64_t id)
@@ -104,7 +117,7 @@ void FfiOHOSAceFrameworkImageSpanCreateWithPixelMap(int64_t id)
     imageInfoConfig.isImageSpan = true;
     ImageModel::GetInstance()->Create(imageInfoConfig);
 #endif
-    NG::ImageSpanView::Create();
+    GetImageSpanModifier()->createImageSpan();
 }
 
 void FfiOHOSAceFrameworkImageSpanVerticalAlign(int32_t value)
@@ -113,7 +126,8 @@ void FfiOHOSAceFrameworkImageSpanVerticalAlign(int32_t value)
         LOGE("invalid value for vertical align");
         return;
     }
-    NG::ImageSpanView::SetVerticalAlign(VERTICAL_ALIGNS[value]);
+    auto frameNode = reinterpret_cast<ArkUINodeHandle>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    GetImageSpanModifier()->setImageSpanVerticalAlign(frameNode, static_cast<int32_t>(VERTICAL_ALIGNS[value]));
 }
 
 void FfiOHOSAceFrameworkImageSpanObjectFit(int32_t value)
@@ -128,13 +142,15 @@ void FfiOHOSAceFrameworkImageSpanObjectFit(int32_t value)
 void FfiOHOSAceFrameworkImageSpanTextBackgroundStyle(uint32_t color, double radius, int32_t unit)
 {
     auto textBackgroundStyle = ParseTextBackgroundStyle(color, radius, unit);
-    NG::ImageSpanView::SetPlaceHolderStyle(textBackgroundStyle);
+    auto frameNode = reinterpret_cast<ArkUINodeHandle>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    GetImageSpanModifier()->setImageSpanPlaceHolderStyle(frameNode, static_cast<void*>(&textBackgroundStyle));
 }
 
 void FfiOHOSAceFrameworkImageSpanTextBackgroundStyleBorder(uint32_t color, CBorderRadiuses radius)
 {
     auto textBackgroundStyle = ParseTextBackgroundStyle(color, radius);
-    NG::ImageSpanView::SetPlaceHolderStyle(textBackgroundStyle);
+    auto frameNode = reinterpret_cast<ArkUINodeHandle>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    GetImageSpanModifier()->setImageSpanPlaceHolderStyle(frameNode, static_cast<void*>(&textBackgroundStyle));
 }
 
 void FfiOHOSAceFrameworkImageSpanAlt(int64_t pixelMapId)

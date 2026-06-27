@@ -128,22 +128,7 @@ public:
         return scrollableDistance_;
     }
 
-    bool IsRowReverse() const
-    {
-        return direction_ == FlexDirection::ROW_REVERSE;
-    }
-
-    bool IsColReverse() const
-    {
-        return direction_ == FlexDirection::COLUMN_REVERSE;
-    }
-
     RefPtr<ScrollableController> GetScrollPositionController() const;
-
-    void SetDirection(FlexDirection direction)
-    {
-        direction_ = direction;
-    }
 
     FocusPattern GetFocusPattern() const override
     {
@@ -480,7 +465,6 @@ private:
     SizeF viewPort_;
     SizeF viewSize_;
     SizeF viewPortExtent_;
-    FlexDirection direction_ { FlexDirection::COLUMN };
 
     /* ============================= zoom Enhancements ============================= */
 public:

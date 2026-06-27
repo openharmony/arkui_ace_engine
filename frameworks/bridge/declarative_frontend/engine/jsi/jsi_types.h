@@ -287,6 +287,7 @@ public:
     ~JsiFunction() override = default;
 
     JsiRef<JsiValue> Call(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
+    JsiRef<JsiValue> CallWithObjCheck(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
     static panda::Local<panda::FunctionRef> New(JsiFunctionCallback func);
     template<typename S>
     static auto Cast(const JsiType<S>& that)

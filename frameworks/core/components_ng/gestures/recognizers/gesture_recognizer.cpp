@@ -164,6 +164,9 @@ bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
         default:
             break;
     }
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+        NotifyManagerStateChange(refereeState_);
+    }
     return true;
 }
 
@@ -244,6 +247,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         if (bridgeObj) {
             bridgeObj->HandleBridgeModeEvent(event);
         }
+    }
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::END || event.action == AxisAction::CANCEL) {
+        NotifyManagerStateChange(refereeState_);
     }
     return true;
 }

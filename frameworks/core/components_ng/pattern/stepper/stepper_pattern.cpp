@@ -22,12 +22,13 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -486,8 +487,11 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     hostNode->RemoveRightButtonNode();
-    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(LOADING_PROGRESS_ETS_TAG,
-        hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
+    auto* loadingProgressModifier = NG::NodeModifier::GetLoadingProgressModifier();
+    CHECK_NULL_VOID(loadingProgressModifier);
+    auto loadingProgressNode = AceType::Claim(reinterpret_cast<FrameNode*>(
+        loadingProgressModifier->createLoadingProgressFrameNode(hostNode->GetRightButtonId())));
+    CHECK_NULL_VOID(loadingProgressNode);
     loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(stepperTheme->GetProgressDiameter()), CalcLength(stepperTheme->GetProgressDiameter())));
     loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>()->UpdateColor(

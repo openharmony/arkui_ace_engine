@@ -139,7 +139,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition from %{public}s to %{public}s",
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition %{public}s -> %{public}s",
         position_.ToString().c_str(), position.ToString().c_str());
     position_ = position;
     optionalPosition_ = position;
@@ -245,7 +245,7 @@ void TextFieldManagerNG::GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocus
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
     isScrollableChild_ = scrollPattern->IsScrollToSafeAreaHelper();
-    TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
+    TAG_LOGI(ACE_KEYBOARD, "isScrollableChild=%{public}d", isScrollableChild_);
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
@@ -306,8 +306,10 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
 
     // caret above scroll's content region
     if (LessNotEqual(diffTop, 0)) {
-        TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffTop=%{public}f",
+        TAG_LOGI(ACE_KEYBOARD, "Scroll:%{public}s Caret:%{public}s Offset=%{public}f DiffTop=%{public}f",
             scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
+        // USER: keyboard show/hide caused by user focusing/blurring the TextField
+        scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return true;
     }
@@ -324,12 +326,14 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         bottomInset.start : scrollableRect.Bottom();
     diffBot = scrollBottom - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     CHECK_NULL_RETURN(diffBot < 0, false);
-    TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
+    TAG_LOGI(ACE_KEYBOARD, "Scroll:%{public}s Caret:%{public}s Offset=%{public}f DiffBot=%{public}f",
         scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);
     if (caretRect.Height() >= scrollableRect.Height()) {
-        TAG_LOGI(ACE_KEYBOARD, "caret height higher then whole scroll, don't scroll");
+        TAG_LOGI(ACE_KEYBOARD, "caret > scroll area, skip");
         return false;
     }
+     // USER: keyboard show/hide caused by user focusing/blurring the TextField
+    scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }
@@ -352,7 +356,7 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
         if (nowOrientation != keyboardOrientation) {
             // When rotating the screen, sometimes we might get a keyboard height that in wrong
             // orientation due to timeing issue. In this case, we assume there is no keyboard.
-            TAG_LOGI(ACE_KEYBOARD, "Current Orientation can't match keyboard orientation");
+            TAG_LOGI(ACE_KEYBOARD, "orientation mismatch");
             keyboardInset = { .start = bottom, .end = bottom };
         }
     }
@@ -424,7 +428,7 @@ void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField
     CHECK_NULL_VOID(parent);
     auto sheetNodePattern = parent->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
-    TAG_LOGI(ACE_KEYBOARD, "Force AvoidKeyboard in sheet");
+    TAG_LOGI(ACE_KEYBOARD, "AvoidKB in sheet");
     sheetNodePattern->AvoidSafeArea(true);
 }
 
@@ -484,7 +488,7 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(const RefPtr<FrameNode
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
-        TAG_LOGI(ACE_KEYBOARD, "navNode id:%{public}d, avoidKeyboardOffset:%{public}f", navNode->GetId(),
+        TAG_LOGI(ACE_KEYBOARD, "Nav%{public}d offset=%{public}f", navNode->GetId(),
             avoidKeyboardOffset);
         auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
         if (pattern) {
@@ -604,7 +608,7 @@ void TextFieldManagerNG::SetOnFocusTextField(const WeakPtr<Pattern>& onFocusText
 bool TextFieldManagerNG::GetImeShow() const
 {
     if (!imeShow_ && imeAttachCalled_) {
-        TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+        TAG_LOGI(ACE_KEYBOARD, "IME Attached");
     }
     return imeShow_ || imeAttachCalled_;
 }

@@ -274,6 +274,7 @@ generated_sources = [
   "implementation/security_component_method_modifier.cpp",
   "implementation/select_extender_accessor.cpp",
   "implementation/select_modifier.cpp",
+  "implementation/shape_mask_peer.cpp",
   "implementation/shape_modifier.cpp",
   "implementation/sheet_dismiss_accessor.cpp",
   "implementation/side_bar_container_modifier.cpp",

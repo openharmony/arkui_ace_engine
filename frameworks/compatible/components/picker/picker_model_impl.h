@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_PICKER_MODEL_IMPL_H
 #define FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_PICKER_MODEL_IMPL_H
 
-#include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/date_picker/picker_model.h"
 
 namespace OHOS::Ace::Framework {
 class DatePickerModelImpl : public DatePickerModel {

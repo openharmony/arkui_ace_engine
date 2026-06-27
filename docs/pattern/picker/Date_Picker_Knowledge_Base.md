@@ -682,7 +682,7 @@ hilog -T ArkUI | grep -i datepicker
 ## 相关目录
 
 ```
-frameworks/core/components_ng/pattern/picker/
+frameworks/core/components_ng/pattern/date_picker/
 ├── datepicker_pattern.h/cpp                 # 主要逻辑
 ├── datepicker_column_pattern.h/cpp          # 列模式
 ├── datepicker_layout_property.h             # 布局属性

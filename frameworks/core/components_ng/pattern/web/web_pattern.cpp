@@ -69,7 +69,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
-#include "core/components_ng/pattern/picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -77,6 +77,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -5341,7 +5342,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         touchPointY = touchPoint.y;
         if (info.GetSourceTool() == SourceTool::PEN &&
             delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
-            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(GetInspectorId(), touchPointX, touchPointY)) {
             TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
             isNeedInterceptedTouchEvent_ = true;
             WebRequestFocus();
@@ -8869,6 +8870,19 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocu
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
     auto accessNode = delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
+}
+
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByParams(int64_t accessibilityId,
+    int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    auto accessNode = delegate_->GetAccessibilityNodeInfoByParams(accessibilityId, direction, focusRuleType, params);
     CHECK_NULL_RETURN(accessNode, nullptr);
     return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }

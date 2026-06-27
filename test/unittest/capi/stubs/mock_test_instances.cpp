@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/date_picker/picker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 #include "core/components_ng/pattern/view_context/view_context_model.h"

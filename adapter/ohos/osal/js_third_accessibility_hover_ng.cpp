@@ -524,6 +524,21 @@ public:
         const FocusMoveResult &result, const int32_t requestId) override
     {
     }
+
+    void SetUpdateCustomAccessibilityPropertyResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
+
+    void SetAddAccessibilityVirtualNodeResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
+
+    void SetRemoveAccessibilityVirtualNodeResult(
+        const OperateVirtualNodeResult result, const int32_t requestId) override
+    {
+    }
 };
 
 void DumpHandleAction(

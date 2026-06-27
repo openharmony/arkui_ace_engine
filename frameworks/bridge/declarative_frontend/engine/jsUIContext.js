@@ -515,6 +515,13 @@ class UIContext {
         return this.promptAction_;
     }
 
+    getDialog() {
+        if (this.dialog_ == null) {
+            this.dialog_ = new Dialog(this.instanceId_);
+        }
+        return this.dialog_;
+    }
+
     getMediaQuery() {
         this.mediaQuery_ = new MediaQuery(this.instanceId_);
         return this.mediaQuery_;
@@ -1504,6 +1511,70 @@ class Router {
                 if (promise) {
                     return promise;
                 }
+            }
+        });
+    }
+}
+
+class Dialog {
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_dialog = globalThis.requireNapi('arkui.dialog');
+    }
+
+    present(optionsOrContent, options) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
+            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+        let argLength = arguments.length;
+        if (argLength < 1 || optionsOrContent === null || optionsOrContent === undefined) {
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        return withInstanceId(this.instanceId_, () => {
+            // CustomBuilder / CustomBuilderWithId: function type -> presentCustomDialog (pass through directly)
+            if (typeof optionsOrContent === 'function') {
+                return this.ohos_dialog.presentCustomDialog(optionsOrContent, options);
+            }
+            // ComponentContent -> extract getFrameNode, then presentCustomDialog
+            if (typeof optionsOrContent.getFrameNode === 'function') {
+                return this.ohos_dialog.presentCustomDialog(optionsOrContent.getFrameNode(), options);
+            }
+            // DialogOptions: plain object -> presentDialog
+            return this.ohos_dialog.presentDialog(optionsOrContent);
+        });
+    }
+
+    update(content, options) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
+            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+        let argLength = arguments.length;
+        if (argLength < 2 || content === null || content === undefined) {
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        return withInstanceId(this.instanceId_, () => {
+            return this.ohos_dialog.updateCustomDialog(content.getFrameNode(), options);
+        });
+    }
+
+    dismiss(target) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified.' +
+            ' 2. Incorrect parameters types. 3. Parameter verification failed.';
+        if (arguments.length < 1 || target === null || target === undefined) {
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        return withInstanceId(this.instanceId_, () => {
+            if (typeof target === 'number') {
+                return this.ohos_dialog.dismissDialog(target);
+            } else {
+                return this.ohos_dialog.dismissDialog(target.getFrameNode());
             }
         });
     }

@@ -52,8 +52,8 @@ export class InteropExtendableComponent extends ExtendableComponent {
     /** @memo */ build(): void {}
 
     override __findProvidedVarV2__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
-        const createStaticProvider = (value: Any, viewV2: Any): ProviderDecoratedVariable<Any> => {
-            const result = new ProviderDecoratedVariable<Any>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, value);
+        const createStaticProvider = (value: Any, viewV2: Any, varName: string): ProviderDecoratedVariable<Any> => {
+            const result = new ProviderDecoratedVariable<Any>(ExtendableComponent.current as ExtendableComponent, varName, providedPropName, value);
             result.viewV2 = viewV2;
             return result;
         }
@@ -169,15 +169,16 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
         return state.getProxy()!.unwrap();
     };
     const createDummyViewV2 = ESValue.getGlobal().getProperty('createDummyViewV2');
-    const findProvider = (varName: string) => {
+    const findProvider = (aliasName: string) => {
         const result = (
-            staticComponent.__findProvidedVarV2__Internal<Object>(varName) ||
-            staticComponent.__findProvider__Internal<Object>(varName)
+            staticComponent.__findProvidedVarV2__Internal<Object>(aliasName) ||
+            staticComponent.__findProvider__Internal<Object>(aliasName)
         ) as ProviderDecoratedVariable<Object> | undefined;
         if (result == undefined) {
             return undefined;
         }
         const value = result.get();
+        const varName = result.varName;
         if (result.viewV2 === undefined) {
             const dummyViewV2 = createDummyViewV2.invoke(result, varName, value).unwrap();
             result.viewV2 = dummyViewV2;

@@ -21,10 +21,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/mixed_mount_registry.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
@@ -45,41 +43,19 @@ bool RosenMixedRenderChildList::IsFrameRenderChild(const std::shared_ptr<Rosen::
     return false;
 }
 
-std::shared_ptr<Rosen::RSNode> RosenMixedRenderChildList::GetRSNodeFromFrameNode(
-    const RefPtr<FrameNode>& frameNode) const
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_RETURN(rosenRenderContext, nullptr);
-    return rosenRenderContext->GetRSNode();
-}
-
-std::shared_ptr<Rosen::RSNode> RosenMixedRenderChildList::ResolveFrameChildRSNode(
-    const RefPtr<UINode>& uiNode) const
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    if (frameNode) {
-        return GetRSNodeFromFrameNode(frameNode);
-    }
-    std::list<RefPtr<FrameNode>> frameNodes;
-    uiNode->GenerateSelfVisibleFrameWithTransition(frameNodes);
-    if (frameNodes.empty()) {
-        return nullptr;
-    }
-    return GetRSNodeFromFrameNode(frameNodes.front());
-}
-
 std::shared_ptr<Rosen::RSNode> RosenMixedRenderChildList::GetChildRSNode(const MixedRenderChild& child) const
 {
     return child.rsNode.lock();
 }
 
 void RosenMixedRenderChildList::RegisterChild(
-    const RefPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode) const
+    const WeakPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode) const
 {
-    CHECK_NULL_VOID(host && childRSNode);
-    MixedMountRegistry::RegisterChild(static_cast<uint64_t>(childRSNode->GetId()), WeakPtr<FrameNode>(host));
+    CHECK_NULL_VOID(childRSNode);
+    if (host.Invalid()) {
+        return;
+    }
+    MixedMountRegistry::RegisterChild(static_cast<uint64_t>(childRSNode->GetId()), host);
 }
 
 void RosenMixedRenderChildList::UnregisterChild(const std::optional<uint64_t>& childRSNodeId) const
@@ -177,7 +153,7 @@ bool RosenMixedRenderChildList::GetInsertIndexAfterRSNode(
 }
 
 bool RosenMixedRenderChildList::InsertPureRenderChildAt(
-    const RefPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
+    const WeakPtr<FrameNode>& host, const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
 {
     CHECK_NULL_RETURN(childRSNode, false);
     MixedRenderChild mixedChild = {
@@ -210,11 +186,10 @@ bool RosenMixedRenderChildList::InsertPureRenderChildAt(
 }
 
 bool RosenMixedRenderChildList::InsertFrameChildBefore(
-    const RefPtr<FrameNode>& host, const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
+    const WeakPtr<FrameNode>& host, const RefPtr<UINode>& child,
+    const std::shared_ptr<Rosen::RSNode>& childRSNode, const RefPtr<UINode>& nextSibling)
 {
     CHECK_NULL_RETURN(child, false);
-    RemoveFrameChild(child);
-    auto childRSNode = ResolveFrameChildRSNode(child);
     MixedRenderChild mixedChild = {
         .rsNode = childRSNode,
         .uiNode = WeakPtr<UINode>(child),
@@ -331,20 +306,8 @@ bool RosenMixedRenderChildList::ClearPureRenderChildren()
     return changed;
 }
 
-bool RosenMixedRenderChildList::SyncFrameChildren(
-    const RefPtr<FrameNode>& host, const std::list<RefPtr<UINode>>& children)
-{
-    bool changed = false;
-    RefPtr<UINode> nextSibling;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        changed |= InsertFrameChildBefore(host, *iter, nextSibling);
-        nextSibling = *iter;
-    }
-    return changed;
-}
-
 std::vector<std::shared_ptr<Rosen::RSNode>> RosenMixedRenderChildList::BuildTargetRSNodes(
-    const RefPtr<FrameNode>& host)
+    const WeakPtr<FrameNode>& host)
 {
     auto addRSNodeIfAbsent = [](std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
                                  std::unordered_map<Rosen::RSNode::SharedPtr, bool>& targetNodeMap,

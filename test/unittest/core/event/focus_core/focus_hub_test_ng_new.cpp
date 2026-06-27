@@ -33,6 +33,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0043, TestSize.Level1)
         AceType::MakeRefPtr<Pattern>());
     auto nodeParent = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1,
         AceType::MakeRefPtr<FlexLayoutPattern>());
+    
     frameNode->GetOrCreateFocusHub();
     frameNode2->GetOrCreateFocusHub();
     nodeParent->GetOrCreateFocusHub();
@@ -48,6 +49,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0043, TestSize.Level1)
     parent->focusType_ = FocusType::SCOPE;
     parent->SwitchFocus(focusHub);
     EXPECT_NE(focusHub->focusType_, FocusType::SCOPE);
+
     parent->currentFocus_ = true;
     frameNode->AddChild(frameNode2);
     frameNode2->focusHub_ = focusHub;
@@ -75,6 +77,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto focusManager = context->GetOrCreateFocusManager();
     ASSERT_NE(focusManager, nullptr);
+
     focusManager->isFocusActive_ = true;
     focusHub->isFocusUnit_ = true;
     auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1,
@@ -111,6 +114,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     eventHub1->AttachHost(frameNode1);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetOrCreateFocusHub();
+
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
@@ -119,6 +123,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->CalculatePosition();
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_FALSE(focusHub->CalculatePosition());
+
     focusHub->focusStyleType_ = FocusStyleType::NONE;
     focusHub->isFocusActiveWhenFocused_ = true;
     EXPECT_FALSE(focusHub->PaintAllFocusState());
@@ -153,12 +158,14 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0048, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
+
     RoundRect focusRectInner;
     auto focusManager = context->GetOrCreateFocusManager();
     ASSERT_NE(focusManager, nullptr);
     focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     EXPECT_FALSE(focusHub->PaintInnerFocusState(focusRectInner));
+    
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);

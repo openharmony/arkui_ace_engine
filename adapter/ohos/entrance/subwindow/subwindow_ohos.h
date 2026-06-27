@@ -97,10 +97,14 @@ public:
     void ClearPopupNG() override;
     void ClearPopupNG(bool isForceClear) override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
+        std::function<void(int32_t, int32_t)> callback) override;
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
         const RefPtr<NG::UINode>& customNode) override;
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
+    void OpenCustomDialogNG(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
     void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
     void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,

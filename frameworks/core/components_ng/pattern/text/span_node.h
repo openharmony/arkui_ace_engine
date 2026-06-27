@@ -934,7 +934,7 @@ public:
     void NotifyColorModeChange(uint32_t colorMode) override;
 
     void UnregisterResource(const std::string& key) override;
-    void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+    ACE_FORCE_EXPORT void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
         const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);

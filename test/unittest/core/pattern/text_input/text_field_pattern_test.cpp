@@ -664,8 +664,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. create pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. call AutoFillValueChanged
+     */
     pattern->isFillRequestFinish_ = true;
     pattern->AutoFillValueChanged();
 }
@@ -2128,11 +2134,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. GetPattern.
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
     Offset offset(1.0, 1.0);
     pattern->enableTouchAndHoverEffect_ = false;
+    /**
+     * @tc.steps: step3. HandleTouchDown.
+     */
     pattern->HandleTouchDown(offset);
     pattern->enableTouchAndHoverEffect_ = true;
     pattern->isMousePressed_ = true;

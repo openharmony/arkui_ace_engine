@@ -490,6 +490,14 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_013, TestSize.Level1)
     layoutConstraint.selfIdealSize.width_ = 10.0;
     layoutConstraint.selfIdealSize.height_ = 10.0;
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    auto navBarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavBarPattern>());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarGeometry = AceType::MakeRefPtr<GeometryNode>();
+    navBarGeometry->SetFrameSize(SizeF(DEFAULT_NAVBAR_WIDTH.ConvertToPx(), DEFAULT_ROOT_HEIGHT));
+    navBarNode->geometryNode_ = navBarGeometry;
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    navigation->SetNavBarNode(navBarNode);
     pattern->HandleDragStart();
     pattern->HandleDragEnd();
     /**
@@ -854,23 +862,6 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_010, TestSize.Level1)
     auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
     navigation->contentNode_ = contentNode;
     navigation->navBarNode_ = navBarNode;
-    /**
-     * @tc.steps: step2. set properties of layoutProperty, test OnModifyDone.
-     * @tc.expected: check whether the properties is correct.
-     */
-    pattern->navigationMode_ = NavigationMode::AUTO;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::SPLIT;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::STACK;
-    pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-    pattern->navigationMode_ = NavigationMode::STACK;
-    pattern->DoAnimation(NavigationMode::STACK);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
-
     ASSERT_EQ(pattern->navigationStack_, nullptr);
     pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     ASSERT_NE(pattern->navigationStack_, nullptr);
@@ -2070,6 +2061,14 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_019, TestSize.Level1)
     layoutConstraint.selfIdealSize.width_ = 10.0;
     layoutConstraint.selfIdealSize.height_ = 10.0;
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    auto navBarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavBarPattern>());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarGeometry = AceType::MakeRefPtr<GeometryNode>();
+    navBarGeometry->SetFrameSize(SizeF(DEFAULT_NAVBAR_WIDTH.ConvertToPx(), DEFAULT_ROOT_HEIGHT));
+    navBarNode->geometryNode_ = navBarGeometry;
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    navigation->SetNavBarNode(navBarNode);
     pattern->HandleDragStart();
     pattern->HandleDragEnd();
     /**
@@ -3224,5 +3223,36 @@ HWTEST_F(NavigationPatternTestNg, HideSystemBarIfNeeded005, TestSize.Level1)
     navigationNode->AddChild(navDestNode);
     navigationPattern->HideSystemBarIfNeeded();
     SUCCEED();
+}
+
+/**
+ * @tc.name: HandleDragStart_UpdateRealNavBarWidthFromNode001
+ * @tc.desc: When realNavBarWidth_ equals initNavBarWidth_, HandleDragStart updates from navBarNode geometry
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, HandleDragStart_UpdateRealNavBarWidthFromNode001, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToFrameNode(navigationNode);
+
+    auto navBarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavBarPattern>());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarGeometry = AceType::MakeRefPtr<GeometryNode>();
+    float navBarWidth = 300.0f;
+    navBarGeometry->SetFrameSize(SizeF(navBarWidth, DEFAULT_ROOT_HEIGHT));
+    navBarNode->geometryNode_ = navBarGeometry;
+    navigationNode->SetNavBarNode(navBarNode);
+
+    EXPECT_TRUE(NearEqual(navigationPattern->realNavBarWidth_, navigationPattern->initNavBarWidth_));
+    navigationPattern->HandleDragStart();
+    EXPECT_EQ(navigationPattern->realNavBarWidth_, navBarWidth);
+    EXPECT_EQ(navigationPattern->preNavBarWidth_, navBarWidth);
 }
 } // namespace OHOS::Ace::NG

@@ -23,10 +23,10 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 struct CurrentDayStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DayColor, Color);

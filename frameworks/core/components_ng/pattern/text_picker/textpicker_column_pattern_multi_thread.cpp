@@ -16,7 +16,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
 void TextPickerColumnPattern::OnAttachToMainTreeMultiThread()

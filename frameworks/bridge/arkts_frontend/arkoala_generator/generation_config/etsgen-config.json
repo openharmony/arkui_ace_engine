@@ -95,9 +95,7 @@
     },
     "StubbedDeclarations": [
         "OnWillScrollCallback",
-        "LayoutChild",
-        "ColumnOptionsV2",
-        "RowOptionsV2"
+        "LayoutChild"
     ],
     "Components": [
         "BaseSpan",

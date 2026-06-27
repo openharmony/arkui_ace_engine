@@ -19,6 +19,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/event/key_code.h"
 #include "core/event/mouse_event.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "interfaces/native/native_interface_xcomponent.h"

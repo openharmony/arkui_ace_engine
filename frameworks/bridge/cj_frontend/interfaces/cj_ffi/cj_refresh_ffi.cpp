@@ -20,11 +20,28 @@
 #include "cj_lambda.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+NG::RefreshModelNG* GetRefreshModel()
+{
+    static NG::RefreshModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Refresh");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find Refresh dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::RefreshModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+
+} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkRefreshCreate(bool refreshing, double offsetValue, int32_t offsetUnit, int32_t friction)
@@ -34,34 +51,34 @@ void FfiOHOSAceFrameworkRefreshCreate(bool refreshing, double offsetValue, int32
         LOGE("Refresh Theme is null");
         return;
     }
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->Create();
-    RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());
-    RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-    RefreshModel::GetInstance()->SetProgressDistance(theme->GetProgressDistance());
-    RefreshModel::GetInstance()->SetProgressDiameter(theme->GetProgressDiameter());
-    RefreshModel::GetInstance()->SetMaxDistance(theme->GetMaxDistance());
-    RefreshModel::GetInstance()->SetShowTimeDistance(theme->GetShowTimeDistance());
-    RefreshModel::GetInstance()->SetTextStyle(theme->GetTextStyle());
-    RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
-    RefreshModel::GetInstance()->SetProgressBackgroundColor(theme->GetBackgroundColor());
+    GetRefreshModel()->Create();
+    GetRefreshModel()->SetLoadingDistance(theme->GetLoadingDistance());
+    GetRefreshModel()->SetRefreshDistance(theme->GetRefreshDistance());
+    GetRefreshModel()->SetProgressDistance(theme->GetProgressDistance());
+    GetRefreshModel()->SetProgressDiameter(theme->GetProgressDiameter());
+    GetRefreshModel()->SetMaxDistance(theme->GetMaxDistance());
+    GetRefreshModel()->SetShowTimeDistance(theme->GetShowTimeDistance());
+    GetRefreshModel()->SetTextStyle(theme->GetTextStyle());
+    GetRefreshModel()->SetProgressColor(theme->GetProgressColor());
+    GetRefreshModel()->SetProgressBackgroundColor(theme->GetBackgroundColor());
 
-    RefreshModel::GetInstance()->SetRefreshing(refreshing);
+    GetRefreshModel()->SetRefreshing(refreshing);
 
     Dimension offset(offsetValue, static_cast<DimensionUnit>(offsetUnit));
     if (offset.Value() <= 0.0) {
-        RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
+        GetRefreshModel()->SetRefreshDistance(theme->GetRefreshDistance());
     } else {
-        RefreshModel::GetInstance()->SetUseOffset(true);
-        RefreshModel::GetInstance()->SetIndicatorOffset(offset);
+        GetRefreshModel()->SetUseOffset(true);
+        GetRefreshModel()->SetIndicatorOffset(offset);
     }
 
-    RefreshModel::GetInstance()->SetFriction(friction);
+    GetRefreshModel()->SetFriction(friction);
     if (friction <= 0) {
-        RefreshModel::GetInstance()->IsRefresh(true);
+        GetRefreshModel()->IsRefresh(true);
     }
 }
 
@@ -73,20 +90,20 @@ void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
         LOGE("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent, Refresh Theme is null");
         return;
     }
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->Create();
-    RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());
-    RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-    RefreshModel::GetInstance()->SetProgressDistance(theme->GetProgressDistance());
-    RefreshModel::GetInstance()->SetProgressDiameter(theme->GetProgressDiameter());
-    RefreshModel::GetInstance()->SetTextStyle(theme->GetTextStyle());
-    RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
-    RefreshModel::GetInstance()->SetMaxDistance(theme->GetMaxDistance());
-    RefreshModel::GetInstance()->SetShowTimeDistance(theme->GetShowTimeDistance());
-    RefreshModel::GetInstance()->SetProgressBackgroundColor(theme->GetBackgroundColor());
+    GetRefreshModel()->Create();
+    GetRefreshModel()->SetLoadingDistance(theme->GetLoadingDistance());
+    GetRefreshModel()->SetRefreshDistance(theme->GetRefreshDistance());
+    GetRefreshModel()->SetProgressDistance(theme->GetProgressDistance());
+    GetRefreshModel()->SetProgressDiameter(theme->GetProgressDiameter());
+    GetRefreshModel()->SetTextStyle(theme->GetTextStyle());
+    GetRefreshModel()->SetProgressColor(theme->GetProgressColor());
+    GetRefreshModel()->SetMaxDistance(theme->GetMaxDistance());
+    GetRefreshModel()->SetShowTimeDistance(theme->GetShowTimeDistance());
+    GetRefreshModel()->SetProgressBackgroundColor(theme->GetBackgroundColor());
 
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [lambda = CJLambda::Create(callback), node = targetNode](const std::string& value) -> void {
@@ -95,31 +112,31 @@ void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
         bool newValue = value == "true";
         lambda(newValue);
     };
-    RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
-    RefreshModel::GetInstance()->SetRefreshing(refreshing);
+    GetRefreshModel()->SetChangeEvent(std::move(changeEvent));
+    GetRefreshModel()->SetRefreshing(refreshing);
 
     Dimension offset(offsetValue, static_cast<DimensionUnit>(offsetUnit));
     if (offset.Value() <= 0.0) {
-        RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
+        GetRefreshModel()->SetRefreshDistance(theme->GetRefreshDistance());
     } else {
         LOGI("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent, offset value > 0");
-        RefreshModel::GetInstance()->SetUseOffset(true);
-        RefreshModel::GetInstance()->SetIndicatorOffset(offset);
+        GetRefreshModel()->SetUseOffset(true);
+        GetRefreshModel()->SetIndicatorOffset(offset);
     }
 
-    RefreshModel::GetInstance()->SetFriction(friction);
+    GetRefreshModel()->SetFriction(friction);
     if (friction <= 0) {
-        RefreshModel::GetInstance()->IsRefresh(true);
+        GetRefreshModel()->IsRefresh(true);
     }
 }
 
 void FfiOHOSAceFrameworkRefreshPop()
 {
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshPop, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->Pop();
+    GetRefreshModel()->Pop();
 }
 
 void FfiOHOSAceFrameworkRefreshOnStateChange(void (*callback)(const int32_t value))
@@ -130,11 +147,11 @@ void FfiOHOSAceFrameworkRefreshOnStateChange(void (*callback)(const int32_t valu
         PipelineContext::SetCallBackNode(node);
         func(key);
     };
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshOnStateChange, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
+    GetRefreshModel()->SetOnStateChange(std::move(onStateChange));
 }
 
 void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)())
@@ -145,11 +162,11 @@ void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         func();
     };
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshOnRefreshing, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
+    GetRefreshModel()->SetOnRefreshing(std::move(onRefreshing));
 }
 
 void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value))
@@ -160,30 +177,29 @@ void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value
         PipelineContext::SetCallBackNode(node);
         func(value);
     };
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshOnOffsetChange, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(onOffsetChange));
+    GetRefreshModel()->SetOnOffsetChange(std::move(onOffsetChange));
 }
 
 void FfiOHOSAceFrameworkRefreshOffset(double offsetValue, int32_t offsetUnit)
 {
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshOffset, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetRefreshOffset(
-        Dimension(offsetValue, static_cast<OHOS::Ace::DimensionUnit>(offsetUnit)));
+    GetRefreshModel()->SetRefreshOffset(Dimension(offsetValue, static_cast<OHOS::Ace::DimensionUnit>(offsetUnit)));
 }
 
 void FfiOHOSAceFrameworkRefreshPullToRefresh(bool value)
 {
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetPullToRefresh(value);
+    GetRefreshModel()->SetPullToRefresh(value);
 }
 
 void FfiOHOSAceFrameworkRefreshPullDownRatio(double ratio)
@@ -196,20 +212,20 @@ void FfiOHOSAceFrameworkRefreshPullDownRatio(double ratio)
     }
     value = ratio;
     std::optional<float> ratioValue = value;
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshPullDownRatio, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);
+    GetRefreshModel()->SetPullDownRatio(ratioValue);
 }
 
 void FfiOHOSAceFrameworkRefreshResetPullDownRatio()
 {
     std::optional<float> ratioValue = std::nullopt;
-    if (RefreshModel::GetInstance() == nullptr) {
+    if (GetRefreshModel() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshResetPullDownRatio, Refresh Instance is null");
         return;
     }
-    RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);
+    GetRefreshModel()->SetPullDownRatio(ratioValue);
 }
 }
