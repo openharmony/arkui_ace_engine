@@ -139,16 +139,18 @@ HWTEST_F(UObjectTest, UObjectTest002, TestSize.Level1)
     char* buffer = nullptr;
     uObject.Serialize(buffer, 0);
     EXPECT_EQ(uObject.offset_, 0);
-    buffer = new char[136];
-    uObject.Serialize(buffer, 136);
-    EXPECT_EQ(uObject.offset_, 136);
+    int32_t bufSize = uObject.EstimateBufferSize();
+    ASSERT_GT(bufSize, 0);
+    buffer = new char[bufSize];
+    uObject.Serialize(buffer, bufSize);
+    EXPECT_EQ(uObject.offset_, bufSize);
 
     /**
      * @tc.steps: step3. Deserialize() test.
      * @tc.expected: step3. Asserting offset_.
      */
-    uObject.Deserialize(buffer, 136);
-    EXPECT_EQ(uObject.offset_, 136);
+    uObject.Deserialize(buffer, bufSize);
+    EXPECT_EQ(uObject.offset_, bufSize);
 
     /**
      * @tc.steps: step4. delete buffer.
