@@ -61,7 +61,7 @@ extern "C" {
 void FfiOHOSAceFrameworkImageCreateWithUrl(const char* url)
 {
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(std::string(url));
+    imageInfoConfig.src = std::make_shared<std::string>(url != nullptr ? url : "");
     imageInfoConfig.bundleName = "";
     imageInfoConfig.moduleName = "";
     imageInfoConfig.isUriPureNumber = false;
@@ -106,7 +106,7 @@ void FfiOHOSAceFrameworkImageSetAlt(const char* url)
 {
     std::string bundleName;
     std::string moduleName;
-    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url, bundleName, moduleName });
+    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url != nullptr ? url : "", bundleName, moduleName });
 }
 
 void FfiOHOSAceFrameworkImageSetAltWithPixelMap(int64_t pixelMapId)

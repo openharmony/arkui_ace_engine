@@ -1209,12 +1209,16 @@ void ViewAbstract::SetSpatialEffect(const std::optional<SpatialEffectParams>& pa
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (params.has_value()) {
-        ACE_UPDATE_RENDER_CONTEXT(SpatialEffect, params.value());
-        return;
+        renderContext->UpdateSpatialEffect(params.value());
+    } else {
+        renderContext->ResetSpatialEffect();
+        renderContext->OnSpatialEffectReset();
     }
-    ACE_RESET_RENDER_CONTEXT(RenderContext, SpatialEffect);
 }
 
 void ViewAbstract::SetLightUpEffect(double radio)
@@ -8411,6 +8415,9 @@ void ViewAbstract::SetSpatialEffect(FrameNode* frameNode, const std::optional<Sp
     }
     auto target = frameNode->GetRenderContext();
     ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+    if (target) {
+        target->OnSpatialEffectReset();
+    }
 }
  
 void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)

@@ -154,6 +154,7 @@ panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallIn
         return panda::JSValueRef::Undefined(vm);
     }
     auto* weak = reinterpret_cast<NG::NativeWeakRef*>(obj->GetNativePointerField(vm, 0));
+    CHECK_NULL_RETURN(weak, panda::JSValueRef::Undefined(vm));
     if (weak->Invalid()) {
         return panda::JSValueRef::Undefined(vm);
     }

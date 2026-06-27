@@ -304,12 +304,8 @@ void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgr
 void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode)
 {
     CHECK_NULL_VOID(backgroundImageNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
-    if (!cameraParams.has_value() || !cameraParams->cameraBufferCrop.has_value()) {
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    if (!cropOpt.has_value()) {
         // No cameraBufferCrop: reset to COVER fit, no matrix
         auto imageLayoutProp = backgroundImageNode->GetLayoutProperty<ImageLayoutProperty>();
         if (imageLayoutProp) {
@@ -323,7 +319,7 @@ void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& 
         return;
     }
 
-    const auto& crop = cameraParams->cameraBufferCrop.value();
+    const auto& crop = cropOpt.value();
     if (crop.cropScale <= 0.0f) {
         return;
     }
@@ -615,24 +611,19 @@ void DepthComponentPattern::TransferImageMatrix(const std::shared_ptr<OHOS::Rose
 
 void DepthComponentPattern::Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
-    if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
-        const auto& crop = cameraParams->cameraBufferCrop.value();
-        if (NearZero(crop.cropScale)) {
-            return;
-        }
-        float scale = (1.0 / crop.cropScale);
-        float offsetX = crop.cropOffset.x;
-        float offsetY = crop.cropOffset.y;
-        float vals[] = { scale, 0.0f, -scale * offsetX, 0.0f, scale, -scale * offsetY, 0.0f, 0.0f, 1.0f };
-        auto* data = matrix.GetData();
-        for (size_t i = 0; i < NUM_9; i++) {
-            data[i] = vals[i];
-        }
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    CHECK_NULL_VOID(cropOpt.has_value());
+    const auto& crop = cropOpt.value();
+    if (NearZero(crop.cropScale)) {
+        return;
+    }
+    float scale = (1.0 / crop.cropScale);
+    float offsetX = crop.cropOffset.x;
+    float offsetY = crop.cropOffset.y;
+    float vals[] = { scale, 0.0f, -scale * offsetX, 0.0f, scale, -scale * offsetY, 0.0f, 0.0f, 1.0f };
+    auto* data = matrix.GetData();
+    for (size_t i = 0; i < NUM_9; i++) {
+        data[i] = vals[i];
     }
 }
 
@@ -653,9 +644,7 @@ void DepthComponentPattern::PropagateCropToChildren()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    auto cropOpt = GetEffectiveCameraBufferCrop();
 
     for (const auto& childWeak : host->GetFrameChildren()) {
         auto child = childWeak.Upgrade();
@@ -671,9 +660,9 @@ void DepthComponentPattern::PropagateCropToChildren()
             continue;
         }
         SpatialEffectParams params = spatialEffect.value();
-        if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
-            params.cropOffset = cameraParams->cameraBufferCrop->cropOffset;
-            params.cropScale = cameraParams->cameraBufferCrop->cropScale;
+        if (cropOpt.has_value()) {
+            params.cropOffset = cropOpt->cropOffset;
+            params.cropScale = cropOpt->cropScale;
         } else {
             params.cropOffset.reset();
             params.cropScale = 1.0f;
@@ -973,14 +962,35 @@ void DepthComponentPattern::MarkRender3D()
 
 #endif
 
+std::optional<OHOS::Ace::CameraBufferCrop> DepthComponentPattern::GetEffectiveCameraBufferCrop()
+    const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_RETURN(depthLayoutProperty, std::nullopt);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    CHECK_NULL_RETURN(cameraParams.has_value(), std::nullopt);
+    if (cameraParams->cameraBufferCrop.has_value()) {
+        return cameraParams->cameraBufferCrop.value();
+    }
+
+    OHOS::Ace::CameraBufferCrop crop;
+    auto geoNode = host->GetGeometryNode();
+    if (geoNode) {
+        crop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
+        crop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
+    }
+    return crop;
+}
+
 DepthComponentPattern::TiltShiftResult DepthComponentPattern::ComputeTiltShift(
     const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH)
 {
     TiltShiftResult result = { camera.yFov, 0.0f, 0.0f };
-    if (!camera.cameraBufferCrop.has_value()) {
-        return result;
-    }
-    const auto& crop = camera.cameraBufferCrop.value();
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    CHECK_NULL_RETURN(cropOpt.has_value(), result);
+    auto crop = cropOpt.value();
     if (crop.bufferWidth <= 0 || crop.bufferHeight <= 0 || crop.cropScale <= 0.0f) {
         return result;
     }

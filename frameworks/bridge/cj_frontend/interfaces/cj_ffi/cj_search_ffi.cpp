@@ -400,14 +400,16 @@ void FfiOHOSAceFrameworkSearchSetCancelButton(
 {
     Dimension iconSize(value, static_cast<DimensionUnit>(unit));
     GetSearchModel()->SetCancelButtonStyle(static_cast<CancelButtonStyle>(style));
-    NG::IconOptions cancelIconOptions = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
+    NG::IconOptions cancelIconOptions = NG::IconOptions(Color(color),
+        iconSize, std::string(src != nullptr ? src : ""), "", "");
     GetSearchModel()->SetCancelImageIcon(cancelIconOptions);
 }
 
 void FfiOHOSAceFrameworkSearchSetSearchIcon(double value, int32_t unit, uint32_t color, const char* src)
 {
     Dimension iconSize(value, static_cast<DimensionUnit>(unit));
-    NG::IconOptions searchIcon = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
+    NG::IconOptions searchIcon = NG::IconOptions(Color(color),
+        iconSize, std::string(src != nullptr ? src : ""), "", "");
     GetSearchModel()->SetSearchImageIcon(searchIcon);
 }
 

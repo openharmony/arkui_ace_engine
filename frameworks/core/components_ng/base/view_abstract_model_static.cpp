@@ -1961,6 +1961,9 @@ void ViewAbstractModelStatic::SetSpatialEffect(FrameNode* frameNode, const std::
     } else {
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+        if (target) {
+            target->OnSpatialEffectReset();
+        }
     }
 }
 

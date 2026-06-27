@@ -1185,6 +1185,7 @@ void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayou
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    textLayoutProperty->UpdatePunctuationOverflow(true);
 
     CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     InitTextHeightAndFontHeight(currentIndex, middleIndex, optionProperties_[currentIndex]);
@@ -1276,6 +1277,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
     }
+    textLayoutProperty->UpdatePunctuationOverflow(true);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 

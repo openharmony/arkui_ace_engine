@@ -15,11 +15,16 @@
 
 #include "gtest/gtest.h"
 #include "tabs_test_ng.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components/focus_animation/focus_animation_theme.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -29,25 +34,58 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == AgingAdapationDialogTheme::TypeId()) {
+        auto agingAdapationDialogTheme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+        agingAdapationDialogTheme->bigFontSizeScale_ = BIG_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->largeFontSizeScale_ = LARGE_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->maxFontSizeScale_ = MAX_FONT_SIZE_SCALE;
+        agingAdapationDialogTheme->bigDialogWidth_ = BIG_DIALOG_WIDTH;
+        agingAdapationDialogTheme->maxDialogWidth_ = MAX_DIALOG_WIDTH;
+        return agingAdapationDialogTheme;
+    } else if (type == TabTheme::TypeId()) {
+        auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_TAB);
+        auto tabTheme = TabTheme::Builder().Build(themeConstants);
+        tabTheme->defaultTabBarName_ = "tabBarItemName";
+        tabTheme->tabBarDefaultWidth_ = Dimension(TAB_BAR_SIZE);
+        tabTheme->tabBarDefaultHeight_ = Dimension(TAB_BAR_SIZE);
+        tabTheme->subTabBarHoverColor_ = Color::RED;
+        tabTheme->subTabBarPressedColor_ = Color::GREEN;
+        tabTheme->bottomTabSymbolOn_ = Color::BLUE;
+        tabTheme->bottomTabIconOff_ = Color::BLACK;
+        tabTheme->tabBarFocusedColor_ = Color::GRAY;
+        tabTheme->activeIndicatorColor_ = Color::RED;
+        return tabTheme;
+    } else if (type == FocusAnimationTheme::TypeId()) {
+        auto focusTheme = AceType::MakeRefPtr<FocusAnimationTheme>();
+        return focusTheme;
+    } else {
+        return AceType::MakeRefPtr<DialogTheme>();
+    }
+}
 } // namespace
 
 class TabsFloatingBarTestNg : public TabsTestNg {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
+    static void SetUpTestSuite()
+    {
+        TestNG::SetUpTestSuite();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+            return GetTheme(type);
+        });
+        EXPECT_CALL(*themeManager, GetTheme(_, _))
+            .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    }
+    static void TearDownTestSuite()
+    {
+        TestNG::TearDownTestSuite();
+        g_isConfigChangePerform = false;
+    }
 };
-
-void TabsFloatingBarTestNg::SetUpTestSuite()
-{
-    MockPipelineContext::SetUp();
-    GTEST_LOG_(INFO) << "TabsFloatingBarTestNg SetUpTestSuite";
-}
-
-void TabsFloatingBarTestNg::TearDownTestSuite()
-{
-    MockPipelineContext::TearDown();
-    GTEST_LOG_(INFO) << "TabsFloatingBarTestNg TearDownTestSuite";
-}
 
 /**
  * @tc.name: CreateLayoutAlgorithm001
@@ -967,6 +1005,293 @@ HWTEST_F(TabsFloatingBarTestNg, OnDetachFromMainTree001, TestSize.Level1)
     // Then detach
     pattern_->OnDetachFromMainTree();
     EXPECT_NE(pattern_, nullptr);
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleDefaultValues001
+ * @tc.desc: Check default BarFloatingStyle is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleDefaultValues001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_FALSE(layoutProperty_->HasBarFloatingStyle());
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleValidValues001
+ * @tc.desc: Check BarFloatingStyle with plain dimension/color values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleValidValues001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.mediumBarWidth = Dimension(20, DimensionUnit::PX);
+    params.largeBarWidth = Dimension(30, DimensionUnit::PX);
+    params.barSideMargin = Dimension(5, DimensionUnit::PX);
+    params.barBottomMargin = Dimension(8, DimensionUnit::PX);
+    params.maskColor = Color::WHITE;
+    params.maskHeight = Dimension(50, DimensionUnit::PX);
+    params.adaptToHandedness = true;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_TRUE(layoutProperty_->HasBarFloatingStyle());
+
+    auto style = layoutProperty_->GetBarFloatingStyle().value();
+    ASSERT_TRUE(style.smallBarWidth.has_value());
+    EXPECT_EQ(style.smallBarWidth.value(), Dimension(10, DimensionUnit::PX));
+    ASSERT_TRUE(style.mediumBarWidth.has_value());
+    EXPECT_EQ(style.mediumBarWidth.value(), Dimension(20, DimensionUnit::PX));
+    ASSERT_TRUE(style.largeBarWidth.has_value());
+    EXPECT_EQ(style.largeBarWidth.value(), Dimension(30, DimensionUnit::PX));
+    ASSERT_TRUE(style.barSideMargin.has_value());
+    EXPECT_EQ(style.barSideMargin.value(), Dimension(5, DimensionUnit::PX));
+    ASSERT_TRUE(style.barBottomMargin.has_value());
+    EXPECT_EQ(style.barBottomMargin.value(), Dimension(8, DimensionUnit::PX));
+    ASSERT_TRUE(style.maskColor.has_value());
+    EXPECT_EQ(style.maskColor.value(), Color::WHITE);
+    ASSERT_TRUE(style.maskHeight.has_value());
+    EXPECT_EQ(style.maskHeight.value(), Dimension(50, DimensionUnit::PX));
+    ASSERT_TRUE(style.adaptToHandedness.has_value());
+    EXPECT_EQ(style.adaptToHandedness.value(), true);
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleReset001
+ * @tc.desc: Check BarFloatingStyle reset by ResetBarFloatingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleReset001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.maskColor = Color::WHITE;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+    ASSERT_TRUE(layoutProperty_->HasBarFloatingStyle());
+
+    TabsModelNG::ResetBarFloatingStyle(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutProperty_->HasBarFloatingStyle());
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleResourceObjectEnabled001
+ * @tc.desc: Check BarFloatingStyle with ResourceObject fields when ConfigChangePerform is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleResourceObjectEnabled001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::FLOAT), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.smallBarWidthObject = resObj;
+    params.mediumBarWidthObject = resObj;
+    params.largeBarWidthObject = resObj;
+    params.barSideMarginObject = resObj;
+    params.barBottomMarginObject = resObj;
+    params.maskColorObject = resObj;
+    params.maskHeightObject = resObj;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleResourceObjectDisabled001
+ * @tc.desc: Check BarFloatingStyle with ResourceObject fields when ConfigChangePerform is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleResourceObjectDisabled001, TestSize.Level1)
+{
+    g_isConfigChangePerform = false;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::FLOAT), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.smallBarWidthObject = resObj;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleResourceObjectColorEnabled001
+ * @tc.desc: Check BarFloatingStyle with maskColor ResourceObject when ConfigChangePerform is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleResourceObjectColorEnabled001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+
+    BarFloatingStyleParameters params;
+    params.maskColor = Color::RED;
+    params.maskColorObject = resObj;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleResourceObjectColorDisabled001
+ * @tc.desc: Check BarFloatingStyle with maskColor ResourceObject when ConfigChangePerform is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleResourceObjectColorDisabled001, TestSize.Level1)
+{
+    g_isConfigChangePerform = false;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+
+    BarFloatingStyleParameters params;
+    params.maskColor = Color::RED;
+    params.maskColorObject = resObj;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: SetBarFloatingStylePlainValuesNoResourceObject001
+ * @tc.desc: Check BarFloatingStyle with plain values does not register ResourceObject even when enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStylePlainValuesNoResourceObject001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.maskColor = Color::WHITE;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleAllUndefinedFields001
+ * @tc.desc: Check BarFloatingStyle with all undefined optional fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleAllUndefinedFields001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    BarFloatingStyleParameters params;
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_TRUE(layoutProperty_->HasBarFloatingStyle());
+
+    auto style = layoutProperty_->GetBarFloatingStyle().value();
+    EXPECT_FALSE(style.smallBarWidth.has_value());
+    EXPECT_FALSE(style.mediumBarWidth.has_value());
+    EXPECT_FALSE(style.largeBarWidth.has_value());
+    EXPECT_FALSE(style.barSideMargin.has_value());
+    EXPECT_FALSE(style.barBottomMargin.has_value());
+    EXPECT_FALSE(style.maskColor.has_value());
+    EXPECT_FALSE(style.maskHeight.has_value());
+    EXPECT_FALSE(style.adaptToHandedness.has_value());
+}
+
+/**
+ * @tc.name: SetBarFloatingStyleMixedValues001
+ * @tc.desc: Check BarFloatingStyle with mixed plain and ResourceObject values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsFloatingBarTestNg, SetBarFloatingStyleMixedValues001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::FLOAT), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+    auto resColorObj = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), std::vector<ResourceObjectParams>(),
+        "", "", Container::CurrentIdSafely());
+
+    BarFloatingStyleParameters params;
+    params.smallBarWidth = Dimension(10, DimensionUnit::PX);
+    params.mediumBarWidthObject = resObj;
+    params.largeBarWidth = Dimension(30, DimensionUnit::PX);
+    params.barSideMargin = Dimension(5, DimensionUnit::PX);
+    params.barBottomMarginObject = resObj;
+    params.maskColorObject = resColorObj;
+    params.maskHeight = Dimension(50, DimensionUnit::PX);
+    TabsModelNG::SetBarFloatingStyle(AceType::RawPtr(frameNode_), params);
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto style = layoutProperty_->GetBarFloatingStyle().value();
+    ASSERT_TRUE(style.smallBarWidth.has_value());
+    EXPECT_EQ(style.smallBarWidth.value(), Dimension(10, DimensionUnit::PX));
+    ASSERT_TRUE(style.largeBarWidth.has_value());
+    EXPECT_EQ(style.largeBarWidth.value(), Dimension(30, DimensionUnit::PX));
+    ASSERT_TRUE(style.barSideMargin.has_value());
+    EXPECT_EQ(style.barSideMargin.value(), Dimension(5, DimensionUnit::PX));
+    ASSERT_TRUE(style.maskHeight.has_value());
+    EXPECT_EQ(style.maskHeight.value(), Dimension(50, DimensionUnit::PX));
+
+    g_isConfigChangePerform = false;
 }
 
 } // namespace OHOS::Ace::NG

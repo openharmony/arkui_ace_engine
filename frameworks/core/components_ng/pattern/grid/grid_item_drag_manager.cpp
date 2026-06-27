@@ -1249,6 +1249,9 @@ void GridItemDragManager::ApplyMoveToArray(std::vector<int32_t>& order, int32_t 
 int32_t GridItemDragManager::FindAvailableColumn(
     const SimMatrix& matrix, int32_t row, int32_t colSpan, int32_t crossCount) const
 {
+    if (colSpan <= 0 || colSpan > crossCount) {
+        return -1;
+    }
     auto it = matrix.find(row);
     if (it == matrix.end()) {
         return 0;
