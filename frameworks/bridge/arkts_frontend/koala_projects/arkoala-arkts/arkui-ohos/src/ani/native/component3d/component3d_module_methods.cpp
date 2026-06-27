@@ -20,7 +20,7 @@
 #include "utils/ani_utils.h"
 
 #if defined(MODEL_COMPONENT_SUPPORTED)
-#include "scene_adapter/scene_bridge_ani.h"
+#include "scene_adapter/scene_bridge_ani_loader.h"
 #endif
 
 namespace OHOS::Ace::Ani {
@@ -36,7 +36,8 @@ void Component3DSetScene(
     auto modifier3D = modifier->getComponent3DModifier();
     CHECK_NULL_VOID(modifier3D);
 
-    auto scene = Render3D::SceneBridgeAni::UnwrapSceneFromAni(env, sceneObj);
+    auto scene = Render3D::SceneBridgeAniLoader::GetInstance().UnwrapSceneFromAni(
+        reinterpret_cast<void*>(env), reinterpret_cast<void*>(sceneObj));
     modifier3D->setScene(arkNode, scene, static_cast<int32_t>(modelType));
 #endif
 }
@@ -62,7 +63,8 @@ ani_long ExtractorsToScenePtr(ani_env* env, [[maybe_unused]] ani_object aniClass
 {
 #if defined(MODEL_COMPONENT_SUPPORTED)
     CHECK_NULL_RETURN(env, 0);
-    auto sceneAdapterPtr = Render3D::SceneBridgeAni::UnwrapSceneFromAni(env, sceneObj);
+    auto sceneAdapterPtr = Render3D::SceneBridgeAniLoader::GetInstance().UnwrapSceneFromAni(
+        reinterpret_cast<void*>(env), reinterpret_cast<void*>(sceneObj));
     return reinterpret_cast<ani_long>(sceneAdapterPtr);
 #else
     return 0;
