@@ -1225,7 +1225,7 @@ SystemProperties::SetSyncDebugTraceEnabled(true);
 
 ### 相关文档
 
-- **[Text 组件知识库](../pattern/text/Text_Knowledge_Base_CN.md)**: Text 组件的布局实现
+- **[Text 组件知识库](../kb/components/basic/text.md)**: Text 组件的布局入口
 - **[Flex 组件知识库](../pattern/flex/Flex_Knowledge_Base.md)**: Flex 布局的详细实现
 - **[Scroll 组件知识库](../pattern/scroll/Scroll_Knowledge_Base.md)**: 滚动布局的特殊处理
 - **[ArkUI SDK API 知识库](../sdk/ArkUI_SDK_API_Knowledge_Base.md)**: SDK API 的布局相关接口
