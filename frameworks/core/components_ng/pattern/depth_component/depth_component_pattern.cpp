@@ -128,8 +128,13 @@ void DepthComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
 
     if (IsGltfBackground()) {
-        RemoveBackgroundImageNode();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+        pendingCleanupImage_ = false;
+        if (HasBackgroundImageNode()) {
+            pendingCleanupImage_ = true;
+        } else {
+            RemoveBackgroundImageNode();
+        }
         InitGltfAdapter();
         if (!gltfWindowsInitialized_) {
             CreateCustomNativeWindows(width3d_, height3d_);
@@ -138,12 +143,19 @@ void DepthComponentPattern::OnModifyDone()
         UpdateWindowChangeSize(true);
         UpdateWindowInfo();
         MarkRender3D();
+#else
+        RemoveBackgroundImageNode();
 #endif
     } else {
-#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
-        CleanupGltfResources(true);
-#endif
         SetupBackgroundImageNode();
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+        pendingCleanupGltf_ = false;
+        if (surfaceRenderContext_.empty()) {
+            CleanupGltfResources(true);
+        } else {
+            pendingCleanupGltf_ = true;
+        }
+#endif
     }
 
 #if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
@@ -266,18 +278,33 @@ void DepthComponentPattern::ApplyOnCompleteCallback(const RefPtr<FrameNode>& bac
     CHECK_NULL_VOID(imageEventHub);
     auto eventHub = GetEventHub<DepthComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    CHECK_NULL_VOID(eventHub->GetOnComplete());
     imageEventHub->SetOnComplete(
-        [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](const LoadImageSuccessEvent& event) {
+        [weakPattern = WeakClaim(this), weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](
+            const LoadImageSuccessEvent& event) {
             constexpr int32_t LOADING_STATUS_LOAD_SUCCESS = 1;
             CHECK_NE_VOID(event.GetLoadingStatus(), LOADING_STATUS_LOAD_SUCCESS);
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->FinishBackgroundSwitch();
+            }
             auto eventHub = weakEventHub.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            DepthComponentCompleteEvent completeEvent;
-            completeEvent.componentWidth = event.GetComponentWidth();
-            completeEvent.componentHeight = event.GetComponentHeight();
-            eventHub->FireCompleteEvent(completeEvent);
+            if (eventHub && eventHub->GetOnComplete()) {
+                DepthComponentCompleteEvent completeEvent;
+                completeEvent.componentWidth = event.GetComponentWidth();
+                completeEvent.componentHeight = event.GetComponentHeight();
+                eventHub->FireCompleteEvent(completeEvent);
+            }
         });
+}
+
+void DepthComponentPattern::FinishBackgroundSwitch()
+{
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+    if (pendingCleanupGltf_) {
+        pendingCleanupGltf_ = false;
+        CleanupGltfResources(true);
+    }
+#endif
 }
 
 void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode)
@@ -287,17 +314,22 @@ void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgr
     CHECK_NULL_VOID(imageEventHub);
     auto eventHub = GetEventHub<DepthComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    CHECK_NULL_VOID(eventHub->GetOnError());
     imageEventHub->SetOnError(
-        [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](const LoadImageFailEvent& event) {
+        [weakPattern = WeakClaim(this), weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](
+            const LoadImageFailEvent& event) {
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->pendingCleanupGltf_ = false;
+            }
             auto eventHub = weakEventHub.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            DepthComponentErrorEvent errorEvent;
-            errorEvent.componentWidth = event.GetComponentWidth();
-            errorEvent.componentHeight = event.GetComponentHeight();
-            errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
-            errorEvent.errorMessage = event.GetErrorMessage();
-            eventHub->FireErrorEvent(errorEvent);
+            if (eventHub && eventHub->GetOnError()) {
+                DepthComponentErrorEvent errorEvent;
+                errorEvent.componentWidth = event.GetComponentWidth();
+                errorEvent.componentHeight = event.GetComponentHeight();
+                errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
+                errorEvent.errorMessage = event.GetErrorMessage();
+                eventHub->FireErrorEvent(errorEvent);
+            }
         });
 }
 
@@ -363,6 +395,7 @@ void DepthComponentPattern::RemoveBackgroundImageNode()
     }
 
     backgroundImageId_.reset();
+    pendingCleanupImage_ = false;
 }
 
 bool DepthComponentPattern::IsCameraChange()
@@ -755,11 +788,16 @@ void DepthComponentPattern::FireGltfLoadCallback()
     auto eventHub = GetEventHub<DepthComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (success) {
+        if (pendingCleanupImage_) {
+            pendingCleanupImage_ = false;
+            RemoveBackgroundImageNode();
+        }
         DepthComponentCompleteEvent completeEvent;
         completeEvent.componentWidth = width3d_;
         completeEvent.componentHeight = height3d_;
         eventHub->FireCompleteEvent(completeEvent);
     } else {
+        pendingCleanupImage_ = false;
         DepthComponentErrorEvent errorEvent;
         errorEvent.componentWidth = width3d_;
         errorEvent.componentHeight = height3d_;
@@ -832,6 +870,7 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     pendingGltfLoadSuccess_.reset();
     nativeWindowSetUp_ = false;
     lastLoadedGltfPath_.clear();
+    pendingCleanupGltf_ = false;
     if (clearAdapter) {
         mrtDepthAdapter_.reset();
     }
