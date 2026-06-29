@@ -34,6 +34,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -1869,6 +1870,9 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
     TriggerRsProfilerNodeMountCallbackIfExist();
+    if (layoutProperty_) {
+        layoutProperty_->MarkEnvDirty(ENV_KEY_DIRECTION);
+    }
     if (eventHub_) {
         eventHub_->FireOnAttach();
         eventHub_->FireOnAppear();

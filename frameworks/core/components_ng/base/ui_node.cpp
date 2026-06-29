@@ -1053,12 +1053,6 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
-    if (!recursive && context) {
-        auto envManager = context->GetEnvironmentManager();
-        if (envManager) {
-            envManager->OnNodeAttached(Claim(this));
-        }
-    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -1093,12 +1087,6 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     }
     isRemoving_ = true;
     auto context = context_;
-    if (!recursive && context) {
-        auto envManager = context->GetEnvironmentManager();
-        if (envManager) {
-            envManager->OnNodeDetached(Claim(this));
-        }
-    }
     DetachContext(false);
     if (isNodeAdapter_) {
         std::list<RefPtr<UINode>> nodes;

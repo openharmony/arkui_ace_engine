@@ -1160,14 +1160,6 @@ public:
     {
         rotationEndCallbackMap_.erase(callbackId);
     }
-    void SetUseEnvManager(bool isEnable)
-    {
-        isUseEnvManager_ = isEnable;
-    }
-    bool GetUseEnvManager()
-    {
-        return isUseEnvManager_;
-    }
     void SetEnvManagerActive(bool isActive)
     {
         isUseEnvManager_ = isActive;
