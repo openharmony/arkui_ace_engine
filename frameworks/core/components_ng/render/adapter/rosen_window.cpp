@@ -59,7 +59,8 @@ std::shared_ptr<OHOS::Rosen::RSUIContext> GetRSUIContextByContainerId(int32_t in
 bool IsDisabledGoStopAndGoResume(const OHOS::Ace::RefPtr<OHOS::Ace::Container>& container)
 {
     CHECK_NULL_RETURN(container, true);
-    return container->IsSubContainer() || container->IsFormRender() || container->IsSceneBoardWindow();
+    return container->IsSubContainer() || container->IsFormRender() || container->IsSceneBoardWindow() ||
+           container->IsDynamicRender();
 }
 } // namespace
 
