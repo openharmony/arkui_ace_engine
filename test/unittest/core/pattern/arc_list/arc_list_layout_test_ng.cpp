@@ -894,6 +894,249 @@ HWTEST_F(ArcListLayoutTestNg, MeasureHeader001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetTargetIndex().value_or(-99), -99));
 }
 
+/**
+ * @tc.name: CalculatePredictSnapEndPositionByIndex001
+ * @tc.desc: Test CalculatePredictSnapEndPositionByIndex calculates independently from itemPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CalculatePredictSnapEndPositionByIndex001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 100.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 200.0f;
+
+    listLayoutAlgorithm->itemPosition_[1] = { 0, 50.0f, 50.0f + itemHeight, false };
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+
+    float result = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, 999.0f);
+    float expected = totalOffset + (50.0f + itemHeight / 2.0f) - contentMainSize / 2.0f;
+    EXPECT_TRUE(NearEqual(result, expected));
+}
+
+/**
+ * @tc.name: CalculatePredictSnapEndPositionByIndex002
+ * @tc.desc: Test CalculatePredictSnapEndPositionByIndex returns prevPredictEndPos when index not in itemPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CalculatePredictSnapEndPositionByIndex002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float fallback = 200.0f;
+    float result = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(99, fallback);
+    EXPECT_TRUE(NearEqual(result, fallback));
+}
+
+/**
+ * @tc.name: CalculatePredictSnapEndPositionByIndex003
+ * @tc.desc: Test CalculatePredictSnapEndPositionByIndex snapSize clamp when itemHeight > snapSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CalculatePredictSnapEndPositionByIndex003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 300.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 200.0f;
+
+    listLayoutAlgorithm->itemPosition_[1] = { 0, 0.0f, itemHeight, false };
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+
+    float snapSize = listLayoutAlgorithm->GetItemSnapSize();
+    float snapLow = 0.0f + snapSize / 2.0f;
+    float snapHigh = itemHeight - snapSize / 2.0f;
+    float itemCenter = 0.0f + itemHeight / 2.0f;
+    float clampedPredictPos = itemCenter;
+    clampedPredictPos = LessNotEqual(clampedPredictPos, snapLow) ? snapLow : clampedPredictPos;
+    clampedPredictPos = LessNotEqual(snapHigh, clampedPredictPos) ? snapHigh : clampedPredictPos;
+
+    float result = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, 999.0f);
+    float expected = totalOffset + clampedPredictPos - contentMainSize / 2.0f;
+    EXPECT_TRUE(NearEqual(result, expected));
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetEndPosAssign001
+ * @tc.desc: Test FixPredictSnapOffset assigns predictSnapEndPos_ instead of reset when endIndex != -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetEndPosAssign001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 100.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 100.0f;
+
+    listLayoutAlgorithm->SetPredictSnapOffset(50.0f);
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+    listLayoutAlgorithm->totalItemCount_ = TOTAL_ITEM_NUMBER;
+
+    listLayoutAlgorithm->itemPosition_[0] = { 0, 0.0f, itemHeight, false };
+    listLayoutAlgorithm->itemPosition_[1] = { 0, itemHeight, itemHeight * 2.0f, false };
+    listLayoutAlgorithm->itemPosition_[2] = { 0, itemHeight * 2.0f, itemHeight * 3.0f, false };
+
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+
+    EXPECT_TRUE(listLayoutAlgorithm->GetPredictSnapEndPosition().has_value());
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetNoCurrentOffset001
+ * @tc.desc: Test FixPredictSnapOffset predictSnapOffset_ without currentOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetNoCurrentOffset001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 100.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 100.0f;
+    float predictSnapOffset = 50.0f;
+
+    listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset);
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+    listLayoutAlgorithm->totalItemCount_ = TOTAL_ITEM_NUMBER;
+
+    listLayoutAlgorithm->itemPosition_[0] = { 0, 0.0f, itemHeight, false };
+    listLayoutAlgorithm->itemPosition_[1] = { 0, itemHeight, itemHeight * 2.0f, false };
+    listLayoutAlgorithm->itemPosition_[2] = { 0, itemHeight * 2.0f, itemHeight * 3.0f, false };
+
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+
+    float item1Center = itemHeight + itemHeight / 2.0f;
+    float recalculatedEndPos = totalOffset + item1Center - contentMainSize / 2.0f;
+    float expectedSnapOffset = totalOffset - recalculatedEndPos;
+
+    EXPECT_TRUE(listLayoutAlgorithm->predictSnapOffset_.has_value());
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->predictSnapOffset_.value_or(0.0f), expectedSnapOffset));
+}
+
+/**
+ * @tc.name: FixPredictSnapPosNoCurrentOffset001
+ * @tc.desc: Test FixPredictSnapPos without currentOffset_ coordinate conversion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapPosNoCurrentOffset001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 100.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 100.0f;
+    float predictSnapEndPos = 50.0f;
+
+    listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos);
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+    listLayoutAlgorithm->totalItemCount_ = TOTAL_ITEM_NUMBER;
+
+    listLayoutAlgorithm->itemPosition_[0] = { 0, 0.0f, itemHeight, false };
+    listLayoutAlgorithm->itemPosition_[1] = { 0, itemHeight, itemHeight * 2.0f, false };
+    listLayoutAlgorithm->itemPosition_[2] = { 0, itemHeight * 2.0f, itemHeight * 3.0f, false };
+
+    listLayoutAlgorithm->FixPredictSnapPos();
+
+    float item1Center = itemHeight + itemHeight / 2.0f;
+    float expected = totalOffset + item1Center - contentMainSize / 2.0f;
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-1.0f), expected));
+}
+
+/**
+ * @tc.name: FixPredictSnapPosNoCurrentOffset002
+ * @tc.desc: Test FixPredictSnapPos returns early when predictSnapEndPos_ has no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapPosNoCurrentOffset002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    listLayoutAlgorithm->predictSnapEndPos_.reset();
+    listLayoutAlgorithm->FixPredictSnapPos();
+    EXPECT_FALSE(listLayoutAlgorithm->GetPredictSnapEndPosition().has_value());
+}
+
+/**
+ * @tc.name: CalculatePredictSnapEndPositionConsistency001
+ * @tc.desc: Test CalculatePredictSnapEndPositionByIndex produces consistent result regardless of prevPredictEndPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CalculatePredictSnapEndPositionConsistency001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+
+    float itemHeight = 100.0f;
+    float contentMainSize = 400.0f;
+    float totalOffset = 200.0f;
+
+    listLayoutAlgorithm->itemPosition_[1] = { 0, 50.0f, 50.0f + itemHeight, false };
+    listLayoutAlgorithm->contentMainSize_ = contentMainSize;
+    listLayoutAlgorithm->totalOffset_ = totalOffset;
+
+    float result1 = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, 0.0f);
+    float result2 = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, 100.0f);
+    float result3 = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, -50.0f);
+
+    EXPECT_TRUE(NearEqual(result1, result2));
+    EXPECT_TRUE(NearEqual(result2, result3));
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: OnMidIndexChanged001
