@@ -35,6 +35,8 @@
 
 namespace OHOS::Ace {
 
+struct KeyEvent;
+
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;
@@ -54,6 +56,12 @@ enum class MousePassMode: int32_t {
 struct TextMenuInfo {
     uint32_t disableFlags = 0;
     std::function<bool()> menuOnChangeCallback;
+};
+
+struct ApplicationKeyboardShortcut {
+    std::string value;
+    uint8_t keys = 0;
+    std::function<void(int32_t)> onKeyboardShortcutAction;
 };
 
 class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
@@ -316,6 +324,13 @@ public:
         return textMenuInfo_;
     }
 
+    void RegisterApplicationShortcut(const std::string& value, uint8_t keys,
+        std::function<void(int32_t)>&& onKeyboardShortcutAction);
+
+    void UnregisterApplicationShortcut(const std::string& value, uint8_t keys);
+
+    bool TryTriggerApplicationShortcut(const KeyEvent& event, int32_t triggerInstanceId);
+
     void SetTouchPadIdChanged(bool touchPadIdChanged)
     {
         touchPadIdChanged_ = touchPadIdChanged;
@@ -409,6 +424,8 @@ protected:
     std::string uiMaterialState_;
     std::string uiMaterialType_;
     TextMenuInfo textMenuInfo_;
+    std::vector<ApplicationKeyboardShortcut> applicationKeyboardShortcuts_;
+    std::mutex applicationShortcutMutex_;
     bool isSystemApp_ = false;
 };
 

@@ -488,6 +488,20 @@ class UIContext {
         getUINativeModule().resource.setResourceManagerCacheMaxCountForHSP(count);
     }
 
+    static registerApplicationShortcut(value, keys, callback) {
+        let shortcut = globalThis.requireNapi('arkui.applicationShortcut');
+        if (shortcut) {
+            shortcut.registerApplicationShortcut(value, keys, callback);
+        }
+    }
+
+    static unregisterApplicationShortcut(value, keys) {
+        let shortcut = globalThis.requireNapi('arkui.applicationShortcut');
+        if (shortcut) {
+            shortcut.unregisterApplicationShortcut(value, keys);
+        }
+    }
+
     getDragController() {
         this.dragController_ = new DragController(this.instanceId_);
         return this.dragController_;

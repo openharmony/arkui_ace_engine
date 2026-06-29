@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <cctype>
+
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -104,6 +108,83 @@ void AceApplicationInfo::UpdateMousePassthroughForPipelines(bool enabled, const 
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->SetMousePassThrough(enabled);
     });
+}
+
+void AceApplicationInfo::RegisterApplicationShortcut(const std::string& value, uint8_t keys,
+    std::function<void(int32_t)>&& onKeyboardShortcutAction)
+{
+    std::lock_guard<std::mutex> lock(applicationShortcutMutex_);
+    for (auto& shortcut : applicationKeyboardShortcuts_) {
+        if (shortcut.value == value && shortcut.keys == keys) {
+            shortcut.onKeyboardShortcutAction = std::move(onKeyboardShortcutAction);
+            return;
+        }
+    }
+    applicationKeyboardShortcuts_.push_back({ value, keys, std::move(onKeyboardShortcutAction) });
+}
+
+void AceApplicationInfo::UnregisterApplicationShortcut(const std::string& value, uint8_t keys)
+{
+    std::lock_guard<std::mutex> lock(applicationShortcutMutex_);
+    applicationKeyboardShortcuts_.erase(
+        std::remove_if(applicationKeyboardShortcuts_.begin(), applicationKeyboardShortcuts_.end(),
+            [&value, keys](const ApplicationKeyboardShortcut& shortcut) {
+                return shortcut.value == value && shortcut.keys == keys;
+            }),
+        applicationKeyboardShortcuts_.end());
+}
+
+static uint8_t GetEventModifierKeys(const KeyEvent& event)
+{
+    uint8_t modifiers = 0;
+    for (auto code : event.pressedCodes) {
+        switch (code) {
+            case KeyCode::KEY_CTRL_LEFT:
+            case KeyCode::KEY_CTRL_RIGHT:
+                modifiers |= 1;   // CTRL bit
+                break;
+            case KeyCode::KEY_SHIFT_LEFT:
+            case KeyCode::KEY_SHIFT_RIGHT:
+                modifiers |= 2;   // SHIFT bit
+                break;
+            case KeyCode::KEY_ALT_LEFT:
+            case KeyCode::KEY_ALT_RIGHT:
+                modifiers |= 4;   // ALT bit
+                break;
+            default:
+                break;
+        }
+    }
+    return modifiers;
+}
+
+static bool MatchShortcutValue(const KeyEvent& event, const std::string& value)
+{
+    auto keyStr = event.ConvertInputCodeToString();
+    std::string lowerKey = keyStr;
+    std::string lowerValue = value;
+    std::transform(lowerKey.begin(), lowerKey.end(), lowerKey.begin(), ::tolower);
+    std::transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+    return lowerKey.find(lowerValue) != std::string::npos;
+}
+
+bool AceApplicationInfo::TryTriggerApplicationShortcut(const KeyEvent& event, int32_t triggerInstanceId)
+{
+    std::lock_guard<std::mutex> lock(applicationShortcutMutex_);
+    uint8_t eventModifiers = GetEventModifierKeys(event);
+    for (auto& shortcut : applicationKeyboardShortcuts_) {
+        if (!MatchShortcutValue(event, shortcut.value)) {
+            continue;
+        }
+        if (eventModifiers != shortcut.keys) {
+            continue;
+        }
+        if (shortcut.onKeyboardShortcutAction) {
+            shortcut.onKeyboardShortcutAction(triggerInstanceId);
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace
