@@ -142,7 +142,7 @@ void ImageSpanView::Create()
 RefPtr<FrameNode> ImageSpanView::CreateFrameNode(int32_t nodeId)
 {
     RefPtr<PixelMap> pixmap = nullptr;
-    auto imageSpanNode = ImageModelNG::CreateFrameNode(nodeId, "", pixmap, "", "");
+    auto imageSpanNode = ImageModelNG::CreateFrameNode(nodeId, "", pixmap, "", "", false, true);
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     auto layoutProperty = imageSpanNode->GetLayoutProperty<ImageLayoutProperty>();
     layoutProperty->UpdateHasPlaceHolderStyle(false);

@@ -181,21 +181,29 @@ void ImageModelNG::SetReloadKey(FrameNode* frameNode, const std::string& reloadK
 }
 
 RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
-    const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber)
+    const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber, bool isImageSpan)
 {
     ACE_UINODE_TRACE(nodeId);
-    auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto draggable = pipeline->GetDraggable<ImageTheme>();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(gestureHub, nullptr);
-        gestureHub->InitDragDropEvent();
+    RefPtr<FrameNode> frameNode;
+    if (isImageSpan) {
+        frameNode = ImageSpanNode::GetOrCreateSpanNode(
+            V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    } else {
+        frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     }
-    frameNode->SetDraggable(draggable);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (!isImageSpan) {
+        // set draggable for framenode
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(gestureHub, nullptr);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(draggable);
+    }
     auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
