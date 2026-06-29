@@ -30,13 +30,16 @@ struct AnimatedDrawableDescriptorTestFrameDurations {
   createPixelMap(src: Resource): image.PixelMap | undefined {
     let manager = this.getUIContext().getHostContext()?.resourceManager
     if (manager) {
+      let source: image.ImageSource | undefined = undefined
       try {
         let buffer = manager.getMediaContentSync(src.id).buffer
-        let source = image.createImageSource(buffer)
+        source = image.createImageSource(buffer)
         let pixelmap = source.createPixelMapSync()
         return pixelmap;
       } catch (error) {
         console.info(`error = ${JSON.stringify(error)}`)
+      } finally {
+        source?.release()
       }
     }
     return undefined

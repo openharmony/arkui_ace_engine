@@ -40,6 +40,8 @@ struct AnimatedDrawableDescriptorTestScroll {
             this.animatedDrawable2 = new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 5000})
           }).catch((error: BusinessError<void>) => {
             console.error(`Lee, erorr = ${JSON.stringify(error)}`)
+          }).finally(() => {
+            imageSource.release()
           })
         }
       } catch (error) {
