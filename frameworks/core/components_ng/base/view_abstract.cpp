@@ -9859,9 +9859,6 @@ void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool se
 #ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        return;
-    }
     auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     SmartGestureShortcutConfig config;

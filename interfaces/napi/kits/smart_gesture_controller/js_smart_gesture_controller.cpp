@@ -743,7 +743,7 @@ RefPtr<NG::SmartGestureManager> GetRequiredManager(napi_env env, int32_t instanc
 {
     auto manager = GetManagerByInstanceId(instanceId);
     if (!manager) {
-        NapiThrow(env, UI_CONTEXT_NOT_FOUND_MESSAGE, ERROR_CODE_INTERNAL_ERROR);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", UI_CONTEXT_NOT_FOUND_MESSAGE);
     }
     return manager;
 }
@@ -766,7 +766,7 @@ bool GetRequiredBooleanArgument(napi_env env, napi_callback_info info, bool& val
     napi_value arg = nullptr;
     napi_valuetype valueType = napi_undefined;
     if (!GetSingleParam(env, info, &arg, valueType)) {
-        NapiThrow(env, INVALID_PARAM_COUNT_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_PARAM_COUNT_MESSAGE);
         return false;
     }
     if (valueType == napi_undefined || valueType == napi_null) {
@@ -774,7 +774,7 @@ bool GetRequiredBooleanArgument(napi_env env, napi_callback_info info, bool& val
         return true;
     }
     if (valueType != napi_boolean) {
-        NapiThrow(env, INVALID_ENABLED_TYPE_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_ENABLED_TYPE_MESSAGE);
         return false;
     }
     return napi_get_value_bool(env, arg, &value) == napi_ok;
@@ -784,11 +784,11 @@ bool GetRequiredFunctionArgument(napi_env env, napi_callback_info info, napi_val
 {
     napi_valuetype valueType = napi_undefined;
     if (!GetSingleParam(env, info, &callback, valueType)) {
-        NapiThrow(env, INVALID_PARAM_COUNT_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_PARAM_COUNT_MESSAGE);
         return false;
     }
     if (valueType != napi_function) {
-        NapiThrow(env, INVALID_MONITOR_CALLBACK_TYPE_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_MONITOR_CALLBACK_TYPE_MESSAGE);
         return false;
     }
     return true;
@@ -799,11 +799,11 @@ bool GetRequiredStringArgument(napi_env env, napi_callback_info info, std::strin
     napi_value arg = nullptr;
     napi_valuetype valueType = napi_undefined;
     if (!GetSingleParam(env, info, &arg, valueType)) {
-        NapiThrow(env, INVALID_PARAM_COUNT_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_PARAM_COUNT_MESSAGE);
         return false;
     }
     if (valueType != napi_string) {
-        NapiThrow(env, INVALID_ID_TYPE_MESSAGE, ERROR_CODE_PARAM_INVALID);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", INVALID_ID_TYPE_MESSAGE);
         return false;
     }
     return NapiStringToString(env, arg, value);
@@ -845,7 +845,7 @@ napi_value JSRegisterMonitor(napi_env env, napi_callback_info info)
     CHECK_NULL_RETURN(manager, nullptr);
 
     if (!SmartGestureMonitorRegistry::Register(env, instanceId, callback)) {
-        NapiThrow(env, MONITOR_STATE_CREATE_FAILED_MESSAGE, ERROR_CODE_INTERNAL_ERROR);
+        TAG_LOGE(AceLogTag::ACE_GESTURE, "%{public}s", MONITOR_STATE_CREATE_FAILED_MESSAGE);
         return nullptr;
     }
 
