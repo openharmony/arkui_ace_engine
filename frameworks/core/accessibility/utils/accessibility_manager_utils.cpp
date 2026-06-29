@@ -45,7 +45,7 @@ uint8_t VirtualNodeContainerIdManager::AllocateContainerId(const RefPtr<FrameNod
     }
 
     // Find the next available ID
-    uint8_t containerId = FindNextAvailableId();
+    uint8_t containerId = FindNextAvailableIdLocked();
     if (containerId == INVALID_CONTAINER_ID) {
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY,
             "Failed to allocate containerId: no available IDs");
@@ -169,9 +169,8 @@ size_t VirtualNodeContainerIdManager::GetAvailableIdCount() const
     return (MAX_CONTAINER_ID - MIN_CONTAINER_ID + 1) - used;
 }
 
-uint8_t VirtualNodeContainerIdManager::FindNextAvailableId()
+uint8_t VirtualNodeContainerIdManager::FindNextAvailableIdLocked()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     for (size_t index = MIN_CONTAINER_ID; index <= MAX_CONTAINER_ID; index++) {
         if (!idPool_.test(index)) {
             return static_cast<uint8_t>(index);
