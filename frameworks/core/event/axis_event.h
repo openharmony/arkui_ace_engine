@@ -157,7 +157,6 @@ public:
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
     const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
-    size_t GetApproximateSize() const;
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;

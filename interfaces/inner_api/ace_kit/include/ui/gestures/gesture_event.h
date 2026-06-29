@@ -399,7 +399,6 @@ public:
         return secCompHandleEvent_;
     }
 #endif
-    size_t GetApproximateSize() const;
 
 private:
     bool repeat_ = false;

@@ -294,8 +294,6 @@ public:
         return isRightButtonEventFromDoulbeTap_;
     }
 
-    size_t GetApproximateSize() const;
-
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
@@ -379,11 +377,6 @@ public:
     MouseAction GetMouseAction() const
     {
         return mouseAction_;
-    }
-
-    size_t GetApproximateSize() const
-    {
-        return sizeof(*this) + GetApproximateBaseEventSize();
     }
 
 private:
