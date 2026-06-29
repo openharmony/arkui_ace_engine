@@ -1458,6 +1458,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     this.__optionsArray = new SynchedPropertyNesedObjectPU(params.optionsArray, this, 'optionsArray');
     this.__options = new SynchedPropertyNesedObjectPU(params.options, this, 'options');
     this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, 'selectedIndexes');
+    this.__componentSize = new SynchedPropertyObjectTwoWayPU(params.componentSize, this, 'componentSize');
     this.__buttonBorderRadius = this.initializeConsume('buttonBorderRadius', 'buttonBorderRadius');
     this.__buttonItemsSize = this.initializeConsume('buttonItemsSize', 'buttonItemsSize');
     this.__positionTrigger = this.initializeConsume('positionTrigger', 'positionTrigger');
@@ -1527,6 +1528,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
     this.__options.purgeDependencyOnElmtId(rmElmtId);
     this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
+    this.__componentSize.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
     this.__positionTrigger.purgeDependencyOnElmtId(rmElmtId);
@@ -1547,6 +1549,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     this.__optionsArray.aboutToBeDeleted();
     this.__options.aboutToBeDeleted();
     this.__selectedIndexes.aboutToBeDeleted();
+    this.__componentSize.aboutToBeDeleted();
     this.__buttonBorderRadius.aboutToBeDeleted();
     this.__buttonItemsSize.aboutToBeDeleted();
     this.__positionTrigger.aboutToBeDeleted();
@@ -1576,6 +1579,12 @@ class SegmentButtonItemArrayComponent extends ViewPU {
   }
   set selectedIndexes(newValue) {
     this.__selectedIndexes.set(newValue);
+  }
+  get componentSize() {
+    return this.__componentSize.get();
+  }
+  set componentSize(newValue) {
+    this.__componentSize.set(newValue);
   }
   get buttonBorderRadius() {
     return this.__buttonBorderRadius.get();
@@ -1943,6 +1952,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
             Row.direction(this.options.direction);
             Row.focusScopeId(this.groupId, true);
             Row.padding(this.options.componentPadding);
+            Row.onSizeChange((_, newValue) => {
+              this.componentSize = { width: newValue.width, height: newValue.height };
+            });
           }, Row);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -2232,6 +2244,7 @@ export class SegmentButton extends ViewPU {
     this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, 'selectedIndexes');
     this.onItemClicked = undefined;
     this.__maxFontScale = new SynchedPropertyObjectOneWayPU(params.maxFontScale, this, 'maxFontScale');
+    this.__componentSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, 'componentSize');
     this.__buttonBorderRadius = new ObservedPropertyObjectPU(
       Array.from(
         {
@@ -2347,6 +2360,9 @@ export class SegmentButton extends ViewPU {
     if (params.maxFontScale === undefined) {
       this.__maxFontScale.set(DEFAULT_MAX_FONT_SCALE);
     }
+    if (params.componentSize !== undefined) {
+      this.componentSize = params.componentSize;
+    }
     if (params.buttonBorderRadius !== undefined) {
       this.buttonBorderRadius = params.buttonBorderRadius;
     }
@@ -2436,6 +2452,7 @@ export class SegmentButton extends ViewPU {
     this.__options.purgeDependencyOnElmtId(rmElmtId);
     this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
     this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__componentSize.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
     this.__positionTrigger.purgeDependencyOnElmtId(rmElmtId);
@@ -2457,6 +2474,7 @@ export class SegmentButton extends ViewPU {
     this.__options.aboutToBeDeleted();
     this.__selectedIndexes.aboutToBeDeleted();
     this.__maxFontScale.aboutToBeDeleted();
+    this.__componentSize.aboutToBeDeleted();
     this.__buttonBorderRadius.aboutToBeDeleted();
     this.__buttonItemsSize.aboutToBeDeleted();
     this.__positionTrigger.aboutToBeDeleted();
@@ -2495,6 +2513,12 @@ export class SegmentButton extends ViewPU {
   }
   set maxFontScale(newValue) {
     this.__maxFontScale.set(newValue);
+  }
+  get componentSize() {
+    return this.__componentSize.get();
+  }
+  set componentSize(newValue) {
+    this.__componentSize.set(newValue);
   }
   get buttonBorderRadius() {
     return this.__buttonBorderRadius.get();
@@ -2758,13 +2782,13 @@ export class SegmentButton extends ViewPU {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
-    return getBackgroundBorderRadius(this.options, this.layoutAlgorithm.refSize.height / 2);
+    return getBackgroundBorderRadius(this.options, this.componentSize.height / 2);
   }
   getButtonSystemMaterial() {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
-    if (this.layoutAlgorithm.refSize.height === 0) {
+    if (this.componentSize.height === 0) {
       return undefined;
     }
     return this.options.backgroundSystemMaterial;
@@ -3214,7 +3238,7 @@ export class SegmentButton extends ViewPU {
                   Stack.create();
                   Stack.direction(this.options.direction);
                   Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
-                  Stack.borderRadius(getBackgroundBorderRadius(this.options, this.layoutAlgorithm.refSize.height / 2));
+                  Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
                   });
@@ -3225,7 +3249,7 @@ export class SegmentButton extends ViewPU {
                     this.options.backgroundSystemMaterial ? undefined : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR
                   );
                   Stack.systemMaterial(this.options.backgroundSystemMaterial);
-                  Stack.visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None);
+                  Stack.visibility(this.componentSize.height > 0 ? Visibility.Visible : Visibility.None);
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   If.create();
@@ -3286,9 +3310,9 @@ export class SegmentButton extends ViewPU {
             globalThis.Context.animation({ duration: 0 });
             Stack.direction(this.options.direction);
             globalThis.Context.animation(null);
-            Stack.borderRadius(getBackgroundBorderRadius(this.options, this.layoutAlgorithm.refSize.height / 2));
+            Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
             Stack.translate({ x: this.selectedItemOffsetX });
-            Stack.visibility(this.layoutAlgorithm.refSize.height > 0 ? Visibility.Visible : Visibility.None);
+            Stack.visibility(this.componentSize.height > 0 ? Visibility.Visible : Visibility.None);
           }, Stack);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -3382,6 +3406,7 @@ export class SegmentButton extends ViewPU {
                   let componentCall = new SegmentButtonItemArrayComponent(
                     this,
                     {
+                      componentSize: this.__componentSize,
                       pressArray: this.__pressArray,
                       hoverArray: this.__hoverArray,
                       hoverColorArray: this.__hoverColorArray,
@@ -3400,6 +3425,7 @@ export class SegmentButton extends ViewPU {
                   ViewPU.create(componentCall);
                   let paramsLambda = () => {
                     return {
+                      componentSize: this.componentSize,
                       pressArray: this.pressArray,
                       hoverArray: this.hoverArray,
                       hoverColorArray: this.hoverColorArray,
@@ -3620,7 +3646,7 @@ function getBackgroundBorderRadius(options, defaultRadius) {
   }
   return options.iconTextBackgroundRadius ?? defaultRadius;
 }
-let SegmentButtonLayoutAlgorithm = class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
+class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   constructor() {
     super(...arguments);
     this.selectedIndex = -1;
@@ -3632,7 +3658,6 @@ let SegmentButtonLayoutAlgorithm = class SegmentButtonLayoutAlgorithm extends Cu
     this.rowSpace = 0;
     this.shouldMirror = false;
     this.buttonCount = 0;
-    this.refSize = { width: 0, height: 0 };
   }
   getButtonX(index) {
     const effectiveIndex = this.shouldMirror ? this.buttonCount - 1 - index : index;
@@ -3649,9 +3674,6 @@ let SegmentButtonLayoutAlgorithm = class SegmentButtonLayoutAlgorithm extends Cu
       buttonLayer.measure(constraint);
     }
     const refSize = buttonLayer ? buttonLayer.getMeasuredSize() : { width: 0, height: 0 };
-    if (this.refSize.width !== refSize.width || this.refSize.height !== refSize.height) {
-      this.refSize = refSize;
-    }
     let buttonWidth = 0;
     if (buttonLayer) {
       this.buttonCount = buttonLayer.getChildrenCount();
@@ -3720,9 +3742,7 @@ let SegmentButtonLayoutAlgorithm = class SegmentButtonLayoutAlgorithm extends Cu
     }
     self.setLayoutPosition({ x: position.x, y: position.y });
   }
-};
-__decorate([Trace], SegmentButtonLayoutAlgorithm.prototype, 'refSize', void 0);
-SegmentButtonLayoutAlgorithm = __decorate([ObservedV2], SegmentButtonLayoutAlgorithm);
+}
 class FocusStyleButtonModifier {
   constructor(stateStyleAction) {
     this.stateStyleAction = stateStyleAction;
