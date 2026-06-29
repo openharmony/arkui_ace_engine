@@ -24303,6 +24303,9 @@ typedef struct Ark_TextPickerDialogOptionsExt {
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
     Opt_PickerBackgroundStyle selectedBackgroundStyle;
+    Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_TextPickerDialogOptionsExt;
 typedef struct Opt_TextPickerDialogOptionsExt {
     Ark_Tag tag;

@@ -106,6 +106,18 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& op
         dialogInfo.hoverModeArea = hoverModeArea.value();
     }
     dialogInfo.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    auto systemMaterialPtr = Converter::OptConvert<UiMaterial*>(options.systemMaterial).value_or(nullptr);
+    if (systemMaterialPtr) {
+        dialogInfo.systemMaterial = systemMaterialPtr->Copy();
+    }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(options.distortionMode);
+    if (distortionMode) {
+        dialogInfo.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(options.edgeLightMode);
+    if (edgeLightMode) {
+        dialogInfo.edgeLightMode = edgeLightMode.value();
+    }
     return dialogInfo;
 }
 

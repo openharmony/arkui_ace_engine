@@ -67,6 +67,18 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.customStyle = false;
     dialogProps.enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    auto systemMaterialPtr = Converter::OptConvert<UiMaterial*>(options.systemMaterial).value_or(nullptr);
+    if (systemMaterialPtr) {
+        dialogProps.systemMaterial = systemMaterialPtr->Copy();
+    }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(options.distortionMode);
+    if (distortionMode) {
+        dialogProps.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(options.edgeLightMode);
+    if (edgeLightMode) {
+        dialogProps.edgeLightMode = edgeLightMode.value();
+    }
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
 }
@@ -234,6 +246,7 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace CalendarPickerDialogAccessor
+
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
 {
     static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {

@@ -4400,7 +4400,7 @@ void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_Br
 }
 
 template<>
-ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, uiMaterial_MaterialPeer* const& src)
 {
     if (!src) {
         dst = std::nullopt;
