@@ -178,7 +178,7 @@ constexpr double DISTANCE_THRESHOLD = 20.0;
 constexpr int32_t TIPS_TIME_MAX = 4000; // ms
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
-    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG, V2::POPUP_ETS_TAG };
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -3676,6 +3676,11 @@ bool OverlayManager::PopupCallBackOnWillDismiss(const RefPtr<FrameNode>& overlay
 bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove bubble enter");
+    CHECK_NULL_RETURN(overlay, false);
+    auto pipeline = overlay->GetContextRefPtr();
+    if (pipeline && pipeline->GetOverlayManager() && AceType::RawPtr(pipeline->GetOverlayManager()) != this) {
+        return pipeline->GetOverlayManager()->RemoveBubble(overlay);
+    }
     if (PopupInteractiveDismiss(overlay)) {
         return true;
     }

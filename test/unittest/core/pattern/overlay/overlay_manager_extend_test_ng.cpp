@@ -799,8 +799,12 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest019, TestSize.Level
     /**
      * @tc.steps: step1. create overlay node and create popup node.
      */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    // Use the OverlayManager owned by the current pipeline as the caller. Since the popup node resolves its
+    // context to the same pipeline, the caller equals the OverlayManager that owns the overlay, so RemoveBubble
+    // does not forward and the local branches (interactiveDismiss / onWillDismiss / popupMap_) are exercised.
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->popupMap_.clear(); // the pipeline OverlayManager is shared across cases; start clean
 
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -836,6 +840,7 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest019, TestSize.Level
     overlayManager->popupMap_.emplace(1, PopupInfo2);
     testResult = overlayManager->RemoveBubble(popupNodeEx);
     EXPECT_TRUE(testResult);
+    overlayManager->popupMap_.clear(); // clean up residue on the shared pipeline OverlayManager
 }
 
 /**
@@ -1454,5 +1459,54 @@ HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay008, TestSize.Level1)
     EXPECT_EQ(error2, ERROR_CODE_NO_ERROR);
     EXPECT_EQ(error3, ERROR_CODE_NO_ERROR);
     EXPECT_EQ(overlayManager->orderOverlayMap_.size(), 3u);
+}
+
+/**
+ * @tc.name: RemoveBubblePageLevelForward001
+ * @tc.desc: Test OverlayManager::RemoveBubble. When the caller is not the OverlayManager owned by the overlay's
+ *           own pipeline, the call is forwarded to that pipeline's OverlayManager (page-level swipe fix).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, RemoveBubblePageLevelForward001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. obtain the OverlayManager owned by the current pipeline and create a different
+     *           standalone OverlayManager as the caller.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto pipelineOverlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(pipelineOverlayManager, nullptr);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    // The caller must differ from the pipeline OverlayManager, otherwise RemoveBubble never forwards.
+    EXPECT_NE(AceType::RawPtr(pipelineOverlayManager), AceType::RawPtr(overlayManager));
+
+    /**
+     * @tc.steps: step2. create a popup node whose context resolves to the current pipeline, and register it
+     *           only in the pipeline OverlayManager's popupMap_.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto targetId = targetNode->GetId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BubblePattern>(targetId, targetNode->GetTag()));
+    ASSERT_NE(popupNode->GetContextRefPtr(), nullptr);
+    EXPECT_EQ(AceType::RawPtr(popupNode->GetContextRefPtr()->GetOverlayManager()), AceType::RawPtr(pipelineOverlayManager));
+
+    NG::PopupInfo popupInfo;
+    popupInfo.popupNode = popupNode;
+    pipelineOverlayManager->popupMap_.emplace(targetId, popupInfo);
+
+    /**
+     * @tc.steps: step3. call RemoveBubble on the standalone OverlayManager.
+     * @tc.expected: The call is forwarded to the pipeline OverlayManager whose popupMap_ holds the bubble, so the
+     *               bubble is removed and true is returned. Without forwarding, the caller's empty popupMap_
+     *               (and default interactiveDismiss) would yield false.
+     */
+    auto testResult = overlayManager->RemoveBubble(popupNode);
+    EXPECT_TRUE(testResult);
+    pipelineOverlayManager->popupMap_.clear(); // clean up residue on the shared pipeline OverlayManager
 }
 }
