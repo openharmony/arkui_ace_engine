@@ -45,7 +45,7 @@ constexpr uint32_t PERCENT_100 = 100;
 constexpr uint32_t NUM_9 = 9;
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
 constexpr uint32_t DEPTH_COMPONENT_NATIVE_WINDOW_COUNT = 2;
-constexpr uint32_t SURFACE_QUEUE_SIZE = 5;
+constexpr uint32_t SURFACE_QUEUE_SIZE = 2;
 constexpr uint32_t DEFAULT_DEPTH_BACKGROUND_COLOR = 0x00000000;
 constexpr uint32_t SURFACE_STRIDE_ALIGNMENT = 8;
 constexpr float DEFAULT_SCALE = 1.0f;
