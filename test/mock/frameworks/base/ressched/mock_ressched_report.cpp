@@ -45,10 +45,8 @@ void ResSchedReport::ResSchedDataReport(
     uint32_t resType, int32_t value, const std::unordered_map<std::string, std::string>& payload)
 {}
 
-void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
-
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
-                                  const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled) {}
+                                  const WeakPtr<NG::FrameNode>& weakNode) {}
 
 void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
 

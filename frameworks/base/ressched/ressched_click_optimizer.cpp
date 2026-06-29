@@ -94,7 +94,7 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
     ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
 }
 
-bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode> weakNode,
+bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
     std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes)
 {
     CHECK_EQUAL_RETURN(clickExtEnabled_, false, false);
