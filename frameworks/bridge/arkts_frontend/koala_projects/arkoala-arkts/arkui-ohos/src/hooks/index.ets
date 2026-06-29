@@ -577,7 +577,7 @@ export function hookSetNavDestination(peer: ArkNavigationPeer, value: PageMapBui
   NavigationOpsHandWritten.hookSetNavDestinationImpl(peer, value);
 }
 
-export function hookSplitPlaceholder(node: ArkNavigationComponent | ArkNavigationPeer, value: ComponentContent<Object>): void {
+export function hookSplitPlaceholder(node: ArkNavigationComponent | ArkNavigationPeer, value: ComponentContent<Object> | undefined): void {
   const navPeer: ArkNavigationPeer = node instanceof ArkNavigationComponent ?
     (node as ArkNavigationComponent).getPeer() : (node as ArkNavigationPeer);
   NavigationOpsHandWritten.hookSplitPlaceholderImpl(navPeer, value);
