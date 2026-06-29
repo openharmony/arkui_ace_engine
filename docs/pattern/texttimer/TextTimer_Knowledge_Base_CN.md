@@ -880,7 +880,7 @@ hilog -T ACE_TEXTTIMER
 ### 参考文档
 
 - [TextTimer/CLAUDE.md](../../frameworks/core/components_ng/pattern/texttimer/CLAUDE.md) - 快速参考
-- [Text_Knowledge_Base_CN.md](../text/Text_Knowledge_Base_CN.md) - Text 组件深入（TextTimer 内部使用 Text）
+- [Text Context](../../kb/components/basic/text.md) - Text 组件路由（TextTimer 内部使用 Text）
 - [text_theme.h](../../frameworks/core/components/text/text_theme.h) - 主题定义
 - [Scheduler 源码](../../core/common/task_scheduler/scheduler.h) - 调度器实现
 

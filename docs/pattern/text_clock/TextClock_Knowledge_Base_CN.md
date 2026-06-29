@@ -774,6 +774,6 @@ hilog -T ACE_TEXT_CLOCK
 ### 参考文档
 
 - [TextClock/CLAUDE.md](../../frameworks/core/components_ng/pattern/text_clock/CLAUDE.md) - 快速参考
-- [Text_Knowledge_Base_CN.md](../text/Text_Knowledge_Base_CN.md) - Text 组件深入（TextClock 内部使用 Text）
+- [Text Context](../../kb/components/basic/text.md) - Text 组件路由（TextClock 内部使用 Text）
 - [text_clock_controller.h](../../frameworks/core/components/text_clock/text_clock_controller.h) - 控制器定义
 - [time_event_proxy.h](../../core/event/time/time_event_proxy.h) - 时间事件代理
