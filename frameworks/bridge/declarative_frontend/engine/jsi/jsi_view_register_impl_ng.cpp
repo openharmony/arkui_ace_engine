@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/ng/size_t.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
@@ -545,9 +546,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
 
 void JsUnbindViews()
 {
-#ifdef CROSS_PLATFORM
     JsiClassBase::UnDeclareAll();
-#endif
 }
 
 } // namespace OHOS::Ace::Framework

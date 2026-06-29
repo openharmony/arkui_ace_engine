@@ -21,34 +21,29 @@
 namespace OHOS::Ace::Framework {
 
 namespace {
-#ifdef CROSS_PLATFORM
 std::unordered_set<JsiClassBase::UnDeclareFunc>& GetUnDeclareRegistry()
 {
     static thread_local std::unordered_set<JsiClassBase::UnDeclareFunc> registry;
     return registry;
 }
-#endif
 } // namespace
 
 void JsiClassBase::RegisterUnDeclare(UnDeclareFunc func)
 {
-#ifdef CROSS_PLATFORM
     if (func == nullptr) {
         return;
     }
     GetUnDeclareRegistry().insert(func);
-#endif
 }
 
 void JsiClassBase::UnDeclareAll()
 {
-#ifdef CROSS_PLATFORM
     for (const auto& func : GetUnDeclareRegistry()) {
         if (func != nullptr) {
             func();
         }
     }
-#endif
+    GetUnDeclareRegistry().clear();
 }
 
 void JsiClassBase::DeclareImpl(const char* name, std::string& className,

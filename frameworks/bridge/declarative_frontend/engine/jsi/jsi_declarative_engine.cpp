@@ -70,6 +70,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
