@@ -942,8 +942,6 @@ void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const R
     }
     auto ngPipeline = DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_VOID(ngPipeline);
-    auto clickOptimizer = ngPipeline->GetClickOptimizer();
-    bool isClickExtEnabled = clickOptimizer ? clickOptimizer->GetClickExtEnabled() : false;
     ReportConfig config;
 #if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
     auto container = Container::GetContainer(ngPipeline->GetInstanceId());
@@ -951,7 +949,7 @@ void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const R
     config.tid = config.isReportTid ? static_cast<uint64_t>(pthread_self()) : config.tid;
 #endif
     if (shouldReportTouchDown_) {
-        ResSchedReport::GetInstance().OnTouchEvent(event, config, frameNode, isClickExtEnabled);
+        ResSchedReport::GetInstance().OnTouchEvent(event, config, frameNode);
     }
 }
 

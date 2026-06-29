@@ -78,9 +78,8 @@ public:
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
-    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
-                      const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled);
+                      const WeakPtr<NG::FrameNode>& weakNode = nullptr);
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
         const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
@@ -110,9 +109,7 @@ private:
     ResSchedReport();
     ~ResSchedReport() {}
     void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
-                         const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled = false);
-    void CollectComponentInfo(const WeakPtr<NG::FrameNode>& weakNode,
-                              std::unordered_map<std::string, std::string>& payload);
+                         const WeakPtr<NG::FrameNode>& weakNode);
     void HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config);
     bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
         int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);
