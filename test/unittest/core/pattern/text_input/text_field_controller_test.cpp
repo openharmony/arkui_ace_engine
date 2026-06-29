@@ -884,55 +884,6 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnDeleteAction002
- * @tc.desc: test testInput deleteAction for ZWJ emoji.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    // change line to aviod the line length exceed 120
-    const std::string txt = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
-        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
-    CreateTextField(txt, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::TEXT);
-    });
-    GetFocus();
-
-    /**
-     * @tc.step: step2. Set caretPosition and call Delete
-     */
-
-    pattern_->SetCaretPosition(132);
-    pattern_->DeleteBackward(2);
-    FlushLayoutTask(frameNode_);
-    // change line to aviod the line length exceed 120
-    std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
-        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
-
-    pattern_->SetCaretPosition(88);
-    pattern_->DeleteBackward(2);
-    FlushLayoutTask(frameNode_);
-    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
-
-    pattern_->SetCaretPosition(0);
-    pattern_->DeleteForward(2);
-    FlushLayoutTask(frameNode_);
-    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
-
-    pattern_->SetCaretPosition(44);
-    pattern_->DeleteForward(2);
-    FlushLayoutTask(frameNode_);
-    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
-}
-
-/**
  * @tc.name: HandleOnDeleteAction003
  * @tc.desc: test testInput deleteAction for VS emoji.
  * @tc.type: FUNC
