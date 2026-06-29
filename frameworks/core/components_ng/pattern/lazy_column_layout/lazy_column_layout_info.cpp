@@ -154,7 +154,7 @@ void LazyColumnLayoutInfo::UpdatePosMap(float prevBodyMainSize)
             UpdatePosMapStart(cachedUpdatedStart_, updatedStart_ - 1);
         }
         adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd_);
-        if (cachedUpdatedEnd_ > updatedEnd_) {
+        if (cachedUpdatedEnd_ < totalItemCount_ && cachedUpdatedEnd_ > updatedEnd_) {
             UpdatePosMapStart(updatedEnd_ + 1, cachedUpdatedEnd_);
             UpdatePosMapEnd(cachedUpdatedEnd_);
         } else {

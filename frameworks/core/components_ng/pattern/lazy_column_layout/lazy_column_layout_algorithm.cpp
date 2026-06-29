@@ -35,7 +35,7 @@ void LazyColumnLayoutAlgorithm::ShiftLayoutWindow(float delta)
     if (NearZero(delta)) {
         return;
     }
-    referencePos_ += delta;
+    referencePos_ -= delta;
     startPos_ += delta;
     endPos_ += delta;
     cacheStartPos_ += delta;
@@ -159,7 +159,8 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
         return;
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
-    referencePos_ = posRef.value().referencePos;
+    // for self-triggered prediction, reuse the referencePos_ adjusted by adjustOffset from the previous frame.
+    referencePos_ = layoutInfo_->deadline_.has_value() ? layoutInfo_->referencePos_ : posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
     stickyTopInset_ = posRef.value().stickyInsetStart;
@@ -1102,6 +1103,7 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItems(
         }
         layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
     }
+    layoutInfo_->referencePos_ = referencePos_;
     layoutInfo_->layoutedStart_ = layoutedStart_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;

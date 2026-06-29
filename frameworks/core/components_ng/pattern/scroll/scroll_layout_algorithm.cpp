@@ -240,6 +240,8 @@ void ScrollLayoutAlgorithm::MeasureLazyChildAgain(
     const PaddingPropertyF& padding, bool hasLazyLayoutChild)
 {
     CHECK_NULL_VOID(hasLazyLayoutChild);
+    auto adjustOffset = GetLazyChildAdjustOffset(childWrapper);
+    currentOffset_ -= adjustOffset.start;
     MinusPaddingToSize(padding, selfSize);
     auto selfMainSize = GetMainAxisSize(selfSize, axis);
     auto geometryNode = childWrapper->GetGeometryNode();

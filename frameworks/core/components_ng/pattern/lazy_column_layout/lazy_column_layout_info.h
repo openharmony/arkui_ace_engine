@@ -70,6 +70,7 @@ private:
     float footerMainSize_ = 0.0f;
     float totalMainSize_ = 0.0f;
     float space_ = 0.0f;
+    float referencePos_ = 0.0f;
 
     int32_t updatedStart_ = INT_MAX;
     int32_t updatedEnd_ = -1;
