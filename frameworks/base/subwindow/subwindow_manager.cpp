@@ -30,7 +30,7 @@ std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
 const std::unordered_set<SubwindowType> NORMAL_SUBWINDOW_TYPE = { SubwindowType::TYPE_MENU,
-    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP };
+    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP, SubwindowType::TYPE_SHEET };
 const std::unordered_set<std::string> DIALOG_AND_POPUP_TAG = { V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
