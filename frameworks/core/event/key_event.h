@@ -312,8 +312,6 @@ public:
 
     void ParseKeyEvent(KeyEvent& keyEvent);
 
-    size_t GetApproximateSize() const;
-
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     std::string keyText_ = "";
