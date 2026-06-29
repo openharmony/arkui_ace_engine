@@ -505,7 +505,7 @@ HWTEST_F(ScrollEffectTestNg, FadeController001, TestSize.Level1)
     fadeController->ProcessPull(1.0, 1.0, 1.0);
     mockTaskExecutor->RunDelayTask();
     fadeController->decele_->NotifyListener(100.0);
-    EXPECT_EQ(param1, 2940.3);
+    EXPECT_DOUBLE_EQ(param1, 2940.3);
     EXPECT_EQ(param2, 31853.25);
 }
 
