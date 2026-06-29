@@ -182,10 +182,9 @@ class ComponentSnapshot {
 
     getSizeLimitation()
     {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let limitation = this.ohos_componentSnapshot.getSizeLimitation();
-        __JSScopeUtil__.restoreInstanceId();
-        return limitation;
+        return withInstanceId(this.instanceId_, () => {
+            return this.ohos_componentSnapshot.getSizeLimitation();
+        });
     }
 }
 
@@ -365,54 +364,54 @@ class SmartGestureController {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
+        }));
     }
 
     registerMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
+        }));
     }
 
     unregisterMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
+        }));
     }
 
     clearMonitors() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.clearMonitors(this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.clearMonitors(this.instanceId_);
+        }));
     }
 
     requestSelected(id) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.requestSelected(id);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.requestSelected(id);
+        }));
     }
 
     clearSelected() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.clearSelected();
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId((this.instanceId_, () => {
+            this.ohos_smartGestureController.clearSelected();
+        }));
     }
 }
 
