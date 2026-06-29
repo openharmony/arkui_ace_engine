@@ -1,0 +1,11 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/BasicFocus",
+    "pages/TabNavigation",
+    "pages/CustomNextFocus",
+    "pages/FocusScope",
+    "pages/FocusBoxStyle",
+    "pages/FocusOnTouch"
+  ]
+}
