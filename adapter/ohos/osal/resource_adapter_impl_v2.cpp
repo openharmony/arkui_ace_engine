@@ -179,6 +179,27 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
     appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
+RefPtr<ResourceAdapterImplV2> ResourceAdapterImplV2::CreateOverrideResourceAdapter(
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager, const ResourceInfo& resourceInfo)
+{
+    CHECK_NULL_RETURN(resourceManager, nullptr);
+    std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
+    CHECK_NULL_RETURN(overrideResConfig, nullptr);
+    resourceManager->GetResConfig(*overrideResConfig);
+    overrideResConfig->SetColorMode(ConvertColorModeToGlobal(resourceInfo.GetResourceConfiguration().GetColorMode()));
+    auto overrideResMgr = resourceManager->GetOverrideResourceManager(overrideResConfig);
+    CHECK_NULL_RETURN(overrideResMgr, nullptr);
+    auto overrideResAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+
+    auto resPath = resourceInfo.GetPackagePath();
+    auto hapPath = resourceInfo.GetHapPath();
+    overrideResAdapter->packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+    overrideResAdapter->resConfig_ = overrideResConfig;
+    overrideResAdapter->appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
+    overrideResAdapter->isOverrideResourceAdapter_ = true;
+    return overrideResAdapter;
+}
+
 void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
@@ -246,6 +267,9 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
     auto resConfig = ConvertConfigToGlobal(config);
     auto needUpdateResConfig = NeedUpdateResConfig(resConfig_, resConfig) || themeFlag;
     if (sysResourceManager_ && resConfig != nullptr && needUpdateResConfig) {
+        if (isOverrideResourceAdapter_) {
+            sysResourceManager_->UpdateOverrideResConfig(*resConfig);
+        }
         sysResourceManager_->UpdateResConfig(*resConfig, themeFlag);
     }
     resConfig_ = resConfig;

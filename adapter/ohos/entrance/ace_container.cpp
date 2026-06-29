@@ -309,7 +309,8 @@ void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const Ref
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false,
+    bool isDynamicUIContent = false)
 {
     std::string bundleName = "";
     std::string moduleName = "";
@@ -335,9 +336,16 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
-        resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-        resourceAdapter->SetBundleName(bundleName);
-        resourceAdapter->SetModuleName(moduleName);
+        if (isDynamicUIContent) {
+            resourceAdapter =
+                ResourceAdapterImplV2::CreateOverrideResourceAdapter(context->GetResourceManager(), resourceInfo);
+        } else {
+            resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        }
+        if (resourceAdapter) {
+            resourceAdapter->SetBundleName(bundleName);
+            resourceAdapter->SetModuleName(moduleName);
+        }
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
@@ -3044,11 +3052,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
-                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
+                                    context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock(),
+                                    isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
 
         if (SystemProperties::GetResourceDecoupling()) {
-            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
+            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo,
+                false, isDynamicUIContent);
         } else {
             ThemeConstants::InitDeviceType();
             auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -4019,8 +4029,9 @@ void AceContainer::UpdateResource()
         if (pipelineContext_->IsFormRender()) {
             ReleaseResourceAdapter();
         }
-        InitResourceAndThemeManager(
-            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
+        bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo,
+            true, isDynamicUIContent);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
