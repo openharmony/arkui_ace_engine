@@ -5329,7 +5329,7 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
 
-var ScrollEffectType;
+let ScrollEffectType;
 (function (ScrollEffectType) {
     ScrollEffectType[ScrollEffectType.COMMON_BLUR = 0] = "COMMON_BLUR";
     ScrollEffectType[ScrollEffectType.GRADUAL_BLUR = 1] = "GRADUAL_BLUR";
