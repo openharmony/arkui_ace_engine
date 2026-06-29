@@ -24,7 +24,14 @@ interface ListCategories {
 struct Index {
   @State message: string = ''
   resourceToString(resource: Resource): string {
-    return getContext(this).resourceManager.getStringSync(resource);
+    try {
+      return getContext(this).resourceManager.getStringSync(resource);
+    } catch (error) {
+      let code = (error as BusinessError).code;
+      let message = (error as BusinessError).message;
+      console.error(`getStringSync failed, error code: ${code}, message: ${message}`);
+      return '';
+    }
   }
   private items : ListCategories[] = [
     { title: this.resourceToString($r('app.string.SideSheet1')), utl: 'pages/sidePolymorphicStyle/SideSheet' },
