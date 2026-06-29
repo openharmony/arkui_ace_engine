@@ -246,7 +246,7 @@ void JSDepthComponent::SetOnError(const JSCallbackInfo& info)
             errorObj->SetProperty<int32_t>("code", errorEvent.errorCode);
             errorObj->SetProperty<std::string>("name", "BusinessError");
             errorObj->SetProperty<std::string>("message", errorEvent.errorMessage);
-            eventObj->SetProperty<JSRef<JSObject>>("error", errorObj);
+            eventObj->SetPropertyObject("error", errorObj);
         }
         JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
         func->ExecuteJS(1, &param);

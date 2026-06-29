@@ -327,7 +327,7 @@ void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgr
                 errorEvent.componentWidth = event.GetComponentWidth();
                 errorEvent.componentHeight = event.GetComponentHeight();
                 errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
-                errorEvent.errorMessage = event.GetErrorMessage();
+                errorEvent.errorMessage = event.GetErrorInfo().errorMessage;
                 eventHub->FireErrorEvent(errorEvent);
             }
         });
