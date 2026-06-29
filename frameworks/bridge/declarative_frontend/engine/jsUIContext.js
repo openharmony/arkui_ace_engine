@@ -364,54 +364,54 @@ class SmartGestureController {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
-        }));
+        });
     }
 
     registerMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
-        }));
+        });
     }
 
     unregisterMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
-        }));
+        });
     }
 
     clearMonitors() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.clearMonitors(this.instanceId_);
-        }));
+        });
     }
 
     requestSelected(id) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.requestSelected(id);
-        }));
+        });
     }
 
     clearSelected() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        withInstanceId((this.instanceId_, () => {
+        withInstanceId(this.instanceId_, () => {
             this.ohos_smartGestureController.clearSelected();
-        }));
+        });
     }
 }
 
