@@ -26,6 +26,7 @@
 
 #define private public
 #define protected public
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
@@ -54,6 +55,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
 #include "core/components_ng/pattern/video/video_node.h"

@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/line_pattern.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"

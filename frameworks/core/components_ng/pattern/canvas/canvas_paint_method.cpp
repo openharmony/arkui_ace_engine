@@ -17,6 +17,7 @@
 #include "core/common/container.h"
 
 #include "base/log/ace_trace.h"
+#include "core/common/font_manager.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST

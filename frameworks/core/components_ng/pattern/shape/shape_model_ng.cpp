@@ -15,12 +15,15 @@
 
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/common/container.h"
-
+#include "base/geometry/ng/image_mesh.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/shape/shape_container_modifier.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
-
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_view_box.h"
 namespace OHOS::Ace::NG {
 constexpr double FILL_OPACITY_MIN = 0.0;
 constexpr double FILL_OPACITY_MAX = 1.0;

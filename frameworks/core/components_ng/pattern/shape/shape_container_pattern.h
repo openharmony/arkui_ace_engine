@@ -16,26 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CONTAINER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CONTAINER_PATTERN_H
 
-#include <cstddef>
-#include <optional>
-
-#include "base/geometry/ng/rect_t.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
-#include "core/components_ng/pattern/shape/shape_container_modifier.h"
-#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
-#include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
+class ShapeContainerLayoutAlgorithm;
+class ShapeContainerModifier;
+class ShapeContainerPaintProperty;
+
 class ShapeContainerPattern : public Pattern {
     DECLARE_ACE_TYPE(ShapeContainerPattern, Pattern);
 
 public:
-    ShapeContainerPattern() = default;
-    ~ShapeContainerPattern() override = default;
+    ShapeContainerPattern();
+    ~ShapeContainerPattern() override;
 
     void UpdateProperty();
 
@@ -54,16 +47,8 @@ public:
         return true;
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<ShapeContainerLayoutAlgorithm>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ShapeContainerPaintProperty>();
-    }
-
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    RefPtr<PaintProperty> CreatePaintProperty() override;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     void OnModifyDone() override;
