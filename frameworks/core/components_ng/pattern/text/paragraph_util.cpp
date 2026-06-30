@@ -31,9 +31,6 @@ bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& next
     if (pStyle != nextStyle) {
         return true;
     }
-    if (pStyle.tailIndents.has_value()) {
-        return true;
-    }
     if (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) {
         return true;
     }
@@ -48,6 +45,9 @@ bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& next
     }
     if ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
         nextTextDirection != textDirection) {
+        return true;
+    }
+    if (pStyle.tailIndents.has_value()) {
         return true;
     }
     return false;
