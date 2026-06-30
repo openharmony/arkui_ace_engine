@@ -42,6 +42,20 @@ export class AppStorageV2 {
     }
 }
 
+const TYPE_VOID = Class.from<void>();
+const TYPE_NULL = Class.from<null>();
+const TYPE_UNDEFINED = Class.from<undefined>();
+const TYPE_BOOLEAN = Class.from<Boolean>();
+const TYPE_BYTE = Class.from<Byte>();
+const TYPE_SHORT = Class.from<Short>();
+const TYPE_INT = Class.from<Int>();
+const TYPE_LONG = Class.from<Long>();
+const TYPE_CHAR = Class.from<Char>();
+const TYPE_FLOAT = Class.from<Float>();
+const TYPE_DOUBLE = Class.from<Double>();
+const TYPE_NUMBER = Class.from<Number>();
+const TYPE_STRING = Class.from<String>();
+
 export class AppStorageV2Impl {
     private static instance_: AppStorageV2Impl | undefined = undefined;
     private memorizedValues_: Map<string, Object>; // IObservedObject?
@@ -65,19 +79,19 @@ export class AppStorageV2Impl {
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
         if (ttype.isPrimitive() ||
-            ttype === Class.from<void>() ||
-            ttype === Class.from<null>() ||
-            ttype === Class.from<undefined>() ||
-            ttype === Class.from<Boolean>() ||
-            ttype === Class.from<Byte>() ||
-            ttype === Class.from<Short>() ||
-            ttype === Class.from<Int>() ||
-            ttype === Class.from<Long>() ||
-            ttype === Class.from<Char>() ||
-            ttype === Class.from<Float>() ||
-            ttype === Class.from<Double>() ||
-            ttype === Class.from<Number>() ||
-            ttype === Class.from<String>()) {
+            ttype === TYPE_VOID ||
+            ttype === TYPE_NULL ||
+            ttype === TYPE_UNDEFINED ||
+            ttype === TYPE_BOOLEAN ||
+            ttype === TYPE_BYTE ||
+            ttype === TYPE_SHORT ||
+            ttype === TYPE_INT ||
+            ttype === TYPE_LONG ||
+            ttype === TYPE_CHAR ||
+            ttype === TYPE_FLOAT ||
+            ttype === TYPE_DOUBLE ||
+            ttype === TYPE_NUMBER ||
+            ttype === TYPE_STRING) {
             throw new Error(StorageHelper.INVALID_DEFAULT_VALUE_PRIMITIVE);
         }
         if (!StorageHelper.isKeyValid(key)) {
@@ -90,10 +104,9 @@ export class AppStorageV2Impl {
             }
             let defaultValue = defaultCreator!();
             StorageHelper.checkTypeByInstanceOf(key!, ttype, defaultValue);
-            let observedValue = uiUtils.autoProxyObject(defaultValue);
 
-            this.memorizedValues_.set(key!, observedValue);
-            return observedValue;
+            this.memorizedValues_.set(key!, defaultValue);
+            return defaultValue;
         }
 
         let obj = this.memorizedValues_.get(key!);

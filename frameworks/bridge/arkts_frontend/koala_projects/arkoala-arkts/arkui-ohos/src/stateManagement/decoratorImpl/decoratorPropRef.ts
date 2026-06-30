@@ -42,14 +42,15 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         } else {
             this.localValue = FactoryInternal.mkDecoratorValue(varName, initValue);
         }
-        this.registerWatchForObservedObjectChanges(initValue);
         this.needForceUpdateFunc = new WatchFunc(() => {
             this.isForceRender = true;
         });
-        this.registerCallbackForPropertyChange(initValue);
-
-        // Register the relationship between this PropRef variable and the observed object it uses
-        this.registerToObservedObject(initValue);
+        if (((initValue && typeof initValue === 'object') && (initValue instanceof Object))) {
+            this.registerWatchForObservedObjectChanges(initValue as T);
+            this.registerCallbackForPropertyChange(initValue as T);
+            // Register the relationship between this PropRef variable and the observed object it uses
+            this.registerToObservedObject(initValue as Object);
+        }
     }
 
     get(): T {
