@@ -90,3 +90,58 @@ ohos_shared_library("arcscrollbar") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+if (is_arkui_x) {
+  foreach(item, ace_platforms) {
+    ohos_shared_library("arkui_arcscrollbar_" + item.name) {
+      output_name = "arkui_arcscrollbar"
+      defines = [ "USE_ARK_ENGINE" ]
+      sources = [
+        "${component_ext_path}/arc_scroll_bar/arc_scroll_bar_napi.cpp",
+        "${component_ext_path}/ext_common/ext_napi_utils.cpp",
+      ]
+
+      include_dirs = [
+        "${component_ext_path}/ext_common/",
+        "${component_ext_path}/arc_scroll_bar/",
+        "${ace_root}/frameworks",
+        "$root_out_dir/arkui/framework",
+        "${ace_root}/interfaces/inner_api/ace_kit/include",
+      ]
+      include_dirs += additional_include_dirs
+
+      deps = [
+        ":gen_obj_src_arkui_arcscrollbar_abc",
+        "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar:ace_core_components_arc_scroll_bar_pattern_ng_" + item.name,
+        "//plugins/libs/napi:napi_" + item.name,
+      ]
+
+      config = {}
+      if (defined(item.config)) {
+        config = item.config
+      }
+      if (defined(config.libace_target)) {
+        deps += [ config.libace_target ]
+      }
+
+      if (!use_mac) {
+        ldflags = [ "-Wl,--gc-sections" ]
+      }
+
+      cflags = [
+        "-fvisibility=hidden",
+        "-fdata-sections",
+        "-ffunction-sections",
+        "-Os",
+      ]
+
+      cflags_cc = [
+        "-fvisibility-inlines-hidden",
+        "-Os",
+      ]
+
+      subsystem_name = ace_engine_subsystem
+      part_name = ace_engine_part
+    }
+  }
+}
