@@ -15,9 +15,44 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_trace.h"
+#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
 
 namespace OHOS::Ace {
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
+namespace {
+constexpr char TRANSLATE_PROCESS_KEY[] = "translate";
+
+struct PageTranslateRequestInfo {
+    int32_t scope = PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE;
+    std::string extraData;
+    bool valid = true;
+};
+
+PageTranslateRequestInfo ParsePageTranslateRequest(const std::string& request)
+{
+    PageTranslateRequestInfo info;
+    auto json = InspectorJsonUtil::ParseJsonString(request);
+    if (json == nullptr || !json->IsObject()) {
+        info.extraData = request;
+        return info;
+    }
+    auto scopeValue = json->GetValue("scope");
+    if (scopeValue != nullptr) {
+        if (!scopeValue->IsNumber()) {
+            info.valid = false;
+            return info;
+        }
+        auto scope = scopeValue->GetInt();
+        if (!PageTranslateRequestUtil::IsTranslateScopeValid(scope)) {
+            info.valid = false;
+            return info;
+        }
+        info.scope = scope;
+    }
+    info.extraData = json->GetString("extraData", "");
+    return info;
+}
+} // namespace
 
 UiSessionManager* UiSessionManager::GetInstance()
 {
@@ -174,19 +209,38 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
-        std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-        std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
         LOGW("agent process dead,processId:%{public}d", processId);
-        auto translateIter = processMap_.find("translate");
-        if (translateIter != processMap_.end() && translateIter->second.size() == 1 &&
-            *translateIter->second.begin() == processId) {
+        bool shouldResetWebTranslate = false;
+        bool shouldResetPageTranslate = false;
+        {
+            std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+            std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+            auto translateIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+            bool isTranslateProcess = translateIter != processMap_.end() &&
+                                      translateIter->second.find(processId) != translateIter->second.end();
+            if (isTranslateProcess) {
+                shouldResetWebTranslate = translateIter->second.size() == 1;
+                std::lock_guard<std::mutex> pageTranslateLock(pageTranslateSessionMutex_);
+                shouldResetPageTranslate = pageTranslateStarted_ &&
+                                           (pageTranslateOwnerPid_ == processId || pageTranslateOwnerPid_ < 0);
+                if (shouldResetPageTranslate) {
+                    pageTranslateStarted_ = false;
+                    pageTranslateScope_ = 0;
+                    pageTranslateOwnerPid_ = -1;
+                }
+            }
+            // reportMap remove this processId
+            this->reportObjectMap_.erase(processId);
+            // processMap remove this processId
+            for (auto& [_, processSet] : processMap_) {
+                processSet.erase(processId);
+            }
+        }
+        if (shouldResetWebTranslate) {
             ResetTranslate(-1);
         }
-        // reportMap remove this processId
-        this->reportObjectMap_.erase(processId);
-        // processMap remove this processId
-        for (auto& [_, processSet] : processMap_) {
-            processSet.erase(processId);
+        if (shouldResetPageTranslate) {
+            ResetPageTranslate(-1);
         }
     });
     reportStub->AddDeathRecipient(uiReportProxyRecipient);
@@ -612,16 +666,26 @@ std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateMan
     return nullptr;
 }
 
-void UiSessionManagerOhos::GetWebViewLanguage()
+bool UiSessionManagerOhos::PostToCurrentTranslateManager(
+    const char* caller, std::function<void(const std::shared_ptr<UiTranslateManager>&)>&& task)
 {
     auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager]() {
-            currentTranslateManager->GetWebViewCurrentLanguage();
-        });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
+    if (!currentTranslateManager) {
+        LOGE("%{public}s translateManager is nullptr", caller);
+        return false;
     }
+    currentTranslateManager->PostToUI([currentTranslateManager, task = std::move(task)]() {
+        task(currentTranslateManager);
+    });
+    return true;
+}
+
+void UiSessionManagerOhos::GetWebViewLanguage()
+{
+    PostToCurrentTranslateManager(
+        "GetWebViewLanguage", [](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetWebViewCurrentLanguage();
+        });
 }
 
 void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
@@ -731,6 +795,9 @@ void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pa
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (key == TRANSLATE_PROCESS_KEY) {
+        processMap_[key].clear();
+    }
     processMap_[key].emplace(id);
 }
 
@@ -744,44 +811,179 @@ void UiSessionManagerOhos::EraseProcessId(const std::string& key, int32_t target
     processIter->second.erase(targetPid);
 }
 
+void UiSessionManagerOhos::MarkPageTranslateOwner(int32_t processId)
+{
+    std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+    if (pageTranslateStarted_) {
+        pageTranslateOwnerPid_ = processId;
+    }
+}
+
+void UiSessionManagerOhos::OnPageTranslateResultHandled(int32_t processId)
+{
+    bool shouldEraseProcess = true;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        shouldEraseProcess = !pageTranslateStarted_ || pageTranslateOwnerPid_ != processId;
+    }
+    if (shouldEraseProcess) {
+        EraseProcessId(TRANSLATE_PROCESS_KEY, processId);
+    }
+}
+
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
-    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    auto processIter = processMap_.find("translate");
-    if (processIter == processMap_.end() || processIter->second.empty()) {
-        LOGW("SendCurrentLanguage no report proxy");
-        return;
-    }
-    for (const auto& pid : processIter->second) {
-        auto reportIter = reportObjectMap_.find(pid);
-        auto reportService =
-            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
-        if (reportService != nullptr) {
-            reportService->SendCurrentLanguage(result);
-        } else {
-            LOGW("Send current language failed, process id:%{public}d", pid);
+    int32_t processId = -1;
+    sptr<ReportService> reportService;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+        auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+        if (processIter == processMap_.end() || processIter->second.empty()) {
+            LOGW("SendCurrentLanguage no report proxy");
+            return;
         }
+        processId = *processIter->second.begin();
+        auto reportIter = reportObjectMap_.find(processId);
+        reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
+    }
+    if (reportService != nullptr) {
+        reportService->SendCurrentLanguage(result);
+    } else {
+        LOGW("Send current language failed, process id:%{public}d", processId);
     }
 }
 
 void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isContinued)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, extraData, isContinued]() {
-            currentTranslateManager->GetTranslateText(extraData, isContinued);
+    PostToCurrentTranslateManager("GetWebTranslateText",
+        [extraData, isContinued](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetTranslateText(extraData, isContinued);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
+}
+
+int32_t UiSessionManagerOhos::GetPageTranslateText(const std::string& request)
+{
+    auto requestInfo = ParsePageTranslateRequest(request);
+    if (!requestInfo.valid) {
+        LOGW("GetPageTranslateText invalid request scope");
+        return PARAM_INVALID;
     }
+    if (!PostToCurrentTranslateManager("GetPageTranslateText",
+        [requestInfo](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetPageTranslateText(requestInfo.scope, requestInfo.extraData);
+        })) {
+        return FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t UiSessionManagerOhos::StartPageTranslate(const std::string& request)
+{
+    auto requestInfo = ParsePageTranslateRequest(request);
+    if (!requestInfo.valid) {
+        LOGW("StartPageTranslate invalid request scope");
+        return PARAM_INVALID;
+    }
+    auto currentTranslateManager = GetCurrentTranslateManager();
+    if (!currentTranslateManager) {
+        LOGE("StartPageTranslate translateManager is nullptr");
+        return FAILED;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        pageTranslateScope_ = requestInfo.scope;
+        pageTranslateStarted_ = true;
+        pageTranslateOwnerPid_ = -1;
+    }
+    currentTranslateManager->PostToUI([currentTranslateManager, requestInfo]() {
+        currentTranslateManager->StartPageTranslate(requestInfo.scope, requestInfo.extraData);
+    });
+    return NO_ERROR;
+}
+
+void UiSessionManagerOhos::EndPageTranslate()
+{
+    int32_t scope = PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        scope = pageTranslateScope_ == 0 ? PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE : pageTranslateScope_;
+        pageTranslateStarted_ = false;
+        pageTranslateScope_ = 0;
+        pageTranslateOwnerPid_ = -1;
+    }
+    PostToCurrentTranslateManager(
+        "EndPageTranslate", [scope](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->EndPageTranslate(scope);
+        });
+}
+
+void UiSessionManagerOhos::ResetPageTranslate(int32_t nodeId)
+{
+    PostToCurrentTranslateManager("ResetPageTranslate",
+        [nodeId](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->ResetPageTranslate(nodeId);
+        });
+}
+
+void UiSessionManagerOhos::SendPageTranslateResult(const std::string& result)
+{
+    PostToCurrentTranslateManager("SendPageTranslateResult",
+        [result](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendPageTranslateResult(result);
+        });
+}
+
+void UiSessionManagerOhos::SendPageTextToAI(int32_t nodeId, const std::string& text, int64_t version)
+{
+    int32_t processId = -1;
+    sptr<ReportService> reportService;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+        auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+        if (processIter == processMap_.end() || processIter->second.empty()) {
+            LOGW("SendPageTextToAI no report proxy");
+            return;
+        }
+        processId = *processIter->second.begin();
+        auto reportIter = reportObjectMap_.find(processId);
+        reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
+    }
+    if (reportService != nullptr) {
+        reportService->SendPageText(nodeId, text, version);
+    } else {
+        LOGW("Send page text to ai failed, process id:%{public}d", processId);
+    }
+}
+
+int32_t UiSessionManagerOhos::GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+{
+    GetAbilityLanguageInfoFunction callback;
+    {
+        std::lock_guard<std::mutex> lock(getAbilityLanguageInfoCallbackMutex_);
+        callback = getAbilityLanguageInfoCallback_;
+    }
+    if (!callback) {
+        LOGW("GetCurrentAbilityLanguageInfo callback is not registered");
+        return FAILED;
+    }
+    return callback(language, region);
+}
+
+void UiSessionManagerOhos::SaveGetCurrentAbilityLanguageInfoFunction(GetAbilityLanguageInfoFunction&& callback)
+{
+    std::lock_guard<std::mutex> lock(getAbilityLanguageInfoCallbackMutex_);
+    getAbilityLanguageInfoCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    auto processIter = processMap_.find("translate");
+    auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
     if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendWebTextToAI no report proxy");
         return;
@@ -801,38 +1003,26 @@ void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 void UiSessionManagerOhos::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, results, ids]() {
-            currentTranslateManager->SendTranslateResult(nodeId, results, ids);
+    PostToCurrentTranslateManager("SendTranslateResult",
+        [nodeId, results, ids](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendTranslateResult(nodeId, results, ids);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
 }
 
 void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, res]() {
-            currentTranslateManager->SendTranslateResult(nodeId, res);
+    PostToCurrentTranslateManager("SendTranslateResult",
+        [nodeId, res](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendTranslateResult(nodeId, res);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
 }
 
 void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId]() {
-            currentTranslateManager->ResetTranslate(nodeId);
+    PostToCurrentTranslateManager("ResetTranslate",
+        [nodeId](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->ResetTranslate(nodeId);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
 }
 
 void UiSessionManagerOhos::GetPixelMap()

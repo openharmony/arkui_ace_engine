@@ -72,6 +72,12 @@ private:
     int32_t UnregisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetPageTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t StartPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t EndPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t ResetPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t SendPageTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetCurrentAbilityLanguageInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     bool IsSACalling() const;
 };

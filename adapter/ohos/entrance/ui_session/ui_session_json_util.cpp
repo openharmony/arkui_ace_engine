@@ -41,6 +41,11 @@ bool InspectorJsonValue::IsObject() const
     return cJSON_IsObject(object_);
 }
 
+bool InspectorJsonValue::IsArray() const
+{
+    return cJSON_IsArray(object_);
+}
+
 bool InspectorJsonValue::Put(double value)
 {
     cJSON* child = cJSON_CreateNumber(value);
@@ -212,6 +217,16 @@ std::unique_ptr<InspectorJsonValue> InspectorJsonValue::GetValue(const std::stri
     return std::make_unique<InspectorJsonValue>(cJSON_GetObjectItem(object_, key.c_str()));
 }
 
+int32_t InspectorJsonValue::GetArraySize() const
+{
+    return cJSON_GetArraySize(object_);
+}
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonValue::GetArrayItem(int32_t index) const
+{
+    return std::make_unique<InspectorJsonValue>(cJSON_GetArrayItem(object_, index));
+}
+
 int32_t InspectorJsonValue::GetInt() const
 {
     return static_cast<int32_t>((object_ == nullptr) ? 0 : object_->valuedouble);
@@ -222,6 +237,20 @@ int32_t InspectorJsonValue::GetInt(const std::string& key, int32_t defaultVal) c
     auto value = GetValue(key);
     if (value && value->IsNumber()) {
         return value->GetInt();
+    }
+    return defaultVal;
+}
+
+int64_t InspectorJsonValue::GetInt64() const
+{
+    return static_cast<int64_t>((object_ == nullptr) ? 0 : object_->valuedouble);
+}
+
+int64_t InspectorJsonValue::GetInt64(const std::string& key, int64_t defaultVal) const
+{
+    auto value = GetValue(key);
+    if (value && value->IsNumber()) {
+        return value->GetInt64();
     }
     return defaultVal;
 }

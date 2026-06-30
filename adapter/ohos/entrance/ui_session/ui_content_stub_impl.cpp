@@ -207,6 +207,41 @@ int32_t UIContentServiceStubImpl::SendTranslateResult(int32_t nodeId, std::strin
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetPageTranslateText(
+    const std::string& request, const PageTranslateTextCallback& eventCallback)
+{
+    return UiSessionManager::GetInstance()->GetPageTranslateText(request);
+}
+
+int32_t UIContentServiceStubImpl::StartPageTranslate(
+    const std::string& request, const PageTranslateTextCallback& eventCallback)
+{
+    return UiSessionManager::GetInstance()->StartPageTranslate(request);
+}
+
+int32_t UIContentServiceStubImpl::EndPageTranslate()
+{
+    UiSessionManager::GetInstance()->EndPageTranslate();
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::ResetPageTranslate(int32_t nodeId)
+{
+    UiSessionManager::GetInstance()->ResetPageTranslate(nodeId);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::SendPageTranslateResult(const std::string& result)
+{
+    UiSessionManager::GetInstance()->SendPageTranslateResult(result);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+{
+    return UiSessionManager::GetInstance()->GetCurrentAbilityLanguageInfo(language, region);
+}
+
 int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
 {

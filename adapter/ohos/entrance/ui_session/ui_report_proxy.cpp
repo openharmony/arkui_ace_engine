@@ -19,6 +19,7 @@
 
 #include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "interfaces/inner_api/ui_session/ui_session_ipc_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace {
@@ -632,6 +633,32 @@ void UiReportProxy::SendWebInfoRequestResult(
     int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_WEB_INFO_BY_REQUEST, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("SendWebInfoRequestResult send request failed, errorCode is %{public}d", sendRequestErrorCode);
+    }
+}
+
+void UiReportProxy::SendPageText(int32_t nodeId, const std::string& text, int64_t version)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendPageText write interface token failed");
+        return;
+    }
+    if (!data.WriteInt32(nodeId)) {
+        LOGW("SendPageText write nodeId failed");
+        return;
+    }
+    if (!data.WriteInt64(version)) {
+        LOGW("SendPageText write version failed");
+        return;
+    }
+    if (!UiSessionIpcUtil::WriteStringWithAshmemFlag(data, SEND_PAGE_TEXT, text, "SendPageText")) {
+        return;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_PAGE_TEXT, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendPageText send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 } // namespace OHOS::Ace

@@ -102,6 +102,14 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) override;
+    int32_t GetPageTranslateText(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    int32_t StartPageTranslate(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    int32_t EndPageTranslate() override;
+    int32_t ResetPageTranslate(int32_t nodeId = -1) override;
+    int32_t SendPageTranslateResult(const std::string& result) override;
+    int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

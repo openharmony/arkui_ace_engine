@@ -27,6 +27,14 @@ public:
     ~Ashmem();
     void CloseAshmem();
     void UnmapAshmem();
+    bool MapReadAndWriteAshmem();
+    bool WriteToAshmem(const void *data, int32_t size, int32_t offset);
+    bool MapReadOnlyAshmem();
+    int32_t GetAshmemSize() const;
+    const void* ReadFromAshmem(int32_t size, int32_t offset) const;
+
+private:
+    int32_t size_ = 0;
 };
 }
 

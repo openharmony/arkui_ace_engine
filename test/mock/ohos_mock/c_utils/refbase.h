@@ -54,6 +54,11 @@ public:
         return ptr_.operator->();
     }
 
+    T* GetRefPtr() const
+    {
+        return ptr_.get();
+    }
+
     bool operator==(std::nullptr_t) const
     {
         return ptr_ == nullptr;
