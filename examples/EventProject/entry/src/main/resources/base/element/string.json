@@ -1,0 +1,212 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "EventProject"
+    },
+    {
+      "name": "Drag_DefaultDrag_title",
+      "value": "通用拖拽"
+    },
+    {
+      "name": "Drag_Index_DefaultDrag_title",
+      "value": "通用拖拽"
+    },
+    {
+      "name": "Drag_Index_DefaultDrag_description",
+      "value": "组件使能拖拽。设置draggable属性为true，并配置onDragStart回调函数。"
+    },
+    {
+      "name": "Drag_Index_MoreDrag_title",
+      "value": "多选拖拽"
+    },
+    {
+      "name": "Drag_Index_MoreDrag_description",
+      "value": "从API version 12开始，Grid组件和List组件中的GridItem和ListItem组件支持多选与拖拽功能。目前，仅支持onDragStart的触发方式。"
+    },
+    {
+      "name": "Drag_Index_title",
+      "value": "拖拽事件"
+    },
+    {
+      "name": "Drag_MoreDrag_title",
+      "value": "多选拖拽"
+    },
+    {
+      "name": "singlegesture_Index_Click_description",
+      "value": "单击作为常用的手势，可以方便地使用onClick接口实现。尽管被称为事件，它实际上是基本手势类型，等同于将count配置为1的TapGesture，即单击手势。"
+    },
+    {
+      "name": "singlegesture_Index_Pancom_title",
+      "value": "滑动手势"
+    },
+    {
+      "name": "singlegesture_Index_PanCombination_description",
+      "value": "滑动手势用于触发滑动手势事件，滑动达到最小滑动距离（默认值为5vp）时滑动手势识别成功"
+    },
+    {
+      "name": "video",
+      "value": "音量"
+    },
+    {
+      "name": "Pages_Index_Focus_Active_title",
+      "value": "聚焦/FocusActive"
+    },
+    {
+      "name": "Focus_Index_Focus_Active_description",
+      "value": "聚焦事件。"
+    },
+    {
+      "name": "Focus_Index_FocusOnClick_title",
+      "value": "聚焦点击/FocusOnClick"
+    },
+    {
+      "name": "Focus_Index_FocusOnClick_description",
+      "value": "聚焦点击。"
+    },
+    {
+      "name": "Focus_Index_FocusScopeId_title",
+      "value": "聚焦范围Id/FocusScopeId"
+    },
+    {
+      "name": "Focus_Index_FocusScopeId_description",
+      "value": "聚焦范围Id"
+    },
+    {
+      "name": "Focus_Index_FocusScopePriorityPrevious_title",
+      "value": "聚焦范围优先/FocusScopePriorityPrevious"
+    },
+    {
+      "name": "Focus_Index_FocusScopePriorityPrevious_description",
+      "value": "聚焦范围优先"
+    },
+    {
+      "name": "Focus_Index_FocusTransfer_title",
+      "value": "聚焦转移/FocusTransfer"
+    },
+    {
+      "name": "Focus_Index_FocusTransfer_description",
+      "value": "聚焦转移"
+    },
+    {
+      "name": "Focus_Index_FocusTraversalGuidelines_title",
+      "value": "聚焦遍历/FocusTraversalGuidelines"
+    },
+    {
+      "name": "Focus_Index_FocusTransfer_desFocus_Index_FocusTraver_descriptioncription",
+      "value": "聚焦遍历"
+    },
+    {
+      "name": "Focus_Index_FrojectAreaFocusFlex_title",
+      "value": "聚焦伸缩/FrojectAreaFocusFlex"
+    },
+    {
+      "name": "Focus_Index_FrojectAreaFocusFlex_description",
+      "value": "聚焦伸缩"
+    },
+    {
+      "name": "Focus_Index_NextFocus_title",
+      "value": "下一个聚焦/NextFocus"
+    },
+    {
+      "name": "Focus_Index_NextFocus_description",
+      "value": "下一个聚焦"
+    },
+    {
+      "name": "Focus_Index_OnFocusOnBlurEvents_title",
+      "value": "聚焦模糊事件/OnFocusOnBlurEvents"
+    },
+    {
+      "name": "Focus_Index_OnFocusOnBlurEvents_description",
+      "value": "聚焦模糊事件"
+    },
+    {
+      "name": "Focus_Index_ProjectionBasedFocus_title",
+      "value": "突显聚焦/ProjectionBasedFocus"
+    },
+    {
+      "name": "Focus_Index_ProjectionBasedFocus_description",
+      "value": "突显聚焦"
+    },
+    {
+      "name": "Focus_Index_RequestFocus_title",
+      "value": "请求聚焦/RequestFocus"
+    },
+    {
+      "name": "Focus_Index_RequestFocus_description",
+      "value": "请求聚焦"
+    },
+    {
+      "name": "Focus_Index_ScopeFocus_title",
+      "value": "范围聚焦/ScopeFocus"
+    },
+    {
+      "name": "Focus_Index_ScopeFocus_description",
+      "value": "范围聚焦"
+    },
+    {
+      "name": "Tab_Index_TabIndex_title",
+      "value": "标签索引/TabIndex"
+    },
+    {
+      "name": "Tab_Index_TabIndex_description",
+      "value": "标签索引"
+    },
+    {
+      "name": "Tab_Index_TabIndexFocus_title",
+      "value": "标签索引聚焦/TabIndexFocus"
+    },
+    {
+      "name": "Tab_Index_TabIndexFocus_description",
+      "value": "标签索引聚焦"
+    },
+    {
+      "name": "Tab_Index_TabStop_title",
+      "value": "标签暂停/TabStop"
+    },
+    {
+      "name": "Tab_Index_TabStop_description",
+      "value": "标签暂停"
+    },
+    {
+      "name": "Focus_Event",
+      "value": "获焦信息"
+    },
+    {
+      "name": "Get_Focus",
+      "value": "获得焦点"
+    },
+    {
+      "name": "OnKeyDistributeEvent_title",
+      "value": "分发按键事件"
+    },
+    {
+      "name": "Key_OnKeyDistributeEvent_Description",
+      "value": "使用onKeyEventDispatch分发按键事件到子组件，子组件使用onKeyEvent。"
+    },
+    {
+      "name": "OnKeyPreImeCommit_title",
+      "value": "回车提交"
+    },
+    {
+      "name": "OnKeyPreImeCommit_Description",
+      "value": "使用OnKeyPreIme实现回车提交（建议使用物理键盘）。"
+    },
+    {
+      "name": "Select_All",
+      "value": "全选"
+    },
+    {
+      "name": "Container_Coking",
+      "value": "容器获焦"
+    }
+  ]
+}
