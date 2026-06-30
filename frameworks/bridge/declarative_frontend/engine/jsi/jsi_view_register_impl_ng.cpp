@@ -100,6 +100,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
@@ -325,6 +326,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSListChildrenMainSize::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
     JSStateMgmtProfiler::JSBind(globalObj);
+    JSStateMgmtHistogram::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
