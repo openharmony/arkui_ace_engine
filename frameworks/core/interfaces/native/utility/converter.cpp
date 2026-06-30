@@ -4645,6 +4645,17 @@ void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptions
     dst = immersiveOptions;
 }
 template<>
+void AssignCast(std::optional<BlurSnapshotOptions>& dst, const Ark_BlurSnapshotOptions& src)
+{
+    auto enableFreeze = Converter::OptConvert<bool>(src.enableFreeze);
+    BlurSnapshotOptions blurSnapshotOptions {};
+    if (enableFreeze.has_value()) {
+        blurSnapshotOptions.enableFreeze = enableFreeze;
+    }
+    dst = blurSnapshotOptions;
+}
+
+template<>
 void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src)
 {
     auto lightEffectColor = Converter::OptConvert<Color>(src.color);

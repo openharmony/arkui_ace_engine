@@ -1125,14 +1125,14 @@ public:
     bool CheckIfUseEffectComponent(const SheetStyle& sheetStyle)
     {
         // Use effectComponent blur snapshot, when the following conditions are met simultaneously:
-        // 1. enableBlurSnapshot is enabled.
+        // 1. blurSnapshotOptions has value.
         // 2. sheetType is not popup.
         // 3. have blur or immersive material.
         if (sheetStyle.systemMaterial &&
             sheetStyle.systemMaterial->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
             return false;
         }
-        bool result = sheetStyle.enableBlurSnapshot.value_or(false) &&
+        bool result = sheetStyle.blurSnapshotOptions.has_value() &&
                       GetSheetTypeNoProcess() != SheetType::SHEET_POPUP &&
                       (sheetStyle.backgroundBlurStyle.has_value() || sheetStyle.systemMaterial);
         return result;

@@ -4087,6 +4087,7 @@ void OverlayManager::UpdateSheetRender(
     sheetPatternModifier->sheetUpdateMaskBackgroundColor(sheetPageNode);
 
     sheetPatternModifier->sheetSetSheetRenderMaterial(sheetPageNode);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, isPartialUpdate);
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4354,20 +4355,22 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
     CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
     sheetWrapperModifier->sheetWrapperSetSheetECNode(sheetWrapperNode, sheetECNode);
 
+    bool enableFreeze =
+        sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false);
+
+    auto ecRSContext = sheetECNode->GetRenderContext();
+    CHECK_NULL_RETURN(ecRSContext, nullptr);
     if (sheetStyle.systemMaterial) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
     }
     if (sheetStyle.backgroundBlurStyle.has_value()) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
         auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
         CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
         sheetNodeRSContext->UpdateUseEffect(true);
     }
+    ecRSContext->UpdateFreeze(enableFreeze);
     return sheetECNode;
 #else
     return nullptr;

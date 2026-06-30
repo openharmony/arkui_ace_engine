@@ -2583,15 +2583,23 @@ void JSViewPopups::ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG
     }
 }
 
-void JSViewPopups::ParseSheetEnableBlurSnapshot(
-    const JSRef<JSVal>& enableBlurSnapshot, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
+void JSViewPopups::ParseSheetBlurSnapshotOptions(
+    const JSRef<JSVal>& blurSnapshotOptions, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
-    if (enableBlurSnapshot->IsBoolean()) {
-        sheetStyle.enableBlurSnapshot = enableBlurSnapshot->ToBoolean();
-    } else if (isPartialUpdate) {
-        sheetStyle.enableBlurSnapshot.reset();
+    if (blurSnapshotOptions->IsObject()) {
+        NG::BlurSnapshotOptions options;
+        auto obj = JSRef<JSObject>::Cast(blurSnapshotOptions);
+        auto enableFreezeVal = obj->GetProperty("enableFreeze");
+        if (enableFreezeVal->IsBoolean()) {
+            options.enableFreeze = enableFreezeVal->ToBoolean();
+        } else if (isPartialUpdate) {
+            options.enableFreeze.reset();
+        } else {
+            options.enableFreeze = false;
+        }
+        sheetStyle.blurSnapshotOptions = options;
     } else {
-        sheetStyle.enableBlurSnapshot = false;
+        sheetStyle.blurSnapshotOptions.reset();
     }
 }
 
@@ -2615,7 +2623,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto uiContextObj = paramObj->GetProperty("uiContext");
     auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
     auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
-    auto enableBlurSnapshot = paramObj->GetProperty("enableBlurSnapshot");
+    auto blurSnapshot = paramObj->GetProperty("blurSnapshot");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
@@ -2626,7 +2634,7 @@ void JSViewAbstract::ParseSheetStyle(
     }
 
     JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
-    JSViewPopups::ParseSheetEnableBlurSnapshot(enableBlurSnapshot, sheetStyle, isPartialUpdate);
+    JSViewPopups::ParseSheetBlurSnapshotOptions(blurSnapshot, sheetStyle, isPartialUpdate);
 
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);

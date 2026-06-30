@@ -8578,6 +8578,9 @@ export type TripleLengthDetents = [
     SheetSize | Length | undefined,
     SheetSize | Length | undefined
 ]
+export interface BlurSnapshotOptions {
+    enableFreeze?: boolean;
+}
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
@@ -8618,7 +8621,7 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
     edgeLightMode?: EdgeLightMode;
-    enableBlurSnapshot?: boolean;
+    blurSnapshot?: BlurSnapshotOptions;
 }
 export interface StateStyles {
     normal?: CustomStyles;
@@ -14940,6 +14943,30 @@ export class BlurOptions_serializer {
         }
         const grayscaleTmpResult: [ double, double ] | undefined = grayscaleTmpBuf
         let value: BlurOptions = ({grayscale: grayscaleTmpResult} as BlurOptions)
+        return value
+    }
+}
+export class BlurSnapshotOptions_serializer {
+    public static write(buffer: SerializerBase, value: BlurSnapshotOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnableFreeze = value.enableFreeze
+        if (valueHolderForEnableFreeze !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableFreezeTmpValue = valueHolderForEnableFreeze!
+            valueSerializer.writeBoolean(valueHolderForEnableFreezeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): BlurSnapshotOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const enableFreezeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableFreezeTmpBuf: boolean | undefined = undefined
+        if ((enableFreezeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableFreezeTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableFreezeTmpResult: boolean | undefined = enableFreezeTmpBuf
+        let value: BlurSnapshotOptions = ({enableFreeze: enableFreezeTmpResult} as BlurSnapshotOptions)
         return value
     }
 }
@@ -26040,11 +26067,11 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnableBlurSnapshot = value.enableBlurSnapshot
-        if (valueHolderForEnableBlurSnapshot !== undefined) {
+        const valueHolderForBlurSnapshot = value.blurSnapshot
+        if (valueHolderForBlurSnapshot !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableBlurSnapshotTmpValue = valueHolderForEnableBlurSnapshot!
-            valueSerializer.writeBoolean(valueHolderForEnableBlurSnapshotTmpValue)
+            const valueHolderForBlurSnapshotTmpValue = valueHolderForBlurSnapshot!
+            BlurSnapshotOptions_serializer.write(valueSerializer, valueHolderForBlurSnapshotTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -26800,13 +26827,13 @@ export class SheetOptions_serializer {
             edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
         }
         const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
-        const enableBlurSnapshotTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let enableBlurSnapshotTmpBuf: boolean | undefined = undefined
-        if ((enableBlurSnapshotTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            enableBlurSnapshotTmpBuf = valueDeserializer.readBoolean()
+        const blurSnapshotTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let blurSnapshotTmpBuf: BlurSnapshotOptions | undefined = undefined
+        if ((blurSnapshotTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blurSnapshotTmpBuf = BlurSnapshotOptions_serializer.read(valueDeserializer)
         }
-        const enableBlurSnapshotTmpResult: boolean | undefined = enableBlurSnapshotTmpBuf
-        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult, enableBlurSnapshot: enableBlurSnapshotTmpResult} as SheetOptions)
+        const blurSnapshotTmpResult: BlurSnapshotOptions | undefined = blurSnapshotTmpBuf
+        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult, blurSnapshot: blurSnapshotTmpResult} as SheetOptions)
         return value
     }
 }

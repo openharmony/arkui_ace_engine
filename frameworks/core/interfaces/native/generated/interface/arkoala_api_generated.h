@@ -2239,6 +2239,8 @@ typedef struct Ark_Blender Ark_Blender;
 typedef struct Opt_Blender Opt_Blender;
 typedef struct Ark_BlurOptions Ark_BlurOptions;
 typedef struct Opt_BlurOptions Opt_BlurOptions;
+typedef struct Ark_BlurSnapshotOptions Ark_BlurSnapshotOptions;
+typedef struct Opt_BlurSnapshotOptions Opt_BlurSnapshotOptions;
 typedef struct Ark_BorderRadiuses_graphics Ark_BorderRadiuses_graphics;
 typedef struct Opt_BorderRadiuses_graphics Opt_BorderRadiuses_graphics;
 typedef struct Ark_BreakPoints Ark_BreakPoints;
@@ -15434,6 +15436,14 @@ typedef struct Opt_BlurOptions {
     Ark_Tag tag;
     Ark_BlurOptions value;
 } Opt_BlurOptions;
+typedef struct Ark_BlurSnapshotOptions {
+    /* kind: Interface */
+    Opt_Boolean enableFreeze;
+} Ark_BlurSnapshotOptions;
+typedef struct Opt_BlurSnapshotOptions {
+    Ark_Tag tag;
+    Ark_BlurSnapshotOptions value;
+} Opt_BlurSnapshotOptions;
 typedef struct Ark_BorderRadiuses_graphics {
     /* kind: Interface */
     Ark_Number topLeft;
@@ -23777,7 +23787,7 @@ typedef struct Ark_SheetOptions {
     Opt_Placement placement;
     Opt_Boolean placementOnTarget;
     Opt_EdgeLightMode edgeLightMode;
-    Opt_Boolean enableBlurSnapshot;
+    Opt_BlurSnapshotOptions blurSnapshot;
 } Ark_SheetOptions;
 typedef struct Opt_SheetOptions {
     Ark_Tag tag;

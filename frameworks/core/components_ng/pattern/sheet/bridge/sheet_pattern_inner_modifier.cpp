@@ -21,9 +21,11 @@
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG::InnerModifier {
 namespace {
+constexpr char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 void SheetInteractiveDismiss(const RefPtr<FrameNode>& sheetNode, BindSheetDismissReason reason)
 {
     CHECK_NULL_VOID(sheetNode);
@@ -616,6 +618,28 @@ bool SheetIsPresentationPattern(const RefPtr<Pattern>& pattern)
 {
     return AceType::InstanceOf<SheetPresentationPattern>(pattern);
 }
+
+void SheetSetSheetBlurSnapshotFreeze(const RefPtr<FrameNode>& sheetPageNode, const SheetStyle& sheetStyle,
+    bool isPartialUpdate)
+{
+    CHECK_NULL_VOID(sheetPageNode);
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    if (!sheetPattern->CheckIfUseEffectComponent(sheetStyle)) {
+        return;
+    }
+    if (isPartialUpdate && !sheetStyle.blurSnapshotOptions.has_value()) {
+        return;
+    }
+    auto sheetECNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    CHECK_NULL_VOID(sheetECNode);
+    if (sheetECNode->GetTag() == EFFECT_COMPONENT_ETS_TAG) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_VOID(ecRSContext);
+        ecRSContext->UpdateFreeze(
+            sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false));
+    }
+}
 } // namespace
 
 const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
@@ -693,6 +717,7 @@ const ArkUISheetPatternInnerModifier* GetSheetPatternInnerModifier()
         .sheetSheetSpringBack = SheetSheetSpringBack,
         .sheetDismissSheetAction = SheetDismissSheetAction,
         .sheetIsPresentationPattern = SheetIsPresentationPattern,
+        .sheetSetSheetBlurSnapshotFreeze = SheetSetSheetBlurSnapshotFreeze,
     };
     return &modifier;
 }

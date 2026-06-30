@@ -176,7 +176,7 @@ HWTEST_F(SheetECTestNg, SheetECBindSheet001, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -233,7 +233,7 @@ HWTEST_F(SheetECTestNg, SheetECBindSheet003, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -326,7 +326,7 @@ HWTEST_F(SheetECTestNg, SheetECBindSheet006, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::REGULAR);
     sheetStyle.sheetEdgeLightMode = EdgeLightMode::EDGELIGHT_AUTO;
     sheetStyle.sheetEffectEdge = SheetEffectEdge::ALL;
@@ -396,7 +396,7 @@ HWTEST_F(SheetECTestNg, SheetECSetSheetRenderMaterial002, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -645,7 +645,7 @@ HWTEST_F(SheetECTestNg, SheetECMountSheetEffectComponent002, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -692,7 +692,7 @@ HWTEST_F(SheetECTestNg, SheetECMountSheetEffectComponent003, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -729,7 +729,7 @@ HWTEST_F(SheetECTestNg, SheetECMountSheetEffectComponent004, TestSize.Level1)
 
     RefPtr<FrameNode> nullWrapper = nullptr;
     SheetStyle sheetStyle;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
     auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
@@ -751,7 +751,7 @@ HWTEST_F(SheetECTestNg, SheetECMountSheetEffectComponent005, TestSize.Level1)
     auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>(-1, ""));
     SheetStyle sheetStyle;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     RefPtr<FrameNode> nullSheetPage = nullptr;
 
     auto ecNode = overlayManager->MountSheetEffectComponent(sheetWrapperNode, sheetStyle, nullSheetPage);
@@ -821,7 +821,7 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRender001, TestSize.Level1)
     SheetStyle updateStyle;
     updateStyle.sheetHeight.sheetMode = SheetMode::LARGE;
     updateStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::REGULAR);
-    updateStyle.enableBlurSnapshot = true;
+    updateStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
     overlayManager->UpdateSheetRender(topModalNode, updateStyle, false);
 }
@@ -890,7 +890,7 @@ HWTEST_F(SheetECTestNg, SheetECUpdateSheetRenderProperty001, TestSize.Level1)
     SheetStyle currentStyle;
     SheetStyle newStyle;
     newStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
-    newStyle.enableBlurSnapshot = true;
+    newStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
     overlayManager->UpdateSheetRenderProperty(topModalNode, newStyle, false);
 }
@@ -1042,7 +1042,7 @@ HWTEST_F(SheetECTestNg, SheetECDismissSheet002, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -1389,12 +1389,12 @@ HWTEST_F(SheetECTestNg, SheetECBindSheetCreateParam002, TestSize.Level1)
 {
     SheetStyle style;
     style.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::REGULAR_EC);
-    style.enableBlurSnapshot = true;
+    style.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
     BindSheetCreateParam param;
     param.style = style;
     EXPECT_TRUE(param.style.systemMaterial);
-    EXPECT_TRUE(param.style.enableBlurSnapshot.has_value());
+    EXPECT_TRUE(param.style.blurSnapshotOptions.has_value());
 }
 
 /**
