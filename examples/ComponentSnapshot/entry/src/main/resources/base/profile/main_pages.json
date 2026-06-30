@@ -1,0 +1,7 @@
+{
+  "src": [
+    "pages/ScrollSnapshot",
+    "pages/GlobalSnapshot",
+    "pages/Index"
+  ]
+}
