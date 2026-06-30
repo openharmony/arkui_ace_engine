@@ -61,7 +61,7 @@ import { GlobalScopeUicontextTextMenu } from "#generated"
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { SizeOptions, ResourceColor } from 'arkui/component/units';
 import { Frame } from 'arkui/Graphics';
-import { TextMenuOptions, TextLayoutOptions, Paragraph } from 'arkui/component/textCommon';
+import { TextMenuOptions, TextLayoutOptions, Paragraph, TextMenuItemId } from 'arkui/component/textCommon';
 import { focusController } from '@ohos/arkui/focusController';
 import { KeyProcessingMode } from 'arkui/component/focus';
 import { componentUtils } from '@ohos/arkui/componentUtils';
@@ -188,6 +188,9 @@ export class TextMenuControllerImpl extends TextMenuController {
     }
     static disableSystemServiceMenuItems(disable: boolean) : void {
         GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems(disable);
+    }
+    static disableMenuItems(items: Array<TextMenuItemId>) : void {
+        GlobalScopeUicontextTextMenu.disableMenuItems(items);
     }
 }
 

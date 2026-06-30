@@ -14,6 +14,7 @@
  */
 
 #include "arkoala_api_generated.h"
+#include <unordered_map>
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
@@ -22,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -84,12 +86,52 @@ void DisableSystemServiceMenuItemsImpl(Ark_Boolean disable)
         }
     }
 }
+SystemServiceMenuDisableFlag GetDisableFlag(const std::string& id)
+{
+    static std::unordered_map<std::string, NG::SystemServiceMenuDisableFlag> disableFlagsMap = {
+        { NG::OH_DEFAULT_TRANSLATE, NG::DISABLE_TRANSLATE_FLAG },
+        { NG::OH_DEFAULT_SEARCH, NG::DISABLE_SEARCH_FLAG },
+        { NG::OH_DEFAULT_SHARE, NG::DISABLE_SHARE_FLAG },
+        { NG::OH_DEFAULT_CAMERA_INPUT, NG::DISABLE_CAMERA_INPUT_FLAG },
+        { NG::OH_DEFAULT_AI_WRITE, NG::DISABLE_AI_WRITER_FLAG },
+        { NG::OH_DEFAULT_COLLABORATION_SERVICE, NG::DISABLE_COLLABORATION_SERVICE_FLAG },
+        { NG::OH_DEFAULT_AI_MENU_URL, NG::DISABLE_AI_MENU_URL_FLAG },
+        { NG::OH_DEFAULT_AI_MENU_PHONE, NG::DISABLE_AI_MENU_PHONE_FLAG },
+        { NG::OH_DEFAULT_AI_MENU_EMAIL, NG::DISABLE_AI_MENU_EMAIL_FLAG },
+        { NG::OH_DEFAULT_AI_MENU_ADDRESS, NG::DISABLE_AI_MENU_ADDRESS_FLAG },
+        { NG::OH_DEFAULT_AI_MENU_DATETIME, NG::DISABLE_AI_MENU_DATETIME_FLAG },
+        { NG::OH_DEFAULT_ASK_CELIA, NG::DISABLE_ASK_CELIA_FLAG },
+        { NG::OH_DEFAULT_AUTO_FILL, NG::DISABLE_AUTO_FILL_FLAG },
+    };
+    return disableFlagsMap.find(id) == disableFlagsMap.end() ? NG::DISABLE_NORMAL_FLAG : disableFlagsMap[id];
+}
+void DisableMenuItemsImpl(const Array_TextMenuItemId* items)
+{
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "TextMenu DisableMenuItemsImpl enter");
+    CHECK_NULL_VOID(items);
+    auto textMenuInfo = AceApplicationInfo::GetInstance().GetTextMenuInfo();
+    auto oldFlags = textMenuInfo.disableFlags;
+    AceApplicationInfo::GetInstance().SetTextMenuDisableFlags(NG::DISABLE_ALL_FLAG);
+    for (Ark_Int32 i = 0; i < items->length; i++) {
+        auto peer = items->array[i];
+        if (peer && peer->id) {
+            AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(GetDisableFlag(peer->id.value()));
+        }
+    }
+    if (oldFlags != AceApplicationInfo::GetInstance().GetTextMenuInfo().disableFlags &&
+        textMenuInfo.menuOnChangeCallback) {
+        if (!textMenuInfo.menuOnChangeCallback()) {
+            AceApplicationInfo::GetInstance().SetTextMenuOnChangeCallback(nullptr);
+        }
+    }
+}
 } // GlobalScopeUicontextTextMenuAccessor
 const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
         GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
         GlobalScopeUicontextTextMenuAccessor::DisableSystemServiceMenuItemsImpl,
+        GlobalScopeUicontextTextMenuAccessor::DisableMenuItemsImpl,
     };
     return &GlobalScopeUicontextTextMenuAccessorImpl;
 }

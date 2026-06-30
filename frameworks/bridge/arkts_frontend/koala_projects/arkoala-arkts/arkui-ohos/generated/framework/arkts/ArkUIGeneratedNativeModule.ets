@@ -5155,6 +5155,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _GlobalScopeUicontextTextMenu_disableSystemServiceMenuItems(disable: boolean): void
     @ani.unsafe.Direct
+    native static _GlobalScopeUicontextTextMenu_disableMenuItems(thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _HierarchicalSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
     native static _HierarchicalSymbolEffect_getFinalizer(): KPointer
