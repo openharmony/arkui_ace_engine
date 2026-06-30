@@ -777,6 +777,7 @@ protected:
     void SetPositionToRSNode();
     void SetPositionToRSNodeMultiThread();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
+    std::shared_ptr<Rosen::RSUIContext> GetOrCreateRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);

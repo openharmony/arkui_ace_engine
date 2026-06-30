@@ -285,6 +285,43 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetOrCreateRSUIContext001
+ * @tc.desc: Test GetOrCreateRSUIContext creates RSUIDirector when RSUIContext is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetOrCreateRSUIContext001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    auto rsUIContext = rosenRenderContext->GetRSUIContext(AceType::RawPtr(pipeline));
+    EXPECT_EQ(rsUIContext, nullptr);
+    EXPECT_EQ(rosenRenderContext->rsUIDirector_, nullptr);
+
+    rsUIContext = rosenRenderContext->GetOrCreateRSUIContext(AceType::RawPtr(pipeline));
+    ASSERT_NE(rosenRenderContext->rsUIDirector_, nullptr);
+    EXPECT_NE(rsUIContext, nullptr);
+    EXPECT_EQ(rsUIContext, rosenRenderContext->rsUIDirector_->GetRSUIContext());
+}
+
+/**
+ * @tc.name: GetOrCreateRSUIContext002
+ * @tc.desc: Test GetOrCreateRSUIContext does not replace existing RSUIDirector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetOrCreateRSUIContext002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create(nullptr);
+    ASSERT_NE(rsUIDirector, nullptr);
+    rosenRenderContext->rsUIDirector_ = rsUIDirector;
+
+    auto rsUIContext = rosenRenderContext->GetOrCreateRSUIContext(AceType::RawPtr(pipeline));
+    EXPECT_EQ(rosenRenderContext->rsUIDirector_, rsUIDirector);
+    EXPECT_EQ(rsUIContext, rsUIDirector->GetRSUIContext());
+}
+
+/**
  * @tc.name: RosenRenderContextTest015
  * @tc.desc: SyncGeometryProperties().
  * @tc.type: FUNC
