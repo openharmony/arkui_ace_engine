@@ -26,6 +26,9 @@ const int32_t RESPONSE_DATA_TYPE_STRING = 0;
 const int32_t RESPONSE_DATA_TYPE_NUMBER = 1;
 const int32_t RESPONSE_DATA_TYPE_RESOURCE = 2;
 const int32_t RESPONSE_DATA_TYPE_BUFFER = 3;
+const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
+const std::string BUNDLE_NAME_PREFIX = "bundleName:";
+const std::string MODULE_NAME_PREFIX = "moduleName:";
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -143,11 +146,17 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
         [peer](const Ark_Resource& responseData) {
             std::optional<std::string> resourceUrl = Converter::OptConvert<std::string>(responseData);
             std::string url;
+            auto convContextPtr = reinterpret_cast<Converter::ConvContext*>(peer->convContext);
             if (resourceUrl) {
+                std::string bundleName = Converter::Convert<std::string>(Converter::ArkValue<Ark_String>
+                                        (responseData.bundleName, convContextPtr));
+                std::string moduleName = Converter::Convert<std::string>(Converter::ArkValue<Ark_String>
+                                            (responseData.moduleName, convContextPtr));
+                resourceUrl.value() = RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + 
+                    moduleName + "/" + resourceUrl->substr(RAWFILE_PREFIX.size());
                 auto np = resourceUrl.value().find_first_of("/");
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }
-            auto convContextPtr = reinterpret_cast<Converter::ConvContext*>(peer->convContext);
             peer->handler->SetResourceUrl(url);
             peer->responseDataType = RESPONSE_DATA_TYPE_RESOURCE;
 
