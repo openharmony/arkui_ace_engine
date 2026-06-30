@@ -143,6 +143,7 @@ private:
     void DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data);
     void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
     void UpdateMenuBarWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr, AAFwk::WantParams& wantParam);
+    bool IsWindowModeFollowHost() const;
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
