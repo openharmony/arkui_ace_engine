@@ -1324,7 +1324,10 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard001, TestSize.Level1)
     /**
      * @tc.steps: step2. Set SetCustomKeyboard.
      */
-    pattern_->SetCustomKeyboard([]() {});
+    pattern_->SetCustomKeyboard([]() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    });
     pattern_->DumpInfo();
     pattern_->DumpAdvanceInfo();
 
@@ -1356,7 +1359,7 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard002, TestSize.Level1)
     /**
      * @tc.steps: step3. call RequestKeyboard.
      */
-    EXPECT_TRUE(pattern_->RequestKeyboard(true, true, true));
+    EXPECT_FALSE(pattern_->RequestKeyboard(true, true, true));
 }
 
 /**

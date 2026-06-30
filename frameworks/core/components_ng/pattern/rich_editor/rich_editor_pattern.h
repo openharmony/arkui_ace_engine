@@ -695,7 +695,7 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
-    void RequestCustomKeyboardBuilder();
+    bool RequestCustomKeyboardBuilder();
     bool CloseCustomKeyboard();
     void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const;

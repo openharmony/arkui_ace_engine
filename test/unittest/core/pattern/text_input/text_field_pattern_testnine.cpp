@@ -1137,7 +1137,10 @@ HWTEST_F(TextFieldPatternTestNine, RequestKeyboardByFocusSwitch001, TestSize.Lev
     pattern_->showKeyBoardOnFocus_ = true;
     pattern_->customKeyboard_ =  AceType::DynamicCast<NG::UINode>(
         AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
-    pattern_->customKeyboardBuilder_ = []{};
+    pattern_->customKeyboardBuilder_ = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
     pattern_->isEdit_ = false;
     pattern_->RequestKeyboardByFocusSwitch();
     EXPECT_TRUE(pattern_->isEdit_);

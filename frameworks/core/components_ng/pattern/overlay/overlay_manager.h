@@ -465,7 +465,7 @@ public:
     std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> GetSheetMap();
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
-    void MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
+    bool MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt, bool isCustKBContFeat = false);
     void OnMainWindowSizeChange(int32_t instanceId, WindowSizeChangeReason reason);
 
@@ -480,8 +480,8 @@ public:
 
     void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
 
-    void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
-    void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
+    bool BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
+    bool BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void ChangeBindKeyboardWithNode(int32_t targetId);
     void CloseKeyboard(int32_t targetId);
     void UpdateCustomKeyboardPosition();
@@ -806,7 +806,7 @@ private:
     RefPtr<FrameNode> GetOverlayFrameNode();
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SetDragNodeNeedClean(bool needClean = true);
-    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
+    bool MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
