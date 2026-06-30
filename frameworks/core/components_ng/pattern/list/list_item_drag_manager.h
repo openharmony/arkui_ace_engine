@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace {
 class GestureEvent;
+struct PanDirection;
 }
 
 namespace OHOS::Ace::NG {
@@ -79,6 +80,7 @@ private:
     void HandleAutoScroll(int32_t index, const PointF& point, const RectF& frameRect);
     void SetPosition(const OffsetF& offset);
     void ResetPrevScaleNode();
+    PanDirection GetDragEventPanDirection();
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
     int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
     int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
