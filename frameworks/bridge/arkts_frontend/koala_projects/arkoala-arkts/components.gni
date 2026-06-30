@@ -29,6 +29,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyDynamicLayout.ets",
   "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/@ohos.arkui.drawableDescriptor.ets",
@@ -87,6 +88,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/DepthComponentModifier.ets",
   "arkui-preprocessed/arkui/DividerModifier.ets",
   "arkui-preprocessed/arkui/DynamicLayoutModifierHandWritten.ets",
+  "arkui-preprocessed/arkui/LazyDynamicLayoutModifierHandWritten.ets",
   "arkui-preprocessed/arkui/EffectComponentModifier.ets",
   "arkui-preprocessed/arkui/EllipseModifier.ets",
   "arkui-preprocessed/arkui/EmbeddedComponentModifier.ets",
@@ -109,6 +111,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/ImageSpanModifier.ets",
   "arkui-preprocessed/arkui/IndicatorComponentModifier.ets",
   "arkui-preprocessed/arkui/LayoutAlgorithm.ets",
+  "arkui-preprocessed/arkui/LazyLayoutAlgorithm.ets",
   "arkui-preprocessed/arkui/LazyGridLayoutModifier.ets",
   "arkui-preprocessed/arkui/LazyColumnLayoutModifier.ets",
   "arkui-preprocessed/arkui/LazyVGridLayoutModifier.ets",
@@ -418,6 +421,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",
   "arkui-preprocessed/arkui/hooks/CanvasOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/DynamicLayoutHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/LazyDynamicLayoutHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ImageOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListItemGroupHandWritten.ets",
@@ -635,6 +639,7 @@ arkui_path_keys = [
   "@aceTrace",
   "@decoratorEnv",
   "@ohos.arkui.components.ArkDynamicLayout",
+  "@ohos.arkui.components.ArkLazyDynamicLayout",
   "@ohos.arkui.WithEnv",
 ]
 
@@ -702,6 +707,7 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyDynamicLayout.ets",
   "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
 ]
 

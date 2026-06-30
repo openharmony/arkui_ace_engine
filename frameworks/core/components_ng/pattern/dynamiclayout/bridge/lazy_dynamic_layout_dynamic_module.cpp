@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/dynamiclayout/bridge/dynamic_layout_dynamic_module.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/lazy_dynamic_layout_dynamic_module.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
-#include "core/components_ng/pattern/dynamiclayout/dynamic_layout_model_ng.h"
+#include "core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/ani/ani_api.h"
-
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_DynamicLayout()
-{
-    return new OHOS::Ace::DynamicLayoutDynamicModule();
-}
-
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_LazyDynamicLayout()
-{
-    return new OHOS::Ace::LazyDynamicLayoutDynamicModule();
-}
 
 namespace OHOS::Ace {
 
@@ -37,48 +26,49 @@ namespace NodeModifier {
 const ArkUIDynamicLayoutModifier* GetDynamicLayoutDynamicModifier();
 }
 #ifdef INCLUDE_GENERATED_SOURCES
-const ArkUIAniDynamicLayoutModifier* GetArkUIAniDynamicLayoutModifier();
+const ArkUIAniLazyDynamicLayoutModifier* GetArkUIAniLazyDynamicLayoutModifier();
 #endif
 } // namespace NG
 
-void DynamicLayoutDynamicModule::RegisterAttributes(
+void LazyDynamicLayoutDynamicModule::RegisterAttributes(
     panda::Local<panda::ObjectRef> object, panda::ecmascript::EcmaVM* vm)
 {
     NG::DynamicLayoutBridge::RegisterDynamicLayoutAttributes(object, vm);
 }
 
-const void* DynamicLayoutDynamicModule::GetDynamicModifier()
+const void* LazyDynamicLayoutDynamicModule::GetDynamicModifier()
 {
     return NG::NodeModifier::GetDynamicLayoutDynamicModifier();
 }
 
-const void* DynamicLayoutDynamicModule::GetStaticModifier()
+const void* LazyDynamicLayoutDynamicModule::GetStaticModifier()
 {
     return nullptr;
 }
 
-const void* DynamicLayoutDynamicModule::GetCjModifier()
+const void* LazyDynamicLayoutDynamicModule::GetCjModifier()
 {
     return nullptr;
 }
 
-void* DynamicLayoutDynamicModule::GetModel()
+void* LazyDynamicLayoutDynamicModule::GetModel()
 {
-    static NG::DynamicLayoutModelNG model;
+    static NG::LazyDynamicLayoutModelNG model;
     return &model;
 }
 
-const void* DynamicLayoutDynamicModule::GetCustomModifier(const std::string& name)
+const void* LazyDynamicLayoutDynamicModule::GetCustomModifier(const std::string& name)
 {
     return nullptr;
 }
 
-const void* DynamicLayoutDynamicModule::GetAniModifier()
+const void* LazyDynamicLayoutDynamicModule::GetAniModifier()
 {
 #ifdef INCLUDE_GENERATED_SOURCES
-    return NG::GetArkUIAniDynamicLayoutModifier();
+    return NG::GetArkUIAniLazyDynamicLayoutModifier();
 #else
     return nullptr;
 #endif
 }
+
 } // namespace OHOS::Ace
