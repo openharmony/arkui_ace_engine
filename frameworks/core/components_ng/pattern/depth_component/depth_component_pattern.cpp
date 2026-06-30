@@ -447,6 +447,7 @@ void DepthComponentPattern::LoadDepthMap()
 
     auto loadNotifier = CreateDepthMapLoadNotifier();
     depthMapLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(depthMap_, std::move(loadNotifier), false);
+    depthMapLoadingCtx_->FinishMeasure();
     depthMapLoadingCtx_->LoadImageData();
 }
 
@@ -500,11 +501,12 @@ LoadNotifier DepthComponentPattern::CreateDepthMapLoadNotifier()
             CHECK_NULL_VOID(eventHub);
             CHECK_NULL_VOID(eventHub->GetOnDepthMapError());
             auto errorCode = static_cast<int32_t>(errorInfo.errorCode);
+            auto errorMessage = errorInfo.errorMessage;
             context->GetTaskExecutor()->PostTask(
-                [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub)), errorCode, errorMsg]() {
+                [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub)), errorCode, errorMessage]() {
                     auto eventHub = weakEventHub.Upgrade();
                     CHECK_NULL_VOID(eventHub);
-                    eventHub->FireDepthMapErrorEvent(errorCode, errorMsg);
+                    eventHub->FireDepthMapErrorEvent(errorCode, errorMessage);
                 },
                 TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadError");
         });
