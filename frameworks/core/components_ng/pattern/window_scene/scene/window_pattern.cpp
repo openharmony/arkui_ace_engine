@@ -260,7 +260,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->HasPersistentSnapshot()) {
-        if (!session_->GetShowRecent() && !session_->GetAppLockControl()) {
+        if (!session_->GetShowRecent()) {
             DelayAddAppWindowForDmaResume(session_->GetCallingPid());
         }
         CreateSnapshotWindow();
