@@ -48,7 +48,8 @@ import {
     ReusePoolOwnership,
     EnvOptions,
     ICustomEnvDecoratedVariable,
-    SystemEnvKey
+    SystemEnvKey,
+    CustomEnvOptions
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -671,13 +672,15 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         owningView: IVariableOwner,
         envKey: CustomEnvKey<T>,
         varName: string,
-        defaultValue: T
+        defaultValue: T,
+        customEnvOptions?: CustomEnvOptions<T>
     ): ICustomEnvDecoratedVariable<T> {
         return new CustomEnvDecoratedVariable<T>(
             owningView,
             envKey,
             varName,
-            uiUtils.autoProxyObject(defaultValue) as T
+            uiUtils.autoProxyObject(defaultValue) as T,
+            customEnvOptions
         ) as ICustomEnvDecoratedVariable<T>;
     }
 }

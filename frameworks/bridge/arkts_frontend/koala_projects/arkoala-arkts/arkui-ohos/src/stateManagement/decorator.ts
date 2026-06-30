@@ -216,7 +216,12 @@ export interface ConsumeOptions<T> {
 }
 
 export interface EnvOptions<T> {
-    initValue?: T
+    initValue?: T;
+    watchFunc?: WatchFuncType;
+}
+
+export interface CustomEnvOptions<T> {
+    watchFunc?: WatchFuncType;
 }
 
 export interface MakeMonitorOptions {
@@ -352,7 +357,8 @@ export interface IStateMgmtFactory {
         owningView: IVariableOwner,
         envKey: CustomEnvKey<T>,
         varName: string,
-        defaultValue: T
+        defaultValue: T,
+        customEnvOptions?: CustomEnvOptions<T>
     ): ICustomEnvDecoratedVariable<T>;
 }
 
