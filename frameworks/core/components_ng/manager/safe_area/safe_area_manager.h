@@ -74,9 +74,11 @@ public:
      */
     bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
-    bool CheckFloatNavSafeArea(const SafeAreaInsets& safeArea);
+    bool CheckFloatNavSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
-    bool UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea);
+    bool UpdateFloatNavSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Retrieves the system safe area insets.

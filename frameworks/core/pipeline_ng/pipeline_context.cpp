@@ -2298,7 +2298,8 @@ bool PipelineContext::FlushSafeArea(
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager_->UpdateNavSafeArea(avoidArea.second);
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_FLOAT_NAVIGATION) {
-            safeAreaUpdated |= safeAreaManager_->UpdateFloatNavSafeArea(avoidArea.second);
+            safeAreaUpdated |=
+                safeAreaManager_->UpdateFloatNavSafeArea(avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_CUTOUT) {
             safeAreaUpdated |=
                 safeAreaManager_->UpdateCutoutSafeArea(avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
@@ -2852,7 +2853,9 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
 void PipelineContext::UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea)
 {
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
+    auto rootSize =
+        NG::OptionalSize<uint32_t>(static_cast<uint32_t>(GetRootWidth()), static_cast<uint32_t>(GetRootHeight()));
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea, rootSize)) {
         AnimateOnSafeAreaUpdate();
     }
 }
@@ -2903,7 +2906,9 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& na
 void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea)
 {
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
+    auto rootSize =
+        NG::OptionalSize<uint32_t>(static_cast<uint32_t>(GetRootWidth()), static_cast<uint32_t>(GetRootHeight()));
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea, rootSize)) {
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
     }
 }
