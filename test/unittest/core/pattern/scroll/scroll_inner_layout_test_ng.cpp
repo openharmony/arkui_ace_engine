@@ -1037,4 +1037,43 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion006, TestSize.Level1)
     scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
     EXPECT_EQ(scrollBar_->GetNormalWidth(), Dimension());
 }
+
+/**
+ * @tc.name: FlushBarWidthZeroViewport001
+ * @tc.desc: Test FlushBarWidth does not update scrollbar regions when viewport is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, FlushBarWidthZeroViewport001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(300.0, 300.0);
+    double estimatedHeight = 3000.0;
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetShapeMode(ShapeMode::RECT);
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+    scrollBar_->UpdateScrollBarRegion(offsetView, sizeView, offsetView, estimatedHeight, SCROLL_FROM_NONE);
+
+    auto barRect = scrollBar_->barRect_;
+    auto trackRect = scrollBar_->trackRect_;
+    auto activeRect = scrollBar_->activeRect_;
+    auto barRegionSize = scrollBar_->barRegionSize_;
+    ASSERT_GT(barRect.Height(), 0.0);
+    ASSERT_GT(activeRect.Height(), 0.0);
+
+    /**
+     * @tc.steps: step1. Flush bar width with an empty viewport.
+     * @tc.expected: The existing scrollbar regions remain unchanged.
+     */
+    scrollBar_->viewPortSize_ = Size(0.0, 0.0);
+    scrollBar_->FlushBarWidth();
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, barRect));
+    EXPECT_TRUE(IsEqual(scrollBar_->trackRect_, trackRect));
+    EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, activeRect));
+    EXPECT_EQ(scrollBar_->barRegionSize_, barRegionSize);
+}
 } // namespace OHOS::Ace::NG
