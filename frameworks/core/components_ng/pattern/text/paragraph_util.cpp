@@ -24,6 +24,36 @@
 #include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& nextStyle,
+    TextDirection textDirection, TextDirection nextTextDirection)
+{
+    if (pStyle != nextStyle) {
+        return true;
+    }
+    if (pStyle.tailIndents.has_value()) {
+        return true;
+    }
+    if (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) {
+        return true;
+    }
+    if (Positive(pStyle.indent.Value())) {
+        return true;
+    }
+    if (pStyle.maxLines != UINT32_MAX) {
+        return true;
+    }
+    if (pStyle.drawableLeadingMargin.has_value()) {
+        return true;
+    }
+    if ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
+        nextTextDirection != textDirection) {
+        return true;
+    }
+    return false;
+}
+} // namespace
+
 ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
 {
     return { .direction = textStyle.GetTextDirection(),
@@ -261,11 +291,7 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
                 break;
             }
             auto nextTextDirection = GetTextDirectionByContent(next->content);
-            if (pStyle != nextSpanParagraphStyle ||
-                (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) || Positive(pStyle.indent.Value()) ||
-                pStyle.maxLines != UINT32_MAX || pStyle.drawableLeadingMargin.has_value() ||
-                ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
-                    nextTextDirection != textDirection)) {
+            if (NeedSplitParagraph(pStyle, nextSpanParagraphStyle, textDirection, nextTextDirection)) {
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
