@@ -50,7 +50,7 @@ bool IsReachEnd(float remain, float threshold)
 
 CompatibleManager::CompatibleManager()
 {
-    state_ = std::make_unique<IdleState>(*this);
+    currentState_ = std::make_unique<IdleState>(*this);
 }
 
 bool CompatibleManager::IdleState::NotifyNewEvent(const TouchEvent& event)
@@ -248,12 +248,12 @@ std::optional<TouchEvent> CompatibleManager::GenerateUpEvent()
 bool CompatibleManager::NotifyNewEvent(const TouchEvent& event)
 {
     UpdateRawEvent(event);
-    return state_->NotifyNewEvent(event);
+    return currentState_->NotifyNewEvent(event);
 }
 
 std::optional<TouchEvent> CompatibleManager::EventGenerate()
 {
-    auto event = state_->EventGenerate();
+    auto event = currentState_->EventGenerate();
     if (event) {
         event->isGenerate = true;
     }
@@ -295,8 +295,13 @@ void CompatibleManager::UpdateRawEvent(const TouchEvent& event)
 
 void CompatibleManager::SetState(std::unique_ptr<TouchState> newState)
 {
+    if (!newState) {
+        TAG_LOGE(AceLogTag::ACE_INPUTKEYFLOW, "SetState failed, newState is null");
+        return;
+    }
     newState->start();
-    state_ = std::move(newState);
+    lastState_ = std::move(currentState_);
+    currentState_ = std::move(newState);
 }
 
 void CompatibleManager::UpdateDistance(float target)
@@ -398,6 +403,6 @@ void CompatibleManager::ClearRawMoveEvent()
 
 StateType CompatibleManager::GetCurrentStateType() const
 {
-    return state_->GetType();
+    return currentState_->GetType();
 }
 } // namespace OHOS::Ace::NG
