@@ -285,7 +285,7 @@ function virtualRender<T>(
             _type = REPEAT_EACH_FUNC_TYPE;
         }
         /** @memo */
-        const itemBuilder = attributes.itemGenFuncs_.get(_type)!;
+        const itemBuilder: RepeatItemBuilder<T> = attributes.itemGenFuncs_.get(_type)!;
         /**
          * wrap in reusable node.
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
@@ -329,7 +329,7 @@ function nonVirtualRender<T>(
     /** @memo */
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
-        const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
+        const itemGenerator: RepeatItemBuilder<T> = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
         const ri = new RepeatItemImpl<T>(arr, i);
         const env = getCurrentEnv();
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
