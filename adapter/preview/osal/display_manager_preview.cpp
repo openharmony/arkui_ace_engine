@@ -14,7 +14,6 @@
  */
 
 #include "base/display_manager/display_manager.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -33,31 +32,6 @@ public:
     {
         return FoldDisplayMode::UNKNOWN;
     }
-
-    // Preview has no Rosen IPC; populate BaseDisplayInfo from SystemProperties.
-    // SystemProperties::GetDeviceWidth/Height are set by the preview harness
-    // via InitDeviceInfo(). DeviceOrientation only has PORTRAIT/LANDSCAPE,
-    // so ROTATION_180/270 cannot be represented.
-    RefPtr<BaseDisplayInfo> GetCachedDisplayInfo(uint64_t displayId) override
-    {
-        auto info = AceType::MakeRefPtr<BaseDisplayInfo>();
-        info->SetDisplayId(displayId);
-        info->SetWidth(SystemProperties::GetDeviceWidth());
-        info->SetHeight(SystemProperties::GetDeviceHeight());
-        auto orientation = SystemProperties::GetDeviceOrientation();
-        info->SetRotation(orientation == DeviceOrientation::LANDSCAPE
-            ? Rotation::ROTATION_90 : Rotation::ROTATION_0);
-        return info;
-    }
-
-    // Preview has no display change events; return 0 to indicate not registered.
-    uint64_t RegisterDisplaySizeChangeCallback(DisplaySizeChangeCallback callback) override
-    {
-        return 0;
-    }
-
-    // No-op: no listeners registered in preview.
-    void UnregisterDisplaySizeChangeCallback(uint64_t callbackId) override {}
 };
 } // namespace
 

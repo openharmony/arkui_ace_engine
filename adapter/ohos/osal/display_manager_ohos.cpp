@@ -48,16 +48,15 @@ bool g_attributeListenerRegistered = false;
 // Falls back to GetDefaultDisplay if GetDisplayById fails (at most 2 IPC in fallback path).
 RefPtr<BaseDisplayInfo> FetchBaseDisplayInfo(uint64_t requestedDisplayId)
 {
-    auto display =
-        Rosen::DisplayManager::GetInstance().GetDisplayById(static_cast<int32_t>(requestedDisplayId));
+    auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(static_cast<int32_t>(requestedDisplayId));
     if (!display) {
         TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN,
             "GetDisplayById failed for displayId=%{public}" PRIu64 ", trying GetDefaultDisplay", requestedDisplayId);
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     if (!display) {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
-            "GetDefaultDisplay also failed for displayId=%{public}" PRIu64, requestedDisplayId);
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "GetDefaultDisplay also failed for displayId=%{public}" PRIu64 "",
+            requestedDisplayId);
         return nullptr;
     }
     auto dmDisplayInfo = display->GetDisplayInfo();
@@ -67,8 +66,8 @@ RefPtr<BaseDisplayInfo> FetchBaseDisplayInfo(uint64_t requestedDisplayId)
     uint64_t actualDisplayId = dmDisplayInfo->GetDisplayId();
     if (actualDisplayId != requestedDisplayId) {
         TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN,
-            "DisplayId mismatch: requested=%{public}" PRIu64 ", actual=%{public}" PRIu64,
-            requestedDisplayId, actualDisplayId);
+            "DisplayId mismatch: requested=%{public}" PRIu64 ", actual=%{public}" PRIu64 "", requestedDisplayId,
+            actualDisplayId);
     }
     auto info = AceType::MakeRefPtr<BaseDisplayInfo>();
     info->SetDisplayId(actualDisplayId);
@@ -78,16 +77,66 @@ RefPtr<BaseDisplayInfo> FetchBaseDisplayInfo(uint64_t requestedDisplayId)
     return info;
 }
 
+bool HasCallbackConsumers()
+{
+    std::lock_guard<std::mutex> lock(g_callbackMutex);
+    return !g_displaySizeChangeCallbacks.empty();
+}
+
+// Diff detection as race-condition guard (server-side already filters).
+// Returns true if cache was updated or newly created.
+bool UpdateCachedDisplayInfo(uint64_t actualId, int32_t newWidth, int32_t newHeight, Rotation newRotation)
+{
+    std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
+    auto it = g_cachedDisplayInfoMap.find(actualId);
+    if (it == g_cachedDisplayInfoMap.end()) {
+        auto info = AceType::MakeRefPtr<BaseDisplayInfo>();
+        info->SetDisplayId(actualId);
+        info->SetWidth(newWidth);
+        info->SetHeight(newHeight);
+        info->SetRotation(newRotation);
+        g_cachedDisplayInfoMap[actualId] = info;
+        return true;
+    }
+    bool changed = (it->second->GetWidth() != newWidth || it->second->GetHeight() != newHeight ||
+                    it->second->GetRotation() != newRotation);
+    if (changed) {
+        it->second->SetWidth(newWidth);
+        it->second->SetHeight(newHeight);
+        it->second->SetRotation(newRotation);
+    }
+    return changed;
+}
+
+void DispatchDisplaySizeChangeCallbacks(int32_t width, int32_t height, Rotation rotation, uint64_t displayId)
+{
+    std::vector<DisplayManager::DisplaySizeChangeCallback> callbacksCopy;
+    {
+        std::lock_guard<std::mutex> lock(g_callbackMutex);
+        callbacksCopy.reserve(g_displaySizeChangeCallbacks.size());
+        for (const auto& [id, callback] : g_displaySizeChangeCallbacks) {
+            callbacksCopy.push_back(callback);
+        }
+    }
+    for (const auto& callback : callbacksCopy) {
+        callback(width, height, rotation, displayId);
+    }
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
+        "OnAttributeChange dispatched %{public}zu callback(s) displayId=%{public}" PRIu64 "", callbacksCopy.size(),
+        displayId);
+}
+
 class DisplayListenerImpl : public Rosen::DisplayManager::IDisplayListener {
 public:
     void OnCreate(Rosen::DisplayId displayId) override
     {
-        TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "OnCreate displayId=%{public}" PRIu64, static_cast<uint64_t>(displayId));
+        TAG_LOGI(
+            AceLogTag::ACE_DEFAULT_DOMAIN, "OnCreate displayId=%{public}" PRIu64 "", static_cast<uint64_t>(displayId));
         uint64_t castDisplayId = static_cast<uint64_t>(displayId);
         auto cachedInfo = FetchBaseDisplayInfo(castDisplayId);
         if (!cachedInfo) {
-            TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "OnCreate: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64,
-                castDisplayId);
+            TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
+                "OnCreate: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64 "", castDisplayId);
             return;
         }
         uint64_t actualId = cachedInfo->GetDisplayId();
@@ -99,7 +148,8 @@ public:
 
     void OnDestroy(Rosen::DisplayId displayId) override
     {
-        TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "OnDestroy displayId=%{public}" PRIu64, static_cast<uint64_t>(displayId));
+        TAG_LOGI(
+            AceLogTag::ACE_DEFAULT_DOMAIN, "OnDestroy displayId=%{public}" PRIu64 "", static_cast<uint64_t>(displayId));
         uint64_t castDisplayId = static_cast<uint64_t>(displayId);
         {
             std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
@@ -121,72 +171,33 @@ public:
         uint64_t castDisplayId = static_cast<uint64_t>(displayId);
 
         // OPT-3: No consumers -> invalidate cache entry + skip IPC entirely.
-        bool hasConsumers = false;
-        {
-            std::lock_guard<std::mutex> lock(g_callbackMutex);
-            hasConsumers = !g_displaySizeChangeCallbacks.empty();
-        }
-        if (!hasConsumers) {
+        if (!HasCallbackConsumers()) {
             std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
             g_cachedDisplayInfoMap.erase(castDisplayId);
             TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-                "OnAttributeChange skip (no consumers), invalidated displayId=%{public}" PRIu64, castDisplayId);
+                "OnAttributeChange skip (no consumers), invalidated displayId=%{public}" PRIu64 "", castDisplayId);
             return;
         }
 
         auto freshInfo = FetchBaseDisplayInfo(castDisplayId);
         if (!freshInfo) {
-            TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "OnAttributeChange: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64,
-                castDisplayId);
+            TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
+                "OnAttributeChange: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64 "", castDisplayId);
             return;
         }
         uint64_t actualId = freshInfo->GetDisplayId();
         int32_t newWidth = freshInfo->GetWidth();
         int32_t newHeight = freshInfo->GetHeight();
         Rotation newRotation = freshInfo->GetRotation();
-
-        // Diff detection as race-condition guard (server-side already filters).
-        bool changed = false;
-        {
-            std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
-            auto it = g_cachedDisplayInfoMap.find(actualId);
-            if (it != g_cachedDisplayInfoMap.end()) {
-                changed = (it->second->GetWidth() != newWidth || it->second->GetHeight() != newHeight ||
-                           it->second->GetRotation() != newRotation);
-                if (changed) {
-                    it->second->SetWidth(newWidth);
-                    it->second->SetHeight(newHeight);
-                    it->second->SetRotation(newRotation);
-                }
-            } else {
-                g_cachedDisplayInfoMap[actualId] = freshInfo;
-                changed = true;
-            }
-        }
-        if (!changed) {
+        if (!UpdateCachedDisplayInfo(actualId, newWidth, newHeight, newRotation)) {
             TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-                "OnAttributeChange no change detected displayId=%{public}" PRIu64, actualId);
+                "OnAttributeChange no change detected displayId=%{public}" PRIu64 "", actualId);
             return;
         }
         TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
             "OnAttributeChange updated displayId=%{public}" PRIu64 " w=%{public}d h=%{public}d rot=%{public}u",
             actualId, newWidth, newHeight, static_cast<uint32_t>(newRotation));
-
-        // Copy callbacks under lock, dispatch outside lock.
-        std::vector<DisplayManager::DisplaySizeChangeCallback> callbacksCopy;
-        {
-            std::lock_guard<std::mutex> lock(g_callbackMutex);
-            callbacksCopy.reserve(g_displaySizeChangeCallbacks.size());
-            for (const auto& [id, callback] : g_displaySizeChangeCallbacks) {
-                callbacksCopy.push_back(callback);
-            }
-        }
-        for (const auto& callback : callbacksCopy) {
-            callback(newWidth, newHeight, newRotation, actualId);
-        }
-        TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-            "OnAttributeChange dispatched %{public}zu callback(s) displayId=%{public}" PRIu64,
-            callbacksCopy.size(), actualId);
+        DispatchDisplaySizeChangeCallbacks(newWidth, newHeight, newRotation, actualId);
     }
 };
 
@@ -210,20 +221,22 @@ bool EnsureListenersRegistered()
     if (retListener == Rosen::DMError::DM_OK) {
         g_displayListenerRegistered = true;
     } else {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "RegisterDisplayListener failed: %{public}d (attempt %{public}d/%{public}d)",
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
+            "RegisterDisplayListener failed: %{public}d (attempt %{public}d/%{public}d)",
             static_cast<int32_t>(retListener), g_displayAttemptCount, MAX_REGISTER_RETRY);
     }
 
     // Register IDisplayAttributeListener (server-side filtered for width/height/rotation).
-    std::vector<std::string> listenAttributes = {"width", "height", "rotation"};
-    auto retAttr = Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(
-        listenAttributes, g_attributeListener);
+    std::vector<std::string> listenAttributes = { "width", "height", "rotation" };
+    auto retAttr =
+        Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(listenAttributes, g_attributeListener);
     if (retAttr == Rosen::DMError::DM_OK) {
         g_attributeListenerRegistered = true;
         TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "AttributeListener registered (attempt %{public}d/%{public}d)",
             g_displayAttemptCount, MAX_REGISTER_RETRY);
     } else {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "RegisterAttributeListener failed: %{public}d (attempt %{public}d/%{public}d)",
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
+            "RegisterAttributeListener failed: %{public}d (attempt %{public}d/%{public}d)",
             static_cast<int32_t>(retAttr), g_displayAttemptCount, MAX_REGISTER_RETRY);
     }
 
@@ -264,8 +277,8 @@ bool DisplayManagerOhos::ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t
 
 FoldDisplayMode DisplayManagerOhos::GetFoldDisplayMode()
 {
-    return static_cast<FoldDisplayMode>(static_cast<uint32_t>(
-        Rosen::DisplayManager::GetInstance().GetFoldDisplayMode()));
+    return static_cast<FoldDisplayMode>(
+        static_cast<uint32_t>(Rosen::DisplayManager::GetInstance().GetFoldDisplayMode()));
 }
 
 RefPtr<BaseDisplayInfo> DisplayManagerOhos::GetCachedDisplayInfo(uint64_t displayId)
@@ -274,30 +287,30 @@ RefPtr<BaseDisplayInfo> DisplayManagerOhos::GetCachedDisplayInfo(uint64_t displa
         std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
         auto it = g_cachedDisplayInfoMap.find(displayId);
         if (it != g_cachedDisplayInfoMap.end()) {
-            return it->second;
+            return it->second->Clone();
         }
     }
-    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-        "GetCachedDisplayInfo cache miss displayId=%{public}" PRIu64, displayId);
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "GetCachedDisplayInfo cache miss displayId=%{public}" PRIu64 "", displayId);
     EnsureListenersRegistered();
     auto cachedInfo = FetchBaseDisplayInfo(displayId);
     if (!cachedInfo) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
-            "GetCachedDisplayInfo: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64, displayId);
+            "GetCachedDisplayInfo: FetchBaseDisplayInfo failed for displayId=%{public}" PRIu64 "", displayId);
         return nullptr;
     }
     {
         std::lock_guard<std::mutex> lock(g_cachedDisplayInfoMutex);
         g_cachedDisplayInfoMap[cachedInfo->GetDisplayId()] = cachedInfo;
+        return cachedInfo->Clone();
     }
-    return cachedInfo;
 }
 
 uint64_t DisplayManagerOhos::RegisterDisplaySizeChangeCallback(DisplaySizeChangeCallback callback)
 {
     CHECK_NULL_RETURN(callback, 0);
     if (!EnsureListenersRegistered()) {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "RegisterDisplaySizeChangeCallback: listener registration not available");
+        TAG_LOGE(
+            AceLogTag::ACE_DEFAULT_DOMAIN, "RegisterDisplaySizeChangeCallback: listener registration not available");
         return 0;
     }
     uint64_t callbackId = 0;
@@ -306,8 +319,7 @@ uint64_t DisplayManagerOhos::RegisterDisplaySizeChangeCallback(DisplaySizeChange
         callbackId = g_nextCallbackId++;
         g_displaySizeChangeCallbacks[callbackId] = std::move(callback);
     }
-    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-        "RegisterDisplaySizeChangeCallback id=%{public}" PRIu64, callbackId);
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "RegisterDisplaySizeChangeCallback id=%{public}" PRIu64 "", callbackId);
     return callbackId;
 }
 
@@ -320,7 +332,6 @@ void DisplayManagerOhos::UnregisterDisplaySizeChangeCallback(uint64_t callbackId
         std::lock_guard<std::mutex> lock(g_callbackMutex);
         g_displaySizeChangeCallbacks.erase(callbackId);
     }
-    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN,
-        "UnregisterDisplaySizeChangeCallback id=%{public}" PRIu64, callbackId);
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "UnregisterDisplaySizeChangeCallback id=%{public}" PRIu64 "", callbackId);
 }
 } // namespace OHOS::Ace

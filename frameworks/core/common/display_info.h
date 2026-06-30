@@ -137,6 +137,19 @@ public:
         displayId_ = displayId;
     }
 
+    // Creates a shallow snapshot of BaseDisplayInfo fields only.
+    // Non-virtual: derived classes (e.g. DisplayInfo) will be sliced.
+    // The display cache only stores BaseDisplayInfo, so this is safe.
+    RefPtr<BaseDisplayInfo> Clone() const
+    {
+        auto copy = AceType::MakeRefPtr<BaseDisplayInfo>();
+        copy->width_ = width_;
+        copy->height_ = height_;
+        copy->rotation_ = rotation_;
+        copy->displayId_ = displayId_;
+        return copy;
+    }
+
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;

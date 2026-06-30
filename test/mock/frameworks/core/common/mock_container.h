@@ -198,6 +198,7 @@ public:
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
     MOCK_METHOD(bool, IsSubWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
+    MOCK_METHOD(RefPtr<BaseDisplayInfo>, GetCachedDisplayInfo, (), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
     static bool mockIsNeedModifySize_;
