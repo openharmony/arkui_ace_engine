@@ -9,7 +9,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the language governing permissions and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -27,85 +27,8 @@
 
 namespace NativeModule {
 
-constexpr uint32_t COLOR_WHITE = 0xFFFFFFFF;
-constexpr uint32_t COLOR_BLACK = 0xFF000000;
-constexpr uint32_t COLOR_BLUE = 0xFF007DFF;
-constexpr uint32_t COLOR_LIGHTGRAY = 0xFFCCCCCC;
-constexpr uint32_t COLOR_GRAY = 0xFF999999;
-constexpr uint32_t COLOR_RED = 0xFFFF4444;
-constexpr uint32_t COLOR_GREEN = 0xFF4CAF50;
-constexpr uint32_t COLOR_ORANGE = 0xFFFF9800;
-constexpr uint32_t COLOR_DARKBLUE = 0xFF1A73E8;
-constexpr uint32_t COLOR_BG_LIGHT = 0xFFF5F5F5;
-
-constexpr float FONT_SIZE_24 = 24.0f;
-constexpr float FONT_SIZE_20 = 20.0f;
-constexpr float FONT_SIZE_18 = 18.0f;
-constexpr float FONT_SIZE_16 = 16.0f;
-constexpr float FONT_SIZE_14 = 14.0f;
-constexpr float FONT_SIZE_12 = 12.0f;
-constexpr float FONT_SIZE_10 = 10.0f;
-
-constexpr int32_t FONT_WEIGHT_LIGHT = 300;
-constexpr int32_t FONT_WEIGHT_NORMAL = 400;
-constexpr int32_t FONT_WEIGHT_BOLD = 700;
-
-constexpr float FULL_WIDTH = 360.0f;
-constexpr float PAGE_PADDING = 12.0f;
 constexpr float BUTTON_HEIGHT = 40.0f;
-constexpr float SMALL_BUTTON_HEIGHT = 30.0f;
-constexpr float BUTTON_BORDER_RADIUS = 8.0f;
-constexpr float BUTTON_WIDTH_SMALL = 80.0f;
-constexpr float BUTTON_WIDTH_MEDIUM = 100.0f;
-constexpr float BUTTON_WIDTH_LARGE = 110.0f;
 constexpr float DIVIDER_HEIGHT = 1.0f;
-constexpr float DIVIDER_BOLD_HEIGHT = 2.0f;
-constexpr float ITEM_HEIGHT_DEFAULT = 40.0f;
-constexpr float ITEM_HEIGHT_ALTERNATIVE = 60.0f;
-constexpr float ITEM_HEIGHT_TALL = 50.0f;
-constexpr float LOG_TEXT_PADDING = 8.0f;
-
-constexpr int32_t LOG_MAX_LINES = 8;
-constexpr int32_t LOG_MAX_ENTRIES = 8;
-constexpr int32_t PICKER_DISPLAYED_COUNT_DEFAULT = 5;
-constexpr int32_t PICKER_DISPLAYED_COUNT_ALTERNATIVE = 3;
-constexpr int32_t PICKER_DEFAULT_HINT_RADIUS = 16;
-constexpr int32_t PICKER_ALTERNATIVE_HINT_RADIUS = 24;
-constexpr int32_t PICKER_SELECTED_INDEX_DEMO = 2;
-constexpr int32_t PICKER_CONTAINER_SELECTED_INDEX_DEMO = 3;
-
-constexpr int32_t DATE_START_YEAR = 2020;
-constexpr int32_t DATE_START_MONTH = 0;
-constexpr int32_t DATE_START_DAY = 1;
-constexpr int32_t DATE_END_YEAR = 2030;
-constexpr int32_t DATE_END_MONTH = 11;
-constexpr int32_t DATE_END_DAY = 31;
-constexpr int32_t DATE_SELECTED_YEAR = 2025;
-constexpr int32_t DATE_SELECTED_MONTH = 5;
-constexpr int32_t DATE_SELECTED_DAY = 22;
-constexpr int32_t DATE_DEMO_YEAR = 2024;
-constexpr int32_t DATE_DEMO_MONTH = 5;
-constexpr int32_t DATE_DEMO_DAY = 15;
-
-constexpr int32_t TIME_DEFAULT_HOUR = 10;
-constexpr int32_t TIME_DEFAULT_MINUTE = 30;
-constexpr int32_t TIME_RANGE_START_HOUR = 8;
-constexpr int32_t TIME_RANGE_END_HOUR = 20;
-
-constexpr int32_t STYLE_VARIANT_COUNT = 2;
-constexpr int32_t DATE_STYLE_VARIANT_COUNT = 3;
-constexpr int32_t DATE_PICKER_MODE_COUNT = 3;
-constexpr int32_t CALENDAR_ALIGNMENT_COUNT = 3;
-constexpr int32_t PICKER_TEXT_STYLE_IDX = 0;
-constexpr int32_t PICKER_DISAPPEAR_STYLE_IDX = 1;
-constexpr int32_t PICKER_SELECTED_STYLE_IDX = 2;
-constexpr int32_t TEXT_PICKER_STYLE_VARIANT_COUNT = 3;
-
-constexpr int32_t EVENT_ID_TEXT_PICKER = 1;
-constexpr int32_t EVENT_ID_DATE_PICKER = 2;
-constexpr int32_t EVENT_ID_TIME_PICKER = 3;
-constexpr int32_t EVENT_ID_CALENDAR_PICKER = 4;
-constexpr int32_t EVENT_ID_PICKER_CONTAINER = 5;
 
 class ArkUINode : public ArkUIBaseNode {
 public:
@@ -128,6 +51,7 @@ public:
     void SetStyle2Attribute(ArkUI_NodeAttributeType attr, float f1, uint32_t u1);
     void RegisterOnClick(const std::function<void()> &onClick);
     void RegisterNodeEvent(ArkUI_NodeEventType eventType, int32_t eventId);
+    const ArkUI_AttributeItem *GetAttribute(ArkUI_NodeAttributeType attr);
 
 protected:
     static void NodeEventReceiver(ArkUI_NodeEvent *event);
@@ -141,36 +65,17 @@ protected:
 
 class PickerTextNode : public ArkUINode {
 public:
-    PickerTextNode()
-        : ArkUINode(NativeModuleInstance::GetInstance()
-              ->GetNativeNodeAPI()->createNode(ARKUI_NODE_TEXT_PICKER))
-    {
-        SetSingleRange();
-        SetI32Attribute(NODE_TEXT_PICKER_OPTION_SELECTED, 0);
-        SetBoolAttribute(NODE_TEXT_PICKER_CAN_LOOP, true);
-        RegisterChangeEvent();
-    }
+    PickerTextNode();
 
-    void SetSingleRange()
-    {
-        ArkUI_NumberValue rangeValues[] = {{.i32 = ARKUI_TEXTPICKER_RANGETYPE_SINGLE}};
-        ArkUI_AttributeItem rangeItem = {
-            .string = "OptionA,OptionB,OptionC,OptionD,OptionE",
-            .value = rangeValues, .size = 1};
-        nativeModule_->setAttribute(handle_, NODE_TEXT_PICKER_OPTION_RANGE, &rangeItem);
-    }
-    void SetSelected(int32_t index) { SetI32Attribute(NODE_TEXT_PICKER_OPTION_SELECTED, index); }
-    void SetCanLoop(bool canLoop) { SetBoolAttribute(NODE_TEXT_PICKER_CAN_LOOP, canLoop); }
-    void SetDefaultPickerItemHeight(float height)
-    { SetF32Attribute(NODE_TEXT_PICKER_DEFAULT_PICKER_ITEM_HEIGHT, height); }
-    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight)
-    { SetStyle3Attribute(NODE_TEXT_PICKER_TEXT_STYLE, fontSize, color, fontWeight); }
-    void SetDisappearTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE, fontSize, color); }
-    void SetSelectedTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_TEXT_PICKER_SELECTED_TEXT_STYLE, fontSize, color); }
-    void SetEnableHapticFeedback(bool enable) { SetBoolAttribute(NODE_TEXT_PICKER_ENABLE_HAPTIC_FEEDBACK, enable); }
-    void RegisterChangeEvent() { RegisterNodeEvent(NODE_TEXT_PICKER_EVENT_ON_CHANGE, EVENT_ID_TEXT_PICKER); }
+    void SetSingleRange();
+    void SetSelected(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetDefaultPickerItemHeight(float height);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void SetEnableHapticFeedback(bool enable);
+    void RegisterChangeEvent();
 
 protected:
     void OnNodeEvent(ArkUI_NodeEvent *event) override;
@@ -187,36 +92,19 @@ private:
 
 class DatePickerNode : public ArkUINode {
 public:
-    DatePickerNode()
-        : ArkUINode(NativeModuleInstance::GetInstance()
-              ->GetNativeNodeAPI()->createNode(ARKUI_NODE_DATE_PICKER))
-    {
-        SetStartDate(DATE_START_YEAR, DATE_START_MONTH, DATE_START_DAY);
-        SetEndDate(DATE_END_YEAR, DATE_END_MONTH, DATE_END_DAY);
-        SetSelectedDate(DATE_SELECTED_YEAR, DATE_SELECTED_MONTH, DATE_SELECTED_DAY);
-        SetBoolAttribute(NODE_DATE_PICKER_LUNAR, false);
-        SetI32Attribute(NODE_DATE_PICKER_MODE, ARKUI_DATEPICKER_MODE_DATE);
-        SetBoolAttribute(NODE_DATE_PICKER_CAN_LOOP, true);
-        RegisterChangeEvent();
-    }
+    DatePickerNode();
 
-    void SetStartDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_DATE_PICKER_START, {year, month, day}); }
-    void SetEndDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_DATE_PICKER_END, {year, month, day}); }
-    void SetSelectedDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_DATE_PICKER_SELECTED, {year, month, day}); }
-    void SetLunar(bool lunar) { SetBoolAttribute(NODE_DATE_PICKER_LUNAR, lunar); }
-    void SetMode(int32_t mode) { SetI32Attribute(NODE_DATE_PICKER_MODE, mode); }
-    void SetCanLoop(bool canLoop) { SetBoolAttribute(NODE_DATE_PICKER_CAN_LOOP, canLoop); }
-    void SetEnableHapticFeedback(bool enable) { SetBoolAttribute(NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK, enable); }
-    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight)
-    { SetStyle3Attribute(NODE_DATE_PICKER_TEXT_STYLE, fontSize, color, fontWeight); }
-    void SetDisappearTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, fontSize, color); }
-    void SetSelectedTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_DATE_PICKER_SELECTED_TEXT_STYLE, fontSize, color); }
-    void RegisterChangeEvent() { RegisterNodeEvent(NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE, EVENT_ID_DATE_PICKER); }
+    void SetStartDate(int32_t year, int32_t month, int32_t day);
+    void SetEndDate(int32_t year, int32_t month, int32_t day);
+    void SetSelectedDate(int32_t year, int32_t month, int32_t day);
+    void SetLunar(bool lunar);
+    void SetMode(int32_t mode);
+    void SetCanLoop(bool canLoop);
+    void SetEnableHapticFeedback(bool enable);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void RegisterChangeEvent();
 
 protected:
     void OnNodeEvent(ArkUI_NodeEvent *event) override;
@@ -230,28 +118,17 @@ private:
 
 class TimePickerNode : public ArkUINode {
 public:
-    TimePickerNode()
-        : ArkUINode(NativeModuleInstance::GetInstance()
-              ->GetNativeNodeAPI()->createNode(ARKUI_NODE_TIME_PICKER))
-    {
-        SetBoolAttribute(NODE_TIME_PICKER_USE_MILITARY_TIME, true);
-        SetSelectedTime(TIME_DEFAULT_HOUR, TIME_DEFAULT_MINUTE);
-        RegisterChangeEvent();
-    }
+    TimePickerNode();
 
-    void SetUseMilitaryTime(bool military) { SetBoolAttribute(NODE_TIME_PICKER_USE_MILITARY_TIME, military); }
-    void SetSelectedTime(int32_t hour, int32_t minute)
-    { SetI32ArrayAttribute(NODE_TIME_PICKER_SELECTED, {hour, minute}); }
-    void SetStart(int32_t hour, int32_t minute) { SetI32ArrayAttribute(NODE_TIME_PICKER_START, {hour, minute}); }
-    void SetEnd(int32_t hour, int32_t minute) { SetI32ArrayAttribute(NODE_TIME_PICKER_END, {hour, minute}); }
-    void SetEnableCascade(bool enable) { SetBoolAttribute(NODE_TIME_PICKER_ENABLE_CASCADE, enable); }
-    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight)
-    { SetStyle3Attribute(NODE_TIME_PICKER_TEXT_STYLE, fontSize, color, fontWeight); }
-    void SetDisappearTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE, fontSize, color); }
-    void SetSelectedTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_TIME_PICKER_SELECTED_TEXT_STYLE, fontSize, color); }
-    void RegisterChangeEvent() { RegisterNodeEvent(NODE_TIME_PICKER_EVENT_ON_CHANGE, EVENT_ID_TIME_PICKER); }
+    void SetUseMilitaryTime(bool military);
+    void SetSelectedTime(int32_t hour, int32_t minute);
+    void SetStart(int32_t hour, int32_t minute);
+    void SetEnd(int32_t hour, int32_t minute);
+    void SetEnableCascade(bool enable);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void RegisterChangeEvent();
 
 protected:
     void OnNodeEvent(ArkUI_NodeEvent *event) override;
@@ -265,28 +142,15 @@ private:
 
 class CalendarPickerNode : public ArkUINode {
 public:
-    CalendarPickerNode()
-        : ArkUINode(NativeModuleInstance::GetInstance()
-              ->GetNativeNodeAPI()->createNode(ARKUI_NODE_CALENDAR_PICKER))
-    {
-        SetF32Attribute(NODE_CALENDAR_PICKER_HINT_RADIUS, PICKER_DEFAULT_HINT_RADIUS);
-        SetSelectedDate(DATE_SELECTED_YEAR, DATE_SELECTED_MONTH, DATE_SELECTED_DAY);
-        SetI32Attribute(NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, ARKUI_CALENDAR_ALIGNMENT_CENTER);
-        RegisterChangeEvent();
-    }
+    CalendarPickerNode();
 
-    void SetHintRadius(float radius) { SetF32Attribute(NODE_CALENDAR_PICKER_HINT_RADIUS, radius); }
-    void SetSelectedDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_CALENDAR_PICKER_SELECTED_DATE, {year, month, day}); }
-    void SetEdgeAlignment(int32_t alignment)
-    { SetI32Attribute(NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, alignment); }
-    void SetTextStyle(float fontSize, uint32_t color)
-    { SetStyle2Attribute(NODE_CALENDAR_PICKER_TEXT_STYLE, fontSize, color); }
-    void SetStartDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_CALENDAR_PICKER_START, {year, month, day}); }
-    void SetEndDate(int32_t year, int32_t month, int32_t day)
-    { SetI32ArrayAttribute(NODE_CALENDAR_PICKER_END, {year, month, day}); }
-    void RegisterChangeEvent() { RegisterNodeEvent(NODE_CALENDAR_PICKER_EVENT_ON_CHANGE, EVENT_ID_CALENDAR_PICKER); }
+    void SetHintRadius(float radius);
+    void SetSelectedDate(int32_t year, int32_t month, int32_t day);
+    void SetEdgeAlignment(int32_t alignment);
+    void SetTextStyle(float fontSize, uint32_t color);
+    void SetStartDate(int32_t year, int32_t month, int32_t day);
+    void SetEndDate(int32_t year, int32_t month, int32_t day);
+    void RegisterChangeEvent();
 
 protected:
     void OnNodeEvent(ArkUI_NodeEvent *event) override;
@@ -297,22 +161,14 @@ public:
 
 class PickerContainerNode : public ArkUINode {
 public:
-    PickerContainerNode()
-        : ArkUINode(NativeModuleInstance::GetInstance()
-              ->GetNativeNodeAPI()->createNode(ARKUI_NODE_PICKER))
-    {
-        SetI32Attribute(NODE_PICKER_OPTION_SELECTED_INDEX, 0);
-        SetBoolAttribute(NODE_PICKER_CAN_LOOP, true);
-        SetBoolAttribute(NODE_PICKER_ENABLE_HAPTIC_FEEDBACK, false);
-        RegisterChangeEvent();
-    }
+    PickerContainerNode();
 
-    void SetSelectedIndex(int32_t index) { SetI32Attribute(NODE_PICKER_OPTION_SELECTED_INDEX, index); }
-    void SetCanLoop(bool canLoop) { SetBoolAttribute(NODE_PICKER_CAN_LOOP, canLoop); }
-    void SetEnableHapticFeedback(bool enable) { SetBoolAttribute(NODE_PICKER_ENABLE_HAPTIC_FEEDBACK, enable); }
-    void SetDisplayedItemCount(int32_t count) { SetI32Attribute(NODE_PICKER_DISPLAYED_ITEM_COUNT, count); }
-    void SetItemHeight(float height) { SetF32Attribute(NODE_PICKER_ITEM_HEIGHT, height); }
-    void RegisterChangeEvent() { RegisterNodeEvent(NODE_PICKER_EVENT_ON_CHANGE, EVENT_ID_PICKER_CONTAINER); }
+    void SetSelectedIndex(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetEnableHapticFeedback(bool enable);
+    void SetDisplayedItemCount(int32_t count);
+    void SetItemHeight(float height);
+    void RegisterChangeEvent();
 
 protected:
     void OnNodeEvent(ArkUI_NodeEvent *event) override;
@@ -321,28 +177,116 @@ public:
     std::function<void()> onChangeEvent_;
 };
 
+class MultiColumnPickerTextNode : public ArkUINode {
+public:
+    MultiColumnPickerTextNode();
+
+    void SetMultiRange();
+    void SetSelected(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetDefaultPickerItemHeight(float height);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void SetColumnWidths(const std::vector<float> &widths);
+
+protected:
+    void OnNodeEvent(ArkUI_NodeEvent *event) override;
+
+public:
+    std::function<void()> onChangeEvent_;
+};
+
+class RangeContentPickerTextNode : public ArkUINode {
+public:
+    RangeContentPickerTextNode();
+
+    void SetRangeContent();
+    void SetSelected(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetDefaultPickerItemHeight(float height);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void SetEnableHapticFeedback(bool enable);
+    void RegisterChangeEvent();
+
+protected:
+    void OnNodeEvent(ArkUI_NodeEvent *event) override;
+    void HandleChangeEvent(ArkUI_NodeEvent *event);
+
+public:
+    std::function<void(const std::string &, int32_t)> onChangeEvent_;
+
+private:
+    std::string lastSelectedText_;
+    int32_t lastSelectedIndex_ = 0;
+};
+
+class CascadeRangePickerTextNode : public ArkUINode {
+public:
+    CascadeRangePickerTextNode();
+
+    void SetCascadeRange();
+    void SetSelected(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetDefaultPickerItemHeight(float height);
+    void SetTextStyle(float fontSize, uint32_t color, int32_t fontWeight);
+    void SetDisappearTextStyle(float fontSize, uint32_t color);
+    void SetSelectedTextStyle(float fontSize, uint32_t color);
+    void SetColumnWidths(const std::vector<float> &widths);
+    void RegisterChangeEvent();
+
+protected:
+    void OnNodeEvent(ArkUI_NodeEvent *event) override;
+
+public:
+    std::function<void()> onChangeEvent_;
+};
+
+class PickerIndicatorDemoNode : public ArkUINode {
+public:
+    PickerIndicatorDemoNode();
+
+    void SetIndicatorBackground();
+    void SetIndicatorDivider();
+    void SetSelectedIndex(int32_t index);
+    void SetCanLoop(bool canLoop);
+    void SetDisplayedItemCount(int32_t count);
+    void SetItemHeight(float height);
+    void RegisterChangeEvent();
+
+protected:
+    void OnNodeEvent(ArkUI_NodeEvent *event) override;
+
+public:
+    std::function<void()> onChangeEvent_;
+};
+
+class PickerPropertyVerifier {
+public:
+    static PickerPropertyVerifier &GetInstance();
+    void RecordResult(const std::string &testName, bool passed);
+    int32_t GetPassedCount() const;
+    int32_t GetFailedCount() const;
+    std::string GetSummary() const;
+    void Clear();
+
+private:
+    struct TestResult {
+        std::string testName;
+        bool passed;
+    };
+    std::vector<TestResult> results_;
+};
+
 class EventLogNode {
 public:
-    static EventLogNode &GetInstance()
-    {
-        static EventLogNode instance;
-        return instance;
-    }
+    static EventLogNode &GetInstance();
 
-    void SetLogTextNode(ArkUINode *node) { logTextNode_ = node; }
-    void LogEvent(const std::string &message)
-    {
-        logEntries_.push_back(GetTimestamp() + " " + message);
-        if (logEntries_.size() > LOG_MAX_ENTRIES) {
-            logEntries_.erase(logEntries_.begin());
-        }
-        UpdateDisplay();
-    }
-    void Clear()
-    {
-        logEntries_.clear();
-        UpdateDisplay();
-    }
+    void SetLogTextNode(ArkUINode *node);
+    void LogEvent(const std::string &message);
+    void Clear();
 
 private:
     std::string GetTimestamp();
@@ -383,6 +327,51 @@ void SetupPickerContainerEvent(const std::shared_ptr<PickerContainerNode> &picke
 void AddPickerContainerButtons(
     const std::shared_ptr<ArkUINode> &root, const std::shared_ptr<PickerContainerNode> &picker);
 
+void AddMultiColumnPickerButtons(
+    const std::shared_ptr<ArkUINode> &root, const std::shared_ptr<MultiColumnPickerTextNode> &picker);
+void RecordAllPickerProperties();
+
+void AddEdgeSmallHeightPicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeLargeHeightPicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeYearOnlyDatePicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdge12hCascadeTimePicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeCalRangePicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeMonthDayDatePicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeCalEndAlignPicker(const std::shared_ptr<ArkUINode> &root);
+void AddEdgeTimeAltPicker(const std::shared_ptr<ArkUINode> &root);
+
+void SetupRangeContentPickerEvent(const std::shared_ptr<RangeContentPickerTextNode> &picker);
+void AddRangeContentPickerButtons(
+    const std::shared_ptr<ArkUINode> &root,
+    const std::shared_ptr<RangeContentPickerTextNode> &picker);
+void ApplyRangeContentStyleVariant(
+    const std::shared_ptr<RangeContentPickerTextNode> &picker, int32_t variant);
+
+void SetupCascadeRangePickerEvent(const std::shared_ptr<CascadeRangePickerTextNode> &picker);
+void AddCascadeRangePickerButtons(
+    const std::shared_ptr<ArkUINode> &root,
+    const std::shared_ptr<CascadeRangePickerTextNode> &picker);
+void ApplyCascadeStyleVariant(
+    const std::shared_ptr<CascadeRangePickerTextNode> &picker, int32_t variant);
+
+void SetupPickerIndicatorEvent(const std::shared_ptr<PickerIndicatorDemoNode> &picker);
+void AddPickerIndicatorButtons(
+    const std::shared_ptr<ArkUINode> &root,
+    const std::shared_ptr<PickerIndicatorDemoNode> &picker);
+void ApplyIndicatorStyleVariant(
+    const std::shared_ptr<PickerIndicatorDemoNode> &picker, int32_t variant);
+
+void AddYearMonthDatePickerButtons(
+    const std::shared_ptr<ArkUINode> &root,
+    const std::shared_ptr<DatePickerNode> &picker);
+void ApplyYearMonthStyleVariant(
+    const std::shared_ptr<DatePickerNode> &picker, int32_t variant);
+
+void VerifyRangeContentPickerProperties(const std::shared_ptr<RangeContentPickerTextNode> &picker);
+void VerifyCascadeRangePickerProperties(const std::shared_ptr<CascadeRangePickerTextNode> &picker);
+void VerifyPickerIndicatorProperties(const std::shared_ptr<PickerIndicatorDemoNode> &picker);
+void AddNewPickerVerificationSections(const std::shared_ptr<ArkUINode> &root);
+
 enum DemoPageType {
     DEMO_TEXT_PICKER = 0,
     DEMO_DATE_PICKER = 1,
@@ -390,6 +379,13 @@ enum DemoPageType {
     DEMO_CALENDAR_PICKER = 3,
     DEMO_PICKER_CONTAINER = 4,
     DEMO_ALL = 5,
+    DEMO_MULTI_COLUMN = 6,
+    DEMO_PROPERTY_TEST = 7,
+    DEMO_EDGE_CASES = 8,
+    DEMO_RANGE_CONTENT = 9,
+    DEMO_CASCADE_RANGE = 10,
+    DEMO_PICKER_INDICATOR = 11,
+    DEMO_YEAR_MONTH_DATE = 12,
 };
 
 extern std::shared_ptr<ArkUIBaseNode> g_currentDemo;
@@ -401,8 +397,21 @@ std::shared_ptr<ArkUIBaseNode> CreateDatePickerDemo();
 std::shared_ptr<ArkUIBaseNode> CreateTimePickerDemo();
 std::shared_ptr<ArkUIBaseNode> CreateCalendarPickerDemo();
 std::shared_ptr<ArkUIBaseNode> CreatePickerContainerDemo();
+std::shared_ptr<ArkUIBaseNode> CreateMultiColumnPickerDemo();
+std::shared_ptr<ArkUIBaseNode> CreatePropertyVerificationDemo();
+std::shared_ptr<ArkUIBaseNode> CreateEdgeCaseDemo();
+std::shared_ptr<ArkUIBaseNode> CreateRangeContentPickerDemo();
+std::shared_ptr<ArkUIBaseNode> CreateCascadeRangePickerDemo();
+std::shared_ptr<ArkUIBaseNode> CreatePickerIndicatorDemo();
+std::shared_ptr<ArkUIBaseNode> CreateYearMonthDatePickerDemo();
 std::shared_ptr<ArkUIBaseNode> CreatePickerExample();
 void AddLogArea(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow1(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow2(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow3(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow4(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow5(const std::shared_ptr<ArkUINode> &root);
+void AddMainPageButtonRow6(const std::shared_ptr<ArkUINode> &root);
 std::shared_ptr<ArkUIBaseNode> CreateMainPage();
 void SetGlobalContentHandle(ArkUI_NodeContentHandle handle);
 
