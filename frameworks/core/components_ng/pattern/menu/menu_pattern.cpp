@@ -2172,6 +2172,15 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
     }
     auto menuChild = host->GetFirstChild();
     auto menuFrameChild = AceType::DynamicCast<FrameNode>(menuChild);
+    if (UseContentModifier()) {
+        for (const auto& child : host->GetChildren()) {
+            auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+            if (childFrameNode && childFrameNode->GetId() == GetBuilderId()) {
+                menuFrameChild = childFrameNode;
+            }
+        }
+    }
+
     RefPtr<RenderContext> menuChildRenderContext = menuFrameChild ? menuFrameChild->GetRenderContext() : nullptr;
     DistortionParam param {
         .luCorner = { 0.8, 0.8 },
