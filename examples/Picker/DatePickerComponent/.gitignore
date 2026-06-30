@@ -1,0 +1,7 @@
+node_modules
+.idea
+build
+.hvigor
+.cache
+.local
+out
