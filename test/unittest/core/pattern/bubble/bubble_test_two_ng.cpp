@@ -1440,9 +1440,9 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level0
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
-    ASSERT_NE(popupNode, nullptr);
+    CHECK_NULL_VOID(popupNode);
     auto bubblePattern = popupNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
+    CHECK_NULL_VOID(bubblePattern);
 
     /**
      * @tc.steps: step2. set param.
@@ -1471,7 +1471,7 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestS
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetBlurStyle(BlurStyle::COMPONENT_REGULAR);
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
-    ASSERT_NE(popupNode, nullptr);
+    CHECK_NULL_VOID(popupNode);
     auto bubblePattern = popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(bubblePattern, nullptr);
     bubblePattern->SetPopupParam(popupParam);
