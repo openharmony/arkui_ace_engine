@@ -1163,6 +1163,39 @@ HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible007, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ScrollToVisible008
+ * @tc.desc: test ScrollToVisible when isSingleLineMode_ is true skips vertical scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible008, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+
+    // Branch: isSingleLineMode_ = true, vertical scroll skipped
+    textRect_.SetSize(SizeF(200.0f, 200.0f));
+    textRect_.SetOffset(OffsetF(50.0f, 100.0f));
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(50.0f, 50.0f));
+    scrollController->isSingleLineMode_ = true;
+    scrollController->ScrollToVisible(0, 0);
+    // OnScrollWithAxisCallback for VERTICAL skipped, Y offset unchanged
+    EXPECT_EQ(textRect_.GetOffset().GetY(), 100.0f);
+
+    // Branch: isSingleLineMode_ = false, vertical scroll applied
+    textRect_.SetOffset(OffsetF(50.0f, 100.0f));
+    scrollController->isSingleLineMode_ = false;
+    scrollController->ScrollToVisible(0, 0);
+    // OnScrollWithAxisCallback for VERTICAL applied, Y offset aligned to contentRect
+    EXPECT_EQ(textRect_.GetOffset().GetY(), 50.0f);
+}
+
+/**
  * @tc.name: CalculateDestination001
  * @tc.desc: test CalculateDestination with cursor position
  * @tc.type: FUNC
