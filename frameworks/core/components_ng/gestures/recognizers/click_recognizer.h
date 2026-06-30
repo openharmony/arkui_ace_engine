@@ -125,7 +125,7 @@ private:
 
     // recognizer report touch down event
     void ResetTouchDownNotifiedToClickFlag();
-    void ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline);
+    void ReportTouchDownToResSched();
 
     void OnResetStatus() override
     {

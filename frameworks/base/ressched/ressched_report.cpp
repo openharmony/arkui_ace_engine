@@ -14,7 +14,6 @@
  */
 
 #include "base/ressched/ressched_report.h"
-#include "base/ressched/ressched_click_optimizer.h"
 
 #include "core/common/container.h"
 #include "core/event/key_event.h"
@@ -46,6 +45,7 @@ constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
+constexpr int32_t TOUCH_DOWN_WITH_CLICKABLE_FRAMENODE_INFO_EVENT = 5;
 constexpr int32_t KEY_DOWN_EVENT = 1;
 constexpr int32_t KEY_UP_EVENT = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
@@ -65,8 +65,6 @@ constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
-constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 4;
-constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -91,6 +89,7 @@ constexpr char SWIPER_SLIDE_OFF[] = "swiper_slide_off";
 constexpr char OVERLAY_ADD[] = "overlay_add";
 constexpr char OVERLAY_REMOVE[] = "overlay_remove";
 constexpr char TOUCH[] = "touch";
+constexpr char TOUCH_CLIKABLE_FRAMENODE[] = "touch clickable frameNode";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
 constexpr char UP_SPEED_KEY[] = "up_speed";
@@ -211,6 +210,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             { CLICK,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
+                }
+            },
+            { TOUCH_CLIKABLE_FRAMENODE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_WITH_CLICKABLE_FRAMENODE_INFO_EVENT, payload);
                 }
             },
             { AUTO_PLAY_ON,
@@ -372,8 +376,7 @@ bool ResSchedReport::AppSwiperReportEnableCheck(const std::unordered_map<std::st
     return reply["result"] == "\"true\"";
 }
 
-void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
-                                  const WeakPtr<NG::FrameNode>& weakNode)
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
 {
     if (!triggerExecuted) {
         auto curContainer = Container::Current();
@@ -393,7 +396,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
     }
     switch (touchEvent.type) {
         case TouchType::DOWN:
-            HandleTouchDown(touchEvent, config, weakNode);
+            HandleTouchDown(touchEvent, config);
             break;
         case TouchType::UP:
             HandleTouchUp(touchEvent, config);
@@ -487,18 +490,11 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
     }
 }
 
-void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
-                                     const WeakPtr<NG::FrameNode>& weakNode)
+void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config)
 {
     std::unordered_map<std::string, std::string> payload;
     payload[Ressched::NAME] = TOUCH;
     LoadReportConfig(config, payload);
-
-    if (!weakNode.Invalid()) {
-        ResSchedClickOptimizer::BuildComponentPayload(weakNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
-            MAX_TOUCH_DOWN_RECURSIVE_NODES);
-    }
-
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
     isInTouch_ = true;

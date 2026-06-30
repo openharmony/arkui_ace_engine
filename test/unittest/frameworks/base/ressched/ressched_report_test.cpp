@@ -260,37 +260,4 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest015, TestSize.Level1)
     ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
     EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
 }
-
-/**
- * @tc.name: HandleTouchDownTest_001
- * @tc.desc: HandleTouchDown should collect component info when weakNode is valid and clickExtEnabled is true
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedReportTest, HandleTouchDownTest_001, TestSize.Level1)
-{
-    auto frameNode = NG::FrameNode::CreateFrameNode("test", 4, AceType::MakeRefPtr<NG::Pattern>());
-    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::DOWN;
-    ReportConfig config;
-    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode);
-    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
-    ResSchedReport::GetInstance().isInTouch_ = false;
-}
-
-/**
- * @tc.name: HandleTouchDownTest_002
- * @tc.desc: HandleTouchDown should not crash when weakNode is invalid and clickExtEnabled is true
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedReportTest, HandleTouchDownTest_002, TestSize.Level1)
-{
-    WeakPtr<NG::FrameNode> weakNode;
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::DOWN;
-    ReportConfig config;
-    ResSchedReport::GetInstance().HandleTouchDown(touchEvent, config, weakNode);
-    EXPECT_TRUE(ResSchedReport::GetInstance().isInTouch_);
-    ResSchedReport::GetInstance().isInTouch_ = false;
-}
 } // namespace OHOS::Ace
