@@ -50,6 +50,18 @@ namespace {
 constexpr float TEST_FRAME_NODE_WIDTH = 10.0f;
 constexpr float TEST_FRAME_NODE_HEIGHT = 10.0f;
 
+class MockThirdAccessibilityManagerForCheckNode : public ThirdAccessibilityManager {
+public:
+    RefPtr<NG::CustomAccessibilityProperty> GetThirdCustomProperty(int64_t elementId) override
+    {
+        if (mockProperty) {
+            return mockProperty;
+        }
+        return nullptr;
+    }
+    RefPtr<NG::CustomAccessibilityProperty> mockProperty;
+};
+
 class MockRenderContextTest : public NG::RenderContext {
 public:
     NG::RectF GetPaintRectWithoutTransform() override

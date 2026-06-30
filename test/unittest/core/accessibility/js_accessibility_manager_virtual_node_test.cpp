@@ -786,4 +786,25 @@ HWTEST_F(JsAccessibilityManagerVirtualNodeTest, UpdateAccessibilityElementInfoFo
     EXPECT_EQ(nodeInfo.GetAccessibilityFocus(), false);
 }
 
+// ==================== VirtualAccessibilityNode OnAccessibilityHover ====================
+
+/**
+ * @tc.name: VirtualAccessibilityNodeOnAccessibilityHover001
+ * @tc.desc: Test OnAccessibilityHover with null containerNode does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeOnAccessibilityHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create virtual node and call OnAccessibilityHover with null containerNode
+     * @tc.expected: no crash
+     */
+    auto virtualNode = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    ASSERT_NE(virtualNode, nullptr);
+    virtualNode->SetRect(0, 0, 100, 100);
+    virtualNode->SetNodeId(1);
+    NG::PointF point(50.0f, 50.0f);
+    virtualNode->OnAccessibilityHover(point, NG::AccessibilityHoverEventType::MOVE, nullptr);
+}
+
 } // namespace OHOS::Ace

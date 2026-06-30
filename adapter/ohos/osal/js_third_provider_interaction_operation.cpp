@@ -15,10 +15,12 @@
 
 #include "js_third_provider_interaction_operation.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/native_interface_accessibility_impl.h"
 
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_third.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "js_third_provider_interaction_operation_utils.h"
 
@@ -255,6 +257,7 @@ JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
 
 JsThirdProviderInteractionOperation::~JsThirdProviderInteractionOperation()
 {
+    ClearAllThirdCustomProperties();
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "JsThirdProviderInteractionOperation Destory");
 }
 
@@ -1092,4 +1095,38 @@ void JsThirdProviderInteractionOperation::CheckAndSendHoverEnterByReadableRules(
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(splitTreeId, targetId);
     SendAccessibilityAsyncEventForThird(targetId, Accessibility::EventType::TYPE_VIEW_HOVER_ENTER_EVENT);
 }
+
+void JsThirdProviderInteractionOperation::SetThirdCustomProperty(
+    int64_t elementId, const RefPtr<NG::CustomAccessibilityProperty>& property)
+{
+    std::lock_guard<std::mutex> lock(thirdCustomPropertiesMutex_);
+    if (!property) {
+        // Treat nullptr as removal to avoid meaningless entries and keep Get semantics unambiguous
+        thirdCustomProperties_.erase(elementId);
+        return;
+    }
+    thirdCustomProperties_[elementId] = property;
+}
+
+RefPtr<NG::CustomAccessibilityProperty> JsThirdProviderInteractionOperation::GetThirdCustomProperty(int64_t elementId)
+{
+    auto it = thirdCustomProperties_.find(elementId);
+    if (it != thirdCustomProperties_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+void JsThirdProviderInteractionOperation::RemoveThirdCustomProperty(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(thirdCustomPropertiesMutex_);
+    thirdCustomProperties_.erase(elementId);
+}
+
+void JsThirdProviderInteractionOperation::ClearAllThirdCustomProperties()
+{
+    std::lock_guard<std::mutex> lock(thirdCustomPropertiesMutex_);
+    thirdCustomProperties_.clear();
+}
+
 } // namespace OHOS::Ace::Framework

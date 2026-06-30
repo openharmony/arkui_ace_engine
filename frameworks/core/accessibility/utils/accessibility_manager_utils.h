@@ -183,7 +183,7 @@ public:
 
     void AddAccessibilityEvent(const int32_t containerId, const int32_t pageId, AccessibilityEvent& event)
     {
-        TimeStamp now = std::chrono::steady_clock::now();
+        TimeStamp now = std::chrono::high_resolution_clock::now();
         auto& eventList = pageEvent_[containerId];
         eventList.emplace_back(std::make_tuple(pageId, event, now));
 

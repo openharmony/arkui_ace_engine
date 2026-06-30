@@ -21,6 +21,14 @@
 
 #include "base/memory/ace_type.h"
 
+struct ArkUI_AccessibilityEventInfo;
+
+namespace OHOS::Ace {
+namespace NG {
+class CustomAccessibilityProperty;
+}
+}
+
 namespace OHOS::Ace {
 class ThirdAccessibilityManager : public AceType {
     DECLARE_ACE_TYPE(ThirdAccessibilityManager, AceType);
@@ -28,6 +36,10 @@ public:
     virtual int32_t SendAccessibilityAsyncEvent(
         const ArkUI_AccessibilityEventInfo& accessibilityEvent,
         void (*callback)(int32_t errorCode)) { return 0; };
+    virtual RefPtr<NG::CustomAccessibilityProperty> GetThirdCustomProperty(int64_t elementId)
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Ace
 

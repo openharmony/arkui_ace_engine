@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
+#if OHOS_STANDARD_SYSTEM && !defined(WINDOWS_PLATFORM)
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -531,6 +535,7 @@ bool AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
     const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
     SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time)
 {
+    CHECK_NULL_RETURN(node, false);
     auto eventHub = node->GetEventHub<EventHub>();
     if (!eventHub->IsEnabled()) {
         // If the host component is disabled, do not transfer hover event.
@@ -547,6 +552,38 @@ bool AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
         sessionAdapter->TransferHoverEvent(pointNode, sourceType, eventType, time);
         return true;
     }
+    return false;
+}
+
+bool AccessibilityManagerNG::NotifyHoverEventToVirtualNode(const RefPtr<FrameNode>& node,
+    const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
+    SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto eventHub = node->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if (!eventHub->IsEnabled()) {
+        // If the host component is disabled, do not transfer hover event.
+        return false;
+    }
+    if (sourceType == SourceType::MOUSE) {
+        return false;
+    }
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    if (!accessibilityProperty->HasVirtualNodeTreeRoot()) {
+        return false;
+    }
+#if OHOS_STANDARD_SYSTEM && !defined(WINDOWS_PLATFORM)
+    auto virtualRoot = AceType::DynamicCast<NG::VirtualAccessibilityNode>(
+        accessibilityProperty->GetVirtualNodeTreeRoot());
+    CHECK_NULL_RETURN(virtualRoot, false);
+    PointF pointNode(pointRoot);
+    if (AccessibilityManagerNG::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
+        virtualRoot->OnAccessibilityHover(pointNode, eventType, node);
+        return true;
+    }
+#endif
     return false;
 }
 
