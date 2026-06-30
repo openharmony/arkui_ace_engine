@@ -534,6 +534,19 @@ if (globalThis.RelativeContainer === undefined) {
   }
 }
 
+if (globalThis.GridContainer === undefined) {
+  globalThis.GridContainer = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('GridContainer');
+      let module = globalThis.requireNapi('arkui.components.arkgridcontainer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().gridContainer.create(value);
+    },
+    name: 'JSGridContainer'
+  }
+}
+
 // @ts-ignore
 if (globalThis.WaterFlow === undefined) {
   globalThis.WaterFlow = {

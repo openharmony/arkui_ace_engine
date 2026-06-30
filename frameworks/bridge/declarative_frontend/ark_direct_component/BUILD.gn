@@ -23,6 +23,15 @@ ohos_abc("arkgauge") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkgridcontainer") {
+  sources = [ "./src/arkgridcontainer.ts" ]
+  output_name = "arkgridcontainer"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkimagespan") {
   sources = [ "./src/arkimagespan.ts" ]
   output_name = "arkimagespan"

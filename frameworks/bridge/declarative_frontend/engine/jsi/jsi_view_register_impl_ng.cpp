@@ -58,7 +58,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
@@ -412,7 +411,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCanvas::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
-    JSGridContainer::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
     JSPath::JSBind(globalObj);

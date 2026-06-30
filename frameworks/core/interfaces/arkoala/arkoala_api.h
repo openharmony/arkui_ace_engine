@@ -8689,6 +8689,12 @@ struct ArkUISpanModifier {
     void (*resetFontVariations)(ArkUINodeHandle node);
 };
 
+struct ArkUIGridContainerModifier {
+    void (*create)(void* containerInfo);
+    void (*pop)();
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+};
+
 struct ArkUISelectModifier {
     void (*setSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -10108,6 +10114,7 @@ struct ArkUINodeModifiers {
     const ArkUIArcListModifier* (*getArcListModifier)();
     const ArkUIArcListItemModifier* (*getArcListItemModifier)();
     const ArkUIArcScrollBarModifier* (*getArcScrollBarModifier)();
+    const ArkUIGridContainerModifier* (*getGridContainerModifier)();
 };
 
 // same as inner defines in property.h

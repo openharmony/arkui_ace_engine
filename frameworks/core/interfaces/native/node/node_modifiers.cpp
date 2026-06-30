@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include "core/interfaces/native/node/gauge_modifier.h"
 #include "core/interfaces/native/node/grid_col_modifier.h"
+#include "core/interfaces/native/node/grid_container_modifier.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/grid_row_modifier.h"
@@ -332,6 +333,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getArcListModifier = NodeModifier::GetArcListModifier,
         .getArcListItemModifier = NodeModifier::GetArcListItemModifier,
         .getArcScrollBarModifier = NodeModifier::GetArcScrollBarModifier,
+        .getGridContainerModifier = NodeModifier::GetGridContainerModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

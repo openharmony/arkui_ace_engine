@@ -14956,32 +14956,6 @@ if (globalThis.Canvas !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkGridContainerComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  alignItems(value) {
-    throw new Error('Method not implemented.');
-  }
-  justifyContent(value) {
-    throw new Error('Method not implemented.');
-  }
-  pointLight(value) {
-    throw new Error('Method not implemented.');
-  }
-}
-// @ts-ignore
-if (globalThis.GridContainer !== undefined) {
-  globalThis.GridContainer.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkGridContainerComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.CommonModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent {
 }
 // @ts-ignore

@@ -821,6 +821,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Gauge", "arkui.components.arkgauge" },
         { "Grid", "arkui.components.arkgrid" },
         { "GridItem", "arkui.components.arkgriditem" },
+        { "GridContainer", "arkui.components.arkgridcontainer" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
         { "ImageSpan", "arkui.components.arkimagespan" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
