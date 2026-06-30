@@ -889,7 +889,8 @@ void SwiperPattern::PostIdleTaskToCleanTabContent()
         bool isOnShow = !pipeline || pipeline->GetOnShow();
 
         std::set<int32_t> itemsHasClean;
-        for (const auto& index : pattern->itemsNeedClean_) {
+        auto itemsNeedClean = pattern->itemsNeedClean_;
+        for (const auto& index : itemsNeedClean) {
             if (GetSysTimestamp() > deadline && isOnShow) {
                 break;
             }
