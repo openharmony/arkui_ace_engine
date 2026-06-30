@@ -6906,6 +6906,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextMenuItemId_getSHARE(): KPointer
     @ani.unsafe.Direct
+    native static _TextMenuItemId_getUrl(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getEmail(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getPhoneNumber(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getAddress(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getDateTime(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getAskAI(): KPointer
+    @ani.unsafe.Direct
     native static _TextMenuItemId_getAutoFill(): KPointer
     @ani.unsafe.Direct
     native static _TextMenuItemId_getPasswordVault(): KPointer

@@ -417,6 +417,12 @@ export class TextMenuItemId implements MaterializedBase {
     public static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
     public static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     public static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
+    public static readonly url: TextMenuItemId = TextMenuItemId.getUrl()
+    public static readonly email: TextMenuItemId = TextMenuItemId.getEmail()
+    public static readonly phoneNumber: TextMenuItemId = TextMenuItemId.getPhoneNumber()
+    public static readonly address: TextMenuItemId = TextMenuItemId.getAddress()
+    public static readonly dateTime: TextMenuItemId = TextMenuItemId.getDateTime()
+    public static readonly askAI: TextMenuItemId = TextMenuItemId.getAskAI()
     public static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
     public static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
@@ -465,6 +471,24 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getSHARE(): TextMenuItemId {
         return TextMenuItemId.getSHARE_serialize()
+    }
+    private static getUrl(): TextMenuItemId {
+        return TextMenuItemId.getUrl_serialize()
+    }
+    private static getEmail(): TextMenuItemId {
+        return TextMenuItemId.getEmail_serialize()
+    }
+    private static getPhoneNumber(): TextMenuItemId {
+        return TextMenuItemId.getPhoneNumber_serialize()
+    }
+    private static getAddress(): TextMenuItemId {
+        return TextMenuItemId.getAddress_serialize()
+    }
+    private static getDateTime(): TextMenuItemId {
+        return TextMenuItemId.getDateTime_serialize()
+    }
+    private static getAskAI(): TextMenuItemId {
+        return TextMenuItemId.getAskAI_serialize()
     }
     private static getAutoFill(): TextMenuItemId {
         return TextMenuItemId.getAutoFill_serialize()
@@ -535,6 +559,36 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getSHARE_serialize(): TextMenuItemId {
         const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getSHARE()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getUrl_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getUrl()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getEmail_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getEmail()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getPhoneNumber_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getPhoneNumber()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAddress_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAddress()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getDateTime_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getDateTime()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAskAI_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAskAI()
         const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
