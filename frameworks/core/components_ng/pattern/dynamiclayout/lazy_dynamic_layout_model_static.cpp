@@ -26,21 +26,13 @@ RefPtr<FrameNode> LazyDynamicLayoutModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", "LazyDynamicLayout", nodeId);
     
-    auto customParams = AceType::MakeRefPtr<LazyCustomLayoutAlgorithmParam>();
-    
-    auto patternGenerator = [customParams]() -> RefPtr<Pattern> {
+    auto patternGenerator = []() -> RefPtr<Pattern> {
+        auto customParams = AceType::MakeRefPtr<LazyCustomLayoutAlgorithmParam>();
         return AceType::MakeRefPtr<LazyDynamicLayoutPattern>(customParams);
     };
     
     auto [frameNode, isInitialRender] =
         DynamicLayoutNode::GetOrCreateDynamicLayoutNode("LazyDynamicLayout", nodeId, patternGenerator);
-    
-    if (!isInitialRender) {
-        auto pattern = patternGenerator();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        frameNode->ReplacePattern(pattern);
-    }
-    
     return frameNode;
 }
 
