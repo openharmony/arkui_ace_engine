@@ -368,6 +368,19 @@ struct GridLayoutInfo {
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    float GetViewStartBound(bool ignoreFixOffset = false) const
+    {
+        return ignoreFixOffset ? 0.0f : -startFixOffset_;
+    }
+
+    float GetViewEndBound(float mainSize, bool ignoreFixOffset = false) const
+    {
+        return mainSize + (ignoreFixOffset ? 0.0f : endFixOffset_);
+    }
+
+    // Compute reported (content-area only) start/end indices after layout.
+    void SyncReportRange(float mainSize, float mainGap);
+
     std::string ToString() const;
 
     Axis axis_ = Axis::VERTICAL;
@@ -392,10 +405,16 @@ struct GridLayoutInfo {
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
+    // reported range = content-area range only (excludes contentClip extension)
+    int32_t reportStartIndex_ = 0;
+    int32_t reportEndIndex_ = -1;
 
     // index of first row and last row in viewport (assuming it's a vertical Grid)
     int32_t startMainLineIndex_ = 0;
     int32_t endMainLineIndex_ = 0;
+    // contentClip extension amount (clip boundary overhang beyond content boundary)
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
     int32_t jumpForRecompose_ = EMPTY_JUMP_INDEX; // new mark index to notify frontend recomposition

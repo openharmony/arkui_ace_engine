@@ -74,6 +74,7 @@ void GridCustomLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
+    CalculateContentClipFixOffset(wrapper_, mainSize, mainGap_);
 
     if (info_.targetIndex_) {
         MeasureToTarget(mainSize);
@@ -85,6 +86,7 @@ void GridCustomLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         MeasureOnOffset(mainSize);
     }
+    info_.SyncReportRange(mainSize, mainGap_);
     if (props->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
     }
@@ -131,8 +133,8 @@ void GridCustomLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             endIndex = std::max(endIndex, info.toDragIndex_);
         }
     }
-    wrapper_->SetActiveChildRange(startIndex, endIndex, cachedItemCnt.first,
-        cachedItemCnt.second, props->GetShowCachedItemsValue(false));
+    wrapper_->SetActiveChildRange(
+        startIndex, endIndex, cachedItemCnt.first, cachedItemCnt.second, props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cachedItemCnt.first);
     UpdateOverlay(wrapper_);
 }
@@ -326,13 +328,14 @@ void GridCustomLayoutAlgorithm::JumpToTargetOffset(float mainSize)
     info_.totalOffset_ = startLineInfo.totalOffset;
 
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillFromStartIndex({ crossLens_, crossGap_, mainGap_ }, mainSize - info_.currentOffset_);
+    filler.FillFromStartIndex(
+        { crossLens_, crossGap_, mainGap_ }, info_.GetViewEndBound(mainSize) - info_.currentOffset_);
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
     UpdateStartInfo(info_, res);
-    auto [endMainLineIdx, endIdx] =
-        solver.SolveForwardForEndIdx(mainGap_, mainSize - info_.currentOffset_, info_.startMainLineIndex_);
+    auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(
+        mainGap_, info_.GetViewEndBound(mainSize) - info_.currentOffset_, info_.startMainLineIndex_);
     info_.endMainLineIndex_ = endMainLineIdx;
     info_.endIndex_ = endIdx;
 }
@@ -347,14 +350,14 @@ void GridCustomLayoutAlgorithm::FillBackward(float mainSize)
         line = it->first;
     }
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillBackward({ crossLens_, crossGap_, mainGap_ }, mainSize - offset, line);
+    filler.FillBackward({ crossLens_, crossGap_, mainGap_ }, info_.GetViewEndBound(mainSize) - offset, line);
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
 
     UpdateStartInfo(info_, res);
 
-    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, info_.GetViewEndBound(mainSize) - res.pos, res.row);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
     info_.totalOffset_ -= info_.currentDelta_;
