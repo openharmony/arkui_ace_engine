@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_BRIDGE_CUSTOM_DIALOG_CONTROLLER_STATIC_PEER_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_BRIDGE_CUSTOM_DIALOG_CONTROLLER_STATIC_PEER_IMPL_H
 
 #include "base/memory/ace_type.h"
 #include "core/common/container_consts.h"
@@ -23,7 +23,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CustomDialogControllerPeerImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType)
+    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType);
+
 public:
     CustomDialogControllerPeerImpl() = default;
     ~CustomDialogControllerPeerImpl() override = default;
@@ -67,12 +68,12 @@ public:
     void SetOnWillAppear(Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnWillDisappear(Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnDidAppearExtender(Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
-    void SetOnDidDisappearExtender(Opt_Callback_Void onDidDisappear,
-        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
-    void SetOnWillAppearExtender(Opt_Callback_Void onWillAppear,
-        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
-    void SetOnWillDisappearExtender(Opt_Callback_Void onWillDisappear,
-        const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnDidDisappearExtender(
+        Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnWillAppearExtender(
+        Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
+    void SetOnWillDisappearExtender(
+        Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
     void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
     void SetLevelUniqueId(Opt_Int32 levelUniqueId);
@@ -99,6 +100,7 @@ public:
     {
         return ownerView_;
     }
+
 private:
     RefPtr<UINode> GetWindowScene() const;
     std::function<void()> TransformCallbackToFunctionVoid(
@@ -123,4 +125,4 @@ struct CustomDialogControllerExtenderPeer : public OHOS::Ace::NG::GeneratedModif
     ~CustomDialogControllerExtenderPeer() override = default;
 };
 
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_BRIDGE_CUSTOM_DIALOG_CONTROLLER_STATIC_PEER_IMPL_H

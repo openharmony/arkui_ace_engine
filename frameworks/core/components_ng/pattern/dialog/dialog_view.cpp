@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,17 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
+constexpr char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
+} // namespace
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode)
 {
@@ -677,11 +681,11 @@ std::string DialogView::GetDialogTag(const DialogProperties& param)
     std::string tag;
     switch (param.type) {
         case DialogType::ALERT_DIALOG: {
-            tag = V2::ALERT_DIALOG_ETS_TAG;
+            tag = ALERT_DIALOG_ETS_TAG;
             break;
         }
         case DialogType::ACTION_SHEET: {
-            tag = V2::ACTION_SHEET_DIALOG_ETS_TAG;
+            tag = ACTION_SHEET_DIALOG_ETS_TAG;
             break;
         }
         default:

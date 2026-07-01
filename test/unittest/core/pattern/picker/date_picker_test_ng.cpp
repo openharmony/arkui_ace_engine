@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,17 +25,18 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/date_picker/datepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef private
 #undef protected
 
@@ -660,8 +661,12 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow001, TestSize.Level0)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     auto pipeline = PipelineContext::GetCurrentContext();
-    auto overlayManger = pipeline->GetOverlayManager();
-    overlayManger->FireBackPressEvent();
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->FireBackPressEvent();
 
     std::vector<ButtonInfo> buttonInfos;
     auto dialogNode =
@@ -811,9 +816,13 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow004, TestSize.Level0)
     titleEventHub->ActClick();
     titleEventHub->ActClick();
     auto pipeline = PipelineContext::GetCurrentContext();
-    auto overlayManger = pipeline->GetOverlayManager();
-    overlayManger->FireBackPressEvent();
-    overlayManger->FireBackPressEvent();
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->FireBackPressEvent();
+    dialogInnerManager->FireBackPressEvent();
 }
 
 /**

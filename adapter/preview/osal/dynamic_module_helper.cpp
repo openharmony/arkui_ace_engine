@@ -128,6 +128,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "Dialog", "dialog" },
         { "ImageAnimator", "imageanimator" },
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },

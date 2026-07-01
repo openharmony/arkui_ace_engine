@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ACTION_SHEET_ACTION_SHEET_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ACTION_SHEET_ACTION_SHEET_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ACTION_SHEET_ACTION_SHEET_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ACTION_SHEET_ACTION_SHEET_MODEL_H
 
 #include <mutex>
 
@@ -30,14 +30,15 @@ public:
     virtual void ShowActionSheet(const DialogProperties& arg) = 0;
     virtual void SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo) = 0;
     virtual void SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg) = 0;
-    virtual void SetConfirm(GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc,
-        ButtonInfo& buttonInfo, DialogProperties& arg) = 0;
-    virtual void SetOnWillDismiss(std::function<void(const int32_t& info,
-        const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg) {};
+    virtual void SetConfirm(GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc, ButtonInfo& buttonInfo,
+        DialogProperties& arg) = 0;
+    virtual void SetOnWillDismiss(
+        std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
+        DialogProperties& arg) {};
 
 private:
     static std::unique_ptr<ActionSheetModel> instance_;
     static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ACTION_SHEET_ACTION_SHEET_MODEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ACTION_SHEET_ACTION_SHEET_MODEL_H

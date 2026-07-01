@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
-
+#include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
+#include "core/components_ng/pattern/dialog/custom_dialog/bridge/custom_dialog_controller_static_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "accessor_test_base.h"
 
 namespace OHOS::Ace::NG {
 

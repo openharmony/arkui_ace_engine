@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,56 +12,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/common/resource/resource_parse_utils.h"
-#include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_model.h"
 
 #include "interfaces/native/node/dialog_model.h"
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/interfaces/native/utility/error_message_macros.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/interfaces/native/node/native_material_util.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
 #include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "native_material_util.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
-    constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
-    constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
-    constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
-    constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
-    constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
-    constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
-    constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
-    constexpr int32_t ARKUI_LEVEL_MODE_DEFAULT_VALUE = 0;
-    constexpr int32_t ARKUI_DEFAULT_LEVEL_UNIQUEID = -1;
-    constexpr int32_t ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE = 0;
-    constexpr int32_t ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK = 12;
-    constexpr int32_t HAS_COLORSTRATEGY = 1;
-    constexpr int32_t HAS_COLOR = 2;
-    constexpr int NUM_0 = 0;
-    constexpr int NUM_1 = 1;
-    constexpr int NUM_2 = 2;
-    constexpr int NUM_3 = 3;
-    constexpr int NUM_4 = 4;
-    constexpr int NUM_5 = 5;
-    constexpr int NUM_6 = 6;
-    constexpr int NUM_7 = 7;
-    constexpr int32_t DEFAULT_BORDER_WIDTH = 0;
-    constexpr uint32_t DEFAULT_BORDER_COLOR = 0xff000000;
-    constexpr int32_t DEFAULT_BORDER_STYLE = static_cast<int32_t>(OHOS::Ace::BorderStyle::SOLID);
-    DialogProperties g_dialogProperties;
+constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
+constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
+constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
+constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
+constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
+constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
+constexpr int32_t ARKUI_LEVEL_MODE_DEFAULT_VALUE = 0;
+constexpr int32_t ARKUI_DEFAULT_LEVEL_UNIQUEID = -1;
+constexpr int32_t ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE = 0;
+constexpr int32_t ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK = 12;
+constexpr int32_t HAS_COLORSTRATEGY = 1;
+constexpr int32_t HAS_COLOR = 2;
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+constexpr int32_t DEFAULT_BORDER_WIDTH = 0;
+constexpr uint32_t DEFAULT_BORDER_COLOR = 0xff000000;
+constexpr int32_t DEFAULT_BORDER_STYLE = static_cast<int32_t>(OHOS::Ace::BorderStyle::SOLID);
+DialogProperties g_dialogProperties;
 } // namespace
 
 static void UnregisterOnWillDialogDismiss(FrameNode* dialogNode)
@@ -100,7 +100,8 @@ static void CloseHistoryDialog(ArkUIDialogHandle controllerHandler)
 
 ArkUIDialogHandle CreateDialog()
 {
-    return new _ArkUIDialog({ .dialogHandle = nullptr,
+    return new _ArkUIDialog({
+        .dialogHandle = nullptr,
         .contentHandle = nullptr,
         .alignment = DEFAULT_DIALOG_ALIGNMENT,
         .offsetX = 0.0f,
@@ -116,7 +117,7 @@ ArkUIDialogHandle CreateDialog()
         .showInSubWindow = false,
         .enableCustomAnimation = false,
         .onWillDismissCall = nullptr,
-        .onWillDismissCallByNDK  = nullptr,
+        .onWillDismissCallByNDK = nullptr,
         .userData = nullptr,
         .keyboardAvoidDistanceValue = std::optional<ArkUI_Float32>(),
         .keyboardAvoidDistanceUnit = DimensionUnit::VP,
@@ -189,7 +190,7 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
         delete cornerRadiusRect;
     }
     controllerHandler->onWillDismissCall = nullptr;
-    controllerHandler->onWillDismissCallByNDK  = nullptr;
+    controllerHandler->onWillDismissCallByNDK = nullptr;
     controllerHandler->userData = nullptr;
     delete controllerHandler;
 }
@@ -308,11 +309,11 @@ void ParseDialogKeyboardAvoidDistance(DialogProperties& dialogProperties, ArkUID
             unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
             dialogProperties.keyboardAvoidDistance = Dimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
         } else if (unitEnum == OHOS::Ace::DimensionUnit::NONE) {
-            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
-                OHOS::Ace::DimensionUnit::VP);
+            dialogProperties.keyboardAvoidDistance =
+                Dimension(controllerHandler->keyboardAvoidDistanceValue.value(), OHOS::Ace::DimensionUnit::VP);
         } else {
-            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
-                unitEnum);
+            dialogProperties.keyboardAvoidDistance =
+                Dimension(controllerHandler->keyboardAvoidDistanceValue.value(), unitEnum);
         }
     }
 }
@@ -409,7 +410,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.displayModeInSubWindow =
         static_cast<DialogDisplayModeInSubWindow>(controllerHandler->displayModeInSubWindow);
-    dialogProperties.systemMaterial = CreateUiMaterialFromHandle(controllerHandler->material);
+    dialogProperties.systemMaterial = NodeModifier::CreateUiMaterialFromHandle(controllerHandler->material);
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.hasInvertColor.hasBackgroundColor = controllerHandler->hasCustomBackgroundColor;
@@ -526,6 +527,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
 {
     PromptDialogAttr dialogAttr = { .autoCancel = dialogProps.autoCancel,
         .showInSubWindow = dialogProps.isShowInSubWindow,
+        .displayModeInSubWindow = dialogProps.displayModeInSubWindow,
         .isModal = dialogProps.isModal,
         .enableHoverMode = dialogProps.enableHoverMode,
         .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
@@ -557,7 +559,6 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .levelOrder = dialogProps.levelOrder,
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
-        .displayModeInSubWindow = dialogProps.displayModeInSubWindow,
         .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
         .customCNode = dialogProps.customCNode,
         .systemMaterial = dialogProps.systemMaterial };
@@ -647,7 +648,7 @@ void openCustomDialogWithNewPipeline(std::function<void(int32_t errorCode, int32
                 TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
             }
         } else {
-            overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            overlayManager->OpenCustomDialogWithErrorCallback(dialogProperties, std::move(callback));
         }
     };
     if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
@@ -681,8 +682,8 @@ ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle controllerHandler)
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle controllerHandler,
-    ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
+ArkUI_Int32 SetDialogContentAlignment(
+    ArkUIDialogHandle controllerHandler, ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     if (alignment < DEFAULT_DIALOG_ALIGNMENT || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
@@ -724,8 +725,8 @@ ArkUI_Int32 SetDialogMask(ArkUIDialogHandle controllerHandler, ArkUI_Uint32 mask
     controllerHandler->maskColor = maskColor;
     controllerHandler->hasCustomMaskColor = true;
     if (rect) {
-        controllerHandler->maskRect = new ArkUIRect({ .x = rect->x, .y = rect->y,
-            .width = rect->width, .height = rect->height });
+        controllerHandler->maskRect =
+            new ArkUIRect({ .x = rect->x, .y = rect->y, .width = rect->width, .height = rect->height });
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -738,12 +739,12 @@ ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle controllerHandler, ArkUI_
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle controllerHandler, ArkUI_Float32 topLeft,
-    ArkUI_Float32 topRight, ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight)
+ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle controllerHandler, ArkUI_Float32 topLeft, ArkUI_Float32 topRight,
+    ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight)
 {
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
-    controllerHandler->cornerRadiusRect = new ArkUICornerRadius({ .topLeft = topLeft, .topRight = topRight,
-    .bottomLeft = bottomLeft, .bottomRight = bottomRight });
+    controllerHandler->cornerRadiusRect = new ArkUICornerRadius(
+        { .topLeft = topLeft, .topRight = topRight, .bottomLeft = bottomLeft, .bottomRight = bottomRight });
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -817,7 +818,7 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
-    controllerHandler->onWillDismissCallByNDK  = callback;
+    controllerHandler->onWillDismissCallByNDK = callback;
     controllerHandler->userData = userData;
     return ERROR_CODE_NO_ERROR;
 }
@@ -832,8 +833,7 @@ ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dia
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetKeyboardAvoidDistance(
-    ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
 {
     CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->keyboardAvoidDistanceValue = distance;
@@ -1098,7 +1098,7 @@ ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
         Shadow shadows;
         GetShadowFromTheme(static_cast<OHOS::Ace::ShadowStyle>(shadow), shadows);
         controllerHandler->customShadow = shadows;
-        controllerHandler->hasCustomShadowColor= false;
+        controllerHandler->hasCustomShadowColor = false;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1137,7 +1137,7 @@ ArkUI_Int32 SetDialogCustomShadow(
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
     controllerHandler->customShadow = shadow;
-    controllerHandler->hasCustomShadowColor= true;
+    controllerHandler->hasCustomShadowColor = true;
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1224,4 +1224,4 @@ ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float
     return ERROR_CODE_NO_ERROR;
 }
 
-} // namespace OHOS::Ace::NG::ViewModel
+} // namespace OHOS::Ace::NG::CustomDialog

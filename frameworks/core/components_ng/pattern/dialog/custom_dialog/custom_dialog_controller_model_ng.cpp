@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -24,10 +24,9 @@
 
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
-    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
-    bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
-    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation,
-    bool& hasBind)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown,
+    std::function<void()>&& cancelTask, std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent,
+    RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation, bool& hasBind)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -46,8 +45,8 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
         return;
     }
-    auto task = ParseOpenDialogTask(
-        currentId, controller, dialogProperties, dialogs, std::move(buildFunc), hasBind, isShown);
+    auto task =
+        ParseOpenDialogTask(currentId, controller, dialogProperties, dialogs, std::move(buildFunc), hasBind, isShown);
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
 }
 
@@ -84,9 +83,9 @@ void ReloadResources(DialogProperties& dialogProperties)
     }
 }
 
-void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayManager>& overlayManager, const RefPtr<Container>& container,
-    const WeakPtr<AceType>& controller, RefPtr<NG::FrameNode>& dialog, DialogProperties& dialogProperties,
-    std::function<void()>&& func, bool& isShown)
+void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<Container>& container, const WeakPtr<AceType>& controller, RefPtr<NG::FrameNode>& dialog,
+    DialogProperties& dialogProperties, std::function<void()>&& func, bool& isShown)
 {
     if (!overlayManager || !container) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "set open dialog in task, manager or container is null.");
@@ -109,8 +108,7 @@ void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayMana
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
         CHECK_NULL_VOID(dialog);
-        if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
-            !container->IsUIExtensionWindow()) {
+        if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog && !container->IsUIExtensionWindow()) {
             auto mask = overlayManager->SetDialogMask(dialogProperties);
             if (!mask) {
                 TAG_LOGW(AceLogTag::ACE_DIALOG, "fail to set mask dialog.");
@@ -127,8 +125,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
     const WeakPtr<AceType>& controller, DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
     std::function<void()>&& buildFunc, bool& hasBind, bool& isShown)
 {
-    auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
-            &hasBind, isShown]() mutable {
+    auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc), &hasBind,
+                    &isShown]() mutable {
         auto controllerPtr = controller.Upgrade();
         if (!controllerPtr) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "parse open dialog, controller is null.");
@@ -141,8 +139,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         auto enableOpenSubwindowInSubwindow = expandDisplay || container->IsPcOrFreeMultiWindowCapability();
         if (!enableOpenSubwindowInSubwindow && isSubContainer && dialogProperties.isShowInSubWindow) {
             enableOpenSubwindowInSubwindow = true;
-            TAG_LOGD(AceLogTag::ACE_DIALOG,
-                "reuse parent container for nested dialog, containerId:%{public}d", currentId);
+            TAG_LOGD(
+                AceLogTag::ACE_DIALOG, "reuse parent container for nested dialog, containerId:%{public}d", currentId);
         }
         if (isSubContainer && (!dialogProperties.isShowInSubWindow || enableOpenSubwindowInSubwindow)) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
@@ -164,8 +162,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
             }
         }
         RefPtr<NG::FrameNode> dialog;
-        CustomDialogControllerModelNG::SetOpenDialogInTask(overlayManager, container, controller, dialog,
-            dialogProperties, std::move(func), isShown);
+        CustomDialogControllerModelNG::SetOpenDialogInTask(
+            overlayManager, container, controller, dialog, dialogProperties, std::move(func), isShown);
         if (!dialog) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "fail to show dialog.");
             return;
@@ -178,8 +176,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
     return task;
 }
 
-RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProperties& dialogProperties,
-    const RefPtr<UINode>& customNode)
+RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(
+    DialogProperties& dialogProperties, const RefPtr<UINode>& customNode)
 {
     ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
@@ -224,9 +222,9 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
 }
 
 void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogProperties,
-    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
-    bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
-    RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown,
+    std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
+    std::list<DialogOperation>& dialogOperation)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "CustomDialogController SetCloseDialog enter.");
     auto container = Container::Current();

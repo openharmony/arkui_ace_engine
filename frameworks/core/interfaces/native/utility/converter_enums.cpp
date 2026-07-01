@@ -1463,7 +1463,7 @@ void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src)
 }
 
 template<>
-void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
 {
     switch (src) {
         case ARK_WORD_BREAK_NORMAL: dst = WordBreak::NORMAL; break;
@@ -2017,7 +2017,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_
 }
 
 template<>
-void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
 {
     switch (src) {
         case ARK_DIALOG_BUTTON_DIRECTION_AUTO: dst = DialogButtonDirection::AUTO; break;
@@ -2028,7 +2028,7 @@ void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButto
 }
 
 template<>
-void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
 {
     switch (src) {
         case ARK_DIALOG_BUTTON_STYLE_DEFAULT: dst = DialogButtonStyle::DEFAULT; break;
@@ -2467,7 +2467,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_Divi
 }
 
 template<>
-void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
 {
     switch (src) {
         case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
@@ -2476,7 +2476,7 @@ void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
     }
 }
 template<>
-void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
 {
     switch (src) {
         case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
@@ -2604,7 +2604,7 @@ void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src)
 }
 
 template<>
-void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src)
 {
     switch (src) {
         case ARK_DIALOG_DISPLAY_MODE_SCREEN_BASED: dst = DialogDisplayModeInSubWindow::SCREEN_BASED; break;

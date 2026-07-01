@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_ALERT_DIALOG_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_ALERT_DIALOG_MODEL_NG_H
 
-#include "core/components_ng/pattern/dialog/alert_dialog_model.h"
+#include "core/components_ng/pattern/dialog/alert_dialog/alert_dialog_model.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT AlertDialogModelNG : public OHOS::Ace::AlertDialogModel {
@@ -29,4 +29,4 @@ public:
         DialogProperties& arg) override;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_ALERT_DIALOG_MODEL_NG_H

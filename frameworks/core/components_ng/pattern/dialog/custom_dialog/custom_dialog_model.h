@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CUSTOM_DIALOG_MODEL_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CUSTOM_DIALOG_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_MODEL_H
 
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "base/geometry/dimension.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components/common/properties/shadow.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 
@@ -88,8 +88,8 @@ ArkUIDialogHandle CreateDialog();
 void DisposeDialog(ArkUIDialogHandle handle);
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode);
 ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle);
-ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle,
-    ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
+ArkUI_Int32 SetDialogContentAlignment(
+    ArkUIDialogHandle handle, ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
 ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle);
 ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, bool isModal);
 ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, bool autoCancel);
@@ -145,4 +145,4 @@ ArkUI_Int32 OpenCustomDialogWithErrorCallback(
     ArkUIDialogHandle handle, void* userData, void (*callback)(int32_t errorCode, int32_t dialogId, void* userData));
 } // namespace OHOS::Ace::NG::CustomDialog
 
-#endif
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CUSTOM_DIALOG_MODEL_H

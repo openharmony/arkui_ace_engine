@@ -167,6 +167,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/image/mock_image_cache.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_file_cache.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_source_info.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/base/mock_constants.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline_ng/mock_ui_task_scheduler.cpp",

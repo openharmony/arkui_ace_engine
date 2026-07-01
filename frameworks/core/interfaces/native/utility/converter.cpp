@@ -740,7 +740,7 @@ void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
 }
 
 template<>
-void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
     dst = converter.ToCalcDimension();
@@ -1052,7 +1052,7 @@ Dimension Convert(const Ark_String& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_String& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
     return StringUtils::StringToCalcDimension(str, false, ConverterState::defDimensionUnit);
@@ -1069,7 +1069,7 @@ CalcLength Convert(const Ark_String& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Number& src)
 {
     return Convert<Dimension>(src);
 }
@@ -1225,7 +1225,7 @@ RadioStyle Convert(const Ark_RadioStyle& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 {
     BorderRadiusProperty property;
     CalcDimension topStart;
@@ -1293,7 +1293,7 @@ BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src)
 }
 
 template<>
-BorderStyleProperty Convert(const Ark_BorderStyle& src)
+ACE_FORCE_EXPORT BorderStyleProperty Convert(const Ark_BorderStyle& src)
 {
     BorderStyleProperty property;
     auto style = OptConvert<BorderStyle>(src);
@@ -2172,7 +2172,7 @@ RefPtr<BasicShape> Convert(const Ark_RectShape& src)
 }
 
 template<>
-RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
+ACE_FORCE_EXPORT RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
     auto effectPeer = src;
     if (effectPeer) {
@@ -2466,7 +2466,7 @@ template ACE_FORCE_EXPORT std::optional<Dimension>
 OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
-std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
+ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
     std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
@@ -2885,7 +2885,7 @@ AnimateParam Convert(const Ark_AnimateParam& src)
 }
 
 template<>
-AnimationOption Convert(const Ark_AnimateParam& src)
+ACE_FORCE_EXPORT AnimationOption Convert(const Ark_AnimateParam& src)
 {
     AnimationOption option;
     // If the attribute does not exist, the default value is used.
@@ -2975,7 +2975,7 @@ ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_EdgeColors& src)
 }
 
 template<>
-BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
     dst.leftColor = OptConvert<Color>(src.start);
@@ -3047,7 +3047,7 @@ BorderRadiusProperty Convert(const Ark_LengthMetrics& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Number& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3059,13 +3059,13 @@ BorderRadiusProperty Convert(const Ark_Float64& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_String& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_String& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Resource& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3199,7 +3199,7 @@ ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 }
 
 template<>
-BorderStyleProperty Convert(const Ark_EdgeStyles& src)
+ACE_FORCE_EXPORT BorderStyleProperty Convert(const Ark_EdgeStyles& src)
 {
     BorderStyleProperty property;
     property.styleLeft = OptConvert<BorderStyle>(src.left);
@@ -4311,7 +4311,7 @@ StrokeJoinStyle Convert(const Ark_StrokeJoinStyle& src)
     return StrokeJoinStyle::MITER_JOIN;
 }
 template<>
-void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 {
     auto peer = src;
     if (peer && peer->levelOrder) {
@@ -4319,7 +4319,7 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
     }
 }
 template<>
-void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 {
     auto peer = src;
     if (peer && peer->levelOrder) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,17 @@
  */
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 
-#include "core/components/calendar/calendar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <utility>
+
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/font_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -30,21 +34,19 @@
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
-#include "core/common/container.h"
-#include "core/common/font_manager.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -144,7 +146,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     scrollFrameNode->MountToParent(contentColumn);
 
     auto entryNode = settingData.entryNode.Upgrade();
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn, entryNode);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
+    auto dialogNode = dialogInnerModifier->createDialogNodeWithThemeNode(dialogProperties, contentColumn, entryNode);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     if (entryNode) {
         auto pickerPattern = entryNode->GetPattern<CalendarPickerPattern>();

@@ -18,7 +18,6 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
-    "action_sheet/action_sheet_model_ng.cpp",
     "animator/animator_model_ng.cpp",
     "app_bar/app_bar_utils.cpp",
     "app_bar/app_bar_view.cpp",
@@ -95,15 +94,6 @@ build_component_ng("pattern_ng") {
     "depth_component/depth_component_model.cpp",
     "depth_component/depth_component_paint_method.cpp",
     "depth_component/depth_component_pattern.cpp",
-    "dialog/alert_dialog_model_ng.cpp",
-    "dialog/custom_dialog_controller_model_ng.cpp",
-    "dialog/custom_dialog_controller_model_static.cpp",
-    "dialog/dialog_accessibility_property.cpp",
-    "dialog/dialog_event_hub.cpp",
-    "dialog/dialog_layout_algorithm.cpp",
-    "dialog/dialog_pattern.cpp",
-    "dialog/dialog_pattern_multi_thread.cpp",
-    "dialog/dialog_view.cpp",
     "distortion_component/distortion_component_layout_algorithm.cpp",
     "distortion_component/distortion_component_model_ng.cpp",
     "distortion_component/distortion_component_node.cpp",

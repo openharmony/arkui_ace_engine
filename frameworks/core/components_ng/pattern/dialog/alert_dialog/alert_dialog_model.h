@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ALERT_DIALOG_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ALERT_DIALOG_MODEL_H
 
-#include <mutex>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "core/components/dialog/dialog_properties.h"
@@ -32,8 +32,9 @@ public:
         const std::string& property) = 0;
     virtual void SetOnCancel(std::function<void()>&& eventFunc, DialogProperties& arg) = 0;
     virtual void SetShowDialog(const DialogProperties& arg) = 0;
-    virtual void SetOnWillDismiss(std::function<void(const int32_t& info,
-        const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg) {};
+    virtual void SetOnWillDismiss(
+        std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
+        DialogProperties& arg) {};
 
 private:
     static std::unique_ptr<AlertDialogModel> instance_;
@@ -41,4 +42,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_MODEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_ALERT_DIALOG_MODEL_H

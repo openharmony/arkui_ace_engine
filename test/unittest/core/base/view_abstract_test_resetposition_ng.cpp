@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#define protected public
+#define private public
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
 #include "core/common/event_manager.h"
 #include "core/components/select/select_theme.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/interfaces/native/node/node_api.h"
-
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -488,9 +492,9 @@ HWTEST_F(ViewAbstractTestNg, DismissDialog001, TestSize.Level1)
     auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
     ASSERT_NE(overlay, nullptr);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
-    auto dialogMapSize = overlayManager->dialogMap_.size();
+    auto dialogMapSize = overlayManager->GetDialogMap().size();
     ViewAbstract::DismissDialog();
-    EXPECT_NE(overlayManager->dialogMap_.size(), dialogMapSize - 1);
+    EXPECT_NE(overlayManager->GetDialogMap().size(), dialogMapSize - 1);
 }
 
 /**

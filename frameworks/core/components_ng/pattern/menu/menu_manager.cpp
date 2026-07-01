@@ -748,7 +748,6 @@ void MenuManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu,
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation enter");
     CHECK_NULL_VOID(menu);
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->BlurLowerNode(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     // delay until end of target hoverScale for interruption
@@ -979,7 +978,6 @@ void MenuManager::PopMenuAnimation(const RefPtr<FrameNode>& menu,
 
     PublishMenuStatus(false, nullptr);
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ResetLowerNodeFocusable(menu);
     overlayManager->ResetContextMenuDragHideFinished();
     RemoveMenuBadgeNode(menu);
 

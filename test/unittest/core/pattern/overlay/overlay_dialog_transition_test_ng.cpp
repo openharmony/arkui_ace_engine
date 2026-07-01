@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -30,27 +29,28 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "base/log/dump_log.h"
 #include "base/window/foldable_window.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -66,19 +66,18 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
-#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -258,7 +257,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest001, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -296,7 +295,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest002, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -341,7 +340,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest003, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -392,7 +391,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest004, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -448,7 +447,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest005, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -504,7 +503,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest006, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -560,7 +559,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest007, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -617,7 +616,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest008, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -674,7 +673,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest009, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
@@ -736,7 +735,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest010, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -795,7 +794,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest011, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -819,18 +818,6 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest011, TestSize.Level1
      */
     auto disappearTransition = transitionEffect->GetDisappearEffect();
     ASSERT_NE(disappearTransition, nullptr);
-
-    /**
-     * @tc.steps: step6. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
-     * @tc.expected: return true
-     */
-    auto eventHub = dialog->GetEventHub<DialogEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-    dialog->eventHub_ = eventHub;
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
 
 /**
@@ -860,7 +847,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest012, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -880,8 +867,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest012, TestSize.Level1
      * @tc.expected: remove successfully.
      */
     EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -911,7 +897,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest013, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
@@ -950,8 +936,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest013, TestSize.Level1
      * @tc.expected: remove successfully.
      */
     EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -980,7 +965,7 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest014, TestSize.Level1
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -1012,18 +997,6 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest014, TestSize.Level1
     auto dialogNode = overlayManager->GetDialog(dialogId);
     CHECK_NULL_VOID(dialogNode);
     EXPECT_EQ(dialogId, dialogNode->GetId());
-
-    /**
-     * @tc.steps: step7. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
-     * @tc.expected: return true
-     */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-    dialogNode->eventHub_ = eventHub;
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
 /**
  * @tc.name: DialogAnalysisLayoutOfContent001

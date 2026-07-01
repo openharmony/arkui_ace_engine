@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,11 +208,11 @@ public:
 
     void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
 
-    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     // for non-animation
     void AddBeforeOrientationChangeTask(const std::function<void()>&& task);

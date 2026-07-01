@@ -17,6 +17,8 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss);
-    void AddOnWillDismiss(DialogProperties& properties, Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss);
-}
+ACE_FORCE_EXPORT void AddOnWillDismiss(
+    DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss);
+ACE_FORCE_EXPORT void AddOnWillDismiss(
+    DialogProperties& properties, Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss);
+} // namespace OHOS::Ace::NG::GeneratedModifier

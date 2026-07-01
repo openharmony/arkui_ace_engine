@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/dialog/custom_dialog/bridge/custom_dialog_controller_static_peer_impl.h"
+
 #include "core/common/container.h"
-#include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/dialog_common.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
-#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_static.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
 inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_arkui_component_common_KeyboardAvoidMode& src)
 {
     switch (src) {
-        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_DEFAULT: dst = KeyboardAvoidMode::DEFAULT; break;
-        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_NONE: dst = KeyboardAvoidMode::NONE; break;
-        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_DEFAULT:
+            dst = KeyboardAvoidMode::DEFAULT;
+            break;
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_NONE:
+            dst = KeyboardAvoidMode::NONE;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -213,15 +219,15 @@ void CustomDialogControllerPeerImpl::SetBuilder(
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(frameNode);
-        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
-            auto controller = weakPeer.Upgrade();
-            CHECK_NULL_VOID(controller);
-            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
-                weakPeer, std::move(builderFunc), controller->hasBind_);
-        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
+        callback.BuildAsync(
+            [weakPeer](const RefPtr<UINode>& uiNode) {
+                auto controller = weakPeer.Upgrade();
+                CHECK_NULL_VOID(controller);
+                auto builderFunc = [uiNode]() -> RefPtr<UINode> { return uiNode; };
+                CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
+                    weakPeer, std::move(builderFunc), controller->hasBind_);
+            },
+            reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
 }
 
@@ -237,15 +243,15 @@ void CustomDialogControllerPeerImpl::SetBuilderExtender(
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(frameNode);
-        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
-            auto controller = weakPeer.Upgrade();
-            CHECK_NULL_VOID(controller);
-            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
-                weakPeer, std::move(builderFunc), controller->hasBind_);
-        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
+        callback.BuildAsync(
+            [weakPeer](const RefPtr<UINode>& uiNode) {
+                auto controller = weakPeer.Upgrade();
+                CHECK_NULL_VOID(controller);
+                auto builderFunc = [uiNode]() -> RefPtr<UINode> { return uiNode; };
+                CustomDialogControllerModelStatic::SetOpenDialog(controller->dialogProperties_, controller->dialogs_,
+                    weakPeer, std::move(builderFunc), controller->hasBind_);
+            },
+            reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
 }
 
@@ -329,8 +335,8 @@ void CustomDialogControllerPeerImpl::SetOpenAnimation(Opt_AnimateParam openAnima
             Converter::OptConvert<int32_t>(openAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
         auto onFinish = Converter::OptConvert<Callback_Void>(openAnimation.value.onFinish);
         if (onFinish.has_value()) {
-            std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(
-                *onFinish, Container::CurrentIdSafely());
+            std::function<void()> onFinishEvent =
+                GetContainerScopedSyncInvoker(*onFinish, Container::CurrentIdSafely());
             option.SetOnFinishEvent(onFinishEvent);
         }
         dialogProperties_.openAnimation = option;
@@ -348,8 +354,8 @@ void CustomDialogControllerPeerImpl::SetCloseAnimation(Opt_AnimateParam closeAni
             Converter::OptConvert<int32_t>(closeAnimation.value.duration).value_or(DEFAULT_ANIMATION_DURATION));
         auto onFinish = Converter::OptConvert<Callback_Void>(closeAnimation.value.onFinish);
         if (onFinish.has_value()) {
-            std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(
-                *onFinish, Container::CurrentIdSafely());
+            std::function<void()> onFinishEvent =
+                GetContainerScopedSyncInvoker(*onFinish, Container::CurrentIdSafely());
             option.SetOnFinishEvent(onFinishEvent);
         }
         dialogProperties_.closeAnimation = option;
@@ -443,8 +449,8 @@ void CustomDialogControllerPeerImpl::SetShadow(Opt_Union_ShadowOptions_ShadowSty
 void CustomDialogControllerPeerImpl::SetBlurStyle(Opt_BlurStyle backgroundBlurStyle)
 {
     auto result = Converter::OptConvert<BlurStyle>(backgroundBlurStyle);
-    dialogProperties_.backgroundBlurStyle = result ?
-        std::optional<int32_t>(static_cast<int32_t>(result.value())) : std::nullopt;
+    dialogProperties_.backgroundBlurStyle =
+        result ? std::optional<int32_t>(static_cast<int32_t>(result.value())) : std::nullopt;
 }
 
 void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(

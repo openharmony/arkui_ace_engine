@@ -16,15 +16,15 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 
-#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier();
 const CJUITimepickerModifier* GetCJUITimepickerModifier();
-const NG::TimePickerUtil::TimepickerCustomModifier* GetTimepickerCustomModifier();
+ACE_FORCE_EXPORT const NG::TimePickerUtil::TimepickerCustomModifier* GetTimepickerCustomModifier();
 void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 

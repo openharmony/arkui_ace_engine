@@ -30,11 +30,11 @@
 #endif
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
-#include "bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/dialog/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"

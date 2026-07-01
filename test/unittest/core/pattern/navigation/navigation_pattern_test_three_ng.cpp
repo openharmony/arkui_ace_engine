@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,18 @@
 #include "gtest/gtest.h"
 #include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
-
 #define protected public
 #define private public
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "base/mousestyle/mouse_style.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -35,11 +40,6 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/frameworks/core/common/mock_container.h"
-#include "test/mock/frameworks/core/common/mock_theme_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1186,11 +1186,14 @@ HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog001, TestSize.Level1)
     ASSERT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->dialogMap_.emplace(backButtonDialogNodeId, titleBarPattern->dialogNode_);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->dialogMap_.emplace(backButtonDialogNodeId, titleBarPattern->dialogNode_);
     auto menuItemDialogNode = NavigationPatternTestThreeNg::CreateDialogNode();
     int32_t menuItemDialogNodeId = menuItemDialogNode->GetId();
     titleBarPattern->largeFontPopUpDialogNode_ = AceType::WeakClaim(AceType::RawPtr(menuItemDialogNode));
-    overlayManager->dialogMap_.emplace(menuItemDialogNodeId, menuItemDialogNode);
+    dialogInnerManager->dialogMap_.emplace(menuItemDialogNodeId, menuItemDialogNode);
     auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TITLE_BAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
     navBarNode->toolBarNode_ = toolBarNode;
@@ -1198,12 +1201,12 @@ HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog001, TestSize.Level1)
     ASSERT_NE(toolBarPattern, nullptr);
     toolBarPattern->dialogNode_ = NavigationPatternTestThreeNg::CreateDialogNode();
     int32_t toolBarItemDialogNodeId = toolBarPattern->dialogNode_->GetId();
-    overlayManager->dialogMap_.emplace(toolBarItemDialogNodeId, toolBarPattern->dialogNode_);
+    dialogInnerManager->dialogMap_.emplace(toolBarItemDialogNodeId, toolBarPattern->dialogNode_);
 
     navigationPattern->CloseLongPressDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.find(backButtonDialogNodeId), overlayManager->dialogMap_.end());
-    EXPECT_EQ(overlayManager->dialogMap_.find(menuItemDialogNodeId), overlayManager->dialogMap_.end());
-    EXPECT_EQ(overlayManager->dialogMap_.find(toolBarItemDialogNodeId), overlayManager->dialogMap_.end());
+    EXPECT_EQ(dialogInnerManager->dialogMap_.find(backButtonDialogNodeId), dialogInnerManager->dialogMap_.end());
+    EXPECT_EQ(dialogInnerManager->dialogMap_.find(menuItemDialogNodeId), dialogInnerManager->dialogMap_.end());
+    EXPECT_EQ(dialogInnerManager->dialogMap_.find(toolBarItemDialogNodeId), dialogInnerManager->dialogMap_.end());
     EXPECT_EQ(titleBarPattern->GetBackButtonDialogNode(), nullptr);
     EXPECT_EQ(titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     EXPECT_EQ(toolBarPattern->GetDialogNode(), nullptr);
@@ -1248,7 +1251,7 @@ HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog002, TestSize.Level1)
     ASSERT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 0);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 0);
     EXPECT_EQ(titleBarPattern->GetBackButtonDialogNode(), nullptr);
     EXPECT_EQ(titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     EXPECT_EQ(toolBarPattern->GetDialogNode(), nullptr);

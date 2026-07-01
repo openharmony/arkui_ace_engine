@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -202,7 +202,7 @@ static void ParseAlertDialogConfirmV2(NativeAlertDialogParamV2& alertDialog, Dia
     // Parse cancel.
     if (alertDialog.cancel.hasValue) {
         auto cancel = [lambda = CJLambda::Create(alertDialog.cancel.value)]() { lambda(); };
-        AlertDialogModel::GetInstance()->SetOnCancel(cancel, properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetOnCancel(cancel, properties);
     }
 
     // Parse alignment
@@ -237,7 +237,7 @@ static void ParseAlertDialogConfirmV2(NativeAlertDialogParamV2& alertDialog, Dia
         std::function<void(const int32_t& info, const int32_t& id)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(alertDialog.onWillDismiss.value)](
                 const int32_t& info, const int32_t& instanceID) { nativeFunc(info); };
-        AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
     }
 
     // Prase transition
@@ -297,7 +297,7 @@ static void ParseButtonObjV2(DialogProperties& properties, NativeAlertDialogButt
 
     // Parse action
     auto action = [lambda = CJLambda::Create(objInner.action)]() { lambda(); };
-    AlertDialogModel::GetInstance()->SetParseButtonObj(action, buttonInfo, properties, property);
+    NG::NodeModifier::GetAlertDialogModel()->SetParseButtonObj(action, buttonInfo, properties, property);
 
     if (!buttonInfo.defaultFocus && isPrimaryButtonValid) {
         if (strcmp(property.c_str(), "confirm") == 0 || strcmp(property.c_str(), "primaryButton") == 0) {
@@ -322,7 +322,7 @@ void FfiOHOSShowAlertDialogParamWithConfirmV2(
 
     ParseButtonObjV2(properties, confirm, "confirm", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithConfirmShadowStyle(
@@ -349,7 +349,7 @@ void FfiOHOSShowAlertDialogParamWithConfirmShadowStyle(
 
     ParseButtonObjV2(properties, confirm, "confirm", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithConfirmShadowOptions(
@@ -373,7 +373,7 @@ void FfiOHOSShowAlertDialogParamWithConfirmShadowOptions(
 
     ParseButtonObjV2(properties, confirm, "confirm", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithButtonsV2(NativeAlertDialogParamV2 alertDialog,
@@ -389,7 +389,7 @@ void FfiOHOSShowAlertDialogParamWithButtonsV2(NativeAlertDialogParamV2 alertDial
 
     ParseButtonObjV2(properties, secondaryButton, "secondaryButton", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithButtonsShadowStyle(NativeAlertDialogParamV2 alertDialog,
@@ -421,7 +421,7 @@ void FfiOHOSShowAlertDialogParamWithButtonsShadowStyle(NativeAlertDialogParamV2 
 
     ParseButtonObjV2(properties, secondaryButton, "secondaryButton", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithButtonsShadowOptions(NativeAlertDialogParamV2 alertDialog,
@@ -449,7 +449,7 @@ void FfiOHOSShowAlertDialogParamWithButtonsShadowOptions(NativeAlertDialogParamV
 
     ParseButtonObjV2(properties, secondaryButton, "secondaryButton", true);
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void ParseButtonArrayV2(
@@ -493,7 +493,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsV2(
         properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
     }
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParamV2 alertDialog,
@@ -527,7 +527,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParamV2 
         properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
     }
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 
 void FfiOHOSShowAlertDialogParamWithOptionsShadowOptions(NativeAlertDialogParamV2 alertDialog,
@@ -557,7 +557,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowOptions(NativeAlertDialogParamV
         properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
     }
 
-    AlertDialogModel::GetInstance()->SetShowDialog(properties);
+    NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
 }
 }
 } // namespace

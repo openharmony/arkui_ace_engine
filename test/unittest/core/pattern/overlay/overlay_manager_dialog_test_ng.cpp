@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
+#include "interfaces/napi/kits/promptaction/prompt_controller.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -30,24 +30,26 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "base/log/dump_log.h"
 #include "base/window/foldable_window.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_setting_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -64,20 +66,18 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
-#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/napi/kits/promptaction/prompt_controller.h"
-#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -282,35 +282,37 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest001, TestSize.Level1)
      * @tc.expected: dialogMap_ is not empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
     /**
-     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
-     * @tc.expected: return false
-     */
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
-    /**
-     * @tc.steps: step4. call CloseDialog when dialogMap_ is not empty.
+     * @tc.steps: step3. call CloseDialog when dialogMap_ is not empty.
      * @tc.expected: remove successfully
      */
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     EXPECT_TRUE(overlayManager->toastMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
     /**
      * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
      * @tc.expected: function exits normally
      */
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     /**
      * @tc.steps: step5. call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
     */
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 }
 
 /**
@@ -351,37 +353,39 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest002, TestSize.Level1)
      * @tc.expected: dialogMap_ is not empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
     /**
-     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
-     * @tc.expected: return false
-     */
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
-    /**
-     * @tc.steps: step4. call CloseDialog when dialogMap_ is not empty.
+     * @tc.steps: step3. call CloseDialog when dialogMap_ is not empty.
      * @tc.expected: remove successfully
      */
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     EXPECT_TRUE(overlayManager->toastMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
     /**
-     * @tc.steps: step5. call CloseDialog again when dialogMap_ is empty.
+     * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
      * @tc.expected: function exits normally
      */
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     /**
-     * @tc.steps: step6. call ShowDateDialog.
+     * @tc.steps: step5. call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
-     * @tc.steps: step7. create timePickerSettingData and call ShowTimeDialog.
+     * @tc.steps: step6. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
      */
     TimePickerSettingData timePickerSettingData;
@@ -393,13 +397,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest002, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
     /**
-     * @tc.steps: step8. call RemoveOverlay when dialogChildCount is 2
+     * @tc.steps: step7. call RemoveOverlay when dialogChildCount is 2
      * @tc.expected: remove lastChild successfully
      */
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 }
 
 /**
@@ -440,9 +444,17 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest003, TestSize.Level1)
      * @tc.expected: dialogMap_ is not empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
 
     /**
      * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
@@ -457,7 +469,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest003, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
 }
 /**
  * @tc.name: DialogTest004
@@ -497,9 +509,17 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest004, TestSize.Level1)
      * @tc.expected: dialogMap_ is not empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
     /**
      * @tc.steps: step3. create timePickerSettingData and call ShowTextDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -518,7 +538,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest004, TestSize.Level1)
         }}};
     overlayManager->ShowTextDialog(dialogProperties, textPickerSettingData, dialogEvent, dialogCancelEvent,
         dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
 }
 /**
  * @tc.name: DialogTest005
@@ -558,9 +578,17 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest005, TestSize.Level1)
      * @tc.expected: dialogMap_ is not empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
     /**
      * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -574,13 +602,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest005, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
     /**
      * @tc.steps: step4. call CloseDialog when dialogMap_ size is 1.
      * @tc.expected: remove successfully
      */
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step5. create textPickerSettingData and call ShowTextDialog.
      * @tc.expected: textDialogNode is created successfully
@@ -591,7 +619,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest005, TestSize.Level1)
         {{"jiangsu"}, {}}};
     overlayManager->ShowTextDialog(dialogProperties, textPickerSettingData, dialogEvent, dialogCancelEvent,
         dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
 }
 /**
  * @tc.name: DialogTest006
@@ -633,13 +661,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest006, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call RemoveOverlay when dialogMap_ is empty.
      * @tc.expected: remove successfully
      */
     overlayManager->RemoveOverlay(true);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     /**
      * @tc.steps: step4. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -653,13 +681,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest006, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step5. call RemoveOverlay when dialogMap_ is empty.
      * @tc.expected: remove successfully
      */
     overlayManager->RemoveOverlay(true);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     /**
      * @tc.steps: step6. create textPickerSettingData and call ShowTextDialog.
      * @tc.expected: textDialogNode is created successfully
@@ -670,13 +698,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest006, TestSize.Level1)
         {{"jiangsu"}, {}}};
     overlayManager->ShowTextDialog(
         dialogProperties, textPickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step7. call RemoveOverlay when dialogMap_ is empty.
      * @tc.expected: remove successfully
      */
     overlayManager->RemoveOverlay(true);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 /**
  * @tc.name: DialogTest007
@@ -721,14 +749,14 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest007, TestSize.Level1)
     auto overlayManager = context->GetOverlayManager();
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
     /**
      * @tc.steps: step4. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -747,7 +775,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest007, TestSize.Level1)
     ASSERT_NE(root, nullptr);
     root->RemoveChild(root->GetLastChild());
     root->RemoveChild(root->GetLastChild());
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 /**
  * @tc.name: DialogTest008
@@ -790,7 +818,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest008, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -804,7 +832,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest008, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
     /**
      * @tc.steps: step4. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -857,7 +885,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest009, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -871,7 +899,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest009, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 2);
     /**
      * @tc.steps: step4. create timePickerSettingData and call ShowTimeDialog.
      * @tc.expected: timeDialogNode is created successfully
@@ -882,7 +910,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest009, TestSize.Level1)
         {{"jiangsu"}, {}}};
     overlayManager->ShowTextDialog(
         dialogProperties, textPickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 3);
     /**
      * @tc.steps: step5. get transitionEffect from dialog.
      * @tc.expected: transitionEffect value is not nullptr.
@@ -917,7 +945,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest001, TestSize.Level1)
     auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
     ASSERT_NE(overlay, nullptr);
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps3: Set the onWillDismiss property.
      * @tc.expected:  return value are as expected.
@@ -932,7 +960,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest001, TestSize.Level1)
      * @tc.expected: DismissDialog function is called.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -961,28 +989,29 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest002, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call ShowCustomDialog.
      * @tc.expected: dialogMap_ is not empty
      */
-    overlayManager->ShowCustomDialog(dialogNode);
-    overlayManager->BeforeShowDialog(dialogNode);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    DialogProperties dialogProps = {
+        .levelOrder = std::nullopt,
+        .focusable = true,
+    };
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+    dialogInnerManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->GetDialogMap().empty());
     /**
-     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
-     * @tc.expected: return false
-     */
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
-    /**
-     * @tc.steps: step4. call DismissDialog when dialogMap_ is not empty.
+     * @tc.steps: step3. call DismissDialog when dialogMap_ is not empty.
      * @tc.expected: remove successfully
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     EXPECT_TRUE(overlayManager->toastMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
     /**
      * @tc.steps: step4. call DismissDialog again when dialogMap_ is empty.
      * @tc.expected: function exits normally
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1009,26 +1038,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest003, TestSize.Level1)
      */
     auto dialogNode = overlayManager->ShowDialog(dialogParam, nullptr, true);
     EXPECT_NE(dialogNode, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-
-    /**
-     * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
-     * @tc.expected: return true
-     */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-    dialogNode->eventHub_ = eventHub;
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1071,13 +1087,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest004, TestSize.Level1)
      */
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1120,13 +1136,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest005, TestSize.Level1)
      */
     overlayManager->ShowDateDialog(
         dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1176,13 +1192,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest006, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1232,13 +1248,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest007, TestSize.Level1)
 
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1277,21 +1293,21 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest008, TestSize.Level1)
         EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
     EXPECT_NE(dialogNode, nullptr);
     auto openCallbackSnd = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 
     /**
      * @tc.steps: step4. call DismissDialog for contentNodeNew.
      * @tc.expected: remove  successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1318,26 +1334,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest009, TestSize.Level1)
      */
     auto dialogNode = overlayManager->ShowDialog(dialogParam, nullptr, true);
     EXPECT_NE(dialogNode, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-
-    /**
-     * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
-     * @tc.expected: return true
-     */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-    dialogNode->eventHub_ = eventHub;
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     /**
      * @tc.steps: step3. call DismissDialog.
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1376,14 +1379,14 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest010, TestSize.Level1)
         EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
     auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
     EXPECT_NE(dialogNode, nullptr);
     auto openCallbackSnd = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->GetDialogMap().size(), 1);
 
     /**
      * @tc.steps: step4. call CloseDialog for contentNodeNew.
@@ -1392,7 +1395,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest010, TestSize.Level1)
     Napi::PromptDialogController* controller = new Napi::PromptDialogController();
     controller->SetNode(dialogNode);
     controller->Close();
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 }
 
 /**
@@ -1425,7 +1428,10 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenDialogAnimationMountCallbackTest001, Te
     auto mountCallback = [&receivedCode](int32_t code) {
         receivedCode = code;
     };
-    overlayManager->OpenDialogAnimation(dialogNode, dialogProps, true, std::move(mountCallback));
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps, true, std::move(mountCallback));
     EXPECT_EQ(receivedCode, ERROR_CODE_NO_ERROR);
 }
 
@@ -1448,7 +1454,10 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenDialogAnimationMountCallbackTest002, Te
     ASSERT_NE(dialogNode, nullptr);
     DialogProperties dialogProps;
 
-    overlayManager->OpenDialogAnimation(dialogNode, dialogProps, true);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode, dialogProps, true, nullptr);
 }
 
 /**
@@ -1474,7 +1483,10 @@ HWTEST_F(OverlayManagerDialogTestNg, SetDialogTransitionEffectMountCallbackTest0
     auto mountCallback = [&receivedCode](int32_t code) {
         receivedCode = code;
     };
-    overlayManager->SetDialogTransitionEffect(dialogNode, dialogProps, std::move(mountCallback));
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode, dialogProps, std::move(mountCallback));
     EXPECT_EQ(receivedCode, ERROR_CODE_NO_ERROR);
 }
 
@@ -1502,7 +1514,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackTest001, Test
         receivedErrorCode = errorCode;
         receivedDialogId = dialogId;
     };
-    overlayManager->OpenCustomDialog(dialogParam, std::move(openCallback));
+    overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(openCallback));
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
 }
 
@@ -1561,7 +1573,8 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogTwoArgCallbackWithBuildFunc001, T
         ViewStackProcessor::GetInstance()->Push(columnNode);
     };
 
-    auto dialog = overlayManager->ShowDialog(dialogProps, std::move(buildFunc), false, std::move(callback));
+    auto dialog =
+        overlayManager->ShowDialogWithErrorCallback(dialogProps, std::move(buildFunc), false, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1589,7 +1602,7 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogTwoArgCallbackWithoutBuildFunc001
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->ShowDialog(dialogProps, nullptr, false, std::move(callback));
+    auto dialog = overlayManager->ShowDialogWithErrorCallback(dialogProps, nullptr, false, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1618,7 +1631,7 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogTwoArgCallbackWithTransitionEffec
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->ShowDialog(dialogProps, nullptr, false, std::move(callback));
+    auto dialog = overlayManager->ShowDialogWithErrorCallback(dialogProps, nullptr, false, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1650,7 +1663,8 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogWithNodeTwoArgCallback001, TestSi
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->ShowDialogWithNode(dialogProps, customNode, false, std::move(callback));
+    auto dialog =
+        overlayManager->ShowDialogWithNodeAndErrorCallback(dialogProps, customNode, false, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1683,7 +1697,8 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogWithNodeTwoArgCallbackWithTransit
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->ShowDialogWithNode(dialogProps, customNode, false, std::move(callback));
+    auto dialog =
+        overlayManager->ShowDialogWithNodeAndErrorCallback(dialogProps, customNode, false, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1711,7 +1726,7 @@ HWTEST_F(OverlayManagerDialogTestNg, ShowDialogWithNodeTwoArgCallbackNullNode001
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->ShowDialogWithNode(dialogProps, nullptr, false, std::move(callback));
+    auto dialog = overlayManager->ShowDialogWithNodeAndErrorCallback(dialogProps, nullptr, false, std::move(callback));
     EXPECT_NE(dialog, nullptr);
 }
 
@@ -1767,7 +1782,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomBui
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1800,7 +1815,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithContentNo
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
 }
@@ -1832,7 +1847,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithContentNo
         receivedDialogId1 = dialogId;
     };
 
-    overlayManager->OpenCustomDialog(dialogParam, std::move(callback1));
+    overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback1));
     EXPECT_EQ(receivedErrorCode1, ERROR_CODE_NO_ERROR);
 
     int32_t receivedErrorCode2 = -1;
@@ -1842,7 +1857,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithContentNo
         receivedDialogId2 = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback2));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback2));
     EXPECT_EQ(receivedErrorCode2, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
 }
 
@@ -1873,7 +1888,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomBui
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1905,7 +1920,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomBui
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     EXPECT_EQ(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_DIALOG_CONTENT_ERROR);
     EXPECT_EQ(receivedDialogId, -1);
@@ -1938,7 +1953,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomCNo
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_NO_ERROR);
     EXPECT_TRUE(receivedDialogId >= 0);
@@ -1967,7 +1982,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithNullConte
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     EXPECT_EQ(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_DIALOG_CONTENT_ERROR);
     EXPECT_EQ(receivedDialogId, -1);
@@ -1998,7 +2013,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomBui
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     EXPECT_EQ(dialog, nullptr);
     EXPECT_EQ(receivedErrorCode, ERROR_CODE_DIALOG_CONTENT_ERROR);
     EXPECT_EQ(receivedDialogId, -1);
@@ -2038,7 +2053,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogTwoArgCallbackWithCustomCNo
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     // In normal conditions, this will succeed. The nullptr branch requires special RebuildCustomBuilder failure.
     // If RebuildCustomBuilder returns nullptr, we expect:
     // dialog = nullptr, receivedErrorCode = ERROR_CODE_DIALOG_CONTENT_ERROR, receivedDialogId = -1
@@ -2085,7 +2100,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogInnerTernaryShowComponentTr
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     
     // In normal conditions, CreateDialogNode succeeds.
     // If it fails with showComponentContent=true, we expect ERROR_CODE_DIALOG_CONTENT_ERROR
@@ -2134,7 +2149,7 @@ HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogInnerTernaryShowComponentFa
         receivedDialogId = dialogId;
     };
 
-    auto dialog = overlayManager->OpenCustomDialog(dialogParam, std::move(callback));
+    auto dialog = overlayManager->OpenCustomDialogWithErrorCallback(dialogParam, std::move(callback));
     
     // In normal conditions, CreateDialogNode succeeds.
     // If it fails with showComponentContent=false, we expect ERROR_CODE_INTERNAL_ERROR
