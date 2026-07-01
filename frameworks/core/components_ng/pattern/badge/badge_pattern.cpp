@@ -99,12 +99,12 @@ void BadgePattern::OnModifyDone()
             ReportComponentChangeEvent("onValueChange");
         }
     }
-    auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
     CHECK_NULL_VOID(badgeTheme);
+    Dimension circleSize = layoutProperty->GetBadgeCircleSizeValue(badgeTheme->GetBadgeCircleSize());
     Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     Dimension outerWidth = layoutProperty->GetBadgeOuterBorderWidthValue(badgeTheme->GetBadgeOuterBorderWidth());
-    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+    if (LessOrEqual(circleSize.Value(), 0)) {
         badgeVisible = true;
         width.Reset();
         outerWidth.Reset();
