@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const char TOGGLE_ETS_TAG[] = "Toggle";
+
 void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultBorderRadius)
 {
     // Change the borderRadius size of a negative number to the default.
@@ -432,7 +434,7 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(context, 0.0);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, 0.0);
-    if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
+    if (frameNode->GetTag() == TOGGLE_ETS_TAG) {
         auto toggleTheme = context->GetTheme<ToggleTheme>();
         CHECK_NULL_RETURN(toggleTheme, 0.0);
         return static_cast<float>(toggleTheme->GetButtonHeight().ConvertToPx());

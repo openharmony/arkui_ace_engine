@@ -18,8 +18,8 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -123,8 +123,7 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(cancelButtonWrapper);
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto cancelButtonLayoutProperty =
-        AceType::DynamicCast<ButtonLayoutProperty>(cancelButtonWrapper->GetLayoutProperty());
+    auto cancelButtonLayoutProperty = cancelButtonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelButtonGeometryNode);
@@ -215,10 +214,13 @@ float SearchLayoutAlgorithm::CalculateTextFieldWidth(
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_RETURN(searchWrapper, 0.0f);
     auto searchButtonNode = searchWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
-    auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(searchButtonLayoutProperty, 0.0f);
-    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    auto searchButtonEvent = searchButtonNode->GetEventHub<EventHub>();
+    auto* modifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(modifier, 0.0f);
+    CHECK_NULL_RETURN(modifier->getAutoDisableFromLayoutProp, 0.0f);
+    auto needToDisable =
+        modifier->getAutoDisableFromLayoutProp(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(searchButtonNode)))
+            .value_or(false);
     if (searchButtonEvent->IsEnabled() || needToDisable) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -350,7 +352,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 {
     auto buttonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_VOID(buttonWrapper);
-    auto buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
+    auto buttonLayoutProperty = buttonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -448,14 +450,17 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // search button height
     auto buttonNode = searchBtnWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
-    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
     auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistributeWithEnv(
             minFontScale_, maxFontScale_, true, envFontScale_);
-    auto searchButtonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(searchButtonLayoutProperty, true);
-    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    auto* modifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(modifier, true);
+    CHECK_NULL_RETURN(modifier->getAutoDisableFromLayoutProp, true);
+    auto needToDisable =
+        modifier->getAutoDisableFromLayoutProp(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)))
+            .value_or(false);
     searchButtonHeight = (!searchButtonEvent->IsEnabled() && !needToDisable) ? 0.0f : searchButtonHeight;
     // search icon height
     auto searchIconFrameHight = searchIconSizeMeasure_.Height();
@@ -468,7 +473,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // cancel button height
     auto cancelButtonNode = cancelBtnLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, 0);
-    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = cancelButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, 0);
     auto cancelBtnHight = cancelBtnSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistributeWithEnv(
@@ -894,11 +899,14 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto cancelButtonHorizontalOffset = 0;
     auto cancelButtonVerticalOffset = (params.searchFrameHeight - cancelButtonFrameHeight) / 2;
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<EventHub>();
     auto buttonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
-    auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(searchButtonLayoutProperty);
-    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    auto* modifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->getAutoDisableFromLayoutProp);
+    auto needToDisable =
+        modifier->getAutoDisableFromLayoutProp(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(searchButtonNode)))
+            .value_or(false);
     if (params.isRTL) {
         if (searchButtonEvent->IsEnabled() || needToDisable) {
             cancelButtonHorizontalOffset =

@@ -36,7 +36,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_utils.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/bridge/button_custom_modifier.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
@@ -112,8 +113,12 @@ RefPtr<FrameNode> BuildIcon(bool isMenuIcon)
 
 OHOS::Ace::RefPtr<FrameNode> BuildButton(bool isMenuButton)
 {
-    auto button = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(buttonHandle, nullptr);
+    auto button = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_RETURN(button, nullptr);
     auto renderContext = button->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto theme = GetAppBarTheme();
@@ -122,9 +127,9 @@ OHOS::Ace::RefPtr<FrameNode> BuildButton(bool isMenuButton)
     auto icon = BuildIcon(isMenuButton);
     button->AddChild(icon);
 
-    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto layoutProperty = button->GetLayoutProperty();
     // type
-    layoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
     // size
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetButtonWidth()), CalcLength(theme->GetButtonHeight())));
@@ -133,9 +138,8 @@ OHOS::Ace::RefPtr<FrameNode> BuildButton(bool isMenuButton)
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusStyleType(FocusStyleType::INNER_BORDER);
     // focus border width
-    auto buttonPattern = button->GetPattern<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->SetFocusBorderWidth(theme->GetFocusedOutlineWidth());
+    auto focusBorderWidth = theme->GetFocusedOutlineWidth();
+    buttonModifier->setFocusBorderWidth(buttonHandle, focusBorderWidth);
 
     button->MarkModifyDone();
     return button;

@@ -15,6 +15,7 @@
 
 #include "button_test_min.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;

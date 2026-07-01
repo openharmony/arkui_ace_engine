@@ -265,7 +265,7 @@ void TextPickerPaintMethod::PaintSelectedBackgroundColor(RSCanvas& canvas, std::
         CHECK_NULL_VOID(stackNode);
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         CHECK_NULL_VOID(buttonNode);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
         CHECK_NULL_VOID(buttonLayoutProperty);
         auto stackGeometryNode = stackNode->GetGeometryNode();
         auto stackRect = stackGeometryNode->GetFrameRect();

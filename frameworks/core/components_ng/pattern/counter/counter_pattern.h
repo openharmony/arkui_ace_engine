@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -108,9 +109,10 @@ public:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
-            if (eventHub) {
-                auto enableInc = eventHub->GetStateEffect();
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            if (buttonModifier) {
+                auto enableInc = buttonModifier->getStateEffectFromEventHub(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(addNode)));
                 json->Put("enableInc", enableInc ? "true" : "false");
             }
         }
@@ -118,9 +120,10 @@ public:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
-            if (eventHub) {
-                auto enableDec = eventHub->GetStateEffect();
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            if (buttonModifier) {
+                auto enableDec = buttonModifier->getStateEffectFromEventHub(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(subNode)));
                 json->Put("enableDec", enableDec ? "true" : "false");
             }
         }
@@ -241,9 +244,10 @@ private:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
-            if (eventHub) {
-                auto enableInc = eventHub->GetStateEffect();
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            if (buttonModifier) {
+                auto enableInc = buttonModifier->getStateEffectFromEventHub(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(addNode)));
                 DumpLog::GetInstance().AddDesc(std::string("enableInc: ").append(enableInc ? "true" : "false"));
             }
         }
@@ -251,9 +255,10 @@ private:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
-            if (eventHub) {
-                auto enableDec = eventHub->GetStateEffect();
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            if (buttonModifier) {
+                auto enableDec = buttonModifier->getStateEffectFromEventHub(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(subNode)));
                 DumpLog::GetInstance().AddDesc(std::string("enableDec: ").append(enableDec ? "true" : "false"));
             }
         }

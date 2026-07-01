@@ -38,7 +38,6 @@ template("ace_core_interfaces_native_node") {
       "node/node_arc_list_modifier.cpp",
       "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
-      "node/button_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
@@ -82,6 +81,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_animate.cpp",
       "node/node_api.cpp",
       "node/node_api_multi_thread.cpp",
+      "node/node_button_modifier.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
@@ -381,3 +381,4 @@ foreach(item, ace_platforms) {
     }
   }
 }
+

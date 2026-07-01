@@ -75,6 +75,10 @@ interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ButtonComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CheckboxComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
     getCheckboxWidthModifier(): any;

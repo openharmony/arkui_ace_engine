@@ -83,6 +83,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"DynamicLayout", "dynamiclayout"},
         {"LazyDynamicLayout", "dynamiclayout"},
         { "ContainerReader", "containerreader" },
+        { "Button", "button" },
         {"Counter", "counter"},
         { "DataPanel", "datapanel" },
         {"Checkbox", "checkbox"},

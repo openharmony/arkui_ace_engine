@@ -27,7 +27,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/text_picker/bridge/textpicker_util.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -439,8 +439,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode()
 RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        TextPickerUtil::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return FrameNode::GetOrCreateFrameNode(TextPickerUtil::BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode)
@@ -525,14 +530,17 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
 void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
     RefPtr<PickerTheme> pickerTheme)
 {
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
+    auto* confirmPropModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(confirmPropModifier);
+    auto confirmPropHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode));
+    confirmPropModifier->updateLabelToLayoutProp(confirmPropHandle, GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        confirmPropModifier->updateTypeToLayoutProp(confirmPropHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        confirmPropModifier->updateTypeToLayoutProp(confirmPropHandle, ButtonType::CAPSULE);
     }
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -543,8 +551,8 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonConfirmLayoutProperty->UpdateMaxLines(1);
-        buttonConfirmLayoutProperty->UpdateFontSize(
+        confirmPropModifier->updateMaxLinesToLayoutProp(confirmPropHandle, 1);
+        confirmPropModifier->updateFontSizeToLayoutProp(confirmPropHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
@@ -564,8 +572,14 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(TextPickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(
+        TextPickerUtil::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto textConfirmNode = FrameNode::CreateFrameNode(
         TextPickerUtil::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<TextPattern>());
@@ -574,15 +588,16 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme, buttonConfirmNode);
     auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
     textPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
-    buttonConfirmEventHub->SetStateEffect(true);
+    auto* confirmBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(confirmBtnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode));
+    confirmBtnModifier->setStateEffectToEventHub(nodeHandle, true);
     UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    confirmBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
-    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -616,17 +631,20 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<Fr
 {
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto buttonLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto* confirmTextModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(confirmTextModifier);
+    auto confirmTextHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode));
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     if (useButtonFocusArea_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
+        confirmTextModifier->updateFontColorToLayoutProp(confirmTextHandle,
+            pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        confirmTextModifier->updateFontColorToLayoutProp(confirmTextHandle,
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
-    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
+    confirmTextModifier->updateFontColorFlagByUserToLayoutProp(confirmTextHandle, true);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -645,17 +663,20 @@ void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(const RefPtr<Fra
 {
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textCancelLayoutProperty);
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonCancelLayoutProperty);
+    auto* cancelTextModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(cancelTextModifier);
+    auto cancelTextHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode));
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     if (useButtonFocusArea_) {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
+        cancelTextModifier->updateFontColorToLayoutProp(cancelTextHandle,
+            pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        cancelTextModifier->updateFontColorToLayoutProp(cancelTextHandle,
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
-    buttonCancelLayoutProperty->UpdateFontColorFlagByUser(true);
+    cancelTextModifier->updateFontColorFlagByUserToLayoutProp(cancelTextHandle, true);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -801,7 +822,7 @@ void TextPickerDialogView::UpdateBackwardButtonMargin(
 }
 
 void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
 {
     if (index >= buttonInfos.size()) {
         return;
@@ -812,37 +833,43 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonInfos[index].type.has_value()) {
-        buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, buttonInfos[index].type.value());
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
+        buttonModifier->updateFontSizeToLayoutProp(buttonHandle,
+            ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
     }
     if (buttonInfos[index].fontColor.has_value()) {
-        buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
-        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, buttonInfos[index].fontColor.value());
+        buttonModifier->updateFontColorFlagByUserToLayoutProp(buttonHandle, true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
-        buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
+        buttonModifier->updateFontWeightToLayoutProp(buttonHandle, buttonInfos[index].fontWeight.value());
     }
     if (buttonInfos[index].fontStyle.has_value()) {
-        buttonLayoutProperty->UpdateFontStyle(buttonInfos[index].fontStyle.value());
+        buttonModifier->updateFontStyleToLayoutProp(buttonHandle, buttonInfos[index].fontStyle.value());
     }
     if (buttonInfos[index].fontFamily.has_value()) {
-        buttonLayoutProperty->UpdateFontFamily(buttonInfos[index].fontFamily.value());
+        buttonModifier->updateFontFamilyToLayoutProp(buttonHandle, buttonInfos[index].fontFamily.value());
     }
     if (buttonInfos[index].borderRadius.has_value()) {
-        buttonLayoutProperty->UpdateBorderRadius(buttonInfos[index].borderRadius.value());
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, buttonInfos[index].borderRadius.value());
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
-        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     }
 }
 
 void TextPickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
     const RefPtr<ButtonTheme>& buttonTheme)
 {
     if (index >= buttonInfos.size()) {
@@ -851,26 +878,28 @@ void TextPickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonInfos[index].role.has_value()) {
-        buttonLayoutProperty->UpdateButtonRole(buttonInfos[index].role.value());
-        ButtonStyleMode buttonStyleMode;
-        if (buttonInfos[index].buttonStyle.has_value()) {
-            buttonStyleMode = buttonInfos[index].buttonStyle.value();
-        } else {
-            buttonStyleMode = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-        }
+        buttonModifier->updateButtonRoleToLayoutProp(buttonHandle, buttonInfos[index].role.value());
+        ButtonStyleMode buttonStyleMode = buttonInfos[index].buttonStyle.has_value()
+            ? buttonInfos[index].buttonStyle.value()
+            : buttonModifier->getButtonStyleFromLayoutProp(buttonHandle).value_or(ButtonStyleMode::EMPHASIZE);
         auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonInfos[index].role.value());
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonInfos[index].role.value());
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
     if (buttonInfos[index].buttonStyle.has_value()) {
-        buttonLayoutProperty->UpdateButtonStyle(buttonInfos[index].buttonStyle.value());
-        ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, buttonInfos[index].buttonStyle.value());
+        ButtonRole buttonRole = buttonModifier->getButtonRoleFromLayoutProp(buttonHandle).value_or(ButtonRole::NORMAL);
         auto bgColor = buttonTheme->GetBgColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         auto textColor = buttonTheme->GetTextColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
 }
 
@@ -880,8 +909,14 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(TextPickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(
+        TextPickerUtil::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(
         TextPickerUtil::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -905,16 +940,18 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventCancelHub->AddClickEvent(recordEventPtr);
 
-    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
-    buttonCancelEventHub->SetStateEffect(true);
+    auto* cancelBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(cancelBtnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode));
+    cancelBtnModifier->setStateEffectToEventHub(nodeHandle, true);
 
     UpdateButtonCancelLayoutProperty(buttonCancelNode, pipeline);
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    cancelBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(buttonCancelLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
 
@@ -930,20 +967,23 @@ void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty();
+    auto* cancelPropModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(cancelPropModifier);
+    auto cancelPropHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode));
+    cancelPropModifier->updateLabelToLayoutProp(cancelPropHandle, GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        cancelPropModifier->updateTypeToLayoutProp(cancelPropHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        cancelPropModifier->updateTypeToLayoutProp(cancelPropHandle, ButtonType::CAPSULE);
     }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonCancelLayoutProperty->UpdateMaxLines(1);
-        buttonCancelLayoutProperty->UpdateFontSize(
+        cancelPropModifier->updateMaxLinesToLayoutProp(cancelPropHandle, 1);
+        cancelPropModifier->updateFontSizeToLayoutProp(cancelPropHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
@@ -963,20 +1003,23 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
-    auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonForwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
+    auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty();
+    auto* forwardPropModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(forwardPropModifier);
+    auto forwardPropHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonForwardNode));
+    forwardPropModifier->updateLabelToLayoutProp(forwardPropHandle, GetDialogAgingButtonText(true));
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonForwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        forwardPropModifier->updateTypeToLayoutProp(forwardPropHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        forwardPropModifier->updateTypeToLayoutProp(forwardPropHandle, ButtonType::CAPSULE);
     }
     buttonForwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonForwardLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonForwardLayoutProperty->UpdateMaxLines(1);
-        buttonForwardLayoutProperty->UpdateFontSize(
+        forwardPropModifier->updateMaxLinesToLayoutProp(forwardPropHandle, 1);
+        forwardPropModifier->updateFontSizeToLayoutProp(forwardPropHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonForwardLayoutProperty->UpdateUserDefinedIdealSize(
@@ -997,20 +1040,23 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     UpdateBackwardButtonMargin(buttonBackwardNode, dialogTheme);
-    auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonBackwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(false));
+    auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty();
+    auto* backwardPropModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(backwardPropModifier);
+    auto backwardPropHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonBackwardNode));
+    backwardPropModifier->updateLabelToLayoutProp(backwardPropHandle, GetDialogAgingButtonText(false));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonBackwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        backwardPropModifier->updateTypeToLayoutProp(backwardPropHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        backwardPropModifier->updateTypeToLayoutProp(backwardPropHandle, ButtonType::CAPSULE);
     }
     buttonBackwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonBackwardLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonBackwardLayoutProperty->UpdateMaxLines(1);
-        buttonBackwardLayoutProperty->UpdateFontSize(
+        backwardPropModifier->updateMaxLinesToLayoutProp(backwardPropHandle, 1);
+        backwardPropModifier->updateFontSizeToLayoutProp(backwardPropHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonBackwardLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1312,8 +1358,14 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
-    auto buttonForwardNode = FrameNode::GetOrCreateFrameNode(TextPickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonForwardNode = FrameNode::GetOrCreateFrameNode(
+        TextPickerUtil::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonForwardNode, nullptr);
     auto textForwardNode = FrameNode::CreateFrameNode(
         TextPickerUtil::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1337,16 +1389,18 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventForwardHub->AddClickEvent(recordEventPtr);
 
-    auto buttonForwardEventHub = buttonForwardNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonForwardEventHub, nullptr);
-    buttonForwardEventHub->SetStateEffect(true);
+    auto* forwardBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(forwardBtnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonForwardNode));
+    forwardBtnModifier->setStateEffectToEventHub(nodeHandle, true);
 
     UpdateButtonForwardLayoutProperty(buttonForwardNode, pipeline);
 
     const auto& buttonForwardRenderContext = buttonForwardNode->GetRenderContext();
     buttonForwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonForwardLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    forwardBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(buttonForwardLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonForwardLayoutProperty, buttonForwardRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonForwardNode, false);
 
@@ -1362,8 +1416,14 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
-    auto buttonBackwardNode = FrameNode::GetOrCreateFrameNode(TextPickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonBackwardNode = FrameNode::GetOrCreateFrameNode(
+        TextPickerUtil::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonBackwardNode, nullptr);
     auto textBackwardNode = FrameNode::CreateFrameNode(
         TextPickerUtil::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1387,16 +1447,18 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventBackwardHub->AddClickEvent(recordEventPtr);
 
-    auto buttonBackwardEventHub = buttonBackwardNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonBackwardEventHub, nullptr);
-    buttonBackwardEventHub->SetStateEffect(true);
+    auto* backwardBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(backwardBtnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonBackwardNode));
+    backwardBtnModifier->setStateEffectToEventHub(nodeHandle, true);
 
     UpdateButtonBackwardLayoutProperty(buttonBackwardNode, pipeline);
 
     const auto& buttonBackwardRenderContext = buttonBackwardNode->GetRenderContext();
     buttonBackwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonBackwardLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    backwardBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(buttonBackwardLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonBackwardLayoutProperty, buttonBackwardRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonBackwardNode, false);
 

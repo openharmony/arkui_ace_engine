@@ -39,7 +39,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
@@ -413,7 +412,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
-    JSButton::JSBind(globalObj);
     JSRectShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSCircleShape::JSBind(globalObj);

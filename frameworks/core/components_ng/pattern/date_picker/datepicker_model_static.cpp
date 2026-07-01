@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/date_picker/datepicker_model_static.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
@@ -25,10 +24,12 @@
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+const char BUTTON_ETS_TAG[] = "Button";
 }
 
 static RefPtr<FrameNode> CreateAndSetupColumnNode(const std::string& tag, int32_t columnId,
@@ -174,8 +175,13 @@ RefPtr<FrameNode> DatePickerModelStatic::CreateColumnNode()
 RefPtr<FrameNode> DatePickerModelStatic::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
 }
 
 void DatePickerModelStatic::SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange)

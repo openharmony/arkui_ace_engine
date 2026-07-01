@@ -40,7 +40,6 @@
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
-#include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -435,7 +434,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
@@ -513,7 +511,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },

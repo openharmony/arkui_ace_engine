@@ -23,13 +23,13 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -250,61 +250,65 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemNode(
 
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<NavigationBarTheme>& theme)
 {
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonPattern->SetNavMenuItemNeedFocus(SystemProperties::GetDeviceType() == DeviceType::TV);
-        buttonPattern->SetNavigationFocusBlendBgColor(theme->GetNavigationFocusBlendBgColor());
-        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
-    } else {
-        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    }
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(rawPattern, nullptr);
     auto menuItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
     CHECK_NULL_RETURN(menuItemNode, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode));
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonModifier->setBlendColor(
+            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonModifier->setNavMenuItemNeedFocus(nodeHandle, SystemProperties::GetDeviceType() == DeviceType::TV);
+        buttonModifier->setNavigationFocusBlendBgColor(nodeHandle, theme->GetNavigationFocusBlendBgColor());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
+    } else {
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
+    }
     auto focusHub = menuItemNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusDependence(FocusDependence::SELF);
-    auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-    menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
+    auto layoutProperty = menuItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Ace::AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto iconBackgroundWidth = theme->GetIconBackgroundWidth();
         auto iconBackgroundHeight = theme->GetIconBackgroundHeight();
-        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(iconBackgroundWidth), CalcLength(iconBackgroundHeight)));
-        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        buttonModifier->updateBorderRadiusToLayoutProp(nodeHandle, BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
         padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
-        menuItemLayoutProperty->UpdatePadding(padding);
+        layoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
         margin.end = CalcLength(theme->GetCompPadding());
-        menuItemLayoutProperty->UpdateMargin(margin);
+        layoutProperty->UpdateMargin(margin);
         BorderWidthProperty borderWidthProperty;
         borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
-        menuItemLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+        layoutProperty->UpdateBorderWidth(borderWidthProperty);
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(theme->GetIconBorderColor());
         renderContext->UpdateBorderColor(borderColorProperty);
         focusHub->SetFocusPadding(theme->GetMenuItemFocusPadding());
     } else {
-        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        buttonModifier->updateBorderRadiusToLayoutProp(nodeHandle, BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(BUTTON_PADDING));
-        menuItemLayoutProperty->UpdatePadding(padding);
+        layoutProperty->UpdatePadding(padding);
     }
-    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     return menuItemNode;
 }
 
@@ -427,7 +431,7 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
     }
 
-    auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
     auto focusHub = buttonNode->GetFocusHub();

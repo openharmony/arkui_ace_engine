@@ -15,6 +15,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -37,6 +38,7 @@ constexpr float NORMAL_SCALE = 1.0f;
 constexpr float MINFONTSCALE = 0.85f;
 constexpr float MAXFONTSCALE = 3.20f;
 constexpr Dimension MIN_HOT_ZONE_HEIGHT = 32.0_vp;
+const char TOGGLE_ETS_TAG[] = "Toggle";
 
 #ifdef ARKUI_WEARABLE
 constexpr TextAlign DEFAULT_TEXT_ALIGN = TextAlign::CENTER;
@@ -75,7 +77,7 @@ std::optional<float> GetExpectedButtonHeight(const RefPtr<FrameNode>& host)
     CHECK_NULL_RETURN(host, std::nullopt);
     auto* context = host->GetContext();
     CHECK_NULL_RETURN(context, std::nullopt);
-    if (host->GetTag() == V2::TOGGLE_ETS_TAG) {
+    if (host->GetTag() == TOGGLE_ETS_TAG) {
         auto toggleTheme = context->GetTheme<ToggleTheme>();
         CHECK_NULL_RETURN(toggleTheme, std::nullopt);
         return static_cast<float>(toggleTheme->GetButtonHeight().ConvertToPx());

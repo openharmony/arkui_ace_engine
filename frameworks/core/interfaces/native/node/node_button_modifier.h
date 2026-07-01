@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUTTON_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUTTON_MODIFIER_H
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_BUTTON_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_BUTTON_MODIFIER_H
 
+#include "base/utils/macros.h"
+#include "core/components_ng/pattern/button/bridge/button_custom_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIButtonModifier* GetButtonModifier();
-const CJUIButtonModifier* GetCJUIButtonModifier();
+ACE_FORCE_EXPORT const ArkUIButtonModifier* GetButtonModifier();
+ACE_FORCE_EXPORT const CJUIButtonModifier* GetCJUIButtonModifier();
+ACE_FORCE_EXPORT const ArkUIButtonCustomModifier* GetButtonCustomModifier();
 }
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUTTON_MODIFIER_H
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_BUTTON_MODIFIER_H

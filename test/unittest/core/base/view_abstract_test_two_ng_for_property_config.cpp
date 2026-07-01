@@ -16,6 +16,7 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 

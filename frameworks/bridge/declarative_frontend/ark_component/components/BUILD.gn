@@ -122,6 +122,7 @@ special_components = [
   "arkrefresh",
   "arktextpicker",
   "arkselect",
+  "arkbutton",
 ]
 
 if (qrcodegen_support) {

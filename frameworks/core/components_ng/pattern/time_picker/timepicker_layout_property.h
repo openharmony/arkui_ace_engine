@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/i18n/time_format.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -85,6 +86,7 @@ protected:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerLayoutProperty);
 };
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_LAYOUT_PROPERTY_H

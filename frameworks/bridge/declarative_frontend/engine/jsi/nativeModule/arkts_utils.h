@@ -367,6 +367,8 @@ public:
     static bool ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result);
     static bool ParseJsResponseRegion(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue,
         ArkUI_Float32* values, int32_t* units, uint32_t length);
+    static void JsRemoteMessage(
+        const EcmaVM* vm, const Local<JSValueRef>& arg, OHOS::Ace::RemoteCallback& remoteCallback);
     static bool HandleCallbackJobs(
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
     static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);

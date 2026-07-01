@@ -41,12 +41,11 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
@@ -1079,7 +1078,7 @@ void DialogPattern::AddButtonColorCallback(const ButtonInfo& params, RefPtr<Fram
     }
     CHECK_NULL_VOID(buttonNode);
     if (params.bgColorResObj) {
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+        auto buttonPattern = buttonNode->GetPattern();
         CHECK_NULL_VOID(buttonPattern);
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(buttonNode))](
                             const RefPtr<ResourceObject>& resObj) {
@@ -1120,8 +1119,11 @@ void DialogPattern::AddButtonColorCallback(const ButtonInfo& params, RefPtr<Fram
 RefPtr<FrameNode> DialogPattern::CreateButton(
     const ButtonInfo& params, int32_t index, bool isCancel, bool isVertical, int32_t length)
 {
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(buttonHandle, nullptr);
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
     CHECK_NULL_RETURN(buttonNode, nullptr);
     ACE_UINODE_TRACE(buttonNode);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
@@ -1133,9 +1135,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     if ((dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) && params.dlgButtonStyle.has_value()) {
         auto buttonStyle = params.dlgButtonStyle.value() == DialogButtonStyle::HIGHTLIGHT ? ButtonStyleMode::EMPHASIZE
                                                                                           : ButtonStyleMode::NORMAL;
-        auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-        CHECK_NULL_RETURN(buttonProp, nullptr);
-        buttonProp->UpdateButtonStyle(buttonStyle);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, buttonStyle);
     }
 
     // append text inside button
@@ -1176,9 +1176,8 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(bgColor.value());
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
@@ -1224,10 +1223,13 @@ void DialogPattern::UpdateDialogButtonProperty(
     RefPtr<FrameNode>& buttonNode, int32_t index, bool isVertical, int32_t length)
 {
     // update button padding
-    auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    auto buttonProp = buttonNode->GetLayoutProperty();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
-        buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, ButtonStyleMode::NORMAL);
     }
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
@@ -1338,9 +1340,9 @@ void DialogPattern::AddButtonAndDivider(
         auto buttonNode = CreateButton(buttons[i], i, false, isVertical, length);
         CHECK_NULL_VOID(buttonNode);
         ACE_UINODE_TRACE(buttonNode);
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetSkipColorConfigurationUpdate();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setSkipColorConfigurationUpdate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)));
         buttonNode->MountToParent(container);
         buttonNode->MarkModifyDone();
     }
@@ -1937,9 +1939,10 @@ void DialogPattern::UpdateSheetIconAndText()
 void DialogPattern::UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnIndex)
 {
     CHECK_NULL_VOID(buttonFrameNode);
-    auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipColorConfigurationUpdate();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->setSkipColorConfigurationUpdate(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)));
     // parse button text color and background color
     std::string textColorStr;
     std::optional<Color> bgColor;
@@ -2272,7 +2275,7 @@ void DialogPattern::UpdateFontScale()
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
 {
     // set Enabled and Focusable
-    auto buttonButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonButtonEvent = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonButtonEvent);
     buttonButtonEvent->SetEnabled(enabled);
     buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);

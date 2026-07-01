@@ -1189,6 +1189,50 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     return obj;
 }
 
+Local<panda::ObjectRef> FrameNodeBridge::CreateClickEventInfo(EcmaVM* vm, const ClickInfo* infoPtr)
+{
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
+    const char* keys[] = { "globalDisplayX", "globalDisplayY", "displayX", "displayY", "windowX", "windowY",
+        "screenX", "screenY", "x", "y", "timestamp", "source", "deviceId", "pressure", "tiltX",
+        "tiltY", "rollAngle", "sourceTool", "axisVertical", "axisHorizontal", "axisPinch",
+        "targetDisplayId", "getModifierKeyState", "target", "getCurrentLocalPosition" };
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetDeviceId())),
+        panda::NumberRef::New(vm, infoPtr->GetForce()),
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceTool())),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        CreateEventTargetObject(vm, *infoPtr),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition),
+    };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<ClickInfo*>(infoPtr)));
+    return obj;
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

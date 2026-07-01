@@ -21,7 +21,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
@@ -31,6 +30,7 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -194,25 +194,34 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         return;
     }
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_VOID(buttonNode);
     ACE_UINODE_TRACE(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
     BorderRadiusProperty borderRaduis;
     borderRaduis.SetRadius(sheetTheme->GetCloseIconRadius());
-    buttonLayoutProperty->UpdateBorderRadius(borderRaduis);
-    buttonLayoutProperty->UpdateButtonStyle(static_cast<ButtonStyleMode>(sheetTheme->GetCloseIconButtonStyle()));
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, borderRaduis);
+    buttonModifier->updateButtonStyleToLayoutProp(
+        buttonHandle, static_cast<ButtonStyleMode>(sheetTheme->GetCloseIconButtonStyle()));
     auto closeIconButtonSize = CalcLength(sheetTheme->GetCloseIconButtonWidth());
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(closeIconButtonSize, closeIconButtonSize));
-    buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(closeIconButtonSize, closeIconButtonSize));
+    layoutProperty->UpdateVisibility(VisibleType::GONE);
     auto eventConfirmHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventConfirmHub);
     auto clickCallback = [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {

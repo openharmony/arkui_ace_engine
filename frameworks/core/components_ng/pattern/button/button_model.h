@@ -40,7 +40,7 @@ enum class ButtonDoubleType {
 };
 class ACE_FORCE_EXPORT ButtonModel {
 public:
-    static ButtonModel* GetInstance();
+    ACE_FORCE_EXPORT static ButtonModel* GetInstance();
     virtual ~ButtonModel() = default;
 
     virtual void SetFontSize(const Dimension& fontSize) = 0;

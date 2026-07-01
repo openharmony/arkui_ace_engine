@@ -21,8 +21,8 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -334,9 +334,11 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, 0.0);
-    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(bgProp, 0.0);
-    auto borderRadius = bgProp->GetBorderRadius();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, 0.0);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
+
     float radius = 0.0;
 
     switch (direction) {
@@ -960,9 +962,9 @@ bool InitSCButtonInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo
             buttonInfo.bgColor_.value = renderContext->GetBackgroundColor().value().GetValue();
         }
 
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(bgProp, false);
-        const auto& borderWidth = bgProp->GetBorderWidthProperty();
+        auto layoutProperty = buttonNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        const auto& borderWidth = layoutProperty->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
             if (borderWidth->leftDimen.has_value()) {
                 buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
@@ -1029,9 +1031,11 @@ void SecurityComponentHandler::WriteButtonInfo(
     } else {
         RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
         CHECK_NULL_VOID(buttonNode);
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(bgProp);
-        const auto& borderRadius = bgProp->GetBorderRadius();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
+
         if (borderRadius.has_value()) {
             buttonInfo.borderRadius_.leftBottom = borderRadius->radiusBottomLeft.value_or(Dimension(0.0)).ConvertToPx();
             buttonInfo.borderRadius_.leftTop = borderRadius->radiusTopLeft.value_or(Dimension(0.0)).ConvertToPx();

@@ -4242,11 +4242,8 @@ struct ArkUIButtonModifier {
     void (*setButtonBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
     void (*resetButtonBackgroundColor)(ArkUINodeHandle node);
-    void (*setButtonBorderRadiusWithOne)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setButtonBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
-    void (*setButtonLocalizedBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetButtonBorderRadius)(ArkUINodeHandle node);
-    void (*resetButtonBorderRadiusJS)(ArkUINodeHandle node);
     void (*setButtonFontWeightEnum)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*setButtonSize)(ArkUINodeHandle node, ArkUI_CharPtr widthValue, ArkUI_Int32 widthUnit,
         ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
@@ -4256,8 +4253,10 @@ struct ArkUIButtonModifier {
     ArkUI_Int32 (*getButtonFontWeight)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getButtonFontColor)(ArkUINodeHandle node);
     void (*setButtonRole)(ArkUINodeHandle node, ArkUI_Uint32 buttonRole);
+    void (*setButtonRoleOnly)(ArkUINodeHandle node, ArkUI_Uint32 buttonRole);
     void (*resetButtonRole)(ArkUINodeHandle node);
     void (*setButtonStyle)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle);
+    void (*setButtonStyleOnly)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle);
     void (*resetButtonStyle)(ArkUINodeHandle node);
     void (*setButtonControlSize)(ArkUINodeHandle node, ArkUI_Uint32 controlSize);
     void (*resetButtonControlSize)(ArkUINodeHandle node);
@@ -4267,6 +4266,10 @@ struct ArkUIButtonModifier {
     void (*setButtonOptions)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle, ArkUI_Uint32 buttonRole);
     void (*resetButtonOptions)(ArkUINodeHandle node);
     void (*setCreateWithLabel)(ArkUINodeHandle node, bool createWithLabel);
+    void (*createButtonWithLabel)(ArkUI_VoidPtr createPara, ArkUI_VoidPtr buttonChildren);
+    void (*createButton)(ArkUI_VoidPtr createPara, ArkUI_VoidPtr buttonChildren);
+    void (*createButtonWithChild)(ArkUI_VoidPtr createPara);
+    void (*createButtonStringResourceObj)(ArkUINodeHandle node, ArkUI_VoidPtr resObj, ArkUI_Int32 buttonStringType);
     void (*setButtonMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
     void (*resetButtonMinFontScale)(ArkUINodeHandle node);
     void (*setButtonMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
@@ -4282,11 +4285,29 @@ struct ArkUIButtonModifier {
         const ArkUIButtonSizeStruct& resObjVector);
     void (*setButtonBackgroundColorWithColorSpacePtr)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
-    void (*setButtonMinFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr);
-    void (*setButtonMaxFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale,  ArkUI_VoidPtr scaleRawPtr);
+    void (*setButtonMinFontScalePtr)(
+        ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr, ArkUI_Bool hasValue);
+    void (*setButtonMaxFontScalePtr)(
+        ArkUINodeHandle node, ArkUI_Float32 maxFontScale, ArkUI_VoidPtr scaleRawPtr, ArkUI_Bool hasValue);
     void (*setButtonBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*setButtonFontColorWithPlaceholder)(
         ArkUINodeHandle node, ArkUI_Uint32 fontColor, ArkUI_Uint32 colorPlaceholder);
+    void (*resetButtonTextAlign)(ArkUINodeHandle node);
+    void (*setJsButtonLabelStylePtr)(ArkUINodeHandle node, ArkUI_VoidPtr buttonParameters);
+    void (*setJsButtonOnClick)(ArkUINodeHandle node, ArkUI_VoidPtr tapEventFunc, ArkUI_VoidPtr clickEventFunc,
+        ArkUI_Float64 distanceThreshold);
+    void (*setJsButtonRemoteMessage)(ArkUINodeHandle node, ArkUI_VoidPtr remoteMessageFunc);
+    void (*setJsButtonBackgroundColorPtr)(
+        ArkUINodeHandle node, const ArkUI_InnerColor* backgroundColor, ArkUI_VoidPtr colorRawPtr, ArkUI_Bool colorFlag);
+    void (*setJsButtonWidth)(ArkUINodeHandle node, ArkUI_Float64 width, ArkUI_Int32 unit);
+    void (*setJsButtonHeight)(ArkUINodeHandle node, ArkUI_Float64 height, ArkUI_Int32 unit);
+    void (*setJsButtonAspectRatio)(ArkUINodeHandle node, ArkUI_Float64 aspectRatio);
+    void (*setJsButtonPadding)(
+        ArkUINodeHandle node, const struct ArkUIPaddingType* oldValue, const struct ArkUIPaddingType* newValue);
+    void (*setJsButtonBorderRadius)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit);
+    void (*setJsButtonLocalizedBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*resetJsButtonBorderRadius)(ArkUINodeHandle node);
+    void (*setJsButtonFontSize)(ArkUINodeHandle node, ArkUI_Float64 fontSizeValue, ArkUI_Int32 fontSizeUnit);
 };
 
 struct ArkUIImageModifier {

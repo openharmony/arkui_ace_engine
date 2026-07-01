@@ -30,7 +30,6 @@ class PipelineBase;
 
 namespace OHOS::Ace::NG {
 using ::OHOS::Ace::PickerDate;
-class ButtonLayoutProperty;
 class TextLayoutProperty;
 class PipelineContext;
 struct CalendarSettingData;
@@ -91,7 +90,7 @@ private:
     static RefPtr<FrameNode> CreateCancelNode(
         const NG::DialogGestureEvent& cancelEvent, const std::vector<ButtonInfo>& buttonInfos);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static RefPtr<FrameNode> CreateDividerNode();
     static RefPtr<FrameNode> CreateOptionsNode(const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& dateNode,
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
@@ -106,7 +105,7 @@ private:
         const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
         const RefPtr<FrameNode>& dialogNode);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void DisableResetOptionButtonColor(
         const RefPtr<CalendarDialogPattern>& calendarDialogPattern, const std::vector<ButtonInfo>& buttonInfos);

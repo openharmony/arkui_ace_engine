@@ -32,8 +32,8 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components/common/properties/placement.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -528,9 +528,10 @@ void BubblePattern::Animation(
             buttonContext->UpdateBackgroundColor(color);
             auto buttonNode = buttonContext->GetHost();
             CHECK_NULL_VOID(buttonNode);
-            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonLayoutProperty);
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         },
         nullptr, nullptr, host->GetContextRefPtr());
 }

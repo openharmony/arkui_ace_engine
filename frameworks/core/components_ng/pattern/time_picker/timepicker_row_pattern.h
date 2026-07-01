@@ -21,6 +21,7 @@
 
 #include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_types.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_text_style.h"
@@ -789,9 +790,9 @@ private:
     void UpdateFocusButtonState();
     void SetHaveFocus(bool haveFocus);
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
-    void UpdateFocusStyles(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty,
+    void UpdateFocusStyles(const RefPtr<LayoutProperty>& buttonLayoutProperty,
         const RefPtr<FrameNode>& timePickerColumnNode, const Dimension& height, bool isFocusButton);
-    void UpdateButtonConfirmLayoutProperty(const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty);
+    void UpdateButtonConfirmLayoutProperty(const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty);
     void PaintRectWithoutButtonFocusArea(RoundRect& paintRect);
     void PaintRectWithButtonFocusArea(RoundRect& paintRect);
         

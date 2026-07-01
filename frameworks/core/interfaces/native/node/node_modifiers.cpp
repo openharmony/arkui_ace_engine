@@ -17,7 +17,7 @@
 #include "core/interfaces/native/node/atomic_service_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
-#include "core/interfaces/native/node/button_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"

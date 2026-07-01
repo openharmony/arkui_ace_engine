@@ -174,6 +174,8 @@
       "OHOS::Ace::ButtonComponent::SetCatchMode(bool)";
       "OHOS::Ace::ButtonComponent::SetClickedColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::ButtonComponent::SetClickedEventId(OHOS::Ace::EventMarker const&)";
+      "OHOS::Ace::ButtonComponent::SetHoverEffect(bool)";
+      "OHOS::Ace::ButtonComponent::SetKeyEnterEventId(OHOS::Ace::EventMarker const&)";
       "OHOS::Ace::ButtonComponent::SetClickFunction(std::__h::function<void ()>&&)";
       "OHOS::Ace::ButtonComponent::SetDisabledColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::ButtonComponent::SetDisabledState(bool)";
@@ -182,6 +184,7 @@
       "OHOS::Ace::ButtonComponent::SetHoverColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::ButtonComponent::SetRadiusState(bool)";
       "OHOS::Ace::ButtonComponent::SetRectRadius(OHOS::Ace::Dimension const&)";
+      "OHOS::Ace::ButtonComponent::SetRemoteMessageEventId(OHOS::Ace::EventMarker const&)";
       "OHOS::Ace::ButtonInfo OHOS::Ace::NG::Converter::Convert<OHOS::Ace::ButtonInfo, Ark_PickerDialogButtonStyle>(Ark_PickerDialogButtonStyle const&)";
       "OHOS::Ace::CalcDimension OHOS::Ace::NG::Converter::Convert<OHOS::Ace::CalcDimension, Ark_LengthMetrics>(Ark_LengthMetrics const&)";
       "OHOS::Ace::CalcDimension OHOS::Ace::NG::Converter::Convert<OHOS::Ace::CalcDimension, double>(double const&)";
@@ -326,6 +329,17 @@
       "OHOS::Ace::CustomSpan::CustomSpan()";
       "OHOS::Ace::CustomSpan::SetOnDraw(std::__h::function<void (OHOS::Ace::NG::DrawingContext&, OHOS::Ace::CustomSpanOptions)>)";
       "OHOS::Ace::CustomSpan::SetOnMeasure(std::__h::function<OHOS::Ace::CustomSpanMetrics (OHOS::Ace::CustomSpanMeasureInfo)>)";
+      "OHOS::Ace::CustomSpan::ApplyToSpanItem(OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> const&, OHOS::Ace::SpanOperation) const";
+      "OHOS::Ace::CustomSpan::GetSubSpan(int, int)";
+      "OHOS::Ace::CustomSpan::IsAttributesEqual(OHOS::Ace::RefPtr<OHOS::Ace::SpanBase> const&) const";
+      "OHOS::Ace::CustomSpan::GetSpanType() const";
+      "OHOS::Ace::CustomSpan::ToString() const";
+      "non-virtual thunk to OHOS::Ace::CustomSpan::~CustomSpan()";
+      "OHOS::Ace::ExtSpan::ClearSpecialData()";
+      "OHOS::Ace::ExtSpan::GetSubSpan(int, int)";
+      "OHOS::Ace::ExtSpan::IsAttributesEqual(OHOS::Ace::RefPtr<OHOS::Ace::SpanBase> const&) const";
+      "OHOS::Ace::ExtSpan::GetSpanType() const";
+      "OHOS::Ace::ExtSpan::ToString() const";
       "OHOS::Ace::DataDetectorAdapter::CreateAIEntityMenu(OHOS::Ace::AISpan const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::DataDetectorAdapter::AIMenuInfo)";
       "OHOS::Ace::DataDetectorAdapter::GetAIEntityMenu()";
       "OHOS::Ace::DataDetectorAdapter::ResponseBestMatchItem(OHOS::Ace::AISpan const&)";
@@ -611,6 +625,7 @@
       "OHOS::Ace::Framework::ViewStackProcessor::GetFlexItemComponent()";
       "OHOS::Ace::Framework::ViewStackProcessor::GetFocusableComponent(bool)";
       "OHOS::Ace::Framework::ViewStackProcessor::GetInspectorComposedComponent() const";
+      "OHOS::Ace::Framework::ViewStackProcessor::GetImplicitAnimationOption() const";
       "OHOS::Ace::Framework::ViewStackProcessor::GetInstance()";
       "OHOS::Ace::Framework::ViewStackProcessor::GetMainComponent() const";
       "OHOS::Ace::Framework::ViewStackProcessor::GetRadioGroupComponent()";
@@ -875,6 +890,7 @@
       "OHOS::Ace::NG::ArkTSUtils::IsJsView(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::IsJsView(panda::Local<panda::JSValueRef> const&, panda::ecmascript::EcmaVM const*)";
       "OHOS::Ace::NG::ArkTSUtils::JsOpacity(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
+      "OHOS::Ace::NG::ArkTSUtils::JsRemoteMessage(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::function<void (OHOS::Ace::BaseEventInfo const*)>&)";
       "OHOS::Ace::NG::ArkTSUtils::MakeNativeNodeInfo(_ArkUINode*)";
       "OHOS::Ace::NG::ArkTSUtils::ParseAllBorderRadiuses(panda::ecmascript::EcmaVM*, panda::Local<panda::ObjectRef>, OHOS::Ace::NG::BorderRadiusOption&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseAllBorderRadiusesResObj(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
@@ -1065,9 +1081,11 @@
       "OHOS::Ace::NG::CheckNeedRender(unsigned int)";
       "OHOS::Ace::NG::CheckMeasureSelfFlag(unsigned int)";
       "OHOS::Ace::NG::CheckNoChanged(unsigned int)";
+      "OHOS::Ace::NG::ConstrainSize(OHOS::Ace::NG::SizeT<float> const&, OHOS::Ace::NG::SizeT<float> const&, OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::ClickEventActuator::GetClickEvent()";
       "OHOS::Ace::NG::CommonBridge::CreateChangeValueInfoObj(panda::ecmascript::EcmaVM*, OHOS::Ace::ChangeValueInfo const&)";
       "OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::CommonBridge::ReportClickEvent(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>)";
       "OHOS::Ace::NG::CommonBridge::ResetMargin(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::ResetWidth(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetBorder(panda::JsiRuntimeCallInfo*)";
@@ -1145,6 +1163,7 @@
       "OHOS::Ace::NG::Converter::ResourceConverter::ToString()";
       "OHOS::Ace::NG::Converter::ResourceConverter::ToInt()";
       "OHOS::Ace::NG::Converter::TextDecorationOptions OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::TextDecorationOptions, Ark_TextDecorationOptions>(Ark_TextDecorationOptions const&)";
+      "OHOS::Ace::NG::Converter::OptConvertFromArkNumResStr(Ark_Union_F64_ResourceStr const&, OHOS::Ace::DimensionUnit)";
       "OHOS::Ace::NG::ConvertToMarginPropertyF(OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> const&, OHOS::Ace::NG::ScaleProperty const&, float, bool)";
       "OHOS::Ace::NG::ConvertToOptionalSize(OHOS::Ace::NG::CalcSize const&, OHOS::Ace::NG::ScaleProperty const&, OHOS::Ace::NG::SizeT<float> const&, std::__h::pair<std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&)";
       "OHOS::Ace::NG::ConvertToPx(OHOS::Ace::Dimension const&, OHOS::Ace::NG::ScaleProperty const&, float)";
@@ -1191,6 +1210,13 @@
       "OHOS::Ace::NG::EventHub::~EventHub()";
       "OHOS::Ace::NG::EventHub::AddInnerOnAreaChangedCallback(int, std::__h::function<void (OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::OffsetT<float> const&)>&&)";
       "OHOS::Ace::NG::EventHub::AddSupportedUIStateWithCallback(unsigned long long, std::__h::function<void (unsigned long long)>&, bool, bool)";
+      "OHOS::Ace::NG::ExtensionHandler::~ExtensionHandler()";
+      "OHOS::Ace::NG::ExtensionHandler::NeedRender() const";
+      "OHOS::Ace::NG::ExtensionHandler::OnDraw(OHOS::Ace::NG::DrawingContext&)";
+      "OHOS::Ace::NG::ExtensionHandler::OnForegroundDraw(OHOS::Ace::NG::DrawingContext&)";
+      "OHOS::Ace::NG::ExtensionHandler::OnLayout(int, int, int, int)";
+      "OHOS::Ace::NG::ExtensionHandler::OnMeasure(OHOS::Ace::NG::ExtensionLayoutConstraint const&)";
+      "OHOS::Ace::NG::ExtensionHandler::OnOverlayDraw(OHOS::Ace::NG::DrawingContext&)";
       "OHOS::Ace::NG::EventHub::ClearCustomerOnDragFunc()";
       "OHOS::Ace::NG::EventHub::CreateGestureEventHub()";
       "OHOS::Ace::NG::EventHub::EventHub()";
@@ -1227,6 +1253,8 @@
       "OHOS::Ace::NG::FlexLayoutAlgorithm::Layout(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::FlexLayoutAlgorithm::Measure(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::FloatToDouble(std::__h::optional<float> const&)";
+      "OHOS::Ace::NG::FrameNodeBridge::CreateClickEventInfo(panda::ecmascript::EcmaVM*, OHOS::Ace::ClickInfo const*)";
+      "OHOS::Ace::NG::FrameNodeBridge::CreateGestureEventInfo(panda::ecmascript::EcmaVM*, OHOS::Ace::GestureEvent*)";
       "OHOS::Ace::NG::FocusEventHandler::OnClick(OHOS::Ace::KeyEvent const&)";
       "OHOS::Ace::NG::FocusHub::AllChildFocusHub(std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::NG::FocusHub> const&)> const&, bool)";
       "OHOS::Ace::NG::FocusHub::ClearFocusMovementFlagsInChildren()";
@@ -1409,6 +1437,8 @@
       "OHOS::Ace::NG::GeometryNode::GetMarginFrameOffset(bool) const";
       "OHOS::Ace::NG::GeometryNode::GetMarginFrameRect(bool) const";
       "OHOS::Ace::NG::GeometryNode::GetMarginFrameSize(bool) const";
+      "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffsetX(int)";
+      "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffsetY(int)";
       "OHOS::Ace::NG::GeometryNode::GetPaddingOffset(bool) const";
       "OHOS::Ace::NG::GeometryNode::GetPaddingSize(bool) const";
       "OHOS::Ace::NG::GeometryNode::GetSelfAdjust() const";
@@ -1899,6 +1929,8 @@
       "OHOS::Ace::NG::ScrollableModelStatic::SetNestedScroll(OHOS::Ace::NG::FrameNode*, std::__h::optional<OHOS::Ace::NestedScrollMode> const&, std::__h::optional<OHOS::Ace::NestedScrollMode> const&)";
       "OHOS::Ace::NG::ScrollableModelStatic::SetOnDidScroll(OHOS::Ace::NG::FrameNode*, std::__h::function<void (OHOS::Ace::Dimension, OHOS::Ace::ScrollState)>&&)";
       "OHOS::Ace::NG::ScrollableModelStatic::SetOnWillScroll(OHOS::Ace::NG::FrameNode*, std::__h::function<OHOS::Ace::ScrollFrameResult (OHOS::Ace::Dimension, OHOS::Ace::ScrollState, OHOS::Ace::ScrollSource)>&&)";
+      "OHOS::Ace::NG::CustomDialogControllerModelStatic::SetCloseDialog(OHOS::Ace::DialogProperties&, std::__h::vector<OHOS::Ace::WeakPtr<OHOS::Ace::AceType>, std::__h::allocator<OHOS::Ace::WeakPtr<OHOS::Ace::AceType>>>&, OHOS::Ace::WeakPtr<OHOS::Ace::AceType> const&)";
+      "OHOS::Ace::NG::CustomDialogControllerModelStatic::GetState(std::__h::vector<OHOS::Ace::WeakPtr<OHOS::Ace::AceType>, std::__h::allocator<OHOS::Ace::WeakPtr<OHOS::Ace::AceType>>>&, bool&)";
       "OHOS::Ace::NG::ContentClip::ContentClip(OHOS::Ace::NG::ContentClipMode, OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> const&)";
       "OHOS::Ace::NG::ContentClip::ContentClip(OHOS::Ace::NG::ContentClip const&)";
       "OHOS::Ace::NG::ContentClip::ContentClip(OHOS::Ace::NG::ContentClip&&)";
@@ -2570,6 +2602,7 @@
       "OHOS::Ace::NG::UseSelfStyle(std::__h::unique_ptr<OHOS::Ace::NG::FontStyle, std::__h::default_delete<OHOS::Ace::NG::FontStyle>> const&, std::__h::unique_ptr<OHOS::Ace::NG::TextLineStyle, std::__h::default_delete<OHOS::Ace::NG::TextLineStyle>> const&, OHOS::Ace::TextStyle&, bool, std::__h::unique_ptr<OHOS::Ace::NG::SymbolStyle, std::__h::default_delete<OHOS::Ace::NG::SymbolStyle>> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::Pattern> const&)";
       "OHOS::Ace::NG::Validator::ClampByRange(std::__h::optional<float>&, float const&, float const&)";
       "OHOS::Ace::NG::Validator::ValidateByRange(std::__h::optional<float>&, float const&, float const&)";
+      "OHOS::Ace::NG::Validator::ValidateLessOrEqual(std::__h::optional<float>&, float const&)";
       "OHOS::Ace::NG::Validator::ValidateGreatOrEqual(std::__h::optional<float>&, float const&)";
       "OHOS::Ace::NG::Validator::ValidateGreatOrEqual(std::__h::optional<int>&, int const&)";
       "OHOS::Ace::NG::Validator::ValidateNonNegative(std::__h::optional<float>&)";
@@ -2970,6 +3003,12 @@
       "OHOS::Ace::ResTracer::ResTracer(char const*, unsigned int, unsigned long long)";
       "OHOS::Ace::ResTracer::ResTracer(char const*, unsigned int, unsigned long)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::ButtonType, Ark_ButtonType>(std::__h::optional<OHOS::Ace::ButtonType>&, Ark_ButtonType const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::ButtonRole, Ark_ButtonRole>(std::__h::optional<OHOS::Ace::ButtonRole>&, Ark_ButtonRole const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::ButtonStyleMode, Ark_ButtonStyleMode>(std::__h::optional<OHOS::Ace::ButtonStyleMode>&, Ark_ButtonStyleMode const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::ControlSize, Ark_ControlSize>(std::__h::optional<OHOS::Ace::ControlSize>&, Ark_ControlSize const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TextOverflow, Ark_TextOverflow>(std::__h::optional<OHOS::Ace::TextOverflow>&, Ark_TextOverflow const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TextHeightAdaptivePolicy, Ark_TextHeightAdaptivePolicy>(std::__h::optional<OHOS::Ace::TextHeightAdaptivePolicy>&, Ark_TextHeightAdaptivePolicy const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Converter::ConvContext::Allocate(unsigned long)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerTime, long>(std::__h::optional<OHOS::Ace::PickerTime>&, long const&)";
@@ -3207,6 +3246,7 @@
       "OHOS::Ace::StringUtils::ToWstring(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::StringUtils::TransformStrCase<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int)";
       "OHOS::Ace::StringUtils::TrimStr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, char)";
+      "OHOS::Ace::StringUtils::TrimStrLeadingAndTrailing(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, char)";
       "OHOS::Ace::StrokeJoinStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::StrokeJoinStyle, Ark_StrokeJoinStyle>(Ark_StrokeJoinStyle const&)";
       "OHOS::Ace::StylusDetectorMgr::AddTextFieldFrameNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> const&)";
       "OHOS::Ace::StylusDetectorMgr::GetInstance()";
@@ -3362,7 +3402,6 @@
       "OHOS::Ace::UtfUtils::Str16ToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str8DebugToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::UtfUtils::Str8ToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
-      "OHOS::Ace::V2::BUTTON_ETS_TAG";
       "OHOS::Ace::V2::CALENDAR_ETS_TAG";
       "OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG";
       "OHOS::Ace::V2::COLUMN_ETS_TAG";
@@ -3511,6 +3550,7 @@
       "OHOS::Ace::V2::ARC_INDEXER_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_SPAN_ETS_TAG";
+      "OHOS::Ace::V2::TOGGLE_ETS_TAG";
       "OHOS::Ace::V2::TEXT_ETS_TAG";
       "OHOS::Ace::V2::WaterFlowComponent::SetColumnsArgs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::V2::WaterFlowComponent::SetColumnsGap(OHOS::Ace::Dimension const&)";
@@ -3812,7 +3852,6 @@
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::BoxComponent::*;
-      OHOS::Ace::ButtonModel::*;
       OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::CircleModel::*;
@@ -4467,7 +4506,6 @@
       vtable?for?OHOS::Ace::NavDestinationModel;
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
-      vtable?for?OHOS::Ace::NG::ButtonPattern;
       vtable?for?OHOS::Ace::NG::CalendarMonthPattern;
       vtable?for?OHOS::Ace::NG::CalendarPattern;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
@@ -4477,6 +4515,7 @@
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::DividerPattern;
       vtable?for?OHOS::Ace::NG::EventHub;
+      vtable?for?OHOS::Ace::NG::ExtensionHandler;
       vtable?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
       vtable?for?OHOS::Ace::NG::FlexLayoutProperty;
       vtable?for?OHOS::Ace::NG::GestureGroup;
@@ -4572,6 +4611,7 @@
       vtable?for?OHOS::Ace::SystemBarStyle;
       vtable?for?OHOS::Ace::TextClockComponent;
       vtable?for?OHOS::Ace::TextDeclaration;
+      vtable?for?OHOS::Ace::TapGesture;
       vtable?for?OHOS::Ace::Texture;
       vtable?for?OHOS::Ace::ThemeConstants;
       vtable?for?OHOS::Ace::TransformComponent;
@@ -4626,7 +4666,6 @@
       VTT?for?OHOS::Ace::MenuComponent;
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
-      VTT?for?OHOS::Ace::NG::ButtonPattern;
       VTT?for?OHOS::Ace::NG::CalendarMonthPattern;
       VTT?for?OHOS::Ace::NG::CalendarPattern;
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
@@ -4634,6 +4673,7 @@
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::DividerPattern;
       VTT?for?OHOS::Ace::NG::EventHub;
+      VTT?for?OHOS::Ace::NG::ExtensionHandler;
       VTT?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
       VTT?for?OHOS::Ace::NG::GestureGroup;
       VTT?for?OHOS::Ace::NG::GridPaintProperty;
@@ -4711,6 +4751,7 @@
       VTT?for?OHOS::Ace::SequencedRecognizer;
       VTT?for?OHOS::Ace::SoleChildElement;
       VTT?for?OHOS::Ace::StackElement;
+      VTT?for?OHOS::Ace::TapGesture;
       VTT?for?OHOS::Ace::TextClockComponent;
       VTT?for?OHOS::Ace::TextDeclaration;
       VTT?for?OHOS::Ace::Texture;
@@ -4727,6 +4768,9 @@
       VTT?for?OHOS::Ace::V2::WaterFlowPositionController;
       OHOS::Ace::NG::LazyLayoutUtils*;
       OHOS::Ace::NG::HeaderFooterUtils*;
+      "OHOS::Ace::NG::NodeModifier::GetButtonModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetCJUIButtonModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetButtonCustomModifier()";
     };
   local:
     *;

@@ -58,7 +58,7 @@ ACE_FORCE_EXPORT OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const
     const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
         std::pair<std::vector<std::string>, std::vector<std::string>>());
 
-SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
+ACE_FORCE_EXPORT SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true,

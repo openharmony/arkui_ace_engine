@@ -299,7 +299,7 @@ namespace Converter {
             int64_t id_;
             std::vector<ParamType> params_;
     };
-    std::optional<Dimension> OptConvertFromArkNumResStr(
+    ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumResStr(
         const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
     template<typename T, typename NumberType = Ark_Float64>
@@ -880,9 +880,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
-    template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
-    template<> void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
-    template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
     template<> void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CalcLength>& dst, const Ark_Resource& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CancelButtonStyle>& dst,
@@ -1080,12 +1080,14 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src);
     template<> void AssignCast(std::optional<TextFlipDirection>& dst, const Ark_FlipDirection& src);
-    template<> void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(
+        std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
-    template<> void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src);
