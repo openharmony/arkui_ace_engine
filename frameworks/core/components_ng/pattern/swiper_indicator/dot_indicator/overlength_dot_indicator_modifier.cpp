@@ -1017,7 +1017,11 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
     overlongSelectedStartCenterX_ = startCenterX.second;
 
     // long point move or no move
-    if (currentSelectedIndex_ != targetSelectedIndex_ || animationStartIndex_ == animationEndIndex_) {
+    // When gestureState is INIT/NONE (idle/shrink state), no navigation animation is needed,
+    // so we must not enter the all-point-move path even if animationStartIndex_ != animationEndIndex_.
+    // Otherwise, completed navigation's start!=end would incorrectly trigger an extra shift.
+    if (currentSelectedIndex_ != targetSelectedIndex_ || animationStartIndex_ == animationEndIndex_ ||
+        NotInDraggingWithUseAlone()) {
         moveDirection_ = OverlongIndicatorMove::NONE;
         CalcTargetStatusOnLongPointMove(itemHalfSizes);
         return;

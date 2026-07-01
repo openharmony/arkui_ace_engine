@@ -1042,4 +1042,146 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg025, TestSize.Level1)
     CHECK_NULL_VOID(theme);
     EXPECT_EQ(indicatorPaintProperty_->GetSpaceValue(0.0_vp), theme->GetIndicatorDotItemSpace());
 }
+
+/**
+ * @tc.name: GetMaxDisplayCount001
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with no swiperParameters_
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount001, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_ = nullptr;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 0);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount002
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with no maxDisplayCountVal
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount002, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = std::nullopt;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 0);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount003
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with value below MIN (5)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount003, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 5;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 0);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount004
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with value above MAX (10)
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount004, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 10;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 0);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount005
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with totalItemCount <= maxDisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount005, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(6);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 6;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 0);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount006
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount with valid value and totalItemCount > maxDisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount006, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 7;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 7);
+}
+
+/**
+ * @tc.name: GetMaxDisplayCount007
+ * @tc.desc: Test IndicatorPattern GetMaxDisplayCount at boundary values MIN=6 and MAX=9
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, GetMaxDisplayCount007, TestSize.Level1)
+{
+    SwiperParameters swiperParameters { Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f),
+        Dimension(2.f), Dimension(2.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), Dimension(10.f), true,
+        Color::RED, Color::GREEN, 0 };
+    CreateWithItem([&swiperParameters](IndicatorModelNG model) {
+        model.SetIndicatorStyle(swiperParameters);
+        model.SetDirection(Axis::HORIZONTAL);
+        model.SetShowIndicator(true);
+        model.SetCount(10);
+    });
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 6;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 6);
+    indicatorPattern_->swiperParameters_->maxDisplayCountVal = 9;
+    EXPECT_EQ(indicatorPattern_->GetMaxDisplayCount(), 9);
+}
 } // namespace OHOS::Ace::NG

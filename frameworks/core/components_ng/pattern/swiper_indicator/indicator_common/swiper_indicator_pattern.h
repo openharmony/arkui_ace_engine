@@ -345,17 +345,13 @@ private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void HandleMouseClick(const GestureEvent& info);
-    void HandleTouchClick(const GestureEvent& info);
     void InitHoverMouseEvent();
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void HoverInAnimation(const Color& hoverColor);
     void HoverOutAnimation(const Color& normalColor);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown();
-    void HandleTouchUp();
     void MarkCustomIconLayoutDirty();
-    void HandleDragStart(const GestureEvent& info);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
@@ -363,10 +359,8 @@ private:
         const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
     bool CheckIsTouchBottom(const GestureEvent& info);
-    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleLongPress(GestureEvent& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
-    float HandleTouchClickMargin();
     int32_t GetInitialIndex() const;
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void InitFocusEvent();
@@ -401,10 +395,8 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<LongPressEvent> longPressEvent_;
     bool isHover_ = false;
     bool isPressed_ = false;
-    bool isLongPressed_ = false;
     PointF hoverPoint_;
     PointF dragStartPoint_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
@@ -416,7 +408,6 @@ private:
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
-    RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
@@ -453,6 +444,16 @@ protected:
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
     virtual void HandleDragEnd(double dragVelocity);
     virtual void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void HandleTouchClick(const GestureEvent& info);
+    float HandleTouchClickMargin();
+    void HandleTouchDown();
+    void HandleTouchUp();
+    void HandleDragStart(const GestureEvent& info);
+
+    bool isLongPressed_ = false;
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {

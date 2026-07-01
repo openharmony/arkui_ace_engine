@@ -133,8 +133,14 @@ public:
             auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
-            indicatorLayoutAlgorithm->SetIndicatorDisplayCount(GetCountFromProperty());
             indicatorLayoutAlgorithm->SetIsSingle(true);
+            auto maxDisplayCount = GetMaxDisplayCount();
+            if (maxDisplayCount > 0) {
+                indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount);
+                indicatorLayoutAlgorithm->SetMaxDisplayCount(maxDisplayCount);
+            } else {
+                indicatorLayoutAlgorithm->SetIndicatorDisplayCount(GetCountFromProperty());
+            }
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
@@ -158,6 +164,9 @@ public:
         }
 
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            if (GetMaxDisplayCount() > 0) {
+                return CreateOverlongDotIndicatorPaintMethodInSingleMode();
+            }
             return CreateDotIndicatorPaintMethodInSingleMode();
         }
         return nullptr;
@@ -247,7 +256,16 @@ public:
     void HandleDragEnd(double dragVelocity) override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub) override; 
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub) override;
+    void HandleTouchClick(const GestureEvent& info) override;
     RectF CalcBoundsRect() const override;
+    int32_t GetMaxDisplayCount() const;
+    RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethodInSingleMode();
+    void UpdateOverlongPaintMethodInSingleMode(
+        const RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
+    void SetOverlongDotIndicatorPaintMethodInfoInSingleMode(
+        const RefPtr<DotIndicatorPaintMethod>& paintMethod);
+    void InitOverlongStatusInSingleMode();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     std::shared_ptr<SwiperParameters> GetIndicatorParameters() const

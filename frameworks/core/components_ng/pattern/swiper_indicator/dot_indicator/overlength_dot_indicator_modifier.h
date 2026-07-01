@@ -30,7 +30,7 @@ class OverlengthDotIndicatorModifier : public DotIndicatorModifier {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorModifier, DotIndicatorModifier);
 
 public:
-    OverlengthDotIndicatorModifier(int32_t themeScopeId)
+    OverlengthDotIndicatorModifier(int32_t themeScopeId = TokenThemeStorage::INVALID_THEME_SCOPE_ID)
         : DotIndicatorModifier(themeScopeId),
           firstPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
           newPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
@@ -308,6 +308,12 @@ private:
     bool NeedUpdateWhenAnimationFinish() const;
     float CalcRealPadding(
         float unselectedIndicatorRadius, float selectedIndicatorRadius, OverlongType overlongType) const;
+
+    bool NotInDraggingWithUseAlone()
+    {
+        return !isBindIndicator_ &&
+               (gestureState_ == GestureState::GESTURE_STATE_INIT || gestureState_ == GestureState::GESTURE_STATE_NONE);
+    }
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
