@@ -4377,6 +4377,7 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
+      OHOS::Ace::NG::RosenRenderContext::GetRSNode*;
       OHOS::Ace::NG::RotationGesture::*;
       OHOS::Ace::NG::SaveButtonModelNG::*;
       OHOS::Ace::NG::ScaleProperty::*;

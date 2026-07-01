@@ -80,8 +80,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         }
     }
     static const std::unordered_map<std::string, std::string> soMap = {
-        { "Blank", "blank" },
-        { "Divider", "divider" },
+        { "Blank", "spacing" },
+        { "Divider", "spacing" },
         {"DynamicLayout", "dynamiclayout"},
         {"LazyDynamicLayout", "dynamiclayout"},
         { "ContainerReader", "containerreader" },
@@ -126,8 +126,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Badge", "badge" },
         { "Hyperlink", "hyperlink" },
-        { "GridCol", "gridcol" },
-        { "GridRow", "gridrow" },
+        { "GridCol", "gridlayout" },
+        { "GridRow", "gridlayout" },
         {"SymbolGlyph", "symbol"},
         {"Richeditor", "richeditor"},
         { "LoadingProgress", "loadingprogress" },

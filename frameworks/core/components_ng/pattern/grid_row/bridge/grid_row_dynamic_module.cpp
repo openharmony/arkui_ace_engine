@@ -33,7 +33,6 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_GridRow()
 namespace OHOS::Ace {
 
 namespace V2 {
-const char GRID_COL_ETS_TAG[] = "GridCol";
 const char GRID_ROW_ETS_TAG[] = "GridRow";
 } // namespace V2
 

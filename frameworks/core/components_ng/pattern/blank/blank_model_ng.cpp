@@ -42,26 +42,6 @@ void BlankModelNG::Create()
     }
 }
 
-void BlankModelNG::CreateBlankModelNG()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", BLANK_ETS_TAG, nodeId);
-    ACE_UINODE_TRACE(nodeId);
-    auto blankNode = FrameNode::GetOrCreateFrameNode(
-        BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
-    stack->Push(blankNode);
-    auto blankProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
-        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 0.0f);
-        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
-        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, Height, Dimension(0.0, DimensionUnit::VP));
-    } else if (blankProperty) {
-        blankProperty->ResetCalcMinSize();
-    }
-}
-
 RefPtr<FrameNode> BlankModelNG::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);

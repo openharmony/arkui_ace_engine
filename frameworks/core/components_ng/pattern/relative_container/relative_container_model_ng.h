@@ -26,7 +26,6 @@ public:
     void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) override;
     void ResetResObj(const std::string& key) override;
 
-    static void CreateRelativeContainerModelNG();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetBarrier(FrameNode* frameNode, const std::vector<BarrierInfo>& barrierInfo);
     static void SetGuideline(FrameNode* frameNode, const std::vector<GuidelineInfo>& guidelineInfo);

@@ -239,7 +239,7 @@ void ResetOrder(ArkUINodeHandle node)
     GridColModelNG::SetOrder(frameNode, order);
 }
 
-ArkUINodeHandle CreateFrameNode(int32_t nodeId)
+ArkUINodeHandle CreateGridColFrameNode(int32_t nodeId)
 {
     auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -263,7 +263,7 @@ const ArkUIGridColModifier* GetGridColDynamicModifier()
             .resetGridColOffset = ResetGridColOffsetImpl,
             .setOrder = SetOrderImpl,
             .resetOrder = ResetOrderImpl,
-            .createFrameNode = CreateFrameNode,
+            .createFrameNode = CreateGridColFrameNode,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -278,7 +278,7 @@ const ArkUIGridColModifier* GetGridColDynamicModifier()
         .resetGridColOffset = ResetGridColOffset,
         .setOrder = SetOrder,
         .resetOrder = ResetOrder,
-        .createFrameNode = CreateFrameNode,
+        .createFrameNode = CreateGridColFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

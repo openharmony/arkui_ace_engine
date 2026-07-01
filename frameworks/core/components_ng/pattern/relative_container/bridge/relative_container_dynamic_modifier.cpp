@@ -32,7 +32,8 @@ namespace OHOS::Ace::NG {
 
 void CreateModel()
 {
-    RelativeContainerModelNG::CreateRelativeContainerModelNG();
+    static RelativeContainerModelNG model;
+    model.Create();
 }
 
 ArkUINodeHandle CreateFrameNode(int32_t nodeId)

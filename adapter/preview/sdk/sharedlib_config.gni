@@ -200,12 +200,7 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_blank"
-    subsystem_name = "arkui"
-    part_name = "ace_engine"
-  },
-  {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_divider"
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_spacing"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -230,12 +225,7 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gridrow"
-    subsystem_name = "arkui"
-    part_name = "ace_engine"
-  },
-  {
-    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gridcol"
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gridlayout"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

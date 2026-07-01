@@ -28,7 +28,6 @@ public:
     void SetColor(const Color& color) override;
     void SetColor(const RefPtr<ResourceObject>& resobj) override;
     void ResetResObj(const std::string& key) override;
-    static void CreateBlankModelNG();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const Color& color);
     static void SetColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resobj);

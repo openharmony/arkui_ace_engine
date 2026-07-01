@@ -31,12 +31,13 @@ Framework::BlankModelImpl* GetBlankModelImpl()
 
 namespace OHOS::Ace::NG {
 
-void CreateModel()
+void CreateBlankModel()
 {
-    BlankModelNG::CreateBlankModelNG();
+    static BlankModelNG model;
+    model.Create();
 }
 
-ArkUINodeHandle CreateFrameNode(int32_t nodeId)
+ArkUINodeHandle CreateBlankFrameNode(int32_t nodeId)
 {
     auto frameNode = BlankModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -97,7 +98,7 @@ void ResetBlankMin(ArkUINodeHandle node)
 }
 
 #ifndef CROSS_PLATFORM
-void CreateModelImpl()
+void CreateBlankModelImpl()
 {
     GetBlankModelImpl()->Create();
 }
@@ -129,7 +130,7 @@ const ArkUIBlankModifier* GetBlankDynamicModifier()
 #ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUIBlankModifier modifier = {
-            .createModel = CreateModelImpl,
+            .createModel = CreateBlankModelImpl,
             .setColor = SetColorImpl,
             .resetColor = nullptr,
             .setBlankHeight = SetBlankHeightImpl,
@@ -144,14 +145,14 @@ const ArkUIBlankModifier* GetBlankDynamicModifier()
     }
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIBlankModifier modifier = {
-        .createModel = CreateModel,
+        .createModel = CreateBlankModel,
         .setColor = SetColor,
         .resetColor = ResetColor,
         .setBlankHeight = SetBlankHeight,
         .resetBlankHeight = ResetBlankHeight,
         .setBlankMin = SetBlankMin,
         .resetBlankMin = ResetBlankMin,
-        .createFrameNode = CreateFrameNode,
+        .createFrameNode = CreateBlankFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
