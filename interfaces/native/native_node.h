@@ -104,6 +104,11 @@ typedef enum {
      * @since 24
      */
     ARKUI_NODE_TEXT_EDITOR = 22,
+    /**
+     * ArcAlphabetIndexer.
+     * @since 26.1.0
+     */
+    ARKUI_NODE_ARC_ALPHABET_INDEXER = 23,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -169,6 +174,10 @@ typedef enum {
      * @since 26.0.0
      */
     ARKUI_NODE_ARC_SCROLL_BAR = 1021,
+    /** Arc swiper.
+     *  @since 26.1.0
+     */
+    ARKUI_NODE_ARC_SWIPER = 1022,
 } ArkUI_NodeType;
 
 /**
@@ -6889,6 +6898,220 @@ typedef enum {
     NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
 
     /**
+     * @brief Defines the index string array.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .object: array of the alphabet index, the type is string array. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .object: array of the alphabet index, the type is string array. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_ARRAY = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
+
+    /**
+     * @brief Defines the index item text color in normal state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_COLOR,
+
+    /**
+     * @brief Defines the index item text color in selected state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED_COLOR,
+
+    /**
+     * @brief Defines the pop-up window text color.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the text,  in 0xARGB format, and the default value is 0xFFFFFFFF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the text,  in 0xARGB format. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_COLOR,
+
+    /**
+     * @brief Defines the index item background color in selected state.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the background,  in 0xARGB format, and the default value is 0xFF1F71FF. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the background,  in 0xARGB format. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED_BACKGROUND_COLOR,
+
+    /**
+     * @brief Defines the pop-up window background color.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].u32: color of the background,  in 0xARGB format, and the default value is 0xD8404040. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].u32: color of the background,  in 0xARGB format. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_BACKGROUND_COLOR,
+
+    /**
+     * @brief Defines whether to use a pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to use a pop-up. The value <b>0</b> means not to use a pop-up, \n
+     * and <b>1</b> means to use a pop-up. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to use a pop-up. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_USE_POPUP,
+
+    /**
+     * @brief Defines the font style of the selected index.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>13</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_SELECTED_FONT,
+
+    /**
+     * @brief Defines the font style of the pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>19</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_POPUP_FONT,
+
+    /**
+     * @brief Defines the default font style.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. Optional. \n
+     * The default value is <b>"HarmonyOS Sans"</b>. \n
+     * .value[0].f32: font size, in fp. Optional. The default value is <b>13</b>. \n
+     * .value[1].i32: font weight. Optional. The parameter type is {@link ArkUI_FontWeight}. \n
+     * The default value is <b>ARKUI_FONT_WEIGHT_W500</b>. \n
+     * .value[2].i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}. \n
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. The parameter type is {@link ArkUI_FontWeight}. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_FONT,
+
+    /**
+     * @brief Defines the letter index bar letter area size.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].f32: the letter area is a circle, set the diameter of the circle, in vp. \n
+     * The default value is <b>24</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].f32: the letter area is a circle, set the diameter of the circle, in vp. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_ITEM_SIZE,
+
+    /**
+     * @brief Defines the selected index.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the selected index. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the selected index. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_SELECTED,
+
+    /**
+     * @brief Defines whether to collapse the characters when the indexer bar is not enough to display all characters.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to collapse the characters when the indexer bar is not enough to display all characters. \n
+     * The value <b>1</b> means to automatically collapses the characters, and <b>0</b> means the opposite. \n
+     * The default value is <b>1</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to collapse the characters when the indexer bar is not enough to display all characters. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_AUTO_COLLAPSE,
+
+    /**
+     * @brief Defines the background blur style of the pop-up window.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: blur style of the pop-up window. The value is an enum of {@link ArkUI_BlurStyle}. \n
+     * The default value is <b>ARKUI_BLUR_STYLE_NONE</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: blur style of the pop-up window. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_POPUP_BACKGROUND_BLUR_STYLE,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -9566,6 +9789,138 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_ARC_SCROLL_BAR_DISPLAY_MODE = 1021001,
+
+    /**
+     * @brief Defines the index of the child component currently displayed in the ArcSwiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: index value of the child component. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: index value of the child component. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
+
+    /**
+     * @brief Defines the indicator type of the ArcSwiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to show indicator. The value <b>1</b> means to show indicator, \n
+     * and <b>0</b> means the opposite. The default value is <b>1</b>. \n
+     * .value[1].i32: direction of the ArcSwiper indicator. The parameter type is {@link OH_ArkUI_ArcDirection}. \n
+     * The default value is <b>OH_ARKUI_ARCDIRECTION_SIX_CLOCK_DIRECTION</b>. Optional. \n
+     * .value[2].u32: color of the unselected points, in 0xARGB format, \n
+     * and the default value is <b>0xA9FFFFFF</b>. Optional. \n
+     * .value[3].u32: color of the selected point, in 0xARGB format, \n
+     * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
+     * .value[4].u32: background color of the ArcSwiper indicator after long pressed, in 0xARGB format, \n
+     * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
+     * .object: gradient color for the mask. Optional. \n
+     * Array of color stops, each of which consists of a color and its stop position. \n
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to show indicator. \n
+     * .value[1].i32: direction of the ArcSwiper indicator. \n
+     * .value[2].u32: color of the unselected points. \n
+     * .value[3].u32: color of the selected point. \n
+     * .value[4].u32: background color of the ArcSwiper indicator after long pressed. \n
+     * .object: gradient color for the mask. \n
+     *
+     * @since 26.1.0
+     *
+     */
+    NODE_ARC_SWIPER_INDICATOR,
+
+    /**
+     * @brief Defines the animation duration.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the animation duration, in ms. The default value is <b>400</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the animation duration. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_DURATION,
+
+    /**
+     * @brief Defines whether to display vertically.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to display vertically. The value <b>1</b> means to display vertically, \n
+     * and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to display vertically. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_VERTICAL,
+
+    /**
+     * @brief Defines whether to disable the swipe feature.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to disable the swipe feature. The value <b>1</b> means to disable \n
+     * the swipe feature, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to disable the swipe feature. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_DISABLE_SWIPE,
+
+    /**
+     * @brief Defines the sensitivity of rotating crown.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the sensitivity of rotating crown. The parameter type is {@link ArkUI_CrownSensitivity}. \n
+     * The default value is <b>ARKUI_CROWN_SENSITIVITY_MEDIUM</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the sensitivity of rotating crown. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_DIGITAL_CROWN_SENSITIVITY,
+
+    /**
+     * @brief Defines the effect used at the edges of the ArcSwiper when the boundary of the scrollable content is reached.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached. \n
+     * The parameter type is {@link ArkUI_EdgeEffect}. \n
+     * The default value is <b>ARKUI_EDGE_EFFECT_SPRING</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached. \n
+     * The parameter type is {@link ArkUI_EdgeEffect}. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_EFFECT_MODE,
+
+    /**
+     * @brief Defines whether to disable the transition animation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to disable the transition animation. The value <b>1</b> means to disable \n
+     * the transition animation, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to disable the transition animation. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_DISABLE_TRANSITION_ANIMATION,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -10905,6 +11260,19 @@ typedef enum {
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
+     * <b>ARKUI_NODE_ARC_ALPHABET_INDEXER</b> instance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_ALPHABET_INDEXER_EVENT_ON_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_ALPHABET_INDEXER,
+
+    /**
+     * @brief Defines the event triggered when the index of the currently displayed element of this
      * <b>ARKUI_NODE_SWIPER</b> instance changes.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
@@ -11825,6 +12193,66 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_ARC_LIST_ON_DID_SCROLL = 1019006,
+
+    /**
+     * @brief Defines the event triggered when the index of the currently displayed element of this
+     * <b>ARKUI_NODE_ARC_SWIPER</b> instance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
+
+    /**
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_ARC_SWIPER</b> instance starts.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains five parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the target element to switch to. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: offset of the target element relative to the start position \n
+     * of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[4].f32</b>: hand-off velocity. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_ANIMATION_START,
+
+    /**
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_ARC_SWIPER</b> instance ends.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END,
+
+    /**
+     * @brief Defines the event triggered on a frame-by-frame basis when the page is turned by a swipe in this
+     * <b>ARKUI_NODE_ARC_SWIPER</b> instance.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     *
+     * @since 26.1.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE,
 } ArkUI_NodeEventType;
 
 /**
@@ -13862,6 +14290,42 @@ int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node);
  * @since 23
  */
 int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Show the previous page of the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.1.0
+ */
+int32_t OH_ArkUI_ArcSwiper_ShowPrevious(ArkUI_NodeHandle node);
+
+/**
+ * @brief Show the next page of the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.1.0
+ */
+int32_t OH_ArkUI_ArcSwiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Stop the animation executed by the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.1.0
+ */
+int32_t OH_ArkUI_ArcSwiper_FinishAnimation(ArkUI_NodeHandle node);
 
 /**
  * @brief Get the root node handle of the corresponding page of the Context.

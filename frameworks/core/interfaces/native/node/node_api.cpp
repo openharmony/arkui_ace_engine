@@ -51,6 +51,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_arc_swiper_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
@@ -659,6 +660,13 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperScrollStateChanged,
 };
 
+const ComponentAsyncEventHandler ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetArcSwiperChange,
+    NodeModifier::SetArcSwiperAnimationStart,
+    NodeModifier::SetArcSwiperAnimationEnd,
+    NodeModifier::SetArcSwiperGestureSwipe,
+};
+
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCanvasOnReady,
 };
@@ -895,6 +903,13 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
 };
 
+const ResetComponentAsyncEventHandler ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
 const ResetComponentAsyncEventHandler CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
 };
@@ -1123,6 +1138,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_ARC_SWIPER: {
+            if (subKind >= sizeof(ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_CANVAS: {
             if (subKind >= sizeof(CANVAS_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
@@ -1180,7 +1203,8 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             }
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             auto* alphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
             if (alphabetIndexerModifier) {
                 eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
@@ -1421,6 +1445,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_ARC_SWIPER: {
+            if (subKind >=
+                sizeof(ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_CANVAS: {
             if (subKind >= sizeof(CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
                 TAG_LOGE(
@@ -1485,7 +1519,8 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             }
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             // alphabet indexer event type.
             if (subKind >= sizeof(ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
                 ResetComponentAsyncEventHandler)) {

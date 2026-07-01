@@ -17,8 +17,10 @@
 #include "modifiers_test_utils.h"
 
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -280,6 +282,7 @@ const std::vector<BlurStyleTestStep> BLUR_STYLE_TEST_PLAN = {
 };
 
 const auto CONTEXT_ID = 123;
+
 } // namespace
 
 class IndexerModifierTest
