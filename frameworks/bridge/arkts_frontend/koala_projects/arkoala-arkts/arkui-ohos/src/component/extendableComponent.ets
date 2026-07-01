@@ -68,7 +68,7 @@ export interface IExtendableComponent {
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
     isViewActive(): boolean;
-    setActiveInternal(active: boolean, isReuse: boolean): void;
+    setActiveInternal(active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
     fireAboutToReuse(param?: RecordData): void;
     fireAboutToRecycle(): void;
     __getParentNode__Internal(): PeerNode | undefined;
@@ -354,11 +354,11 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.activeChangeListenerForInterop_.delete(listener);
     }
 
-    __propagateToChild__Internal(active: boolean, isReuse: boolean): void {
+    __propagateToChild__Internal(active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean = false): void {
         if (this.childrenWeakRefMap_.size > 0) {
             this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
                 const child = weak.deref();
-                child?.__setActiveInternal__Internal(active, isReuse);
+                child?.__setActiveInternal__Internal(active, isReuse, suppressActiveLifecycle);
             });
         }
         if (this.activeChangeListenerForInterop_.size > 0) {
@@ -368,8 +368,8 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         }
     }
 
-    __setActiveInternal__Internal(active: boolean, isReuse: boolean): void {
-        this.delegate_!.setActiveInternal(active, isReuse);
+    __setActiveInternal__Internal(active: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void {
+        this.delegate_!.setActiveInternal(active, isReuse, suppressActiveLifecycle);
     }
 
     __setDelegate__Internal(delegate: IExtendableComponent): void {

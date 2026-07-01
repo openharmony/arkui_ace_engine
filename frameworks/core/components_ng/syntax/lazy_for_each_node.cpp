@@ -414,7 +414,8 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild,
+    bool isCache, bool addToRenderTree)
 {
     ACE_SYNTAX_SCOPED_TRACE(
         "LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
@@ -430,7 +431,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false, true);
+        if (!addToRenderTree) {
+            child.second->SetJSViewActive(false, true);
+        } else {
+            child.second->SetJSViewActive(false, true, false, true);
+        }
         bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
         auto optionsFreeze = GetEnableCustomComponentFreeze();
         if (optionsFreeze == LazyForEachCustomComponentFreezeMode::DISABLED) {

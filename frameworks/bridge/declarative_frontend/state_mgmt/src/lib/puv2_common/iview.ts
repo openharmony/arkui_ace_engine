@@ -53,7 +53,7 @@ interface IView {
     setDeleteStatusRecursively(): void;
 
     isCompFreezeAllowed(): boolean;
-    setActiveInternal(newState: boolean, isReuse: boolean): void;
+    setActiveInternal(newState: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
 
     findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
 

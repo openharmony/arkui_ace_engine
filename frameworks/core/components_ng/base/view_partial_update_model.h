@@ -48,7 +48,7 @@ struct NodeInfoPU {
     std::function<bool(int32_t)> hasNodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc;
-    std::function<void(bool, bool)> setActiveFunc;
+    std::function<void(bool, bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void()> clearAllRecycleFunc;

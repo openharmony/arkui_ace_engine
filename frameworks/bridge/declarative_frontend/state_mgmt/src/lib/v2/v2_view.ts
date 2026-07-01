@@ -311,7 +311,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
     private freezeRecycledComponent(): void {
         this.activeCount_--;
-        if (this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+        if (this.__needToActiveOrInactiveLifecycle__Internal && this.activeCount_ === 0) {
             this.__customComponentExecuteInactive__Internal();
         }
         ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
@@ -333,7 +333,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             });
         }
         this.elmtIdsDelayedUpdate.clear();
-        if (this.activeCount_ === 1 && this.__needToActiveOrInactiveLifecycle__Internal) {
+        if (this.__needToActiveOrInactiveLifecycle__Internal && this.activeCount_ === 1) {
             this.__customComponentExecuteActive__Internal();
         }
         ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
@@ -873,16 +873,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // If the component has `hasComponentFreezeEnabled` set to true and is marked as @ReusableV2,
     // skip the delayed update, as freeze and delayed updates are handled in `aboutToRecycleInternal`
     // and `aboutToReuseInternal` for @ReusableV2 components.
-    public setActiveInternal(active: boolean, isReuse: boolean = false): void {
+    public setActiveInternal(active: boolean, isReuse: boolean = false, suppressActiveLifecycle: boolean = false): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
         const isCompFreezeAllowed = this.isCompFreezeAllowed();
         stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${isCompFreezeAllowed}`);
-        if (!isCompFreezeAllowed && !isReuse && this.__needToActiveOrInactiveLifecycle__Internal) {
+        if (this.__needToActiveOrInactiveLifecycle__Internal && !isCompFreezeAllowed && !isReuse) {
             // Non-freeze state: use __activeCountForNonFreeze__Internal
             // Only execute when @Active/@Inactive decorator is used for performance
             const oldCount = this.__activeCountForNonFreeze__Internal;
             this.setActiveCountForNonFreeze(active);
-            this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+            this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount, suppressActiveLifecycle);
         }
         if (isCompFreezeAllowed && !isReuse) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
@@ -891,20 +891,24 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-                if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                if (this.__needToActiveOrInactiveLifecycle__Internal && !suppressActiveLifecycle &&
+                    oldCount === 0 && this.activeCount_ > 0 &&
+                    !this.__isComponentActiveOrInactive__Internal) {
                     this.__customComponentExecuteActive__Internal();
                 }
             } else {
                 ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-                if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                if (this.__needToActiveOrInactiveLifecycle__Internal && !suppressActiveLifecycle &&
+                    oldCount > 0 && this.activeCount_ === 0 &&
+                    this.__isComponentActiveOrInactive__Internal) {
                     this.__customComponentExecuteInactive__Internal();
                 }
             }
         }
         // Propagate state to all child View
-        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse, suppressActiveLifecycle);
         // Propagate state to all child BuilderNode
-        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse, suppressActiveLifecycle);
 
         if (InteropConfigureStateMgmt.needsInterop()) {
             this.handleActiveChangeForInterop(active);

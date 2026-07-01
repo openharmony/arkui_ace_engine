@@ -1523,4 +1523,55 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeGetChildrenTest001, TestSize.Le
     EXPECT_EQ(children2.size(), 1);
 }
 
+
+/**
+ * @tc.name: GetFrameChildByIndexWithAddToRenderTreeTest001
+ * @tc.desc: Test GetFrameChildByIndex with different addToRenderTree parameter values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, GetFrameChildByIndexWithAddToRenderTreeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. Invoke GetFrameChildByIndex with isCache=true and addToRenderTree=false.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->needPredict_ = false;
+    lazyForEachNode->GetFrameChildByIndex(0, true, true, false);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step4. Invoke GetFrameChildByIndex with isCache=true and addToRenderTree=true.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->GetFrameChildByIndex(0, true, true, true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step5. Invoke GetFrameChildByIndex with isCache=false and addToRenderTree=true.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->needPredict_ = true;
+    lazyForEachNode->GetFrameChildByIndex(0, false, false, true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
 } // namespace OHOS::Ace::NG

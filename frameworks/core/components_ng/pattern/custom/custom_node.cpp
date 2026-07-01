@@ -165,11 +165,11 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);
-        FireSetActiveFunc(active, isReuse);
+        FireSetActiveFunc(active, isReuse, suppressActiveLifecycle);
     }
 }
 

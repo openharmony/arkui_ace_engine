@@ -107,6 +107,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // used when isCompFreezeAllowed() is false
   protected __activeCountForNonFreeze__Internal: number = 1;
 
+  // custom component is inactive when __isComponentActiveOrInactive__Internal is false
+  protected __isComponentActiveOrInactive__Internal: boolean = true;
+
   protected __needToExecuteActive__Internal: boolean = false;
   protected __needToExecuteInactive__Internal: boolean = false;
 
@@ -300,6 +303,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentActive error, ${this.debugInfo__()}, ${e.message}`);
       throw e;
     }
+    this.__isComponentActiveOrInactive__Internal = true;
   }
 
   public __customComponentExecuteInactive__Internal(): void {
@@ -315,6 +319,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInactive error, ${this.debugInfo__()}, ${e.message}`);
       throw e;
     }
+    this.__isComponentActiveOrInactive__Internal = false;
   }
 
   public static create(view: PUV2ViewBase): void {
@@ -650,22 +655,21 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected setActiveCountForNonFreeze(active: boolean): void {
     // Similar to setActiveCount but for __activeCountForNonFreeze__Internal
     // Used when isCompFreezeAllowed is false
-    if (Utils.isApiVersionEQAbove(API_VERSION_ISOLATION_FOR_5_1)) {
-      this.__activeCountForNonFreeze__Internal += active ? 1 : -1;
-    } else {
-      this.__activeCountForNonFreeze__Internal = active ? 1 : 0;
-    }
+    this.__activeCountForNonFreeze__Internal += active ? 1 : -1;
   }
 
-  protected executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount: number): void {
+  protected executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount: number, suppressActiveLifecycle: boolean): void {
+    if (suppressActiveLifecycle) {
+      return;
+    }
     // Execute @Active or @Inactive lifecycle callbacks based on count transition
     // Directly check __activeCountForNonFreeze__Internal instead of isViewActive()
     if (this.__activeCountForNonFreeze__Internal > 0) {
-      if (oldCount === 0 && this.__activeCountForNonFreeze__Internal > 0) {
+      if (!this.__isComponentActiveOrInactive__Internal && oldCount === 0 && this.__activeCountForNonFreeze__Internal > 0) {
         this.__customComponentExecuteActive__Internal();
       }
     } else {
-      if (oldCount > 0 && this.__activeCountForNonFreeze__Internal === 0) {
+      if (this.__isComponentActiveOrInactive__Internal && oldCount > 0 && this.__activeCountForNonFreeze__Internal === 0) {
         this.__customComponentExecuteInactive__Internal();
       }
     }

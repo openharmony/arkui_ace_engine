@@ -2175,7 +2175,7 @@ void UINode::SetActive(bool active, bool needRebuildRenderContext)
     }
 }
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
@@ -2184,10 +2184,10 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
             return;
         }
         if (customNode) {
-            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse);
+            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse, suppressActiveLifecycle);
             continue;
         }
-        child->SetJSViewActive(active, isLazyForEachNode, isReuse);
+        child->SetJSViewActive(active, isLazyForEachNode, isReuse, suppressActiveLifecycle);
     }
 }
 

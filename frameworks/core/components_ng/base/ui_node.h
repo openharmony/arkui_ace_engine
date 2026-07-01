@@ -526,7 +526,8 @@ public:
 
     virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
-    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false);
 
     virtual void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility);
 
