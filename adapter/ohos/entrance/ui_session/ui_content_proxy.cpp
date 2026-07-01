@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
 
 namespace OHOS::Ace {
 int32_t UIContentServiceProxy::GetInspectorTree(
@@ -687,6 +688,107 @@ bool UIContentServiceProxy::IsConnect()
     return isConnected_;
 }
 
+int32_t UIContentServiceProxy::SendPageTranslateRequest(uint32_t code, const char* caller, const std::string& request,
+    const PageTranslateTextCallback* eventCallback, bool isContinuous)
+{
+    if (eventCallback == nullptr || *eventCallback == nullptr) {
+        LOGW("%{public}s eventCallback is nullptr", caller);
+        return PARAM_INVALID;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("%{public}s write interface token failed", caller);
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("%{public}s reportStub is nullptr, connect is not execute", caller);
+        return FAILED;
+    }
+    if (!PageTranslateRequestUtil::IsPageTranslateRequestValid(request)) {
+        LOGW("%{public}s invalid page translate request", caller);
+        return PARAM_INVALID;
+    }
+    if (!data.WriteString(request)) {
+        LOGW("%{public}s write request failed", caller);
+        return FAILED;
+    }
+    if (!report_->RegisterPageTranslateTextCallback(*eventCallback, isContinuous)) {
+        LOGW("%{public}s register callback failed", caller);
+        return LAST_UNFINISH;
+    }
+    auto remote = Remote();
+    auto descriptor = GetDescriptor();
+    if (remote == nullptr) {
+        LOGW("%{public}s remote is nullptr", caller);
+        report_->UnregisterPageTranslateTextCallback();
+        return FAILED;
+    }
+    if (!isContinuous) {
+        report_->RegisterPageTranslateTimeoutCallback([remote, descriptor]() {
+            if (remote == nullptr) {
+                return;
+            }
+            MessageParcel data;
+            MessageParcel reply;
+            MessageOption option(MessageOption::TF_ASYNC);
+            if (!data.WriteInterfaceToken(descriptor)) {
+                LOGW("PageTranslate timeout cleanup write interface token failed");
+                return;
+            }
+            int32_t sendRequestErrorCode = remote->SendRequest(END_PAGE_TRANSLATE, data, reply, option);
+            if (sendRequestErrorCode != ERR_NONE) {
+                LOGW("PageTranslate timeout cleanup send request failed, errorCode is %{public}d",
+                    sendRequestErrorCode);
+            }
+        });
+    }
+    int32_t sendRequestErrorCode = remote->SendRequest(code, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("%{public}s send request failed, errorCode is %{public}d", caller, sendRequestErrorCode);
+        report_->UnregisterPageTranslateTextCallback();
+        return REPLY_ERROR;
+    }
+    if (!isContinuous) {
+        report_->PostPageTranslateCallbackRemoveTask();
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendPageTranslateControlRequest(uint32_t code, const char* caller, int32_t nodeId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("%{public}s write interface token failed", caller);
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("%{public}s reportStub is nullptr, connect is not execute", caller);
+        return FAILED;
+    }
+    if (code == RESET_PAGE_TRANSLATE && !data.WriteInt32(nodeId)) {
+        LOGW("%{public}s write nodeId failed", caller);
+        return FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        LOGW("%{public}s remote is nullptr", caller);
+        return FAILED;
+    }
+    int32_t sendRequestErrorCode = remote->SendRequest(code, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("%{public}s send request failed, errorCode is %{public}d", caller, sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    if (code == END_PAGE_TRANSLATE) {
+        report_->UnregisterPageTranslateTextCallback();
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::GetWebViewTranslateText(
     const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback)
 {
@@ -1144,6 +1246,99 @@ int32_t UIContentServiceProxy::GetWebInfoByRequest(
         LOGW("GetWebInfoByRequest send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetPageTranslateText(
+    const std::string& request, const PageTranslateTextCallback& eventCallback)
+{
+    return SendPageTranslateRequest(GET_PAGE_TRANSLATE_TEXT, "GetPageTranslateText", request, &eventCallback, false);
+}
+
+int32_t UIContentServiceProxy::StartPageTranslate(
+    const std::string& request, const PageTranslateTextCallback& eventCallback)
+{
+    return SendPageTranslateRequest(START_PAGE_TRANSLATE, "StartPageTranslate", request, &eventCallback, true);
+}
+
+int32_t UIContentServiceProxy::EndPageTranslate()
+{
+    return SendPageTranslateControlRequest(END_PAGE_TRANSLATE, "EndPageTranslate");
+}
+
+int32_t UIContentServiceProxy::ResetPageTranslate(int32_t nodeId)
+{
+    return SendPageTranslateControlRequest(RESET_PAGE_TRANSLATE, "ResetPageTranslate", nodeId);
+}
+
+int32_t UIContentServiceProxy::SendPageTranslateResult(const std::string& result)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    std::vector<PageTranslateRequestUtil::TranslateResult> translateResults;
+    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
+        LOGW("SendPageTranslateResult invalid result");
+        return PARAM_INVALID;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendPageTranslateResult write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteString(result)) {
+        LOGW("SendPageTranslateResult write result failed");
+        return FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        LOGW("SendPageTranslateResult remote is nullptr");
+        return FAILED;
+    }
+    int32_t sendRequestErrorCode = remote->SendRequest(SEND_PAGE_TRANSLATE_RESULT, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendPageTranslateResult send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    if (report_ != nullptr) {
+        for (const auto& translateResult : translateResults) {
+            report_->CancelPageTranslateResultWatchdogTask(translateResult.nodeId, translateResult.version);
+        }
+        report_->FinishPageTranslateTextRequest();
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+{
+    SyncRequestGuard requestGuard(currentAbilityLanguageInfoPending_);
+    if (!requestGuard.IsAcquired()) {
+        LOGW("GetCurrentAbilityLanguageInfo request is already pending");
+        return LAST_UNFINISH;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetCurrentAbilityLanguageInfo write interface token failed");
+        return FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        LOGW("GetCurrentAbilityLanguageInfo remote is nullptr");
+        return FAILED;
+    }
+    int32_t sendRequestErrorCode = remote->SendRequest(GET_CURRENT_ABILITY_LANGUAGE_INFO, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("GetCurrentAbilityLanguageInfo send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    int32_t result = reply.ReadInt32();
+    if (result != NO_ERROR) {
+        LOGW("GetCurrentAbilityLanguageInfo remote failed, result is %{public}d", result);
+        return result;
+    }
+    language = reply.ReadString();
+    region = reply.ReadString();
     return NO_ERROR;
 }
 

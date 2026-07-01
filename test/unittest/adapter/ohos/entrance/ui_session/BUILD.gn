@@ -16,16 +16,43 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 config("ui_session_test_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$ace_root/interfaces/inner_api/ui_session",
+    "$ace_root/test/mock/ohos_mock/image",
     "$ace_root/test/unittest/adapter/ohos/entrance/ui_session",
+    "$root_out_dir/arkui/framework",
+  ]
+  defines = [
+    "ACE_UNITTEST",
+    "OHOS_STANDARD_SYSTEM",
+  ]
+  cflags_cc = [
+    "-Wno-unused-private-field",
+    "-Wno-thread-safety-attributes",
+    "-Wno-thread-safety-analysis",
+    "-Wno-non-c-typedef-for-linkage",
+    "-fvisibility-inlines-hidden",
+  ]
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-g",
   ]
 }
 
 ohos_unittest("ui_content_stub_unittest") {
   module_out_path = adapter_test_output_path
   sources = [
+    "$ace_root/adapter/ohos/entrance/ui_session/large_string_ashmem.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_ipc_util.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_translate_request_util.cpp",
     "$ace_root/test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/ohos/entrance/ui_session/mock_ui_session_manager_ohos.cpp",
 
@@ -36,10 +63,7 @@ ohos_unittest("ui_content_stub_unittest") {
     "ui_content_stub_test.cpp",
   ]
 
-  configs = [
-    "$ace_root/test/unittest:ace_unittest_config",
-    ":ui_session_test_config",
-  ]
+  configs = [ ":ui_session_test_config" ]
 
   deps = [
     "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils",
@@ -49,7 +73,13 @@ ohos_unittest("ui_content_stub_unittest") {
   ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "googletest:gmock",
     "googletest:gtest_main",
   ]
+}
+
+group("ui_content_stub_unittest_linux") {
+  testonly = true
+  deps = [ ":ui_content_stub_unittest(${host_toolchain})" ]
 }

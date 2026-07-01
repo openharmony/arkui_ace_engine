@@ -24,6 +24,7 @@
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
@@ -215,6 +216,30 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case GET_WEBINFO_BY_REQUEST: {
             GetWebInfoByRequestInner(data, reply, option);
+            break;
+        }
+        case GET_PAGE_TRANSLATE_TEXT: {
+            GetPageTranslateTextInner(data, reply, option);
+            break;
+        }
+        case START_PAGE_TRANSLATE: {
+            StartPageTranslateInner(data, reply, option);
+            break;
+        }
+        case END_PAGE_TRANSLATE: {
+            EndPageTranslateInner(data, reply, option);
+            break;
+        }
+        case RESET_PAGE_TRANSLATE: {
+            ResetPageTranslateInner(data, reply, option);
+            break;
+        }
+        case SEND_PAGE_TRANSLATE_RESULT: {
+            SendPageTranslateResultInner(data, reply, option);
+            break;
+        }
+        case GET_CURRENT_ABILITY_LANGUAGE_INFO: {
+            GetCurrentAbilityLanguageInfoInner(data, reply, option);
             break;
         }
         default: {
@@ -613,6 +638,89 @@ int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParc
     int32_t webId = data.ReadInt32();
     std::string request = data.ReadString();
     reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetPageTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string request = data.ReadString();
+    if (!PageTranslateRequestUtil::IsPageTranslateRequestValid(request)) {
+        reply.WriteInt32(PARAM_INVALID);
+        return NO_ERROR;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
+    int32_t result = GetPageTranslateText(request, nullptr);
+    if (result != NO_ERROR) {
+        UiSessionManager::GetInstance()->EraseProcessId("translate", processId);
+    }
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::StartPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string request = data.ReadString();
+    if (!PageTranslateRequestUtil::IsPageTranslateRequestValid(request)) {
+        reply.WriteInt32(PARAM_INVALID);
+        return NO_ERROR;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
+    int32_t result = StartPageTranslate(request, nullptr);
+    if (result == NO_ERROR) {
+        UiSessionManager::GetInstance()->MarkPageTranslateOwner(processId);
+    } else {
+        UiSessionManager::GetInstance()->EraseProcessId("translate", processId);
+    }
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::EndPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    int32_t result = EndPageTranslate();
+    UiSessionManager::GetInstance()->EraseProcessId("translate", processId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ResetPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t nodeId = data.ReadInt32();
+    reply.WriteInt32(ResetPageTranslate(nodeId));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendPageTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string result = data.ReadString();
+    std::vector<PageTranslateRequestUtil::TranslateResult> translateResults;
+    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
+        reply.WriteInt32(PARAM_INVALID);
+        return NO_ERROR;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    int32_t ret = SendPageTranslateResult(result);
+    if (ret == NO_ERROR) {
+        UiSessionManager::GetInstance()->OnPageTranslateResultHandled(processId);
+    }
+    reply.WriteInt32(ret);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetCurrentAbilityLanguageInfoInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string language;
+    std::string region;
+    int32_t result = GetCurrentAbilityLanguageInfo(language, region);
+    reply.WriteInt32(result);
+    if (result == NO_ERROR) {
+        reply.WriteString(language);
+        reply.WriteString(region);
+    }
     return NO_ERROR;
 }
 } // namespace OHOS::Ace
