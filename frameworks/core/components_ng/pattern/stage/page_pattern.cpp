@@ -1227,4 +1227,36 @@ void PagePattern::ContentChangeByDetaching(PipelineContext* pipeline)
     mgr->OnTransitionRemoved(host->GetId());
 }
 
+bool PagePattern::GetComponentInfo(const std::string& id, std::string& info)
+{
+    auto infoIter = restoreInfo_.find(id);
+    if (infoIter == restoreInfo_.end()) {
+        return false;
+    }
+    info = infoIter->second;
+    restoreInfo_.erase(infoIter);
+    return true;
+}
+
+void PagePattern::SetRestoreInfo(const std::string& info)
+{
+    auto values = JsonUtil::ParseJsonString(info);
+    if (!values->IsArray()) {
+        return;
+    }
+    auto size = values->GetArraySize();
+    for (int32_t index = 0; index < size; index++) {
+        auto restoreItem = values->GetArrayItem(index);
+        if (!restoreItem->IsObject()) {
+            continue;
+        }
+        if (!restoreItem->Contains("componentId")) {
+            continue;
+        }
+        if (!restoreItem->Contains("info")) {
+            continue;
+        }
+        restoreInfo_.insert(std::make_pair(restoreItem->GetString("componentId"), restoreItem->GetString("info")));
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/manager/recoverable/recoverable_declaration.h"
 
 namespace OHOS::Ace {
     struct NavigateChangeInfo;
@@ -74,6 +75,7 @@ struct NavdestinationRecoveryInfo {
     std::string moduleName;
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
+    std::string componentInfo;
     int32_t launchMode = 0;
     std::string state;
 

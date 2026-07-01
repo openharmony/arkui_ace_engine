@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -99,6 +100,9 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     RouterPageInfo info;
     info.url = url;
     info.params = params;
+    if (!firstRestorePageComponentInfo_.empty()) {
+        info.componentInfo = std::move(firstRestorePageComponentInfo_);
+    }
 #if !defined(PREVIEW)
     if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
@@ -185,6 +189,9 @@ void PageRouterManager::RunPageByNamedRouterInner(const std::string& name, const
     info.url = name;
     info.params = params;
     info.isNamedRouterMode = true;
+    if (!firstRestorePageComponentInfo_.empty()) {
+        info.componentInfo = std::move(firstRestorePageComponentInfo_);
+    }
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
@@ -604,6 +611,7 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
     info.params = tempStack.back().params;
     info.recoverable = true;
     info.isNamedRouterMode = tempStack.back().isNamedRouter;
+    info.componentInfo = tempStack.back().componentInfo;
     tempStack.pop_back();
     restorePageStack_ = tempStack;
 
@@ -689,6 +697,7 @@ RouterPageInfo PageRouterManager::GetPageInfoByIndex(int32_t index, const std::s
         info.params = params;
         info.recoverable = true;
         info.isNamedRouterMode = it->isNamedRouter;
+        info.componentInfo = it->componentInfo;
         return info;
     }
 
@@ -1023,14 +1032,20 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo(ContentInfoType type)
         if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
             jsonItem->Put("params", restoreIter->params.c_str());
             jsonItem->Put("isNamedRoute", restoreIter->isNamedRouter);
+            jsonItem->Put("componentInfo", restoreIter->componentInfo.c_str());
         }
         jsonRouterStack->Put(jsonItem);
         ++restoreIter;
     }
+    RefPtr<RecoverableManager> recoverableMgr = nullptr;
     auto iter = pageRouterStack_.begin();
     while (iter != pageRouterStack_.end()) {
         auto pageNode = iter->Upgrade();
         CHECK_NULL_RETURN(pageNode, jsonRouterStack);
+        auto context = pageNode->GetContext();
+        if (!recoverableMgr && context) {
+            recoverableMgr = context->GetRecoverableManager();
+        }
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_RETURN(pagePattern, jsonRouterStack);
         auto pageInfo = AceType::DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
@@ -1045,6 +1060,10 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo(ContentInfoType type)
         if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
             jsonItem->Put("params", pageInfo->GetPageInitParams().c_str());
             jsonItem->Put("isNamedRoute", pageInfo->IsCreateByNamedRouter());
+            std::string componentInfo;
+            if (recoverableMgr && recoverableMgr->GetRestoreByPage(false, pageNode->GetId(), componentInfo)) {
+                jsonItem->Put("componentInfo", componentInfo.c_str());
+            }
         }
         jsonRouterStack->Put(jsonItem);
         ++iter;
@@ -1110,6 +1129,7 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> PageRouterManager::RestoreRou
         auto item = stackInfo->GetArrayItem(index);
         bool isNamedRoute = false;
         std::string params;
+        std::string componentInfo;
         if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
             auto isNamedRouteJson = item->GetValue("isNamedRoute");
             if (isNamedRouteJson && isNamedRouteJson->IsBool()) {
@@ -1119,6 +1139,10 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> PageRouterManager::RestoreRou
             if (paramsJson && paramsJson->IsString()) {
                 params = paramsJson->GetString();
             }
+            auto componentInfoJson = item->GetValue("componentInfo");
+            if (componentInfoJson && componentInfoJson->IsString()) {
+                componentInfo = componentInfoJson->GetString();
+            }
         }
 
         std::string url = item->GetValue("url")->ToString();
@@ -1126,9 +1150,10 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> PageRouterManager::RestoreRou
         url = url.substr(1, url.size() - 2);
 
         if (index < stackSize - 1) {
-            restorePageStack_.emplace_back(url, params, isNamedRoute);
+            restorePageStack_.emplace_back(url, params, isNamedRoute, componentInfo);
         } else {
-            topRecord = RouterRecoverRecord(url, params, isNamedRoute);
+            topRecord = RouterRecoverRecord(url, params, isNamedRoute, componentInfo);
+            firstRestorePageComponentInfo_ = componentInfo;
         }
     }
     return std::make_pair(topRecord, UIContentErrorCode::NO_ERRORS);
@@ -1630,10 +1655,13 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
         pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
-
+    CHECK_NULL_RETURN(pagePattern, nullptr);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
     ResSchedReportScope reportScope("push_page", reportData);
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    if (!target.componentInfo.empty()) {
+        pagePattern->SetRestoreInfo(target.componentInfo);
+    }
     pageNode->SetHostPageId(pageId);
     // !!! must push_back first for UpdateRootComponent
     pageRouterStack_.emplace_back(pageNode);
@@ -1730,10 +1758,14 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
         pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
+    CHECK_NULL_RETURN(pagePattern, nullptr);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
     ResSchedReportScope reportScope("push_page", reportData);
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
+    if (!target.componentInfo.empty()) {
+        pagePattern->SetRestoreInfo(target.componentInfo);
+    }
     // !!! must push_back first for UpdateRootComponent
     pageRouterStack_.emplace_back(pageNode);
 
@@ -1936,6 +1968,7 @@ void PageRouterManager::RestorePageWithTarget(int32_t index, bool removeRestoreP
     info.url = iter->url;
     info.isNamedRouterMode = iter->isNamedRouter;
     info.recoverable = true;
+    info.componentInfo = iter->componentInfo;
     if (!info.errorCallback) {
         info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
             TAG_LOGE(AceLogTag::ACE_ROUTER, "restore page with target error: %{public}d, msg: %{public}s",

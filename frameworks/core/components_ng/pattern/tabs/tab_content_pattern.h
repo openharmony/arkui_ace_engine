@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -32,8 +33,8 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TabContentPattern : public Pattern {
-    DECLARE_ACE_TYPE(TabContentPattern, Pattern);
+class ACE_EXPORT TabContentPattern : public Pattern, public virtual RecoverableView {
+    DECLARE_ACE_TYPE(TabContentPattern, Pattern, RecoverableView);
 
 public:
     explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
@@ -75,6 +76,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        SetRecoverableViewHostNode(host);
         host->GetRenderContext()->UpdateClipEdge(true);
         FireWillShowEvent();
         auto parentNode = host->GetAncestorNodeOfFrame(false);
@@ -584,6 +586,8 @@ public:
         totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromSwiper, frameRect));
         return true;
     }
+
+    void OnAttachToMainTree() override;
 
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
