@@ -202,6 +202,7 @@ export class d1 extends ViewPU {
         this.onClose = b1;
         this.theme = a1;
         this.applycontentKey = 'applyContent' + SystemDateTime.getTime(false);
+        this.displayDpiScale = 1;
         this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
         this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, "maxWidth");
         this.__messageMaxWidth = new SynchedPropertySimpleOneWayPU(params.messageMaxWidth, this, "messageMaxWidth");
@@ -238,6 +239,9 @@ export class d1 extends ViewPU {
         }
         if (params.applycontentKey !== undefined) {
             this.applycontentKey = params.applycontentKey;
+        }
+        if (params.displayDpiScale !== undefined) {
+            this.displayDpiScale = params.displayDpiScale;
         }
         if (params.icon === undefined) {
             this.__icon.set({ image: '' });
@@ -753,10 +757,9 @@ export class d1 extends ViewPU {
         }
         v1 -= this.titleHeight;
         v1 -= this.buttonHeight;
-        v1 -= this.theme.h2.padding.top.value;
-        v1 -= (this.theme.button.e2.bottom.value / 2);
-        v1 -= (this.theme.h2.padding.bottom.value -
-            (this.theme.button.e2.bottom.value / 2));
+        let totalSpacing = this.theme.h2.padding.top.value + this.theme.h2.padding.bottom.value;
+        totalSpacing += this.theme.title.margin.bottom.value;
+        v1 -= totalSpacing * this.displayDpiScale;
         if (Math.floor(this.textHeight) > Math.floor(v1 + 1)) {
             this.scrollMaxHeight = v1;
         }
@@ -864,6 +867,8 @@ export class d1 extends ViewPU {
             this.messageMaxWeight = 400;
             return o1 = { maxWidth: 400, maxHeight: 480 };
         }
+        let densityPixels = p1.densityPixels;
+        this.displayDpiScale = (this.getUIContext()?.vp2px(1) ?? densityPixels) / densityPixels;
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
                 q1 = this.maxWidth;
