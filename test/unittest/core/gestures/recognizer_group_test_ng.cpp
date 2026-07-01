@@ -631,4 +631,70 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest020, TestSize.Level1)
     auto clickTypeName = AceType::TypeName(clickWithoutNode);
     EXPECT_NE(hittedRecognizerInfo.find(clickTypeName), hittedRecognizerInfo.end());
 }
+
+/**
+ * @tc.name: RemoveRecognizerInGroup001
+ * @tc.desc: Test RemoveRecognizerInGroup removes existing recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RemoveRecognizerInGroup001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
+
+    exclusiveRecognizer->RemoveRecognizerInGroup(clickRecognizer);
+    EXPECT_TRUE(exclusiveRecognizer->recognizers_.empty());
+}
+
+/**
+ * @tc.name: RemoveRecognizerInGroup002
+ * @tc.desc: Test RemoveRecognizerInGroup with recognizer not in group
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RemoveRecognizerInGroup002, TestSize.Level1)
+{
+    auto clickRecognizer1 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto clickRecognizer2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizer1 };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
+
+    exclusiveRecognizer->RemoveRecognizerInGroup(clickRecognizer2);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveRecognizerInGroup003
+ * @tc.desc: Test RemoveRecognizerInGroup with null recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RemoveRecognizerInGroup003, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
+
+    RefPtr<NGGestureRecognizer> nullRecognizer;
+    exclusiveRecognizer->RemoveRecognizerInGroup(nullRecognizer);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveRecognizerInGroup004
+ * @tc.desc: Test RemoveRecognizerInGroup with empty group
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RemoveRecognizerInGroup004, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers;
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    EXPECT_TRUE(exclusiveRecognizer->recognizers_.empty());
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    exclusiveRecognizer->RemoveRecognizerInGroup(clickRecognizer);
+    EXPECT_TRUE(exclusiveRecognizer->recognizers_.empty());
+}
 }; // namespace OHOS::Ace::NG
