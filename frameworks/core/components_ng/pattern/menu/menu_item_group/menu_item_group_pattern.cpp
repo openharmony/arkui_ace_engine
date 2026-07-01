@@ -47,6 +47,7 @@ void MenuItemGroupPattern::AttachBottomDivider()
     auto index = parent->GetChildIndex(host);
     if (index >= 0) {
         bottomDivider_->MountToParent(parent, ++index);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
