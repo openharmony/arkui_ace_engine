@@ -4442,6 +4442,7 @@
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::TimePickerModel::*;
       OHOS::Ace::TokenColors::*;
+      OHOS::Ace::TransparencyUtils::GetTransparencyLevel*;
       OHOS::Ace::TouchEventInfo::*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       virtual?thunk?to?OHOS::Ace::TouchEventTarget::*;
