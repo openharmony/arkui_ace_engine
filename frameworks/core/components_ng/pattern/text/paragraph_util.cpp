@@ -24,36 +24,6 @@
 #include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& nextStyle,
-    TextDirection textDirection, TextDirection nextTextDirection)
-{
-    if (pStyle != nextStyle) {
-        return true;
-    }
-    if (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) {
-        return true;
-    }
-    if (Positive(pStyle.indent.Value())) {
-        return true;
-    }
-    if (pStyle.maxLines != UINT32_MAX) {
-        return true;
-    }
-    if (pStyle.drawableLeadingMargin.has_value()) {
-        return true;
-    }
-    if ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
-        nextTextDirection != textDirection) {
-        return true;
-    }
-    if (pStyle.tailIndents.has_value()) {
-        return true;
-    }
-    return false;
-}
-} // namespace
-
 ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
 {
     return { .direction = textStyle.GetTextDirection(),
@@ -423,5 +393,33 @@ ImageSourceInfo ParagraphUtil::CreateImageSourceInfo(const ImageSpanOptions& opt
 #endif
     info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
     return info;
+}
+
+bool ParagraphUtil::NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& nextStyle,
+    TextDirection textDirection, TextDirection nextTextDirection)
+{
+    if (pStyle != nextStyle) {
+        return true;
+    }
+    if (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) {
+        return true;
+    }
+    if (Positive(pStyle.indent.Value())) {
+        return true;
+    }
+    if (pStyle.maxLines != UINT32_MAX) {
+        return true;
+    }
+    if (pStyle.drawableLeadingMargin.has_value()) {
+        return true;
+    }
+    if ((pStyle.direction == TextDirection::INHERIT || pStyle.direction == TextDirection::AUTO) &&
+        nextTextDirection != textDirection) {
+        return true;
+    }
+    if (pStyle.tailIndents.has_value()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
