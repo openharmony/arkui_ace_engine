@@ -32,7 +32,7 @@ void ResSchedClickOptimizer::GetComponentTextRecursive(
 bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
     std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes)
 {
-    return ture;
+    return true;
 }
 
 } // namespace OHOS::Ace
