@@ -935,14 +935,14 @@ std::string ClickRecognizer::GetGestureInfoString() const
     return gestureInfoStr;
 }
 
-void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline)
+void ClickRecognizer::ReportTouchDownToResSched()
 {
     CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
     auto frameNode = GetAttachedNode();
     CHECK_EQUAL_VOID(frameNode.Invalid(), true);
 
     std::unordered_map<std::string, std::string> payload;
-    bool ret = ResSchedClickOptimizer::BuidComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
+    bool ret = ResSchedClickOptimizer::BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
         MAX_TOUCH_DOWN_RECURSIVE_NODES);
     CHECK_EQUAL_VOID(ret, false);
     ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
