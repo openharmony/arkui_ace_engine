@@ -940,12 +940,7 @@ void ClickRecognizer::ReportTouchDownToResSched()
     CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
     auto frameNode = GetAttachedNode();
     CHECK_EQUAL_VOID(frameNode.Invalid(), true);
-
-    std::unordered_map<std::string, std::string> payload;
-    bool ret = ResSchedClickOptimizer::BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
-        MAX_TOUCH_DOWN_RECURSIVE_NODES);
-    CHECK_EQUAL_VOID(ret, false);
-    ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
+    ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(frameNode);
 }
 
 void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()

@@ -45,7 +45,7 @@ constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
-constexpr int32_t TOUCH_DOWN_WITH_CLICKABLE_FRAMENODE_INFO_EVENT = 5;
+constexpr int32_t TOUCH_EVENT_DOWN_CLICKABLE_FRAMENODE = 6;
 constexpr int32_t KEY_DOWN_EVENT = 1;
 constexpr int32_t KEY_UP_EVENT = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
@@ -214,7 +214,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             },
             { TOUCH_CLIKABLE_FRAMENODE,
                 [this](std::unordered_map<std::string, std::string>& payload) {
-                    reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_WITH_CLICKABLE_FRAMENODE_INFO_EVENT, payload);
+                    reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT_DOWN_CLICKABLE_FRAMENODE, payload);
                 }
             },
             { AUTO_PLAY_ON,

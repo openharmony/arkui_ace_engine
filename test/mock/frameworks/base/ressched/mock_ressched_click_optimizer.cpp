@@ -35,4 +35,8 @@ bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>&
     return true;
 }
 
+void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
+{
+}
+
 } // namespace OHOS::Ace

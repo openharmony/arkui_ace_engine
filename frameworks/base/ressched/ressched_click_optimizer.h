@@ -51,10 +51,11 @@ public:
         depth_ = std::clamp(value, 0, MAX_DEPTH);
     }
 
-    static bool BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
-        std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes = INT_MAX);
+    static void HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode);
 
 private:
+    static bool BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
+        std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes = INT_MAX);
     static void GetComponentTextRecursive(const WeakPtr<NG::FrameNode> weakNode, std::string& text,
         const int32_t remain, int32_t& maxNodes);
 

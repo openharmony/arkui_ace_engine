@@ -22,6 +22,8 @@ namespace OHOS::Ace {
 std::atomic_bool ResSchedClickOptimizer::clickExtEnabled_{false};
 
 namespace {
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 5;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
 constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 
 bool SafeConvertStringToInt32(const std::string& str, int32_t& result)
@@ -92,6 +94,15 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
         return;
     }
     ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
+}
+
+void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
+{
+    std::unordered_map<std::string, std::string> payload;
+    bool ret = BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH, 
+        MAX_TOUCH_DOWN_RECURSIVE_NODES);
+    CHECK_EQUAL_VOID(ret, false);
+    ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
 }
 
 bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
