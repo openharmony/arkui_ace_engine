@@ -3931,13 +3931,13 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         [weak = WeakPtr(GetHost()), containerId = Container::CurrentId(), backgroundTaskId = ++backgroundTaskId_](
             std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
             CHECK_NULL_VOID(pixmap);
-            auto frameNode = weak.Upgrade();
-            CHECK_NULL_VOID(frameNode);
             ContainerScope scope(containerId);
             std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
             auto pixelmap = PixelMap::CreatePixelMap(&pmap);
-            auto task = [pixelmap, frameNode, containerId, backgroundTaskId]() {
+            auto task = [pixelmap, weak, containerId, backgroundTaskId]() {
                 ContainerScope scope(containerId);
+                auto frameNode = weak.Upgrade();
+                CHECK_NULL_VOID(frameNode);
                 auto context = frameNode->GetRenderContext();
                 if (context && (context->GetCurrentBackgroundTaskId() == backgroundTaskId)) {
                     context->UpdateBackgroundPixelMap(pixelmap);
