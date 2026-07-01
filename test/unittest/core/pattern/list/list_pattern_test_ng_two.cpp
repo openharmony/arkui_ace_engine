@@ -848,7 +848,7 @@ HWTEST_F(ListPatternTwoTestNg, UpdateCurrentOffset_IsOutOfBoundary, TestSize.Lev
     listPattern->contentStartOffset_ = 4.0f;
     listPattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    listPattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    listPattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
     listPattern->frameNode_.Upgrade()->layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
     listPattern->crossMatchChild_ = true;
 
