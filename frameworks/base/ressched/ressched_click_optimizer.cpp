@@ -99,7 +99,7 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
 {
     std::unordered_map<std::string, std::string> payload;
-    bool ret = BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH, 
+    bool ret = BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
         MAX_TOUCH_DOWN_RECURSIVE_NODES);
     CHECK_EQUAL_VOID(ret, false);
     ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
