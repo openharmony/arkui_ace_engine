@@ -42,7 +42,9 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t PERCENT_100 = 100;
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
 constexpr uint32_t NUM_9 = 9;
+#endif
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
 constexpr uint32_t DEPTH_COMPONENT_NATIVE_WINDOW_COUNT = 2;
 constexpr uint32_t SURFACE_QUEUE_SIZE = 2;
@@ -182,7 +184,7 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     auto rsDepthNode = GetRSDepthNode();
     CHECK_NULL_RETURN(rsDepthNode, false);
     TransferCameraParams(rsDepthNode);
