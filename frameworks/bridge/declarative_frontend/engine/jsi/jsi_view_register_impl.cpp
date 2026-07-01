@@ -121,6 +121,7 @@
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
+#include "bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
@@ -960,6 +961,7 @@ void JsBindFormViews(
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSStateMgmtHistogram::JSBind(globalObj);
         JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
@@ -1023,6 +1025,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDumpRegister::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
     JSStateMgmtProfiler::JSBind(globalObj);
+    JSStateMgmtHistogram::JSBind(globalObj);
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);

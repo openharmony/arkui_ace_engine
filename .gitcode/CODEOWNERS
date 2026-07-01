@@ -4153,6 +4153,8 @@ frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding
 frameworks/bridge/declarative_frontend/jsview/js_popups.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h @arkui_statemgmt
+frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.cpp @arkui_statemgmt
+frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/js_tabs_feature.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_tabs_feature.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h @huawei_g_five
