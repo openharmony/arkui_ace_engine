@@ -25,16 +25,40 @@ void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_DecorationStyle ConstructImpl(const Ark_DecorationStyleInterface* value)
+Ark_DecorationStyle Construct0Impl(const Ark_DecorationStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
     if (value) {
         auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
         auto aceColorOpt = Converter::OptConvert<Color>(value->color);
         auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        auto aceThicknessScaleOpt = Converter::OptConvert<float>(value->thicknessScale);
         peer->span = AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({aceTypeOpt.value_or(TextDecoration::NONE)}),
-            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>(), nullptr);
+            std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }), aceColorOpt, aceStyleOpt,
+            aceThicknessScaleOpt, std::optional<TextDecorationOptions>(), nullptr);
+    } else {
+        peer->span = AceType::MakeRefPtr<DecorationSpan>();
+    }
+    return peer;
+}
+Ark_DecorationStyle Construct1Impl(const Ark_DecorationStyleInterface* value, const Opt_DecorationOptions* options)
+{
+    auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
+    if (value) {
+        auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
+        auto aceColorOpt = Converter::OptConvert<Color>(value->color);
+        auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        auto aceThicknessScaleOpt = Converter::OptConvert<float>(value->thicknessScale);
+        if (options) {
+            auto aceOptionsOpt = Converter::OptConvert<TextDecorationOptions>(options->value);
+            peer->span = AceType::MakeRefPtr<DecorationSpan>(
+                std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }), aceColorOpt, aceStyleOpt,
+                aceThicknessScaleOpt, aceOptionsOpt, nullptr);
+        } else {
+            peer->span = AceType::MakeRefPtr<DecorationSpan>(
+                std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }), aceColorOpt, aceStyleOpt,
+                aceThicknessScaleOpt, std::optional<TextDecorationOptions>(), nullptr);
+        }
     } else {
         peer->span = AceType::MakeRefPtr<DecorationSpan>();
     }
@@ -67,16 +91,35 @@ Opt_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
     auto optValue = peer->span->GetTextDecorationStyle();
     return Converter::ArkValue<Opt_TextDecorationStyle>(optValue);
 }
+Opt_Float64 GetThicknessScaleImpl(Ark_DecorationStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_Float64>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    auto optValue = peer->span->GetLineThicknessScale();
+    return Converter::ArkValue<Opt_Float64>(optValue);
+}
+Opt_DecorationOptions GetOptionsImpl(Ark_DecorationStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_DecorationOptions>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    auto optValue = peer->span->GetTextDecorationOptions();
+    return Converter::ArkValue<Opt_DecorationOptions>(optValue);
+}
 } // DecorationStyleAccessor
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
 {
     static const GENERATED_ArkUIDecorationStyleAccessor DecorationStyleAccessorImpl {
         DecorationStyleAccessor::DestroyPeerImpl,
-        DecorationStyleAccessor::ConstructImpl,
+        DecorationStyleAccessor::Construct0Impl,
+        DecorationStyleAccessor::Construct1Impl,
         DecorationStyleAccessor::GetFinalizerImpl,
         DecorationStyleAccessor::GetTypeImpl,
         DecorationStyleAccessor::GetColorImpl,
         DecorationStyleAccessor::GetStyleImpl,
+        DecorationStyleAccessor::GetThicknessScaleImpl,
+        DecorationStyleAccessor::GetOptionsImpl,
     };
     return &DecorationStyleAccessorImpl;
 }

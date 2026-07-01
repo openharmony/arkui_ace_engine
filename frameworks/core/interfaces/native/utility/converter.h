@@ -98,6 +98,7 @@ struct Font;
 struct PickerIndicatorStyle;
 struct PreviewText;
 struct SelectionOptions;
+struct TextDecorationOptions;
 struct TextDetectConfig;
 struct TextMetrics;
 struct UserUnderlineColor;
@@ -1075,6 +1076,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextContentAlign>& dst, const Ark_TextContentAlign& src);
     template<> void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src);
     template<> void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::TextDecorationOptions>& dst, const Ark_DecorationOptions& src);
     template<> void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src);
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src);

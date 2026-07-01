@@ -4496,6 +4496,15 @@ void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_Union
 }
 
 template<>
+void AssignCast(std::optional<OHOS::Ace::TextDecorationOptions>& dst, const Ark_DecorationOptions& src)
+{
+    OHOS::Ace::TextDecorationOptions result;
+    auto enableMultiType = Converter::OptConvert<bool>(src.enableMultiType);
+    result.enableMultiType = enableMultiType;
+    dst = result;
+}
+
+template<>
 void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src)
 {
     auto immersiveOptions = ImmersiveOptions();

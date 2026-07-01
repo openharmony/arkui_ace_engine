@@ -251,7 +251,7 @@ private:
             .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
             .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
         };
-        decorationStylePeer = GeneratedModifier::GetDecorationStyleAccessor()->construct(&decorationStyle);
+        decorationStylePeer = GeneratedModifier::GetDecorationStyleAccessor()->construct0(&decorationStyle);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_DecorationStyle>(decorationStylePeer);
     }
 

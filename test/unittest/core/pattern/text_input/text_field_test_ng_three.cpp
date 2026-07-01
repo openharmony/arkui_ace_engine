@@ -57,10 +57,16 @@ HWTEST_F(TextFieldTestNgThree, OnThemeScopeUpdate002, TestSize.Level1)
  */
 HWTEST_F(TextFieldTestNgThree, TwinklingByFocus001, TestSize.Level1)
 {
+    /**
+     * @tc.step1: step1. create textFieldPattern
+     */
     auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->focusIndex_ = FocuseIndex::TEXT;
     textFieldPattern->TwinklingByFocus();
+    /**
+     * @tc.steps: step2. verify cursorVisible_ is false
+     */
     EXPECT_EQ(textFieldPattern->cursorVisible_, false);
 }
 

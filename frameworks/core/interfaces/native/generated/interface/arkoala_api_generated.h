@@ -2311,6 +2311,8 @@ typedef struct Ark_DataPanelOptions Ark_DataPanelOptions;
 typedef struct Opt_DataPanelOptions Opt_DataPanelOptions;
 typedef struct Ark_DateRange Ark_DateRange;
 typedef struct Opt_DateRange Opt_DateRange;
+typedef struct Ark_DecorationOptions Ark_DecorationOptions;
+typedef struct Opt_DecorationOptions Opt_DecorationOptions;
 typedef struct Ark_DeleteValue Ark_DeleteValue;
 typedef struct Opt_DeleteValue Opt_DeleteValue;
 typedef struct Ark_DepthColorRGB Ark_DepthColorRGB;
@@ -15785,6 +15787,14 @@ typedef struct Opt_DateRange {
     Ark_Tag tag;
     Ark_DateRange value;
 } Opt_DateRange;
+typedef struct Ark_DecorationOptions {
+    /* kind: Interface */
+    Opt_Boolean enableMultiType;
+} Ark_DecorationOptions;
+typedef struct Opt_DecorationOptions {
+    Ark_Tag tag;
+    Ark_DecorationOptions value;
+} Opt_DecorationOptions;
 typedef struct Ark_DeleteValue {
     /* kind: Interface */
     Ark_Int32 deleteOffset;
@@ -19732,6 +19742,7 @@ typedef struct Ark_DecorationStyleInterface {
     Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
+    Opt_Float64 thicknessScale;
 } Ark_DecorationStyleInterface;
 typedef struct Opt_DecorationStyleInterface {
     Ark_Tag tag;
@@ -29584,11 +29595,15 @@ typedef struct GENERATED_ArkUIDataResubmissionHandlerAccessor {
 
 typedef struct GENERATED_ArkUIDecorationStyleAccessor {
     void (*destroyPeer)(Ark_DecorationStyle peer);
-    Ark_DecorationStyle (*construct)(const Ark_DecorationStyleInterface* value);
+    Ark_DecorationStyle (*construct0)(const Ark_DecorationStyleInterface* value);
+    Ark_DecorationStyle (*construct1)(const Ark_DecorationStyleInterface* value,
+                                      const Opt_DecorationOptions* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_TextDecorationType (*getType)(Ark_DecorationStyle peer);
     Opt_ResourceColor (*getColor)(Ark_DecorationStyle peer);
     Opt_TextDecorationStyle (*getStyle)(Ark_DecorationStyle peer);
+    Opt_Float64 (*getThicknessScale)(Ark_DecorationStyle peer);
+    Opt_DecorationOptions (*getOptions)(Ark_DecorationStyle peer);
 } GENERATED_ArkUIDecorationStyleAccessor;
 
 typedef struct GENERATED_ArkUIDialogExtenderAccessor {
