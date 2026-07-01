@@ -440,7 +440,7 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil005, TestSize.Level1)
     spans.emplace_back(span3);
     
     /**
- * @tc.steps: step2. Set tailIndents for first SpanItem
+     * @tc.steps: step2. Set tailIndents for first SpanItem
      * @tc.expected: tailIndents set successfully
      */
     TailIndentsArray indentsArray;
