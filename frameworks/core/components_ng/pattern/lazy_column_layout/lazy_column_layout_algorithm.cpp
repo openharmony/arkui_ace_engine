@@ -35,7 +35,6 @@ void LazyColumnLayoutAlgorithm::ShiftLayoutWindow(float delta)
     if (NearZero(delta)) {
         return;
     }
-    referencePos_ -= delta;
     startPos_ += delta;
     endPos_ += delta;
     cacheStartPos_ += delta;
@@ -681,6 +680,8 @@ void LazyColumnLayoutAlgorithm::MeasureItemsLazy(LayoutWrapper* layoutWrapper)
     }
     // Report the pre-shifted header compensation; never apply it to the window a second time.
     layoutInfo_->adjustOffset_.start += headerAdjustOffset_;
+    referencePos_ = forwardLayout_ ? referencePos_ - layoutInfo_->adjustOffset_.start
+                                   : referencePos_ + layoutInfo_->adjustOffset_.end;
     totalMainSize_ = layoutInfo_->totalMainSize_;
     CalculateVisibleStartIndex();
     CalculateVisibleEndIndex();
