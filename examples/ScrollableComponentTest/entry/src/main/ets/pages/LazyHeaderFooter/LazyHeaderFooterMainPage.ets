@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,22 +29,15 @@ class TextList {
 
 @Entry
 @Component
-struct IndexPage {
+struct LazyHeaderFooterMainPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'Scrollable', 'pages/scrollable/ScrollableMainPage'),
-    new TextList(2, 'Tabs', 'pages/Tabs/TabsMainPage'),
-    new TextList(3, 'WaterFlow', 'pages/waterflow/WaterFlowMainPage'),
-    new TextList(4, 'Swiper', 'pages/Swiper/SwiperMainPage'),
-    new TextList(5, 'List', 'pages/List/ListMainPage'),
-    new TextList(6, 'AlphabetIndexer', 'pages/alphabetIndexer/AlphabetIndexerMainPage'),
-    new TextList(7, 'Refresh', 'pages/refresh/RefreshMainPage'),
-    new TextList(8, 'Grid', 'pages/grid/GridMainPage'),
-    new TextList(9, 'Scroll', 'pages/Scroll/ScrollMainPage'),
-    new TextList(10, 'LazyVGridLayout', 'pages/LazyVGridLayout/LazyVGridLayoutMainPage'),
-    new TextList(11, 'LazyHeaderFooter', 'pages/LazyHeaderFooter/LazyHeaderFooterMainPage'),
+    new TextList(1, 'Back', 'pages/Index'),
+    new TextList(2, 'Scroll', 'pages/LazyHeaderFooter/ScrollSample'),
+    new TextList(3, 'List', 'pages/LazyHeaderFooter/ListSample'),
+    new TextList(4, 'WaterFlow', 'pages/LazyHeaderFooter/WaterFlowSample'),
   ]
-  @State fontSize: Resource | undefined = undefined
+
   build() {
     Column() {
       Scroll(this.scroll) {
