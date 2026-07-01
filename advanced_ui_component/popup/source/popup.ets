@@ -266,6 +266,7 @@ export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
   private applycontentKey: string = 'applyContent' + systemDateTime.getTime(false);
+  private displayDpiScale: number = 1;
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop maxWidth?: Dimension;
   @Prop messageMaxWidth?: number = 0;
@@ -595,10 +596,9 @@ export struct PopupComponent {
     }
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
-    scrollMaxHeight -= this.theme.windows.padding.top!.value
-    scrollMaxHeight -= (this.theme.button.textMargin.bottom!.value / 2)
-    scrollMaxHeight -= (this.theme.windows.padding.bottom!.value -
-      (this.theme.button.textMargin.bottom!.value / 2))
+    let totalSpacing = this.theme.windows.padding.top!.value + this.theme.windows.padding.bottom!.value;
+    totalSpacing += this.theme.title.margin.bottom!.value;
+    scrollMaxHeight -= totalSpacing * this.displayDpiScale;
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
       this.scrollMaxHeight = scrollMaxHeight;
     } else {
@@ -703,6 +703,8 @@ export struct PopupComponent {
       this.messageMaxWeight = 400
       return applyMaxSize = { maxWidth: 400, maxHeight: 480 }
     }
+    let densityPixels = defaultDisplaySync.densityPixels;
+    this.displayDpiScale = (this.getUIContext()?.vp2px(1) ?? densityPixels) / densityPixels;
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
         maxWidthSize = this.maxWidth;
