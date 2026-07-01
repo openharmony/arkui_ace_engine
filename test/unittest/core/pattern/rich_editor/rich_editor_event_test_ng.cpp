@@ -749,6 +749,12 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level0)
     EXPECT_TRUE(eventHub->FireOnWillChange(value));
     EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
 
+    /**
+     * @tc.steps: step3. FireOnStyledStringDidChange event when callback is null
+     */
+    EXPECT_FALSE(eventHub->HasOnStyledStringDidChange());
+    eventHub->FireOnStyledStringDidChange(info);
+
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
