@@ -3186,11 +3186,7 @@ HWTEST_F(WebSelectOverlayTest, IsShowMenuOfAutoFill_001, TestSize.Level1)
     EXPECT_EQ(isShow, true);
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(isShow, false);
-    } else {
-        EXPECT_EQ(isShow, true);
-    }
+    EXPECT_EQ(isShow, true);
 #endif
 }
 
@@ -5496,18 +5492,10 @@ HWTEST_F(WebSelectOverlayTest, OnUpdateSelectOverlayInfo_001, TestSize.Level1)
     overlay.webSelectInfo_.isHandleLineShow = false;
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(selectInfo.isHandleLineShow, false);
-    } else {
-        EXPECT_EQ(selectInfo.isHandleLineShow, true);
-    }
+    EXPECT_EQ(selectInfo.isHandleLineShow, true);
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(selectInfo.isHandleLineShow, false);
-    } else {
-        EXPECT_EQ(selectInfo.isHandleLineShow, true);
-    }
+    EXPECT_EQ(selectInfo.isHandleLineShow, true);
 }
 
 /**

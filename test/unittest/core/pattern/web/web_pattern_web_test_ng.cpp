@@ -453,8 +453,10 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     webPattern->drawSizeCache_.SetHeight(50.00);
-    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
+    // OnModifyDone initializes delegate_, which is required by ProcessVirtualKeyBoardShow.
     webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->drawSizeCache_.SetHeight(50.00);
     EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));
@@ -1297,12 +1299,8 @@ HWTEST_F(WebPatternWebTest, HandleTouchUp_002, TestSize.Level1)
     TouchLocationInfo touchInfo2(0);
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
-    webPattern->HandleTouchUp(info, true);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
-    } else {
-        EXPECT_NE(webPattern->showMagnifierFingerId_, -1);
-    }
+    webPattern->HandleTouchUp(info2, true);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
 #endif
 }
 
@@ -1429,12 +1427,8 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel_002, TestSize.Level1)
     TouchLocationInfo touchInfo2(0);
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
-    webPattern->HandleTouchCancel(info);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
-    } else {
-        EXPECT_NE(webPattern->showMagnifierFingerId_, -1);
-    }
+    webPattern->HandleTouchCancel(info2);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
 #endif
 }
 
