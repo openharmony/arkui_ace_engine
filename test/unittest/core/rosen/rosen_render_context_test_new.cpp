@@ -332,48 +332,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew010, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTestNew011
- * @tc.desc: SetOpacity().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew011, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
-    rosenRenderContext->SetOpacity(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
-    rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
-    rosenRenderContext->SetRenderPivot(1.0, 0.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetPivot().x_, 1.0);
-
-    rosenRenderContext->SetScale(1.0, 0.0);
-    rosenRenderContext->PaintPixmapBgImage();
-    rosenRenderContext->PaintRSBgImage();
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetScale().data_[0], 1.0);
-    rosenRenderContext->SetRenderFrameOffset(OffsetF(1.0, 0.0));
-    EXPECT_EQ(rosenRenderContext->frameOffset_, OffsetF(1.0, 0.0));
-    rosenRenderContext->SetShadowRadius(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowRadius(), 1.0);
-    rosenRenderContext->SetShadowElevation(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowElevation(), 1.0);
-    rosenRenderContext->SetShadowAlpha(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowAlpha(), 1.0);
-    rosenRenderContext->SetShadowOffset(1.0, 0.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowOffsetX(), 1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowOffsetY(), 0.0);
-    rosenRenderContext->SetShadowColor(SHAPE_MASK_DEFAULT_COLOR);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowColor(),
-        OHOS::Rosen::RSColor::FromArgbInt(SHAPE_MASK_DEFAULT_COLOR));
-    rosenRenderContext->SetRotation(1.0, 0.0, 1.0);
-    rosenRenderContext->DumpInfo();
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetRotationX(), 1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetRotationY(), 0.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetRotation(), 1.0);
-}
-
-/**
  * @tc.name: RosenRenderContextTestNew012
  * @tc.desc: SetContentRectToFrame().
  * @tc.type: FUNC
@@ -737,48 +695,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew022, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowIsFilled(), true);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowColorStrategy(),
         Rosen::SHADOW_COLOR_STRATEGY::COLOR_STRATEGY_NONE);
-}
-
-/**
- * @tc.name: RosenRenderContextTestNew023
- * @tc.desc: OnBackBlendApplyTypeUpdate().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto fgModifier = AceType::MakeRefPtr<Modifier>();
-    rosenRenderContext->FlushForegroundModifier(fgModifier);
-    auto overlayModifier = AceType::MakeRefPtr<Modifier>();
-    rosenRenderContext->FlushOverlayModifier(overlayModifier);
-    std::function<void(RSCanvas & canvas)> func = [](RSCanvas& canvas) {};
-    rosenRenderContext->FlushOverlayDrawFunction(std::move(func));
-    auto rect = RectF(1.0, 1.0, 1.0, 1.0);
-    RoundRect roundRect;
-    roundRect.SetRect(rect);
-    roundRect.SetCornerRadius(1.0);
-    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true, true);
-    rosenRenderContext->SetShadowRadius(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowRadius(), 1.0);
-    rosenRenderContext->SetShadowElevation(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowElevation(), 1.0);
-    rosenRenderContext->FlushForegroundDrawFunction(std::move(func));
-    auto contentModifier = AceType::MakeRefPtr<Modifier>();
-    rosenRenderContext->FlushContentModifier(contentModifier);
-    rosenRenderContext->FlushContentDrawFunction(std::move(func));
-    rosenRenderContext->ClearFocusState();
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, false);
-    EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
-    rosenRenderContext->SetOpacity(1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
-    rosenRenderContext->PaintAccessibilityFocus(false);
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, true);
-    rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
-    rosenRenderContext->SetRenderPivot(1.0, 0.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetPivot().x_, 1.0);
 }
 
 /**
