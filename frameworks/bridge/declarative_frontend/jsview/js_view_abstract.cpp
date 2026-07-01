@@ -11127,7 +11127,7 @@ bool JSViewAbstract::ParseShadowPropsInner(
     if (ParseJsShadowColorStrategy(jsColor, shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
     } else if (ParseJsColor(jsColor, color, colorResObj)) {
-        if (needResObj && colorResObj) {
+        if (needResObj && colorResObj && jsColor->IsObject()) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsColor);
             JSViewAbstract::CompleteResourceObject(jsObj);
             colorResObj = JSViewAbstract::GetResourceObject(jsObj);

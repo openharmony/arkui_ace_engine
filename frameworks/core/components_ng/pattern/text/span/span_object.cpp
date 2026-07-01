@@ -848,8 +848,8 @@ void TextShadowSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
             auto key = "shadow_" + std::to_string(index);
             spanItem->RemoveResourceObj(key);
         }
+        spanItem->fontStyle->ResetTextShadow();
     }
-    spanItem->fontStyle->ResetTextShadow();
 }
 
 std::vector<Shadow> TextShadowSpan::GetTextShadow() const
