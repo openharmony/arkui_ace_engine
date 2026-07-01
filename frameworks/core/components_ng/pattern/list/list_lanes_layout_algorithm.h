@@ -78,6 +78,8 @@ private:
     int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
         int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show) override;
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
+    void UpdateLineItemPositions(int32_t startIndex, int32_t endIndex, float startPos, float endPos);
+    bool TryUseFirstItemInfo(int32_t& currentIndex, float& linePos, bool forward);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
         int32_t index, float& pos, bool forward);

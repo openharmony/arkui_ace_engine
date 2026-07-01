@@ -867,7 +867,7 @@ bool ListLayoutAlgorithm::CanUseInfoInPosMap(int32_t index, float delta) const
         return false;
     }
     const auto& info = posMap_->GetPositionInfo(index);
-    if (info.isGroup && GreatNotEqual(info.mainSize, contentMainSize_ * 2.0f)) {
+    if ((info.isGroup || info.isLazyChild) && GreatNotEqual(info.mainSize, contentMainSize_ * 2.0f)) {
         return false;
     }
     return true;
@@ -1291,9 +1291,11 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             ReportGetChildError("LayoutALineForward", currentIndex + 1);
             return 0;
         }
-        int32_t id = wrapper->GetHostNode()->GetId();
+        auto childNode = wrapper->GetHostNode();
+        int32_t id = childNode ? childNode->GetId() : -1;
         ++currentIndex;
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         if (isGroup) {
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d, %f", currentIndex, startPos);
@@ -1303,7 +1305,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
                 AdjustStartPosition(wrapper, startPos);
             }
             CheckGroupMeasureBreak(wrapper);
-        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+        } else if (isLazyChild) {
             MeasureLazyChild(wrapper, currentIndex, startPos, true);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
@@ -1313,7 +1315,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         endPos = startPos + mainLen;
-        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup, isLazyChild };
     } else {
         ++currentIndex;
         itemPosition_[currentIndex] = firstItemInfo_.value().second;
@@ -1337,16 +1339,18 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             ReportGetChildError("LayoutALineBackward", currentIndex - 1);
             return 0;
         }
-        int32_t id = wrapper->GetHostNode()->GetId();
+        auto childNode = wrapper->GetHostNode();
+        int32_t id = childNode ? childNode->GetId() : -1;
         --currentIndex;
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         if (isGroup) {
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d, %f", currentIndex, endPos);
             wrapper->Measure(childLayoutConstraint_);
             CheckGroupMeasureBreak(wrapper);
-        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+        } else if (isLazyChild) {
             MeasureLazyChild(wrapper, currentIndex, endPos, false);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, endPos);
@@ -1356,7 +1360,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
         float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         startPos = endPos - mainLen;
-        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup, isLazyChild };
     } else {
         --currentIndex;
         itemPosition_[currentIndex] = firstItemInfo_.value().second;
@@ -2312,8 +2316,7 @@ void ListLayoutAlgorithm::ApplyLazyVGridAdjustOffset(
 bool ListLayoutAlgorithm::CanSupportNestedLazy(
     const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode, int32_t lanes)
 {
-    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listLayoutProperty, false);
+    CHECK_NULL_RETURN(childNode, false);
     auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, false);
 
@@ -2325,6 +2328,9 @@ bool ListLayoutAlgorithm::CanSupportNestedLazy(
         return false;
     }
 
+    CHECK_NULL_RETURN(listNode, false);
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listLayoutProperty, false);
     bool hasChainAnimation = listLayoutProperty->GetChainAnimation().has_value() &&
         listLayoutProperty->GetChainAnimation().value();
     if (hasChainAnimation) {
@@ -2618,6 +2624,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
             return curIndex - 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        auto childNode = wrapper->GetHostNode();
+        bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
             !wrapper->CheckHasPreMeasured()) {
@@ -2628,8 +2636,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
-        int32_t id = wrapper->GetHostNode()->GetId();
-        ListItemInfo pos = { id, currPos, currPos + mainLen, isGroup };
+        int32_t id = childNode ? childNode->GetId() : -1;
+        ListItemInfo pos = { id, currPos, currPos + mainLen, isGroup, isLazyChild };
         currPos += mainLen + spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);
@@ -2677,6 +2685,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
             return curIndex + 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        auto childNode = wrapper->GetHostNode();
+        bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
             !wrapper->CheckHasPreMeasured()) {
@@ -2687,8 +2697,8 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
-        int32_t id = wrapper->GetHostNode()->GetId();
-        ListItemInfo pos = { id, currPos - mainLen, currPos, isGroup };
+        int32_t id = childNode ? childNode->GetId() : -1;
+        ListItemInfo pos = { id, currPos - mainLen, currPos, isGroup, isLazyChild };
         currPos -= mainLen + spaceWidth_;
         auto startIndex = curIndex;
         LayoutItem(wrapper, curIndex, pos, startIndex, crossSize);

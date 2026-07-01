@@ -27,7 +27,10 @@ void ListPositionMap::UpdatePosRange(int32_t startIndex, int32_t endIndex,
     ListPositionInfo posInfo, float space, int32_t lanes)
 {
     for (int32_t i = startIndex; i < endIndex; i++) {
-        posMap_[i] = posInfo;
+        auto& currPosInfo = posMap_[i];
+        bool isLazyChild = currPosInfo.isLazyChild;
+        currPosInfo = posInfo;
+        currPosInfo.isLazyChild = isLazyChild;
         if (lanes >= 1 && (i % lanes == lanes - 1)) {
             posInfo.mainPos = posInfo.mainPos + posInfo.mainSize + space;
         }
@@ -42,6 +45,7 @@ void ListPositionMap::UpdatePosWithCheck(int32_t index, ListPositionInfo posInfo
         return;
     }
     iter->second.isGroup = posInfo.isGroup;
+    iter->second.isLazyChild = posInfo.isLazyChild;
     if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
         iter->second.mainSize = posInfo.mainSize;
     }

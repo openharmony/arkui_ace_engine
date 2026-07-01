@@ -600,7 +600,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge001, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -640,7 +640,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge002, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { false, true };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -678,7 +678,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge003, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -718,7 +718,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge004, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { false, true };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -758,7 +758,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge005, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { false, true };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -798,7 +798,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge006, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { false, false };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
@@ -838,7 +838,7 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge007, TestSize.Level1)
     scrollablePattern->contentStartOffset_ = 4.0f;
     scrollablePattern->canStayOverScroll_ = false;
     ListItemGroupLayoutInfo itemGroupInfo = { false, false };
-    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 0.0f, itemGroupInfo };
 
     /**
      * @tc.steps: step3. Calling the GetOnScrollEdge function
