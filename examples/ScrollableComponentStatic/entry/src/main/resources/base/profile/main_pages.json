@@ -42,6 +42,11 @@
     "pages/refresh/RefreshMainPage",
     "pages/refresh/RefreshNumberSample",
     "pages/lazyvgrid/LazyVGridMainPage",
-    "pages/lazyvgrid/LavyVGrid1_2Test"
+    "pages/lazyvgrid/LavyVGrid1_2Test",
+    "pages/lazyheaderfooter/Index",
+    "pages/lazyheaderfooter/ScrollSample",
+    "pages/lazyheaderfooter/ListSample",
+    "pages/lazyheaderfooter/WaterFlowSample",
+    "pages/lazyheaderfooter/GridDirect"
   ]
 }

@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Component,
@@ -44,11 +43,11 @@ class PageInfo {
 @Entry
 @Component
 struct WaterFlowMainPage {
-  @State routers: Array<PageInfo> = []
+  @State routers: PageInfo[] = [] as PageInfo[]
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
-    this.routers = []
+    this.routers = [] as PageInfo[]
     this.routers.push(new PageInfo('Back', 'pages/Index'))
     this.routers.push(new PageInfo('WaterFlow 声明式', 'pages/waterflow/WaterFlowDeclare'))
     this.routers.push(new PageInfo('WaterFlow 命令式', 'pages/waterflow/WaterFlowCommand'))
