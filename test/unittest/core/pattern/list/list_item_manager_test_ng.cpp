@@ -572,4 +572,326 @@ HWTEST_F(ListItemManagerTestNg, HandleOnItemDragCancel002, TestSize.Level1)
     EXPECT_EQ(onDropCnt, 0);
     EXPECT_FALSE(listItemDragManager->scrolling_);
 }
+
+/**
+ * @tc.name: GetDragEventPanDirection001
+ * @tc.desc: Test GetDragEventPanDirection when no swipeAction is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with no swipeAction
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0,
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder));
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Call GetDragEventPanDirection with no swipeAction set
+     * @tc.expected: Returns PanDirection::ALL
+     */
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::ALL);
+}
+
+/**
+ * @tc.name: GetDragEventPanDirection002
+ * @tc.desc: Test GetDragEventPanDirection with HasStartNode true and VERTICAL list axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with VERTICAL list and swipeAction startNode
+     */
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->axis_ = Axis::VERTICAL;
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+    listItemPattern->startNodeIndex_ = 0;
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, listItemPattern);
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Call GetDragEventPanDirection with HasStartNode true
+     * @tc.expected: Returns PanDirection::VERTICAL
+     */
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::VERTICAL);
+}
+
+/**
+ * @tc.name: GetDragEventPanDirection003
+ * @tc.desc: Test GetDragEventPanDirection with HasEndNode true and HORIZONTAL list axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with HORIZONTAL list and swipeAction endNode
+     */
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->axis_ = Axis::HORIZONTAL;
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+    listItemPattern->endNodeIndex_ = 1;
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, listItemPattern);
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Call GetDragEventPanDirection with HasEndNode true
+     * @tc.expected: Returns PanDirection::HORIZONTAL
+     */
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::HORIZONTAL);
+}
+
+/**
+ * @tc.name: GetDragEventPanDirection004
+ * @tc.desc: Test GetDragEventPanDirection with startOnDelete and VERTICAL list axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with VERTICAL list
+     */
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->axis_ = Axis::VERTICAL;
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0,
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder));
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set startOnDelete and call GetDragEventPanDirection
+     * @tc.expected: Returns PanDirection::VERTICAL
+     */
+    listItemEventHub->SetStartOnDelete([]() {});
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::VERTICAL);
+}
+
+/**
+ * @tc.name: GetDragEventPanDirection005
+ * @tc.desc: Test GetDragEventPanDirection with swipeAction but listNode_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager without valid listNode parent
+     */
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+    listItemPattern->startNodeIndex_ = 0;
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, listItemPattern);
+    ASSERT_NE(host, nullptr);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Call GetDragEventPanDirection with swipeAction but no parent list
+     * @tc.expected: Returns PanDirection::ALL because listNode_ is null
+     */
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::ALL);
+}
+
+/**
+ * @tc.name: GetDragEventPanDirection006
+ * @tc.desc: Test GetDragEventPanDirection when ListItemPattern is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, GetDragEventPanDirection006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with host without ListItemPattern
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Call GetDragEventPanDirection when host pattern is not ListItemPattern
+     * @tc.expected: Returns PanDirection::ALL because pattern is null
+     */
+    auto result = listItemDragManager->GetDragEventPanDirection();
+    EXPECT_EQ(result.type, PanDirection::ALL);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_DragEvent_WithSwipeAction001
+ * @tc.desc: Test InitDragDropEvent sets correct direction with swipeAction and VERTICAL list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_DragEvent_WithSwipeAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with VERTICAL list and swipeAction
+     */
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->axis_ = Axis::VERTICAL;
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+    listItemPattern->startNodeIndex_ = 0;
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, listItemPattern);
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Calling the InitDragDropEvent function
+     * @tc.expected: The direction is PanDirection::VERTICAL
+     */
+    listItemDragManager->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->HasDragEvent());
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetFingers(), DEFAULT_PAN_FINGER);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDirection().type, PanDirection::VERTICAL);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDistance(), DEFAULT_PAN_DISTANCE.Value());
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->isForDragDrop_);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_DragEvent_WithSwipeAction002
+ * @tc.desc: Test InitDragDropEvent sets correct direction with swipeAction and HORIZONTAL list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_DragEvent_WithSwipeAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager with HORIZONTAL list and swipeAction
+     */
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->axis_ = Axis::HORIZONTAL;
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+    listItemPattern->endNodeIndex_ = 1;
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, 0, listItemPattern);
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Calling the InitDragDropEvent function
+     * @tc.expected: The direction is PanDirection::HORIZONTAL
+     */
+    listItemDragManager->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->HasDragEvent());
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetFingers(), DEFAULT_PAN_FINGER);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDirection().type, PanDirection::HORIZONTAL);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDistance(), DEFAULT_PAN_DISTANCE.Value());
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->isForDragDrop_);
+}
 } // namespace OHOS::Ace::NG
