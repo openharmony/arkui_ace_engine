@@ -3966,6 +3966,7 @@ void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
 
 void WebPattern::OnFullScreenVideoOverlayUpdate(bool value)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (delegate_) {
         delegate_->UpdateFullScreenVideoOverlayEnable(value);
     }
