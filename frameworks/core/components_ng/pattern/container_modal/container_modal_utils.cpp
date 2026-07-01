@@ -37,7 +37,13 @@ bool ExecuteCustomTitleAbc()
     bool isLoadSuccess = false;
     if (readFile.is_open()) {
         readFile.seekg(0, std::ios::end);
-        binarySize = static_cast<int32_t>(readFile.tellg());
+        auto fileSize = readFile.tellg();
+        if (fileSize <= 0 || fileSize > INT32_MAX) {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "app bar invalid abc file size!");
+            readFile.close();
+            return false;
+        }
+        binarySize = static_cast<int32_t>(fileSize);
         readFile.seekg(0, std::ios::beg);
         buffer.resize(binarySize);
         if (readFile.read((char*)buffer.data(), binarySize)) {
@@ -75,7 +81,13 @@ bool ExecuteCustomWindowMaskAbc()
     std::ifstream readFile(filePath, std::ifstream::binary);
     if (readFile && readFile.is_open()) {
         readFile.seekg(0, std::ios::end);
-        binarySize = static_cast<int32_t>(readFile.tellg());
+        auto fileSize = readFile.tellg();
+        if (fileSize <= 0 || fileSize > INT32_MAX) {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "invalid windowmask abc file size!");
+            readFile.close();
+            return false;
+        }
+        binarySize = static_cast<int32_t>(fileSize);
         readFile.seekg(0, std::ios::beg);
         buffer.resize(binarySize);
         if (readFile.read((char*)buffer.data(), binarySize)) {
