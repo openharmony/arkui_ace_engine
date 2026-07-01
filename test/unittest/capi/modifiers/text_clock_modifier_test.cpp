@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <sys/time.h>
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
@@ -217,21 +218,18 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    std::string expectedStr;
-    Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>();
-    Ark_TextClockOptions& inputValueOptions = realInputValue.value;
-    Ark_TextClockOptions initValueOptions;
+    float expectedOffset = 0.0f;
+    struct timeval expectedTv {};
+    struct timezone expectedTz {};
+    gettimeofday(&expectedTv, &expectedTz);
+    expectedOffset = static_cast<float>(expectedTz.tz_minuteswest / 60);
 
-    // Verifying attribute's  values
     for (auto&& value: setTextClockOptionsOptionsInvalidValues) {
-        inputValueOptions = initValueOptions;
-        modifier_->setTextClockOptions(node_, &realInputValue);
-        inputValueOptions = std::get<1>(value).value;
+        Opt_TextClockOptions realInputValue = std::get<1>(value);
         modifier_->setTextClockOptions(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-        expectedStr = ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_FLOAT_EQ(std::stof(resultStr), expectedOffset) << "Passed value is: " << std::get<0>(value);
     }
 }
 
