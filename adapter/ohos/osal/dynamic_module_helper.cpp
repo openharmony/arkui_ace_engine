@@ -68,6 +68,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Divider", "spacing" },
         { "CalendarPicker", "calendarpicker" },
         { "CalendarPickerDialog", "calendarpicker" },
+        { "Canvas", "canvas" },
         { "Checkbox", "checkbox" },
         { "CheckboxGroup", "checkbox" },
         { "ColumnSplit", "linearsplit" },

@@ -24,7 +24,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class DrawingRenderingContextPeerImpl : public Referenced {
+class ACE_FORCE_EXPORT DrawingRenderingContextPeerImpl : public Referenced {
 public:
     DrawingRenderingContextPeerImpl();
     ~DrawingRenderingContextPeerImpl() override = default;

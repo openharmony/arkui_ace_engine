@@ -16,6 +16,7 @@
 #include "core/common/container.h"
 #include "offscreen_canvas_peer.h"
 #include "core/common/container_scope.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "image_bitmap_peer_impl.h"
 #include "rendering_context_settings_peer.h"
 
@@ -27,8 +28,11 @@ void OffscreenCanvasPeer::SetOptions(const double cw, const double ch)
     double fHeight = ch * density;
     SetWidth(fWidth);
     SetHeight(fHeight);
-    offscreenCanvasPattern = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>(
-        static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
+    auto* bridge = OHOS::Ace::NG::GetCanvasRuntimeBridgeFromModule();
+    if (bridge && bridge->createOffscreenPattern) {
+        offscreenCanvasPattern = bridge->createOffscreenPattern(
+            static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
+    }
 }
 ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap()
 {
@@ -36,10 +40,14 @@ ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap()
     CHECK_NULL_RETURN(offscreenCanvasPattern, bitmap);
     CHECK_NULL_RETURN(offscreenCanvasContext, bitmap);
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
-    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    auto* bridge = OHOS::Ace::NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, bitmap);
+    CHECK_NULL_RETURN(bridge->transferOffscreenToImageBitmap, bitmap);
+    auto pixelMap = bridge->transferOffscreenToImageBitmap(offscreenCanvasPattern);
     ImageBitmapPeer::LoadImageConstructor(bitmap, pixelMap);
 #ifndef PIXEL_MAP_SUPPORTED
-    auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width, height);
+    CHECK_NULL_RETURN(bridge->getOffscreenImageData, bitmap);
+    auto imageData = bridge->getOffscreenImageData(offscreenCanvasPattern, 0, 0, width, height);
     if (imageData == nullptr) {
         return bitmap;
     }
@@ -113,7 +121,10 @@ void OffscreenCanvasPeer::OnSetHeight(double value)
     value *= density;
     if (height != value) {
         height = value;
-        offscreenCanvasPattern->UpdateSize(width, height);
+        auto* bridge = OHOS::Ace::NG::GetCanvasRuntimeBridgeFromModule();
+        if (bridge && bridge->updateOffscreenSize) {
+            bridge->updateOffscreenSize(offscreenCanvasPattern, width, height);
+        }
         if (offscreenCanvasContext != nullptr) {
             offscreenCanvasContext->SetHeight(height);
         }
@@ -144,7 +155,10 @@ void OffscreenCanvasPeer::OnSetWidth(double value)
     value *= density;
     if (width != value) {
         width = value;
-        offscreenCanvasPattern->UpdateSize(width, height);
+        auto* bridge = OHOS::Ace::NG::GetCanvasRuntimeBridgeFromModule();
+        if (bridge && bridge->updateOffscreenSize) {
+            bridge->updateOffscreenSize(offscreenCanvasPattern, width, height);
+        }
         if (offscreenCanvasContext != nullptr) {
             offscreenCanvasContext->SetWidth(width);
         }

@@ -289,7 +289,6 @@ template("declarative_js_engine") {
       "engine/functions/js_xcomponent_onload_function.cpp",
       "engine/js_types.cpp",
       "interfaces/profiler/js_profiler.cpp",
-      "jsview/canvas/js_canvas.cpp",
       "jsview/canvas/js_canvas_gradient.cpp",
       "jsview/canvas/js_canvas_image_data.cpp",
       "jsview/canvas/js_canvas_path.cpp",
@@ -794,7 +793,6 @@ template("declarative_js_engine_ng") {
 
       # jsviews
       "interfaces/profiler/js_profiler.cpp",
-      "jsview/canvas/js_canvas.cpp",
       "jsview/canvas/js_canvas_gradient.cpp",
       "jsview/canvas/js_canvas_image_data.cpp",
       "jsview/canvas/js_canvas_path.cpp",

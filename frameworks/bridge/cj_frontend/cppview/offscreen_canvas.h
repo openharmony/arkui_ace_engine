@@ -22,7 +22,8 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -78,7 +79,7 @@ public:
         unit_ = unit;
     }
 
-    void SetOffscreenPattern(const RefPtr<NG::OffscreenCanvasPattern>& offscreenPattern)
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenPattern)
     {
         offscreenCanvasPattern_ = offscreenPattern;
     }
@@ -107,7 +108,7 @@ private:
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double width_ = 0.0f;
     double height_ = 0.0f;
-    RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
+    RefPtr<AceType> offscreenCanvasPattern_;
     sptr<CJOffscreenRenderingContext> offscreenCanvasContext_;
     bool isGetContext_ = false;
     bool isDetached_ = false;

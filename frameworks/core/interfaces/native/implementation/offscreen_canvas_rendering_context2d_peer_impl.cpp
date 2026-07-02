@@ -14,7 +14,7 @@
  */
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "image_bitmap_peer_impl.h"
 #include "offscreen_canvas_rendering_context2d_peer_impl.h"
 #include "rendering_context_settings_peer.h"
@@ -28,15 +28,10 @@ uint32_t OffscreenCanvasRenderingContext2DPeerImpl::offscreenPatternCount_ = 0;
 OffscreenCanvasRenderingContext2DPeerImpl::OffscreenCanvasRenderingContext2DPeerImpl()
 {
     id_ = offscreenPatternCount_;
-#ifdef NG_BUILD
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
-    } else {
-        renderingContext2DModel_ = nullptr;
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    if (bridge && bridge->createOffscreenCanvasRenderingContext2DModel) {
+        renderingContext2DModel_ = bridge->createOffscreenCanvasRenderingContext2DModel();
     }
-#endif
 }
 void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
     double width, double height, const std::optional<RenderingContextSettingsPeer*>& optSettings)
@@ -48,9 +43,10 @@ void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
         height *= density;
         SetWidth(width);
         SetHeight(height);
-        auto renderingContext = AceType::DynamicCast<OffscreenCanvasRenderingContext2DModel>(renderingContext2DModel_);
-        CHECK_NULL_VOID(renderingContext);
-        auto offscreenPattern = renderingContext->CreateOffscreenPattern(round(width), round(height));
+        auto* bridge = GetCanvasRuntimeBridgeFromModule();
+        CHECK_NULL_VOID(bridge);
+        CHECK_NULL_VOID(bridge->createOffscreenPattern);
+        auto offscreenPattern = bridge->createOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
         SetOffscreenPattern(offscreenPattern);
         AddOffscreenCanvasPattern(offscreenPattern);
@@ -71,13 +67,17 @@ void OffscreenCanvasRenderingContext2DPeerImpl::RemoveOptions()
 ImageBitmapPeer* OffscreenCanvasRenderingContext2DPeerImpl::TransferToImageBitmap()
 {
     ContainerScope scope(instanceId_);
-    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));
+    auto offscreenCanvasPattern = GetOffscreenPattern(id_);
     CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
-    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->transferOffscreenToImageBitmap, nullptr);
+    auto pixelMap = bridge->transferOffscreenToImageBitmap(offscreenCanvasPattern);
     auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     ImageBitmapPeer::LoadImageConstructor(bitmap, pixelMap);
 #ifndef PIXEL_MAP_SUPPORTED
-    auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
+    CHECK_NULL_RETURN(bridge->getOffscreenImageData, bitmap);
+    auto imageData = bridge->getOffscreenImageData(offscreenCanvasPattern, 0, 0, width_, height_);
     bitmap->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
 #endif
     bitmap->SetUnit(GetUnit());

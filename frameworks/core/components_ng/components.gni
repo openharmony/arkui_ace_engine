@@ -278,6 +278,9 @@ template("build_component_ng") {
     build_component_ng_impl(item.name) {
       platform = item.name
       defines = []
+      if (defined(invoker.defines)) {
+        defines += invoker.defines
+      }
       defines += uicast_configs.uicast_defines
 
       if (defined(item.config)) {

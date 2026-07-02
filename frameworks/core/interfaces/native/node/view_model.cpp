@@ -54,7 +54,6 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
-#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
@@ -98,6 +97,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -413,10 +413,13 @@ void* createSliderNode(ArkUI_Int32 nodeId)
 
 void* createCanvasNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CanvasModelNG::CreateFrameNode(nodeId);
+    auto canvasModifier = NG::NodeModifier::GetCanvasModifier();
+    CHECK_NULL_RETURN(canvasModifier, nullptr);
+    auto arkUINodeHandle = canvasModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createDatePickerNode(ArkUI_Int32 nodeId)

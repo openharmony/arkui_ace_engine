@@ -9346,10 +9346,22 @@ struct ArkUITextAreaControllerModifier {
 };
 
 struct ArkUICanvasModifier {
+    void (*createModel)(void);
     void (*setCanvasOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetCanvasOnReady)(ArkUINodeHandle node);
     void (*setCanvasEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetCanvasEnableAnalyzer)(ArkUINodeHandle node);
+    void (*setCanvasAntiAlias)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setCanvasImmediateRender)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetCanvasImmediateRender)(ArkUINodeHandle node);
+    void (*setCanvasUpdateUnit)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*resetCanvasUpdateUnit)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*setInvalidate)(ArkUINodeHandle node);
+    void (*setAntiAlias)(ArkUINodeHandle node, ArkUI_Bool antialias);
+    void (*setRSCanvasCallback)(ArkUINodeHandle node, void* callback);
+    void (*setUpdateContextCallback)(ArkUINodeHandle node, void* callback);
+    void (*setRSCanvasForDrawingContext)(ArkUINodeHandle node);
 };
 
 struct ArkUICanvasRenderingContext2DModifier {

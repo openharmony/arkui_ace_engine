@@ -415,7 +415,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src);
     void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src);
-    void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_NavigationTransitionProxy& dst,
+        const RefPtr<NavigationTransitionProxy>& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_Number& dst, const Dimension& src);
     void AssignArkValue(Ark_Number& dst, const double& src);
