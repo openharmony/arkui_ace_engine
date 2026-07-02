@@ -54,30 +54,9 @@ void HandleAdjustedOffset(ani_env* env, ArkUINodeHandle arkNode, ani_object resu
 void HandleInActiveChildren(ani_env* env, ArkUINodeHandle arkNode, ani_object resultObj,
     const ArkUIAniLazyDynamicLayoutModifier* modifier)
 {
-    ani_ref inActiveChildrenRef;
-    ANI_CALL(env, Object_GetPropertyByName_Ref(resultObj, "inActiveChildren", &inActiveChildrenRef), return);
-    
-    ani_boolean isUndefined = ANI_FALSE;
-    ANI_CALL(env, Reference_IsUndefined(inActiveChildrenRef, &isUndefined), return);
-    if (isUndefined) {
-        return;
-    }
-    
-    ani_array inActiveArray = static_cast<ani_array>(inActiveChildrenRef);
-    ani_size arraySize = 0;
-    ANI_CALL(env, Array_GetLength(inActiveArray, &arraySize), return);
-    
     std::vector<int32_t> inActiveChildren;
-    inActiveChildren.reserve(arraySize);
-    
-    for (ani_size i = 0; i < arraySize; ++i) {
-        ani_ref elementRef;
-        ANI_CALL(env, Array_Get(inActiveArray, i, &elementRef), continue);
-        
-        ani_object elementObj = static_cast<ani_object>(elementRef);
-        ani_int value = 0;
-        ANI_CALL(env, Object_GetPropertyByName_Int(elementObj, "value", &value), continue);
-        inActiveChildren.push_back(static_cast<int32_t>(value));
+    if (!AniUtils::GetArrayIntParam(env, resultObj, "inActiveChildren", inActiveChildren)) {
+        return;
     }
     
     if (modifier->setInActiveChildren) {
@@ -98,7 +77,6 @@ void HandleLazyMeasureResult(ani_env* env, ArkUINodeHandle arkNode, ani_object r
 
 ani_object CreateLazyLayoutInfo(ani_env* env, const NG::ViewPosReference& viewPosRef, float mainSize)
 {
-    ani_status status;
     ani_object result = nullptr;
     ani_class lazyLayoutInfoClass;
     ANI_CALL(env, FindClass("arkui.LazyLayoutAlgorithm.LazyLayoutInfo", &lazyLayoutInfoClass), return nullptr);
@@ -169,22 +147,24 @@ std::function<void(const NG::LayoutConstraintF&, float)> CreateLazyOnMeasureFunc
         CHECK_NULL_VOID(refEnv);
         
         ani_boolean algoReleased = ANI_FALSE;
-        ani_ref algoRef;
-        ANI_CALL(refEnv, WeakReference_GetReference(*algoWeakRef, &algoReleased, &algoRef), return);
+        ani_ref algoRefRaw;
+        ANI_CALL(refEnv, WeakReference_GetReference(*algoWeakRef, &algoReleased, &algoRefRaw), return);
         if (algoReleased) {
             return;
         }
+        AniLocalRefGuard algoGuard(refEnv, algoRefRaw);
         
         ani_boolean frameNodeReleased = ANI_FALSE;
-        ani_ref frameNodeRef;
+        ani_ref frameNodeRefRaw;
         ANI_CALL(refEnv, WeakReference_GetReference(
-            *frameNodeWeakRef, &frameNodeReleased, &frameNodeRef), return);
+            *frameNodeWeakRef, &frameNodeReleased, &frameNodeRefRaw), return);
         if (frameNodeReleased) {
             return;
         }
+        AniLocalRefGuard frameNodeGuard(refEnv, frameNodeRefRaw);
         
-        auto algoObj = reinterpret_cast<ani_object>(algoRef);
-        auto fnObj = reinterpret_cast<ani_object>(frameNodeRef);
+        auto algoObj = static_cast<ani_object>(algoGuard);
+        auto fnObj = static_cast<ani_object>(frameNodeGuard);
         
         auto constraintObj = CreateLayoutConstraintF(refEnv, layoutConstraint);
         CHECK_NULL_VOID(constraintObj);
@@ -194,9 +174,7 @@ std::function<void(const NG::LayoutConstraintF&, float)> CreateLazyOnMeasureFunc
         
         if (onMeasureMethod && layoutConstraint.viewPosRef.has_value()) {
             auto lazyLayoutInfoObj = CreateLazyLayoutInfo(refEnv, layoutConstraint.viewPosRef.value(), mainSize);
-            if (!lazyLayoutInfoObj) {
-                return;
-            }
+            CHECK_NULL_VOID(lazyLayoutInfoObj);
             
             ANI_CALL(refEnv, Object_CallMethod_Ref(algoObj, onMeasureMethod,
                 &resultRef, fnObj, constraintObj, lazyLayoutInfoObj), return);
@@ -211,7 +189,6 @@ std::function<void(const NG::LayoutConstraintF&, float)> CreateLazyOnMeasureFunc
             
             HandleLazyMeasureResult(refEnv, arkNode, resultObj);
         } else {
-            // Fallback: call onMeasure with undefined helper parameter
             ani_ref undefinedRef;
             ANI_CALL(refEnv, GetUndefined(&undefinedRef), return);
             ANI_CALL(refEnv, Object_CallMethodByName_Void(algoObj, "onMeasure",
@@ -326,12 +303,13 @@ void SetLazyDynamicLayoutOnVisibleIndexesChange(
         vm->GetEnv(ANI_VERSION_1, &refEnv);
         CHECK_NULL_VOID(refEnv);
         ani_boolean released = ANI_FALSE;
-        ani_ref callbackRef;
-        ANI_CALL(refEnv, WeakReference_GetReference(*callbackWeakRef, &released, &callbackRef), return);
+        ani_ref callbackRefRaw;
+        ANI_CALL(refEnv, WeakReference_GetReference(*callbackWeakRef, &released, &callbackRefRaw), return);
         if (released) {
             return;
         }
-        auto callbackFn = static_cast<ani_fn_object>(callbackRef);
+        AniLocalRefGuard callbackGuard(refEnv, callbackRefRaw);
+        auto callbackFn = static_cast<ani_fn_object>(callbackGuard);
         ani_ref undefined;
         ANI_CALL(refEnv, GetUndefined(&undefined), return);
         ani_array indexesArray;

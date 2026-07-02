@@ -98,7 +98,7 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetPar
 
 /**
  * @tc.name: LazyDynamicLayoutModelStatic_SetParams_002
- * @tc.desc: Test SetParams with null FrameNode
+ * @tc.desc: Test SetParams with null FrameNode does not crash
  * @tc.type: FUNC
  */
 HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetParams_002, TestSize.Level1)
@@ -107,11 +107,13 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetPar
     FrameNode* nullFrameNode = nullptr;
     
     LazyDynamicLayoutModelStatic::SetParams(nullFrameNode, customParams);
+    EXPECT_NE(customParams, nullptr);
+    EXPECT_EQ(customParams->GetAxis(), Axis::VERTICAL);
 }
 
 /**
  * @tc.name: LazyDynamicLayoutModelStatic_SetParams_003
- * @tc.desc: Test SetParams with null params
+ * @tc.desc: Test SetParams with null params does not modify existing state
  * @tc.type: FUNC
  */
 HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetParams_003, TestSize.Level1)
@@ -119,8 +121,40 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetPar
     auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
     
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto originalParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(originalParams, nullptr);
+    Axis originalAxis = originalParams->GetAxis();
+    
     RefPtr<LazyCustomLayoutAlgorithmParam> nullParams = nullptr;
     LazyDynamicLayoutModelStatic::SetParams(AceType::RawPtr(frameNode), nullParams);
+    
+    auto currentParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(currentParams, nullptr);
+    EXPECT_EQ(currentParams->GetAxis(), originalAxis);
+}
+
+/**
+ * @tc.name: LazyDynamicLayoutModelStatic_SetParams_004
+ * @tc.desc: Test SetParams with Axis::HORIZONTAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetParams_004, TestSize.Level1)
+{
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto customParams = AceType::MakeRefPtr<LazyCustomLayoutAlgorithmParam>();
+    customParams->SetAxis(Axis::HORIZONTAL);
+    
+    LazyDynamicLayoutModelStatic::SetParams(AceType::RawPtr(frameNode), customParams);
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto retrievedParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(retrievedParams, nullptr);
+    EXPECT_EQ(retrievedParams->GetAxis(), Axis::HORIZONTAL);
 }
 
 /**
@@ -164,13 +198,22 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetAdj
 
 /**
  * @tc.name: LazyDynamicLayoutModelStatic_SetAdjustedOffset_003
- * @tc.desc: Test SetAdjustedOffset with null FrameNode
+ * @tc.desc: Test SetAdjustedOffset with zero offset
  * @tc.type: FUNC
  */
 HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetAdjustedOffset_003, TestSize.Level1)
 {
-    FrameNode* nullFrameNode = nullptr;
-    LazyDynamicLayoutModelStatic::SetAdjustedOffset(nullFrameNode, TEST_ADJUSTED_OFFSET);
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    constexpr float zeroOffset = 0.0f;
+    LazyDynamicLayoutModelStatic::SetAdjustedOffset(AceType::RawPtr(frameNode), zeroOffset);
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto customParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(customParams, nullptr);
+    EXPECT_FLOAT_EQ(customParams->GetAdjustedOffset(), zeroOffset);
 }
 
 /**
@@ -220,14 +263,27 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetInA
 
 /**
  * @tc.name: LazyDynamicLayoutModelStatic_SetInActiveChildren_003
- * @tc.desc: Test SetInActiveChildren with null FrameNode
+ * @tc.desc: Test IsChildInActive returns correct results
  * @tc.type: FUNC
  */
 HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_SetInActiveChildren_003, TestSize.Level1)
 {
-    FrameNode* nullFrameNode = nullptr;
-    std::vector<int32_t> inActiveChildren = {1, 2, 3};
-    LazyDynamicLayoutModelStatic::SetInActiveChildren(nullFrameNode, inActiveChildren);
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<int32_t> inActiveChildren = {5, 10, 15};
+    LazyDynamicLayoutModelStatic::SetInActiveChildren(AceType::RawPtr(frameNode), inActiveChildren);
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto customParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(customParams, nullptr);
+    
+    EXPECT_TRUE(customParams->IsChildInActive(5));
+    EXPECT_TRUE(customParams->IsChildInActive(10));
+    EXPECT_TRUE(customParams->IsChildInActive(15));
+    EXPECT_FALSE(customParams->IsChildInActive(1));
+    EXPECT_FALSE(customParams->IsChildInActive(20));
 }
 
 /**
@@ -264,7 +320,7 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg,
 
 /**
  * @tc.name: LazyDynamicLayoutModelStatic_SetOnVisibleIndexesChange_002
- * @tc.desc: Test SetOnVisibleIndexesChange with null FrameNode
+ * @tc.desc: Test SetOnVisibleIndexesChange with null FrameNode does not crash
  * @tc.type: FUNC
  */
 HWTEST_F(LazyDynamicLayoutModelStaticTestNg,
@@ -273,6 +329,73 @@ HWTEST_F(LazyDynamicLayoutModelStaticTestNg,
     FrameNode* nullFrameNode = nullptr;
     OnVisibleIndexesChangeEvent callback = [](const std::vector<int32_t>& indexes) {};
     LazyDynamicLayoutModelStatic::SetOnVisibleIndexesChange(nullFrameNode, std::move(callback));
+}
+
+/**
+ * @tc.name: LazyDynamicLayoutModelStatic_SetOnVisibleIndexesChange_003
+ * @tc.desc: Test SetOnVisibleIndexesChange callback fires correctly via FireOnVisibleIndexesChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutModelStaticTestNg,
+    LazyDynamicLayoutModelStatic_SetOnVisibleIndexesChange_003, TestSize.Level1)
+{
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<int32_t> expectedIndexes = {0, 5, 10};
+    std::vector<int32_t> receivedIndexes;
+    OnVisibleIndexesChangeEvent callback = [&receivedIndexes](const std::vector<int32_t>& indexes) {
+        receivedIndexes = indexes;
+    };
+    
+    LazyDynamicLayoutModelStatic::SetOnVisibleIndexesChange(AceType::RawPtr(frameNode), std::move(callback));
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto customParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(customParams, nullptr);
+    EXPECT_TRUE(customParams->HasOnVisibleIndexesChange());
+    
+    customParams->FireOnVisibleIndexesChange(expectedIndexes);
+    EXPECT_EQ(receivedIndexes.size(), expectedIndexes.size());
+    for (size_t i = 0; i < expectedIndexes.size(); ++i) {
+        EXPECT_EQ(receivedIndexes[i], expectedIndexes[i]);
+    }
+}
+
+/**
+ * @tc.name: LazyDynamicLayoutModelStatic_SetOnVisibleIndexesChange_004
+ * @tc.desc: Test HasOnVisibleIndexesChange returns false when no callback is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutModelStaticTestNg,
+    LazyDynamicLayoutModelStatic_SetOnVisibleIndexesChange_004, TestSize.Level1)
+{
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto customParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(customParams, nullptr);
+    EXPECT_FALSE(customParams->HasOnVisibleIndexesChange());
+}
+
+/**
+ * @tc.name: LazyDynamicLayoutModelStatic_DefaultAxis_001
+ * @tc.desc: Test default axis is VERTICAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutModelStaticTestNg, LazyDynamicLayoutModelStatic_DefaultAxis_001, TestSize.Level1)
+{
+    auto frameNode = LazyDynamicLayoutModelStatic::CreateFrameNode(TEST_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<LazyDynamicLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto customParams = pattern->GetCustomLayoutAlgorithmParam();
+    ASSERT_NE(customParams, nullptr);
+    EXPECT_EQ(customParams->GetAxis(), Axis::VERTICAL);
 }
 
 } // namespace OHOS::Ace::NG

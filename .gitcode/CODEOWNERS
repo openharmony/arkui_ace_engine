@@ -2492,6 +2492,11 @@ frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng
 frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h @arkuiscroll
 frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_pattern.cpp @arkuiscroll
 frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_pattern.h @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/bridge/lazy_dynamic_layout_dynamic_module.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/bridge/lazy_dynamic_layout_dynamic_module.h @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/bridge/lazy_dynamic_layout_static_ani_modifier.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_static.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_static.h @arkuiscroll
 frameworks/core/components_ng/pattern/hyperlink/ @huawei_g_five
 frameworks/core/components_ng/pattern/image_animator/ @arkui001
 frameworks/core/components_ng/pattern/image/ @arkui001
@@ -3510,6 +3515,7 @@ frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazy_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazyv_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazy_column_layout_extender_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/lazy_dynamic_layout_extender_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_swipe_action_manager_accessor.cpp @arkuiscroll
@@ -3966,6 +3972,12 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/list/ @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/water_flow/ @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/LazyColumnLayoutModifier.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.components.ArkLazyDynamicLayout.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/LazyDynamicLayoutModifierHandWritten.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/LazyLayoutAlgorithm.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/lazy_dynamic_layout/lazy_dynamic_layout_module.cpp @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/lazy_dynamic_layout/lazy_dynamic_layout_module.h @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hooks/LazyDynamicLayoutHandWritten.ets @arkuiscroll
 
 [Claude]
 .claude/ @arkui_architecture
@@ -4327,6 +4339,8 @@ frameworks/core/interfaces/native/ani/list_ani_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/ani/list_ani_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/ani/list_item_group_ani_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/ani/list_item_group_ani_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/ani/lazy_dynamic_layout_ani_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/ani/lazy_dynamic_layout_ani_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/ani/node_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/parallelize_ui_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/parallelize_ui_ani_modifier.h @arkui_framework_xnode

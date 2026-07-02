@@ -56,6 +56,32 @@
     }
 
 namespace OHOS::Ace::Ani {
+
+class AniLocalRefGuard {
+public:
+    AniLocalRefGuard(ani_env* env, ani_ref ref) : env_(env), ref_(ref) {}
+    ~AniLocalRefGuard()
+    {
+        if (env_ && ref_) {
+            env_->Reference_Delete(ref_);
+        }
+    }
+    AniLocalRefGuard(const AniLocalRefGuard&) = delete;
+    AniLocalRefGuard& operator=(const AniLocalRefGuard&) = delete;
+    AniLocalRefGuard(AniLocalRefGuard&& other) noexcept : env_(other.env_), ref_(other.ref_)
+    {
+        other.env_ = nullptr;
+        other.ref_ = nullptr;
+    }
+    ani_ref Get() const { return ref_; }
+    explicit operator ani_ref() const { return ref_; }
+    explicit operator ani_object() const { return reinterpret_cast<ani_object>(ref_); }
+    explicit operator ani_fn_object() const { return reinterpret_cast<ani_fn_object>(ref_); }
+private:
+    ani_env* env_ = nullptr;
+    ani_ref ref_ = nullptr;
+};
+
 class AniUtils {
 public:
     static ani_object CreateDouble(ani_env *env, double value);
