@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -36,16 +37,23 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
+#include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
+constexpr Dimension CLOSE_SIDEBAR_PAN_DISTANCE = 100.0_vp;
+const RefPtr<InterpolatingSpring> SIDEBAR_SPRING_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 24.0f);
 
 constexpr int32_t BG_MASK_INDEX = 1;
 constexpr uint32_t DEFAULT_GRADIENT_COLOR_NUM = 21;
@@ -502,10 +510,144 @@ void TabsPattern::OnModifyDone()
     InitFloatingBar();
     OnUpdateShowDivider();
 
+    InitShowAndCloseSidebarPanEvent();
+
     if (onChangeEvent_) {
         return;
     }
     SetOnChangeEvent(nullptr);
+}
+
+bool TabsPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    bool skip = Pattern::OnDirtyLayoutWrapperSwap(dirty, config);
+    if (config.skipMeasure) {
+        return skip;
+    }
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, skip);
+    if (!property->HasBarStyle() || property->GetBarStyleValue(TabBarStyle::NOSTYLE) != TabBarStyle::SIDEBARADAPTABLE) {
+        return skip;
+    }
+    UpdateDisplayModeByBreakpoint();
+    return skip;
+}
+
+TabBarDisplayMode TabsPattern::CalculateDisplayMode(float width, double density)
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, TabBarDisplayMode::BOTTOMTABBAR);
+    auto currentBreakpoint = GetCommonWidthBreakpoint(width, density);
+    if (property->HasBarDisplayModeBreakpoint()) {
+        auto customBreakpoint = property->GetBarDisplayModeBreakpointValue();
+        if (!customBreakpoint.isNull) {
+            switch (currentBreakpoint) {
+                case WidthBreakpoint::WIDTH_SM:
+                    return customBreakpoint.sm;
+                case WidthBreakpoint::WIDTH_MD:
+                    return customBreakpoint.md;
+                case WidthBreakpoint::WIDTH_LG:
+                case WidthBreakpoint::WIDTH_XL:
+                case WidthBreakpoint::WIDTH_XXL:
+                    return customBreakpoint.lg;
+                default:
+                    return TabBarDisplayMode::BOTTOMTABBAR;
+            }
+        }
+    }
+    if (currentBreakpoint >= WidthBreakpoint::WIDTH_LG) {
+        return TabBarDisplayMode::SIDEBAR;
+    }
+    return TabBarDisplayMode::BOTTOMTABBAR;
+}
+
+void TabsPattern::UpdateDisplayModeByBreakpoint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto density = PipelineBase::GetCurrentDensity();
+    auto currentBreakpoint = GetCommonWidthBreakpoint(frameSize.Width(), density);
+    if (lastWidthBreakpoint_.has_value() && lastWidthBreakpoint_.value() == currentBreakpoint) {
+        return;
+    }
+    lastWidthBreakpoint_ = currentBreakpoint;
+    auto newMode = CalculateDisplayMode(frameSize.Width(), density);
+    OnDisplayModeChanged(newMode);
+}
+
+void TabsPattern::OnDisplayModeChanged(TabBarDisplayMode newMode)
+{
+    if (currentBarDisplayMode_ == newMode) {
+        return;
+    }
+    auto oldMode = currentBarDisplayMode_;
+    currentBarDisplayMode_ = newMode;
+    FireOnBarDisplayModeChangeEvent(newMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+
+    bool toSidebar = (newMode == TabBarDisplayMode::SIDEBAR);
+    bool fromSidebar = (oldMode == TabBarDisplayMode::SIDEBAR);
+
+    if (toSidebar || fromSidebar) {
+        StartSidebarTransitionAnimation(toSidebar);
+    }
+
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto controller = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+    if (controller) {
+        controller->SetBarDisplayMode(newMode);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsPattern::StartSidebarTransitionAnimation(bool toShow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+
+    AnimationOption option;
+    option.SetDuration(300);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f));
+
+    auto propertyCallback = [weak = WeakClaim(tabBarNode), toShow]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (toShow) {
+            renderContext->UpdateOpacity(1.0f);
+        } else {
+            renderContext->UpdateOpacity(0.0f);
+        }
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    auto finishCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
 }
 
 void TabsPattern::OnAfterModifyDone()
@@ -1189,6 +1331,7 @@ RefPtr<LayoutAlgorithm> TabsPattern::CreateLayoutAlgorithm()
     algo->SetItemIndex(tabsNode->GetItemIndex());
     algo->SetIsFloatingBar(isFloatingBar_);
     algo->SetLastFloatingBar(lastFloatingBar_);
+    algo->SetBarDisplayMode(currentBarDisplayMode_);
     return algo;
 }
 
@@ -1584,5 +1727,364 @@ void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
         return;
     }
     renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
+}
+
+void TabsPattern::FireOnBarDisplayModeChangeEvent(TabBarDisplayMode displayMode)
+{
+    if (onBarDisplayModeChangeEvent_) {
+        onBarDisplayModeChangeEvent_(displayMode);
+    }
+}
+
+void TabsPattern::FireOnSideBarChangeEvent(bool isShow)
+{
+    if (onSideBarChangeEvent_) {
+        onSideBarChangeEvent_(isShow);
+    }
+}
+
+void TabsPattern::InitShowAndCloseSidebarPanEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    bool withGesture = property->GetShowSideBarWithGestureValue(false);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (!withGesture) {
+        gestureHub->RemovePanEvent(dragEventForCloseSideBar_);
+        return;
+    }
+    if (dragEventForCloseSideBar_) {
+        return;
+    }
+    auto sideBarPosition = property->GetSidebarPositionValue(SidebarPosition::START);
+
+    auto callbackStart = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        AnimationUtils::StopAnimation(pattern->springAnimation_);
+        pattern->inAnimation_ = false;
+    };
+    auto callbackUpdate = [weak = WeakClaim(this), sideBarPosition](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->sideBarInDragGesture_ = true;
+        auto offsetX = static_cast<float>(info.GetOffsetX());
+        if (sideBarPosition == SidebarPosition::START && pattern->sideBarStatus_ == SideBarStatus::SHOW) {
+            if (offsetX > 0) {
+                return;
+            }
+        } else if (sideBarPosition == SidebarPosition::END && pattern->sideBarStatus_ == SideBarStatus::SHOW) {
+            if (offsetX < 0) {
+                return;
+            }
+        } else if (sideBarPosition == SidebarPosition::START && pattern->sideBarStatus_ == SideBarStatus::HIDDEN) {
+            if (offsetX < 0) {
+                return;
+            }
+        } else if (sideBarPosition == SidebarPosition::END && pattern->sideBarStatus_ == SideBarStatus::HIDDEN) {
+            if (offsetX > 0) {
+                return;
+            }
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto sidebarWidth = pattern->realSidebarWidth_;
+        if (sidebarWidth <= 0) {
+            sidebarWidth = pattern->GetLayoutProperty<TabsLayoutProperty>()
+                ->GetSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+        }
+        if (std::abs(offsetX) > sidebarWidth) {
+            offsetX = (offsetX > 0 ? sidebarWidth : -sidebarWidth);
+        }
+        pattern->currentContentDragOffset_ = offsetX;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    auto callbackEnd = [weak = WeakClaim(this), sideBarPosition](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEndForContent(static_cast<float>(info.GetOffsetX()), sideBarPosition);
+        pattern->sideBarInDragGesture_ = false;
+    };
+    auto callbackCancel = [weak = WeakClaim(this), sideBarPosition]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEndForContent(0.0f, sideBarPosition);
+        pattern->sideBarInDragGesture_ = false;
+    };
+
+    if (dragEventForCloseSideBar_) {
+        gestureHub->RemovePanEvent(dragEventForCloseSideBar_);
+    }
+    dragEventForCloseSideBar_ = MakeRefPtr<PanEvent>(
+        std::move(callbackStart), std::move(callbackUpdate), std::move(callbackEnd), std::move(callbackCancel));
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(dragEventForCloseSideBar_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
+}
+
+void TabsPattern::HandleDragEndForContent(float xOffset, SidebarPosition position)
+{
+    auto thresholdPx = CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx();
+    bool shouldHide = (position == SidebarPosition::START && xOffset < -thresholdPx) ||
+                      (position == SidebarPosition::END && xOffset > thresholdPx);
+    bool shouldShow = (position == SidebarPosition::START && xOffset > thresholdPx) ||
+                      (position == SidebarPosition::END && xOffset < -thresholdPx);
+    if (shouldHide && sideBarStatus_ == SideBarStatus::SHOW) {
+        DoSpringAnimation();
+        return;
+    }
+    if (shouldShow && sideBarStatus_ == SideBarStatus::HIDDEN) {
+        DoSpringAnimation();
+        return;
+    }
+    currentContentDragOffset_ = 0.0f;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsPattern::DoSpringAnimation()
+{
+    currentContentDragOffset_ = 0.0f;
+    sideBarInDragGesture_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto sidebarWidthPx = property->GetSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+    realSidebarWidth_ = sidebarWidthPx;
+    realDividerWidth_ = 0.0f;
+    UpdateAnimDir();
+    auto prevStatus = sideBarStatus_;
+    sideBarStatus_ = SideBarStatus::CHANGING;
+    inAnimation_ = true;
+
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+
+    auto propertyCallback = [weak = WeakClaim(this), sidebarWidthPx, prevStatus]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto sideBarPosition = pattern->GetLayoutProperty<TabsLayoutProperty>()
+            ->GetSidebarPositionValue(SidebarPosition::START);
+        if (prevStatus == SideBarStatus::HIDDEN) {
+            pattern->currentOffset_ = 0.0f;
+        } else {
+            pattern->currentOffset_ = -sidebarWidthPx;
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->GetRenderContext()->FlushUITasks();
+    };
+
+    auto finishCallback = [weak = WeakClaim(this), prevStatus]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (prevStatus == SideBarStatus::HIDDEN) {
+            pattern->sideBarStatus_ = SideBarStatus::SHOW;
+            pattern->FireOnSideBarChangeEventIfNeeded(true);
+        } else {
+            pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+            pattern->FireOnSideBarChangeEventIfNeeded(false);
+        }
+        pattern->inAnimation_ = false;
+        pattern->currentOffset_ = 0.0f;
+        pattern->springAnimation_ = nullptr;
+    };
+
+    AnimationOption option;
+    option.SetCurve(SIDEBAR_SPRING_CURVE);
+    springAnimation_ = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback, nullptr, context);
+}
+
+void TabsPattern::UpdateAnimDir()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto sideBarPosition = property->GetSidebarPositionValue(SidebarPosition::START);
+    if (sideBarStatus_ == SideBarStatus::SHOW) {
+        floatingBarPosition_ = (sideBarPosition == SidebarPosition::START) ? FloatingBarPosition::RIGHT : FloatingBarPosition::LEFT;
+    } else if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+        floatingBarPosition_ = (sideBarPosition == SidebarPosition::START) ? FloatingBarPosition::LEFT : FloatingBarPosition::RIGHT;
+    }
+}
+
+void TabsPattern::UpdateSidebarStatus()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    autoHide_ = property->GetSidebarAutoHideValue(false);
+    auto displayStyle = property->GetSidebarDisplayStyleValue(SidebarDisplayStyle::EMBED);
+    bool showSideBar = true;
+    if (autoHide_ && sideBarStatus_ == SideBarStatus::HIDDEN) {
+        showSideBar = false;
+    } else {
+        switch (sideBarStatus_) {
+            case SideBarStatus::SHOW:
+                showSideBar = true;
+                break;
+            case SideBarStatus::HIDDEN:
+                showSideBar = false;
+                break;
+            case SideBarStatus::CHANGING:
+                showSideBar = inAnimation_ ? !userSetShowSideBar_ : userSetShowSideBar_;
+                break;
+            default:
+                showSideBar = property->GetShowSideBarValue(true);
+                break;
+        }
+    }
+    userSetShowSideBar_ = property->GetShowSideBarValue(true);
+}
+
+void TabsPattern::FireOnSideBarChangeEventIfNeeded(bool isShow)
+{
+    FireOnSideBarChangeEvent(isShow);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto controller = AceType::DynamicCast<TabsControllerNG>(swiperPattern->GetSwiperController());
+    if (controller) {
+        controller->SetBarDisplayMode(currentBarDisplayMode_);
+    }
+}
+
+void TabsPattern::InitDividerDragEvent()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto divider = property->GetSidebarDividerValue(TabsSidebarDivider());
+    if (divider.isNull) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+}
+
+std::vector<TabsPattern::SidebarSectionInfo> TabsPattern::ComputeSidebarSections() const
+{
+    std::vector<SidebarSectionInfo> sections;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, sections);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_RETURN(tabsNode, sections);
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_RETURN(swiperNode, sections);
+
+    std::map<std::string, std::vector<int32_t>> sectionMap;
+    int32_t tabCount = swiperNode->TotalChildCount();
+    for (int32_t i = 0; i < tabCount; ++i) {
+        auto child = swiperNode->GetChildAtIndex(i);
+        CHECK_NULL_CONTINUE(child);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(tabContentNode);
+        auto tabContentProperty = tabContentNode->GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_CONTINUE(tabContentProperty);
+        auto sectionName = tabContentProperty->GetSidebarSectionValue("");
+        if (!sectionName.empty()) {
+            sectionMap[sectionName].push_back(i);
+        } else {
+            sectionMap[""].push_back(i);
+        }
+    }
+
+    for (auto& [name, indices] : sectionMap) {
+        if (name.empty()) {
+            sections.emplace_back(SidebarSectionInfo{ "", indices });
+        } else {
+            sections.emplace_back(SidebarSectionInfo{ name, indices });
+        }
+    }
+    return sections;
+}
+
+std::vector<int32_t> TabsPattern::ComputeVisibleTabIndices() const
+{
+    std::vector<int32_t> visibleIndices;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, visibleIndices);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_RETURN(tabsNode, visibleIndices);
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_RETURN(swiperNode, visibleIndices);
+
+    int32_t tabCount = swiperNode->TotalChildCount();
+    for (int32_t i = 0; i < tabCount; ++i) {
+        auto child = swiperNode->GetChildAtIndex(i);
+        CHECK_NULL_CONTINUE(child);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(tabContentNode);
+        auto tabContentProperty = tabContentNode->GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_CONTINUE(tabContentProperty);
+        auto visibility = tabContentProperty->GetDefaultVisibilityValue(TabVisibility::AUTO);
+        switch (visibility) {
+            case TabVisibility::VISIBLE:
+                visibleIndices.push_back(i);
+                break;
+            case TabVisibility::AUTO:
+                visibleIndices.push_back(i);
+                break;
+            case TabVisibility::HIDDEN:
+                break;
+            default:
+                visibleIndices.push_back(i);
+                break;
+        }
+    }
+    return visibleIndices;
+}
+
+TabsPattern::SidebarPlacementMap TabsPattern::ComputeSidebarPlacementMap() const
+{
+    SidebarPlacementMap placementMap;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, placementMap);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_RETURN(tabsNode, placementMap);
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_RETURN(swiperNode, placementMap);
+
+    int32_t tabCount = swiperNode->TotalChildCount();
+    for (int32_t i = 0; i < tabCount; ++i) {
+        auto child = swiperNode->GetChildAtIndex(i);
+        CHECK_NULL_CONTINUE(child);
+        auto tabContentNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(tabContentNode);
+        auto tabContentProperty = tabContentNode->GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_CONTINUE(tabContentProperty);
+        auto placement = tabContentProperty->GetPreferredPlacementValue(TabBarPlacement::DEFAULT);
+        switch (placement) {
+            case TabBarPlacement::FIXED:
+                placementMap.fixedIndices.push_back(i);
+                break;
+            case TabBarPlacement::PINNED:
+                placementMap.pinnedIndices.push_back(i);
+                break;
+            case TabBarPlacement::SIDEBARONLY:
+                placementMap.sidebarOnlyIndices.push_back(i);
+                break;
+            case TabBarPlacement::OPTIONAL:
+                placementMap.customizableIndices.push_back(i);
+                break;
+            case TabBarPlacement::DEFAULT:
+                placementMap.customizableIndices.push_back(i);
+                break;
+            default:
+                placementMap.customizableIndices.push_back(i);
+                break;
+        }
+    }
+    return placementMap;
 }
 } // namespace OHOS::Ace::NG

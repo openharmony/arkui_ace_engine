@@ -27,9 +27,11 @@
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/event/pan_event.h"
+#include "core/animation/curve.h"
 
-namespace OHOS::Ace::NG {
-namespace {
 enum class FloatingBarPosition {
     CENTER = 0,
     LEFT,
@@ -38,7 +40,8 @@ enum class FloatingBarPosition {
 
 constexpr float FLOATING_BAR_SCALE = 1.0f;
 constexpr float FLOATING_BAR_SCALE_ENLARGED = 1.15f;
-}
+
+namespace OHOS::Ace::NG {
 
 class TabsNode;
 
@@ -102,6 +105,7 @@ public:
     }
 
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     std::string ProvideRestoreInfo() override;
 
@@ -164,6 +168,71 @@ public:
         return animateMode_;
     }
 
+    void SetOnBarDisplayModeChangeEvent(BarDisplayModeChangeEvent&& callback)
+    {
+        onBarDisplayModeChangeEvent_ = std::move(callback);
+    }
+
+    BarDisplayModeChangeEvent GetOnBarDisplayModeChangeEvent() const
+    {
+        return onBarDisplayModeChangeEvent_;
+    }
+
+    void SetOnSideBarChangeEvent(SideBarChangeEvent&& callback)
+    {
+        onSideBarChangeEvent_ = std::move(callback);
+    }
+
+    SideBarChangeEvent GetOnSideBarChangeEvent() const
+    {
+        return onSideBarChangeEvent_;
+    }
+
+    TabBarDisplayMode GetCurrentBarDisplayMode() const
+    {
+        return currentBarDisplayMode_;
+    }
+
+    SideBarStatus GetSideBarStatus() const
+    {
+        return sideBarStatus_;
+    }
+
+    void SetSideBarStatus(SideBarStatus status)
+    {
+        sideBarStatus_ = status;
+    }
+
+    float GetRealSidebarWidth() const
+    {
+        return realSidebarWidth_;
+    }
+
+    void SetRealSidebarWidth(float width)
+    {
+        realSidebarWidth_ = width;
+    }
+
+    float GetCurrentOffset() const
+    {
+        return currentOffset_;
+    }
+
+    void SetCurrentOffset(float offset)
+    {
+        currentOffset_ = offset;
+    }
+
+    bool IsInAnimation() const
+    {
+        return inAnimation_;
+    }
+
+    bool IsAutoHide() const
+    {
+        return autoHide_;
+    }
+
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
     void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
@@ -202,6 +271,31 @@ public:
     }
     void SetFloatingScaleEnabled(bool isFloatingScaleEnabled);
 
+    void SetSidebarHeaderNode(const RefPtr<NG::UINode>& header)
+    {
+        sidebarHeaderNode_ = header;
+    }
+    RefPtr<NG::UINode> GetSidebarHeaderNode() const
+    {
+        return sidebarHeaderNode_;
+    }
+    void SetSidebarFooterNode(const RefPtr<NG::UINode>& footer)
+    {
+        sidebarFooterNode_ = footer;
+    }
+    RefPtr<NG::UINode> GetSidebarFooterNode() const
+    {
+        return sidebarFooterNode_;
+    }
+    void SetSidebarSearchableNode(const RefPtr<NG::UINode>& searchable)
+    {
+        sidebarSearchableNode_ = searchable;
+    }
+    RefPtr<NG::UINode> GetSidebarSearchableNode() const
+    {
+        return sidebarSearchableNode_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -214,6 +308,32 @@ private:
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
     void FireTabChangeCallback(int32_t preIndex, int32_t nextIndex);
+    void FireOnBarDisplayModeChangeEvent(TabBarDisplayMode displayMode);
+    void FireOnSideBarChangeEvent(bool isShow);
+    void UpdateDisplayModeByBreakpoint();
+    TabBarDisplayMode CalculateDisplayMode(float width, double density);
+    void OnDisplayModeChanged(TabBarDisplayMode newMode);
+    void InitShowAndCloseSidebarPanEvent();
+    void HandleDragEndForContent(float xOffset, SidebarPosition position);
+    void DoSpringAnimation();
+    void UpdateAnimDir();
+    void InitDividerDragEvent();
+    void UpdateSidebarStatus();
+    void StartSidebarTransitionAnimation(bool toShow);
+    void FireOnSideBarChangeEventIfNeeded(bool isShow);
+    struct SidebarSectionInfo {
+        std::string sectionName;
+        std::vector<int32_t> tabIndices;
+    };
+    std::vector<SidebarSectionInfo> ComputeSidebarSections() const;
+    std::vector<int32_t> ComputeVisibleTabIndices() const;
+    struct SidebarPlacementMap {
+        std::vector<int32_t> fixedIndices;
+        std::vector<int32_t> customizableIndices;
+        std::vector<int32_t> pinnedIndices;
+        std::vector<int32_t> sidebarOnlyIndices;
+    };
+    SidebarPlacementMap ComputeSidebarPlacementMap() const;
     void UpdateBackBlurStyle(const RefPtr<FrameNode>& tabBarNode);
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     // Information on TabChange event
@@ -272,6 +392,31 @@ private:
     std::list<std::shared_ptr<AnimationUtils::Animation>> floatTabBarFollowHandAnimations_;
     std::optional<float> floatingBarMargin_ = 0.0f;
     float baseFloatingScale_ = FLOATING_BAR_SCALE;
+
+    using BarDisplayModeChangeEvent = std::function<void(TabBarDisplayMode)>;
+    using SideBarChangeEvent = std::function<void(bool)>;
+    BarDisplayModeChangeEvent onBarDisplayModeChangeEvent_;
+    SideBarChangeEvent onSideBarChangeEvent_;
+    TabBarDisplayMode currentBarDisplayMode_ = TabBarDisplayMode::BOTTOMTABBAR;
+    std::optional<WidthBreakpoint> lastWidthBreakpoint_;
+
+    SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
+    float currentOffset_ = 0.0f;
+    bool inAnimation_ = false;
+    bool sideBarInDragGesture_ = false;
+    float currentContentDragOffset_ = 0.0f;
+    float realSidebarWidth_ = 0.0f;
+    float realDividerWidth_ = 0.0f;
+    bool autoHide_ = false;
+    bool userSetShowSideBar_ = true;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    RefPtr<PanEvent> dragEventForCloseSideBar_;
+    std::vector<SidebarSectionInfo> sidebarSections_;
+    std::vector<int32_t> visibleTabIndices_;
+    SidebarPlacementMap sidebarPlacementMap_;
+    RefPtr<NG::UINode> sidebarHeaderNode_;
+    RefPtr<NG::UINode> sidebarFooterNode_;
+    RefPtr<NG::UINode> sidebarSearchableNode_;
 };
 
 } // namespace OHOS::Ace::NG

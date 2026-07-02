@@ -231,6 +231,78 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
     return this;
   }
+  barStyle(style: BarStyle): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, BarStyleModifier.identity, BarStyleModifier, style);
+    return this;
+  }
+  sidebarWidth(width: Length): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarWidthModifier.identity, SidebarWidthModifier, width);
+    return this;
+  }
+  sidebarBackgroundColor(color: ResourceColor): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarBackgroundColorModifier.identity, SidebarBackgroundColorModifier, color);
+    return this;
+  }
+  sidebarDivider(divider: TabsSidebarDivider): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarDividerModifier.identity, SidebarDividerModifier, divider);
+    return this;
+  }
+  barDisplayModeBreakpoint(breakpoint: TabBarDisplayModeBreakpoint): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, BarDisplayModeBreakpointModifier.identity, BarDisplayModeBreakpointModifier, breakpoint);
+    return this;
+  }
+  sidebarDisplayStyle(displayStyle: SidebarDisplayStyle): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarDisplayStyleModifier.identity, SidebarDisplayStyleModifier, displayStyle);
+    return this;
+  }
+  showSideBar(show: boolean): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, ShowSideBarModifier.identity, ShowSideBarModifier, show);
+    return this;
+  }
+  showSideBarWithGesture(withGesture: boolean): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, ShowSideBarWithGestureModifier.identity, ShowSideBarWithGestureModifier, withGesture);
+    return this;
+  }
+  sidebarAutoHide(autoHide: boolean): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarAutoHideModifier.identity, SidebarAutoHideModifier, autoHide);
+    return this;
+  }
+  minSidebarWidth(minWidth: Length): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, MinSidebarWidthModifier.identity, MinSidebarWidthModifier, minWidth);
+    return this;
+  }
+  maxSidebarWidth(maxWidth: Length): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, MaxSidebarWidthModifier.identity, MaxSidebarWidthModifier, maxWidth);
+    return this;
+  }
+  minContentWidth(minWidth: Length): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, MinContentWidthModifier.identity, MinContentWidthModifier, minWidth);
+    return this;
+  }
+  sidebarPosition(position: SidebarPosition): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarPositionModifier.identity, SidebarPositionModifier, position);
+    return this;
+  }
+  onBarDisplayModeChange(handler: (displayMode: TabBarDisplayMode) => void): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, OnBarDisplayModeChangeModifier.identity, OnBarDisplayModeChangeModifier, handler);
+    return this;
+  }
+  onSideBarChange(handler: (isShow: boolean) => void): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, OnSideBarChangeModifier.identity, OnSideBarChangeModifier, handler);
+    return this;
+  }
+  sidebarHeader(value: CustomBuilder): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarHeaderModifier.identity, SidebarHeaderModifier, value);
+    return this;
+  }
+  sidebarFooter(value: CustomBuilder): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarFooterModifier.identity, SidebarFooterModifier, value);
+    return this;
+  }
+  sidebarSearchable(value: CustomBuilder): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, SidebarSearchableModifier.identity, SidebarSearchableModifier, value);
+    return this;
+  }
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
@@ -911,7 +983,169 @@ class TabsCustomContentTransition extends ModifierWithKey<(from: number, to: num
       getUINativeModule().tabs.setTabsCustomContentTransition(node, this.value);
     }
   }
-} 
+}
+
+class BarStyleModifier extends ModifierWithKey<BarStyle> {
+  constructor(value: BarStyle) { super(value); }
+  static identity: Symbol = Symbol('barStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetBarStyle(node); }
+    else { getUINativeModule().tabs.setBarStyle(node, this.value); }
+  }
+}
+
+class SidebarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) { super(value); }
+  static identity: Symbol = Symbol('sidebarWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarWidth(node); }
+    else { getUINativeModule().tabs.setSidebarWidth(node, this.value); }
+  }
+}
+
+class SidebarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) { super(value); }
+  static identity: Symbol = Symbol('sidebarBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarBackgroundColor(node); }
+    else { getUINativeModule().tabs.setSidebarBackgroundColor(node, this.value); }
+  }
+}
+
+class SidebarDividerModifier extends ModifierWithKey<TabsSidebarDivider> {
+  constructor(value: TabsSidebarDivider) { super(value); }
+  static identity: Symbol = Symbol('sidebarDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarDivider(node); }
+    else { getUINativeModule().tabs.setSidebarDivider(node, this.value); }
+  }
+}
+
+class BarDisplayModeBreakpointModifier extends ModifierWithKey<TabBarDisplayModeBreakpoint> {
+  constructor(value: TabBarDisplayModeBreakpoint) { super(value); }
+  static identity: Symbol = Symbol('barDisplayModeBreakpoint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetBarDisplayModeBreakpoint(node); }
+    else { getUINativeModule().tabs.setBarDisplayModeBreakpoint(node, this.value); }
+  }
+}
+
+class SidebarDisplayStyleModifier extends ModifierWithKey<SidebarDisplayStyle> {
+  constructor(value: SidebarDisplayStyle) { super(value); }
+  static identity: Symbol = Symbol('sidebarDisplayStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarDisplayStyle(node); }
+    else { getUINativeModule().tabs.setSidebarDisplayStyle(node, this.value); }
+  }
+}
+
+class ShowSideBarModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) { super(value); }
+  static identity: Symbol = Symbol('showSideBar');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetShowSideBar(node); }
+    else { getUINativeModule().tabs.setShowSideBar(node, this.value); }
+  }
+}
+
+class ShowSideBarWithGestureModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) { super(value); }
+  static identity: Symbol = Symbol('showSideBarWithGesture');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetShowSideBarWithGesture(node); }
+    else { getUINativeModule().tabs.setShowSideBarWithGesture(node, this.value); }
+  }
+}
+
+class SidebarAutoHideModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) { super(value); }
+  static identity: Symbol = Symbol('sidebarAutoHide');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarAutoHide(node); }
+    else { getUINativeModule().tabs.setSidebarAutoHide(node, this.value); }
+  }
+}
+
+class MinSidebarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) { super(value); }
+  static identity: Symbol = Symbol('minSidebarWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetMinSidebarWidth(node); }
+    else { getUINativeModule().tabs.setMinSidebarWidth(node, this.value); }
+  }
+}
+
+class MaxSidebarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) { super(value); }
+  static identity: Symbol = Symbol('maxSidebarWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetMaxSidebarWidth(node); }
+    else { getUINativeModule().tabs.setMaxSidebarWidth(node, this.value); }
+  }
+}
+
+class MinContentWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) { super(value); }
+  static identity: Symbol = Symbol('minContentWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetMinContentWidth(node); }
+    else { getUINativeModule().tabs.setMinContentWidth(node, this.value); }
+  }
+}
+
+class SidebarPositionModifier extends ModifierWithKey<SidebarPosition> {
+  constructor(value: SidebarPosition) { super(value); }
+  static identity: Symbol = Symbol('sidebarPosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarPosition(node); }
+    else { getUINativeModule().tabs.setSidebarPosition(node, this.value); }
+  }
+}
+
+class OnBarDisplayModeChangeModifier extends ModifierWithKey<(displayMode: TabBarDisplayMode) => void> {
+  constructor(value: (displayMode: TabBarDisplayMode) => void) { super(value); }
+  static identity: Symbol = Symbol('onBarDisplayModeChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetOnBarDisplayModeChange(node); }
+    else { getUINativeModule().tabs.setOnBarDisplayModeChange(node, this.value); }
+  }
+}
+
+class OnSideBarChangeModifier extends ModifierWithKey<(isShow: boolean) => void> {
+  constructor(value: (isShow: boolean) => void) { super(value); }
+  static identity: Symbol = Symbol('onSideBarChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetOnSideBarChange(node); }
+    else { getUINativeModule().tabs.setOnSideBarChange(node, this.value); }
+  }
+}
+
+class SidebarHeaderModifier extends ModifierWithKey<CustomBuilder> {
+  constructor(value: CustomBuilder) { super(value); }
+  static identity: Symbol = Symbol('sidebarHeader');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarHeader(node); }
+    else { getUINativeModule().tabs.setSidebarHeader(node, this.value); }
+  }
+}
+
+class SidebarFooterModifier extends ModifierWithKey<CustomBuilder> {
+  constructor(value: CustomBuilder) { super(value); }
+  static identity: Symbol = Symbol('sidebarFooter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarFooter(node); }
+    else { getUINativeModule().tabs.setSidebarFooter(node, this.value); }
+  }
+}
+
+class SidebarSearchableModifier extends ModifierWithKey<CustomBuilder> {
+  constructor(value: CustomBuilder) { super(value); }
+  static identity: Symbol = Symbol('sidebarSearchable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) { getUINativeModule().tabs.resetSidebarSearchable(node); }
+    else { getUINativeModule().tabs.setSidebarSearchable(node, this.value); }
+  }
+}
 
 
 // @ts-ignore

@@ -5614,6 +5614,32 @@ struct ArkUITabsModifier {
         void* colorRawPtr, void* inactiveColorRawPtr);
     void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
     void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
+    void (*setBarStyle)(ArkUINodeHandle node, ArkUI_Int32 barStyle);
+    void (*resetBarStyle)(ArkUINodeHandle node);
+    void (*setSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 sidebarWidth);
+    void (*resetSidebarWidth)(ArkUINodeHandle node);
+    void (*setSidebarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 backgroundColor);
+    void (*resetSidebarBackgroundColor)(ArkUINodeHandle node);
+    void (*setSidebarDivider)(ArkUINodeHandle node, void* dividerRawPtr);
+    void (*resetSidebarDivider)(ArkUINodeHandle node);
+    void (*setBarDisplayModeBreakpoint)(ArkUINodeHandle node, void* breakpointRawPtr);
+    void (*resetBarDisplayModeBreakpoint)(ArkUINodeHandle node);
+    void (*setSidebarDisplayStyle)(ArkUINodeHandle node, ArkUI_Int32 displayStyle);
+    void (*resetSidebarDisplayStyle)(ArkUINodeHandle node);
+    void (*setShowSideBar)(ArkUINodeHandle node, ArkUI_Bool showSideBar);
+    void (*resetShowSideBar)(ArkUINodeHandle node);
+    void (*setShowSideBarWithGesture)(ArkUINodeHandle node, ArkUI_Bool withGesture);
+    void (*resetShowSideBarWithGesture)(ArkUINodeHandle node);
+    void (*setSidebarAutoHide)(ArkUINodeHandle node, ArkUI_Bool autoHide);
+    void (*resetSidebarAutoHide)(ArkUINodeHandle node);
+    void (*setMinSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 minWidth);
+    void (*resetMinSidebarWidth)(ArkUINodeHandle node);
+    void (*setMaxSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 maxWidth);
+    void (*resetMaxSidebarWidth)(ArkUINodeHandle node);
+    void (*setMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 minWidth);
+    void (*resetMinContentWidth)(ArkUINodeHandle node);
+    void (*setSidebarPosition)(ArkUINodeHandle node, ArkUI_Int32 position);
+    void (*resetSidebarPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

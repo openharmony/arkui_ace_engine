@@ -1424,4 +1424,44 @@ void TabContentModelNG::InitTabText(const RefPtr<TextLayoutProperty>& textLayout
         textLayoutProperty->UpdateFallbackLineSpacing(true);
     }
 }
+
+void TabContentModelNG::SetSidebarSection(const std::string& section)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, SidebarSection, section);
+}
+
+void TabContentModelNG::SetDefaultVisibility(TabVisibility visibility)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, DefaultVisibility, visibility);
+}
+
+void TabContentModelNG::SetPreferredPlacement(TabBarPlacement placement)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, PreferredPlacement, placement);
+}
+
+void TabContentModelNG::SetCustomizationBehavior(TabBarCustomizationBehavior behavior)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, CustomizationBehavior, behavior);
+}
+
+void TabContentModelNG::SetSidebarSection(FrameNode* frameNode, const std::string& section)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, SidebarSection, section, frameNode);
+}
+
+void TabContentModelNG::SetDefaultVisibility(FrameNode* frameNode, TabVisibility visibility)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, DefaultVisibility, visibility, frameNode);
+}
+
+void TabContentModelNG::SetPreferredPlacement(FrameNode* frameNode, TabBarPlacement placement)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, PreferredPlacement, placement, frameNode);
+}
+
+void TabContentModelNG::SetCustomizationBehavior(FrameNode* frameNode, TabBarCustomizationBehavior behavior)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, CustomizationBehavior, behavior, frameNode);
+}
 } // namespace OHOS::Ace::NG

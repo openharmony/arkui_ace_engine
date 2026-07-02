@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +38,10 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propIcon_ = CloneIcon();
         value->propText_ = CloneText();
+        value->propSidebarSection_ = CloneSidebarSection();
+        value->propDefaultVisibility_ = CloneDefaultVisibility();
+        value->propPreferredPlacement_ = ClonePreferredPlacement();
+        value->propCustomizationBehavior_ = CloneCustomizationBehavior();
         return value;
     }
 
@@ -45,6 +50,10 @@ public:
         LayoutProperty::Reset();
         ResetIcon();
         ResetText();
+        ResetSidebarSection();
+        ResetDefaultVisibility();
+        ResetPreferredPlacement();
+        ResetCustomizationBehavior();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -77,6 +86,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LabelSelectedColorSetByUser, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconUnselectedColorSetByUser, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSelectedColorSetByUser, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarSection, std::string, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultVisibility, TabVisibility, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredPlacement, TabBarPlacement, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CustomizationBehavior, TabBarCustomizationBehavior, PROPERTY_UPDATE_LAYOUT);
 };
 
 } // namespace OHOS::Ace::NG

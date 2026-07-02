@@ -74,6 +74,10 @@ private:
     static void SetBottomTabBarStyle(const JSCallbackInfo& info);
     static void SetOnWillShow(const JSCallbackInfo& info);
     static void SetOnWillHide(const JSCallbackInfo& info);
+    static void SetSidebarSection(const JSCallbackInfo& info);
+    static void SetDefaultVisibility(const JSCallbackInfo& info);
+    static void SetPreferredPlacement(const JSCallbackInfo& info);
+    static void SetCustomizationBehavior(const JSCallbackInfo& info);
     static bool ParseDrawableIndicator(const JSRef<JSVal>& info, ImageInfoConfig& drawableIndicatorConfig);
     static ImageType ParseImageType(const JSRef<JSVal>& imageInfo);
     static int32_t GetThemeScopeId();

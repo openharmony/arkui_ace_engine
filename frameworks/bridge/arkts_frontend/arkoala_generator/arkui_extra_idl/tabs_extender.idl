@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,100 @@
 
 package arkui.component.idlize;
 
+import arkui.component.common;
+import arkui.component.enums;
+
+dictionary TabBarDisplayMode {
+    number BOTTOM = 0;
+    number SIDEBAR = 1;
+};
+
+dictionary SidebarDisplayStyle {
+    number EMBED = 0;
+    number OVERLAY = 1;
+    number DISPLACE = 2;
+};
+
+dictionary SidebarPosition {
+    number START = 0;
+    number END = 1;
+};
+
+dictionary TabVisibility {
+    number VISIBLE = 0;
+    number HIDDEN = 1;
+    number AUTO = 2;
+};
+
+dictionary TabBarPlacement {
+    number FIXED = 0;
+    number CUSTOMIZABLE = 1;
+    number PINNED = 2;
+    number SIDEBAR_ONLY = 3;
+};
+
+dictionary TabBarCustomizationBehavior {
+    number NONE = 0;
+    number MOVE_TO_SIDEBAR = 1;
+    number MOVE_TO_OVERFLOW = 2;
+    number HIDE = 3;
+};
+
+[Entity=Interface]
+interface TabsSidebarDivider {
+    attribute (ResourceColor or undefined) color;
+    attribute (Length or undefined) strokeWidth;
+    attribute (Length or undefined) startMargin;
+    attribute (Length or undefined) endMargin;
+};
+
+[Entity=Interface]
+interface TabBarDisplayModeBreakpoint {
+    attribute (ResourceStr or undefined) sm;
+    attribute (ResourceStr or undefined) md;
+    attribute (ResourceStr or undefined) lg;
+};
+
+callback OnBarDisplayModeChangeCallback = void (TabBarDisplayMode mode);
+callback OnSideBarChangeCallback = void (boolean showing);
+
 [Entity=Class]
 interface TabsExtender {
     static void ApplyAttributesFinish(pointer node);
+    static void setBarStyle(pointer node, i32 barStyle);
+    static void resetBarStyle(pointer node);
+    static void setSidebarWidth(pointer node, f32 sidebarWidth);
+    static void resetSidebarWidth(pointer node);
+    static void setSidebarBackgroundColor(pointer node, u32 backgroundColor);
+    static void resetSidebarBackgroundColor(pointer node);
+    static void setSidebarDivider(pointer node, TabsSidebarDivider divider);
+    static void resetSidebarDivider(pointer node);
+    static void setBarDisplayModeBreakpoint(pointer node, TabBarDisplayModeBreakpoint breakpoint);
+    static void resetBarDisplayModeBreakpoint(pointer node);
+    static void setSidebarDisplayStyle(pointer node, i32 displayStyle);
+    static void resetSidebarDisplayStyle(pointer node);
+    static void setShowSideBar(pointer node, boolean showSideBar);
+    static void resetShowSideBar(pointer node);
+    static void setShowSideBarWithGesture(pointer node, boolean withGesture);
+    static void resetShowSideBarWithGesture(pointer node);
+    static void setSidebarAutoHide(pointer node, boolean autoHide);
+    static void resetSidebarAutoHide(pointer node);
+    static void setMinSidebarWidth(pointer node, f32 minWidth);
+    static void resetMinSidebarWidth(pointer node);
+    static void setMaxSidebarWidth(pointer node, f32 maxWidth);
+    static void resetMaxSidebarWidth(pointer node);
+    static void setMinContentWidth(pointer node, f32 minWidth);
+    static void resetMinContentWidth(pointer node);
+    static void setSidebarPosition(pointer node, i32 position);
+    static void resetSidebarPosition(pointer node);
+    static void setOnBarDisplayModeChange(pointer node, (OnBarDisplayModeChangeCallback or undefined) handler);
+    static void resetOnBarDisplayModeChange(pointer node);
+    static void setOnSideBarChange(pointer node, (OnSideBarChangeCallback or undefined) handler);
+    static void resetOnSideBarChange(pointer node);
+    static void setSidebarHeader(pointer node, pointer builderNode);
+    static void resetSidebarHeader(pointer node);
+    static void setSidebarFooter(pointer node, pointer builderNode);
+    static void resetSidebarFooter(pointer node);
+    static void setSidebarSearchable(pointer node, pointer builderNode);
+    static void resetSidebarSearchable(pointer node);
 };

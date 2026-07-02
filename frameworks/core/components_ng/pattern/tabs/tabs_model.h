@@ -36,6 +36,62 @@
 
 namespace OHOS::Ace {
 
+enum class TabBarDisplayMode {
+    BOTTOMTABBAR = 0,
+    SIDEBAR,
+};
+
+enum class SidebarDisplayStyle {
+    EMBED = 0,
+    OVERLAY,
+    DISPLACE,
+};
+
+enum class TabVisibility {
+    AUTO = 0,
+    VISIBLE,
+    HIDDEN,
+};
+
+enum class TabBarPlacement {
+    DEFAULT = 0,
+    FIXED,
+    PINNED,
+    SIDEBARONLY,
+    OPTIONAL,
+};
+
+enum class TabBarCustomizationBehavior {
+    DEFAULT = 0,
+    DISABLED,
+};
+
+enum class SidebarPosition {
+    START = 0,
+    END,
+};
+
+struct TabsSidebarDivider {
+    Dimension strokeWidth;
+    Dimension startMargin;
+    Dimension endMargin;
+    Color color;
+    bool isNull = true;
+};
+
+struct TabBarDisplayModeBreakpoint {
+    TabBarDisplayMode sm = TabBarDisplayMode::BOTTOMTABBAR;
+    TabBarDisplayMode md = TabBarDisplayMode::BOTTOMTABBAR;
+    TabBarDisplayMode lg = TabBarDisplayMode::SIDEBAR;
+    bool isNull = false;
+};
+
+struct TabsSidebarSearchableOptions {
+    bool autoSearchOnFocus = false;
+    Dimension searchAreaHeight;
+    bool isNull = true;
+};
+
 enum class TabsCacheMode {
     CACHE_BOTH_SIDE = 0,
     CACHE_LATEST_SWITCHED
@@ -198,6 +254,25 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
     virtual void ResetBarFloatingStyle() {}
+    virtual void SetBarStyle(TabBarStyle barStyle) {}
+    virtual void SetSidebarWidth(const Dimension& sidebarWidth) {}
+    virtual void SetSidebarBackgroundColor(const Color& backgroundColor) {}
+    virtual void SetSidebarDivider(const TabsSidebarDivider& divider) {}
+    virtual void SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint) {}
+    virtual void SetSidebarDisplayStyle(SidebarDisplayStyle displayStyle) {}
+    virtual void SetShowSideBar(bool showSideBar) {}
+    virtual void SetShowSideBarWithGesture(bool withGesture) {}
+    virtual void SetSidebarAutoHide(bool autoHide) {}
+    virtual void SetMinSidebarWidth(const Dimension& minWidth) {}
+    virtual void SetMaxSidebarWidth(const Dimension& maxWidth) {}
+    virtual void SetMinContentWidth(const Dimension& minWidth) {}
+    virtual void SetSidebarPosition(SidebarPosition position) {}
+    virtual void SetOnBarDisplayModeChange(std::function<void(TabBarDisplayMode)>&& callback) {}
+    virtual void SetOnSideBarChange(std::function<void(bool)>&& callback) {}
+    virtual void SetSidebarHeader(const RefPtr<NG::UINode>& header) {}
+    virtual void SetSidebarFooter(const RefPtr<NG::UINode>& footer) {}
+    virtual void SetSidebarSearchable(const RefPtr<NG::UINode>& searchable) {}
+    virtual void SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

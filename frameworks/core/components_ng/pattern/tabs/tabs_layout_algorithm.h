@@ -92,6 +92,16 @@ public:
         lastFloatingBar_ = lastFloatingBar;
     }
 
+    void SetBarDisplayMode(TabBarDisplayMode displayMode)
+    {
+        barDisplayMode_ = displayMode;
+    }
+
+    TabBarDisplayMode GetBarDisplayMode() const
+    {
+        return barDisplayMode_;
+    }
+
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
@@ -102,6 +112,8 @@ private:
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& idealSize);
     SizeF MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty, RefPtr<LayoutWrapper>& swiperWrapper,
         const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth);
+    SizeF MeasureSwiperInSidebarMode(const RefPtr<TabsLayoutProperty>& layoutProperty,
+        RefPtr<LayoutWrapper>& swiperWrapper, const SizeF& idealSize, const SizeF& tabBarSize);
     std::vector<OffsetF> LayoutOffsetList(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const;
 
@@ -120,6 +132,7 @@ private:
     bool isFloatingBar_ = false;
     bool lastFloatingBar_ = false;
     std::optional<float> floatingBarMargin_;
+    TabBarDisplayMode barDisplayMode_ = TabBarDisplayMode::BOTTOMTABBAR;
 };
 
 } // namespace OHOS::Ace::NG

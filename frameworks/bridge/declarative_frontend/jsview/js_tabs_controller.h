@@ -41,6 +41,10 @@ public:
 
     void SetTabBarOpacity(const JSCallbackInfo& args);
 
+    void GetBarDisplayMode(const JSCallbackInfo& args);
+
+    void SetBarDisplayMode(const JSCallbackInfo& args);
+
     const RefPtr<AceType>& GetController() const
     {
         return controller_;

@@ -82,6 +82,25 @@ public:
     void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) override;
     void ResetBarFloatingStyle() override;
+    void SetBarStyle(TabBarStyle barStyle) override;
+    void SetSidebarWidth(const Dimension& sidebarWidth) override;
+    void SetSidebarBackgroundColor(const Color& backgroundColor) override;
+    void SetSidebarDivider(const TabsSidebarDivider& divider) override;
+    void SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint) override;
+    void SetSidebarDisplayStyle(SidebarDisplayStyle displayStyle) override;
+    void SetShowSideBar(bool showSideBar) override;
+    void SetShowSideBarWithGesture(bool withGesture) override;
+    void SetSidebarAutoHide(bool autoHide) override;
+    void SetMinSidebarWidth(const Dimension& minWidth) override;
+    void SetMaxSidebarWidth(const Dimension& maxWidth) override;
+    void SetMinContentWidth(const Dimension& minWidth) override;
+    void SetSidebarPosition(SidebarPosition position) override;
+    void SetOnBarDisplayModeChange(std::function<void(TabBarDisplayMode)>&& callback) override;
+    void SetOnSideBarChange(std::function<void(bool)>&& callback) override;
+    void SetSidebarHeader(const RefPtr<NG::UINode>& header) override;
+    void SetSidebarFooter(const RefPtr<NG::UINode>& footer) override;
+    void SetSidebarSearchable(const RefPtr<NG::UINode>& searchable) override;
+    void SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options) override;
     static void ProcessDimensionWithResourceObj(
         FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
     static void ProcessColorWithResourceObj(
@@ -160,6 +179,25 @@ public:
 
     static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);
     static void ResetBarFloatingStyle(FrameNode* frameNode);
+    static void SetBarStyle(FrameNode* frameNode, TabBarStyle barStyle);
+    static void SetSidebarWidth(FrameNode* frameNode, const Dimension& sidebarWidth);
+    static void SetSidebarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
+    static void SetSidebarDivider(FrameNode* frameNode, const TabsSidebarDivider& divider);
+    static void SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint);
+    static void SetSidebarDisplayStyle(FrameNode* frameNode, SidebarDisplayStyle displayStyle);
+    static void SetShowSideBar(FrameNode* frameNode, bool showSideBar);
+    static void SetShowSideBarWithGesture(FrameNode* frameNode, bool withGesture);
+    static void SetSidebarAutoHide(FrameNode* frameNode, bool autoHide);
+    static void SetMinSidebarWidth(FrameNode* frameNode, const Dimension& minWidth);
+    static void SetMaxSidebarWidth(FrameNode* frameNode, const Dimension& maxWidth);
+    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& minWidth);
+    static void SetSidebarPosition(FrameNode* frameNode, SidebarPosition position);
+    static void SetOnBarDisplayModeChange(FrameNode* frameNode, std::function<void(TabBarDisplayMode)>&& callback);
+    static void SetOnSideBarChange(FrameNode* frameNode, std::function<void(bool)>&& callback);
+    static void SetSidebarHeader(FrameNode* frameNode, const RefPtr<NG::UINode>& header);
+    static void SetSidebarFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
+    static void SetSidebarSearchable(FrameNode* frameNode, const RefPtr<NG::UINode>& searchable);
+    static void SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

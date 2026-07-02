@@ -824,6 +824,7 @@ enum class TabBarStyle {
     NOSTYLE = 0,
     SUBTABBATSTYLE,
     BOTTOMTABBATSTYLE,
+    SIDEBARADAPTABLE,
 };
 
 enum class GestureJudgeResult {

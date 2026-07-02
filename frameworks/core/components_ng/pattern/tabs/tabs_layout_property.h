@@ -53,6 +53,19 @@ public:
         value->propHeightAuto_ = CloneHeightAuto();
         value->propCachedMaxCount_ = CloneCachedMaxCount();
         value->propCacheMode_ = CloneCacheMode();
+        value->propBarStyle_ = CloneBarStyle();
+        value->propSidebarWidth_ = CloneSidebarWidth();
+        value->propSidebarBackgroundColor_ = CloneSidebarBackgroundColor();
+        value->propSidebarDivider_ = CloneSidebarDivider();
+        value->propBarDisplayModeBreakpoint_ = CloneBarDisplayModeBreakpoint();
+        value->propSidebarDisplayStyle_ = CloneSidebarDisplayStyle();
+        value->propShowSideBar_ = CloneShowSideBar();
+        value->propShowSideBarWithGesture_ = CloneShowSideBarWithGesture();
+        value->propSidebarAutoHide_ = CloneSidebarAutoHide();
+        value->propMinSidebarWidth_ = CloneMinSidebarWidth();
+        value->propMaxSidebarWidth_ = CloneMaxSidebarWidth();
+        value->propMinContentWidth_ = CloneMinContentWidth();
+        value->propSidebarPosition_ = CloneSidebarPosition();
         return value;
     }
 
@@ -71,6 +84,19 @@ public:
         ResetBarOverlap();
         ResetCachedMaxCount();
         ResetCacheMode();
+        ResetBarStyle();
+        ResetSidebarWidth();
+        ResetSidebarBackgroundColor();
+        ResetSidebarDivider();
+        ResetBarDisplayModeBreakpoint();
+        ResetSidebarDisplayStyle();
+        ResetShowSideBar();
+        ResetShowSideBarWithGesture();
+        ResetSidebarAutoHide();
+        ResetMinSidebarWidth();
+        ResetMaxSidebarWidth();
+        ResetMinContentWidth();
+        ResetSidebarPosition();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -189,6 +215,20 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarFloatingStyle, BarFloatingStyleParameters, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarStyle, TabBarStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarBackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarDivider, TabsSidebarDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarDisplayModeBreakpoint, TabBarDisplayModeBreakpoint, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarDisplayStyle, SidebarDisplayStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowSideBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowSideBarWithGesture, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarAutoHide, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxSidebarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarPosition, SidebarPosition, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SidebarSearchableOptions, TabsSidebarSearchableOptions, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

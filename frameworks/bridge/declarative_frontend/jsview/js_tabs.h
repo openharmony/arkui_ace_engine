@@ -67,6 +67,24 @@ protected:
     static void SetOnSelected(const JSCallbackInfo& info);
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetBarFloatingStyle(const JSCallbackInfo& info);
+    static void SetBarStyle(const JSCallbackInfo& info);
+    static void SetSidebarWidth(const JSCallbackInfo& info);
+    static void SetSidebarBackgroundColor(const JSCallbackInfo& info);
+    static void SetSidebarDivider(const JSCallbackInfo& info);
+    static void SetBarDisplayModeBreakpoint(const JSCallbackInfo& info);
+    static void SetSidebarDisplayStyle(const JSCallbackInfo& info);
+    static void SetShowSideBar(const JSCallbackInfo& info);
+    static void SetShowSideBarWithGesture(const JSCallbackInfo& info);
+    static void SetSidebarAutoHide(const JSCallbackInfo& info);
+    static void SetMinSidebarWidth(const JSCallbackInfo& info);
+    static void SetMaxSidebarWidth(const JSCallbackInfo& info);
+    static void SetMinContentWidth(const JSCallbackInfo& info);
+    static void SetSidebarPosition(const JSCallbackInfo& info);
+    static void SetOnBarDisplayModeChange(const JSCallbackInfo& info);
+    static void SetOnSideBarChange(const JSCallbackInfo& info);
+    static void SetSidebarHeader(const JSCallbackInfo& info);
+    static void SetSidebarFooter(const JSCallbackInfo& info);
+    static void SetSidebarSearchable(const JSCallbackInfo& info);
 
 private:
     static int32_t GetThemeScopeId();

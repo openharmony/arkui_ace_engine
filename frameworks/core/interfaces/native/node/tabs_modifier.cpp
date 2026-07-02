@@ -871,6 +871,191 @@ void ResetTabsBarFloatingStyle(ArkUINodeHandle node)
     TabsModelNG::ResetBarFloatingStyle(frameNode);
 }
 
+void SetBarStyle(ArkUINodeHandle node, ArkUI_Int32 barStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarStyle(frameNode, static_cast<TabBarStyle>(barStyle));
+}
+
+void ResetBarStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarStyle(frameNode, TabBarStyle::NOSTYLE);
+}
+
+void SetSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 sidebarWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarWidth(frameNode, Dimension(sidebarWidth, DimensionUnit::VP));
+}
+
+void ResetSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarWidth(frameNode, Dimension(240, DimensionUnit::VP));
+}
+
+void SetSidebarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 backgroundColor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarBackgroundColor(frameNode, Color(backgroundColor));
+}
+
+void ResetSidebarBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarBackgroundColor(frameNode, Color::TRANSPARENT);
+}
+
+void SetSidebarDivider(ArkUINodeHandle node, void* dividerRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDivider(frameNode, TabsSidebarDivider());
+}
+
+void ResetSidebarDivider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsSidebarDivider divider;
+    TabsModelNG::SetSidebarDivider(frameNode, divider);
+}
+
+void SetBarDisplayModeBreakpoint(ArkUINodeHandle node, void* breakpointRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto breakpoint = reinterpret_cast<TabBarDisplayModeBreakpoint*>(breakpointRawPtr);
+    TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, *breakpoint);
+}
+
+void ResetBarDisplayModeBreakpoint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabBarDisplayModeBreakpoint breakpoint;
+    TabsModelNG::SetBarDisplayModeBreakpoint(frameNode, breakpoint);
+}
+
+void SetSidebarDisplayStyle(ArkUINodeHandle node, ArkUI_Int32 displayStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, static_cast<SidebarDisplayStyle>(displayStyle));
+}
+
+void ResetSidebarDisplayStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarDisplayStyle(frameNode, SidebarDisplayStyle::EMBED);
+}
+
+void SetShowSideBar(ArkUINodeHandle node, ArkUI_Bool showSideBar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetShowSideBar(frameNode, showSideBar);
+}
+
+void ResetShowSideBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetShowSideBar(frameNode, true);
+}
+
+void SetShowSideBarWithGesture(ArkUINodeHandle node, ArkUI_Bool withGesture)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetShowSideBarWithGesture(frameNode, withGesture);
+}
+
+void ResetShowSideBarWithGesture(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetShowSideBarWithGesture(frameNode, false);
+}
+
+void SetSidebarAutoHide(ArkUINodeHandle node, ArkUI_Bool autoHide)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarAutoHide(frameNode, autoHide);
+}
+
+void ResetSidebarAutoHide(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarAutoHide(frameNode, false);
+}
+
+void SetMinSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 minWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMinSidebarWidth(frameNode, Dimension(minWidth, DimensionUnit::VP));
+}
+
+void ResetMinSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMinSidebarWidth(frameNode, Dimension(240, DimensionUnit::VP));
+}
+
+void SetMaxSidebarWidth(ArkUINodeHandle node, ArkUI_Float32 maxWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMaxSidebarWidth(frameNode, Dimension(maxWidth, DimensionUnit::VP));
+}
+
+void ResetMaxSidebarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMaxSidebarWidth(frameNode, Dimension(280, DimensionUnit::VP));
+}
+
+void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 minWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMinContentWidth(frameNode, Dimension(minWidth, DimensionUnit::VP));
+}
+
+void ResetMinContentWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetMinContentWidth(frameNode, Dimension(0, DimensionUnit::VP));
+}
+
+void SetSidebarPosition(ArkUINodeHandle node, ArkUI_Int32 position)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarPosition(frameNode, static_cast<SidebarPosition>(position));
+}
+
+void ResetSidebarPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetSidebarPosition(frameNode, SidebarPosition::START);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -964,6 +1149,32 @@ const ArkUITabsModifier* GetTabsModifier()
         .createBarBackgroundEffectWithResourceObj = CreateBarBackgroundEffectWithResourceObj,
         .setTabsBarFloatingStyle = SetTabsBarFloatingStyle,
         .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyle,
+        .setBarStyle = SetBarStyle,
+        .resetBarStyle = ResetBarStyle,
+        .setSidebarWidth = SetSidebarWidth,
+        .resetSidebarWidth = ResetSidebarWidth,
+        .setSidebarBackgroundColor = SetSidebarBackgroundColor,
+        .resetSidebarBackgroundColor = ResetSidebarBackgroundColor,
+        .setSidebarDivider = SetSidebarDivider,
+        .resetSidebarDivider = ResetSidebarDivider,
+        .setBarDisplayModeBreakpoint = SetBarDisplayModeBreakpoint,
+        .resetBarDisplayModeBreakpoint = ResetBarDisplayModeBreakpoint,
+        .setSidebarDisplayStyle = SetSidebarDisplayStyle,
+        .resetSidebarDisplayStyle = ResetSidebarDisplayStyle,
+        .setShowSideBar = SetShowSideBar,
+        .resetShowSideBar = ResetShowSideBar,
+        .setShowSideBarWithGesture = SetShowSideBarWithGesture,
+        .resetShowSideBarWithGesture = ResetShowSideBarWithGesture,
+        .setSidebarAutoHide = SetSidebarAutoHide,
+        .resetSidebarAutoHide = ResetSidebarAutoHide,
+        .setMinSidebarWidth = SetMinSidebarWidth,
+        .resetMinSidebarWidth = ResetMinSidebarWidth,
+        .setMaxSidebarWidth = SetMaxSidebarWidth,
+        .resetMaxSidebarWidth = ResetMaxSidebarWidth,
+        .setMinContentWidth = SetMinContentWidth,
+        .resetMinContentWidth = ResetMinContentWidth,
+        .setSidebarPosition = SetSidebarPosition,
+        .resetSidebarPosition = ResetSidebarPosition,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

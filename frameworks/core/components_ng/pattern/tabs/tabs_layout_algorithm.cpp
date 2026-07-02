@@ -81,6 +81,24 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure tab bar.
     SizeF tabBarSize = MeasureTabBar(layoutWrapper, childLayoutConstraint);
 
+    if (barDisplayMode_ == TabBarDisplayMode::SIDEBAR) {
+        auto tabsPattern = layoutWrapper->GetHostNode()->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(tabsPattern);
+        auto sidebarWidth = layoutProperty->GetSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+        auto minSidebarWidth = layoutProperty->GetMinSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+        auto maxSidebarWidth = layoutProperty->GetMaxSidebarWidthValue(Dimension(280.0_vp)).ConvertToPx();
+        sidebarWidth = std::clamp(sidebarWidth, minSidebarWidth, maxSidebarWidth);
+        auto showSideBar = layoutProperty->GetShowSideBarValue(true);
+        if (!showSideBar) {
+            sidebarWidth = 0.0f;
+        }
+        if (tabsPattern->GetSideBarStatus() == SideBarStatus::HIDDEN) {
+            sidebarWidth = 0.0f;
+        }
+        tabsPattern->SetRealSidebarWidth(sidebarWidth);
+        tabBarSize = SizeF(sidebarWidth, idealSize.Height());
+    }
+
     // Measure effect node.
     auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.effectIndex);
     if (effectWrapper) {
@@ -92,7 +110,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure divider.
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
-    if (dividerWrapper) {
+    if (dividerWrapper && barDisplayMode_ != TabBarDisplayMode::SIDEBAR) {
         dividerStrokeWidth = MeasureDivider(layoutProperty, dividerWrapper, idealSize);
     }
 
@@ -104,7 +122,9 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
     }
     SizeF swiperSize;
-    if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
+    if (barDisplayMode_ == TabBarDisplayMode::SIDEBAR) {
+        swiperSize = MeasureSwiperInSidebarMode(layoutProperty, swiperWrapper, idealSize, tabBarSize);
+    } else if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
         swiperSize = MeasureSwiper(layoutProperty, swiperWrapper, idealSize, tabBarSize, dividerStrokeWidth);
     } else if (swiperWrapper && swiperWrapper->GetGeometryNode()) {
         swiperWrapper->GetGeometryNode()->SetFrameSize(SizeF());
@@ -158,6 +178,29 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSize);
         offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, effectWrapper, frameSize);
     }
+
+    if (barDisplayMode_ == TabBarDisplayMode::SIDEBAR) {
+        auto sidebarPosition = layoutProperty->GetSidebarPositionValue(SidebarPosition::START);
+        if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            if (sidebarPosition == SidebarPosition::START) {
+                sidebarPosition = SidebarPosition::END;
+            } else {
+                sidebarPosition = SidebarPosition::START;
+            }
+        }
+        swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.swiperIndex]);
+        swiperWrapper->Layout();
+        dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.dividerIndex]);
+        dividerWrapper->Layout();
+        if (effectWrapper) {
+            effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.effectIndex]);
+            effectWrapper->Layout();
+        }
+        tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.tabBarIndex]);
+        tabBarWrapper->Layout();
+        return;
+    }
+
     if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
         auto tabsWidth = geometryNode->GetFrameSize().Width();
         auto swiperWidth = swiperWrapper->GetGeometryNode()->GetFrameSize().Width();
@@ -289,6 +332,50 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
     CHECK_NULL_RETURN(layoutProperty, offsetList);
     auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
     auto barOverlap = layoutProperty->GetBarOverlap().value_or(false);
+
+    if (barDisplayMode_ == TabBarDisplayMode::SIDEBAR) {
+        auto hostNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(hostNode, offsetList);
+        auto tabsPattern = hostNode->GetPattern<TabsPattern>();
+        CHECK_NULL_RETURN(tabsPattern, offsetList);
+        auto sidebarWidth = tabsPattern->GetRealSidebarWidth();
+        auto displayStyle = layoutProperty->GetSidebarDisplayStyleValue(SidebarDisplayStyle::EMBED);
+        auto sidebarPosition = layoutProperty->GetSidebarPositionValue(SidebarPosition::START);
+        auto currentOffset = tabsPattern->GetCurrentOffset();
+
+        float sidebarOffsetX = 0.0f;
+        float contentOffsetX = 0.0f;
+
+        if (sidebarPosition == SidebarPosition::START) {
+            sidebarOffsetX = paddingOffset.GetX() + currentOffset;
+            if (displayStyle == SidebarDisplayStyle::EMBED || displayStyle == SidebarDisplayStyle::DISPLACE) {
+                contentOffsetX = paddingOffset.GetX() + sidebarWidth;
+            } else {
+                contentOffsetX = paddingOffset.GetX();
+            }
+        } else {
+            sidebarOffsetX = frameSize.Width() - sidebarWidth + paddingOffset.GetX() + currentOffset;
+            if (displayStyle == SidebarDisplayStyle::EMBED || displayStyle == SidebarDisplayStyle::DISPLACE) {
+                contentOffsetX = paddingOffset.GetX();
+            } else {
+                contentOffsetX = paddingOffset.GetX();
+            }
+        }
+
+        swiperOffset = OffsetF(contentOffsetX, paddingOffset.GetY());
+        tabBarOffset = OffsetF(sidebarOffsetX, paddingOffset.GetY());
+        dividerOffset = OffsetF();
+        effectOffset = OffsetF();
+
+        offsetList.emplace_back(swiperOffset);
+        if (itemIndex_.bgMaskIndex > 0) {
+            offsetList.emplace_back(OffsetF());
+        }
+        offsetList.emplace_back(dividerOffset);
+        offsetList.emplace_back(tabBarOffset);
+        offsetList.emplace_back(effectOffset);
+        return offsetList;
+    }
 
     if (axis == Axis::HORIZONTAL) {
         float barPosX = (frameSize.MainSize(axis) - tabBarFrameSize.MainSize(axis)) / 2 + paddingOffset.GetX();
@@ -725,5 +812,54 @@ std::optional<float> TabsLayoutAlgorithm::ParseBarWidthAndMargin(
     }
 
     return std::nullopt;
+}
+
+SizeF TabsLayoutAlgorithm::MeasureSwiperInSidebarMode(
+    const RefPtr<TabsLayoutProperty>& layoutProperty,
+    RefPtr<LayoutWrapper>& swiperWrapper, const SizeF& idealSize, const SizeF& tabBarSize)
+{
+    auto hostNode = swiperWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, SizeF(idealSize.Width(), idealSize.Height()));
+    auto sidebarWidth = layoutProperty->GetSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+    auto minSidebarWidth = layoutProperty->GetMinSidebarWidthValue(Dimension(240.0_vp)).ConvertToPx();
+    auto maxSidebarWidth = layoutProperty->GetMaxSidebarWidthValue(Dimension(280.0_vp)).ConvertToPx();
+    sidebarWidth = std::clamp(sidebarWidth, minSidebarWidth, maxSidebarWidth);
+
+    auto sidebarPosition = layoutProperty->GetSidebarPositionValue(SidebarPosition::START);
+    auto displayStyle = layoutProperty->GetSidebarDisplayStyleValue(SidebarDisplayStyle::EMBED);
+    auto minContentWidth = layoutProperty->GetMinContentWidthValue(Dimension(0.0_vp)).ConvertToPx();
+    auto showSideBar = layoutProperty->GetShowSideBarValue(true);
+
+    auto totalWidth = idealSize.Width();
+    float effectiveSidebarWidth = showSideBar ? sidebarWidth : 0.0f;
+    if (effectiveSidebarWidth > 0 && minContentWidth > 0 &&
+        (totalWidth - effectiveSidebarWidth) < minContentWidth) {
+        effectiveSidebarWidth = std::max(0.0f, totalWidth - minContentWidth);
+    }
+
+    float swiperWidth = 0.0f;
+    if (displayStyle == SidebarDisplayStyle::EMBED) {
+        swiperWidth = totalWidth - effectiveSidebarWidth;
+    } else if (displayStyle == SidebarDisplayStyle::OVERLAY) {
+        swiperWidth = totalWidth;
+    } else {
+        swiperWidth = totalWidth - effectiveSidebarWidth;
+    }
+    swiperWidth = std::max(0.0f, swiperWidth);
+
+    auto swiperHeight = idealSize.Height();
+    auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.UpdateMaxSizeWithCheck(SizeF(swiperWidth, swiperHeight));
+    childConstraint.parentIdealSize = OptionalSizeF(SizeF(swiperWidth, swiperHeight));
+    if (!childConstraint.selfIdealSize.Width()) {
+        childConstraint.selfIdealSize.SetWidth(swiperWidth);
+    }
+    if (!childConstraint.selfIdealSize.Height()) {
+        childConstraint.selfIdealSize.SetHeight(swiperHeight);
+    }
+    swiperWrapper->Measure(childConstraint);
+    auto swiperGeometryNode = swiperWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(swiperGeometryNode, SizeF(swiperWidth, swiperHeight));
+    return swiperGeometryNode->GetFrameSize();
 }
 } // namespace OHOS::Ace::NG

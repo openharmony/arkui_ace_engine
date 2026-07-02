@@ -35,6 +35,9 @@
 #include "core/drawable/drawable_descriptor.h"
 
 namespace {
+const std::vector<NG::TabVisibility> TAB_VISIBILITY = { NG::TabVisibility::AUTO, NG::TabVisibility::VISIBLE, NG::TabVisibility::HIDDEN };
+const std::vector<NG::TabBarPlacement> TAB_BAR_PLACEMENTS = { NG::TabBarPlacement::DEFAULT, NG::TabBarPlacement::FIXED, NG::TabBarPlacement::PINNED, NG::TabBarPlacement::SIDEBARONLY, NG::TabBarPlacement::OPTIONAL };
+const std::vector<NG::TabBarCustomizationBehavior> TAB_CUSTOMIZATION_BEHAVIORS = { NG::TabBarCustomizationBehavior::DEFAULT, NG::TabBarCustomizationBehavior::DISABLED };
 } // namespace
 
 namespace OHOS::Ace {
@@ -918,6 +921,55 @@ void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
     TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
 }
 
+void JSTabContent::SetSidebarSection(const JSCallbackInfo& info)
+{
+    std::string section = "";
+    if (info.Length() > 0 && info[0]->IsString()) {
+        section = info[0]->ToString();
+    }
+    auto model = TabContentModel::GetInstance();
+    model->SetSidebarSection(section);
+}
+
+void JSTabContent::SetDefaultVisibility(const JSCallbackInfo& info)
+{
+    NG::TabVisibility visibility = NG::TabVisibility::AUTO;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto val = info[0]->ToNumber<int32_t>();
+        if (val >= 0 && val < static_cast<int32_t>(TAB_VISIBILITY.size())) {
+            visibility = TAB_VISIBILITY[val];
+        }
+    }
+    auto model = TabContentModel::GetInstance();
+    model->SetDefaultVisibility(visibility);
+}
+
+void JSTabContent::SetPreferredPlacement(const JSCallbackInfo& info)
+{
+    NG::TabBarPlacement placement = NG::TabBarPlacement::DEFAULT;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto val = info[0]->ToNumber<int32_t>();
+        if (val >= 0 && val < static_cast<int32_t>(TAB_BAR_PLACEMENTS.size())) {
+            placement = TAB_BAR_PLACEMENTS[val];
+        }
+    }
+    auto model = TabContentModel::GetInstance();
+    model->SetPreferredPlacement(placement);
+}
+
+void JSTabContent::SetCustomizationBehavior(const JSCallbackInfo& info)
+{
+    NG::TabBarCustomizationBehavior behavior = NG::TabBarCustomizationBehavior::DEFAULT;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto val = info[0]->ToNumber<int32_t>();
+        if (val >= 0 && val < static_cast<int32_t>(TAB_CUSTOMIZATION_BEHAVIORS.size())) {
+            behavior = TAB_CUSTOMIZATION_BEHAVIORS[val];
+        }
+    }
+    auto model = TabContentModel::GetInstance();
+    model->SetCustomizationBehavior(behavior);
+}
+
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");
@@ -938,6 +990,10 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
     JSClass<JSTabContent>::StaticMethod("onWillShow", &JSTabContent::SetOnWillShow);
     JSClass<JSTabContent>::StaticMethod("onWillHide", &JSTabContent::SetOnWillHide);
+    JSClass<JSTabContent>::StaticMethod("sidebarSection", &JSTabContent::SetSidebarSection);
+    JSClass<JSTabContent>::StaticMethod("defaultVisibility", &JSTabContent::SetDefaultVisibility);
+    JSClass<JSTabContent>::StaticMethod("preferredPlacement", &JSTabContent::SetPreferredPlacement);
+    JSClass<JSTabContent>::StaticMethod("customizationBehavior", &JSTabContent::SetCustomizationBehavior);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }

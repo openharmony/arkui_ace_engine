@@ -95,6 +95,10 @@ constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
+const std::vector<TabBarStyle> BAR_STYLES = { TabBarStyle::NOSTYLE, TabBarStyle::BOTTOMTABBAR, TabBarStyle::SIDEBARADAPTABLE };
+const std::vector<SidebarDisplayStyle> SIDEBAR_DISPLAY_STYLES = { SidebarDisplayStyle::EMBED, SidebarDisplayStyle::OVERLAY, SidebarDisplayStyle::DISPLACE };
+const std::vector<SidebarPosition> SIDEBAR_POSITIONS = { SidebarPosition::START, SidebarPosition::END };
+const std::vector<TabBarDisplayMode> BAR_DISPLAY_MODES = { TabBarDisplayMode::BOTTOMTABBAR, TabBarDisplayMode::SIDEBAR };
 
 const std::vector<BlurStyle> BAR_BLURSTYLE = {
     BlurStyle::NO_MATERIAL,
@@ -1097,6 +1101,220 @@ void JSTabs::SetBarFloatingStyle(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarFloatingStyle(parameters);
 }
 
+void JSTabs::SetBarStyle(const JSCallbackInfo& info)
+{
+    TabBarStyle barStyle = TabBarStyle::NOSTYLE;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto barStyleVal = info[0]->ToNumber<int32_t>();
+        if (barStyleVal >= 0 && barStyleVal < static_cast<int32_t>(BAR_STYLES.size())) {
+            barStyle = BAR_STYLES[barStyleVal];
+        }
+    }
+    TabsModel::GetInstance()->SetBarStyle(barStyle);
+}
+
+void JSTabs::SetSidebarWidth(const JSCallbackInfo& info)
+{
+    Dimension sidebarWidth(240, DimensionUnit::VP);
+    if (info.Length() > 0) {
+        ParseJsDimensionVp(info[0], sidebarWidth);
+    }
+    TabsModel::GetInstance()->SetSidebarWidth(sidebarWidth);
+}
+
+void JSTabs::SetSidebarBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::TRANSPARENT;
+    if (info.Length() > 0) {
+        ParseJsColor(info[0], backgroundColor);
+    }
+    TabsModel::GetInstance()->SetSidebarBackgroundColor(backgroundColor);
+}
+
+void JSTabs::SetSidebarDivider(const JSCallbackInfo& info)
+{
+    TabsSidebarDivider divider;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        Dimension strokeWidth;
+        if (ParseJsDimensionVp(obj->GetProperty("strokeWidth"), strokeWidth)) {
+            divider.strokeWidth = strokeWidth;
+        }
+        Dimension startMargin;
+        if (ParseJsDimensionVp(obj->GetProperty("startMargin"), startMargin)) {
+            divider.startMargin = startMargin;
+        }
+        Dimension endMargin;
+        if (ParseJsDimensionVp(obj->GetProperty("endMargin"), endMargin)) {
+            divider.endMargin = endMargin;
+        }
+        Color color;
+        if (ParseJsColor(obj->GetProperty("color"), color)) {
+            divider.color = color;
+        }
+        divider.isNull = false;
+    }
+    TabsModel::GetInstance()->SetSidebarDivider(divider);
+}
+
+void JSTabs::SetBarDisplayModeBreakpoint(const JSCallbackInfo& info)
+{
+    TabBarDisplayModeBreakpoint breakpoint;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        if (obj->GetProperty("sm")->IsNumber()) {
+            auto smVal = obj->GetProperty("sm")->ToNumber<int32_t>();
+            if (smVal >= 0 && smVal < static_cast<int32_t>(BAR_DISPLAY_MODES.size())) {
+                breakpoint.sm = BAR_DISPLAY_MODES[smVal];
+            }
+        }
+        if (obj->GetProperty("md")->IsNumber()) {
+            auto mdVal = obj->GetProperty("md")->ToNumber<int32_t>();
+            if (mdVal >= 0 && mdVal < static_cast<int32_t>(BAR_DISPLAY_MODES.size())) {
+                breakpoint.md = BAR_DISPLAY_MODES[mdVal];
+            }
+        }
+        if (obj->GetProperty("lg")->IsNumber()) {
+            auto lgVal = obj->GetProperty("lg")->ToNumber<int32_t>();
+            if (lgVal >= 0 && lgVal < static_cast<int32_t>(BAR_DISPLAY_MODES.size())) {
+                breakpoint.lg = BAR_DISPLAY_MODES[lgVal];
+            }
+        }
+        breakpoint.isNull = false;
+    }
+    TabsModel::GetInstance()->SetBarDisplayModeBreakpoint(breakpoint);
+}
+
+void JSTabs::SetSidebarDisplayStyle(const JSCallbackInfo& info)
+{
+    SidebarDisplayStyle displayStyle = SidebarDisplayStyle::EMBED;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto val = info[0]->ToNumber<int32_t>();
+        if (val >= 0 && val < static_cast<int32_t>(SIDEBAR_DISPLAY_STYLES.size())) {
+            displayStyle = SIDEBAR_DISPLAY_STYLES[val];
+        }
+    }
+    TabsModel::GetInstance()->SetSidebarDisplayStyle(displayStyle);
+}
+
+void JSTabs::SetShowSideBar(const JSCallbackInfo& info)
+{
+    bool showSideBar = true;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], showSideBar);
+    }
+    TabsModel::GetInstance()->SetShowSideBar(showSideBar);
+}
+
+void JSTabs::SetShowSideBarWithGesture(const JSCallbackInfo& info)
+{
+    bool withGesture = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], withGesture);
+    }
+    TabsModel::GetInstance()->SetShowSideBarWithGesture(withGesture);
+}
+
+void JSTabs::SetSidebarAutoHide(const JSCallbackInfo& info)
+{
+    bool autoHide = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], autoHide);
+    }
+    TabsModel::GetInstance()->SetSidebarAutoHide(autoHide);
+}
+
+void JSTabs::SetMinSidebarWidth(const JSCallbackInfo& info)
+{
+    Dimension minWidth(240, DimensionUnit::VP);
+    if (info.Length() > 0) {
+        ParseJsDimensionVp(info[0], minWidth);
+    }
+    TabsModel::GetInstance()->SetMinSidebarWidth(minWidth);
+}
+
+void JSTabs::SetMaxSidebarWidth(const JSCallbackInfo& info)
+{
+    Dimension maxWidth(280, DimensionUnit::VP);
+    if (info.Length() > 0) {
+        ParseJsDimensionVp(info[0], maxWidth);
+    }
+    TabsModel::GetInstance()->SetMaxSidebarWidth(maxWidth);
+}
+
+void JSTabs::SetMinContentWidth(const JSCallbackInfo& info)
+{
+    Dimension minWidth(0, DimensionUnit::VP);
+    if (info.Length() > 0) {
+        ParseJsDimensionVp(info[0], minWidth);
+    }
+    TabsModel::GetInstance()->SetMinContentWidth(minWidth);
+}
+
+void JSTabs::SetSidebarPosition(const JSCallbackInfo& info)
+{
+    SidebarPosition position = SidebarPosition::START;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto val = info[0]->ToNumber<int32_t>();
+        if (val >= 0 && val < static_cast<int32_t>(SIDEBAR_POSITIONS.size())) {
+            position = SIDEBAR_POSITIONS[val];
+        }
+    }
+    TabsModel::GetInstance()->SetSidebarPosition(position);
+}
+
+void JSTabs::SetOnBarDisplayModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsFunction()) {
+        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+        auto callback = [jsFunc](TabBarDisplayMode displayMode) {
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(displayMode)));
+            jsFunc->Call(JSRef<JSObject>(), 1, &param);
+        };
+        TabsModel::GetInstance()->SetOnBarDisplayModeChange(std::move(callback));
+    }
+}
+
+void JSTabs::SetOnSideBarChange(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsFunction()) {
+        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+        auto callback = [jsFunc](bool isShow) {
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isShow));
+            jsFunc->Call(JSRef<JSObject>(), 1, &param);
+        };
+        TabsModel::GetInstance()->SetOnSideBarChange(std::move(callback));
+    }
+}
+
+void JSTabs::SetSidebarHeader(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto headerAction = [builderFunc]() { builderFunc->Execute(); };
+        TabsModel::GetInstance()->SetSidebarHeader(nullptr);
+    }
+}
+
+void JSTabs::SetSidebarFooter(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+        TabsModel::GetInstance()->SetSidebarFooter(nullptr);
+    }
+}
+
+void JSTabs::SetSidebarSearchable(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto searchableAction = [builderFunc]() { builderFunc->Execute(); };
+        TabsModel::GetInstance()->SetSidebarSearchable(nullptr);
+    }
+}
+
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -1148,6 +1366,24 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
     JSClass<JSTabs>::StaticMethod("nestedScroll", &JSTabs::SetNestedScroll);
     JSClass<JSTabs>::StaticMethod("barFloatingStyle", &JSTabs::SetBarFloatingStyle);
+    JSClass<JSTabs>::StaticMethod("barStyle", &JSTabs::SetBarStyle);
+    JSClass<JSTabs>::StaticMethod("sidebarWidth", &JSTabs::SetSidebarWidth);
+    JSClass<JSTabs>::StaticMethod("sidebarBackgroundColor", &JSTabs::SetSidebarBackgroundColor);
+    JSClass<JSTabs>::StaticMethod("sidebarDivider", &JSTabs::SetSidebarDivider);
+    JSClass<JSTabs>::StaticMethod("barDisplayModeBreakpoint", &JSTabs::SetBarDisplayModeBreakpoint);
+    JSClass<JSTabs>::StaticMethod("sidebarDisplayStyle", &JSTabs::SetSidebarDisplayStyle);
+    JSClass<JSTabs>::StaticMethod("showSideBar", &JSTabs::SetShowSideBar);
+    JSClass<JSTabs>::StaticMethod("showSideBarWithGesture", &JSTabs::SetShowSideBarWithGesture);
+    JSClass<JSTabs>::StaticMethod("sidebarAutoHide", &JSTabs::SetSidebarAutoHide);
+    JSClass<JSTabs>::StaticMethod("minSidebarWidth", &JSTabs::SetMinSidebarWidth);
+    JSClass<JSTabs>::StaticMethod("maxSidebarWidth", &JSTabs::SetMaxSidebarWidth);
+    JSClass<JSTabs>::StaticMethod("minContentWidth", &JSTabs::SetMinContentWidth);
+    JSClass<JSTabs>::StaticMethod("sidebarPosition", &JSTabs::SetSidebarPosition);
+    JSClass<JSTabs>::StaticMethod("onBarDisplayModeChange", &JSTabs::SetOnBarDisplayModeChange);
+    JSClass<JSTabs>::StaticMethod("onSideBarChange", &JSTabs::SetOnSideBarChange);
+    JSClass<JSTabs>::StaticMethod("sidebarHeader", &JSTabs::SetSidebarHeader);
+    JSClass<JSTabs>::StaticMethod("sidebarFooter", &JSTabs::SetSidebarFooter);
+    JSClass<JSTabs>::StaticMethod("sidebarSearchable", &JSTabs::SetSidebarSearchable);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

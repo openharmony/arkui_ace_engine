@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class TextLayoutProperty;
@@ -66,6 +67,14 @@ public:
     void SetVerticalAlign(FlexAlign verticalAlign) override;
     void SetSymmetricExtensible(bool isExtensible) override;
     void SetId(const std::string& id) override;
+    void SetSidebarSection(const std::string& section) override;
+    void SetDefaultVisibility(TabVisibility visibility) override;
+    void SetPreferredPlacement(TabBarPlacement placement) override;
+    void SetCustomizationBehavior(TabBarCustomizationBehavior behavior) override;
+    static void SetSidebarSection(FrameNode* frameNode, const std::string& section);
+    static void SetDefaultVisibility(FrameNode* frameNode, TabVisibility visibility);
+    static void SetPreferredPlacement(FrameNode* frameNode, TabBarPlacement placement);
+    static void SetCustomizationBehavior(FrameNode* frameNode, TabBarCustomizationBehavior behavior);
     static void AddTabBarItem(
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);

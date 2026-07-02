@@ -112,6 +112,8 @@ void JSTabsController::JSBind(BindingTarget globalObj)
     JSClass<JSTabsController>::CustomMethod("preloadItems", &JSTabsController::PreloadItems);
     JSClass<JSTabsController>::CustomMethod("setTabBarTranslate", &JSTabsController::SetTabBarTranslate);
     JSClass<JSTabsController>::CustomMethod("setTabBarOpacity", &JSTabsController::SetTabBarOpacity);
+    JSClass<JSTabsController>::CustomMethod("getBarDisplayMode", &JSTabsController::GetBarDisplayMode);
+    JSClass<JSTabsController>::CustomMethod("setBarDisplayMode", &JSTabsController::SetBarDisplayMode);
     JSClass<JSTabsController>::Bind(globalObj, JSTabsController::Constructor, JSTabsController::Destructor);
 }
 
@@ -254,6 +256,32 @@ void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
         tabsController->SetTabBarOpacity(opacity);
     } else {
         tabsController->SetTabBarOpacity(1.0f);
+    }
+}
+
+void JSTabsController::GetBarDisplayMode(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    CHECK_NULL_VOID(tabsController);
+    auto displayMode = tabsController->GetBarDisplayMode();
+    args.SetReturnValue(ToJSValue(static_cast<int32_t>(displayMode)));
+}
+
+void JSTabsController::SetBarDisplayMode(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    CHECK_NULL_VOID(tabsController);
+    if (args.Length() > 0 && args[0]->IsNumber()) {
+        auto val = args[0]->ToNumber<int32_t>();
+        TabBarDisplayMode displayMode = TabBarDisplayMode::BOTTOMTABBAR;
+        if (val == 0) {
+            displayMode = TabBarDisplayMode::BOTTOMTABBAR;
+        } else if (val == 1) {
+            displayMode = TabBarDisplayMode::SIDEBAR;
+        }
+        tabsController->SetBarDisplayMode(displayMode);
     }
 }
 

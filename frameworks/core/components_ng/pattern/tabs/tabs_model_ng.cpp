@@ -1919,4 +1919,232 @@ void TabsModelNG::ProcessColorWithResourceObj(
         pattern->RemoveResObj("tabs." + name);
     }
 }
+
+void TabsModelNG::SetBarStyle(TabBarStyle barStyle)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarStyle, barStyle);
+}
+
+void TabsModelNG::SetSidebarWidth(const Dimension& sidebarWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarWidth, sidebarWidth);
+}
+
+void TabsModelNG::SetSidebarBackgroundColor(const Color& backgroundColor)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarBackgroundColor, backgroundColor);
+}
+
+void TabsModelNG::SetSidebarDivider(const TabsSidebarDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint);
+}
+
+void TabsModelNG::SetSidebarDisplayStyle(SidebarDisplayStyle displayStyle)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDisplayStyle, displayStyle);
+}
+
+void TabsModelNG::SetShowSideBar(bool showSideBar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, ShowSideBar, showSideBar);
+}
+
+void TabsModelNG::SetShowSideBarWithGesture(bool withGesture)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, ShowSideBarWithGesture, withGesture);
+}
+
+void TabsModelNG::SetSidebarAutoHide(bool autoHide)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarAutoHide, autoHide);
+}
+
+void TabsModelNG::SetMinSidebarWidth(const Dimension& minWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, MinSidebarWidth, minWidth);
+}
+
+void TabsModelNG::SetMaxSidebarWidth(const Dimension& maxWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, MaxSidebarWidth, maxWidth);
+}
+
+void TabsModelNG::SetMinContentWidth(const Dimension& minWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, MinContentWidth, minWidth);
+}
+
+void TabsModelNG::SetSidebarPosition(SidebarPosition position)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarPosition, position);
+}
+
+void TabsModelNG::SetOnBarDisplayModeChange(std::function<void(TabBarDisplayMode)>&& callback)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnBarDisplayModeChangeEvent(std::move(callback));
+}
+
+void TabsModelNG::SetOnSideBarChange(std::function<void(bool)>&& callback)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSideBarChangeEvent(std::move(callback));
+}
+
+void TabsModelNG::SetBarStyle(FrameNode* frameNode, TabBarStyle barStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarStyle, barStyle, frameNode);
+}
+
+void TabsModelNG::SetSidebarWidth(FrameNode* frameNode, const Dimension& sidebarWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarWidth, sidebarWidth, frameNode);
+}
+
+void TabsModelNG::SetSidebarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarBackgroundColor, backgroundColor, frameNode);
+}
+
+void TabsModelNG::SetSidebarDivider(FrameNode* frameNode, const TabsSidebarDivider& divider)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDivider, divider, frameNode);
+}
+
+void TabsModelNG::SetBarDisplayModeBreakpoint(FrameNode* frameNode, const TabBarDisplayModeBreakpoint& breakpoint)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarDisplayModeBreakpoint, breakpoint, frameNode);
+}
+
+void TabsModelNG::SetSidebarDisplayStyle(FrameNode* frameNode, SidebarDisplayStyle displayStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarDisplayStyle, displayStyle, frameNode);
+}
+
+void TabsModelNG::SetShowSideBar(FrameNode* frameNode, bool showSideBar)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, ShowSideBar, showSideBar, frameNode);
+}
+
+void TabsModelNG::SetShowSideBarWithGesture(FrameNode* frameNode, bool withGesture)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, ShowSideBarWithGesture, withGesture, frameNode);
+}
+
+void TabsModelNG::SetSidebarAutoHide(FrameNode* frameNode, bool autoHide)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarAutoHide, autoHide, frameNode);
+}
+
+void TabsModelNG::SetMinSidebarWidth(FrameNode* frameNode, const Dimension& minWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinSidebarWidth, minWidth, frameNode);
+}
+
+void TabsModelNG::SetMaxSidebarWidth(FrameNode* frameNode, const Dimension& maxWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MaxSidebarWidth, maxWidth, frameNode);
+}
+
+void TabsModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, MinContentWidth, minWidth, frameNode);
+}
+
+void TabsModelNG::SetSidebarPosition(FrameNode* frameNode, SidebarPosition position)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarPosition, position, frameNode);
+}
+
+void TabsModelNG::SetOnBarDisplayModeChange(FrameNode* frameNode, std::function<void(TabBarDisplayMode)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnBarDisplayModeChangeEvent(std::move(callback));
+}
+
+void TabsModelNG::SetOnSideBarChange(FrameNode* frameNode, std::function<void(bool)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSideBarChangeEvent(std::move(callback));
+}
+
+void TabsModelNG::SetSidebarHeader(const RefPtr<NG::UINode>& header)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarHeaderNode(header);
+}
+
+void TabsModelNG::SetSidebarFooter(const RefPtr<NG::UINode>& footer)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarFooterNode(footer);
+}
+
+void TabsModelNG::SetSidebarSearchable(const RefPtr<NG::UINode>& searchable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarSearchableNode(searchable);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSearchableOptions, options);
+}
+
+void TabsModelNG::SetSidebarHeader(FrameNode* frameNode, const RefPtr<NG::UINode>& header)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarHeaderNode(header);
+}
+
+void TabsModelNG::SetSidebarFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarFooterNode(footer);
+}
+
+void TabsModelNG::SetSidebarSearchable(FrameNode* frameNode, const RefPtr<NG::UINode>& searchable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSidebarSearchableNode(searchable);
+}
+
+void TabsModelNG::SetSidebarSearchableOptions(FrameNode* frameNode, const TabsSidebarSearchableOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, SidebarSearchableOptions, options, frameNode);
+}
 } // namespace OHOS::Ace::NG
