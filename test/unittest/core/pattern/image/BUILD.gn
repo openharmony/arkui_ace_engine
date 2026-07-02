@@ -18,6 +18,7 @@ test_sources = [
   "image_model_ng_test_ng.cpp",
   "image_model_static_test_ng.cpp",
   "image_paint_method_test_ng.cpp",
+  "image_pattern_property_load_test.cpp",
   "image_pattern_test_animation.cpp",
   "image_pattern_test_branch_coverage.cpp",
   "image_pattern_test_events_edge_cases.cpp",
