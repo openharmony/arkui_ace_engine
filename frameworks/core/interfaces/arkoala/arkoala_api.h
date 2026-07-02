@@ -4957,7 +4957,6 @@ struct ArkUINavigatorModifier {
     void (*resetActive)(ArkUINodeHandle node);
     void (*setParams)(ArkUINodeHandle node, ArkUI_CharPtr args);
     void (*resetParams)(ArkUINodeHandle node);
-    void (*setIsDefSize)(ArkUI_Bool isWidth);
 };
 
 struct ArkUINodeContainerModifier {

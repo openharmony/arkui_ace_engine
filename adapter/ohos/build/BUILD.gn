@@ -37,7 +37,6 @@ component_modules = [
   "marquee",
   "progress",
   "texttimer",
-  "navigator",
   "search",
   "stepper",
   "radio",

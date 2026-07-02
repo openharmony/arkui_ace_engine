@@ -106,7 +106,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Marquee", "marquee"},
         { "Progress", "progress" },
         { "TextTimer", "texttimer" },
-        { "Navigator", "navigator" },
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
         {"Radio", "radio"},
