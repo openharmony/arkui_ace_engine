@@ -25,7 +25,18 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 }
 
 void ResSchedClickOptimizer::GetComponentTextRecursive(
-    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, const int32_t maxNodes)
+    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, int32_t& maxNodes)
 {
 }
+
+bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
+    std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes)
+{
+    return true;
+}
+
+void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
+{
+}
+
 } // namespace OHOS::Ace

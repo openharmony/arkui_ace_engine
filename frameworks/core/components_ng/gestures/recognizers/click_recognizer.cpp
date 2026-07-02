@@ -27,7 +27,6 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
@@ -312,7 +311,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     UpdateInfoWithDownEvent(event);
-    ReportTouchDownToResSched(event, pipeline);
+    ReportTouchDownToResSched();
 }
 
 void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
@@ -934,25 +933,12 @@ std::string ClickRecognizer::GetGestureInfoString() const
     return gestureInfoStr;
 }
 
-void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline)
+void ClickRecognizer::ReportTouchDownToResSched()
 {
+    CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
     auto frameNode = GetAttachedNode();
-    if (frameNode.Invalid()) {
-        return;
-    }
-    auto ngPipeline = DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
-    auto clickOptimizer = ngPipeline->GetClickOptimizer();
-    bool isClickExtEnabled = clickOptimizer ? clickOptimizer->GetClickExtEnabled() : false;
-    ReportConfig config;
-#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
-    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
-    config.isReportTid = container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
-    config.tid = config.isReportTid ? static_cast<uint64_t>(pthread_self()) : config.tid;
-#endif
-    if (shouldReportTouchDown_) {
-        ResSchedReport::GetInstance().OnTouchEvent(event, config, frameNode, isClickExtEnabled);
-    }
+    CHECK_EQUAL_VOID(frameNode.Invalid(), true);
+    ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(frameNode);
 }
 
 void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()
