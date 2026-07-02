@@ -1241,6 +1241,7 @@
         "arkui.component.idlize.AnimationExtender.OpenImplicitAnimationForAnimation",
         "arkui.component.idlize.AnimationExtender.CloseImplicitAnimationForAnimation",
         "idlize.internal.interop.NativeModuleNode.ApplyModifierFinish",
+        "idlize.internal.interop.NativeModuleNode.AddChild",
         "arkui.component.idlize.RouterExtender.back",
         "arkui.component.idlize.RouterExtender.clear",
         "arkui.component.idlize.RouterExtender.push",

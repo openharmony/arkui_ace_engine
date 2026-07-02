@@ -250,7 +250,7 @@ Ark_Int32 impl_AddChild(Ark_NativePointer parent, Ark_NativePointer child)
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_SELF_WHEN_ADD_CHILD);
     return result;
 }
-KOALA_INTEROP_DIRECT_2(AddChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_2(AddChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_InsertChildBefore(Ark_NativePointer parent, Ark_NativePointer child, Ark_NativePointer sibling)
 {
