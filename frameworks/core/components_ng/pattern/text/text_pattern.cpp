@@ -150,11 +150,17 @@ void TextPattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false)) {
+        auto punctuationOverflowFlag = GetPunctuationOverflowStyleOptimizeFlag();
+        if (SetPunctuationOverflowByFlag(punctuationOverflowFlag)) {
+            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
     if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
-    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     if (!textLayoutProperty->GetEnableSmallLanguageTruncationValue(false)) {
         return;
     }
@@ -6267,6 +6273,21 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(" prop: ")
                 .append(textLayoutProp->HasFallbackLineSpacing() ? hasFallbackLineSpacing : "Na"));
     }
+    DumpTextStyleInfo6();
+}
+
+void TextPattern::DumpTextStyleInfo6()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto hasPunctuationOverflow = textLayoutProp->GetPunctuationOverflowValue(false) ? "true" : "false";
+    auto hasEnablePunctuationOverflowOptimize =
+        textLayoutProp->GetEnablePunctuationOverflowOptimizeValue(false) ? "true" : "false";
+    dumpLog.AddDesc(std::string("PunctuationOverflow: ")
+            .append(hasPunctuationOverflow)
+            .append(" EnablePunctuationOverflowOptimize: ")
+            .append(hasEnablePunctuationOverflowOptimize));
     DumpInfoRes();
 }
 
@@ -8902,6 +8923,29 @@ bool TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
     }
     textLayoutProperty->UpdateIncludeFontPadding(flag);
     textLayoutProperty->UpdateFallbackLineSpacing(flag);
+    return true;
+}
+
+bool TextPattern::GetPunctuationOverflowStyleOptimizeFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetPunctuationOverflowStyleOptimizeFlag();
+}
+
+bool TextPattern::SetPunctuationOverflowByFlag(bool flag)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto punctuationOverflowChanged = textLayoutProperty->GetPunctuationOverflowValue(false) != flag;
+    if (!punctuationOverflowChanged) {
+        return false;
+    }
+    textLayoutProperty->UpdatePunctuationOverflow(flag);
     return true;
 }
 

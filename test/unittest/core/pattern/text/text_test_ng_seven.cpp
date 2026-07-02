@@ -1305,4 +1305,109 @@ HWTEST_F(TextTestNgSeven, SetFallbackLineSpacingAndIncludeFontPadding001, TestSi
     EXPECT_EQ(textLayoutProperty->GetIncludeFontPadding(), true);
     EXPECT_EQ(textLayoutProperty->GetFallbackLineSpacing(), true);
 }
+
+/**
+ * @tc.name: SetPunctuationOverflowByFlag001
+ * @tc.desc: Test the PunctuationOverflow attribute with flag true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, SetPunctuationOverflowByFlag001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567891");
+
+    textPattern->SetPunctuationOverflowByFlag(true);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflowValue(false), true);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflowByFlag002
+ * @tc.desc: Test the PunctuationOverflow attribute with flag false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, SetPunctuationOverflowByFlag002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567891");
+
+    textPattern->SetPunctuationOverflowByFlag(false);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflowValue(false), false);
+}
+
+/**
+ * @tc.name: SetPunctuationOverflowByFlag003
+ * @tc.desc: Test SetPunctuationOverflowByFlag returns false when value unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, SetPunctuationOverflowByFlag003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567891");
+
+    textPattern->SetPunctuationOverflowByFlag(true);
+    auto result = textPattern->SetPunctuationOverflowByFlag(true);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetPunctuationOverflowStyleOptimizeFlag001
+ * @tc.desc: Test GetPunctuationOverflowStyleOptimizeFlag returns false by default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, GetPunctuationOverflowStyleOptimizeFlag001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    pipeline->fontManager_ = fontManager;
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto result = textPattern->GetPunctuationOverflowStyleOptimizeFlag();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetPunctuationOverflowStyleOptimizeFlag002
+ * @tc.desc: Test GetPunctuationOverflowStyleOptimizeFlag returns true when mock flag is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSeven, GetPunctuationOverflowStyleOptimizeFlag002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    fontManager->punctuationOverflowStyleOptimizeFlag_ = true;
+    pipeline->fontManager_ = fontManager;
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto result = textPattern->GetPunctuationOverflowStyleOptimizeFlag();
+    EXPECT_EQ(result, true);
+}
 } // namespace OHOS::Ace::NG

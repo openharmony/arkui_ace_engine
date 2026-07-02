@@ -548,6 +548,7 @@
       "OHOS::Ace::FontManager::AddVariationNode(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&)";
       "OHOS::Ace::FontManager::GetAppCustomFont() const";
       "OHOS::Ace::FontManager::GetFallbackLineSpacingStyleOptimizeFlag()";
+      "OHOS::Ace::FontManager::GetPunctuationOverflowStyleOptimizeFlag()";
       "OHOS::Ace::FontManager::IsUseAppCustomFont() const";
       "OHOS::Ace::FontManager::IsDefaultFontChanged()";
       "OHOS::Ace::FontManager::RegisterCallback(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::function<void ()> const&)";
@@ -2393,6 +2394,8 @@
       "OHOS::Ace::NG::TextLayoutProperty::FromJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>> const&)";
       "OHOS::Ace::NG::TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool)";
       "OHOS::Ace::NG::TextLayoutProperty::UpdateEnableSmallLanguageTruncation(bool const&)";
+      "OHOS::Ace::NG::TextLayoutProperty::OnEnablePunctuationOverflowOptimizeUpdate(bool)";
+      "OHOS::Ace::NG::TextLayoutProperty::UpdateEnablePunctuationOverflowOptimize(bool const&)";
       "OHOS::Ace::NG::TextLayoutProperty::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextLineStyle::GetGradient() const";
       "OHOS::Ace::NG::TextLineStyle::ReloadResources()";

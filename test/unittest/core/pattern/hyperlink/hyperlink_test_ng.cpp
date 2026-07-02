@@ -107,11 +107,36 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty001, TestSize.Level1)
 
 /**
  * @tc.name: HyperlinkModelNGTextProperty002
- * @tc.desc: Verify hyperlink PunctuationOverflow default value is true.
+ * @tc.desc: Verify hyperlink PunctuationOverflow is false by default.
  * @tc.type: FUNC
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty002, TestSize.Level1)
 {
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    pipeline->fontManager_ = fontManager;
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_FALSE(textLayoutProperty->GetPunctuationOverflowValue(false));
+}
+
+/**
+ * @tc.name: HyperlinkModelNGTextProperty003
+ * @tc.desc: Verify hyperlink PunctuationOverflow is true when flag is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty003, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    fontManager->punctuationOverflowStyleOptimizeFlag_ = true;
+    pipeline->fontManager_ = fontManager;
     HyperlinkModelNG hyperlinkModelNG;
     hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

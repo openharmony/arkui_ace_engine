@@ -62,7 +62,7 @@ void HyperlinkModelStatic::SetTextStyle(
     textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
     textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    textLayoutProperty->UpdatePunctuationOverflow(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     frameNode->MarkModifyDone();
     frameNode->MarkDirtyNode();
 

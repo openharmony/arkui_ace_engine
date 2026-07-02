@@ -136,6 +136,7 @@ public:
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
     void DumpTextStyleInfo5();
+    void DumpTextStyleInfo6();
     void DumpInfoRes();
     void DumpSpanItem();
     void DumpScaleInfo();
@@ -482,7 +483,9 @@ public:
     bool IsMeasured() const;
     ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
     bool GetFallbackLineSpacingStyleOptimizeFlag();
+    bool GetPunctuationOverflowStyleOptimizeFlag();
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    bool SetPunctuationOverflowByFlag(bool flag);
     virtual void ClearParagraphCache() {};
 
     void BindJSTextController(std::function<void()>&& bindFunc) {

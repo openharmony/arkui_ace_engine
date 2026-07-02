@@ -115,6 +115,7 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     void UpdateEnableSmallLanguageTruncation(const bool& value);
+    void UpdateEnablePunctuationOverflowOptimize(const bool& value);
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -182,6 +183,7 @@ public:
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnableSmallLanguageTruncation, bool);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnablePunctuationOverflowOptimize, bool);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
@@ -336,6 +338,7 @@ protected:
 
 private:
     void OnEnableSmallLanguageTruncationUpdate(bool value);
+    void OnEnablePunctuationOverflowOptimizeUpdate(bool value);
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
