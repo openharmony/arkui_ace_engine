@@ -16,7 +16,7 @@
 #include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "drawing_rendering_context_peer_impl.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #ifdef ACE_UNITTEST
@@ -65,9 +65,12 @@ void DrawingRenderingContextPeerImpl::SetOptions(const std::optional<CanvasUnit>
 }
 void DrawingRenderingContextPeerImpl::SetInvalidate()
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
-    CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->SetInvalidate();
+    auto canvasPattern = canvasPattern_.Upgrade();
+    CHECK_NULL_VOID(canvasPattern);
+    auto* modifier = NodeModifier::GetCanvasModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->setInvalidate);
+    modifier->setInvalidate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(canvasPattern)));
 }
 SizeF DrawingRenderingContextPeerImpl::GetSize()
 {
@@ -95,10 +98,12 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(const WeakPtr<AceType>
         context->size_.SetWidth(width);
         context->rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas.get());
     };
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
-    if (customPaintPattern) {
-        customPaintPattern->SetRSCanvasCallback(callback);
-    }
+    auto pattern = canvasPattern.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto* modifier2 = NodeModifier::GetCanvasModifier();
+    CHECK_NULL_VOID(modifier2);
+    CHECK_NULL_VOID(modifier2->setRSCanvasCallback);
+    modifier2->setRSCanvasCallback(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)), &callback);
 #ifdef ACE_UNITTEST
     auto holder = TestHolder::GetInstance();
     if (holder->request) {
@@ -161,3 +166,4 @@ void DrawingRenderingContextPeerImpl::SetUnit(CanvasUnit unit)
     }
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
+

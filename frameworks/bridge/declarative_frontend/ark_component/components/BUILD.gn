@@ -107,6 +107,7 @@ special_components = [
   "arkdivider",
   "arkgauge",
   "arkbadge",
+  "arkcanvas",
   "arkgrid",
   "arkgriditem",
   "arkdatapanel",

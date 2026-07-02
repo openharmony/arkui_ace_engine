@@ -28,6 +28,7 @@ component_modules = [
   "text_clock",
   "text_field",
   "checkbox",
+  "canvas",
   "patternlock",
   "qrcode",
   "rating",
@@ -115,6 +116,7 @@ foreach(module, component_modules) {
   }
   component_modules_libs += [ ":$module_name" ]
 }
+
 
 # Install packages
 group("ace_packages") {

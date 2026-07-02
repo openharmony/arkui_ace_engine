@@ -526,7 +526,7 @@ ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[];
 
 // canvas
 ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[];
-ACE_EXPORT extern const char CANVAS_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CANVAS_ETS_TAG[];
 
 // ActionSheet
 ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[];

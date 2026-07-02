@@ -22,8 +22,7 @@
 #include "compatible/components/canvas/canvas_modifier_compatible.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 
 namespace OHOS::Ace::Framework {
 std::mutex JSOffscreenRenderingContext::mutex_;
@@ -46,6 +45,33 @@ const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
     return nullptr;
 }
 #endif
+
+RefPtr<RenderingContext2DModel> CreateOffscreenCanvasRenderingContextModel()
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createOffscreenCanvasRenderingContext2DModel, nullptr);
+    return bridge->createOffscreenCanvasRenderingContext2DModel();
+}
+
+RefPtr<PixelMap> TransferToImageBitmap(const RefPtr<AceType>& offscreenPattern)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->transferOffscreenToImageBitmap, nullptr);
+    return bridge->transferOffscreenToImageBitmap(offscreenPattern);
+}
+
+#ifndef PIXEL_MAP_SUPPORTED
+std::unique_ptr<ImageData> GetImageData(
+    const RefPtr<AceType>& offscreenPattern, double left, double top, double width, double height)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->getOffscreenImageData, nullptr);
+    return bridge->getOffscreenImageData(offscreenPattern, left, top, width, height);
+}
+#endif
 }
 
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
@@ -53,10 +79,10 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
     apiVersion_ = Container::GetCurrentApiTargetVersion();
     id_ = offscreenPatternCount_;
 #ifdef NG_BUILD
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateOffscreenCanvasRenderingContextModel();
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
+        renderingContext2DModel_ = CreateOffscreenCanvasRenderingContextModel();
     } else {
         const auto* modifier = GetCanvasInnerModifier();
         CHECK_NULL_VOID(modifier);
@@ -250,9 +276,9 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     CHECK_NULL_VOID(nativeEngine);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value renderImage = nullptr;
-    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));
+    auto offscreenCanvasPattern = GetOffscreenPattern(id_);
     CHECK_NULL_VOID(offscreenCanvasPattern);
-    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    auto pixelMap = TransferToImageBitmap(offscreenCanvasPattern);
     if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return;
     }
@@ -261,7 +287,7 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_VOID(jsImage);
 #ifndef PIXEL_MAP_SUPPORTED
-    auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
+    auto imageData = GetImageData(offscreenCanvasPattern, 0, 0, width_, height_);
     CHECK_NULL_VOID(imageData);
     jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
 #endif

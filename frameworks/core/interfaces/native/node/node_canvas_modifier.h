@@ -20,9 +20,5 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICanvasModifier* GetCanvasModifier();
-void SetCanvasOnReady(ArkUINodeHandle node, void* callback);
-void ResetCanvasOnReady(ArkUINodeHandle node);
-void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value);
-void ResetCanvasEnableAnalyzer(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

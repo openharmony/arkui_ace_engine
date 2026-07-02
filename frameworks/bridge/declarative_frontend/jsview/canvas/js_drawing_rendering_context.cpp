@@ -39,6 +39,8 @@ void JSDrawingRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSDrawingRenderingContext>::CustomProperty(
         "canvas", &JSDrawingRenderingContext::JsGetCanvas, &JSDrawingRenderingContext::JsSetCanvas);
     JSClass<JSDrawingRenderingContext>::CustomMethod("invalidate", &JSDrawingRenderingContext::SetInvalidate);
+    JSClass<JSDrawingRenderingContext>::CustomMethod(
+        "__setCanvasComponent__", &JSDrawingRenderingContext::JsSetCanvasComponent);
 
     JSClass<JSDrawingRenderingContext>::Bind(
         globalObj, JSDrawingRenderingContext::Constructor, JSDrawingRenderingContext::Destructor);
@@ -122,7 +124,13 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPatt
     std::function<void(std::shared_ptr<RSCanvas>, double, double)> callback = func;
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
-        customPaintPattern->SetRSCanvasCallback(callback);
+        auto frameNode = customPaintPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto* modifier = NG::NodeModifier::GetCanvasModifier();
+        CHECK_NULL_VOID(modifier);
+        CHECK_NULL_VOID(modifier->setRSCanvasCallback);
+        modifier->setRSCanvasCallback(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)), &callback);
     }
 }
 
@@ -130,7 +138,12 @@ void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 {
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->SetInvalidate();
+    auto frameNode = customPaintPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto* modifier = NG::NodeModifier::GetCanvasModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->setInvalidate);
+    modifier->setInvalidate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
 }
 
 void JSDrawingRenderingContext::SetUnit(CanvasUnit unit)
@@ -162,7 +175,13 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
     // 解析info[1],把antialias给到pattern
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     if (customPaintPattern) {
-        customPaintPattern->SetAntiAlias(antialias);
+        auto frameNode = customPaintPattern->GetHost();
+        CHECK_NULL_RETURN(frameNode, context2d_);
+        auto* modifier = NG::NodeModifier::GetCanvasModifier();
+        CHECK_NULL_RETURN(modifier, context2d_);
+        CHECK_NULL_RETURN(modifier->setAntiAlias, context2d_);
+        modifier->setAntiAlias(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)), antialias);
     }
     return context2d_;
 }

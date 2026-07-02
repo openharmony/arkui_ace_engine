@@ -516,7 +516,7 @@ const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[] = "textPickerDialog";
 
 // canvas
 const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
-const char CANVAS_ETS_TAG[] = "Canvas";
+ACE_FORCE_EXPORT const char CANVAS_ETS_TAG[] = "Canvas";
 
 // ActionSheet
 const char ACTION_SHEET_DIALOG_COMPONENT_TAG[] = "ActionSheet";

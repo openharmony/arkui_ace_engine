@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 
+#include <type_traits>
+
 #include "base/error/error_code.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
@@ -50,6 +52,7 @@
 #endif //XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
@@ -1406,6 +1409,16 @@ panda::Local<panda::JSValueRef> WrapImageAIOptions(panda::JsiRuntimeCallInfo* ru
     Framework::ScopeRAII scopeRAII(env);
     JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
     napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
+    if constexpr (std::is_same_v<T, NG::CanvasPattern>) {
+        auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+        CHECK_NULL_RETURN(bridge, panda::JSValueRef::Undefined(vm));
+        CHECK_NULL_RETURN(bridge->getCanvasPattern, panda::JSValueRef::Undefined(vm));
+        CHECK_NULL_RETURN(bridge->setCanvasImageAIOptions, panda::JSValueRef::Undefined(vm));
+        auto canvasPattern = bridge->getCanvasPattern(frameNode);
+        CHECK_NULL_RETURN(canvasPattern, panda::JSValueRef::Undefined(vm));
+        bridge->setCanvasImageAIOptions(canvasPattern, optionsValue);
+        return panda::JSValueRef::Undefined(vm);
+    }
     pattern->SetImageAIOptions(optionsValue);
     return panda::JSValueRef::Undefined(vm);
 }

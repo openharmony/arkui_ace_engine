@@ -24,7 +24,7 @@ const auto IMAGE_FLAG_0 = 0;
 const auto IMAGE_FLAG_1 = 1;
 const auto IMAGE_FLAG_2 = 2;
 enum class ParamType { DEFAULT, INT32, STRING, COLOR, CANVAS_GRADIENT, CANVAS_PATTERN };
-class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
+class ACE_FORCE_EXPORT CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
     enum class SizeParam {
         TWO_ARGS, FOUR_ARGS, SIX_ARGS, EIGHT_ARGS

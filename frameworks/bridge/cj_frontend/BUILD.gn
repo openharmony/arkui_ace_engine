@@ -226,6 +226,7 @@ template("cj_frontend") {
     ]
 
     deps += [
+      "$ace_root/adapter/ohos/build:arkui_canvas",
       "$ace_root/adapter/ohos/build:arkui_waterflow",
       "$ace_root/build:libace_compatible",
     ]
