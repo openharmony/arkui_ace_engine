@@ -67,12 +67,27 @@ public:
     static DisplayManager& GetInstance();
     std::vector<sptr<Display>> GetAllDisplays(int32_t userId = -1);
 
+    /**
+     * @brief Obtain the id of the default display.
+     *
+     * @return Default display id.
+     */
     DisplayId GetDefaultDisplayId();
 
+    /**
+     * @brief Get the default display object.
+     *
+     * @return Default display object.
+     */
     sptr<Display> GetDefaultDisplay();
 
     sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo = false);
 
+    /**
+     * @brief Get the default display object by means of sync.
+     *
+     * @return Default display id.
+     */
     sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false, int32_t userId = -1);
 
     DMError RegisterDisplayAttributeListener(std::vector<std::string>& attributes,

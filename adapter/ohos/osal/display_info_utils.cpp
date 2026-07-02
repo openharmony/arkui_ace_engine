@@ -15,11 +15,10 @@
 
 #include "core/common/display_info_utils.h"
 
-#include "display_info.h"
 #include "display_manager.h"
+#include "display_info.h"
 
 #include "base/log/log.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace {
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
@@ -140,4 +139,4 @@ Rect DisplayInfoUtils::GetFoldExpandAvailableRect() const
 
     return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::DisplayInfoUtils

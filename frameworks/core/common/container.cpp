@@ -24,7 +24,6 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
-#include "base/display_manager/display_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_handler.h"
@@ -278,11 +277,6 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
 RefPtr<DisplayInfo> Container::GetDisplayInfo()
 {
     return displayManager_->GetDisplayInfo(currentDisplayId_);
-}
-
-RefPtr<BaseDisplayInfo> Container::GetCachedDisplayInfo()
-{
-    return DisplayManager::GetInstance().GetCachedDisplayInfo(currentDisplayId_);
 }
 
 void Container::InitIsFoldable()

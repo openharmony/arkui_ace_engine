@@ -212,11 +212,6 @@ RefPtr<DisplayInfo> Container::GetDisplayInfo()
     return MockContainer::Current()->GetMockDisplayInfo();
 }
 
-RefPtr<BaseDisplayInfo> Container::GetCachedDisplayInfo()
-{
-    return nullptr;
-}
-
 void Container::InitIsFoldable() {}
 
 HintToTypeWrap Container::PlaceHolderToType(const std::string& onePlaceHolder,

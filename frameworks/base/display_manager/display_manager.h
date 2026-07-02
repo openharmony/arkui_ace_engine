@@ -37,7 +37,7 @@ public:
     // SystemProperties::GetDeviceWidth/Height are set by the preview harness
     // via InitDeviceInfo(). DeviceOrientation only has PORTRAIT/LANDSCAPE,
     // so ROTATION_180/270 cannot be represented.
-    virtual RefPtr<BaseDisplayInfo> GetCachedDisplayInfo(uint64_t displayId = 0)
+    virtual RefPtr<BaseDisplayInfo> GetCachedDisplayInfo(uint64_t displayId)
     {
         auto info = AceType::MakeRefPtr<BaseDisplayInfo>();
         info->SetDisplayId(displayId);
