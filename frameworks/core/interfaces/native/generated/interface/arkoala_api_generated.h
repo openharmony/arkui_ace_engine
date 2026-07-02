@@ -1375,6 +1375,8 @@ typedef struct Array_TextDataDetectorType Array_TextDataDetectorType;
 typedef struct Opt_Array_TextDataDetectorType Opt_Array_TextDataDetectorType;
 typedef struct Array_TextMenuItem Array_TextMenuItem;
 typedef struct Opt_Array_TextMenuItem Opt_Array_TextMenuItem;
+typedef struct Array_TextMenuItemId Array_TextMenuItemId;
+typedef struct Opt_Array_TextMenuItemId Opt_Array_TextMenuItemId;
 typedef struct Array_TextPickerRangeContent Array_TextPickerRangeContent;
 typedef struct Opt_Array_TextPickerRangeContent Opt_Array_TextPickerRangeContent;
 typedef struct Array_TextRange Array_TextRange;
@@ -11146,6 +11148,15 @@ typedef struct Opt_Array_TextMenuItem {
     Ark_Tag tag;
     Array_TextMenuItem value;
 } Opt_Array_TextMenuItem;
+typedef struct Array_TextMenuItemId {
+    /* kind: ContainerType */
+    Ark_TextMenuItemId* array;
+    Ark_Int32 length;
+} Array_TextMenuItemId;
+typedef struct Opt_Array_TextMenuItemId {
+    Ark_Tag tag;
+    Array_TextMenuItemId value;
+} Opt_Array_TextMenuItemId;
 typedef struct Array_TextPickerRangeContent {
     /* kind: ContainerType */
     Ark_TextPickerRangeContent* array;
@@ -30198,6 +30209,7 @@ typedef struct GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor {
 typedef struct GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor {
     void (*setMenuOptions)(const Ark_TextMenuOptions* options);
     void (*disableSystemServiceMenuItems)(Ark_Boolean disable);
+    void (*disableMenuItems)(const Array_TextMenuItemId* items);
 } GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor;
 
 typedef struct GENERATED_ArkUIHierarchicalSymbolEffectAccessor {

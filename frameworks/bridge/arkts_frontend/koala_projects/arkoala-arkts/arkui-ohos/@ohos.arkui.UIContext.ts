@@ -34,7 +34,7 @@ import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
 import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/framework';
-import { TextMenuOptions } from 'arkui/framework';
+import { TextMenuOptions, TextMenuItemId } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
@@ -152,6 +152,9 @@ export class TextMenuController {
     }
     static disableSystemServiceMenuItems(disable: boolean) : void {
         GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems(disable)
+    }
+    static disableMenuItems(items: Array<TextMenuItemId>) : void {
+        GlobalScopeUicontextTextMenu.disableMenuItems(items)
     }
 }
 

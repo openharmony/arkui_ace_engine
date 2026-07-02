@@ -67,7 +67,7 @@ import { default as image } from '@ohos.multimedia.image'
 import { font_FontOptions_serializer, font_FontInfo_serializer, font_UIFontConfig_serializer } from './../framework/ohos.font'
 import { default as font } from '@ohos.font'
 import { MeasureOptions_serializer } from './../framework/ohos.measure'
-import { TextLayoutOptions_serializer, TextLayoutOptions, TextMenuOptions_serializer, TextMenuOptions } from './textCommon'
+import { TextLayoutOptions_serializer, TextLayoutOptions, TextMenuOptions_serializer, TextMenuOptions, TextMenuItemId, TextMenuItemId_serializer } from './textCommon'
 import { text_Paragraph_serializer } from './../framework/ohos.graphics.text'
 import { MeasureOptions } from '@ohos.measure'
 import { StyledString, StyledStringInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanDrawInfo_serializer } from './styledString'
@@ -3659,6 +3659,11 @@ export class GlobalScopeUicontextTextMenu {
         GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems_serialize(disable_casted)
         return
     }
+    public static disableMenuItems(items: Array<TextMenuItemId>): void {
+        const items_casted = items as (Array<TextMenuItemId>)
+        GlobalScopeUicontextTextMenu.disableMenuItems_serialize(items_casted)
+        return
+    }
     private static setMenuOptions_serialize(options: TextMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         TextMenuOptions_serializer.write(thisSerializer, options)
@@ -3667,6 +3672,16 @@ export class GlobalScopeUicontextTextMenu {
     }
     private static disableSystemServiceMenuItems_serialize(disable: boolean): void {
         ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_disableSystemServiceMenuItems(disable ? true : false)
+    }
+    private static disableMenuItems_serialize(items: Array<TextMenuItemId>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((items.length).toInt())
+        for (let itemsCounterI = 0; itemsCounterI < items.length; itemsCounterI++) {
+            const itemsTmpElement: TextMenuItemId = items[itemsCounterI]
+            TextMenuItemId_serializer.write(thisSerializer, itemsTmpElement)
+        }
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_disableMenuItems(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class ImmersiveHelper {

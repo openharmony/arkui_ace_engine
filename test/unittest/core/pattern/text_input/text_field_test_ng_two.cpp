@@ -856,11 +856,17 @@ HWTEST_F(TextFieldTestNgTwo, TextInputTextDecoration001, TestSize.Level1)
  */
 HWTEST_F(TextFieldTestNgTwo, SupportAvoidanceTest, TestSize.Level1)
 {
+    /**
+     * @tc.step: step1. Create TextField.
+     */
     CreateTextField(DEFAULT_TEXT);
     auto supportAvoidance = true;
     pattern_->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_TRUE(pattern_->keyboardAvoidance_);
     supportAvoidance = false;
+    /**
+     * @tc.step: step1. SetCustomKeyboardOption.
+     */
     pattern_->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_FALSE(pattern_->keyboardAvoidance_);
 }
