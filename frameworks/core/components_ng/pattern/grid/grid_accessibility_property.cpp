@@ -44,7 +44,7 @@ int32_t GridAccessibilityProperty::GetBeginIndex() const
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, -1);
     auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    return gridLayoutInfo.startIndex_;
+    return gridLayoutInfo.reportStartIndex_;
 }
 
 int32_t GridAccessibilityProperty::GetEndIndex() const
@@ -54,7 +54,7 @@ int32_t GridAccessibilityProperty::GetEndIndex() const
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, -1);
     auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    return gridLayoutInfo.endIndex_;
+    return gridLayoutInfo.reportEndIndex_;
 }
 
 int32_t GridAccessibilityProperty::GetCollectionItemCounts() const

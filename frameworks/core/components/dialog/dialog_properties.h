@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ enum class DialogType {
 
 class DialogTypeUtils {
 public:
-    static std::string ConvertDialogTypeToString(DialogType type);
+    ACE_FORCE_EXPORT static std::string ConvertDialogTypeToString(DialogType type);
 };
 
 enum class DialogButtonStyle {
@@ -115,12 +115,12 @@ enum class DialogDisplayModeInSubWindow {
 
 class DialogAlignmentUtils {
 public:
-    static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment);
+    ACE_FORCE_EXPORT static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment);
 };
 
 class DialogButtonDirectionUtils {
 public:
-    static std::string ConvertDialogButtonDirectionToString(DialogButtonDirection buttonDirection);
+    ACE_FORCE_EXPORT static std::string ConvertDialogButtonDirectionToString(DialogButtonDirection buttonDirection);
 };
 
 struct HasInvertColor {

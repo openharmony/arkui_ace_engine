@@ -86,7 +86,7 @@ void FfiOHOSAceFrameworkImageSpanCreateWithUrl(const char* url)
         return;
     }
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(std::string(url));
+    imageInfoConfig.src = std::make_shared<std::string>(std::string(url != nullptr ? url : ""));
     imageInfoConfig.bundleName = "";
     imageInfoConfig.moduleName = "";
     imageInfoConfig.isUriPureNumber = false;

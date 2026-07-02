@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -195,7 +195,10 @@ void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std:
     }
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonFrameNode);
+    auto buttonModifier = OHOS::Ace::NG::NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    CHECK_NULL_VOID(buttonModifier->resetFontSizeToLayoutProp);
+    buttonModifier->resetFontSizeToLayoutProp(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)));
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, frameNode);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

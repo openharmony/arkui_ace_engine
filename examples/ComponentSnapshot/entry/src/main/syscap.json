@@ -1,0 +1,23 @@
+
+{
+  "devices": {
+    "general": [
+      "default",
+      "tablet"
+    ]
+  },
+  "production": {
+    "removedSysCaps": [
+      "SystemCapability.HiviewDFX.HiDumper",
+      "SystemCapability.Security.DeviceAuth",
+      "SystemCapability.Multimedia.Media.AVTranscoder",
+      "SystemCapability.Tee.TeeClient",
+      "SystemCapability.Communication.Bluetooth.Core",
+      "SystemCapability.ArkUi.Graphics3D",
+      "SystemCapability.DistributedHardware.DeviceManager",
+      "SystemCapability.Multimedia.Drm.Core",
+      "SystemCapability.Advertising.Ads",
+      "SystemCapability.Customization.EnterpriseDeviceManager"
+    ]
+  }
+}

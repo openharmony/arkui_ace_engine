@@ -30,7 +30,13 @@ constexpr const char* TABS_ETS_TAG = "Tabs";
 extern "C" {
 void FfiOHOSAceFrameworkLazyForEachCreate(int64_t viewID, int64_t parentViewID, int64_t lazyForEachFuncsID)
 {
+    (void)viewID;
+    (void)parentViewID;
     auto lazyForeachFunc = LazyForEachFuncs::Create<LazyForEachFuncs>(lazyForEachFuncsID);
+    if (!lazyForeachFunc) {
+        LOGE("LazyForEach: invalid funcs id=%{public}" PRId64, lazyForEachFuncsID);
+        return;
+    }
     auto builder = AceType::MakeRefPtr<CJLazyForEachBuilder>(std::move(lazyForeachFunc));
     LazyForEachModel::GetInstance()->Create(builder);
 }

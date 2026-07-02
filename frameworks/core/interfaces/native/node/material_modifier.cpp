@@ -41,7 +41,7 @@ void SetSystemMaterialByHandle(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* ma
         ViewAbstract::SetSystemMaterial(frameNode, nullptr);
         return;
     }
-    auto uiMaterial = CreateUiMaterialFromHandle(material);
+    auto uiMaterial = NodeModifier::CreateUiMaterialFromHandle(material);
     ViewAbstract::SetSystemMaterial(frameNode, AceType::RawPtr(uiMaterial));
 }
 
@@ -61,7 +61,7 @@ bool GetSystemMaterialHandle(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* mate
     CHECK_NULL_RETURN(renderContext, false);
     auto uiMaterial = renderContext->GetSystemMaterial();
     CHECK_NULL_RETURN(uiMaterial, false);
-    return CreateHandleFromUiMaterial(uiMaterial, material);
+    return NodeModifier::CreateHandleFromUiMaterial(uiMaterial, material);
 }
 } // namespace
 

@@ -92,7 +92,7 @@ std::optional<SizeF> LayoutAlgorithmWrapper::MeasureContent(
 
 Kit::LayoutConstraintInfo GetLayoutConstraint(const std::optional<LayoutConstraintF>& contentConstraint)
 {
-    Kit::LayoutConstraintInfo layoutConstraintInfo;
+    Kit::LayoutConstraintInfo layoutConstraintInfo = {};
     if (contentConstraint.has_value()) {
         layoutConstraintInfo.minWidth = contentConstraint.value().minSize.Width();
         layoutConstraintInfo.minHeight = contentConstraint.value().minSize.Height();

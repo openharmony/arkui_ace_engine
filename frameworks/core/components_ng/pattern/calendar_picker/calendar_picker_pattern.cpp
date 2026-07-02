@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/container_window_manager.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +55,7 @@ constexpr uint32_t MAX_MONTH = 12;
 constexpr Dimension DIALOG_HEIGHT = 348.0_vp;
 constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 constexpr double DISABLE_ALPHA = 0.4;
+const char BUTTON_ETS_TAG[] = "Button";
 } // namespace
 void CalendarPickerPattern::OnModifyDone()
 {
@@ -140,16 +141,17 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
     int32_t buttonIndex = 0;
     for (const auto& child : buttonFlexNode->GetChildren()) {
         CHECK_NULL_VOID(child);
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
             BorderColorProperty borderColor;
             borderColor.SetColor(theme->GetEntryBorderColor());
             buttonNode->GetRenderContext()->UpdateBorderColor(borderColor);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonLayoutProperty);
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+            auto* calPickerBtnModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(calPickerBtnModifier);
+            calPickerBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();

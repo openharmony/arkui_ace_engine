@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(

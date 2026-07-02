@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
@@ -29,17 +30,16 @@
 #endif
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
-#include "bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/dialog/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
-#include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -63,10 +63,8 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -92,7 +90,6 @@
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
-#include "bridge/declarative_frontend/jsview/js_navigator.h"
 #include "bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -119,12 +116,12 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
-#include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
+#include "bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
@@ -438,7 +435,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
@@ -516,7 +512,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
@@ -526,8 +521,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "Grid", JSGrid::JSBind },
-    { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
@@ -541,7 +534,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
-    { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
@@ -652,7 +644,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoControllerAsync", JSVideoControllerAsync::JSBind },
 #endif
 #endif
-    { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockControllerBinding::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -970,6 +961,7 @@ void JsBindFormViews(
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSStateMgmtHistogram::JSBind(globalObj);
         JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
@@ -1033,6 +1025,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDumpRegister::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
     JSStateMgmtProfiler::JSBind(globalObj);
+    JSStateMgmtHistogram::JSBind(globalObj);
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
@@ -1074,6 +1067,11 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
+}
+
+void JsUnbindViews()
+{
+    JsiClassBase::UnDeclareAll();
 }
 
 } // namespace OHOS::Ace::Framework

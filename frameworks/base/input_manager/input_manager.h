@@ -54,8 +54,6 @@ public:
     static bool IsKeyboardConnected();
 
     static bool GetSystemHotkeys(std::vector<HotKey>& hotkeys);
-
-    static size_t GetApproximatePointerEventSize();
 };
 
 } // namespace OHOS::Ace

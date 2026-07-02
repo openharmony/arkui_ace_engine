@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
+#include "core/components_ng/event/click_event.h"
+
 namespace OHOS::Ace::NG {
 OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
 OverlayManager::~OverlayManager() = default;

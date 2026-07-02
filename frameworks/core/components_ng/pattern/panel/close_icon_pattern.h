@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_CLOSE_ICON_PATTERN_H
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/panel/close_icon_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/close_icon_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"

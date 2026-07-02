@@ -205,6 +205,21 @@ public:
         currentIndexActual_ = currentIndexActual;
     }
 
+    void SetCustomIconIndexes(const std::vector<int32_t>& customIconIndexes)
+    {
+        customIconIndexes_ = customIconIndexes;
+    }
+
+    LinearVector<float> GetBlackPointCenterX() const
+    {
+        return vectorBlackPointCenterX_ ? vectorBlackPointCenterX_->Get() : LinearVector<float>();
+    }
+
+    bool HasCustomIconAtIndex(int32_t index) const
+    {
+        return std::find(customIconIndexes_.begin(), customIconIndexes_.end(), index) != customIconIndexes_.end();
+    }
+
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
         normalToHoverIndex_ = normalToHoverIndex;
@@ -315,6 +330,11 @@ public:
     void SetIsIndicatorCustomSize(bool isCustomSize)
     {
         isCustomSize_ = isCustomSize;
+    }
+
+    void SetDisableIndicatorAnimation(bool disableIndicatorAnimation)
+    {
+        disableIndicatorAnimation_ = disableIndicatorAnimation;
     }
 
     void SetAnimationDuration(int32_t duration)
@@ -448,6 +468,7 @@ protected:
 
     bool indicatorMask_ = false;
     bool isCustomSize_ = false;
+    bool disableIndicatorAnimation_ = false;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;
     int32_t animationDuration_ = 0;
@@ -471,6 +492,7 @@ protected:
     float rectHeight_ = 0.0f;
     LinearVector<float> targetVectorBlackPointCenterX_;
     TargetContentProperty targetContentProperty_;
+    std::vector<int32_t> customIconIndexes_;
 
     int32_t themeScopeId_ = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
 

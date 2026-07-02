@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIDatePickerModifier* GetDatePickerModifier();
 const CJUIDatePickerModifier* GetCJUIDatePickerModifier();
-const NG::DatePickerUtil::DatepickerCustomModifier* GetDatepickerCustomModifier();
+ACE_FORCE_EXPORT const NG::DatePickerUtil::DatepickerCustomModifier* GetDatepickerCustomModifier();
 void SetDatePickerOnDateChange(ArkUINodeHandle node, void* extraParam);
 }
 

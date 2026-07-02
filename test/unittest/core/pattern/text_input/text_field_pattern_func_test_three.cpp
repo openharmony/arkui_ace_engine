@@ -1986,4 +1986,92 @@ HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplMarginTop001, TestSize
     auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
 }
+
+/**
+ * @tc.name: UpdateCancelButtonIconColorWithMaterialPlaceholder001
+ * @tc.desc: Test UpdatePropertyImpl with cancelButtonIconColor property using Material color placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdateCancelButtonIconColorWithMaterialPlaceholder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with cancel button
+     */
+    CreateTextField("", "", [](TextFieldModelNG& model) { model.SetIsShowCancelButton(true); });
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value with Material placeholder color (ICON_PRIMARY)
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color iconColor(ColorPlaceholder::ICON_PRIMARY);
+    value->SetValue(iconColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with cancelButtonIconColor key
+     * @tc.expected: Icon color should be updated with placeholder preserved
+     */
+    pattern_->UpdatePropertyImpl("cancelButtonIconColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIconColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIconColor().value().GetPlaceholder(), ColorPlaceholder::ICON_PRIMARY);
+}
+
+/**
+ * @tc.name: UpdateCancelButtonIconColorWithMaterialPlaceholder002
+ * @tc.desc: Test UpdatePropertyImpl with cancelButtonIconColor property using Material color placeholder ICON_SECONDARY
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdateCancelButtonIconColorWithMaterialPlaceholder002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with cancel button
+     */
+    CreateTextField("", "", [](TextFieldModelNG& model) { model.SetIsShowCancelButton(true); });
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value with Material placeholder color (ICON_SECONDARY)
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color iconColor(ColorPlaceholder::ICON_SECONDARY);
+    value->SetValue(iconColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with cancelButtonIconColor key
+     * @tc.expected: Icon color should be updated with placeholder preserved
+     */
+    pattern_->UpdatePropertyImpl("cancelButtonIconColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIconColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIconColor().value().GetPlaceholder(), ColorPlaceholder::ICON_SECONDARY);
+}
+
+/**
+ * @tc.name: UpdateCancelButtonIconColorWithMaterialPlaceholder003
+ * @tc.desc: Test UpdatePropertyImpl with cancelButtonIconColor property using concrete color without placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdateCancelButtonIconColorWithMaterialPlaceholder003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with cancel button
+     */
+    CreateTextField("", "", [](TextFieldModelNG& model) { model.SetIsShowCancelButton(true); });
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value with concrete color (no placeholder)
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color iconColor = Color(0xFFFF0000);
+    value->SetValue(iconColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with cancelButtonIconColor key
+     * @tc.expected: Icon color should be updated without placeholder
+     */
+    pattern_->UpdatePropertyImpl("cancelButtonIconColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIconColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIconColor().value(), Color(0xFFFF0000));
+    EXPECT_EQ(layoutProperty->GetIconColor().value().GetPlaceholder(), ColorPlaceholder::NONE);
+}
 } // namespace OHOS::Ace::NG

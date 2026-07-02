@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H
 
+#include <map>
+
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 

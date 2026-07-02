@@ -18,7 +18,6 @@
 
 #include <functional>
 #include <memory>
-#include <unordered_map>
 #include <unordered_set>
 
 #include "base/memory/referenced.h"
@@ -31,6 +30,7 @@
 // Forward declarations and type aliases from gesture_event.h
 namespace OHOS::Ace {
 class GestureEvent;
+struct AxisEvent;
 using GestureEventFunc = std::function<void(GestureEvent& info)>;
 using GestureEventNoParameter = std::function<void()>;
 }

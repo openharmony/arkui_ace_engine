@@ -1515,6 +1515,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         auto infoName = navdestinationsInfo[index].name;
         auto infoParam = navdestinationsInfo[index].param;
         auto infoMode = navdestinationsInfo[index].mode;
+        auto componentInfo = navdestinationsInfo[index].componentInfo;
 
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
@@ -1523,7 +1524,12 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
+        navPathInfo->SetProperty<std::string>("ohmUrl", navdestinationsInfo[index].fileName.c_str());
+        navPathInfo->SetProperty<std::string>("moduleName", navdestinationsInfo[index].moduleName.c_str());
         navPathInfo->SetProperty<std::string>("autoCleanedState", navdestinationsInfo[index].state);
+        if (!componentInfo.empty()) {
+            navPathInfo->SetProperty<std::string>("componentInfo", componentInfo);
+        }
         newPathArray->SetValueAt(index, navPathInfo);
     }
     dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
@@ -1948,5 +1954,61 @@ bool JSNavigationStack::IsPushOperation()
     auto func = JSRef<JSFunc>::Cast(indexes);
     auto result = func->Call(dataSourceObj_, {});
     return result->ToBoolean();
+}
+
+bool JSNavigationStack::GetOhmUrl(const RefPtr<NG::UINode>& customNode, std::string& moduleName, std::string& fileName)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto targetCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode);
+    CHECK_NULL_RETURN(targetCustomNode, false);
+    auto thisObjTmp = targetCustomNode->FireThisFunc();
+    CHECK_NULL_RETURN(thisObjTmp, false);
+    auto thisVal = (JSRef<JSObject>*)(thisObjTmp);
+    CHECK_NULL_RETURN(thisVal, false);
+    JSRef<JSObject> thisObj = *(thisVal);
+    auto constructor = thisObj->GetProperty("constructor");
+    if (constructor->IsUndefined()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination file custom node is undefined");
+        return false;
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    return res;
+}
+
+bool JSNavigationStack::CreateNodeFromRecovery(int32_t index, const WeakPtr<NG::UINode>& customNode,
+    RefPtr<NG::UINode>& node)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "recover page(%{public}d) failed", index);
+        return false;
+    }
+    auto ohmUrl = pathInfo->GetPropertyValue<std::string>("ohmUrl", "");
+    auto moduleName = pathInfo->GetPropertyValue<std::string>("moduleName", "");
+    if (ohmUrl.empty() || moduleName.empty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reovery page ohmUrl or moduleName is empty");
+        return false;
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    if (runtime->LoadDestinationFile("", moduleName, ohmUrl, true) != 0) {
+        return false;
+    }
+    return CreateNodeByIndex(index, customNode, node);
+}
+
+std::string JSNavigationStack::GetComponentInfo(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return "";
+    }
+    auto pathInfo = GetJsPathInfo(index);
+    auto info = pathInfo->GetPropertyValue<std::string>("componentInfo", "");
+    JSRef<JSVal> undefinedVal = JSVal::Undefined();
+    pathInfo->SetPropertyObject("componentInfo", undefinedVal);
+    return info;
 }
 } // namespace OHOS::Ace::Framework

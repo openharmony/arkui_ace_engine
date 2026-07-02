@@ -144,14 +144,20 @@ bool ActiveRangeUpdater::InitializeThreshold(LayoutWrapper* layoutWrapper, float
 
     auto geometry = layoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, false);
-    float mainSize = geometry->GetPaddingSize().MainSize(axis_);
     float referencePos = posRef.value().referencePos;
     if (posRef.value().referenceEdge == ReferenceEdge::START) {
         startPos_ = posRef.value().viewPosStart - referencePos - adjustOffset;
         endPos_ = posRef.value().viewPosEnd - referencePos - adjustOffset;
     } else {
+        float mainSize = geometry->GetPaddingSize().MainSize(axis_);
         startPos_ = posRef.value().viewPosStart - (referencePos - mainSize) - adjustOffset;
         endPos_ = posRef.value().viewPosEnd - (referencePos - mainSize) - adjustOffset;
+    }
+    const auto& padding = geometry->GetPadding();
+    if (padding) {
+        float paddingOffset = axis_ == Axis::VERTICAL ? padding->top.value_or(0) : padding->left.value_or(0);
+        startPos_ += paddingOffset;
+        endPos_ += paddingOffset;
     }
     startExtOffset_ = posRef.value().viewExtStart;
     endExtOffset_ = posRef.value().viewExtEnd;

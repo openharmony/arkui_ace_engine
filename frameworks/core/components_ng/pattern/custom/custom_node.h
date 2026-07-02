@@ -24,7 +24,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
@@ -115,7 +114,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override;
 
     void SetDestroying(bool isDestroying, bool cleanStatus) override;
 

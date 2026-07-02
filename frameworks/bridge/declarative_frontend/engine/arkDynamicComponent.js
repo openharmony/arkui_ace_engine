@@ -132,6 +132,27 @@ if (globalThis.CheckboxGroup === undefined) {
   };
 }
 
+// @ts-ignore
+if (globalThis.Button === undefined) {
+  globalThis.Button = {
+    createWithLabel: function(...args) {
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().button.createWithLabel(...args);
+    },
+    createWithChild: function(...args) {
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().button.createWithChild(...args);
+    },
+    name: 'JSButton'
+  };
+}
+
 
 // @ts-ignore
 if (globalThis.Rating === undefined) {
@@ -235,6 +256,20 @@ if (globalThis.Refresh === undefined) {
       getUINativeModule().refresh.create(params);
     },
     name: 'JSRefresh'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Navigator === undefined) {
+  globalThis.Navigator = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Navigator');
+      let module = globalThis.requireNapi('arkui.components.arknavigator');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().navigator.create(params);
+    },
+    name: 'JSNavigator'
   }
 }
 
@@ -648,6 +683,34 @@ if (globalThis.ImageAnimator === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Grid === undefined) {
+  globalThis.Grid = {
+    create: function(scroller, options) {
+      getUINativeModule().loadNativeModule('Grid');
+      let module = globalThis.requireNapi('arkui.components.arkgrid');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().grid.create(scroller, options);
+    },
+    name: 'Grid'
+  }
+}
+
+// @ts-ignore
+if (globalThis.GridItem === undefined) {
+  globalThis.GridItem = {
+    create: function(func, isLazy, style) {
+      getUINativeModule().loadNativeModule('GridItem');
+      let module = globalThis.requireNapi('arkui.components.arkgriditem');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().gridItem.create(func, isLazy, style);
+    },
+    name: 'GridItem'
+  }
+}
+
+// @ts-ignore
 if (globalThis.DatePicker === undefined) {
   globalThis.DatePicker = {
     create: function(params) {
@@ -686,4 +749,18 @@ if (globalThis.LazyVGridLayout === undefined) {
     },
     name: 'JSLazyVGridLayout'
   };
+}
+
+// @ts-ignore
+if (globalThis.Select === undefined) {
+  globalThis.Select = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule('Select');
+      let module = globalThis.requireNapi('arkui.components.arkselect');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().select.create(params);
+    },
+    name: 'JSSelect'
+  }
 }

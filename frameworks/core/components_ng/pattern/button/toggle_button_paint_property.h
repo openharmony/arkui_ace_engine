@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_TOGGLE_BUTTON_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace {
@@ -25,6 +24,7 @@ class ToggleTheme;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ToggleButtonPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty);

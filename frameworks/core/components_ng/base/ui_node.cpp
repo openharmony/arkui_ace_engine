@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -37,6 +38,7 @@
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
+#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
 #include "ui/base/versions.h"
 
 namespace OHOS::Ace::NG {
@@ -1051,12 +1053,6 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
-    if (!recursive && context) {
-        auto envManager = context->GetEnvironmentManager();
-        if (envManager) {
-            envManager->OnNodeAttached(Claim(this));
-        }
-    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -1091,12 +1087,6 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     }
     isRemoving_ = true;
     auto context = context_;
-    if (!recursive && context) {
-        auto envManager = context->GetEnvironmentManager();
-        if (envManager) {
-            envManager->OnNodeDetached(Claim(this));
-        }
-    }
     DetachContext(false);
     if (isNodeAdapter_) {
         std::list<RefPtr<UINode>> nodes;
@@ -2185,7 +2175,7 @@ void UINode::SetActive(bool active, bool needRebuildRenderContext)
     }
 }
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
@@ -2194,10 +2184,10 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
             return;
         }
         if (customNode) {
-            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse);
+            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse, suppressActiveLifecycle);
             continue;
         }
-        child->SetJSViewActive(active, isLazyForEachNode, isReuse);
+        child->SetJSViewActive(active, isLazyForEachNode, isReuse, suppressActiveLifecycle);
     }
 }
 

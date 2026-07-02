@@ -38,7 +38,6 @@ template("ace_core_interfaces_native_node") {
       "node/node_arc_list_modifier.cpp",
       "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
-      "node/button_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
@@ -46,8 +45,8 @@ template("ace_core_interfaces_native_node") {
       "node/common_shape_modifier.cpp",
       "node/node_container_reader_modifier.cpp",
       "node/counter_modifier.cpp",
-      "node/custom_dialog_model.cpp",
       "node/data_panel_modifier.cpp",
+      "node/dialog_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/drag_adapter_impl.cpp",
       "node/dynamic_layout_modifier.cpp",
@@ -82,6 +81,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_animate.cpp",
       "node/node_api.cpp",
       "node/node_api_multi_thread.cpp",
+      "node/node_button_modifier.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
@@ -111,6 +111,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_span_modifier.cpp",
       "node/node_stack_modifier.cpp",
       "node/node_swiper_modifier.cpp",
+      "node/node_arc_swiper_modifier.cpp",
       "node/node_symbol_glyph_modifier.cpp",
       "node/node_symbol_span_modifier.cpp",
       "node/node_text_area_modifier.cpp",
@@ -204,6 +205,7 @@ template("ace_core_interfaces_native_node") {
         "ani/xcomponent_ani_modifier.cpp",
         "ani/parallelize_ui_ani_modifier.cpp",
         "ani/dynamiclayout_ani_modifier.cpp",
+        "ani/lazy_dynamic_layout_ani_modifier.cpp",
       ]
 
       sources += [ "drawable/drawable_modifier.cpp" ]
@@ -229,6 +231,7 @@ template("ace_core_interfaces_native_node") {
           "ani/image_ani_modifier.cpp",
           "ani/with_env_ani_modifier.cpp",
           "ani/dynamiclayout_ani_modifier.cpp",
+          "ani/lazy_dynamic_layout_ani_modifier.cpp",
         ]
       }
 
@@ -378,3 +381,4 @@ foreach(item, ace_platforms) {
     }
   }
 }
+

@@ -187,7 +187,7 @@ public:
     void SetImplicitAnimationOption(const AnimationOption& option);
 
     // Returns implicit animation option.
-    const AnimationOption& GetImplicitAnimationOption() const;
+    ACE_FORCE_EXPORT const AnimationOption& GetImplicitAnimationOption() const;
 
     void SetZIndex(RefPtr<Component>& component);
     bool ShouldPopImmediately();

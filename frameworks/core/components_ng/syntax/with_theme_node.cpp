@@ -17,6 +17,7 @@
 
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

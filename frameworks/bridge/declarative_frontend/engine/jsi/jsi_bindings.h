@@ -53,6 +53,7 @@ public:
 
     static void Declare(const char* name);
 
+    static void UnDeclare();
     template<typename Base, typename R, typename... Args>
     static void Method(const char* name, FunctionBinding<Base, R, Args...>*);
 

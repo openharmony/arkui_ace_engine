@@ -1,4 +1,5 @@
-﻿/*
+'use static'
+/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import { typeNode } from '@ohos.arkui.node';
 import {
   Button,
@@ -40,11 +39,11 @@ struct ScrollDeclare {
   @State private bindResult: string = 'Dynamic scroller not bound';
   @State private defaultOffsetText: string = 'Default yOffset: 0';
   @State private dynamicOffsetText: string = 'Dynamic yOffset: 0';
-  @State private items: Array<number> = [];
+  @State private items: int[] = [] as int[];
 
   aboutToAppear(): void {
-    this.items = [];
-    for (let i: number = 0; i < 40; i++) {
+    this.items = [] as int[];
+    for (let i: int = 0; i < 40; i++) {
       this.items.push(i);
     }
   }
@@ -154,14 +153,14 @@ struct ScrollDeclare {
 
       Scroll(this.defaultScroller) {
         Column() {
-          ForEach(this.items, (idx: number) => {
+          ForEach(this.items, (idx: int) => {
             Text(`Item ${idx}`)
               .width('100%')
               .height(48)
               .margin({ bottom: 8 })
               .textAlign(TextAlign.Center)
               .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef');
-          }, (idx: number) => idx.toString());
+          }, (idx: int) => idx.toString());
         }
         .width('100%');
       }

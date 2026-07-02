@@ -1409,6 +1409,10 @@ export class ArkUIGeneratedNativeModule {
     native static _NavDestinationAttribute_setEnableNavigationIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setFullScreenOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _NavDestinationAttribute_setOnSaveState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _NavDestinationAttribute_setOnRestoreState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _NavDestinationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -1468,6 +1472,8 @@ export class ArkUIGeneratedNativeModule {
     native static _NavigationAttribute_setEnableModeChangeAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _NavigationAttribute_setConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _NavigationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2497,6 +2503,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TabsAttribute_setOnContentWillChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setOnContentDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TabsAttribute_setBarFloatingStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setBarMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -4572,6 +4580,8 @@ export class ArkUIGeneratedNativeModule {
     native static _DotIndicator_maxDisplayCount(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DotIndicator_space(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_indicatorIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DragEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -6901,6 +6911,18 @@ export class ArkUIGeneratedNativeModule {
     native static _TextMenuItemId_getSEARCH(): KPointer
     @ani.unsafe.Direct
     native static _TextMenuItemId_getSHARE(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getUrl(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getEmail(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getPhoneNumber(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getAddress(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getDateTime(): KPointer
+    @ani.unsafe.Direct
+    native static _TextMenuItemId_getAskAI(): KPointer
     @ani.unsafe.Direct
     native static _TextMenuItemId_getAutoFill(): KPointer
     @ani.unsafe.Direct

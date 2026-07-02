@@ -73,7 +73,7 @@ public:
     void ExecuteAboutToRecycle();
     void ExecuteAboutToReuse(void* params);
     bool ExecuteTriggerLifecycle(int32_t eventId);
-    void ExecuteSetActive(bool active, bool isReuse = false);
+    void ExecuteSetActive(bool active, bool isReuse = false, bool suppressActiveLifecycle = false);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
     void ExecuteClearAllRecycle();

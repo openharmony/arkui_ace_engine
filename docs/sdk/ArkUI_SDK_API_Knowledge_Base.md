@@ -436,7 +436,7 @@ class ButtonModifier extends ButtonAttribute
 
 | 组件 | ace_engine Pattern | 知识库 | 功能 |
 |------|--------------------|--------|------|
-| Text | `pattern/text/text_pattern.cpp` | [Text](../pattern/text/Text_Knowledge_Base_CN.md) | 文本显示 |
+| Text | `pattern/text/text_pattern.cpp` | [Text](../kb/components/basic/text.md) | 文本显示 |
 | Image | `pattern/image/image_pattern.cpp` | [Image](../pattern/image/Image_Knowledge_Base.md) | 图片显示 |
 | TextInput | `pattern/text_input/text_input_pattern.cpp` | - | 单行文本输入 |
 | TextArea | `pattern/text_area/text_area_pattern.cpp` | - | 多行文本输入 |

@@ -256,6 +256,7 @@ export class StorageHelper {
     public static readonly NULL_OR_UNDEFINED_KEY: string = `The parameter cannot be null or undefined`;
     public static readonly ERROR_NOT_IN_THE_STORE: string = `The parameter is not in the store`;
     public static readonly INVALID_DEFAULT_VALUE_PRIMITIVE: string = 'Can not store primitive data types';
+    public static reg: RegExp = new RegExp('^[0-9a-zA-Z_]+$');
 
     public static getKeyOrTypeNameWithChecks<T>(keyOrType: string | Class): string | undefined {
         if (typeof keyOrType === 'string') {
@@ -308,7 +309,7 @@ export class StorageHelper {
         if (len < 2 || len > 255) {
             StateMgmtConsole.log(StorageHelper.INVALID_LENGTH_KEY);
         }
-        if (!(new RegExp("^[0-9a-zA-Z_]+$")).test(key)) {
+        if (!(StorageHelper.reg.test(key))) {
             StateMgmtConsole.log(StorageHelper.INVALID_CHARACTER_KEY);
         }
 

@@ -53,7 +53,7 @@ interface CustomComponentContext {
 }
 
 /**
- * Implements the `__ReusePool_Internal__` class responsible for managing recycled
+ * Implements the `__ReusePool__Internal` class responsible for managing recycled
  * ViewPU/ViewV2 instances
  * Supports
  *  - Per-instance reuse pools
@@ -61,7 +61,7 @@ interface CustomComponentContext {
  *  - Element ID remapping for recycled nodes
  *  - Owner tracking for shared pool lifecycle management
  */
-class __ReusePool_Internal__ implements IReusePool {
+class __ReusePool__Internal implements IReusePool {
     // Key suffixes for internal cache buckets
     private static readonly SUFFIX_DEFAULT = 'INTERNAL_DEFAULT';
     private static readonly SUFFIX_COMPLIMIT = 'INTERNAL_COMPLIMIT';
@@ -86,7 +86,7 @@ class __ReusePool_Internal__ implements IReusePool {
     private ownership_: ReusePoolOwnership;
     private owners_ = new Set<PUV2ViewBase>();
     // Global registry of shared pools
-    static sharedPools_: Map<string, __ReusePool_Internal__> = new Map();
+    static sharedPools_: Map<string, __ReusePool__Internal> = new Map();
 
     private static ctorIdCounter_: number = 0;
     private static ctorIdMap_: WeakMap<Function, string> = new WeakMap();
@@ -101,10 +101,10 @@ class __ReusePool_Internal__ implements IReusePool {
     // Registers a constructor name so aliased imports are recognized as defaults
     // Used to construct reuse component key with func ptrs of component class
     static registerCtorName(ctor: Function, name: string): void {
-        let names = __ReusePool_Internal__.ctorKnownNames_.get(ctor);
+        let names = __ReusePool__Internal.ctorKnownNames_.get(ctor);
         if (!names) {
             names = new Set();
-            __ReusePool_Internal__.ctorKnownNames_.set(ctor, names);
+            __ReusePool__Internal.ctorKnownNames_.set(ctor, names);
         }
         names.add(name);
     }
@@ -116,7 +116,7 @@ class __ReusePool_Internal__ implements IReusePool {
         }
         // Check if the reuseId matches ANY known name for this constructor
         // (covers aliases like CompA imported as CompB)
-        const knownNames = __ReusePool_Internal__.ctorKnownNames_.get(cls);
+        const knownNames = __ReusePool__Internal.ctorKnownNames_.get(cls);
         if (knownNames?.has(reuseId)) {
             return true;
         }
@@ -125,10 +125,10 @@ class __ReusePool_Internal__ implements IReusePool {
 
     // Returns or assigns a stable string key for a constructor,used as a cache key prefix
     static getCtorKey(ctor: Function): string {
-        let key = __ReusePool_Internal__.ctorIdMap_.get(ctor);
+        let key = __ReusePool__Internal.ctorIdMap_.get(ctor);
         if (key === undefined) {
-            key = `__ctor_${__ReusePool_Internal__.ctorIdCounter_++}`;
-            __ReusePool_Internal__.ctorIdMap_.set(ctor, key);
+            key = `__ctor_${__ReusePool__Internal.ctorIdCounter_++}`;
+            __ReusePool__Internal.ctorIdMap_.set(ctor, key);
         }
         return key;
     }
@@ -185,7 +185,7 @@ class __ReusePool_Internal__ implements IReusePool {
 
     // Called by framework when a component is created (in reuseOrCreateNewComponent)
     public registerActiveReuseId(cls: abstract new (...args: unknown[]) => PUV2ViewBase, reuseId: string): void {
-        const ctorKey = __ReusePool_Internal__.getCtorKey(cls);
+        const ctorKey = __ReusePool__Internal.getCtorKey(cls);
         let set = this.activeReuseIds_.get(ctorKey);
         if (!set) {
             set = new Set();
@@ -196,7 +196,7 @@ class __ReusePool_Internal__ implements IReusePool {
 
     // Called by framework when component is recycled
     public unregisterActiveReuseId(cls: abstract new (...args: unknown[]) => PUV2ViewBase, reuseId: string): void {
-        const ctorKey = __ReusePool_Internal__.getCtorKey(cls);
+        const ctorKey = __ReusePool__Internal.getCtorKey(cls);
         const set = this.activeReuseIds_.get(ctorKey);
         if (set) {
             set.delete(reuseId);
@@ -213,10 +213,10 @@ class __ReusePool_Internal__ implements IReusePool {
             stateMgmtConsole.warn(`GlobalReuse: maxCount=${value} is set to negative, clamping to 0`);
             value = 0;
         }
-        if (value > __ReusePool_Internal__.USER_MAX_COUNT_LIMIT) {
-            stateMgmtConsole.warn(`GlobalReuse: maxCount=${value} exceeds maximum allowed. Max can be only ${__ReusePool_Internal__.USER_MAX_COUNT_LIMIT},
-                Set to ${__ReusePool_Internal__.USER_MAX_COUNT_LIMIT}`);
-            value = __ReusePool_Internal__.USER_MAX_COUNT_LIMIT;
+        if (value > __ReusePool__Internal.USER_MAX_COUNT_LIMIT) {
+            stateMgmtConsole.warn(`GlobalReuse: maxCount=${value} exceeds maximum allowed. Max can be only ${__ReusePool__Internal.USER_MAX_COUNT_LIMIT},
+                Set to ${__ReusePool__Internal.USER_MAX_COUNT_LIMIT}`);
+            value = __ReusePool__Internal.USER_MAX_COUNT_LIMIT;
         }
 
         if (id === undefined) {
@@ -262,7 +262,7 @@ class __ReusePool_Internal__ implements IReusePool {
      * Returns reuse pool statistics and limits for a given reusable component.
      *
      * This API allows querying and configuring reuse behavior for a component
-     * stored in this __ReusePool_Internal__.
+     * stored in this __ReusePool__Internal.
      *
      * Behavior depends on whether a specific `reuseId` is provided and whether
      * the component has been recycled with reuseIds.
@@ -300,10 +300,10 @@ class __ReusePool_Internal__ implements IReusePool {
             return undefined;
         }
 
-        const ctorKey = __ReusePool_Internal__.getCtorKey(cls);
+        const ctorKey = __ReusePool__Internal.getCtorKey(cls);
         const prefix = ctorKey + '__';
-        const defaultKey = `${prefix}${__ReusePool_Internal__.SUFFIX_DEFAULT}`;
-        const componentLimitKey = `${prefix}${__ReusePool_Internal__.SUFFIX_COMPLIMIT}`;
+        const defaultKey = `${prefix}${__ReusePool__Internal.SUFFIX_DEFAULT}`;
+        const componentLimitKey = `${prefix}${__ReusePool__Internal.SUFFIX_COMPLIMIT}`;
         const self = this;
 
         // Creates a live IReusableInfo whose count/maxCount always reflect current pool state.
@@ -337,7 +337,7 @@ class __ReusePool_Internal__ implements IReusePool {
                 continue;
             }
             const id = key.slice(prefix.length);
-            if (id !== __ReusePool_Internal__.SUFFIX_DEFAULT && id !== __ReusePool_Internal__.SUFFIX_COMPLIMIT) {
+            if (id !== __ReusePool__Internal.SUFFIX_DEFAULT && id !== __ReusePool__Internal.SUFFIX_COMPLIMIT) {
                 allKnownIds.add(id);
             }
         }
@@ -349,7 +349,7 @@ class __ReusePool_Internal__ implements IReusePool {
                 continue;
             }
             const id = key.slice(prefix.length);
-            if (id !== __ReusePool_Internal__.SUFFIX_DEFAULT && id !== __ReusePool_Internal__.SUFFIX_COMPLIMIT) {
+            if (id !== __ReusePool__Internal.SUFFIX_DEFAULT && id !== __ReusePool__Internal.SUFFIX_COMPLIMIT) {
                 allKnownIds.add(id);
             }
         }
@@ -409,7 +409,7 @@ class __ReusePool_Internal__ implements IReusePool {
         const builderFn = (context && rawFn) ? rawFn.bind(context) : rawFn;
         try {
             // Activate pre-render context
-            PUV2ViewBase.beginPreRender(this);
+            PUV2ViewBase.__beginPreRender__Internal(this);
 
             for (let i = 0; i < n; i++)  {
                 builderFn();
@@ -420,7 +420,7 @@ class __ReusePool_Internal__ implements IReusePool {
         }
         finally {
             // clear context
-            PUV2ViewBase.endPreRender();
+            PUV2ViewBase.__endPreRender__Internal();
         }
         // Wait for all deferred builds to push to the pool before resolving, so the
         // consuming component reuses the pre-rendered node instead of creating a fresh one
@@ -440,9 +440,9 @@ class __ReusePool_Internal__ implements IReusePool {
             stateMgmtConsole.debug(`GlobalReuse: buildKey called with undefined cls, reuseId=${reuseId}`);
             return `unknown__${reuseId || 'default'}`;
         }
-        const ctorKey = __ReusePool_Internal__.getCtorKey(cls);
+        const ctorKey = __ReusePool__Internal.getCtorKey(cls);
         if (!reuseId || this.isDefaultReuseId(cls, reuseId)) {
-            return `${ctorKey}__${__ReusePool_Internal__.SUFFIX_DEFAULT}`;
+            return `${ctorKey}__${__ReusePool__Internal.SUFFIX_DEFAULT}`;
         }
         return `${ctorKey}__${reuseId}`;
     }
@@ -478,17 +478,17 @@ class __ReusePool_Internal__ implements IReusePool {
     }
 
     /**
-     * Factory method to create a __ReusePool_Internal__
+     * Factory method to create a __ReusePool__Internal
      * @param config Optional configuration
      * @param config.reusePool - 'shared' or 'perInstance'
      * @param config.poolAccepts - Optional class references this pool accepts
-     * @returns __ReusePool_Internal__ instance
+     * @returns __ReusePool__Internal instance
      */
     public static create(config?: {
         reusePool?: ReusePoolOwnership,
         poolAccepts?: Array<new (...args: PUV2ViewBase[]) => PUV2ViewBase>,
         owner?: PUV2ViewBase
-    }): __ReusePool_Internal__ {
+    }): __ReusePool__Internal {
 
         const ownership: ReusePoolOwnership =
             config?.reusePool ?? 'shared';
@@ -504,19 +504,19 @@ class __ReusePool_Internal__ implements IReusePool {
             if (!config.owner || !config.owner.constructor) {
                 throw new Error('Global Reuse: shared pool requires a valid owner with a constructor');
             }
-            const ownerKey = __ReusePool_Internal__.getCtorKey(config.owner.constructor);
-            const acceptedKeys = accepted.map(c => __ReusePool.getCtorKey(c)).sort().join('_');
+            const ownerKey = __ReusePool__Internal.getCtorKey(config.owner.constructor);
+            const acceptedKeys = accepted.map(c => __ReusePool__Internal.getCtorKey(c)).sort().join('_');
             const key = `${ownerKey}_${acceptedKeys}`;
 
-            let pool = __ReusePool_Internal__.sharedPools_.get(key);
+            let pool = __ReusePool__Internal.sharedPools_.get(key);
 
             if (!pool) {
-                pool = new __ReusePool_Internal__('shared', accepted);
-                __ReusePool_Internal__.sharedPools_.set(key, pool);
+                pool = new __ReusePool__Internal('shared', accepted);
+                __ReusePool__Internal.sharedPools_.set(key, pool);
             }
             return pool;
         }
-        return new __ReusePool_Internal__('perInstance', accepted);
+        return new __ReusePool__Internal('perInstance', accepted);
     }
 
     /**
@@ -531,10 +531,10 @@ class __ReusePool_Internal__ implements IReusePool {
     // Returns the effective maxCount for a cache bucket.
     // Priority: bucket-specific limit → component-wide limit → unlimited.
     private getEffectiveMaxCount(key: string, cls: abstract new (...args: PUV2ViewBase[]) => PUV2ViewBase): number {
-        const ctorKey = __ReusePool_Internal__.getCtorKey(cls);
+        const ctorKey = __ReusePool__Internal.getCtorKey(cls);
         return this.maxCounts_.get(key) ?? // bucket with its own limit
-            this.maxCounts_.get(`${ctorKey}__${__ReusePool_Internal__.SUFFIX_COMPLIMIT}`) ?? // a component-wide default
-            __ReusePool_Internal__.DEFAULT_MAX_COUNT; // default cap of 100
+            this.maxCounts_.get(`${ctorKey}__${__ReusePool__Internal.SUFFIX_COMPLIMIT}`) ?? // a component-wide default
+            __ReusePool__Internal.DEFAULT_MAX_COUNT; // default cap of 100
     }
 
     /**
@@ -617,6 +617,3 @@ class __ReusePool_Internal__ implements IReusePool {
         return JSON.stringify(result);
     }
 }
-// Temporary alias since ace-loader still references __ReusePool
-// Remove once they switch to use __ReusePool_Internal__
-const __ReusePool = __ReusePool_Internal__;

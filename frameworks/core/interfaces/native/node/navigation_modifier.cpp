@@ -24,6 +24,26 @@ constexpr int32_t NAVIGATION_MODE_RANGE_MODIFIER = 2;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_FOR_MODIFIER = 240;
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
+
+static NG::ScrollEffectOptions ConvertScrollEffectOptions(const ArkUIScrollEffectOptions& src)
+{
+    NG::ScrollEffectOptions opts;
+    if (src.scrollEffectType.isSet) {
+        opts.scrollEffectType = static_cast<NG::ScrollEffectType>(src.scrollEffectType.value);
+    }
+    if (src.blurEffectiveStartOffset.isSet) {
+        opts.blurEffectiveStartOffset = CalcDimension(
+            static_cast<double>(src.blurEffectiveStartOffset.dimension.value),
+            static_cast<DimensionUnit>(src.blurEffectiveStartOffset.dimension.units));
+    }
+    if (src.blurEffectiveEndOffset.isSet) {
+        opts.blurEffectiveEndOffset = CalcDimension(
+            static_cast<double>(src.blurEffectiveEndOffset.dimension.value),
+            static_cast<DimensionUnit>(src.blurEffectiveEndOffset.dimension.units));
+    }
+    return opts;
+}
+
 void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -369,6 +389,9 @@ void UpdateNavigationTitlebarOptions(
             finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
         }
         finalOptions.material = material;
+        if (options.scrollEffectOptions.isSet) {
+            finalOptions.bgOptions.scrollEffectOptions = ConvertScrollEffectOptions(options.scrollEffectOptions);
+        }
         auto localFinalOptions = finalOptions;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -434,6 +457,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         material = castMaterial->Copy();
     }
     finalOptions.material = material;
+    if (options.scrollEffectOptions.isSet) {
+        finalOptions.bgOptions.scrollEffectOptions = ConvertScrollEffectOptions(options.scrollEffectOptions);
+    }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
     if (SystemProperties::ConfigChangePerform()) {
         UpdateNavigationTitlebarOptions(frameNode, options, material);
@@ -666,6 +692,9 @@ void SetTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opt
     if (opts.material) {
         auto* castMaterial = reinterpret_cast<UiMaterial*>(opts.material);
         finalOptions.material = castMaterial->Copy();
+    }
+    if (opts.scrollEffectOptions.isSet) {
+        finalOptions.bgOptions.scrollEffectOptions = ConvertScrollEffectOptions(opts.scrollEffectOptions);
     }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }

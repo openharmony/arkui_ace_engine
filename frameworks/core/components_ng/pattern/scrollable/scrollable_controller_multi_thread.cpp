@@ -44,6 +44,7 @@ bool ScrollableController::AnimateToMultiThread(
                     "ScrollTo with animation, position:%f, duration:%f, smooth:%u, canOverScroll:%u, id:%d, tag:%s",
                     position.ConvertToPx(), duration, smooth, canOverScroll,
                     static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
                 pattern->AnimateTo(position.ConvertToPx(), duration, curve, smooth, canOverScroll);
             });
         } else {
@@ -55,7 +56,7 @@ bool ScrollableController::AnimateToMultiThread(
                 CHECK_NULL_VOID(pattern);
                 ACE_SCOPED_TRACE("ScrollTo without animation, position:%f, id:%d, tag:%s", position.ConvertToPx(),
                     static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
                 pattern->ScrollTo(position.ConvertToPx());
             });
         }
@@ -77,6 +78,7 @@ void ScrollableController::ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->GetAxis() != Axis::NONE) {
+            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
             pattern->ScrollToEdge(scrollEdgeType, smooth);
         }
     });
@@ -95,6 +97,7 @@ void ScrollableController::ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType
         pattern->SetIsOverScroll(false);
         pattern->SetCanStayOverScroll(false);
         pattern->SetAnimateCanOverScroll(false);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
             pattern->ScrollAtFixedVelocity(velocity);
         } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
@@ -123,6 +126,7 @@ void ScrollableController::ScrollByMultiThread(double pixelX, double pixelY, boo
         auto offset = pattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
         ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         if (pattern->GetAxis() == Axis::FREE) {
             pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY });
             return;
@@ -146,6 +150,7 @@ void ScrollableController::FlingMultiThread(double flingVelocity)
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("Fling, flingVelocity:%f, id:%d, tag:%s", static_cast<float>(flingVelocity),
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         pattern->Fling(flingVelocity);
     });
 }
@@ -161,6 +166,7 @@ void ScrollableController::ScrollToIndexMultiThread(
         index, smooth, align, extraOffset]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         pattern->ScrollToIndex(index, smooth, align, extraOffset);
     });
 }
@@ -175,6 +181,7 @@ void ScrollableController::ScrollPageMultiThread(bool reverse, bool smooth)
         reverse, smooth]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollPage(reverse, smooth)) {
             return;
         }

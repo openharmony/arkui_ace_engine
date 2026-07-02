@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_ALERT_DIALOG_MODEL_IMPI_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_ALERT_DIALOG_MODEL_IMPI_H
 
-#include "core/components_ng/pattern/dialog/alert_dialog_model.h"
+#include "core/components_ng/pattern/dialog/alert_dialog/alert_dialog_model.h"
 
 namespace OHOS::Ace::Framework {
 class AlertDialogModelImpl : public OHOS::Ace::AlertDialogModel {

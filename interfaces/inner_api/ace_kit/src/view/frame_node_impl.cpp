@@ -158,7 +158,7 @@ void FrameNodeImpl::Measure(const Kit::LayoutConstraintInfo& parentContraint)
 
 LayoutConstraintInfo FrameNodeImpl::GetLayoutConstraint() const
 {
-    LayoutConstraintInfo out;
+    LayoutConstraintInfo out = {};
     CHECK_NULL_RETURN(frameNode_, out);
     auto tmp = frameNode_->GetLayoutConstraint();
     out.minWidth = tmp.minSize.Width();

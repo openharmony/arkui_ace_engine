@@ -16,12 +16,12 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/syntax/lazy_for_each_utils.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -414,7 +414,8 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild,
+    bool isCache, bool addToRenderTree)
 {
     ACE_SYNTAX_SCOPED_TRACE(
         "LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
@@ -430,7 +431,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false, true);
+        if (!addToRenderTree) {
+            child.second->SetJSViewActive(false, true);
+        } else {
+            child.second->SetJSViewActive(false, true, false, true);
+        }
         bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
         auto optionsFreeze = GetEnableCustomComponentFreeze();
         if (optionsFreeze == LazyForEachCustomComponentFreezeMode::DISABLED) {
@@ -707,9 +712,9 @@ void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = childNode->GetPattern<GridItemPattern>();
+        auto pattern = NodeModifier::GetGridItemCustomModifier();
         CHECK_NULL_VOID(pattern);
-        pattern->InitDragManager(AceType::Claim(this));
+        pattern->initDragManager(childNode, AceType::Claim(this));
     }
 }
 
@@ -741,14 +746,14 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = item->GetPattern<GridItemPattern>();
+            auto pattern = NodeModifier::GetGridItemCustomModifier();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->InitDragManager(AceType::Claim(this));
+                pattern->initDragManager(item, AceType::Claim(this));
             } else {
-                pattern->DeInitDragManager();
+                pattern->deInitDragManager(item);
             }
         }
     }

@@ -47,7 +47,7 @@ public:
 private:
     Accessibility::FocusMoveResult CheckAndGetReadableInfoToRoot(
         const RefPtr<NG::FrameNode>& currentFrameNode, std::list<Accessibility::AccessibilityElementInfo>& targetInfos,
-        const int32_t windowId);
+        const int32_t windowId, Accessibility::FocusRuleType focusRuleType = Accessibility::FocusRuleType::DEFAULT);
     void UpdateBelongTreeIdAndParentWindowId(const int32_t windowId, Accessibility::FocusMoveResult &result);
 
     virtual bool CheckNodeIsAvailable(const std::shared_ptr<FocusRulesCheckNode>& node);

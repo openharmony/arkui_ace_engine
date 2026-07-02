@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
-#include "core/pipeline/container_window_manager.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
@@ -23,14 +21,16 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,6 +56,8 @@ constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t ROW_CHILD_INDEX = 0;
 constexpr int32_t ONE_PX = 1;
+constexpr char LIST_ETS_TAG[] = "List";
+constexpr char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -330,7 +332,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, 
         if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
             scroll = grandson;
             scrollHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
-        } else if (grandson->GetHostTag() == V2::LIST_ETS_TAG) {
+        } else if (grandson->GetHostTag() == LIST_ETS_TAG) {
             list = grandson;
             listHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
         } else {
@@ -1336,7 +1338,7 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
 bool DialogLayoutAlgorithm::IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
 {
     auto parent = frameNode->GetParent();
-    if (parent && (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG)) {
+    if (parent && (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG)) {
         return true;
     }
     return false;
@@ -1349,7 +1351,7 @@ float DialogLayoutAlgorithm::GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& f
     if (parent->GetTag() == V2::PAGE_ETS_TAG) {
         return parent->GetOffsetRelativeToWindow().GetY();
     }
-    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
         return parent->GetGeometryNode()->GetParentAdjust().GetY();
     }
     return 0.0f;

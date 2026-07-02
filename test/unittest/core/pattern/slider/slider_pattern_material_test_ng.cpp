@@ -1754,12 +1754,11 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_CreateParticleOptions_Horizo
     
     float emitterLength = 50.0f;
     float trackThickness = 10.0f;
-    Color blockColor = Color::BLUE;
     Axis direction = Axis::HORIZONTAL;
-    
-    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, blockColor, direction);
-    
-    EXPECT_EQ(particleOptions.size(), 5);
+
+    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, direction, 25.0f, false);
+
+    EXPECT_EQ(particleOptions.size(), 1);
 }
 
 /**
@@ -1777,12 +1776,11 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_CreateParticleOptions_Vertic
     
     float emitterLength = 50.0f;
     float trackThickness = 10.0f;
-    Color blockColor = Color::BLUE;
     Axis direction = Axis::VERTICAL;
-    
-    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, blockColor, direction);
-    
-    EXPECT_EQ(particleOptions.size(), 5);
+
+    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, direction, 25.0f, false);
+
+    EXPECT_EQ(particleOptions.size(), 1);
 }
 
 /**

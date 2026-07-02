@@ -1,4 +1,4 @@
-import { runtimeType, RuntimeType, KPointer } from "@koalaui/interop";
+import { runtimeType, RuntimeType, KPointer, MaterializedBase } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, LengthMetricsUnit, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
@@ -83,7 +83,7 @@ import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
 import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from '#generated';
 import { ListHandWritten } from "./ListHandWritten"
-import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from '#generated';
+import { ArkWebComponent, JavaScriptProxy, CredentialType } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
@@ -93,8 +93,11 @@ import { DataPanelExtender, GaugeExtender } from '#generated';
 import { ArkToggleComponent, ToggleOptions } from "#generated";
 import { ToggleHandWritten } from "./ToggleHandWritten";
 import { ArkDynamicLayoutComponent } from '@ohos.arkui.components.ArkDynamicLayout';
+import { ArkLazyDynamicLayoutComponent } from '@ohos.arkui.components.ArkLazyDynamicLayout';
 import { LayoutAlgorithm } from './../LayoutAlgorithm';
+import { LazyLayoutAlgorithm } from './../LazyLayoutAlgorithm';
 import { DynamicLayoutHandWritten } from './DynamicLayoutHandWritten';
+import { LazyDynamicLayoutHandWritten } from './LazyDynamicLayoutHandWritten';
 
 export function hookId(component: object, value?: string) {}
 
@@ -577,7 +580,7 @@ export function hookSetNavDestination(peer: ArkNavigationPeer, value: PageMapBui
   NavigationOpsHandWritten.hookSetNavDestinationImpl(peer, value);
 }
 
-export function hookSplitPlaceholder(node: ArkNavigationComponent | ArkNavigationPeer, value: ComponentContent<Object>): void {
+export function hookSplitPlaceholder(node: ArkNavigationComponent | ArkNavigationPeer, value: ComponentContent<Object> | undefined): void {
   const navPeer: ArkNavigationPeer = node instanceof ArkNavigationComponent ?
     (node as ArkNavigationComponent).getPeer() : (node as ArkNavigationPeer);
   NavigationOpsHandWritten.hookSplitPlaceholderImpl(navPeer, value);
@@ -898,6 +901,16 @@ export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: Chil
 export function hookSetDynamicLayoutOptions(node: ArkDynamicLayoutComponent, value: LayoutAlgorithm): void {
   DynamicLayoutHandWritten.hookSetDynamicLayoutOptionsImpl(node.getPeer(), value)
 }
+
+export function hookSetLazyDynamicLayoutOptions(node: ArkLazyDynamicLayoutComponent, value: LazyLayoutAlgorithm): void {
+  LazyDynamicLayoutHandWritten.hookSetLazyDynamicLayoutOptionsImpl(node.getPeer(), value)
+}
+
+export function hookSetLazyDynamicLayoutOnVisibleIndexesChange(node: ArkLazyDynamicLayoutComponent, callback: ((indexes: Array<int32>) => void) | undefined): void {
+  LazyDynamicLayoutHandWritten.hookSetLazyDynamicLayoutOnVisibleIndexesChangeImpl(node.getPeer(), callback)
+}
+
+export { hookLazyDynamicLayoutAttributeModifierForHandWritten } from './modifiers/index';
 
 export function hookListChildrenMainSizeImpl(peer: ArkListPeer, value: ChildrenMainSize | undefined): void {
   ListHandWritten.hookListChildrenMainSizeImpl(peer, value)

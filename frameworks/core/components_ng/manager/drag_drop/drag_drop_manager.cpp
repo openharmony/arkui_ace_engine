@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/node/grid_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -2067,17 +2068,17 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
 {
     CHECK_NULL_VOID(frameNode);
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto* eventHub = NG::NodeModifier::GetGridCustomModifier();
         CHECK_NULL_VOID(eventHub);
         switch (type) {
             case DragEventType::ENTER:
-                eventHub->FireOnItemDragEnter(itemDragInfo);
+                eventHub->fireOnItemDragEnter(frameNode, itemDragInfo);
                 break;
             case DragEventType::MOVE:
-                eventHub->FireOnItemDragMove(itemDragInfo, draggedIndex, insertIndex);
+                eventHub->fireOnItemDragMove(frameNode, itemDragInfo, draggedIndex, insertIndex);
                 break;
             case DragEventType::LEAVE:
-                eventHub->FireOnItemDragLeave(itemDragInfo, draggedIndex);
+                eventHub->fireOnItemDragLeave(frameNode, itemDragInfo, draggedIndex);
                 break;
             default:
                 break;
@@ -2108,10 +2109,10 @@ bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, Dr
     auto dropPositionX = PipelineBase::Px2VpWithCurrentDensity(itemDragInfo.GetX());
     auto dropPositionY = PipelineBase::Px2VpWithCurrentDensity(itemDragInfo.GetY());
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto eventHub = NodeModifier::GetGridCustomModifier();
         CHECK_NULL_RETURN(eventHub, false);
         ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
-        return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
+        return eventHub->fireOnItemDrop(frameNode, itemDragInfo, draggedIndex, insertIndex, isSuccess);
     } else if (dragType == DragType::LIST) {
         auto eventHub = frameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
@@ -2126,18 +2127,18 @@ int32_t DragDropManager::GetItemIndex(
 {
     CHECK_NULL_RETURN(frameNode, -1);
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto eventHub = NodeModifier::GetGridCustomModifier();
         CHECK_NULL_RETURN(eventHub, -1);
         if (frameNode != draggedGridFrameNode_) {
-            return eventHub->GetInsertPosition(globalX, globalY);
+            return eventHub->getInsertPosition(frameNode, globalX, globalY);
         }
         auto itemFrameNode = frameNode->FindChildByPositionWithoutChildTransform(globalX, globalY);
         if (!itemFrameNode) {
-            if (eventHub->CheckPostionInGrid(globalX, globalY)) {
-                return eventHub->GetFrameNodeChildSize();
+            if (eventHub->checkPositionInGrid(frameNode, globalX, globalY)) {
+                return eventHub->getFrameNodeChildSize(frameNode);
             }
         } else {
-            return eventHub->GetGridItemIndex(itemFrameNode);
+            return eventHub->getGridItemIndex(frameNode, itemFrameNode);
         }
     } else if (dragType == DragType::LIST) {
         auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -2258,9 +2259,9 @@ void DragDropManager::CancelItemDrag()
             listEventHub->HandleOnItemDragCancel();
             return;
         }
-        auto gridEventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+        auto gridEventHub = NodeModifier::GetGridCustomModifier();
         if (gridEventHub) {
-            gridEventHub->HandleOnItemDragCancel();
+            gridEventHub->handleOnItemDragCancel(draggedGridFrameNode_);
             return;
         }
     }

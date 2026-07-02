@@ -30,6 +30,7 @@ void ListModelNG::SetScrollToIndexMultiThread(
         [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), index, animation, alignment, extraOffset]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
             pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
         });
 }
@@ -47,6 +48,7 @@ void ListModelNG::ScrollToItemInGroupMultiThread(
         [weak = AceType::WeakClaim(AceType::RawPtr(listPattern)), index, indexInGroup, smooth, align]() {
             auto listPattern = weak.Upgrade();
             CHECK_NULL_VOID(listPattern);
+            listPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
             listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
         });
 }

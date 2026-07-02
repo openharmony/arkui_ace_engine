@@ -1113,8 +1113,9 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
         auto richEditorBaseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
         auto pattern = richEditorBaseController ? richEditorBaseController->GetPattern().Upgrade() : nullptr;
         auto hostFrameNode = pattern ? pattern->GetHost() : nullptr;
-        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
-        BindBuilderToHostNode(builderFunc, hostFrameNode, funcValue);
+        auto jsFuncValue = JSRef<JSFunc>::Cast(funcValue);
+        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(jsFuncValue);
+        BindBuilderToHostNode(builderFunc, hostFrameNode, jsFuncValue);
         CHECK_NULL_VOID(builderFunc);
         ViewStackModel::GetInstance()->NewScope();
         builderFunc->Execute();
@@ -1131,7 +1132,7 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
 }
 
 void JSRichEditorController::BindBuilderToHostNode(RefPtr<JsFunction>& builderFunc,
-    const RefPtr<NG::FrameNode>& hostNode, const JSRef<JSVal>& funcValue)
+    const RefPtr<NG::FrameNode>& hostNode, const JSRef<JSFunc>& funcValue)
 {
     CHECK_NULL_VOID(hostNode);
     NG::PipelineContext::SetCallBackNode(AceType::WeakClaim(Referenced::RawPtr(hostNode)));
@@ -1140,7 +1141,7 @@ void JSRichEditorController::BindBuilderToHostNode(RefPtr<JsFunction>& builderFu
     auto thisObjTmp = parentCustomNode->FireThisFunc();
     CHECK_NULL_VOID(thisObjTmp);
     JSRef<JSObject> thisObj = *(reinterpret_cast<JSRef<JSObject>*>(thisObjTmp));
-    builderFunc = AceType::MakeRefPtr<JsFunction>(thisObj, JSRef<JSFunc>::Cast(funcValue));
+    builderFunc = AceType::MakeRefPtr<JsFunction>(thisObj, funcValue);
 }
 
 void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)

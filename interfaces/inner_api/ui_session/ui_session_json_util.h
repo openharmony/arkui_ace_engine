@@ -47,6 +47,7 @@ public:
     // serialize
     std::string ToString();
     bool IsObject() const;
+    bool IsArray() const;
     bool IsNull() const;
     bool IsString() const;
     bool IsNumber() const;
@@ -56,8 +57,12 @@ public:
     std::string GetString() const;
     std::string GetString(const std::string& key, const std::string& defaultVal = "") const;
     std::unique_ptr<InspectorJsonValue> GetValue(const std::string& key) const;
+    int32_t GetArraySize() const;
+    std::unique_ptr<InspectorJsonValue> GetArrayItem(int32_t index) const;
     int32_t GetInt() const;
     int32_t GetInt(const std::string& key, int32_t defaultVal = 0) const;
+    int64_t GetInt64() const;
+    int64_t GetInt64(const std::string& key, int64_t defaultVal = 0) const;
 
 private:
     JsonObject* object_ = nullptr;

@@ -41,7 +41,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
@@ -61,6 +60,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_event_hub.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
@@ -110,6 +110,22 @@ constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
 constexpr Dimension DEFAULT_ICON_SIZE = 24.0_vp;
 #endif
 const float EDGELIGHT_LENGTH_RATIO = 0.4f;
+
+void ApplyTextOverlayButtonStyle(const RefPtr<FrameNode>& buttonNode,
+    const RefPtr<TextOverlayTheme>& textOverlayTheme, std::optional<bool> hasCustomPadding = std::nullopt)
+{
+    CHECK_NULL_VOID(buttonNode);
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    if (hasCustomPadding.has_value()) {
+        buttonModifier->setHasCustomPadding(nodeHandle, hasCustomPadding.value());
+    }
+    buttonModifier->setClickedColor(nodeHandle, textOverlayTheme->GetButtonClickedColor());
+    buttonModifier->setBlendColor(
+        nodeHandle, textOverlayTheme->GetButtonClickedColor(), textOverlayTheme->GetButtonHoverColor());
+}
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -681,11 +697,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::shared_ptr<SelectOverlayInfo>& inf
     SetResponseRegion(pasteButton);
     auto buttonNode = GetSecCompChildNode(pasteButton, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, pasteButton);
-    if (buttonNode->GetPatternPtr<ButtonPattern>()) {
-        buttonNode->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        buttonNode->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
-            textOverlayTheme->GetButtonHoverColor());
-    }
+    ApplyTextOverlayButtonStyle(buttonNode, textOverlayTheme);
     pasteButton->MarkModifyDone();
     return pasteButton;
 }
@@ -754,28 +766,33 @@ bool PrepareButtonTextProp(
     return true;
 }
 
-bool PrepareButtonProp(RefPtr<OHOS::Ace::NG::ButtonLayoutProperty>& buttonLayoutProperty,
-                       float& buttonWidth, const RefPtr<OHOS::Ace::NG::FrameNode>& buttonNode,
-                       const std::shared_ptr<SelectOverlayInfo>& info)
+bool PrepareButtonProp(const RefPtr<OHOS::Ace::NG::FrameNode>& buttonNode, float& buttonWidth,
+    const std::shared_ptr<SelectOverlayInfo>& info)
 {
     CHECK_NULL_RETURN(buttonNode, false);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>(GetCallerScopedId(info));
     CHECK_NULL_RETURN(textOverlayTheme, false);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonLayoutProperty, false);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
-        buttonLayoutProperty->UpdateControlSize(ControlSize::SMALL);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
+        buttonModifier->updateControlSizeToLayoutProp(buttonHandle, ControlSize::SMALL);
     } else {
-        buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CAPSULE);
     }
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
+    buttonModifier->updateBorderRadiusToLayoutProp(
+        buttonHandle, BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
+
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
@@ -788,12 +805,7 @@ bool PrepareButtonProp(RefPtr<OHOS::Ace::NG::ButtonLayoutProperty>& buttonLayout
     buttonLayoutProperty->UpdateFlexShrink(0);
 
     // interactive_hover and interactive_click
-    CHECK_NULL_RETURN(buttonNode->GetPatternPtr<ButtonPattern>(), false);
-    if (buttonNode->GetPatternPtr<ButtonPattern>()) {
-        buttonNode->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        buttonNode->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
-            textOverlayTheme->GetButtonHoverColor());
-    }
+    ApplyTextOverlayButtonStyle(buttonNode, textOverlayTheme);
     return true;
 }
 
@@ -802,7 +814,13 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
     const ButtonBasicInfo& buttonBasicInfo)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(text, button);
@@ -823,13 +841,14 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
     CHECK_NE_RETURN(retPrepare, true, button);
     text->MarkModifyDone();
 
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    retPrepare = PrepareButtonProp(buttonLayoutProperty, buttonWidth, button, info);
+    retPrepare = PrepareButtonProp(button, buttonWidth, info);
     CHECK_NE_RETURN(retPrepare, true, button);
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, button);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button)), true);
 
     if (hasCallback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
@@ -896,7 +915,13 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
 
@@ -927,7 +952,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
 
     // Update button property.
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = button->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (isAging) {
@@ -938,15 +963,13 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     }
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, button);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button)), true);
     BindButtonClickEvent(button, menuOption, overlayId);
     SetResponseRegion(button);
-    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>(); buttonPattern) {
-        buttonPattern->SetHasCustomPadding(isAging);
-        buttonPattern->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        buttonPattern->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
-            textOverlayTheme->GetButtonHoverColor());
-    }
+    ApplyTextOverlayButtonStyle(button, textOverlayTheme, isAging);
     button->MarkModifyDone();
     return button;
 }
@@ -1001,7 +1024,13 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     auto contentWidth = 0.0f;
 
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto text = FrameNode::GetOrCreateFrameNode("SelectMenuButtonText", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     // Update text property and mount to button.
@@ -1032,7 +1061,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     text->MarkModifyDone();
 
     // Update button property.
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = button->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
@@ -1042,22 +1071,22 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
             { CalcLength(contentWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
     }
     buttonLayoutProperty->UpdateFlexShrink(0);
-    if (button->GetPatternPtr<ButtonPattern>()) {
-        button->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        button->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
-            textOverlayTheme->GetButtonHoverColor());
-    }
+    ApplyTextOverlayButtonStyle(button, textOverlayTheme);
 
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, button);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
     if (button->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
-        buttonLayoutProperty->UpdateControlSize(ControlSize::SMALL);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
+        buttonModifier->updateControlSizeToLayoutProp(buttonHandle, ControlSize::SMALL);
     } else {
-        buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CAPSULE);
     }
 
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
+    buttonModifier->updateBorderRadiusToLayoutProp(
+        buttonHandle, BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     BindCreateMenuItemClickEvent(button, menuOptionsParam, overlayId, systemCallback, menuItemCallback);
     SetResponseRegion(button);
     button->MarkModifyDone();
@@ -1069,7 +1098,7 @@ void UpdateBackButtonPadding(
     const RefPtr<FrameNode>& button, const CalcLength& sideWidth, const Edge& padding, int32_t overlayId)
 {
     CHECK_NULL_VOID(button);
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = button->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -1114,22 +1143,27 @@ void PrepareMoreOrBackButtonNode(RefPtr<OHOS::Ace::NG::FrameNode>& button,
     });
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = button->GetLayoutProperty<LayoutProperty>();
     if (buttonLayoutProperty) {
-        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button)), true);
     }
-    if (button->GetPatternPtr<ButtonPattern>()) {
-        button->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        button->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
-            textOverlayTheme->GetButtonHoverColor());
-    }
+    ApplyTextOverlayButtonStyle(button, textOverlayTheme);
 }
 
 RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>& info,
     int32_t overlayId, bool isMoreButton)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(button, button);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, button);
@@ -1137,7 +1171,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
     CHECK_NULL_RETURN(textOverlayTheme, button);
 
     // Update property.
-    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = button->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
 
     const auto& padding = textOverlayTheme->GetMenuPadding();
@@ -1973,10 +2007,11 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
         auto pasteNodeNonConst = pasteNode;
         auto buttonNode = GetSecCompChildNode(pasteNodeNonConst, V2::BUTTON_ETS_TAG);
         CHECK_NULL_VOID(buttonNode);
-        auto buttonPattern = buttonNode->GetPatternPtr<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetClickedColor(theme->GetClickedColor());
-        buttonPattern->SetBlendColor(theme->GetClickedColor(), theme->GetHoverColor());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        buttonModifier->setClickedColor(nodeHandle, theme->GetClickedColor());
+        buttonModifier->setBlendColor(nodeHandle, theme->GetClickedColor(), theme->GetHoverColor());
     }
 }
 
@@ -4944,10 +4979,11 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
 void UpdateButtonColor(const RefPtr<FrameNode>& button, const Color& clickedColor, const Color& hoverColor)
 {
     CHECK_NULL_VOID(button);
-    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>()) {
-        buttonPattern->SetClickedColor(clickedColor);
-        buttonPattern->SetBlendColor(clickedColor, hoverColor);
-    }
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
+    buttonModifier->setClickedColor(nodeHandle, clickedColor);
+    buttonModifier->setBlendColor(nodeHandle, clickedColor, hoverColor);
 }
 
 void UpdateTextColor(const RefPtr<FrameNode>& textNode, const Color& textColor)

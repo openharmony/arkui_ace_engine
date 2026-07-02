@@ -21,6 +21,7 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
 
 namespace OHOS::Ace {
@@ -256,11 +257,20 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     auto pipeline = node->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto colorMode = GetNodeColorMode(node);
-    return GetImmersiveMaterialConfig(options, pipeline->GetDipScale(), colorMode);
+    return GetImmersiveMaterialConfig(options, pipeline->GetDipScale(), colorMode, node);
+}
+
+void MaterialUtils::LowerGearLevel(UiMaterialLevel& materialLevel, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (materialLevel == UiMaterialLevel::GENTLE && node->GetTag() == V2::SHEET_PAGE_TAG) {
+        materialLevel = UiMaterialLevel::SMOOTH;
+    }
 }
 
 std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig(
-    const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode)
+    const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode,
+    const RefPtr<NG::FrameNode>& node)
 {
     if (!options) {
         return std::nullopt;
@@ -269,6 +279,7 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
         colorMode = ColorMode::LIGHT;
     }
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    LowerGearLevel(materialLevel, node);
     ImmersiveMaterialConfig result {
         .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
         .lightEffectOptions = options->lightEffectOptions

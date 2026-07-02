@@ -184,7 +184,7 @@ void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
 
 // Convert Ark_ButtonRole
 template<>
-void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
     switch (src) {
         case ARK_BUTTON_ROLE_NORMAL: dst = ButtonRole::NORMAL; break;
@@ -195,7 +195,7 @@ void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 
 // Convert Ark_ButtonType
 template<>
-void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
 {
     switch (src) {
         case ARK_BUTTON_TYPE_CAPSULE: dst = ButtonType::CAPSULE; break;
@@ -208,7 +208,7 @@ void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
 
 // Convert Ark_ControlSize
 template<>
-void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
 {
     switch (src) {
         case ARK_CONTROL_SIZE_SMALL: dst = ControlSize::SMALL; break;
@@ -219,7 +219,7 @@ void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
 
 // Convert Ark_ButtonStyleMode
 template<>
-void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src)
 {
     switch (src) {
         case ARK_BUTTON_STYLE_MODE_NORMAL: dst = ButtonStyleMode::NORMAL; break;
@@ -261,7 +261,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark
 }
 
 template<>
-void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
 {
     switch (src) {
         case ARK_FOCUS_WRAP_MODE_DEFAULT: dst = FocusWrapMode::DEFAULT; break;
@@ -601,7 +601,7 @@ void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src)
 }
 
 template<>
-void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 {
     switch (src) {
         case ARK_GRID_DIRECTION_ROW: dst = FlexDirection::ROW; break;
@@ -728,7 +728,7 @@ void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& 
 }
 
 template<>
-void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 {
     switch (src) {
         case ARK_EDGE_EFFECT_SPRING: dst = EdgeEffect::SPRING; break;
@@ -789,7 +789,7 @@ void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAli
 }
 
 template<>
-void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
 {
     switch (src) {
         case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST:
@@ -851,7 +851,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
 }
 
 template<>
-void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
 {
     switch (src) {
         case ARK_TEXT_OVERFLOW_NONE: dst = TextOverflow::NONE; break;
@@ -1061,7 +1061,7 @@ void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& 
 }
 
 template<>
-void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
 {
     switch (src) {
         case ARK_NESTED_SCROLL_MODE_SELF_ONLY: dst = NestedScrollMode::SELF_ONLY; break;
@@ -1463,7 +1463,7 @@ void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src)
 }
 
 template<>
-void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
 {
     switch (src) {
         case ARK_WORD_BREAK_NORMAL: dst = WordBreak::NORMAL; break;
@@ -2017,7 +2017,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_
 }
 
 template<>
-void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
 {
     switch (src) {
         case ARK_DIALOG_BUTTON_DIRECTION_AUTO: dst = DialogButtonDirection::AUTO; break;
@@ -2028,7 +2028,7 @@ void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButto
 }
 
 template<>
-void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
 {
     switch (src) {
         case ARK_DIALOG_BUTTON_STYLE_DEFAULT: dst = DialogButtonStyle::DEFAULT; break;
@@ -2467,7 +2467,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_Divi
 }
 
 template<>
-void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
 {
     switch (src) {
         case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
@@ -2476,7 +2476,7 @@ void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
     }
 }
 template<>
-void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
 {
     switch (src) {
         case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
@@ -2604,7 +2604,7 @@ void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src)
 }
 
 template<>
-void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src)
 {
     switch (src) {
         case ARK_DIALOG_DISPLAY_MODE_SCREEN_BASED: dst = DialogDisplayModeInSubWindow::SCREEN_BASED; break;
@@ -2634,6 +2634,28 @@ void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src)
         case ARK_UNION_MODE_SMOOTH_UNION: dst = UnionMode::SMOOTH_UNION; break;
         case ARK_UNION_MODE_GRAVITY_UNION: dst = UnionMode::GRAVITY_UNION; break;
         default: LOGE("Unexpected enum value in Ark_UnionMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<DistortionMode>& dst, const Ark_DistortionMode& src)
+{
+    switch (src) {
+        case ARK_DISTORTION_MODE_DISTORTION_AUTO: dst = DistortionMode::DISTORTION_AUTO; break;
+        case ARK_DISTORTION_MODE_DISTORTION_ENABLED: dst = DistortionMode::DISTORTION_ENABLED; break;
+        case ARK_DISTORTION_MODE_DISTORTION_DISABLED: dst = DistortionMode::DISTORTION_DISABLED; break;
+        default: LOGE("Unexpected enum value in Ark_DistortionMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeLightMode>& dst, const Ark_EdgeLightMode& src)
+{
+    switch (src) {
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO: dst = EdgeLightMode::EDGELIGHT_AUTO; break;
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_ENABLED: dst = EdgeLightMode::EDGELIGHT_ENABLED; break;
+        case ARK_EDGE_LIGHT_MODE_EDGELIGHT_DISABLED: dst = EdgeLightMode::EDGELIGHT_DISABLED; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeLightMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

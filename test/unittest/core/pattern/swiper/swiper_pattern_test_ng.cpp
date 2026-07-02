@@ -130,10 +130,10 @@ HWTEST_F(SwiperPatternTestNg, CalcWillScrollOffset003, TestSize.Level1)
     RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
     ASSERT_NE(frameNode, nullptr);
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation,
-        bool forceCreateNewChild) {
-        return std::make_pair(2, 0);
-    };
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index =
+        [](int32_t index, bool inAnimation, bool forceCreateNewChild) {
+            return std::make_pair(2, 0);
+        };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};

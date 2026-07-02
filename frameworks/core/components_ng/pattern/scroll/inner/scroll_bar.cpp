@@ -227,6 +227,11 @@ void ScrollBar::UpdateActiveRectOffset(double activeMainOffset)
 void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context)
 {
     if (shapeMode_ == ShapeMode::RECT) {
+        if (NearZero(scrollBarHeight_.Value())) {
+            barRect_ = Rect();
+            trackRect_ = Rect();
+            return;
+        }
         double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
         double avoidStart = !scrollBarMargin_ ? NormalizeToPx(scrollBarStartMargin_, context) : 0.0;
         double avoidEnd = 0.0;
@@ -271,6 +276,12 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPt
 void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
     double estimatedHeight, int32_t scrollSource, const RefPtr<PipelineContext>& context)
 {
+    if (NearZero(scrollBarHeight_.Value())) {
+        barRegionSize_ = 0.0;
+        activeRect_ = Rect();
+        trackRect_ = Rect();
+        return;
+    }
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
     double avoidStart = !scrollBarMargin_ ? NormalizeToPx(scrollBarStartMargin_, context) : 0.0;
     double avoidEnd = 0.0;

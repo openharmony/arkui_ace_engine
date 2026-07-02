@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,10 @@
  */
 
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
-#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -28,17 +27,17 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/dialog/alert_dialog/alert_dialog_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;

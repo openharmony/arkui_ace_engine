@@ -30,6 +30,7 @@
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/pipeline/pipeline_base.h"
 #include "base/geometry/calc_dimension.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 

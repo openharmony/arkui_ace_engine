@@ -17,9 +17,9 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_BUTTON_THEME_H
 
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/button/button_model.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/implementation/theme/ani_theme_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 class AniButtonTheme {
@@ -56,10 +56,13 @@ private:
 
         // normal
         ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
-        if (isLabelButton) {
-            ButtonModel::GetInstance()->SetFontColor(AniButtonTheme::FontColor(themeColors));
+        auto* modifier = NodeModifier::GetButtonCustomModifier();
+        if (modifier) {
+            if (isLabelButton) {
+                modifier->setFontColorDefault(AniButtonTheme::FontColor(themeColors));
+            }
+            modifier->setBackgroundColorDefault(AniButtonTheme::BackgroundColor(themeColors, false));
         }
-        ButtonModel::GetInstance()->BackgroundColor(AniButtonTheme::BackgroundColor(themeColors, false), true);
 
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();

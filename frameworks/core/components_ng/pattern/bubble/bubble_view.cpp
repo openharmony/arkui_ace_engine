@@ -31,12 +31,12 @@
 #include "core/components/theme/shadow_theme.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -975,6 +975,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    layoutProperty->UpdatePunctuationOverflow(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         layoutProperty->UpdateOrphanCharOptimization(true);
     }
@@ -1191,16 +1192,17 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     CHECK_NULL_RETURN(popupTheme, nullptr);
     auto focusColor = popupTheme->GetFocusColor();
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    // set button focus color
-    buttonPattern->setComponentButtonType(ComponentButtonType::POPUP);
-    buttonPattern->SetFocusBorderColor(focusColor);
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto nodeHandle = buttonModifier->createFrameNode(buttonId);
+    CHECK_NULL_RETURN(nodeHandle, nullptr);
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(nodeHandle));
+    CHECK_NULL_RETURN(buttonNode, nullptr);
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::POPUP);
+    buttonModifier->setFocusBorderColor(nodeHandle, focusColor);
     ACE_UINODE_TRACE(buttonNode);
 
-    auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    auto buttonProp = buttonNode->GetLayoutProperty();
     auto isUseCustom = param->IsUseCustom();
 
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom, popupTheme);
@@ -1236,14 +1238,18 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
         buttonProp->UpdatePadding(buttonPadding);
     }
     if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
         auto popupButtonType = static_cast<ButtonType>(popupTheme->GetPopupButtonType());
-        buttonProp->UpdateType(popupButtonType);
+        buttonModifier->updateTypeToLayoutProp(nodeHandle, popupButtonType);
     }
     auto fontScale = pipelineContext->GetFontScale();
     if (fontScale == AGE_SCALE_NUMBER) {
         buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(popupTheme->GetButtonHeight())));
+    }
+    auto enablePopupFlexGrow = popupTheme->GetEnablePopupFlexGrow();
+    if (enablePopupFlexGrow) {
+        buttonProp->UpdateFlexGrow(1.0f);
     }
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
@@ -1257,7 +1263,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
         } else {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
-        buttonProp->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     }
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();

@@ -1199,6 +1199,7 @@ ArkThemeWhiteList.whiteList = [
     'Button',
     'JSAlphabetIndexer',
     'JSBadge',
+    'JSButton',
     'JSCounter',
     'JSDataPanel',
     'JSDatePicker',

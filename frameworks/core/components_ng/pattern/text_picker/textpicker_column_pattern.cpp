@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -304,7 +303,7 @@ void TextPickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1185,6 +1184,7 @@ void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayou
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    textLayoutProperty->UpdatePunctuationOverflow(true);
 
     CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     InitTextHeightAndFontHeight(currentIndex, middleIndex, optionProperties_[currentIndex]);
@@ -1276,6 +1276,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
     }
+    textLayoutProperty->UpdatePunctuationOverflow(true);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 

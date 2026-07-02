@@ -736,6 +736,16 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     } while (false);
+
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during dragging");
+        return true;
+    }
+    
     if (!navigationPattern->IsFinishInteractiveAnimation()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during interactive animation");
         return true;
@@ -3448,5 +3458,33 @@ void NavigationGroupNode::UpdateMaskNodeVisibility(bool isLeft, VisibleType type
     auto property = node->GetLayoutProperty();
     CHECK_NULL_VOID(property);
     property->UpdateVisibility(type);
+}
+
+void NavigationGroupNode::InitNavigationId()
+{
+    if (recoverable_ || !curId_.empty()) {
+        return;
+    }
+    // support navigation in navigation
+    curId_ = GetTag();
+    auto parentNode = GetParent();
+    while (parentNode) {
+        if (parentNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto navdestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parentNode);
+            CHECK_NULL_CONTINUE(navdestinationNode);
+            curId_ = navdestinationNode->GetTag() + "-" + std::to_string(navdestinationNode->GetIndex());
+        } else if (parentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parentNode);
+            CHECK_NULL_CONTINUE(navigationNode);
+            auto currentId = navigationNode->GetCurId();
+            if (currentId.empty()) {
+                currentId = navigationNode->GetTag();
+            }
+            curId_ = currentId + "-" + curId_;
+        } else if (parentNode->GetTag() == V2::NAVBAR_ETS_TAG) {
+            curId_ = "navBar-" + curId_;
+        }
+        parentNode = parentNode->GetParent();
+    }
 }
 } // namespace OHOS::Ace::NG

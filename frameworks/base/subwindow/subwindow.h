@@ -114,6 +114,7 @@ public:
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) {}
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
+    virtual void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) = 0;
     virtual void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback) = 0;

@@ -254,6 +254,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest037, TestSize.Le
     pattern->info_.startIndex_ = 0;
     pattern->info_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
+    ASSERT_NE(dragEventActuator->previewLongPressRecognizer_, nullptr);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     EXPECT_EQ(itemPattern->isSelected_, true);
 }

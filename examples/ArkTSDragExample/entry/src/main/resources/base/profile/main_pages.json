@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/BasicDrag",
+    "pages/DragInteraction",
+    "pages/DragPreview",
+    "pages/DragSpringLoading"
+  ]
+}

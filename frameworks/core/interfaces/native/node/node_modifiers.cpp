@@ -17,7 +17,7 @@
 #include "core/interfaces/native/node/atomic_service_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
-#include "core/interfaces/native/node/button_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
@@ -83,6 +83,7 @@
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_arc_swiper_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #include "core/interfaces/native/node/node_symbol_span_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -244,6 +245,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getShapeModifier = NodeModifier::GetShapeModifier,
         .getRectModifier = NodeModifier::GetRectModifier,
         .getSwiperModifier = NodeModifier::GetSwiperModifier,
+        .getArcSwiperModifier = NodeModifier::GetArcSwiperModifier,
         .getListItemModifier = NodeModifier::GetListItemModifier,
         .getListModifier = NodeModifier::GetListModifier,
         .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,

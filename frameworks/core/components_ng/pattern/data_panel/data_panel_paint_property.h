@@ -20,13 +20,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct DataPanelShadow {
     bool isShadowVisible = true;
     double radius = 5.0;

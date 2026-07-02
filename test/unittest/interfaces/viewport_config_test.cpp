@@ -96,8 +96,8 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
     if (viewConfig != viewConfigTest2) {
         GTEST_LOG_(INFO) << "ViewportConfigTest operator!=";
     }
-    ASSERT_EQ(
-        toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) transformHint: 0 displayId: 0");
+    ASSERT_EQ(toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) "
+                        "transformHint: 0 displayId: 0 forceSplitDisplayConfig: disable forceSplit, mode: 0");
 }
 
 /**
@@ -115,5 +115,24 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest003, TestSize.Level1)
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().fromAnimateCache_, false);
     viewConfig.SetKeyFrameConfigCacheState(true);
     ASSERT_EQ(viewConfig.GetKeyFrameConfig().fromAnimateCache_, true);
+}
+
+/**
+* @tc.name: ViewportConfigTest004
+* @tc.desc: Verify SetForceSplitEnable, SetForceSplitMode and GetForceSplitDisplayConfig api for ViewportConfig
+* @tc.type: FUNC
+*/
+HWTEST_F(ViewportConfigTest, ViewportConfigTest004, TestSize.Level1)
+{
+    ViewportConfig viewConfig;
+    auto config = viewConfig.GetForceSplitDisplayConfig();
+    ASSERT_EQ(config.enableForceSplit, false);
+    ASSERT_EQ(config.mode, ForceSplitMode::NOT_SPLIT);
+
+    viewConfig.SetForceSplitEnable(true);
+    viewConfig.SetForceSplitMode(ForceSplitMode::WIDE_SPLIT);
+    config = viewConfig.GetForceSplitDisplayConfig();
+    ASSERT_EQ(config.enableForceSplit, true);
+    ASSERT_EQ(config.mode, ForceSplitMode::WIDE_SPLIT);
 }
 } // namespace OHOS::Ace

@@ -309,7 +309,6 @@ public:
     void SetTouchEventsEnd(bool isTouchEventsEnd);
     bool GetTouchEventsEnd() const;
     TouchEvent ConvertToTouchEvent() const;
-    size_t GetApproximateSize() const;
 
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;

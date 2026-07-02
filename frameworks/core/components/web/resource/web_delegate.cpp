@@ -3134,7 +3134,6 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
                 initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
             }
 
@@ -3668,7 +3667,6 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
@@ -9049,6 +9047,24 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
         return nullptr;
     }
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+}
+
+std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByParams(
+    int64_t accessibilityId, int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::GetAccessibilityNodeInfoByParams, accessibilityId = %{public}" PRId64
+        ", direction = %{public}d, focusRuleType = %{public}d",
+        accessibilityId, direction, focusRuleType);
+    CHECK_NULL_RETURN(nweb_, nullptr);
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    if (IS_CALLING_FROM_M114() || IS_CALLING_FROM_M132()) {
+        return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    }
+    return nweb_->GetAccessibilityNodeInfoByParams(accessibilityId, direction, focusRuleType, params);
 }
 
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const

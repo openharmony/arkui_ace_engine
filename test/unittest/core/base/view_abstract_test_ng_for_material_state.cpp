@@ -994,4 +994,20 @@ HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_AllFlags, TestSize.Level1
     EXPECT_TRUE(config.colorInvert);
 }
 
+/**
+ * @tc.name: LowerGearLevel001
+ * @tc.desc: Test LowerGearLevel changes GENTLE to SMOOTH when node is SHEET_PAGE_TAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, LowerGearLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node with SHEET_PAGE_TAG and call LowerGearLevel with GENTLE level.
+     * @tc.expected: step1. materialLevel changed from GENTLE to SMOOTH.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>(V2::SHEET_PAGE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto level = UiMaterialLevel::GENTLE;
+    MaterialUtils::LowerGearLevel(level, node);
+    EXPECT_EQ(level, UiMaterialLevel::SMOOTH);
+}
 } // namespace OHOS::Ace::NG

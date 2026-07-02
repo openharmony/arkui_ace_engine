@@ -23,9 +23,9 @@ namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT ErrorMessageManager {
 public:
-    static ErrorMessageManager& GetInstance();
+    ACE_FORCE_EXPORT static ErrorMessageManager& GetInstance();
 
-    void SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage);
+    ACE_FORCE_EXPORT void SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage);
     void SetFunctionName(const char* functionName);
 
     const char* GetErrorMessage() const;

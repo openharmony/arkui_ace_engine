@@ -1,0 +1,173 @@
+{
+  "schema_version": "0.1.0",
+  "last_updated": "2026-06-26",
+  "contexts": [
+    {
+      "id": "Text",
+      "name": "Text",
+      "name_cn": "文本组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Text",
+        "文本",
+        "文字",
+        "font",
+        "span",
+        "selection",
+        "copy",
+        "overflow",
+        "marquee",
+        "data detector",
+        "typography"
+      ],
+      "aliases": [
+        "Text组件",
+        "文本",
+        "文字组件",
+        "TextPattern"
+      ],
+      "kb": "docs/kb/components/basic/text.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/04-text",
+      "func_id": "05-09-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/text/text_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/text/text_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/text/text_layout_algorithm.cpp",
+        "layout_header": "frameworks/core/components_ng/pattern/text/text_layout_algorithm.h",
+        "property": "frameworks/core/components_ng/pattern/text/text_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/text/text_event_hub.h",
+        "controller": "frameworks/core/components_ng/pattern/text/text_controller.h",
+        "native_impl": "interfaces/native/node/text_native_impl.h",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/text.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.static.d.ets",
+        "capi": "interfaces/native/node/text_native_impl.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/"
+      ],
+      "status": "active",
+      "last_verified": "2026-06-27"
+    },
+    {
+      "id": "Image",
+      "name": "Image",
+      "name_cn": "图片组件",
+      "kind": "component",
+      "category": "media",
+      "keywords": [
+        "Image",
+        "图片",
+        "图片加载",
+        "image loading",
+        "alt",
+        "占位图",
+        "ImageFit",
+        "SVG",
+        "GIF",
+        "HDR",
+        "PixelMap",
+        "autoResize",
+        "图片缓存"
+      ],
+      "aliases": [
+        "Image组件",
+        "图片",
+        "图片组件",
+        "ImagePattern"
+      ],
+      "kb": "docs/kb/components/media/image.md",
+      "spec_domain": "specs/05-ui-components/08-image-components/01-image",
+      "func_id": "05-08-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/image/image_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/image/image_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/image/image_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/image/image_layout_property.h",
+        "render_property": "frameworks/core/components_ng/pattern/image/image_render_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/image/image_event_hub.h",
+        "image_provider": "frameworks/core/components_ng/image_provider/image_provider.cpp",
+        "loading_context": "frameworks/core/components_ng/image_provider/image_loading_context.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/image/"
+      ],
+      "status": "active",
+      "last_verified": "2026-06-27"
+    },
+    {
+      "id": "Toggle",
+      "name": "Toggle",
+      "name_cn": "开关组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "Toggle",
+        "开关",
+        "切换",
+        "switch",
+        "checkbox",
+        "button",
+        "isOn",
+        "selectedColor",
+        "switchPointColor",
+        "switchStyle",
+        "ToggleType",
+        "状态切换"
+      ],
+      "aliases": [
+        "Toggle组件",
+        "开关",
+        "切换按钮",
+        "Switch开关"
+      ],
+      "kb": "docs/kb/components/selector/toggle.md",
+      "spec_domain": "specs/05-ui-components/04-input-form-components/06-toggle",
+      "func_id": "05-04-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern_switch": "frameworks/core/components_ng/pattern/toggle/switch_pattern.cpp",
+        "pattern_button": "frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
+        "pattern_checkbox": "frameworks/core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/toggle/toggle_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/toggle/toggle_model_static.cpp",
+        "base_pattern": "frameworks/core/components_ng/pattern/toggle/toggle_base_pattern.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/toggle/bridge/arkts_native_toggle_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/toggle/bridge/toggle_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_toggle_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/toggle.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/toggle.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/toggle/"
+      ],
+      "status": "active",
+      "last_verified": "2026-06-27"
+    }
+  ]
+}

@@ -21,6 +21,10 @@ using namespace OHOS::Ace::Framework;
 extern "C" {
 void FfiFontManagerRegisterFont(const char* familyName, const char* familySrc)
 {
+    if (familyName == nullptr || familySrc == nullptr) {
+        LOGE("RegisterFont fail, familyName or familySrc is null");
+        return;
+    }
     auto container = Container::Current();
     if (container && container->GetPipelineContext()) {
         auto pipelineContext = container->GetPipelineContext();
@@ -47,6 +51,10 @@ VectorStringHandle FfiFontManagerGetSystemFontList()
 
 NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName)
 {
+    if (fontName == nullptr) {
+        LOGE("GetFontByName fail, fontName is null");
+        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
+    }
     auto container = Container::Current();
     if (!container || !container->GetPipelineContext()) {
         LOGE("Can not get pipelineContext.");
@@ -77,6 +85,10 @@ NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName)
 
 NativeFontInfo4Font* FfiFontManagerGetFontByNameV2(const char* fontName)
 {
+    if (fontName == nullptr) {
+        LOGE("fontName is null");
+        return nullptr;
+    }
     auto container = Container::Current();
     if (!container || !container->GetPipelineContext()) {
         LOGE("Can not get pipelineContext.");

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_HIDUMPER_ACCESSIBILITY_HIDUMPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_HIDUMPER_ACCESSIBILITY_HIDUMPER_H
 
+#include <map>
+
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
 
@@ -47,6 +49,8 @@ enum class DumpMode {
     EXECUTE_ACTION_TEST,
     WEB_ACC_DUMP,
     CUSTOM_ACTION_TEST,
+    SET_COMPONENT_TYPE_TEST,
+    CLEAR_COMPONENT_TYPE_TEST,
 };
 
 struct DumpInfoArgument {
@@ -61,6 +65,7 @@ struct DumpInfoArgument {
     int32_t action = 0;
     int32_t eventId = -1;
     int64_t webAccId = -1;
+    int32_t focusMoveRule = -1;
     std::string webAccFun = "tree";
 };
 

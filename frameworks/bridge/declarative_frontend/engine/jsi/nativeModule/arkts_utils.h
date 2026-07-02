@@ -28,9 +28,12 @@ class BrightnessBlender;
 
 namespace OHOS::Ace {
 class ResourceWrapper;
+struct SelectParam;
 }
 
 namespace OHOS::Ace::NG {
+class MenuItemConfiguration;
+struct MenuParam;
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 using panda::JSValueRef;
 using panda::ObjectRef;
@@ -364,6 +367,8 @@ public:
     static bool ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result);
     static bool ParseJsResponseRegion(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue,
         ArkUI_Float32* values, int32_t* units, uint32_t length);
+    static void JsRemoteMessage(
+        const EcmaVM* vm, const Local<JSValueRef>& arg, OHOS::Ace::RemoteCallback& remoteCallback);
     static bool HandleCallbackJobs(
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
     static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);
@@ -583,6 +588,19 @@ public:
     static void SetButtonBorderRadiusByJs(
         const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
     static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
+    static void ParseMenuOutlineWidth(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineWidthValue, MenuParam& menuParam);
+    static void ParseMenuOutlineColor(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineColorValue, MenuParam& menuParam);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
+    static void SetTextStyleApply(
+        EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const Local<JSValueRef> modifierObj);
+    static Local<JSValueRef> GetSelectLocalHandle(EcmaVM* vm, MenuItemConfiguration& config);
+    static SelectParam GetSelectParam(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetSymbolModifier(
+        std::vector<SelectParam>& params, const size_t i, const Local<JSValueRef>& selectSymbolIcon);
 
     static bool ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj, DimensionUnit defaultUnit = DimensionUnit::FP);
@@ -594,6 +612,11 @@ public:
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);
+    static Local<ObjectRef> CreateItemDragInfo(const EcmaVM* vm, const ItemDragInfo& info);
+    static bool SetJSWidth(const Local<JSValueRef>& jsValue);
+    static bool SetJSHeight(const Local<JSValueRef>& jsValue);
+    static void SetJsBindContextMenu(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static bool ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRef> object,

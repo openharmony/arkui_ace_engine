@@ -58,6 +58,7 @@ typedef uint8_t ani_boolean;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef double  ani_double;
+typedef float   ani_float;
 typedef class __ani_fn_object *ani_fn_object;
 typedef class __ani_string* ani_string;
 typedef class __ani_enum_item* ani_enum_item;
@@ -699,7 +700,7 @@ struct  ArkUICustomNodeInfo {
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
-    std::function<void(bool, bool)> setActiveFunc;
+    std::function<void(bool, bool, bool)> setActiveFunc;
     std::function<void()> clearParentReusePoolFunc;
     std::function<int32_t()> getMemOptFunc;
     std::function<std::string()> onGetJsViewNameFunc;
@@ -757,6 +758,12 @@ struct ArkUICustomLayoutAlgorithm {
     std::function<void(const OHOS::Ace::NG::OffsetF&)> onPlaceChildrenFunc = nullptr;
 };
 
+struct ArkUILazyCustomLayoutAlgorithm {
+    ArkUI_Int32 axis = 0;
+    std::function<void(const OHOS::Ace::NG::LayoutConstraintF&, float mainSize)> onMeasureFunc = nullptr;
+    std::function<void(const OHOS::Ace::NG::OffsetF&)> onPlaceChildrenFunc = nullptr;
+};
+
 struct ArkUIAniDynamicLayoutModifier {
     ArkUINodeHandle (*construct)(ArkUI_Int32 id, ArkUI_Int32 flags);
     bool (*setDynamicLayoutStackOptions)(ArkUINodeHandle node, ArkUIStackLayoutAlgorithm algorithm);
@@ -764,6 +771,15 @@ struct ArkUIAniDynamicLayoutModifier {
     bool (*setDynamicLayoutColumnOptions)(ArkUINodeHandle node, ArkUIColumnLayoutAlgorithm algorithm);
     bool (*setDynamicLayoutCustomOptions)(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm);
     bool (*setDynamicLayoutGridOptions)(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm);
+};
+
+struct ArkUIAniLazyDynamicLayoutModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id, ArkUI_Int32 flags);
+    bool (*setLazyDynamicLayoutOptions)(ArkUINodeHandle node, const ArkUILazyCustomLayoutAlgorithm& algorithm);
+    bool (*setOnVisibleIndexesChange)(ArkUINodeHandle node,
+        std::function<void(const std::vector<int32_t>&)>&& callback);
+    bool (*setAdjustedOffset)(ArkUINodeHandle node, ani_float offset);
+    bool (*setInActiveChildren)(ArkUINodeHandle node, const std::vector<int32_t>& children);
 };
 
 enum ArkUIAniEnvironmentValueType {
@@ -1033,6 +1049,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniDynamicLayoutModifier* (*getArkUIAniDynamicLayoutModifier)();
+    const ArkUIAniLazyDynamicLayoutModifier* (*getArkUIAniLazyDynamicLayoutModifier)();
     const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();

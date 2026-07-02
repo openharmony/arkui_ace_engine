@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -240,7 +240,7 @@ public:
     const std::unique_ptr<PaddingPropertyF>& GetResolvedSingleSafeAreaPadding() const;
     void ResetResolvedSelfSafeAreaPadding();
 
-    RectF GetParentAdjust() const;
+    ACE_FORCE_EXPORT RectF GetParentAdjust() const;
     void SetParentAdjust(RectF parentAdjust);
     RectF GetSelfAdjust() const;
     void SetSelfAdjust(RectF selfAdjust);

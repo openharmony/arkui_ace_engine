@@ -55,6 +55,8 @@ private:
     static TextDirection GetSpanParagraphDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
         TextDirection spanDirection, const std::list<RefPtr<SpanItem>>& spanGroup);
     static TextDirection GetSpanTextDirectionForCompare(const std::u16string& content, TextDirection textDirection);
+    static bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& nextStyle,
+        TextDirection textDirection, TextDirection nextTextDirection);
 };
 
 } // namespace OHOS::Ace::NG

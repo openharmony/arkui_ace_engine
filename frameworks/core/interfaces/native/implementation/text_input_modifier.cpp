@@ -689,7 +689,7 @@ void SetCancelButton0Impl(Ark_NativePointer node, const Opt_CancelButtonOptions*
     }
     std::optional<Color> iconColor;
     if (Container::CurrentColorMode() != ColorMode::DARK) {
-        iconColor = Converter::OptConvert<Color>(optIconOptions->color);
+        iconColor = Converter::OptConvertColorForMaterial(&optIconOptions->color);
     }
     TextFieldModelStatic::SetCancelIconColor(frameNode, iconColor);
 }

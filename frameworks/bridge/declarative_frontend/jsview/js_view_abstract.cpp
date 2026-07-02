@@ -106,6 +106,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/common/color_inverter.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -4126,11 +4127,12 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
 
 DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
 {
-    if (!vectorValue->IsObject()) {
-        return DepthVector3();
-    }
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();
@@ -7726,9 +7728,9 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-            result = std::to_string(resourceWrapper->GetDouble(static_cast<uint32_t>(resIdNum)));
+            result = std::to_string(resourceWrapper->GetDoubleByName(param->ToString()));
         } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
+            result = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
         } else {
             return false;
         }

@@ -78,7 +78,7 @@ void WithEnvModelNG::Create()
     stack->Push(withEnvNode);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->SetUseEnvManager(true);
+    pipeline->SetEnvManagerActive(true);
 }
 
 void WithEnvModelNG::RemoveSystemEnvProperty(const std::string& key)

@@ -21,10 +21,12 @@
 #include <cmath>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -35,6 +37,7 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
@@ -125,6 +128,7 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -404,6 +408,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
+    }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
         avoidInfoMgr_->SetInstanceId(instanceId);
@@ -441,6 +448,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
+    }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
         avoidInfoMgr_->SetInstanceId(instanceId);
@@ -473,6 +483,9 @@ PipelineContext::PipelineContext()
     }
     if (forceSplitMgr_) {
         forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (recoverableMgr_) {
+        recoverableMgr_->SetPipelineContext(WeakClaim(this));
     }
     if (avoidInfoMgr_) {
         avoidInfoMgr_->SetPipelineContext(WeakClaim(this));
@@ -1814,9 +1827,14 @@ void PipelineContext::FlushFocusView()
     ACE_EVENT_SCOPED_TRACE("FlushFocusView:[%s][%d][enable:%d][show:%d]", lastFocusViewHub->GetFrameName().c_str(),
         lastFocusViewHub->GetFrameId(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow());
     auto container = Container::Current();
-    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
-        (!lastFocusView->IsRootScopeCurrentFocus())) {
+    if (container && container->IsDynamicRender() && (!lastFocusView->IsRootScopeCurrentFocus())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
+    }
+    if (container && container->IsUIExtensionWindow() && (!lastFocusView->IsRootScopeCurrentFocus())) {
+        if (focusManager_->GetIsFocusActive() ||
+            !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            lastFocusView->SetIsViewRootScopeFocused(false);
+        }
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
@@ -2290,7 +2308,8 @@ bool PipelineContext::FlushSafeArea(
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager_->UpdateNavSafeArea(avoidArea.second);
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_FLOAT_NAVIGATION) {
-            safeAreaUpdated |= safeAreaManager_->UpdateFloatNavSafeArea(avoidArea.second);
+            safeAreaUpdated |=
+                safeAreaManager_->UpdateFloatNavSafeArea(avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_CUTOUT) {
             safeAreaUpdated |=
                 safeAreaManager_->UpdateCutoutSafeArea(avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
@@ -2844,7 +2863,9 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
 void PipelineContext::UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea)
 {
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
+    auto rootSize =
+        NG::OptionalSize<uint32_t>(static_cast<uint32_t>(GetRootWidth()), static_cast<uint32_t>(GetRootHeight()));
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea, rootSize)) {
         AnimateOnSafeAreaUpdate();
     }
 }
@@ -2895,7 +2916,9 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& na
 void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea)
 {
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
+    auto rootSize =
+        NG::OptionalSize<uint32_t>(static_cast<uint32_t>(GetRootWidth()), static_cast<uint32_t>(GetRootHeight()));
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea, rootSize)) {
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
     }
 }
@@ -8340,6 +8363,7 @@ void PipelineContext::InitManagers()
     frameRateManager_ = MakeRefPtr<FrameRateManager>();
     privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
+    recoverableMgr_ = MakeRefPtr<RecoverableManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
@@ -8352,6 +8376,11 @@ void PipelineContext::InitManagers()
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
 {
     return forceSplitMgr_;
+}
+
+const RefPtr<RecoverableManager>& PipelineContext::GetRecoverableManager() const
+{
+    return recoverableMgr_;
 }
 
 const RefPtr<FormVisibleManager>& PipelineContext::GetFormVisibleManager() const

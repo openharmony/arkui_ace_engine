@@ -63,6 +63,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         }
     }
     static const std::unordered_map<std::string, std::string> soMap = {
+        { "Button", "button" },
         { "CalendarPicker", "calendarpicker" },
         { "CalendarPickerDialog", "calendarpicker" },
         { "Checkbox", "checkbox" },
@@ -75,14 +76,17 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FlowItem", "waterflow" },
         { "FolderStack", "folderstack" },
         {"DynamicLayout", "dynamiclayout"},
-        { "LazyDynamicLayout", "dynamiclayout "},
+        { "LazyDynamicLayout", "dynamiclayout"},
         { "Gauge", "gauge" },
+        { "Grid", "grid" },
+        { "GridItem", "grid" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },
         { "Marquee", "marquee" },
         { "Progress", "progress" },
         { "TextTimer", "texttimer" },
+        { "Navigator", "navigator" },
         { "PatternLock", "patternlock" },
         { "QRCode", "qrcode" },
         { "Radio", "radio" },
@@ -107,6 +111,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "Dialog", "dialog" },
         { "ImageAnimator", "imageanimator" },
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
@@ -114,6 +119,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
+        { "Select", "select" },
 #if defined(CROSS_PLATFORM)
         { "ArcScrollBar", "arcscrollbar" },
         { "ArcList", "arclist" },

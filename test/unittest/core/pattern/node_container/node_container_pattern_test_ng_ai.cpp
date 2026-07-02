@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
 #include "core/components_ng/pattern/node_container/node_container_model_ng.h"

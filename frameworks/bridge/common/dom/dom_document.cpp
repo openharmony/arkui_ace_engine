@@ -34,6 +34,7 @@
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 #endif
 #include "frameworks/bridge/common/dom/dom_slider.h"
+#include "frameworks/bridge/common/dom/dom_span.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"

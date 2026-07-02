@@ -153,7 +153,7 @@ private:
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, RefPtr<FrameNode> column, int32_t themeScopeId);
-    static void MountGridSection(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+    static void MountGridSection(const std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn);
     static RefPtr<FrameNode> CreateGridItem(
         const OptionParam& param, int32_t index, const WeakPtr<FrameNode>& menuWeak = nullptr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/common/display_info.h"
 
 namespace OHOS::Ace {
@@ -141,14 +142,15 @@ public:
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps,
         std::function<void()>&& buildFunc, std::function<void(int32_t, int32_t)> callback);
-    RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
-        const RefPtr<NG::UINode>& customNode);
-    void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNGWithNode(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
+    ACE_FORCE_EXPORT void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     ACE_FORCE_EXPORT void OpenCustomDialogNG(
         const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId);
+    ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
@@ -157,8 +159,9 @@ public:
     ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
-    void HideDialogSubWindow(int32_t instanceId);
-    void SetHotAreas(const std::vector<Rect>& rects, SubwindowType type, int32_t nodeId = -1, int32_t instanceId = -1);
+    ACE_FORCE_EXPORT void HideDialogSubWindow(int32_t instanceId);
+    ACE_FORCE_EXPORT void SetHotAreas(
+        const std::vector<Rect>& rects, SubwindowType type, int32_t nodeId = -1, int32_t instanceId = -1);
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
@@ -174,7 +177,7 @@ public:
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
-    void HideToastSubWindowNG(int32_t instanceId);
+    void HideSubWindowNG(int32_t instanceId);
     ToastWindowType GetToastWindowType(int32_t instanceId);
     ACE_FORCE_EXPORT void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
@@ -198,7 +201,7 @@ public:
     ACE_FORCE_EXPORT bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
-    RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
     void SetRect(const NG::RectF& rect, int32_t instanceId);
     void FlushSubWindowUITasks(int32_t instanceId);
@@ -242,12 +245,12 @@ public:
     ACE_FORCE_EXPORT void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
-    bool GetIsExpandDisplay();
+    ACE_FORCE_EXPORT bool GetIsExpandDisplay();
     ACE_FORCE_EXPORT const RefPtr<Subwindow> GetSubwindowByType(
         int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow, int32_t nodeId = -1);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
-    void RemoveSubwindowByNodeId(const int32_t nodeId);
+    ACE_FORCE_EXPORT void RemoveSubwindowByNodeId(const int32_t nodeId);
     void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     bool HasDialogOrPopup(int32_t containerId);

@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "frameworks/core/components_ng/layout/layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_constant.h"
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT RefreshLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RefreshLayoutProperty, LayoutProperty);

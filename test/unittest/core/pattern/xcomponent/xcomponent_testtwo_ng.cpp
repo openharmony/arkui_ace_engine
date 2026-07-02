@@ -44,6 +44,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "frameworks/core/gestures/press_recognizer.h"
@@ -80,6 +81,10 @@ constexpr uint32_t SURFACE_WIDTH_SIZE = 200;
 constexpr uint32_t SURFACE_HEIGHT_SIZE = 250;
 constexpr float OFFSET_X = 10;
 constexpr float OFFSET_Y = 10;
+constexpr float TEST_HDR_BRIGHTNESS_VALUE = 0.65f;
+constexpr float RESET_HDR_BRIGHTNESS_VALUE = 1.0f;
+constexpr int32_t INVALID_HDR_TYPE_VALUE = -1;
+constexpr int32_t AIHDR_TYPE_VALUE = static_cast<int32_t>(HdrType::AIHDR);
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const RectF MAX_SURFACE_RECT(0, 0, MAX_WIDTH, MAX_HEIGHT);
 ArkUI_XComponent_Params g_params;
@@ -735,6 +740,90 @@ HWTEST_F(XComponentTestTwoNg, HdrBrightnessTest, TestSize.Level1)
     EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
                 SetHDRBrightness(0.5f)).Times(0);
     pattern->HdrBrightness(0.5f);
+}
+
+/**
+ * @tc.name: SetXComponentHdrBrightnessWithoutHdrTypeTest
+ * @tc.desc: Test setXComponentHdrBrightness keeps the existing hdrType when hdrType is not provided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetXComponentHdrBrightnessWithoutHdrTypeTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto xComponentModifier = NodeModifier::GetXComponentModifier();
+    ASSERT_NE(xComponentModifier, nullptr);
+    ASSERT_NE(xComponentModifier->setXComponentHdrBrightness, nullptr);
+
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_);
+    ASSERT_NE(mockRenderContext, nullptr);
+    EXPECT_CALL(*mockRenderContext, SetHDRBrightness(TEST_HDR_BRIGHTNESS_VALUE)).WillOnce(Return());
+
+    xComponentModifier->setXComponentHdrBrightness(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)),
+        TEST_HDR_BRIGHTNESS_VALUE, INVALID_HDR_TYPE_VALUE);
+
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, TEST_HDR_BRIGHTNESS_VALUE);
+}
+
+/**
+ * @tc.name: SetXComponentHdrBrightnessWithHdrTypeTest
+ * @tc.desc: Test setXComponentHdrBrightness updates hdrType when hdrType is provided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetXComponentHdrBrightnessWithHdrTypeTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto xComponentModifier = NodeModifier::GetXComponentModifier();
+    ASSERT_NE(xComponentModifier, nullptr);
+    ASSERT_NE(xComponentModifier->setXComponentHdrBrightness, nullptr);
+
+    xComponentModifier->setXComponentHdrBrightness(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)),
+        TEST_HDR_BRIGHTNESS_VALUE, AIHDR_TYPE_VALUE);
+
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, TEST_HDR_BRIGHTNESS_VALUE);
+    EXPECT_EQ(pattern->hdrType_, HdrType::AIHDR);
+}
+
+/**
+ * @tc.name: ResetXComponentHdrBrightnessTest
+ * @tc.desc: Test resetXComponentHdrBrightness resets brightness and keeps the current hdrType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, ResetXComponentHdrBrightnessTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->hdrType_ = HdrType::AIHDR;
+
+    auto xComponentModifier = NodeModifier::GetXComponentModifier();
+    ASSERT_NE(xComponentModifier, nullptr);
+    ASSERT_NE(xComponentModifier->resetXComponentHdrBrightness, nullptr);
+
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_);
+    ASSERT_NE(mockRenderContext, nullptr);
+    EXPECT_CALL(*mockRenderContext, SetHDRBrightness(RESET_HDR_BRIGHTNESS_VALUE)).WillOnce(Return());
+
+    xComponentModifier->resetXComponentHdrBrightness(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+
+    EXPECT_FLOAT_EQ(pattern->hdrBrightness_, RESET_HDR_BRIGHTNESS_VALUE);
+    EXPECT_EQ(pattern->hdrType_, HdrType::AIHDR);
 }
 
 /**

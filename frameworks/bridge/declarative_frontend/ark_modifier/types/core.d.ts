@@ -66,6 +66,14 @@ declare enum StickyStyle {
   Both = 3,
 }
 
+declare enum FocusWrapMode {}
+
+declare enum GridItemAlignment
+{
+    DEFAULT = 0,
+    STRETCH = 1,
+}
+
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}
@@ -177,6 +185,9 @@ interface LazyColumnLayoutAttribute extends CommonAttribute {}
 interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
 interface DividerOptions extends CommonAttribute {}
 interface PickerBackgroundStyle extends CommonAttribute {}
+interface ItemFillPolicy {}
+interface EditModeOptions {}
+interface OffsetResult {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;
@@ -381,6 +392,10 @@ type ToggleConfiguration = object;
 type ArrowPosition = 'end' | 'start' | 'center';
 type OptionWidthMode = 'default' | 'fit_content' | 'fit_trigger';
 type DividerStyleOptions = object;
+type MenuAlignType = 'start' | 'center' | 'end';
+type MenuKeyboardAvoidMode = 'none' | 'translate_and_resize';
+type DistortionMode = 'distortion_auto' | 'distortion_enabled' | 'distortion_disabled';
+type EdgeLightMode = 'edgeLight_auto' | 'edgeLight_enabled' | 'edgeLight_disabled';
 
 type CalendarAlign = 'start' | 'center' | 'end';
 type CalendarTextStyle = object;
@@ -489,6 +504,8 @@ type CheckboxGroupOptions = object;
 type RadioOptions = object;
 type CheckBoxConfiguration = object;
 type RadioConfiguration = object;
+type MenuItemConfiguration = object;
+type SelectOption = object;
 type DataPanelConfiguration = object;
 type DataPanelShadowOptions = object;
 type GaugeConfiguration = object;
@@ -519,6 +536,7 @@ type ImageFrameInfo = object;
 type TextOverflowOptions = object;
 type SideBarPosition = 'start' | 'end';
 type ButtonStyle = object;
+type ButtonConfiguration = object;
 type DividerStyle = object;
 type BadgePosition = object;
 type BadgeStyle = object;
@@ -551,6 +569,10 @@ type SliderBlockType = 'default' | 'image' | 'shape';
 type AnimationStatus = 'initial' | 'running' | 'paused' | 'stopped';
 type FillMode = 'forwards' | 'backwards' | 'both' | 'none';
 
+type SystemUiMaterial = object;
+type MenuOutlineOptions = object;
+type DividerOptions = object;
+type OnSelectCallback = object;
 type RatingConfiguration = object;
 type RichEditorRange = object;
 type PasteEventCallback = object;

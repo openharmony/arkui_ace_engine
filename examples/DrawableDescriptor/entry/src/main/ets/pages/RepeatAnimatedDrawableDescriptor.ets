@@ -38,6 +38,8 @@ struct RepeatAnimatedDrawableDescriptor {
             this.animatedDrawable1 = new AnimatedDrawableDescriptor(pixelMaps, { duration: 2000, iterations: -1 })
           }).catch((error: BusinessError<void>) => {
             console.error(`Lee, erorr = ${JSON.stringify(error)}`)
+          }).finally(() => {
+            imageSource.release()
           })
         }
       } catch (error) {

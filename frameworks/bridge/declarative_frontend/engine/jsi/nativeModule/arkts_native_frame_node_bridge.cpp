@@ -1184,9 +1184,52 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
+    return obj;
+}
+
+Local<panda::ObjectRef> FrameNodeBridge::CreateClickEventInfo(EcmaVM* vm, const ClickInfo* infoPtr)
+{
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
+    const char* keys[] = { "globalDisplayX", "globalDisplayY", "displayX", "displayY", "windowX", "windowY",
+        "screenX", "screenY", "x", "y", "timestamp", "source", "deviceId", "pressure", "tiltX",
+        "tiltY", "rollAngle", "sourceTool", "axisVertical", "axisHorizontal", "axisPinch",
+        "targetDisplayId", "getModifierKeyState", "target", "getCurrentLocalPosition" };
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetDeviceId())),
+        panda::NumberRef::New(vm, infoPtr->GetForce()),
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceTool())),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        CreateEventTargetObject(vm, *infoPtr),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition),
+    };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<ClickInfo*>(infoPtr)));
     return obj;
 }
 
@@ -1293,9 +1336,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
     return eventObj;
 }
 
@@ -1429,9 +1471,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO);
     return obj;
 }
 
@@ -1572,9 +1613,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* 
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
         panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return eventObj;
 }
 
@@ -1726,9 +1766,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetMouseHistoricalPoints));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO);
     return obj;
 }
 

@@ -17,7 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/bridge/button_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
@@ -52,10 +52,31 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIButtonContentModifier* GetButtonStaticContentModifier();
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
+const GENERATED_ArkUIButtonContentModifier* GetButtonContentModifier()
+{
+#ifdef ARKUI_CAPI_UNITTEST
+    return GetButtonStaticContentModifier();
+#else
+    static const GENERATED_ArkUIButtonContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Button");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIButtonContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+#endif
+}
+
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {
 #ifdef ACE_UNITTEST
@@ -190,37 +211,17 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
                                const Ark_Object* contentModifier,
                                const ButtonModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        ButtonConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_ButtonConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.label = Converter::ArkValue<Ark_String>(config.label_, Converter::FC);
-        arkConfig.pressed = Converter::ArkValue<Ark_Boolean>(config.pressed_);
-        std::function<void(Ark_Float64, Ark_Float64)> handler = [frameNode](Ark_Float64 arkX, Ark_Float64 arkY) {
-            auto x = Converter::Convert<int32_t>(arkX);
-            auto y = Converter::Convert<int32_t>(arkY);
-            ButtonModelNG::TriggerClick(frameNode, x, y);
-        };
-        auto triggerCallback = CallbackKeeper::Claim<ButtonTriggerClickCallback>(handler);
-        arkConfig.triggerClick = triggerCallback.ArkValue();
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    ButtonModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetButtonContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierButtonImpl(node, contentModifier, builder);
 }
 void ResetContentModifierButtonImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetButtonContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierButtonImpl(node);
 }
 void ContentModifierCheckBoxImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,
@@ -385,7 +386,7 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        MenuItemConfiguration config) -> RefPtr<FrameNode> {
+                           MenuItemConfiguration config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_MenuItemConfiguration arkConfig = PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
         arkConfig->contentModifier_ = contentModifier;
@@ -426,13 +427,17 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return boxNode;
     };
-    SelectModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setBuilderFunc(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::ResetBuilderFunc(frameNode);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->resetBuilderFunc(frameNode);
 }
 const GENERATED_ArkUISliderContentModifier* GetSliderContentModifier()
 {

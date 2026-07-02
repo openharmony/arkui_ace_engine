@@ -553,7 +553,11 @@ void RichEditorEventHub::SetAboutToIMEInput(std::function<bool(const RichEditorI
 
 bool RichEditorEventHub::FireAboutToIMEInput(const RichEditorInsertValue& info)
 {
-    return aboutToIMEInput_ ? aboutToIMEInput_(info) : true;
+    if (!aboutToIMEInput_) {
+        return true;
+    }
+    auto callback = aboutToIMEInput_;
+    return callback(info);
 }
 
 void RichEditorEventHub::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
@@ -585,7 +589,11 @@ void RichEditorEventHub::SetAboutToDelete(std::function<bool(const RichEditorDel
 
 bool RichEditorEventHub::FireAboutToDelete(const RichEditorDeleteValue& info)
 {
-    return aboutToDelete_ ? aboutToDelete_(info) : true;
+    if (!aboutToDelete_) {
+        return true;
+    }
+    auto callback = aboutToDelete_;
+    return callback(info);
 }
 
 void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
@@ -638,7 +646,11 @@ void RichEditorEventHub::SetOnWillChange(std::function<bool(const RichEditorChan
 
 bool RichEditorEventHub::FireOnWillChange(const RichEditorChangeValue& info)
 {
-    return onWillChange_ ? onWillChange_(info) : true;
+    if (!onWillChange_) {
+        return true;
+    }
+    auto callback = onWillChange_;
+    return callback(info);
 }
 
 bool RichEditorEventHub::HasOnWillChange() const
@@ -711,7 +723,11 @@ void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const St
 
 bool RichEditorEventHub::FireOnStyledStringWillChange(const StyledStringChangeValue& info)
 {
-    return onStyledStringWillChange_ ? onStyledStringWillChange_(info) : true;
+    if (!onStyledStringWillChange_) {
+        return true;
+    }
+    auto callback = onStyledStringWillChange_;
+    return callback(info);
 }
 
 bool RichEditorEventHub::HasOnStyledStringWillChange() const
@@ -726,7 +742,9 @@ void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const Sty
 
 void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
 {
-    onStyledStringDidChange_(info);
+    if (onStyledStringDidChange_) {
+        onStyledStringDidChange_(info);
+    }
 }
 
 bool RichEditorEventHub::HasOnStyledStringDidChange() const

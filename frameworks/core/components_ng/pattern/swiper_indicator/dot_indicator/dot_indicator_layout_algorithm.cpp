@@ -30,6 +30,7 @@ namespace {
 constexpr float SMALLEST_POINT_RATIO = 1.0f / 3.0f;
 constexpr float SECOND_SMALLEST_POINT_RATIO = 2.0f / 3.0f;
 constexpr int32_t OVERLONG_SMALL_COUNT = 2;
+constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 SizeF DotIndicatorLayoutAlgorithm::CalcIndicatorFrameSize(
     LayoutWrapper* layoutWrapper, float indicatorWidth, float indicatorHeight)
@@ -147,6 +148,15 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);
+    if (!indicatorPattern->NeedCustomDotIndicatorLayout()) {
+        return;
+    }
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.maxSize = frameSize;
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        CHECK_NULL_VOID(child);
+        child->Measure(childLayoutConstraint);
+    }
 }
 
 void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -157,12 +167,88 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
     CHECK_NULL_VOID(indicatorPattern);
     OffsetF currentOffset = OffsetF(0.0f, 0.0f);
-    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, ignorSizeIndicatorWidth_,
-        ignorSizeIndicatorHeight_);
+    bool needCustomIconLayout = indicatorPattern->NeedCustomDotIndicatorLayout();
+    auto offsetWidth = needCustomIconLayout ? indicatorWidth_ : ignorSizeIndicatorWidth_;
+    auto offsetHeight = needCustomIconLayout ? indicatorHeight_ : ignorSizeIndicatorHeight_;
+    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, offsetWidth, offsetHeight);
     if (needSet) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         geometryNode->SetMarginFrameOffset(currentOffset);
+    }
+
+    if (!needCustomIconLayout) {
+        return;
+    }
+
+    CustomIconLayoutContext context;
+    if (!InitCustomIconLayoutContext(layoutWrapper, indicatorPattern, context)) {
+        return;
+    }
+    LayoutCustomIconChildren(layoutWrapper, context);
+}
+
+bool DotIndicatorLayoutAlgorithm::InitCustomIconLayoutContext(
+    LayoutWrapper* layoutWrapper, const RefPtr<SwiperIndicatorPattern>& indicatorPattern,
+    CustomIconLayoutContext& context) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_NULL_RETURN(indicatorPattern, false);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+
+    context.direction = indicatorPattern->GetDirection();
+    context.frameSize = geometryNode->GetFrameSize();
+    context.crossSize = context.direction == Axis::HORIZONTAL
+        ? context.frameSize.Height() : context.frameSize.Width();
+    context.pointCenters = indicatorPattern->GetCustomIconCenterX();
+    const auto& activeInfos = indicatorPattern->GetActiveCustomIconInfos();
+    context.items.reserve(activeInfos.size());
+    for (const auto& info : activeInfos) {
+        context.items.push_back({ info.wrapperId, info.slotIndex });
+    }
+    return true;
+}
+
+void DotIndicatorLayoutAlgorithm::LayoutCustomIconChildren(
+    LayoutWrapper* layoutWrapper, const CustomIconLayoutContext& context) const
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    std::unordered_map<int32_t, RefPtr<LayoutWrapper>> childWrapperById;
+    childWrapperById.reserve(children.size());
+    for (const auto& child : children) {
+        CHECK_NULL_VOID(child);
+        auto hostNode = child->GetHostNode();
+        CHECK_NULL_VOID(hostNode);
+        childWrapperById[hostNode->GetId()] = child;
+    }
+    for (const auto& item : context.items) {
+        if (item.slotIndex < 0 || static_cast<size_t>(item.slotIndex) >= context.pointCenters.size()) {
+            continue;
+        }
+        auto childIter = childWrapperById.find(item.wrapperId);
+        if (childIter == childWrapperById.end()) {
+            continue;
+        }
+        auto child = childIter->second;
+        if (!child) {
+            continue;
+        }
+        auto childGeometry = child->GetGeometryNode();
+        CHECK_NULL_VOID(childGeometry);
+        auto childSize = childGeometry->GetMarginFrameSize();
+        float pointCenter = context.pointCenters[item.slotIndex];
+        OffsetF childOffset;
+        if (context.direction == Axis::HORIZONTAL) {
+            childOffset = OffsetF(pointCenter - childSize.Width() * HALF_FLOAT,
+                (context.crossSize - childSize.Height()) * HALF_FLOAT);
+        } else {
+            childOffset = OffsetF((context.frameSize.Width() - childSize.Width()) * HALF_FLOAT,
+                pointCenter - childSize.Height() * HALF_FLOAT);
+        }
+        childGeometry->SetMarginFrameOffset(childOffset);
+        child->Layout();
     }
 }
 

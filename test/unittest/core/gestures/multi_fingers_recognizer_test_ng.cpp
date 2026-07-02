@@ -2124,4 +2124,88 @@ HWTEST_F(MultiFingersRecognizerTestNg, MultiFingersRecognizerComprehensiveTest00
     recognizer->ForceCleanRecognizer();
     EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
 }
+
+/**
+ * @tc.name: DumpGestureInfo001
+ * @tc.desc: Test DumpGestureInfo with no gestureInfo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfo001, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    recognizer->gestureInfo_ = nullptr;
+    std::string result = recognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [all]");
+}
+
+/**
+ * @tc.name: DumpGestureInfo002
+ * @tc.desc: Test DumpGestureInfo with gestureInfo_ but bitmap is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfo002, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>(AllowedTypesNone);
+    recognizer->gestureInfo_ = gestureInfo;
+    std::string result = recognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [all]");
+}
+
+/**
+ * @tc.name: CheckCurrentFingers001
+ * @tc.desc: Test CheckCurrentFingers with currentFingers_ equals 0 and empty touchPoints_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingers001, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    recognizer->currentFingers_ = 0;
+    recognizer->touchPoints_.clear();
+    recognizer->CheckCurrentFingers();
+}
+
+/**
+ * @tc.name: CheckCurrentFingers002
+ * @tc.desc: Test CheckCurrentFingers with currentFingers_ less than 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingers002, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    recognizer->currentFingers_ = -1;
+    recognizer->touchPoints_.clear();
+    recognizer->CheckCurrentFingers();
+}
+
+/**
+ * @tc.name: CheckCurrentFingers003
+ * @tc.desc: Test CheckCurrentFingers with currentFingers_ greater than touchPointSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingers003, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    recognizer->currentFingers_ = 3;
+    recognizer->touchPoints_.clear();
+    recognizer->CheckCurrentFingers();
+}
+
+/**
+ * @tc.name: CheckCurrentFingers004
+ * @tc.desc: Test CheckCurrentFingers with currentFingers_ equals touchPointSize (normal case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingers004, TestSize.Level1)
+{
+    RefPtr<MultiFingersRecognizer> recognizer = AceType::MakeRefPtr<MockMultiFingersRecognizer>();
+    recognizer->currentFingers_ = 2;
+    TouchEvent touchEvent1;
+    touchEvent1.id = 0;
+    recognizer->touchPoints_[0] = touchEvent1;
+    TouchEvent touchEvent2;
+    touchEvent2.id = 1;
+    recognizer->touchPoints_[1] = touchEvent2;
+    recognizer->CheckCurrentFingers();
+}
 }; // namespace OHOS::Ace::NG

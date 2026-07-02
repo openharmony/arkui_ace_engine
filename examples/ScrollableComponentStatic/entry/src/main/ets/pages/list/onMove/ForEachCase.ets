@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Text,
@@ -22,11 +21,11 @@ import {
   Button,
   ClickEvent,
   List,
+  ListOptions,
   ListItem,
   ForEach,
   Color,
   Row,
-  ClickEvent,
   LazyForEach,
   DynamicNode,
   OnMoveHandler,
@@ -44,7 +43,7 @@ struct ForEachSort {
 
   build() {
     Row() {
-      List() {
+      List({} as ListOptions) {
         ForEach(this.arr, (item: string) => {
           ListItem() {
             Text(item.toString())
@@ -55,21 +54,21 @@ struct ForEachSort {
           .borderRadius(10)
           .backgroundColor('#FFFFFFFF')
         }, (item: string) => item)
-          .onMove((from: number, to: number) => {
-            let tmp = this.arr.splice(from as int, 1);
-            this.arr.splice(to as int, 0, tmp[0]);
+          .onMove((from: int, to: int) => {
+            let tmp = this.arr.splice(from, 1);
+            this.arr.splice(to, 0, tmp[0]);
           } as OnMoveHandler,
             {
-              onLongPress: (index: number) => {
+              onLongPress: (index: int) => {
                 console.log('listTest onLongPress: ' + index);
               },
-              onDrop: (index: number) => {
+              onDrop: (index: int) => {
                 console.log('listTest onDrop: ' + index);
               },
-              onDragStart: (index: number) => {
+              onDragStart: (index: int) => {
                 console.log('listTest onDragStart: ' + index);
               },
-              onMoveThrough: (from: number, to: number) => {
+              onMoveThrough: (from: int, to: int) => {
                 console.log('listTest onMoveThrough From: ' + from);
                 console.log('listTest onMoveThrough To: ' + to);
               }  as OnMoveHandler

@@ -19,6 +19,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"

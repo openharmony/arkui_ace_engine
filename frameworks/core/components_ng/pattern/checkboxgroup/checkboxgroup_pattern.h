@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_PATTERN_H
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
@@ -31,7 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
+class InspectorFilter;
 class GroupManager;
 
 class CheckBoxGroupPattern : public Pattern {

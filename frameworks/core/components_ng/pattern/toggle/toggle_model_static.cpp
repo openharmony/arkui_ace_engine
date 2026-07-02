@@ -17,9 +17,8 @@
 
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
-#include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +31,14 @@ bool IsToggleCheckboxPattern(FrameNode* frameNode)
     auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
     return checkboxModifier->isToggleCheckboxPattern(node);
 }
+
+bool IsToggleButtonPattern(FrameNode* frameNode)
+{
+    auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    return buttonModifier->isToggleButtonPattern(node);
+}
 } // namespace
 RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType toggleType)
 {
@@ -41,7 +48,7 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
         auto toggleTypeNotChange =
             (AceType::InstanceOf<SwitchPattern>(pattern) && toggleType == ToggleType::SWITCH) ||
             (IsToggleCheckboxPattern(AceType::RawPtr(childFrameNode)) && toggleType == ToggleType::CHECKBOX) ||
-            (AceType::InstanceOf<ToggleButtonPattern>(pattern) && toggleType == ToggleType::BUTTON);
+            (IsToggleButtonPattern(AceType::RawPtr(childFrameNode)) && toggleType == ToggleType::BUTTON);
         if (toggleTypeNotChange) {
             return childFrameNode;
         }
@@ -57,7 +64,11 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
                 reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId)));
         }
         case ToggleType::BUTTON: {
-            return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createToggleButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::Claim(rawPattern));
         }
         default: {
             return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
@@ -116,11 +127,11 @@ void ToggleModelStatic::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChan
             reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChangeEvent));
         return;
     }
-    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
-    if (buttonPattern) {
-        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+    if (IsToggleButtonPattern(frameNode)) {
+        auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setToggleOnChangeEventToEventHub(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), std::move(onChangeEvent));
         return;
     }
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
@@ -137,9 +148,10 @@ void ToggleModelStatic::TriggerChange(FrameNode* frameNode, bool value)
         checkboxModifier->setChangeValue(reinterpret_cast<ArkUINodeHandle>(frameNode), value);
         return;
     }
-    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
-    if (buttonPattern) {
-        buttonPattern->SetButtonPress(value);
+    if (IsToggleButtonPattern(frameNode)) {
+        auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setToggleButtonPress(reinterpret_cast<ArkUINodeHandle>(frameNode), value);
         return;
     }
     auto switchPattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());

@@ -75,6 +75,10 @@ interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ButtonComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CheckboxComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
     getCheckboxWidthModifier(): any;
@@ -102,6 +106,10 @@ interface DataPanelComponentModule {
 }
 
 interface GaugeComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface NavigatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -177,6 +185,10 @@ interface SearchComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface SelectComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface SideBarContainerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -222,6 +234,14 @@ interface WaterFlowComponentModule {
 }
 
 interface TextPickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridItemComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

@@ -33,6 +33,10 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/pattern/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_layout_algorithm.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -418,6 +422,26 @@ void SendStatisticEvent(StatisticEventType type)
     statisticEventReporter->SendEvent(type);
 }
 } // namespace
+
+RefPtr<EventHub> VideoPattern::CreateEventHub()
+{
+    return MakeRefPtr<VideoEventHub>();
+}
+
+RefPtr<LayoutProperty> VideoPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<VideoLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> VideoPattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<VideoLayoutAlgorithm>();
+}
+
+RefPtr<AccessibilityProperty> VideoPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<VideoAccessibilityProperty>();
+}
 
 VideoPattern::VideoPattern(const RefPtr<VideoControllerV2>& videoController)
     : instanceId_(Container::CurrentId()), videoControllerV2_(videoController)

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
@@ -130,7 +130,6 @@ bool CheckWhetherBarItemSizeCrossBorder(LayoutWrapper* layoutWrapper, NG::SizeF&
     bool needToUpdateHeight = false;
 
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
-        auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
         auto barItemWrapper = toolbarItemWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_RETURN(barItemWrapper, false);
 
@@ -156,7 +155,7 @@ void UpdateToolbarItemSize(LayoutWrapper* layoutWrapper, NG::SizeF& toolbarItemS
     auto containerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(containerWrapper);
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
-        auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
+        auto layoutProperty = toolbarItemWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto constraint = layoutProperty->GetLayoutConstraint();
         CHECK_NULL_VOID(constraint);

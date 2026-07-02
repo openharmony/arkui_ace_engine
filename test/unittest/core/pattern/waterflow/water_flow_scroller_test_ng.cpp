@@ -245,11 +245,6 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController003, TestSize.Level1)
     EXPECT_TRUE(Position(0));
 }
 
-namespace {
-constexpr float SCROLL_FIXED_VELOCITY = 200.f;
-constexpr float OFFSET_TIME = 100.f;
-constexpr int32_t TIME_CHANGED_COUNTS = 20 * 20;
-} // namespace
 /**
  * @tc.name: PositionController004
  * @tc.desc: Test PositionController ScrollEdge

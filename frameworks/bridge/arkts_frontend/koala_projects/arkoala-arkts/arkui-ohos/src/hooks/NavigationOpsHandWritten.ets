@@ -165,7 +165,10 @@ export class NavigationOpsHandWritten {
             return peer.peer.ptr;
         });
     }
-    static hookSplitPlaceholderImpl(peer: ArkNavigationPeer, value: ComponentContent<Object>) {
+    static hookSplitPlaceholderImpl(peer: ArkNavigationPeer, value: ComponentContent<Object> | undefined) {
+        if (value === undefined) {
+            return;
+        }
         let peerPtr = peer.peer.ptr;
         let ptr: KPointer = 0;
         if (value.getNodePtr() !== undefined) {

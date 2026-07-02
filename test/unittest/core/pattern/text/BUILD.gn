@@ -62,20 +62,6 @@ if (is_host_product) {
   }
 }
 
-ace_unittest("selection_container_test_ng") {
-  module_name = "TextSet-Text"
-  type = "new"
-  sources = [
-    "selection_container_child_test_ng.cpp",
-    "selection_container_model_ng_test.cpp",
-    "selection_container_test_ng.cpp",
-    "selection_select_overlay_test_ng.cpp",
-  ]
-
-  defines = [ "ENABLE_ROSEN_BACKEND" ]
-  cflags = [ "-fno-access-control" ]
-}
-
 ace_unittest("text_test_ng_addition") {
   module_name = "TextSet-Text"
   type = "new"
@@ -149,7 +135,6 @@ ace_unittest("text_test_nullptr") {
 group("text_tests_ng") {
   testonly = true
   deps = [
-    ":selection_container_test_ng",
     ":text_test_ng",
     ":text_test_nullptr",
   ]

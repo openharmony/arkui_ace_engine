@@ -36,9 +36,9 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -722,10 +723,8 @@ void NavigationPattern::OnModifyDone()
         DoNavbarHideAnimation(hostNode);
     }
 
-    if (!HandleIntent(false)) {
-        // AddRecoverableNavigation function will check inside whether current navigation can be recovered
-        pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
-        RestoreJsStackIfNeeded();
+    if (CheckNeedHandleIntent(false)) {
+        HandleIntent(false);
     }
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
@@ -862,12 +861,19 @@ void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 
 void NavigationPattern::OnAttachToMainTree()
 {
-    auto host = GetHost();
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     InitPageNode(host);
     InitFoldState();
     RegisterAvoidInfoChangeListener(host);
+    host->InitNavigationId();
+    if (!CheckNeedHandleIntent(false)) {
+        auto navigationManager = host->GetContext()->GetNavigationManager();
+        CHECK_NULL_VOID(navigationManager);
+        navigationManager->AddRecoverableNavigation(host->GetCurId(), host);
+        RestoreJsStackIfNeeded();
+    }
 }
 
 void NavigationPattern::InitFoldState()
@@ -1447,7 +1453,7 @@ void NavigationPattern::UpdateNavPathList()
         if (navigationStack_->NeedBuildNewInstance(arrayIndex)) {
             navigationStack_->SetNeedBuildNewInstance(arrayIndex, false);
             // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
-            if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
+            if (!GenerateUINodeByIndex(arrayIndex, uiNode, false)) {
                 removeSize++;
                 continue;
             }
@@ -1514,7 +1520,7 @@ void NavigationPattern::UpdateNavPathList()
         }
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
             "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
-        if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
+        if (!GenerateUINodeByIndex(arrayIndex, uiNode, false)) {
             std::string replacedName = "";
             int32_t replacedIndex = -1;
             if (navigationStack_->CheckIsReplacedDestination(arrayIndex, replacedName, replacedIndex)) {
@@ -1578,7 +1584,7 @@ bool NavigationPattern::RestoreAutoCleanedDestination(NavPathList& navPathList, 
         !navigationStack_->IsAutoCleaned(stackIndex)) {
         return false;
     }
-    if (!navPathList[index].second && !GenerateUINodeByIndex(stackIndex, navPathList[index].second)) {
+    if (!navPathList[index].second && !GenerateUINodeByIndex(stackIndex, navPathList[index].second, false)) {
         return false;
     }
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -3060,7 +3066,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
         AbortAnimation(hostNode);
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
     if (context) {
         context->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
@@ -3280,7 +3287,7 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
         if (navPathList[index].second || !navigationStack_->IsFromRecovery(index)) {
             continue;
         }
-        if (!GenerateUINodeByIndex(index - removeSize, navPathList[index].second)) {
+        if (!GenerateUINodeByIndex(index - removeSize, navPathList[index].second, true)) {
             removeSize++;
             continue;
         }
@@ -3294,11 +3301,15 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
             eventHub->FireOnRestoreState(navigationStack_->GetAutoCleanedState(index));
         }
         navigationStack_->ClearAutoCleanedState(index);
+        auto componentInfo = navigationStack_->GetComponentInfo(index);
+        if (!componentInfo.empty()) {
+            navdestination->SetRestoreInfo(componentInfo);
+        }
     }
     return removeSize;
 }
 
-bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node)
+bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node, bool isRecovery)
 {
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     do {
@@ -3325,7 +3336,8 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
             pattern->SetParentCustomNode(parentCustomNode);
         }
     } while (false);
-    bool isCreate = navigationStack_->CreateNodeByIndex(index, parentNode_, node);
+    bool isCreate = isRecovery ? navigationStack_->CreateNodeFromRecovery(index, parentNode_, node)
+        : navigationStack_->CreateNodeByIndex(index, parentNode_, node);
     if (node) {
         node->SetFreeze(true, true);
     }
@@ -4379,12 +4391,13 @@ void NavigationPattern::UpdateToobarFocusColor()
     auto toolBarItemNodes = containerNode->GetChildren();
     auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
     for (auto& toolBarItemNode : toolBarItemNodes) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(toolBarItemNode);
         CHECK_NULL_VOID(buttonNode);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonModifier->setFocusBorderColor(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), theme->GetToolBarItemFocusColor());
         auto focusHub = buttonNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetPaintColor(theme->GetToolBarItemFocusColor());
@@ -5184,9 +5197,15 @@ void NavigationPattern::FireOnInactiveLifecycle(const RefPtr<NavDestinationGroup
 std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
 {
     auto allNavdestinationInfo = JsonUtil::CreateArray(true);
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, allNavdestinationInfo);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_RETURN(context, allNavdestinationInfo);
+    auto recoverableMgr = context->GetRecoverableManager();
+    CHECK_NULL_RETURN(recoverableMgr, allNavdestinationInfo);
     const auto& navdestinationNodes = GetAllNavDestinationNodes();
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    int32_t lastStandardIndex = hostNode ? hostNode->GetLastStandardIndex() : -1;
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    int32_t lastStandardIndex = navigationGroupNode ? navigationGroupNode->GetLastStandardIndex() : -1;
     for (int32_t index = 0; index < static_cast<int32_t>(navdestinationNodes.size()); ++index) {
         auto iter = navdestinationNodes[index];
         auto navdestinationInfo = JsonUtil::Create(true);
@@ -5223,7 +5242,18 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
         navdestinationInfo->Put("name", name.c_str());
         navdestinationInfo->Put("param", param.c_str());
         navdestinationInfo->Put("mode", mode);
+        std::string fileName;
+        std::string moduleName;
+        if (navigationStack_->GetOhmUrl(AceType::DynamicCast<UINode>(navdestinationNode->GetNavDestinationCustomNode()),
+            moduleName, fileName)) {
+            navdestinationInfo->Put("fileName", fileName.c_str());
+            navdestinationInfo->Put("moduleName", moduleName.c_str());
+        }
         navdestinationInfo->Put("state", navigationStack_ ? navigationStack_->GetAutoCleanedState(index).c_str() : "");
+        std::string componentInfo;
+        if (recoverableMgr->GetRestoreByPage(true, navdestinationNode->GetId(), componentInfo)) {
+            navdestinationInfo->Put("componentInfo", componentInfo.c_str());
+        }
         allNavdestinationInfo->Put(navdestinationInfo);
     }
     return allNavdestinationInfo;
@@ -5263,15 +5293,23 @@ void NavigationPattern::RestoreJsStackIfNeeded()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto navigationManager = pipeline->GetNavigationManager();
-    CHECK_NULL_VOID(navigationManager);
+    auto recoverableMgr = pipeline->GetRecoverableManager();
+    CHECK_NULL_VOID(recoverableMgr);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
-    if (navdestinationsInfo.empty()) {
-        return;
+    auto homeInfo = recoverableMgr->GetNavigationHomeInfo(hostNode->GetCurId());
+    if (!homeInfo.empty()) {
+        auto homeDestination = AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
+        if (homeDestination) {
+            homeDestination->SetRestoreInfo(homeInfo);
+        }
     }
-    navigationStack_->SetPathArray(navdestinationsInfo);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
+    if (!navdestinationsInfo.empty()) {
+        navigationStack_->SetPathArray(navdestinationsInfo);
+    }
 }
 
 void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
@@ -6150,7 +6188,7 @@ void NavigationPattern::GenerateLastStandardPage(NavPathList& navPathList)
         auto pageNode = navPathList[lastPageIndex].second;
         // existed dialog node is no need to generate
         bool isExistedNode = (pageNode != nullptr);
-        if (!pageNode && !GenerateUINodeByIndex(lastPageIndex, pageNode)) {
+        if (!pageNode && !GenerateUINodeByIndex(lastPageIndex, pageNode, false)) {
             std::string replacedName;
             int32_t replacedIndex = -1;
             if (navigationStack_->CheckIsReplacedDestination(lastPageIndex, replacedName, replacedIndex)) {
@@ -6868,6 +6906,9 @@ void NavigationPattern::SetToolbarManagerNavigationMode(NavigationMode mode)
 
 bool NavigationPattern::HandleIntent(bool needTransition)
 {
+    if (!CheckNeedHandleIntent(needTransition)) {
+        return false;
+    }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
@@ -6875,12 +6916,6 @@ bool NavigationPattern::HandleIntent(bool needTransition)
     auto navigationManager = context->GetNavigationManager();
     CHECK_NULL_RETURN(navigationManager, false);
     auto navigationIntentInfo = navigationManager->GetNavigationIntentInfo();
-    if (!navigationIntentInfo.has_value()) {
-        return false;
-    }
-    if (navigationIntentInfo.value().navigationInspectorId != host->GetCurId()) {
-        return false;
-    }
     navigationManager->ResetNavigationIntentInfo();
     // add the intentInfo into navPathStack
     navigationStack_->PushIntentNavDestination(navigationIntentInfo.value().navDestinationName,
@@ -8574,5 +8609,23 @@ void NavigationPattern::SetNavigationConfiguration(const NavigationConfiguration
     if (config.stackSizeLimit <= 0) {
         config_.stackSizeLimit = config.stackSizeLimit;
     }
+}
+
+bool NavigationPattern::CheckNeedHandleIntent(bool needTransition)
+{
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, false);
+    auto navigationIntentInfo = navigationManager->GetNavigationIntentInfo();
+    if (!navigationIntentInfo.has_value()) {
+        return false;
+    }
+    if (navigationIntentInfo.value().navigationInspectorId != host->GetCurId()) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

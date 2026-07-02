@@ -20,6 +20,7 @@
 
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

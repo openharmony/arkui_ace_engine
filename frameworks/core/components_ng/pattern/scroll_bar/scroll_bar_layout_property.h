@@ -19,11 +19,12 @@
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT ScrollBarLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ScrollBarLayoutProperty, LayoutProperty);
 

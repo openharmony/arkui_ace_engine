@@ -45,7 +45,7 @@ struct DatePickerSettingData {
 };
 
 struct TimePickerSettingData {
-    bool isUseMilitaryTime;
+    bool isUseMilitaryTime = false;
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;

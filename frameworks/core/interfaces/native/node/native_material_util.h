@@ -19,9 +19,11 @@
 #include "interfaces/native/node/native_material_impl.h"
 #include "ui/properties/ui_material.h"
 
-OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial> CreateUiMaterialFromHandle(ArkUI_ImmersiveMaterialHandle handle);
-
+namespace OHOS::Ace::NG::NodeModifier {
+ACE_FORCE_EXPORT OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial> CreateUiMaterialFromHandle(
+    ArkUI_ImmersiveMaterialHandle handle);
 bool CreateHandleFromUiMaterial(
     const OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& material, ArkUI_ImmersiveMaterialHandle out);
+} // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NATIVE_MATERIAL_UTIL_H

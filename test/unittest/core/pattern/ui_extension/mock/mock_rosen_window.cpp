@@ -22,6 +22,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
 
 void RosenWindow::Init() {}
 
+void RosenWindow::InitArkUI_X() {}
+
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) {}
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch) {}
@@ -41,6 +43,8 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
 void RosenWindow::FlushTasks(std::function<void()> callback) {}
+
+void RosenWindow::FlushLayoutSize(int32_t width, int32_t height) {}
 
 float RosenWindow::GetRefreshRate() const
 {
@@ -68,5 +72,27 @@ uint32_t RosenWindow::GetStatusBarHeight() const
 }
 
 void RosenWindow::NotifyExtensionTimeout(int32_t errorCode) {}
+
+bool RosenWindow::GetIsRequestVsync()
+{
+    return false;
+}
+
+bool RosenWindow::GetIsRequestFrame()
+{
+    return false;
+}
+
+void RosenWindow::NotifySnapshotUpdate() {}
+
+void RosenWindow::SetDVSyncUpdate(uint64_t dvsyncTime) {}
+
+void RosenWindow::ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
+
+void RosenWindow::FlushVsync() {}
+
+void RosenWindow::NotifyWindowAttachStateChange(bool status) {}
+
+void RosenWindow::GoBackgroundForNodeRelease() {}
 
 } // namespace OHOS::Ace::NG

@@ -817,6 +817,42 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRectTrickRegionHeight004
+ * @tc.desc: Test scrollbar hides when scrollBarHeight changes from non-zero to zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight004, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_TRUE(scrollBar_->NeedPaint());
+
+    paintProperty_->UpdateScrollBarHeight(Dimension(37.0));
+    pattern_->SetScrollBar(paintProperty_->GetScrollBarProperty());
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_TRUE(scrollBar_->NeedPaint());
+    VerifyDrawScrollBar(2);
+
+    paintProperty_->UpdateScrollBarHeight(Dimension(0.0));
+    pattern_->SetScrollBar(paintProperty_->GetScrollBarProperty());
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_FALSE(scrollBar_->NeedPaint());
+    EXPECT_TRUE(IsEqual(scrollBar_->GetActiveRect(), Rect()));
+    EXPECT_TRUE(IsEqual(scrollBar_->GetTrackRect(), Rect()));
+
+    paintProperty_->UpdateScrollBarHeight(Dimension(37.0));
+    pattern_->SetScrollBar(paintProperty_->GetScrollBarProperty());
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_TRUE(scrollBar_->NeedPaint());
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
+    VerifyDrawScrollBar(2);
+}
+
+/**
  * @tc.name: SetRectTrickRegionHeight003
  * @tc.desc: Test large scrollbar region still uses 48vp default minimum height instead of minHeight_
  * @tc.type: FUNC

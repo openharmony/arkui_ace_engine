@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Text,
@@ -25,8 +24,10 @@ import {
   ListDividerOptions,
   RectResult,
   List,
+  ListOptions,
   ListItem,
   ListItemGroup,
+  ListItemGroupOptions,
   ForEach,
   ListScroller,
   EdgeEffect,
@@ -40,7 +41,6 @@ import {
   ListItemStyle,
   Color,
   Row,
-  ClickEvent,
   SwipeEdgeEffect,
   CustomBuilder,
   Builder,
@@ -59,7 +59,7 @@ import {
   ChildrenMainSize,
   TextAlign,
   BarState,
-  ListItemAlign,
+  ListItemAlign
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
@@ -67,7 +67,7 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct ListChildrenMainSizeTest {
-  @State numbers: string[] = [];
+  @State numbers: string[] = [] as string[];
   @State listChildrenSize: ChildrenMainSize = new ChildrenMainSize(100);
   @State groupChildrenSize: ChildrenMainSize = new ChildrenMainSize(100);
   private listScroller: ListScroller = new ListScroller();
@@ -84,8 +84,8 @@ struct ListChildrenMainSizeTest {
   build() {
     Column() {
       List({ space: 10, initialIndex: 5, scroller: this.listScroller }) {
-        ListItemGroup() {
-          ForEach(this.numbers, (item: string, index: number) => {
+        ListItemGroup({} as ListItemGroupOptions) {
+          ForEach(this.numbers, (item: string, index: int) => {
             ListItem() {
               Text(`group: 0, item: ${index}`)
                 .height( index < 5 ? 300 : this.listChildrenSize.childDefaultSize)
@@ -98,7 +98,7 @@ struct ListChildrenMainSizeTest {
           }, (item: string) => item)
         }
         .childrenMainSize(this.groupChildrenSize)
-        ForEach(this.numbers, (item: string, index: number) => {
+        ForEach(this.numbers, (item: string, index: int) => {
           ListItem() {
             Text(`item: ${index + 1}`)
               .height(index < 5 ? 300 : this.listChildrenSize.childDefaultSize)

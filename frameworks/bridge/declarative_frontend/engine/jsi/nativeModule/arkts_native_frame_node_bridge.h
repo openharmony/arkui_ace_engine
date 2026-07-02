@@ -34,7 +34,7 @@ enum NativePtrTag {
     NATIVE_PTR_TAG_KEY_EVENT_INFO,
 };
 
-class FrameNodeBridge {
+class ACE_FORCE_EXPORT FrameNodeBridge {
 public:
     static ArkUINodeHandle GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUI_Bool IsCustomFrameNode(FrameNode* node);
@@ -54,6 +54,7 @@ public:
     static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent* infoPtr);
+    static Local<panda::ObjectRef> CreateClickEventInfo(EcmaVM* vm, const ClickInfo* infoPtr);
     static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo* infoPtr);
     static Local<panda::ObjectRef> CreateMouseInfoObj(EcmaVM* vm, MouseInfo& info);
     static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo* infoPtr);

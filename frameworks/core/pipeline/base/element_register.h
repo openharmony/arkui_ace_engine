@@ -24,8 +24,8 @@
 #include <unordered_set>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/animation_option.h"
 #include "frameworks/base/memory/ace_type.h"
-#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::V2 {
 class ElementProxy;
@@ -34,6 +34,7 @@ class ElementProxy;
 namespace OHOS::Ace::NG {
 class UINode;
 class FrameNode;
+class GeometryTransition;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -68,7 +69,7 @@ public:
 
     ACE_FORCE_EXPORT RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
     ACE_FORCE_EXPORT std::vector<RefPtr<NG::UINode>> GetUINodesFromItemMap(const std::vector<std::int32_t>& keys);
-    NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
+    ACE_FORCE_EXPORT NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
     ACE_FORCE_EXPORT bool AddUINode(const RefPtr<NG::UINode>& node);
 

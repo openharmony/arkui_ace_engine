@@ -36,7 +36,7 @@ class OptionComponent;
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT SelectComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT SelectComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SelectComponent, SoleChildComponent);
 
 public:

@@ -47,46 +47,6 @@ HWTEST_F(LayoutAlgorithmTestNg, PostponeForIgnoreTagFuncs, TestSize.Level0)
     EXPECT_EQ(layoutAlgorithm->GetNeedPostponeForIgnore(), true);
 }
 
-
-/**
- * @tc.name: GetLayoutConstraintTest001
- * @tc.desc: test GetLayoutConstraint with contentConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutAlgorithmTestNg, GetLayoutConstraintTest001, TestSize.Level0)
-{
-    LayoutConstraintF contentConstraint;
-    contentConstraint.minSize = SizeF(10.0f, 10.0f);
-    contentConstraint.maxSize = SizeF(100.0f, 100.0f);
-    contentConstraint.percentReference = SizeF(200.0f, 200.0f);
-
-    auto result = GetLayoutConstraint(contentConstraint);
-    EXPECT_EQ(result.minSize.Width(), 10.0f);
-    EXPECT_EQ(result.minSize.Height(), 10.0f);
-    EXPECT_EQ(result.maxSize.Width(), 100.0f);
-    EXPECT_EQ(result.maxSize.Height(), 100.0f);
-    EXPECT_EQ(result.percentReference.Width(), 200.0f);
-    EXPECT_EQ(result.percentReference.Height(), 200.0f);
-}
-
-/**
- * @tc.name: GetLayoutConstraintTest002
- * @tc.desc: test GetLayoutConstraint with empty contentConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutAlgorithmTestNg, GetLayoutConstraintTest002, TestSize.Level0)
-{
-    std::optional<LayoutConstraintF> contentConstraint = std::nullopt;
-
-    auto result = GetLayoutConstraint(contentConstraint);
-    EXPECT_EQ(result.minSize.Width(), 0.0f);
-    EXPECT_EQ(result.minSize.Height(), 0.0f);
-    EXPECT_EQ(result.maxSize.Width(), 1000000.0f);
-    EXPECT_EQ(result.maxSize.Height(), 1000000.0f);
-    EXPECT_EQ(result.percentReference.Width(), 0.0f);
-    EXPECT_EQ(result.percentReference.Height(), 0.0f);
-}
-
 /**
  * @tc.name: CollectOverflowFromFrameNodeTest002
  * @tc.desc: test CollectOverflowFromFrameNode with null hostNode

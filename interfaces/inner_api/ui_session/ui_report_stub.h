@@ -243,8 +243,13 @@ public:
         int32_t webId,
         const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
+    void SendPageText(int32_t nodeId, const std::string& text, int64_t version) override;
 
     void RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback);
+    bool RegisterPageTranslateTextCallback(const PageTranslateTextCallback& eventCallback, bool isContinuous = false);
+    void RegisterPageTranslateTimeoutCallback(std::function<void()>&& timeoutCallback);
+    void UnregisterPageTranslateTextCallback();
+    void FinishPageTranslateTextRequest();
     void SendCurrentLanguage(const std::string& data) override;
     void SendCurrentPageName(const std::string& result) override;
     void SendWebText(int32_t nodeId, std::string res) override;
@@ -266,11 +271,20 @@ public:
     void SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler);
 
     void PostGetInspectorTreeCallbackRemoveTask(int32_t timeout);
+    void PostPageTranslateCallbackRemoveTask(int32_t timeout = DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS);
+    void PostPageTranslateResultWatchdogTask(int32_t nodeId, int64_t version,
+        int32_t timeout = DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS);
+    void CancelPageTranslateResultWatchdogTask(int32_t nodeId, int64_t version);
 
 private:
     void HandleInspectorTreeCallbackTimeout();
     void CancelGetInspectorTreeCallbackTimeoutTaskLocked();
     void OnGetWebInfoByRequestInner(MessageParcel& data);
+    void OnSendPageTextInner(MessageParcel& data);
+    void HandlePageTranslateCallbackTimeout(int64_t requestId);
+    void HandlePageTranslateResultWatchdogTimeout(int32_t nodeId, int64_t version);
+    void ClearPageTranslateCallbackLocked();
+    void CancelPageTranslateCallbackTimeoutTaskLocked();
 
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
@@ -285,6 +299,11 @@ private:
     EventCallback selectTextEventCallback_;
     std::function<void(std::vector<std::pair<float, float>>)> getSpecifiedContentOffsets_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
+    std::mutex pageTranslateCallbackMutex_;
+    PageTranslateTextCallback pageTranslateTextCallback_;
+    std::function<void()> pageTranslateTimeoutCallback_;
+    bool pageTranslateContinuous_ = false;
+    int64_t pageTranslateRequestId_ = 0;
     std::mutex inspectorTreeCallbackMutex_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;

@@ -58,16 +58,30 @@ struct AnimatedDrawableDescriptorTestOne {
       let imageSource1 = image.createImageSource(buffer1)
       let imageSource2 = image.createImageSource(buffer2)
       if (imageSource1) {
-        imageSource1.createPixelMapList().then((pixelMaps: Array<PixelMap>) => {
-          this.animatedDrawable1 =
-            new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000, autoPlay: false })
-        })
+        imageSource1.createPixelMapList()
+          .then((pixelMaps: Array<PixelMap>) => {
+            this.animatedDrawable1 =
+              new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000, autoPlay: false })
+          })
+          .catch((error: BusinessError<void>) => {
+            console.error(`Failed to create pixelMapList: ${JSON.stringify(error)}`)
+          })
+          .finally(() => {
+            imageSource1.release()
+          })
       }
       if (imageSource2) {
-        imageSource2.createPixelMapList().then((pixelMaps: Array<PixelMap>) => {
-          this.animatedDrawable2 =
-            new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000, autoPlay: true })
-        })
+        imageSource2.createPixelMapList()
+          .then((pixelMaps: Array<PixelMap>) => {
+            this.animatedDrawable2 =
+              new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000, autoPlay: true })
+          })
+          .catch((error: BusinessError<void>) => {
+            console.error(`Failed to create pixelMapList: ${JSON.stringify(error)}`)
+          })
+          .finally(() => {
+            imageSource2.release()
+          })
       }
     }
   }

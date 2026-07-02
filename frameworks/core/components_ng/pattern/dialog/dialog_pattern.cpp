@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,11 @@
 #include <cstdint>
 #include <cstring>
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#if defined(ENABLE_ROSEN_BACKEND)
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#endif
+
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
@@ -27,6 +32,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
+#include "core/common/color_inverter.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
@@ -41,8 +47,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
@@ -51,7 +56,6 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
-#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -71,14 +75,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/common/color_inverter.h"
-#if defined(ENABLE_ROSEN_BACKEND)
-#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
@@ -117,6 +117,12 @@ constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
 constexpr uint32_t MIN_FRAME_RATE = 60;
 constexpr uint32_t MAX_FRAME_RATE = 120;
 constexpr uint32_t EXPECTED_FRAME_RATE = 120;
+constexpr char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
+constexpr char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
+constexpr char BUTTON_ETS_TAG[] = "Button";
+constexpr char LIST_ETS_TAG[] = "List";
+constexpr char LIST_ITEM_ETS_TAG[] = "ListItem";
+constexpr char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
 const DistortionParam TERMINAL_DISTORTION_PARAM {
     .luCorner = { 0, 0 },
@@ -343,7 +349,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
                 return;
             }
             PopDialog(-1);
-            if (overlayManager->isMaskNode(GetHost()->GetId())) {
+            if (overlayManager->IsMaskNode(GetHost()->GetId())) {
                 overlayManager->PopModalDialog(GetHost()->GetId());
             }
         }
@@ -815,6 +821,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -883,6 +890,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateEnableSmallLanguageTruncation(true);
+    titleProp->UpdatePunctuationOverflow(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -950,6 +958,7 @@ void DialogPattern::UpdateContentTextProperty(
     const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
 {
     contentProp->UpdateEnableSmallLanguageTruncation(true);
+    contentProp->UpdatePunctuationOverflow(true);
     if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         contentProp->UpdateOrphanCharOptimization(true);
     }
@@ -1076,7 +1085,7 @@ void DialogPattern::AddButtonColorCallback(const ButtonInfo& params, RefPtr<Fram
     }
     CHECK_NULL_VOID(buttonNode);
     if (params.bgColorResObj) {
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+        auto buttonPattern = buttonNode->GetPattern();
         CHECK_NULL_VOID(buttonPattern);
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(buttonNode))](
                             const RefPtr<ResourceObject>& resObj) {
@@ -1117,8 +1126,11 @@ void DialogPattern::AddButtonColorCallback(const ButtonInfo& params, RefPtr<Fram
 RefPtr<FrameNode> DialogPattern::CreateButton(
     const ButtonInfo& params, int32_t index, bool isCancel, bool isVertical, int32_t length)
 {
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(buttonHandle, nullptr);
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
     CHECK_NULL_RETURN(buttonNode, nullptr);
     ACE_UINODE_TRACE(buttonNode);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
@@ -1130,9 +1142,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     if ((dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) && params.dlgButtonStyle.has_value()) {
         auto buttonStyle = params.dlgButtonStyle.value() == DialogButtonStyle::HIGHTLIGHT ? ButtonStyleMode::EMPHASIZE
                                                                                           : ButtonStyleMode::NORMAL;
-        auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-        CHECK_NULL_RETURN(buttonProp, nullptr);
-        buttonProp->UpdateButtonStyle(buttonStyle);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, buttonStyle);
     }
 
     // append text inside button
@@ -1173,9 +1183,8 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(bgColor.value());
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
@@ -1221,10 +1230,13 @@ void DialogPattern::UpdateDialogButtonProperty(
     RefPtr<FrameNode>& buttonNode, int32_t index, bool isVertical, int32_t length)
 {
     // update button padding
-    auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    auto buttonProp = buttonNode->GetLayoutProperty();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
-        buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, ButtonStyleMode::NORMAL);
     }
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
@@ -1335,9 +1347,9 @@ void DialogPattern::AddButtonAndDivider(
         auto buttonNode = CreateButton(buttons[i], i, false, isVertical, length);
         CHECK_NULL_VOID(buttonNode);
         ACE_UINODE_TRACE(buttonNode);
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetSkipColorConfigurationUpdate();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setSkipColorConfigurationUpdate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)));
         buttonNode->MountToParent(container);
         buttonNode->MarkModifyDone();
     }
@@ -1352,6 +1364,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateEnableSmallLanguageTruncation(true);
+    textProps->UpdatePunctuationOverflow(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1385,7 +1398,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     // ListItem -> Row -> title + icon
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> itemNode = FrameNode::CreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        LIST_ITEM_ETS_TAG, Id, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     CHECK_NULL_RETURN(itemNode, nullptr);
 
     // update sheet row flex align
@@ -1448,6 +1461,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateEnableSmallLanguageTruncation(true);
+    props->UpdatePunctuationOverflow(true);
     if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         props->UpdateOrphanCharOptimization(true);
     }
@@ -1484,7 +1498,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
 RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& sheets)
 {
     auto listId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto list = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, listId, AceType::MakeRefPtr<ListPattern>());
+    auto list = FrameNode::CreateFrameNode(LIST_ETS_TAG, listId, AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_RETURN(list, nullptr);
 
     // set sheet padding
@@ -1674,7 +1688,7 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
+    if (host->GetTag() == ALERT_DIALOG_ETS_TAG || host->GetTag() == ACTION_SHEET_DIALOG_ETS_TAG) {
         json->PutExtAttr("title", title_.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
         json->PutExtAttr("message", message_.c_str(), filter);
@@ -1932,9 +1946,10 @@ void DialogPattern::UpdateSheetIconAndText()
 void DialogPattern::UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnIndex)
 {
     CHECK_NULL_VOID(buttonFrameNode);
-    auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipColorConfigurationUpdate();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->setSkipColorConfigurationUpdate(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)));
     // parse button text color and background color
     std::string textColorStr;
     std::optional<Color> bgColor;
@@ -1961,7 +1976,7 @@ void DialogPattern::UpdateButtonsProperty()
     if (buttonContainer_) {
         isFirstDefaultFocus_ = true;
         for (const auto& buttonNode : buttonContainer_->GetChildren()) {
-            if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+            if (buttonNode->GetTag() != BUTTON_ETS_TAG) {
                 continue;
             }
             ACE_UINODE_TRACE(buttonNode);
@@ -1977,7 +1992,7 @@ void DialogPattern::UpdateButtonsProperty()
                 continue;
             }
             auto buttonFrameNode = DynamicCast<FrameNode>(rowNode->GetFirstChild());
-            if (buttonFrameNode && buttonFrameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+            if (buttonFrameNode && buttonFrameNode->GetTag() == BUTTON_ETS_TAG) {
                 UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
             }
             ++btnIndex;
@@ -2032,7 +2047,7 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
     isSuitOldMeasure_ = false;
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_RETURN(buttonNode, false);
             ACE_UINODE_TRACE(buttonNode);
@@ -2177,7 +2192,7 @@ void DialogPattern::UpdateTextFontScale()
     }
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+        if (child->GetTag() == BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
             ACE_UINODE_TRACE(buttonNode);
@@ -2267,7 +2282,7 @@ void DialogPattern::UpdateFontScale()
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
 {
     // set Enabled and Focusable
-    auto buttonButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonButtonEvent = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonButtonEvent);
     buttonButtonEvent->SetEnabled(enabled);
     buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);
@@ -2794,7 +2809,7 @@ void DialogPattern::OnAttachToMainTreeImpl()
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (parentNode->GetTag() != NAVDESTINATION_VIEW_ETS_TAG) {
         return;
     }
     auto dialogRenderContext = host->GetRenderContext();
@@ -2864,7 +2879,7 @@ void DialogPattern::OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode)
     auto overlayManager = GetOverlayManager(nullptr);
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveDialog(dialogNode, false);
-    if (overlayManager->isMaskNode(GetHost()->GetId())) {
+    if (overlayManager->IsMaskNode(GetHost()->GetId())) {
         overlayManager->PopModalDialog(GetHost()->GetId());
     }
 }
@@ -2955,7 +2970,7 @@ std::vector<RefPtr<FrameNode>> DialogPattern::GetButtons()
     std::vector<RefPtr<FrameNode>> result;
     CHECK_NULL_RETURN(buttonContainer_, result);
     for (const auto& buttonNode : buttonContainer_->GetChildren()) {
-        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+        if (buttonNode->GetTag() != BUTTON_ETS_TAG) {
             continue;
         }
         ACE_UINODE_TRACE(buttonNode);

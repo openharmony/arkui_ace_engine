@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -27,59 +25,44 @@ using namespace OHOS::Ace::Framework;
 namespace {
 enum class SubMenuExpandingMode { SIDE = 0, EMBEDDED, STACK };
 } // namespace
-namespace OHOS::Ace {
-// Should use CJUIModifier API later
-NG::MenuModelNG* GetMenuModel()
-{
-    static NG::MenuModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find Menu dynamic module");
-        }
-        model = reinterpret_cast<NG::MenuModelNG*>(module->GetModel());
-    }
-    return model;
-}
-} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuCreate()
 {
-    GetMenuModel()->Create();
+    NG::NodeModifier::GetMenuModel()->Create();
 }
 
 void FfiOHOSAceFrameworkMenuFont(double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    GetMenuModel()->SetFontStyle(static_cast<FontStyle>(style));
+    NG::NodeModifier::GetMenuModel()->SetFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    GetMenuModel()->SetFontFamily(fontFamilies);
+    NG::NodeModifier::GetMenuModel()->SetFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    GetMenuModel()->SetFontSize(fontSize);
+    NG::NodeModifier::GetMenuModel()->SetFontSize(fontSize);
 
     std::string weightVal = weight;
-    GetMenuModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
+    NG::NodeModifier::GetMenuModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuSetFontColor(uint32_t color)
 {
     std::optional<Color> colorVal = Color(color);
-    GetMenuModel()->SetFontColor(colorVal);
+    NG::NodeModifier::GetMenuModel()->SetFontColor(colorVal);
 }
 
 void FfiOHOSAceFrameworkMenuSetWidth(double width, int32_t unit)
 {
     CalcDimension widthVal = CalcDimension(width, DimensionUnit(unit));
-    GetMenuModel()->SetWidth(widthVal);
+    NG::NodeModifier::GetMenuModel()->SetWidth(widthVal);
 }
 
 void FfiOHOSAceFrameworkMenuSetRadiusByLength(double size, int32_t unit)
 {
     CalcDimension radius = CalcDimension(size, DimensionUnit(unit));
-    GetMenuModel()->SetBorderRadius(radius);
+    NG::NodeModifier::GetMenuModel()->SetBorderRadius(radius);
 }
 
 void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
@@ -92,12 +75,13 @@ void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
         CalcDimension(radius.bottomLeftRadiuses, DimensionUnit(radius.bottomLeftUnit));
     std::optional<CalcDimension> radiusBottomRight =
         CalcDimension(radius.bottomRightRadiuses, DimensionUnit(radius.bottomRightUnit));
-    GetMenuModel()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+    NG::NodeModifier::GetMenuModel()->SetBorderRadius(
+        radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
 }
 
 void FfiOHOSAceFrameworkMenuResetRadius()
 {
-    GetMenuModel()->ResetBorderRadius();
+    NG::NodeModifier::GetMenuModel()->ResetBorderRadius();
 }
 
 void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool hasValue)
@@ -118,7 +102,7 @@ void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool has
             divider.endMargin.Reset();
         }
     }
-    GetMenuModel()->SetItemDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
+    NG::NodeModifier::GetMenuModel()->SetItemDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, bool hasValue)
@@ -148,7 +132,7 @@ void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, boo
             divider.endMargin.SetUnit(DimensionUnit::INVALID);
         }
     }
-    GetMenuModel()->SetItemGroupDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
+    NG::NodeModifier::GetMenuModel()->SetItemGroupDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)
@@ -157,6 +141,6 @@ void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)
     auto expandingMode = modeVal == SubMenuExpandingMode::EMBEDDED ? NG::SubMenuExpandingMode::EMBEDDED
                          : modeVal == SubMenuExpandingMode::STACK  ? NG::SubMenuExpandingMode::STACK
                                                                    : NG::SubMenuExpandingMode::SIDE;
-    GetMenuModel()->SetExpandingMode(expandingMode);
+    NG::NodeModifier::GetMenuModel()->SetExpandingMode(expandingMode);
 }
 }

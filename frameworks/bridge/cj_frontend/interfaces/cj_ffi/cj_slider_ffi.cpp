@@ -127,7 +127,7 @@ void FfiOHOSAceFrameworkSliderShowTipsNew(bool isShow, const char* content, bool
 {
     std::optional<std::string> value;
     if (contentExist) {
-        value = std::string(content);
+        value = std::string(content != nullptr ? content : "");
     } else {
         value = std::nullopt;
     }

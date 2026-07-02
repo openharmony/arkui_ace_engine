@@ -1,0 +1,7 @@
+node_modules/
+.idea/
+build/
+.hvigor/
+oh_modules/
+entry/build/
+.cache/

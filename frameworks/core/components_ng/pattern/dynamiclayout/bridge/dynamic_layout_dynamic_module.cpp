@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/dynamiclayout/bridge/dynamic_layout_dynamic_module.h"
+#include "core/components_ng/pattern/dynamiclayout/bridge/lazy_dynamic_layout_dynamic_module.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
 #include "core/components_ng/pattern/dynamiclayout/dynamic_layout_model_ng.h"
 #include "arkoala_api_generated.h"
@@ -26,7 +27,7 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_DynamicLayout()
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_LazyDynamicLayout()
 {
-    return new OHOS::Ace::DynamicLayoutDynamicModule();
+    return new OHOS::Ace::LazyDynamicLayoutDynamicModule();
 }
 
 namespace OHOS::Ace {

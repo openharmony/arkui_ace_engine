@@ -101,15 +101,17 @@ import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 import { ComponentContent } from 'arkui.ComponentContent';
 import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
-import { BusinessErrorInterface, BusinessError } from "#generated";
+import { BusinessError } from "@ohos.base";
+import { BusinessErrorInterface } from "#generated";
 import { WaterFlowSections } from "#handwritten";
 import { WaterFlowSectionsInterface } from "#generated";
 import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
-import { CommonModifier } from '#generated'
+import { CommonModifier } from './../CommonModifier'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
-import { CustomSpanWrapper, ArkUIGeneratedNativeModule } from "#generated";
+import { CustomSpanWrapper } from "#generated";
+import { ArkUIGeneratedNativeModule } from "#components";
 import { default as text } from '@ohos.graphics.text'
 import { PanGestureOptions } from '../component/gesture'
 import { PanGestureOptionsProxy } from '../component/idlize'
@@ -304,6 +306,13 @@ export namespace extractors {
   }
   export function fromUiMaterialMaterialPtr(ptr: KPointer): uiMaterial.Material {
     throw new Error("fromUiMaterialMaterialPtr is not implemented.")
+  }
+
+  export function toUiMaterialImmersiveMaterialPtr(value: uiMaterial.ImmersiveMaterial): KPointer {
+    return ArkUIAniModule._Extractors_ToUiMaterialMaterialPtr(value);
+  }
+  export function fromUiMaterialImmersiveMaterialPtr(ptr: KPointer): uiMaterial.ImmersiveMaterial {
+    throw new Error("fromUiMaterialImmersiveMaterialPtr is not implemented.")
   }
 
   export function toUiEffectVisualEffectPtr(

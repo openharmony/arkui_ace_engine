@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,34 +25,26 @@
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<AlertDialogModel> AlertDialogModel::instance_ = nullptr;
-std::mutex AlertDialogModel::mutex_;
 AlertDialogModel* AlertDialogModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::AlertDialogModelNG());
+    return NG::NodeModifier::GetAlertDialogModel();
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::AlertDialogModelNG());
-            } else {
-                instance_.reset(new Framework::AlertDialogModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::NodeModifier::GetAlertDialogModel();
+    } else {
+        static Framework::AlertDialogModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
@@ -64,7 +56,7 @@ const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButt
     DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
 constexpr int32_t ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM = 1;
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
-const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND };
 const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
     DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
 const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
@@ -141,8 +133,7 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
     }
 
     if (!buttonInfo.defaultFocus && isPrimaryButtonValid) {
-        if (strcmp(property.c_str(), "confirm") == 0 ||
-        strcmp(property.c_str(), "primaryButton") == 0) {
+        if (strcmp(property.c_str(), "confirm") == 0 || strcmp(property.c_str(), "primaryButton") == 0) {
             buttonInfo.isPrimary = true;
         } else {
             auto primaryButton = objInner->GetProperty("primary");
@@ -491,30 +482,28 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertMaskRect(properties, obj);
         ParseAlertDialogLevelMode(properties, obj);
 
-        auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
-                                    parseButton = ParseButtons, parseShadow = ParseAlertShadow,
-                                    parseBorderProps = ParseAlertBorderWidthAndColor,
-                                    parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
-                                    parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
-                                    parseDialogLevelMode = ParseAlertDialogLevelMode,
-                                    parseSystemMaterial = ParseAlertSystemMaterial,
-                                    node = dialogNode](DialogProperties& dialogProps) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
-            ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
-            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            parseContent(dialogProps, obj);
-            parseButton(execContext, dialogProps, obj);
-            parseShadow(dialogProps, obj);
-            parseBorderProps(dialogProps, obj);
-            parseRadius(dialogProps, obj);
-            parseAlignment(dialogProps, obj);
-            parseOffset(dialogProps, obj);
-            parseMaskRect(dialogProps, obj);
-            parseDialogLevelMode(dialogProps, obj);
-            parseSystemMaterial(dialogProps, obj);
-        };
+        auto onLanguageChange =
+            [execContext, obj, parseContent = ParseDialogTitleAndMessage, parseButton = ParseButtons,
+                parseShadow = ParseAlertShadow, parseBorderProps = ParseAlertBorderWidthAndColor,
+                parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment, parseOffset = ParseAlertOffset,
+                parseMaskRect = ParseAlertMaskRect, parseDialogLevelMode = ParseAlertDialogLevelMode,
+                parseSystemMaterial = ParseAlertSystemMaterial, node = dialogNode](DialogProperties& dialogProps) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+                ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
+                auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
+                parseContent(dialogProps, obj);
+                parseButton(execContext, dialogProps, obj);
+                parseShadow(dialogProps, obj);
+                parseBorderProps(dialogProps, obj);
+                parseRadius(dialogProps, obj);
+                parseAlignment(dialogProps, obj);
+                parseOffset(dialogProps, obj);
+                parseMaskRect(dialogProps, obj);
+                parseDialogLevelMode(dialogProps, obj);
+                parseSystemMaterial(dialogProps, obj);
+            };
         properties.onLanguageChange = std::move(onLanguageChange);
 
         // Parses gridCount.

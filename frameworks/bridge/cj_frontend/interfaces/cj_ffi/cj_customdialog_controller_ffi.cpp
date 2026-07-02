@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "cj_lambda.h"
 
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace;
@@ -309,9 +310,9 @@ void NativeCustomDialogController::OpenDialog()
     }
     dialogProperties_.isSysBlurStyle =
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
-    CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, AccessibilityManager::WeakClaim(this),
-        dialogs_, pending_, isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_,
-        dialogOperation_, hasBind_);
+    NG::NodeModifier::GetCustomDialogControllerModel()->SetOpenDialog(dialogProperties_,
+        AccessibilityManager::WeakClaim(this), dialogs_, pending_, isShown_, std::move(cancelTask),
+        std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_, hasBind_);
     return;
 }
 
@@ -333,8 +334,9 @@ void NativeCustomDialogController::CloseDialog()
         }
     });
 
-    CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, AccessibilityManager::WeakClaim(this),
-        dialogs_, pending_, isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
+    NG::NodeModifier::GetCustomDialogControllerModel()->SetCloseDialog(dialogProperties_,
+        AccessibilityManager::WeakClaim(this), dialogs_, pending_, isShown_, std::move(cancelTask), dialogComponent_,
+        customDialog_, dialogOperation_);
 }
 } // namespace OHOS::Ace::Framework
 

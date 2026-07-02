@@ -39,6 +39,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

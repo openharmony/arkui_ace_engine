@@ -3419,6 +3419,9 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
  */
 HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create target node.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -3426,9 +3429,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. update placeholder value and call DumpSimplifyInfo
+     */
     textFieldLayoutProperty->UpdatePlaceholder(DEFAULT_TEXT_U16);
     std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern->DumpSimplifyInfo(json);
+
+    /**
+     * @tc.steps: step3. verify placeholder is dumped correctly
+     */
     EXPECT_EQ(json->GetString("placeholder", DEFAULT_TEXT), DEFAULT_TEXT);
 }
 

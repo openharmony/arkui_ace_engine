@@ -35,7 +35,7 @@ interface IView {
     getChildById(elmtId: number) : IView | undefined;
     removeChild(child: IView): boolean;
     findViewInHierarchy(id: number): ViewPU | ViewV2 | undefined;
-    shouldDeleteRecursively(): boolean;
+    __shouldDeleteRecursively__Internal(): boolean;
 
     purgeDeleteElmtId(rmElmtId: number): boolean;
     initialRenderView(): void;
@@ -53,12 +53,12 @@ interface IView {
     setDeleteStatusRecursively(): void;
 
     isCompFreezeAllowed(): boolean;
-    setActiveInternal(newState: boolean, isReuse: boolean): void;
+    setActiveInternal(newState: boolean, isReuse: boolean, suppressActiveLifecycle: boolean): void;
 
     findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
 
     localStorage_ : LocalStorage;
-    __isGlobalPoolActive? : boolean;
+    __isGlobalPoolActive__Internal? : boolean;
 
     debugInfoViewHierarchyInternal(depth: number, recursive: boolean): string;
     debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number, recursive: boolean): string;

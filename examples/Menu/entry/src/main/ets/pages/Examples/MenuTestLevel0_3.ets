@@ -20,6 +20,7 @@
  
 import { common } from '@kit.AbilityKit'
 import { deviceInfo } from '@kit.BasicServicesKit';
+import { window } from '@kit.ArkUI';
 import { MenuBuilder, MenuAttrOptions, SimpleMenuBuilder } from  '../../customBuilder/MenuBuilder'
 
 @Extend(Text)
@@ -94,12 +95,14 @@ struct MenuTestLevel0_3 {
 
   // 监听设备横竖屏, 适配避让距离: safeEdge padding
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-  private windowClass = (this.context as common.UIAbilityContext).windowStage.getMainWindowSync();
+  private windowClass: window.Window | undefined;
   aboutToAppear(): void {
     try {
+      let windowClass = (this.context as common.UIAbilityContext).windowStage.getMainWindowSync();
+      this.windowClass = windowClass;
       let deviceTypeInfo: string = deviceInfo.deviceType
       // ...
-      this.windowClass.on('windowSizeChange', (size) => {
+      windowClass.on('windowSizeChange', (size) => {
         let viewWidth = this.getUIContext().px2vp(size.width)
         let viewHeight = this.getUIContext().px2vp(size.height)
         // 根据不同设备类型和横竖屏状,设置避让边距
@@ -453,7 +456,7 @@ struct MenuTestLevel0_3 {
   }
 
   aboutToDisappear(): void {
-    this.windowClass.off('windowSizeChange')
+    this.windowClass?.off('windowSizeChange')
   }
 
   pageTransition() {

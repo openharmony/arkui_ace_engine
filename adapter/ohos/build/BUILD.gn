@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
+  "button",
   "badge",
   "container_reader",
   "dynamiclayout",
@@ -35,6 +36,7 @@ component_modules = [
   "marquee",
   "progress",
   "texttimer",
+  "navigator",
   "search",
   "stepper",
   "radio",
@@ -49,11 +51,14 @@ component_modules = [
   "menu",
   "lazy_column_layout",
   "toggle",
+  "dialog",
   "image_animator",
   "date_picker",
   "lazy_grid_layout",
   "refresh",
   "text_picker",
+  "select",
+  "grid",
 ]
 
 if (!ace_engine_feature_wearable) {

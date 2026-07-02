@@ -1334,6 +1334,7 @@ class ArkDotIndicator extends DotIndicator {
   selectedColorValue: ResourceColor | undefined;
   maxDisplayCountValue: ResourceColor | undefined;
   spaceValue: LengthMetrics | undefined;
+  indicatorIconValue: Array<IndicatorIconInfo> | undefined;
   ignoreSizeValue: boolean | undefined;
 
   constructor() {
@@ -1352,6 +1353,7 @@ class ArkDotIndicator extends DotIndicator {
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
     this.spaceValue = undefined;
+    this.indicatorIconValue = undefined;
     this.ignoreSizeValue = undefined;
   }
 
@@ -1371,6 +1373,7 @@ class ArkDotIndicator extends DotIndicator {
       this.selectedColorValue === another.selectedColorValue &&
       this.maxDisplayCountValue === another.maxDisplayCountValue &&
       this.spaceValue === another.spaceValue &&
+      this.indicatorIconValue === another.indicatorIconValue &&
       this.ignoreSizeValue === another.ignoreSizeValue
     );
   }

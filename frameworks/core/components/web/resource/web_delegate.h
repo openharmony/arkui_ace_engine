@@ -1569,6 +1569,9 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByFocusMove(
         int64_t accessibilityId, int32_t direction);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByParams(
+        int64_t accessibilityId, int32_t direction, int32_t focusRuleType,
+        const std::map<std::string, std::string>& params);
     void SetAccessibilityState(bool state, bool isDelayed);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;

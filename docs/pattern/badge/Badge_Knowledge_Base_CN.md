@@ -1121,7 +1121,7 @@ hilog -T ACE_BADGE
 ### 参考文档
 
 - [Badge/CLAUDE.md](../../frameworks/core/components_ng/pattern/badge/CLAUDE.md) - 快速参考
-- [Text_Knowledge_Base_CN.md](../text/Text_Knowledge_Base_CN.md) - Text 组件深入（Badge 内部使用 Text）
+- [Text Context](../../kb/components/basic/text.md) - Text 组件路由（Badge 内部使用 Text）
 - [badge_theme.h](../../frameworks/core/components/badge/badge_theme.h) - 主题定义
 
 ### 版本历史

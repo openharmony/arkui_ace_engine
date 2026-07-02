@@ -229,6 +229,15 @@ bool ArcSwiperPattern::IsDisableTransitionAnimation() const
     return disableTransitionAnimation_;
 }
 
+CrownSensitivity ArcSwiperPattern::GetDigitalCrownSensitivity() const
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    return crownSensitivity_;
+#else
+    return CrownSensitivity::MEDIUM;
+#endif
+}
+
 void ArcSwiperPattern::PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode,
     bool rollBack)
 {

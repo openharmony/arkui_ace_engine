@@ -248,6 +248,12 @@ ace_unittest("content_change_manager_test_ng") {
   sources = [ "content_change_manager_test_ng.cpp" ]
 }
 
+ace_unittest("recoverable_manager_test_ng") {
+  module_name = "NavigationSet-Indicator"
+  type = "new"
+  sources = [ "recoverable_manager_test_ng.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
@@ -273,6 +279,7 @@ group("core_manager_unittest") {
     ":json_report_test_ng",
     ":navigation_manager_test_ng",
     ":post_event_manager_test_ng",
+    ":recoverable_manager_test_ng",
     ":safe_area_manager_test_ng",
     ":scroll_adjust_manager_test_ng",
     ":select_overlay_manager_test_ng",

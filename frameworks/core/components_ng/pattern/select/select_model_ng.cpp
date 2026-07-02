@@ -26,9 +26,13 @@
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+
+const char SELECT_ETS_TAG[] = "Select";
+
 void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 {
     auto* pipeline = select->GetContextWithCheck();
@@ -38,7 +42,7 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
     } else {
         auto pattern = select->GetPattern<SelectPattern>();
@@ -53,9 +57,9 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SELECT_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", SELECT_ETS_TAG, nodeId);
     auto select = FrameNode::GetOrCreateFrameNode(
-        V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+        SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
     InitSelect(AceType::RawPtr(select), params);
@@ -430,7 +434,7 @@ void SelectModelNG::SetHasOptionWidth(bool hasOptionWidth)
 
 void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
     if (controlSize.has_value()) {
@@ -503,7 +507,7 @@ void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
 
 ControlSize SelectModelNG::GetControlSize()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return ControlSize::NORMAL;
     }
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
@@ -521,7 +525,7 @@ ControlSize SelectModelNG::GetControlSize(FrameNode* frameNode)
 RefPtr<FrameNode> SelectModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+        SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
 
     return frameNode;
 }
@@ -798,7 +802,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     if (!pattern->GetMenuNode()) {
         const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
         auto menuWrapper = menuViewModifier ? menuViewModifier->createWithSelectParams(
-            params, select->GetId(), V2::SELECT_ETS_TAG, false) : nullptr;
+            params, select->GetId(), SELECT_ETS_TAG, false) : nullptr;
         pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
@@ -1569,6 +1573,239 @@ void SelectModelNG::CreateWithDividerResourceObj(
         if (pattern->GetDividerMode().has_value()) {
             pattern->SetDividerMode(pattern->GetDividerMode());
         }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void SelectModelNG::CreateSelect(
+    const std::vector<SelectParam>& params, const std::vector<SelectResObjParam>& resObjVec)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", SELECT_ETS_TAG, nodeId);
+    auto select =
+        FrameNode::GetOrCreateFrameNode(SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(select);
+    InitSelect(AceType::RawPtr(select), params);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        MaterialUtils::IsMaterialEnabled()) {
+        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(material));
+    }
+
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (resObjVec.size() > 0) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SelectPattern>();
+        CHECK_NULL_VOID(pattern);
+        int32_t index = 0;
+        for (const auto& objParam : resObjVec) {
+            RefPtr<ResourceObject> resValueObj = objParam.valueResObj;
+            std::string keyValue = "selectItemValue" + std::to_string(index);
+            AddResObjWithStaCallBack(keyValue, resValueObj, index, SelectOptionType::TEXT);
+            RefPtr<ResourceObject> resIconObj = objParam.iconResObj;
+            std::string keyIcon = "selectItemIcon" + std::to_string(index);
+            AddResObjWithStaCallBack(keyIcon, resIconObj, index, SelectOptionType::ICON);
+            index++;
+        }
+    }
+}
+
+void SelectModelNG::SetSelectChangeEvent(FrameNode* frameNode, NG::SelectChangeEvent&& selectChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(selectChangeEvent));
+}
+
+void SelectModelNG::SetValueChangeEvent(FrameNode* frameNode, NG::ValueChangeEvent&& valueChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValueChangeEvent(std::move(valueChangeEvent));
+}
+
+void SelectModelNG::ResetShowInSubWindow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->ResetShowInSubWindow();
+}
+
+void SelectModelNG::ResetFontColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->ResetFontColor();
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, FontColorSetByUser, false, frameNode);
+}
+
+void SelectModelNG::ResetShowDefaultSelectedIcon(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->ResetShowDefaultSelectedIcon();
+}
+
+void SelectModelNG::SetPadding(FrameNode* frameNode, const CalcDimension& value)
+{
+    if (value.Unit() == DimensionUnit::CALC) {
+        ViewAbstract::SetPadding(
+            frameNode, NG::CalcLength(value.IsNonNegative() ? value.CalcValue() : CalcDimension().CalcValue()));
+    } else {
+        ViewAbstract::SetPadding(frameNode, NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+    }
+}
+
+void SelectModelNG::SetPaddingLeft(FrameNode* frameNode, const CalcDimension& leftValue)
+{
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    paddings.bottom = std::nullopt;
+
+    if (!NearEqual(leftValue.Value(), 0.0)) {
+        if (leftValue.Unit() == DimensionUnit::CALC) {
+            paddings.left =
+                NG::CalcLength(leftValue.IsNonNegative() ? leftValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(leftValue.IsNonNegative() ? leftValue : CalcDimension());
+        }
+    }
+    paddings.right = std::nullopt;
+    ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void SelectModelNG::SetPaddingTop(FrameNode* frameNode, const CalcDimension& topValue)
+{
+    NG::PaddingProperty paddings;
+    if (!NearEqual(topValue.Value(), 0.0)) {
+        if (topValue.Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(topValue.IsNonNegative() ? topValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(topValue.IsNonNegative() ? topValue : CalcDimension());
+        }
+    }
+    paddings.bottom = std::nullopt;
+    paddings.left = std::nullopt;
+    paddings.right = std::nullopt;
+    ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void SelectModelNG::SetPaddingRight(FrameNode* frameNode, const CalcDimension& rightValue)
+{
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    paddings.bottom = std::nullopt;
+    paddings.left = std::nullopt;
+    if (!NearEqual(rightValue.Value(), 0.0)) {
+        if (rightValue.Unit() == DimensionUnit::CALC) {
+            paddings.right =
+                NG::CalcLength(rightValue.IsNonNegative() ? rightValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(rightValue.IsNonNegative() ? rightValue : CalcDimension());
+        }
+    }
+    ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void SelectModelNG::SetPaddingBottom(FrameNode* frameNode, const CalcDimension& buttomValue)
+{
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    if (!NearEqual(buttomValue.Value(), 0.0)) {
+        if (buttomValue.Unit() == DimensionUnit::CALC) {
+            paddings.bottom =
+                NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue.CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(buttomValue.IsNonNegative() ? buttomValue : CalcDimension());
+        }
+    }
+    paddings.left = std::nullopt;
+    paddings.right = std::nullopt;
+    ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void SelectModelNG::SetTextModifierApply(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextModifierApply(textApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, TextModifierSetByUser, true, frameNode);
+}
+
+void SelectModelNG::SetArrowModifierApply(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowModifierApply(arrowApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, ArrowModifierSetByUser, true, frameNode);
+}
+
+void SelectModelNG::SetOptionTextModifier(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionTextModifier(optionApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, OptionTextModifierSetByUser, true, frameNode);
+}
+
+void SelectModelNG::SetSelectedOptionTextModifier(
+    FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionTextModifier(optionSelectedApply);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionTextModifierSetByUser, true, frameNode);
+}
+
+void SelectModelNG::AddResObjWithStaCallBack(
+    std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [index, optionType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        std::string result;
+        switch (optionType) {
+            case SelectOptionType::TEXT:
+                if (!ResourceParseUtils::ParseResString(resObj, result)) {
+                    return;
+                }
+                break;
+            case SelectOptionType::ICON:
+                if (!ResourceParseUtils::ParseResMedia(resObj, result)) {
+                    return;
+                }
+                break;
+            default:
+                break;
+        }
+        pattern->UpdateMenuOption(index, result, optionType);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

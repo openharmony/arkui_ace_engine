@@ -99,6 +99,7 @@ export class FreeRootNode extends PeerNode {
         }
     }
     dispose(): void {
+        this.componentRoot?.deleteFreezeRoot(this);
         this.componentRoot = undefined;
         this.context = undefined;
         super.dispose();

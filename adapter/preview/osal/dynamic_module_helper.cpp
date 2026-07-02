@@ -81,7 +81,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
     }
     static const std::unordered_map<std::string, std::string> soMap = {
         {"DynamicLayout", "dynamiclayout"},
+        {"LazyDynamicLayout", "dynamiclayout"},
         { "ContainerReader", "containerreader" },
+        { "Button", "button" },
         {"Counter", "counter"},
         { "DataPanel", "datapanel" },
         {"Checkbox", "checkbox"},
@@ -94,12 +96,15 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
+        { "Grid", "grid" },
+        { "GridItem", "grid" },
         { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
         { "Progress", "progress" },
         { "TextTimer", "texttimer" },
+        { "Navigator", "navigator" },
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
         {"Radio", "radio"},
@@ -123,6 +128,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "Dialog", "dialog" },
         { "ImageAnimator", "imageanimator" },
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
@@ -130,6 +136,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
+        { "Select", "select" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

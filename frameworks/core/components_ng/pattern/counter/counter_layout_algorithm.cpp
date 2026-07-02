@@ -18,6 +18,7 @@
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -136,17 +137,27 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(subButtonGeometryNode);
     auto subButtonLayoutProperty = subButtonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(subButtonLayoutProperty);
-    auto leftButtonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(subButtonLayoutProperty);
-    CHECK_NULL_VOID(leftButtonLayoutProperty);
     BorderRadiusProperty leftButtonBorder { counterTheme->GetBorderRadius().radiusTopLeft.value(), 0.0_vp, 0.0_vp,
         counterTheme->GetBorderRadius().radiusBottomLeft.value() };
     BorderRadiusProperty rightButtonBorder { 0.0_vp, counterTheme->GetBorderRadius().radiusTopRight.value(),
         counterTheme->GetBorderRadius().radiusBottomRight.value(), 0.0_vp };
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (layoutDirection == TextDirection::RTL) {
-        leftButtonLayoutProperty->UpdateBorderRadius(rightButtonBorder);
+        auto* subBtnModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(subBtnModifier);
+        auto subButtonHostNode = subButtonWrapper->GetHostNode();
+        CHECK_NULL_VOID(subButtonHostNode);
+        ArkUINodeHandle subBtnHandle =
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(subButtonHostNode));
+        subBtnModifier->updateBorderRadiusToLayoutProp(subBtnHandle, rightButtonBorder);
     } else {
-        leftButtonLayoutProperty->UpdateBorderRadius(leftButtonBorder);
+        auto* subBtnModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(subBtnModifier);
+        auto subButtonHostNode = subButtonWrapper->GetHostNode();
+        CHECK_NULL_VOID(subButtonHostNode);
+        ArkUINodeHandle subBtnHandle =
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(subButtonHostNode));
+        subBtnModifier->updateBorderRadiusToLayoutProp(subBtnHandle, leftButtonBorder);
     }
     CalcSize subButtonSize;
     subButtonSize.SetWidth(CalcLength(buttonWidth));
@@ -172,12 +183,17 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(addButtonGeometryNode);
     auto addButtonLayoutProperty = addButtonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(addButtonLayoutProperty);
-    auto rightButtonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(addButtonLayoutProperty);
-    CHECK_NULL_VOID(rightButtonLayoutProperty);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto addButtonNodeForHandle = addButtonWrapper->GetHostNode();
+    CHECK_NULL_VOID(addButtonNodeForHandle);
+    ArkUINodeHandle buttonHandle =
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(addButtonNodeForHandle));
+
     if (layoutDirection == TextDirection::RTL) {
-        rightButtonLayoutProperty->UpdateBorderRadius(leftButtonBorder);
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, leftButtonBorder);
     } else {
-        rightButtonLayoutProperty->UpdateBorderRadius(rightButtonBorder);
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, rightButtonBorder);
     }
     CalcSize addButtonSize;
     addButtonSize.SetWidth(CalcLength(buttonWidth));

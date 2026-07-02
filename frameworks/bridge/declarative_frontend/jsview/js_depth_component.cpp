@@ -169,19 +169,6 @@ void JSDepthComponent::SetCamera(const JSCallbackInfo& info)
     auto cameraBufferCropValue = jsObject->GetProperty("cameraBufferCrop");
     if (cameraBufferCropValue->IsObject()) {
         cameraParams.cameraBufferCrop = ParseCameraBufferCrop(cameraBufferCropValue);
-    } else {
-        OHOS::Ace::CameraBufferCrop defaultCrop;
-        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        if (frameNode) {
-            auto geoNode = frameNode->GetGeometryNode();
-            if (geoNode) {
-                defaultCrop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
-                defaultCrop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
-            }
-        }
-        defaultCrop.cropOffset = {0.0f, 0.0f};
-        defaultCrop.cropScale = 1.0f;
-        cameraParams.cameraBufferCrop = defaultCrop;
     }
 
     NG::DepthComponentModel::SetCamera(cameraParams);
@@ -259,7 +246,7 @@ void JSDepthComponent::SetOnError(const JSCallbackInfo& info)
             errorObj->SetProperty<int32_t>("code", errorEvent.errorCode);
             errorObj->SetProperty<std::string>("name", "BusinessError");
             errorObj->SetProperty<std::string>("message", errorEvent.errorMessage);
-            eventObj->SetProperty<JSRef<JSObject>>("error", errorObj);
+            eventObj->SetPropertyObject("error", errorObj);
         }
         JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
         func->ExecuteJS(1, &param);
@@ -427,8 +414,12 @@ OHOS::Ace::CameraBufferCrop JSDepthComponent::ParseCameraBufferCrop(const JSRef<
 
 OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector3 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();
@@ -448,8 +439,12 @@ OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vecto
 
 OHOS::Ace::DepthVector4 JSDepthComponent::ParseVector4(const JSRef<JSVal>& vectorValue)
 {
-    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     OHOS::Ace::DepthVector4 vector;
+    if (!vectorValue->IsObject()) {
+        return vector;
+    }
+
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     auto xValue = vectorObj->GetProperty("x");
     if (xValue->IsNumber()) {
         vector.x = xValue->ToNumber<float>();

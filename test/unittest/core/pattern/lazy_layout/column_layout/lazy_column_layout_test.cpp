@@ -995,27 +995,65 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest004, TestSize.Level1)
 
 /**
  * @tc.name: AddDelChildrenTest005
- * @tc.desc: Delete 5 bottom children while scrolled to the bottom; the last item stays bottom-pinned
+ * @tc.desc: Repeatedly delete bottom children while scrolled to the bottom; the last item stays bottom-pinned
  * @tc.type: FUNC
  */
 HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create Scroll > LazyColumnLayout with 10 items
-     * @tc.expected: content height = 10 * ITEM_HEIGHT = 1000, scrollable range = 1000 - SCROLL_HEIGHT = 550
+     * @tc.steps: step1. Create Scroll > LazyColumnLayout with 20 items
+     * @tc.expected: content height = 20 * ITEM_HEIGHT = 2000, scrollable range = 2000 - SCROLL_HEIGHT = 1550
      */
     CreateScroll();
     CreateLazyColumnLayout();
-    CreateContent(10);
+    CreateContent(20);
     CreateDone();
 
     /**
      * @tc.steps: step2. Scroll to the bottom
-     * @tc.expected: visible range 5-9, scroll offset = -550, last item bottom-aligned
-     *               (on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350)
+     * @tc.expected: visible range 15-19, scroll offset = SCROLL_HEIGHT - 20 * ITEM_HEIGHT = -1550,
+     *               last item bottom-aligned (on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350)
      */
-    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    scrollablePattern_->UpdateCurrentOffset(-2000, SCROLL_FROM_UPDATE);
     FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -1550);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step3. Delete the last 5 (bottom) children, then flush once
+     * @tc.expected: the 15 remaining items become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 15, visible 10-14, offset = SCROLL_HEIGHT - 15 * ITEM_HEIGHT = -1050,
+     *               last item on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 5; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 14);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -1050);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 14), 350);
+
+    /**
+     * @tc.steps: step4. Delete the last 5 (bottom) children, then flush once
+     * @tc.expected: the 10 remaining items become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 10, visible 5-9, offset = SCROLL_HEIGHT - 10 * ITEM_HEIGHT = -550,
+     *               last item on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 5; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
     EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 5);
     EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
@@ -1023,9 +1061,9 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest005, TestSize.Level1)
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
 
     /**
-     * @tc.steps: step3. Delete the last 5 (bottom) children, then flush once
-     * @tc.expected: the 5 remaining top items become the whole content and the scroll re-clamps to the new
-     *               bottom; totalItemCount = 5, visible 0-4, offset = -(550 - 5 * ITEM_HEIGHT) = -50,
+     * @tc.steps: step5. Delete the last 5 (bottom) children, then flush once
+     * @tc.expected: the 5 remaining items become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 5, visible 0-4, offset = SCROLL_HEIGHT - 5 * ITEM_HEIGHT = -50,
      *               last item on-screen top y stays 350
      */
     for (int32_t i = 0; i < 5; i++) {

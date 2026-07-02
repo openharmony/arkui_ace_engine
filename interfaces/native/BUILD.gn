@@ -164,6 +164,9 @@ if (is_arkui_x) {
       "$ace_root/interfaces/inner_api/ace_kit/include",
       "//base/global/resource_management/interfaces/inner_api/include",
       "//foundation/graphic/graphic_2d/rosen/modules/platform/ipc_core",
+      "//foundation/multimedia/image_framework/interfaces/kits/native/include/image",
+      "//foundation/distributeddatamgr/udmf/interfaces/innerkits/common",
+      "//foundation/distributeddatamgr/udmf/interfaces/innerkits/data",
     ]
 
     configs = [
@@ -171,6 +174,8 @@ if (is_arkui_x) {
       "//foundation/arkui/napi:ace_napi_config",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/drawing_ndk:export_config",
       "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config",
+      "//foundation/distributeddatamgr/udmf/interfaces/innerkits:udmf_client_config",
+      "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/want:want_params_config",
     ]
 
     sources = [
@@ -178,6 +183,12 @@ if (is_arkui_x) {
       "native_error_message_wrapper.cpp",
       "native_interface_xcomponent_cross_platform.cpp",
       "native_styled_string_descriptor.cpp",
+      "event/drag_and_drop_impl.cpp",
+      "event/key_event_impl.cpp",
+      "event/ui_input_event.cpp",
+      "node/node_component_snapshot.cpp",
+      "node/native_interface_focus.cpp",
+      "node/drawable_descriptor.cpp",
       "node/native_node_ani.cpp",
       "node/native_node_napi.cpp",
       "node/node_utils.cpp",

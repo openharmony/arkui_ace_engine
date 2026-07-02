@@ -109,8 +109,8 @@ public:
     void FireOnReuseFunc(void* params);
 
     // called for Component freezing
-    void SetSetActiveFunc(std::function<void(bool, bool)>&& func);
-    void FireSetActiveFunc(bool active, bool isReuse = false);
+    void SetSetActiveFunc(std::function<void(bool, bool, bool)>&& func);
+    void FireSetActiveFunc(bool active, bool isReuse = false, bool suppressActiveLifecycle = false);
 
     // called for DFX
     void SetExtraInfo(const ExtraInfo extraInfo);
@@ -185,7 +185,7 @@ private:
     std::function<bool(int32_t)> hasNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
-    std::function<void(bool, bool)> setActiveFunc_;
+    std::function<void(bool, bool, bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     std::function<std::string()> onDumpInspectorFunc_;
     std::function<void()> clearAllRecycleFunc_;

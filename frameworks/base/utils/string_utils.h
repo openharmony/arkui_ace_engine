@@ -158,7 +158,7 @@ inline void DeleteAllMark(std::string& str, const char mark)
 }
 
 ACE_FORCE_EXPORT std::string TrimStr(const std::string& str, char cTrim = ' ');
-void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ');
+ACE_FORCE_EXPORT void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ');
 
 ACE_FORCE_EXPORT void SplitStr(
     const std::string& str, const std::string& sep, std::vector<std::string>& out, bool needTrim = true);

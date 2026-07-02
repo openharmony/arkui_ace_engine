@@ -60,6 +60,7 @@
 #include "security_component/paste_button_module.h"
 #include "security_component/save_button_module.h"
 #include "dynamiclayout/dynamiclayout_module.h"
+#include "lazy_dynamic_layout/lazy_dynamic_layout_module.h"
 #include "with_env/with_env_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -105,6 +106,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetDynamicLayoutGridLayoutAlgorithm",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutGridLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_LazyDynamicLayout_construct",
+            "ii:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::LazyDynamicLayoutConstruct)
+        },
+        ani_native_function {
+            "_SetLazyDynamicLayoutCustomLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetLazyDynamicLayoutCustomLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetLazyDynamicLayoutOnVisibleIndexesChange",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetLazyDynamicLayoutOnVisibleIndexesChange)
         },
         ani_native_function {
             "_WithEnv_construct",

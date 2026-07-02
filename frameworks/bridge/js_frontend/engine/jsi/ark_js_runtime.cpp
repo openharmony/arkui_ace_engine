@@ -545,4 +545,14 @@ int32_t ArkJSRuntime::LoadDestinationFile(const std::string& bundleName, const s
     }
     return ret;
 }
+
+bool ArkJSRuntime::GetOhmUrlByObject(const Local<ObjectRef>& object, std::string& moduleName, std::string& fileName)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch tryCatch(vm_);
+    bool ret = JSNApi::GetOhmurlByObject(vm_, object, moduleName, fileName);
+    HandleUncaughtException(tryCatch);
+    return ret;
+}
 } // namespace OHOS::Ace::Framework

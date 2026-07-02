@@ -77,6 +77,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -3965,6 +3966,7 @@ void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
 
 void WebPattern::OnFullScreenVideoOverlayUpdate(bool value)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (delegate_) {
         delegate_->UpdateFullScreenVideoOverlayEnable(value);
     }
@@ -8869,6 +8871,19 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocu
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
     auto accessNode = delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
+}
+
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByParams(int64_t accessibilityId,
+    int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    auto accessNode = delegate_->GetAccessibilityNodeInfoByParams(accessibilityId, direction, focusRuleType, params);
     CHECK_NULL_RETURN(accessNode, nullptr);
     return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }

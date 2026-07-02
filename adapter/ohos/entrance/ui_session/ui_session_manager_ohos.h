@@ -17,6 +17,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include <functional>
 #include <map>
 #include <shared_mutex>
 
@@ -102,8 +103,18 @@ public:
     void SendCurrentPageName(const std::string& result) override;
     void SaveProcessId(std::string key, int32_t id) override;
     void EraseProcessId(const std::string& key, int32_t targetPid) override;
+    void MarkPageTranslateOwner(int32_t processId) override;
+    void OnPageTranslateResultHandled(int32_t processId) override;
     void SendCurrentLanguage(std::string result) override;
     void GetWebTranslateText(std::string extraData, bool isContinued) override;
+    int32_t GetPageTranslateText(const std::string& request) override;
+    int32_t StartPageTranslate(const std::string& request) override;
+    void EndPageTranslate() override;
+    void ResetPageTranslate(int32_t nodeId = -1) override;
+    void SendPageTranslateResult(const std::string& result) override;
+    void SendPageTextToAI(int32_t nodeId, const std::string& text, int64_t version) override;
+    int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) override;
+    void SaveGetCurrentAbilityLanguageInfoFunction(GetAbilityLanguageInfoFunction&& callback) override;
     void SendWebTextToAI(int32_t nodeId, std::string res) override;
     void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
     void SendTranslateResult(int32_t nodeId, std::string res) override;
@@ -142,6 +153,13 @@ public:
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
 private:
+    bool PostToCurrentTranslateManager(const char* caller,
+        std::function<void(const std::shared_ptr<UiTranslateManager>&)>&& task);
+
+    int32_t pageTranslateScope_ = 0;
+    int32_t pageTranslateOwnerPid_ = -1;
+    bool pageTranslateStarted_ = false;
+    std::mutex pageTranslateSessionMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     std::shared_mutex reportObjectMutex_;
 };

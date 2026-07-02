@@ -16,6 +16,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectExtenderAccessor {
@@ -25,36 +26,9 @@ void SetDividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto divider = SelectModelStatic::GetDefaultDivider(frameNode);
-    if (options->tag == INTEROP_TAG_UNDEFINED) {
-        SelectModelStatic::SetDivider(frameNode, divider);
-        return;
-    }
-    auto dividerOptions = options->value;
-    auto strokeWidthOpt = Converter::OptConvert<Dimension>(dividerOptions.strokeWidth);
-    Validator::ValidateNonNegative(strokeWidthOpt);
-    Validator::ValidateNonPercent(strokeWidthOpt);
-    if (strokeWidthOpt.has_value()) {
-        divider.strokeWidth = strokeWidthOpt.value();
-    }
-    auto colorOpt = Converter::OptConvert<Color>(dividerOptions.color);
-    if (colorOpt.has_value()) {
-        divider.color = colorOpt.value();
-    }
-    auto startMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.startMargin);
-    Validator::ValidateNonNegative(startMarginOpt);
-    Validator::ValidateNonPercent(startMarginOpt);
-    if (startMarginOpt.has_value()) {
-        divider.startMargin = startMarginOpt.value();
-    }
-    auto endMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.endMargin);
-    Validator::ValidateNonNegative(endMarginOpt);
-    Validator::ValidateNonPercent(endMarginOpt);
-    if (endMarginOpt.has_value()) {
-        divider.endMargin = endMarginOpt.value();
-    }
-    std::optional<SelectDivider> dividerOpt = divider;
-    SelectModelStatic::SetDivider(frameNode, dividerOpt);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setDividerImpl(frameNode, options);
 }
 } // SelectExtenderAccessor
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()

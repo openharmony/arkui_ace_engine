@@ -35,10 +35,8 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.h"
-#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 #include "core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.h"
-#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {

@@ -229,7 +229,8 @@ public:
 
     void NotifyColorModeChange(uint32_t colorMode) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override;
     void PaintDebugBoundaryTreeAll(bool flag) override;
 
     bool IsAllowAnimation();

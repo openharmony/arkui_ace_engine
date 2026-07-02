@@ -17,6 +17,7 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/select/bridge/select_custom_modifier.h"
 namespace OHOS::Ace::NG {
 #define ADD_RADIUS_RESOURCE(resObjPtr, borderColorProp, colorMember)                              \
     auto colorMember##Update = [](const RefPtr<ResourceObject>& obj, BorderColorProperty& prop) { \
@@ -31,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier();
 const CJUISelectModifier* GetCJUISelectModifier();
+ACE_FORCE_EXPORT const ArkUISelectCustomModifier* GetSelectCustomModifier();
 void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam);
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

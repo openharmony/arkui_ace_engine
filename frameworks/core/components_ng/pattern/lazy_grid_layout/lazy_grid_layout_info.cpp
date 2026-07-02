@@ -150,7 +150,7 @@ void LazyGridLayoutInfo::UpdatePosMap(float prevBodyMainSize)
             UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), updatedStart_ - 1);
         }
         adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd_);
-        if (cachedUpdatedEnd_ > updatedEnd_) {
+        if (cachedUpdatedEnd_ < totalItemCount_ && cachedUpdatedEnd_ > updatedEnd_) {
             UpdatePosMapStart(updatedEnd_ + 1, LanesCeil(cachedUpdatedEnd_));
             UpdatePosMapEnd(LanesCeil(cachedUpdatedEnd_));
         } else {

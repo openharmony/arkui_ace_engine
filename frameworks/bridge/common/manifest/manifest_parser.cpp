@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
+#include "frameworks/bridge/common/manifest/manifest_widget.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -23,6 +24,8 @@ ManifestParser::ManifestParser()
       manifestWidget_(Referenced::MakeRefPtr<ManifestWidgetGroup>()),
       manifestWindow_(Referenced::MakeRefPtr<ManifestWindow>())
 {}
+
+ManifestParser::~ManifestParser() = default;
 
 const RefPtr<ManifestAppInfo>& ManifestParser::GetAppInfo() const
 {

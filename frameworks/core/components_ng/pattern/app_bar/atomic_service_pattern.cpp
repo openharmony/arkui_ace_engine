@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+#include "core/common/container.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <string>
 
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 namespace OHOS::Ace::NG {
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
 constexpr int32_t FIRST_OVERLAY_INDEX = 1;
@@ -354,19 +355,20 @@ void AtomicServicePattern::UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(button);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
     // pressed color
-    auto buttonPattern = button->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
     if (isLight) {
-        buttonPattern->SetClickedColor(theme->GetClickEffectColorLight());
+        buttonModifier->setClickedColor(nodeHandle, theme->GetClickEffectColorLight());
     } else {
-        buttonPattern->SetClickedColor(theme->GetClickEffectColorDark());
+        buttonModifier->setClickedColor(nodeHandle, theme->GetClickEffectColorDark());
     }
     // focus border color
     if (isLight) {
-        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorLight());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetFocusedOutlineColorLight());
     } else {
-        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorDark());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetFocusedOutlineColorDark());
     }
 
     button->MarkModifyDone();
@@ -459,8 +461,10 @@ void AtomicServicePattern::UpdateButtonLayout(RefPtr<AppBarTheme>& theme, RefPtr
     auto leftBorderRadius = BorderRadiusProperty(bent, rightAngle, rightAngle, bent);
     auto rightBorderRadius = BorderRadiusProperty(rightAngle, bent, bent, rightAngle);
 
-    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-    layoutProperty->UpdateBorderRadius(isLeft ? leftBorderRadius : rightBorderRadius);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(button));
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, isLeft ? leftBorderRadius : rightBorderRadius);
 
     button->MarkModifyDone();
     button->MarkDirtyNode();

@@ -17,6 +17,7 @@
 
 #include "render_service_client/core/ui/rs_root_node.h"
 
+#include "core/common/draw_delegate.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 #include "core/pipeline/base/rs_node_adapter.h"

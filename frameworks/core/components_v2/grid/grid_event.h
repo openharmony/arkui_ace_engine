@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::V2 {
 
-class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
+class ACE_FORCE_EXPORT GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
     DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
 
 public:

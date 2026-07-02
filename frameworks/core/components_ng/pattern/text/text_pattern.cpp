@@ -62,6 +62,7 @@
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2670,6 +2671,8 @@ HoverInfo TextPattern::ConvertHoverInfoFromMouseInfo(const MouseInfo& info) cons
     result.SetDeviceId(info.GetDeviceId());
     result.SetTargetDisplayId(info.GetTargetDisplayId());
     result.SetSourceDevice(info.GetSourceDevice());
+    result.SetSourceTool(info.GetSourceTool());
+    result.SetPressedKeyCodes(info.GetPressedKeyCodes());
     if (info.GetTiltX().has_value()) {
         result.SetTiltX(info.GetTiltX().value());
     }

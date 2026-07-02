@@ -5922,7 +5922,8 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     CHECK_NULL_RETURN(pipeline && renderContext, {});
 
     float caretHeight = 0.0f;
-    OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
+    bool isShowCaretDown = caretAffinityPolicy_ != CaretAffinityPolicy::UPSTREAM_FIRST;
+    OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight, isShowCaretDown);
     caretHeight = CalcCursorHeight(caretHeight);
 
     // richeditor relative to root node offset(without transform)
@@ -5937,8 +5938,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
     if (auto manager = pipeline->GetSafeAreaManager(); manager) {
-        auto keyboardOffset = manager->GetKeyboardOffset();
-        positionY -= keyboardOffset;
+        positionY -= manager->GetKeyboardOffset();
     }
     OffsetF caretLeftTopPoint(caretOffset.GetX() + parentGlobalOffset.GetX(), caretTop);
     OffsetF caretRightBottomPoint(caretLeftTopPoint.GetX() + GetCaretWidth(), caretLeftTopPoint.GetY() + caretHeight);

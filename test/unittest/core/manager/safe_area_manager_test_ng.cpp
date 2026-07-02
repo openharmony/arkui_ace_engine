@@ -42,29 +42,29 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level0)
     
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), true);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), false);
+
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
-
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(false), true);
-    EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
 
+    EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), false);
-    EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
 
+    EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(false), true);
-    EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
 
+    EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), false);
-    EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
 
+    EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(false), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
-
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
+
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
-
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), false);
-    EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
 
+    EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), false);
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), true);
 }
@@ -167,6 +167,31 @@ HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level0)
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
+}
+
+/**
+ * @tc.name: FloatNavSafeAreaTest
+ * @tc.desc: Float navigation safe area should be expanded to the corresponding window edge before storing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, FloatNavSafeAreaTest, TestSize.Level0)
+{
+    constexpr uint32_t FLOAT_NAV_TOP_START = 20;
+    constexpr uint32_t FLOAT_NAV_TOP_END = 80;
+    auto floatNavArea = NG::SafeAreaInsets({}, { FLOAT_NAV_TOP_START, FLOAT_NAV_TOP_END }, {}, {});
+    auto floatNavAreaWithRoot = NG::SafeAreaInsets({}, { 0, FLOAT_NAV_TOP_END }, {}, {});
+
+    safeAreaManager_->SetUseCutout(false);
+    safeAreaManager_->SetIsFullScreen(true);
+
+    auto ret = safeAreaManager_->UpdateFloatNavSafeArea(floatNavArea);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateFloatNavSafeArea(floatNavArea);
+    EXPECT_EQ(ret, false);
+
+    EXPECT_EQ(safeAreaManager_->GetFloatNavSafeArea(), floatNavAreaWithRoot);
+    EXPECT_EQ(safeAreaManager_->GetFloatNavSafeAreaWithoutProcess(), floatNavAreaWithRoot);
+    EXPECT_EQ(safeAreaManager_->GetSafeArea(), floatNavAreaWithRoot);
 }
 
 /**

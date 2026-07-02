@@ -104,6 +104,13 @@ enum class ScrollError {
     SCROLL_NOT_SCROLLABLE_ERROR,
     SCROLL_ERROR_OTHER
 };
+enum class AccessibilityScrollSource {
+    NONE,
+    USER,
+    API,
+    ACCESSIBILITY,
+    FOCUS,
+};
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
     Axis axis = Axis::VERTICAL;
@@ -583,6 +590,15 @@ public:
         scrollSource_ = scrollSource;
     }
 
+    void SetAccessibilityScrollSource(AccessibilityScrollSource source)
+    {
+        accessibilityScrollSource_ = source;
+    }
+
+    std::string GetAccessibilityScrollSource();
+
+    void MarkUserScrollSource(int32_t source);
+
     int32_t GetScrollSource() const
     {
         return scrollSource_;
@@ -772,7 +788,7 @@ public:
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
-    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
+    ACE_FORCE_EXPORT void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -828,8 +844,8 @@ public:
 
     PositionMode GetPositionMode();
 
-    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
-    void HandleLeaveHotzoneEvent();
+    ACE_FORCE_EXPORT void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
+    ACE_FORCE_EXPORT void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
@@ -892,6 +908,11 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetNestedScrolling();
+    }
+
+    void SetIsScrolling(bool isScrolling)
+    {
+        isScrolling_ = isScrolling;
     }
 
     bool IsScrolling() const
@@ -996,14 +1017,14 @@ public:
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
-    static double GetDefaultFriction();
+    ACE_FORCE_EXPORT static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
     void ContentChangeReport(
         const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
-    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
+    ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
     bool EnableCachePredictNodes() const override
     {
@@ -1011,7 +1032,7 @@ public:
     }
 
 protected:
-    void SuggestOpIncGroup(bool flag);
+    ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThread();
@@ -1041,6 +1062,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
+    void FireAccessibilityScrollEndEvent();
     void FireObserverOnPanActionEnd(GestureEvent& info);
 
     float FireOnWillScroll(float offset) const;
@@ -1256,6 +1278,7 @@ private:
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     int32_t lastScrollSource_ = SCROLL_FROM_NONE;
+    AccessibilityScrollSource accessibilityScrollSource_ = AccessibilityScrollSource::NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;

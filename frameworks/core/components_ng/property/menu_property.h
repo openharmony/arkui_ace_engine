@@ -94,14 +94,14 @@ enum class MenuKeyboardAvoidMode {
 };
 
 enum class MenuGridPosition {
-    UP = 0,
-    DOWN = 1,
+    TOP = 0,
+    BOTTOM = 1,
 };
 
 struct MenuGridStyleOptions {
     int32_t count = 3;
     int32_t horizontalSize = 3;
-    MenuGridPosition position = MenuGridPosition::UP;
+    MenuGridPosition position = MenuGridPosition::TOP;
 };
 
 enum class AnchoredColorMode {

@@ -157,6 +157,13 @@ public:
 
     void FlushVsync() override;
 
+    void NotifyWindowAttachStateChange(bool status) override;
+
+    void GoBackgroundForNodeRelease() override;
+
+    void NotifyBackgroundForNodeRelease();
+
+    void NotifyForegroundForNodeGoResume();
 private:
     class RecoverExecutor : public std::enable_shared_from_this<RecoverExecutor> {
     public:
@@ -208,6 +215,21 @@ private:
     void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
     void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
 
+    bool IsWindowDetached() const
+    {
+        return windowAttachedStatus_.has_value() && !windowAttachedStatus_.value();
+    }
+
+    bool IsWindowAttached() const
+    {
+        return windowAttachedStatus_.has_value() && windowAttachedStatus_.value();
+    }
+
+    int32_t GetWindowAttachedStatusForLog() const
+    {
+        return windowAttachedStatus_.has_value() ? static_cast<int32_t>(windowAttachedStatus_.value()) : -1;
+    }
+
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
     int32_t id_ = 0;
@@ -215,7 +237,13 @@ private:
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
     bool directorFromWindow_ = false;
-
+    // Window render node attach status, managed by NotifyWindowAttachStateChange:
+    // - true:  node is attached (alive), director can render normally
+    // - false: node is detached (destroyed), director should GoStop to release resources
+    // - nullopt: initial state before first NotifyWindowAttachStateChange call,
+    //            treated as attached by default (no GoResume/GoStop triggered)
+    std::optional<bool> windowAttachedStatus_;
+    bool hasPost_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };
 

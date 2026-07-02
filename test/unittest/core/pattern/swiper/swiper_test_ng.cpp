@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"

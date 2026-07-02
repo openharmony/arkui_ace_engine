@@ -46,6 +46,7 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 namespace {

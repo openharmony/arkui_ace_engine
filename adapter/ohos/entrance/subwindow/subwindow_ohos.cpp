@@ -1499,7 +1499,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc), false, std::move(callback));
+    auto dialog = overlay->ShowDialogWithErrorCallback(dialogProps, std::move(buildFunc), false, std::move(callback));
     CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());
@@ -1657,7 +1657,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps,
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    auto dialog = overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    auto dialog = overlay->OpenCustomDialogWithErrorCallback(dialogProps, std::move(callback));
     CHECK_NULL_VOID(dialog);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());
@@ -1679,6 +1679,12 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     return overlay->CloseCustomDialog(dialogId);
+}
+
+void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    CloseCustomDialogNG(dialogId);
+    callback(0);
 }
 
 void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
@@ -2508,6 +2514,7 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
+    ContainerScope scope(context->GetInstanceId());
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     auto lastChild = rootNode->GetLastChild();

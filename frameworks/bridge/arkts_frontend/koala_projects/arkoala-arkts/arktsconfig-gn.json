@@ -160,6 +160,9 @@
             "@ohos.arkui.components.ContainerReader": [
                 "./@ohos.arkui.components.ContainerReader.ets"
             ],
+            "@ohos.arkui.components.ArkLazyDynamicLayout": [
+                "./@ohos.arkui.components.ArkLazyDynamicLayout"
+            ],
             "@ohos.arkui.WithEnv": [
                 "./@ohos.arkui.WithEnv"
             ],

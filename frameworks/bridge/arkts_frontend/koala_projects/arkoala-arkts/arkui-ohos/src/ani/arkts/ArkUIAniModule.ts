@@ -31,9 +31,10 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
-import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
-import { Resource } from '#generated';
+import { KeyboardAvoidMode, NodeIdentity, NodeRenderStateChangeCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, PictureDrawableDescriptor, HdrCompositionConfig } from '@ohos.arkui.drawableDescriptor';
+import { AnimationStatus, Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
@@ -56,6 +57,7 @@ import { RowLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { ColumnLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { CustomLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { GridLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { LazyLayoutAlgorithm } from "arkui/LazyLayoutAlgorithm"
 
 export class ArkUIAniModule {
     static {
@@ -67,6 +69,9 @@ export class ArkUIAniModule {
     native static _SetDynamicLayoutColumnLayoutAlgorithm(ptr: KPointer, value: ColumnLayoutAlgorithm): void;
     native static _SetDynamicLayoutCustomLayoutAlgorithm(ptr: KPointer, value: CustomLayoutAlgorithm, frameNode: FrameNode): void;
     native static _SetDynamicLayoutGridLayoutAlgorithm(ptr: KPointer, value: GridLayoutAlgorithm): void;
+    native static _LazyDynamicLayout_construct(id: KInt, flags: KInt): KPointer;
+    native static _SetLazyDynamicLayoutCustomLayoutAlgorithm(ptr: KPointer, value: LazyLayoutAlgorithm, frameNode: FrameNode): void;
+    native static _SetLazyDynamicLayoutOnVisibleIndexesChange(ptr: KPointer, callback: ((indexes: Array<KInt>) => void) | undefined): void;
     native static _WithEnv_construct(id: KInt): KPointer;
     native static _WithEnv_removeSystemEnvProperty(ptr: KPointer, key: string): void;
     native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: Any): void;

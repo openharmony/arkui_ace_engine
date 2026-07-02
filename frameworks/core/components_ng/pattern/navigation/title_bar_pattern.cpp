@@ -28,9 +28,9 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -990,14 +991,16 @@ void TitleBarPattern::UpdateBackButtonIconEffect(bool forceUpdate)
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    CHECK_NE_VOID(buttonModifier->isButtonPattern(nodeHandle), true);
     auto param = GetCurrentIconColorParam();
     if (!param.has_value()) {
         return;
     }
-    buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
-    buttonPattern->SetFocusBorderColor(param->focusColor);
+    buttonModifier->setBlendColor(nodeHandle, param->pressedColor, param->hoverColor);
+    buttonModifier->setFocusBorderColor(nodeHandle, param->focusColor);
     if (backButtonNode->GetChildren().empty()) {
         return;
     }
@@ -1142,11 +1145,13 @@ void TitleBarPattern::UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool 
         if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
             continue;
         }
-        auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_CONTINUE(buttonPattern);
-        buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
-        buttonPattern->SetFocusBorderColor(param->focusColor);
-        auto buttonEvent = menuItemNode->GetEventHub<ButtonEventHub>();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_CONTINUE(buttonModifier);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode));
+        CHECK_NULL_CONTINUE(buttonModifier->isButtonPattern(nodeHandle));
+        buttonModifier->setBlendColor(nodeHandle, param->pressedColor, param->hoverColor);
+        buttonModifier->setFocusBorderColor(nodeHandle, param->focusColor);
+        auto buttonEvent = menuItemNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(buttonEvent);
         bool isButtonEnabled = buttonEvent->IsEnabled();
         if (menuItemNode->GetChildren().empty()) {
@@ -1930,15 +1935,16 @@ void TitleBarPattern::UpdateBackButtonColor()
         iconColor = theme->GetIconColor();
         auto backButtonColor = theme->GetCompBackgroundColor();
         auto renderContext = backButton->GetRenderContext();
-        auto backButtonPattern = backButton->GetPattern<ButtonPattern>();
-        backButtonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-        backButtonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        backButtonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        backButtonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButton));
+        buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+        buttonModifier->setBlendColor(
+            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
         renderContext->UpdateBackgroundColor(backButtonColor);
-        auto backButtonLayoutProperty = backButtonPattern->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
         backButton->MarkModifyDone();
     }
     auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
@@ -2847,9 +2853,10 @@ void TitleBarPattern::InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHu
             CHECK_NULL_VOID(pipeline);
             auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
             CHECK_NULL_VOID(buttonTheme);
-            auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
-            CHECK_NULL_VOID(buttonPattern);
-            buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->setClickedColor(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode)), buttonTheme->GetClickedColor());
             if (!pattern->GetMoveIndex().has_value()) {
                 pattern->SetMoveIndex(index);
             }

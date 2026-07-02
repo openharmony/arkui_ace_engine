@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 #include "core/components_ng/pattern/date_picker/picker_setting_data.h"
 
@@ -66,15 +67,15 @@ private:
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     static void UpdateButtonLayoutProperty(
-        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+        const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
-        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+        const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(
-        const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+        const RefPtr<LayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
     static void UpdateButtonDefaultFocus(
@@ -116,9 +117,9 @@ private:
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
     static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textLayoutProperty,
-        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonConfirmLayoutProperty);
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<LayoutProperty> &buttonConfirmLayoutProperty);
     static void UpdateCancelButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textCancelLayoutProperty,
-        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonCancelLayoutProperty);
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<LayoutProperty> &buttonCancelLayoutProperty);
     static std::string GetDialogAgingButtonText(bool isNext);
     static std::string GetDialogNormalButtonText(bool isConfirm);
     static thread_local bool switchFlag_;

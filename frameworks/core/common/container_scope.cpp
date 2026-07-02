@@ -454,6 +454,13 @@ void ContainerScope::UpdateCurrent(int32_t id)
     currentId_ = id;
 }
 
+void ContainerScope::RestoreCurrent(int32_t id)
+{
+    // id parameter is unused, kept to match ContainerScopeCallback typedef signature.
+    // Resets currentId_ to INSTANCE_ID_UNDEFINED(-1) for FinishContainerScopeFunc callback.
+    UpdateCurrent(-1);
+}
+
 // Mark the current thread as an isolated thread (dc/card scenario).
 // Once marked, base query functions will return thread-local values instead of global ones.
 void ContainerScope::MarkIsolatedThread()

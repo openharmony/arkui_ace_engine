@@ -206,6 +206,10 @@ class IndicatorComponentStyleModifier extends ModifierWithKey<DotIndicator | Dig
         !isBaseOrResourceEqual(
           (this.stageValue as ArkDotIndicator).maxDisplayCountValue,
           (this.value as ArkDotIndicator).maxDisplayCountValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).indicatorIconValue,
+          (this.value as ArkDotIndicator).indicatorIconValue
         )
       );
     } else {

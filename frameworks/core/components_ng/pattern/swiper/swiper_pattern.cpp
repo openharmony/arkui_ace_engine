@@ -889,7 +889,8 @@ void SwiperPattern::PostIdleTaskToCleanTabContent()
         bool isOnShow = !pipeline || pipeline->GetOnShow();
 
         std::set<int32_t> itemsHasClean;
-        for (const auto& index : pattern->itemsNeedClean_) {
+        auto itemsNeedClean = pattern->itemsNeedClean_;
+        for (const auto& index : itemsNeedClean) {
             if (GetSysTimestamp() > deadline && isOnShow) {
                 break;
             }
@@ -2737,8 +2738,14 @@ void SwiperPattern::DoSwiperPreMakeItems(const std::set<int32_t>& indexSet)
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
         for (auto index : indexSet) {
-            if (lazyForEachNode) {
-                lazyForEachNode->GetFrameChildByIndex(index, true);
+            if (!lazyForEachNode) {
+                break;
+            }
+            auto premakeNode = lazyForEachNode->GetFrameChildByIndex(index, true);
+            RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(premakeNode);
+            if (frameNode && frameNode->GetGeometryNode()) {
+                frameNode->GetGeometryNode()->SetParentLayoutConstraint(GetLayoutConstraint());
+                FrameNode::ProcessOffscreenNode(frameNode);
             }
         }
     }
@@ -5955,13 +5962,26 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper() const
 
 void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    // The common attribute rendergroup is set to false, and the default itemrendergroup does not take effect.
+    // Clear the cache that has not been closed.
+    if (renderContext->HasRenderGroup() && !renderContext->GetRenderGroupValue()) {
+        itemRenderGroup = false;
+    }
+    if (!lastSetRenderGroup_ && !itemRenderGroup) {
+        return;
+    }
+    lastSetRenderGroup_ = itemRenderGroup;
+
     for (auto& item : itemPosition_) {
         if (auto frameNode = item.second.node) {
             groupedItems_.insert(frameNode);
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     for (auto child : host->GetChildren()) {
         auto frameNode = DynamicCast<FrameNode>(child);
         if (!frameNode || child->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {

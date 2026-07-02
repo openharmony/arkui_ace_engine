@@ -183,6 +183,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressValue(ArkUIRuntimeCallInfo* ru
             value = DEFAULT_PROGRESS_VALUE;
         }
         nodeModifiers->getProgressModifier()->setProgressValue(nativeNode, value);
+    } else if (isJsView && secondArg->IsNull()) {
+        nodeModifiers->getProgressModifier()->setProgressValue(nativeNode, DEFAULT_PROGRESS_VALUE);
     } else if (!isJsView) {
         nodeModifiers->getProgressModifier()->resetProgressValue(nativeNode);
     }

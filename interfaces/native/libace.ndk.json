@@ -3196,7 +3196,7 @@
         "name": "OH_ArkUI_CustomDialog_OpenDialog"
     },
     {
-        "first_introduced": "26.0.0",
+        "first_introduced": "26.1.0",
         "name": "OH_ArkUI_CustomDialog_OpenDialogWithCallback"
     },
     {
@@ -6590,6 +6590,18 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_Swiper_ShowNext"
+    },
+    {
+        "first_introduced": "26.1.0",
+        "name": "OH_ArkUI_ArcSwiper_ShowNext"
+    },
+    {
+        "first_introduced": "26.1.0",
+        "name": "OH_ArkUI_ArcSwiper_ShowPrevious"
+    },
+    {
+        "first_introduced": "26.1.0",
+        "name": "OH_ArkUI_ArcSwiper_FinishAnimation"
     },
     {
         "first_introduced": "24",

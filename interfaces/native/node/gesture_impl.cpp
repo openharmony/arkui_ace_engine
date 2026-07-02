@@ -1031,6 +1031,9 @@ int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* use
 int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event))
 {
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        parallelInnerGesture, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "parallelInnerGesture is null");
     auto callback =
         reinterpret_cast<ArkUIGestureRecognizer* (*)(ArkUIParallelInnerGestureEvent * current)>(parallelInnerGesture);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setInnerGestureParallelTo(

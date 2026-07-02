@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -161,6 +162,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/base/mount_policy.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -1415,17 +1417,22 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
-    if (eventHub && config.interactionInfo) {
-        json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
-        json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
+    if (config.interactionInfo) {
+        if (eventHub) {
+            json->Put("clickable", eventHub->IsAccessibilityClickable());
+            json->Put("longClickable", eventHub->IsAccessibilityLongClickable());
+        }
+        if (focusHub_) {
+            json->Put("focusable", focusHub_->IsFocusable());
+        }
     }
     if (accessibilityProperty_) {
         if (!accessibilityProperty_->GetAccessibilityText().empty() && config.accessibilityInfo) {
             json->Put("accessibilityContent", accessibilityProperty_->GetAccessibilityText().c_str());
         }
         if (config.interactionInfo) {
-            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
-            json->Put(TreeKey::IS_EDITABLE, accessibilityProperty_->IsEditable());
+            json->Put("scrollable", accessibilityProperty_->IsScrollable());
+            json->Put("editable", accessibilityProperty_->IsEditable());
         }
     }
 }
@@ -1863,6 +1870,9 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
     TriggerRsProfilerNodeMountCallbackIfExist();
+    if (layoutProperty_) {
+        layoutProperty_->MarkEnvDirty(ENV_KEY_DIRECTION);
+    }
     if (eventHub_) {
         eventHub_->FireOnAttach();
         eventHub_->FireOnAppear();
@@ -5384,6 +5394,20 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, const std
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = accessibilityId_;
+        event.extraEventInfo = extraEventInfo;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -8931,9 +8955,11 @@ template RefPtr<DatePickerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerAccessibilityProperty>() const;
 template RefPtr<DatePickerColumnAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
-template RefPtr<DialogAccessibilityProperty> FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<DialogAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
 template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;

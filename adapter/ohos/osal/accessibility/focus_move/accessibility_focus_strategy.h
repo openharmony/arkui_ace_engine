@@ -129,9 +129,14 @@ public:
     }
 };
 
+bool CheckNodeMatchedFocusType(
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode, Accessibility::FocusRuleType focusRuleType);
+
 class AccessibilityFocusStrategy {
 public:
-    AccessibilityFocusStrategy() = default;
+    explicit AccessibilityFocusStrategy(
+        Accessibility::FocusRuleType focusRuleType = Accessibility::FocusRuleType::DEFAULT)
+        : focusRuleType_(focusRuleType) {}
     virtual ~AccessibilityFocusStrategy() = default;
 
     static const std::map<AceAction, std::string> aceActionToFocusActionName;
@@ -252,6 +257,8 @@ private:
         std::shared_ptr<FocusRulesCheckNode>& targetNode,
         std::unordered_set<int64_t>& visitedPrevFocusNodes,
         const char* stageTag);
+
+    Accessibility::FocusRuleType focusRuleType_ = Accessibility::FocusRuleType::DEFAULT;
 };
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_STRATEGY_H

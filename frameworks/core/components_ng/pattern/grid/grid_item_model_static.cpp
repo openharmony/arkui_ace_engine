@@ -25,11 +25,14 @@
 #include "core/components_ng/syntax/shallow_builder.h"
  
 namespace OHOS::Ace::NG {
+namespace {
+const char GRID_ITEM_ETS_TAG[] = "GridItem";
+}
 RefPtr<FrameNode> GridItemModelStatic::CreateFrameNode(int32_t nodeId)
 {
     // call CreateFrameNodeMultiThread by multi thread
     THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 
     return frameNode;
@@ -37,7 +40,7 @@ RefPtr<FrameNode> GridItemModelStatic::CreateFrameNode(int32_t nodeId)
 
 RefPtr<FrameNode> GridItemModelStatic::CreateFrameNodeMultiThread(int32_t nodeId)
 {
-    return FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+    return FrameNode::GetOrCreateFrameNode(GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 }
 

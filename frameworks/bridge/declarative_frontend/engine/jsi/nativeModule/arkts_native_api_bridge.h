@@ -56,12 +56,10 @@ public:
     // ArkTSCard end
 private:
     static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -76,14 +74,12 @@ private:
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

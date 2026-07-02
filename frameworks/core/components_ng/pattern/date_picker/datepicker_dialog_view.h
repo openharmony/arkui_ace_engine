@@ -20,7 +20,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/date_picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/date_picker/datepicker_pattern_fwd.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -126,18 +125,18 @@ private:
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty);
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<LayoutProperty>& buttonLayoutProperty);
     static void UpdateButtonLayoutProperty(
-        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+        const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
-        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+        const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(
-        const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
-    static void UpdateNextButtonMargin(const RefPtr<ButtonLayoutProperty>& buttonNextLayoutProperty);
+        const RefPtr<LayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateNextButtonMargin(const RefPtr<LayoutProperty>& buttonNextLayoutProperty);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void UpdateContentPadding(const RefPtr<FrameNode>& contentColumn);
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
@@ -180,7 +179,7 @@ private:
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
     static void UpdateCancelButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textCancelLayoutProperty,
-        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty);
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<LayoutProperty>& buttonCancelLayoutProperty);
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);

@@ -24,17 +24,20 @@ build_component_ng("dynamiclayout_pattern_ng") {
     "dynamic_layout_pattern.cpp",
     "lazy_dynamic_layout_algorithm.cpp",
     "lazy_dynamic_layout_model_ng.cpp",
+    "lazy_dynamic_layout_model_static.cpp",
     "lazy_dynamic_layout_pattern.cpp"
   ]
   ark_sources = [
     "bridge/arkts_native_dynamic_layout_bridge.cpp",
     "bridge/dynamic_layout_dynamic_modifier.cpp",
     "bridge/dynamic_layout_dynamic_module.cpp",
+    "bridge/lazy_dynamic_layout_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
     if (!ace_engine_feature_wearable) {
       ark_sources += [
         "bridge/dynamic_layout_static_ani_modifier.cpp",
+        "bridge/lazy_dynamic_layout_static_ani_modifier.cpp",
         ]
     }
   }

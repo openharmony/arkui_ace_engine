@@ -36,7 +36,6 @@
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
@@ -97,6 +96,7 @@
 #include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
@@ -109,6 +109,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -717,9 +718,9 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
-    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
-    if (avoidTargetOpt.has_value()) {
-        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    if (customModifier) {
+        customModifier->setAvoidTarget(popupParam, src.avoidTarget);
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
@@ -2762,11 +2763,19 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
+    if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+        auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setBackgroundColorToModelStatic(frameNode, colorValue);
+        return;
+    }
     if (!colorValue) {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
-        SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2781,7 +2790,9 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
         if (colorValue.has_value()) {
-            ToggleButtonModelNG::SetBackgroundColor(frameNode, colorValue.value());
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->setToggleBackgroundColor(reinterpret_cast<ArkUINodeHandle>(node), colorValue.value());
         }
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
@@ -3091,8 +3102,14 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
     if (radiuses) {
         // Implement Reset value
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
-            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
-                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            const auto& borderRadius = radiuses.value();
+            buttonModifier->setButtonBorderRadius(reinterpret_cast<ArkUINodeHandle>(node),
+                borderRadius.radiusTopLeft,
+                borderRadius.radiusTopRight,
+                borderRadius.radiusBottomLeft,
+                borderRadius.radiusBottomRight);
         }
         if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
             ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,

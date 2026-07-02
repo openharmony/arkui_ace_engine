@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
 import {
   Text,
   TextAttribute,
@@ -21,9 +21,9 @@ import {
   Button,
   ButtonAttribute,
   ClickEvent,
-  UserView,
   Grid,
   GridItem,
+  GridItemOptions,
   GridLayoutOptions,
   EdgeEffect,
   BarState,
@@ -36,7 +36,10 @@ import {
   ScrollState,
   OnScrollFrameBeginHandlerResult,
   OnScrollFrameBeginCallback,
-  Entry
+  Entry,
+  ColumnOptions,
+  Scroller,
+  ResourceColor
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
@@ -44,19 +47,20 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct GridExample {
-  irregularIndexes: Array<number> = []
+  private scroller: Scroller = new Scroller();
+  irregularIndexes: Array<int> = []
   layoutOptions2: GridLayoutOptions = {
-    regularSize: [1, 1],
+    regularSize: [1, 1] as [int, int],
     irregularIndexes: this.irregularIndexes,
 
   } as GridLayoutOptions
-  @State colorNumber1: number = 0xF9CF93;
-  @State colorNumber2: number = 0xF9CF93;
-  @State colorNumber3: number = 0xF9CF93;
+  @State colorNumber1: ResourceColor = '#F9CF93';
+  @State colorNumber2: ResourceColor = '#F9CF93';
+  @State colorNumber3: ResourceColor = '#F9CF93';
   @State text: string = 'drag'
   arrGridItem: Array<string> = new Array<string>('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11');
 
-  changeIndex(index1: number, index2: number) { //交换数组位置
+  changeIndex(index1: int, index2: int) { // 交换数组位置
     let temp: string;
     temp = this.arrGridItem[index1];
     this.arrGridItem[index1] = this.arrGridItem[index2];
@@ -64,14 +68,14 @@ struct GridExample {
   }
 
   build() {
-    Column(undefined) {
-      Column(undefined) {
-        Grid() {
+    Column({} as ColumnOptions) {
+      Column({} as ColumnOptions) {
+        Grid(this.scroller, this.layoutOptions2) {
           GridItem({ style: GridItemStyle.PLAIN }) {
             Text('1')
               .fontSize(16)
               .focusable(true)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .width('100%')
           .height(100)
@@ -81,9 +85,9 @@ struct GridExample {
           .onSelect((parameter: boolean) =>{
             hilog.info(0x0000, 'testTag',  'Grid onSelect1: ' + parameter);
             if (parameter) {
-              this.colorNumber1 = 0x6B8E23
+              this.colorNumber1 = '#6B8E23'
             }else{
-              this.colorNumber1 = 0x6A5ACD
+              this.colorNumber1 = '#6A5ACD'
             }
           })
 
@@ -91,7 +95,7 @@ struct GridExample {
             Text('2')
               .fontSize(16)
               .focusable(true)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .backgroundColor(this.colorNumber2)
           .selectable(true)
@@ -101,16 +105,16 @@ struct GridExample {
           .onSelect((parameter: boolean) =>{
             hilog.info(0x0000, 'testTag',  'Grid onSelect2: ' + parameter);
             if (parameter) {
-              this.colorNumber2 = 0x00FFFF
+              this.colorNumber2 = '#00FFFF'
             }else{
-              this.colorNumber2 = 0x00FF7F
+              this.colorNumber2 = '#00FF7F'
             }
           })
 
           GridItem({ style: GridItemStyle.PLAIN }) {
             Text('3')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .width('100%')
           .height(100)
@@ -120,16 +124,16 @@ struct GridExample {
           .onSelect((parameter: boolean) =>{
             hilog.info(0x0000, 'testTag',  'Grid onSelect3: ' + parameter);
             if (parameter) {
-              this.colorNumber3 = 0x6A5ACD
+              this.colorNumber3 = '#6A5ACD'
             }else{
-              this.colorNumber3 = 0x00FF7F
+              this.colorNumber3 = '#00FF7F'
             }
           })
 
           GridItem({ style: GridItemStyle.PLAIN }) {
             Text('4')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .width('100%')
           .height(100)
@@ -138,45 +142,45 @@ struct GridExample {
           GridItem({ style: GridItemStyle.NONE }) {
             Text('5')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .backgroundColor(Color.Green)
           .width('100%')
           .height(100)
 
-          GridItem(undefined) {
+          GridItem({} as GridItemOptions) {
             Text('6')
               .fontSize(16)
           }
-          .backgroundColor(0xF9CF93)
+          .backgroundColor('#F9CF93')
           .width('100%')
           .height(100)
           .border({width:1})
 
-          GridItem(undefined) {
+          GridItem({} as GridItemOptions) {
             Text('7')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .backgroundColor(Color.Brown)
           .width('100%')
           .height(100)
 
-          GridItem(undefined) {
+          GridItem({} as GridItemOptions) {
             Text('8')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
           .width('100%')
           .height(100)
-          .backgroundColor(0x6A5ACD)
+          .backgroundColor('#6A5ACD')
 
-          GridItem(undefined) {
+          GridItem({} as GridItemOptions) {
             Text('9')
               .fontSize(16)
-              .backgroundColor(0xF9CF93)
+              .backgroundColor('#F9CF93')
           }
-          .backgroundColor(0xF9CF93)
+          .backgroundColor('#F9CF93')
           .width('100%')
           .height('100%')
           .border({width:1})
@@ -206,7 +210,7 @@ struct GridExample {
         .onReachEnd(() => {
           hilog.info(0x0000, 'testTag','Grid onReachEnd');
         })
-        .onScrollIndex((first: number, last: number) => {
+        .onScrollIndex((first: int, last: int) => {
           hilog.info(0x0000, 'testTag','Grid onScrollIndex');
           hilog.info(0x0000, 'testTag','Grid onScrollIndex first:' + first);
           hilog.info(0x0000, 'testTag','Grid onScrollIndex last:' + last);

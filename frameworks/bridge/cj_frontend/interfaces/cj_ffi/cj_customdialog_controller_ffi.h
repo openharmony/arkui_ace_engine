@@ -19,15 +19,16 @@
 #include <optional>
 #include <string>
 
+#include "cj_action_sheet_ffi.h"
+#include "cj_animate_param_ffi.h"
+#include "ffi_remote_data.h"
+
 #include "bridge/cj_frontend/cppview/native_view.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components/dialog/dialog_component.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
-#include "ffi_remote_data.h"
-#include "cj_animate_param_ffi.h"
-#include "cj_action_sheet_ffi.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model.h"
 
 extern "C" {
 struct NativeOptionShadow {

@@ -36,6 +36,8 @@ class GestureEvent;
 
 namespace NG {
 class FrameNode;
+using DialogEvent = std::function<void(const std::string&)>;
+using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
 namespace DatePickerUtil {
 const char DATE_PICKER_ETS_TAG[] = "DatePicker";
@@ -48,9 +50,8 @@ struct DatePickerDialogInfo {
 };
 
 struct DatepickerCustomModifier {
-    void (*setDatePickerDialogViewShow)(DatePickerDialogInfo& info,
-        std::map<std::string, std::function<void(const std::string&)>> dialogEvent,
-        std::map<std::string, std::function<void(const GestureEvent& info)>> dialogCancelEvent);
+    void (*setDatePickerDialogViewShow)(DatePickerDialogInfo& info, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     std::string (*getFormatString)(PickerDateF date);
 };
 

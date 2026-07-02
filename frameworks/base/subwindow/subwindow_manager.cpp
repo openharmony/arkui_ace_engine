@@ -30,7 +30,7 @@ std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
 const std::unordered_set<SubwindowType> NORMAL_SUBWINDOW_TYPE = { SubwindowType::TYPE_MENU,
-    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP };
+    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP, SubwindowType::TYPE_SHEET };
 const std::unordered_set<std::string> DIALOG_AND_POPUP_TAG = { V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
@@ -940,6 +940,13 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
     }
 }
 
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    auto subwindow = GetSubwindow(Container::CurrentId());
+    CHECK_NULL_VOID(subwindow);
+    subwindow->CloseCustomDialogNG(dialogId, std::move(callback));
+}
+
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
@@ -1446,14 +1453,14 @@ void SubwindowManager::HideSubWindowNG()
     }
 }
 
-void SubwindowManager::HideToastSubWindowNG(int32_t instanceId)
+void SubwindowManager::HideSubWindowNG(int32_t instanceId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide toast subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide subwindow enter");
     RefPtr<Subwindow> subwindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId);
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide toast subwindow, subwindow is null.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide subwindow, subwindow is null.");
     }
 }
 

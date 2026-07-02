@@ -21,12 +21,12 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -158,8 +158,13 @@ RefPtr<FrameNode> TimePickerModelNG::CreateColumnNode()
 RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        TimePickerUtil::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
 }
 
 RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)

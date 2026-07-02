@@ -20,10 +20,12 @@
 
 #include "ui/focus/focus_constants.h"
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/layout_break_point.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/event_manager.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -60,6 +62,9 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "interfaces/native/native_type.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 using namespace OHOS::Ace::Framework;
 
@@ -5127,7 +5132,10 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
     config.action = SmartGestureShortcutAction::PRIMARY;
     if (actionVal->IsNumber()) {
-        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        auto rawAction = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        if (rawAction == SmartGestureShortcutAction::PRIMARY) {
+            config.action = rawAction;
+        }
     }
     config.enabled = false;
     if (enabledVal->IsBoolean()) {
@@ -8852,9 +8860,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
+        (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTargetDisplayId())));
     if (infoPtr->GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !infoPtr->GetFingerList().empty()) {
@@ -8972,6 +8979,28 @@ ArkUINativeModuleValue CommonBridge::ResetOnClick(ArkUIRuntimeCallInfo* runtimeC
     ViewAbstract::DisableOnClick(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+void CommonBridge::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
+{
+    if (UiSessionManager::GetInstance()->GetClickEventRegistered()) {
+        auto data = JsonUtil::Create();
+        data->Put("event", "onClick");
+        std::u16string content = text;
+        auto node = weakNode.Upgrade();
+        if (node) {
+            data->Put("id", node->GetId());
+            auto children = node->GetChildren();
+            if (!children.empty()) {
+                node->GetContainerComponentText(content);
+            }
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
+            data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
+        }
+        UiSessionManager::GetInstance()->ReportClickEvent(data->ToString());
+    }
+}
+#endif
 
 ArkUINativeModuleValue CommonBridge::SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -9729,9 +9758,8 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return obj;
 }
 
@@ -11364,9 +11392,8 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO);
     return obj;
 }
 
@@ -11490,9 +11517,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_AXIS_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_AXIS_INFO);
     return obj;
 }
 

@@ -33,7 +33,6 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -91,6 +90,7 @@ class ToolbarManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
 class ForceSplitManager;
+class RecoverableManager;
 class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
@@ -857,6 +857,8 @@ public:
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
+    const RefPtr<RecoverableManager>& GetRecoverableManager() const;
+
     double CalcPageWidth(double rootWidth) const override;
 
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
@@ -1160,14 +1162,6 @@ public:
     void UnregisterRotationEndCallback(int32_t callbackId)
     {
         rotationEndCallbackMap_.erase(callbackId);
-    }
-    void SetUseEnvManager(bool isEnable)
-    {
-        isUseEnvManager_ = isEnable;
-    }
-    bool GetUseEnvManager()
-    {
-        return isUseEnvManager_;
     }
     void SetEnvManagerActive(bool isActive)
     {
@@ -1620,6 +1614,7 @@ private:
     RefPtr<MemoryManager> memoryMgr_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
+    RefPtr<RecoverableManager> recoverableMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;
     RefPtr<FormEventManager> formEventMgr_;
     RefPtr<FormGestureManager> formGestureMgr_;

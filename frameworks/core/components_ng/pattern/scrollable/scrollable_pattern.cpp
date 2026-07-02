@@ -24,6 +24,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/multi_thread.h"
@@ -1140,6 +1141,7 @@ void ScrollablePattern::StopScrollAnimation()
 
 void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
 {
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // touch down may interrupt animation
     if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
         auto child = GetScrollOriginChild();
         CHECK_NULL_VOID(child);
@@ -1430,6 +1432,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // long-press inner scrollbar
         pattern->ScrollPage(reverse, smooth);
     };
     scrollBar_->SetScrollPageCallback(std::move(scrollPageCallback));
@@ -1914,6 +1917,8 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // click or long-press external scrollbar
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         return pattern->ScrollPage(reverse, smooth);
     };
     auto scrollBarOnDidStopDraggingCallback = [weak = WeakClaim(this)](bool isWillFling) {
@@ -2184,6 +2189,7 @@ void ScrollablePattern::SmartGesturePerformScroll(float position)
         scrollToDirection_ = ScrollToDirection::BACKWARD;
     }
 
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     PlaySpringAnimation(position, SpringCurveOption(), false, true);
     if (!GetIsDragging()) {
         FireOnScrollStart(false);
@@ -3325,6 +3331,7 @@ void ScrollablePattern::OnStatusBarClick()
     }
 
     isBackToTopRunning_ = true; // set stop animation flag when click status bar.
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // click status bar to scroll back to top
     StartBackToTopAnimation();
     ReportBackToTop();
 }
@@ -3570,6 +3577,59 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     host->SetSuggestOpIncActivatedOnce();
 }
 
+std::string ScrollablePattern::GetAccessibilityScrollSource()
+{
+    switch (accessibilityScrollSource_) {
+        case AccessibilityScrollSource::USER:
+        case AccessibilityScrollSource::FOCUS:
+            return "user";
+        case AccessibilityScrollSource::API:
+            return "api";
+        case AccessibilityScrollSource::ACCESSIBILITY:
+            return "accessibility";
+        case AccessibilityScrollSource::NONE:
+        default:
+            return "";
+    }
+}
+
+void ScrollablePattern::MarkUserScrollSource(int32_t source)
+{
+    // When scrollSource_ is one of the user-typed values below
+    // (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_FLING/BAR_OVER_DRAG), it clearly indicates a user gesture, so
+    // accessibilityScrollSource_ is forced to USER. Otherwise, for the source-neutral values
+    // (JUMP/FOCUS_JUMP/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER), accessibilityScrollSource_ is left unchanged
+    // (falls through to default).
+
+    switch (source) {
+        case SCROLL_FROM_UPDATE: // drag
+        case SCROLL_FROM_AXIS: // mouse event
+        case SCROLL_FROM_CROWN: // rotary crown
+        case SCROLL_FROM_STATUSBAR: // click status bar to scroll to top
+        case SCROLL_FROM_BAR: // drag scrollbar
+        case SCROLL_FROM_BAR_FLING: // fling after dragging scrollbar
+        case SCROLL_FROM_BAR_OVER_DRAG: // drag scrollbar over boundary
+            accessibilityScrollSource_ = AccessibilityScrollSource::USER;
+            break;
+        default:
+            break;
+    }
+}
+
+void ScrollablePattern::FireAccessibilityScrollEndEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string accessibilityScrollSource = GetAccessibilityScrollSource();
+    std::map<std::string, std::string> extraEventInfo;
+    extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE,
+        "%{public}s/%{public}d SCROLL_END, scrollSource_:%{public}d, accessibilityScrollSource:%{public}s",
+        host->GetTag().c_str(), host->GetId(), GetScrollSource(), accessibilityScrollSource.c_str());
+    accessibilityScrollSource.empty() ? host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END)
+                                      : host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END, extraEventInfo);
+}
+
 void ScrollablePattern::OnScrollStop(
     const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop)
 {
@@ -3583,9 +3643,7 @@ void ScrollablePattern::OnScrollStop(
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
-        if (host != nullptr) {
-            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-        }
+        FireAccessibilityScrollEndEvent();
         isScrolling_ = false;
         if (scrollBarProxy_) {
             scrollBarProxy_->SetIsScrollableNodeScrolling(false);
@@ -3630,6 +3688,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     }
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
     SetScrollSource(SCROLL_FROM_NONE);
+    SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     ResetLastSnapTargetIndex();
     ResetScrollableSnapDirection();
     auto pipeline = host->GetContext();
@@ -4066,6 +4125,7 @@ void ScrollablePattern::HandleClickEvent()
     Point point(locationInfo_.GetX(), locationInfo_.GetY());
     bool reverse = false;
     if (scrollBar_->AnalysisUpOrDown(point, reverse) && isMousePressed_) {
+        SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // click inner scrollbar
         ScrollPage(reverse, true);
     }
 }
@@ -4406,6 +4466,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
         pattern->ScrollPage(false, true, scrollType);
     });
 
@@ -4418,6 +4479,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
         pattern->ScrollPage(true, true, scrollType);
     });
 }
@@ -5227,6 +5289,7 @@ int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
         ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
+    SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY); // UiSession injection
     if (ret == "scrollForward") {
         HandleScrollByRatio(info.isScrollByRatio, true, info.ratio, info.reportEventId);
     } else if (ret == "scrollBackward") {

@@ -31,7 +31,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
@@ -191,8 +190,8 @@ void DatePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -209,7 +208,7 @@ void DatePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
         borderColor.SetColor(buttonDefaultBorderColor_);
     }
 
-    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    layoutProperty->UpdateBorderWidth(borderWidth);
     renderContext->UpdateBorderColor(borderColor);
     renderContext->UpdateBackgroundColor(buttonBgColor_);
 

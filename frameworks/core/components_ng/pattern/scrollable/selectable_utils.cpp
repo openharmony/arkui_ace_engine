@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_event_hub.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"

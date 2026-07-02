@@ -538,15 +538,25 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest023, TestSize.Level0)
  */
 HWTEST_F(TextTestNgEleven, TextModelStaticTest024, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern, get textLayoutProperty.
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. set valid TextIndent value and verify has_value is true.
+     */
     auto dimensionOpt = std::make_optional<Dimension>();
     TextModelStatic::SetTextIndent(frameNode.GetRawPtr(), dimensionOpt);
     EXPECT_TRUE(layoutProperty->GetTextIndent().has_value());
+
+    /**
+     * @tc.steps: step3. set nullopt TextIndent value and verify has_value is false.
+     */
     std::optional<Dimension> emptyDimension = std::nullopt;
     TextModelStatic::SetTextIndent(frameNode.GetRawPtr(), emptyDimension);
     EXPECT_FALSE(layoutProperty->GetTextIndent().has_value());
@@ -559,14 +569,24 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest024, TestSize.Level0)
  */
 HWTEST_F(TextTestNgEleven, TextModelStaticTest025, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern, get textLayoutProperty.
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. set valid WordBreak value and verify has_value is true.
+     */
     TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::make_optional(WordBreak::BREAK_ALL));
     EXPECT_TRUE(layoutProperty->GetWordBreak().has_value());
+
+    /**
+     * @tc.steps: step3. set nullopt WordBreak value and verify has_value is false.
+     */
     TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::nullopt);
     EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
 }

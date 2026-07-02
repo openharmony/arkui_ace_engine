@@ -19,7 +19,6 @@
 #include <string>
 
 #include "base/log/dump_log.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -27,6 +26,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class FlexLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(FlexLayoutPattern, Pattern);
 

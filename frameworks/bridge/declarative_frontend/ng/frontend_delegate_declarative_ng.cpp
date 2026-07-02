@@ -948,6 +948,27 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId)
     return;
 }
 
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    auto task = [dialogId, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        auto needCallback = true;
+        auto finalCallback = [&needCallback, callback](int32_t errorCode) {
+            callback(errorCode);
+        };
+        overlayManager->CloseCustomDialog(dialogId, std::move(finalCallback));
+    };
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    if (dialogNode) {
+        auto pipeline = dialogNode->GetContext();
+        if (pipeline) {
+            currentOverlay = pipeline->GetOverlayManager();
+        }
+    }
+    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
+}
+
 void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
     std::function<void(int32_t)> &&callback)
 {

@@ -32,6 +32,24 @@ ohos_abc("arkimagespan") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkgrid") {
+  sources = [ "./src/arkgrid.ts" ]
+  output_name = "arkgrid"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgriditem") {
+  sources = [ "./src/arkgriditem.ts" ]
+  output_name = "arkgriditem"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"
@@ -113,6 +131,14 @@ ohos_abc("arkloadingprogress") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkbutton") {
+  sources = [ "./src/arkbutton.ts" ]
+  output_name = "arkbutton"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"
@@ -156,6 +182,15 @@ ohos_abc("arklazygridlayout") {
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
+ }
+
+ohos_abc("arknavigator") {
+  sources = [ "./src/arknavigator.ts" ]
+  output_name = "arknavigator"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
 ohos_abc("arkrefresh") {
@@ -170,6 +205,15 @@ ohos_abc("arkrefresh") {
 ohos_abc("arktextpicker") {
   sources = [ "./src/arktextpicker.ts" ]
   output_name = "arktextpicker"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkselect") {
+  sources = [ "./src/arkselect.ts" ]
+  output_name = "arkselect"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

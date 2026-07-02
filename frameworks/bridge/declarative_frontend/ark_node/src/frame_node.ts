@@ -1402,7 +1402,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Button', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Button', (node: NodePtr, type: ModifierType): ArkButtonComponent => {
-        return new ArkButtonComponent(node, type);
+        getUINativeModule().loadNativeModule('Button');
+        let module = globalThis.requireNapi('arkui.components.arkbutton');
+        return module.createComponent(node, type);
       })
     }],
     ['XComponent', (context: UIContext, options?: object): FrameNode => {
@@ -1458,12 +1460,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Grid', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
-        return new ArkGridComponent(node, type);
+        getUINativeModule().loadNativeModule('Grid');
+        let module = globalThis.requireNapi('arkui.components.arkgrid');
+        return module.createComponent(node, type);
       })
     }],
     ['GridItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
-        return new ArkGridItemComponent(node, type);
+        getUINativeModule().loadNativeModule('GridItem');
+        let module = globalThis.requireNapi('arkui.components.arkgriditem');
+        return module.createComponent(node, type);
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
@@ -1535,7 +1541,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Select', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
-        return new ArkSelectComponent(node, type);
+        getUINativeModule().loadNativeModule('Select');
+        let module = globalThis.requireNapi('arkui.components.arkselect');
+        return module.createComponent(node, type);
       });
     }],
     ['Toggle', (context: UIContext, options?: object): FrameNode => {
@@ -1631,7 +1639,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Grid');
+      let module = globalThis.requireNapi('arkui.components.arkgrid');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['GridItem', (node: FrameNode): ArkGridItemComponent => {
@@ -1641,7 +1651,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('GridItem');
+      let module = globalThis.requireNapi('arkui.components.arkgriditem');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Text', (node: FrameNode): ArkTextComponent => {
@@ -1681,7 +1693,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Button');
+      let module = globalThis.requireNapi('arkui.components.arkbutton');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Checkbox', (node: FrameNode): ArkCheckboxComponent => {

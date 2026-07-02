@@ -23,6 +23,10 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
+#ifdef SMART_GESTURE_SUPPORTED
+#include "core/components_ng/property/smart_gesture_property.h"
+#endif
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -1546,4 +1550,131 @@ HWTEST_F(ViewAbstractTestNg, BindContextMenuWithLongPress001, TestSize.Level1)
     EXPECT_NE(longPressEventActuator->longPressEvent_, nullptr);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->duration_, HOVER_IMAGE_LONG_PRESS_DURATION);
 }
+
+#ifdef SMART_GESTURE_SUPPORTED
+/**
+ * @tc.name: SetSmartGestureShortcutPrimaryEnabled001
+ * @tc.desc: Test SetSmartGestureShortcut with PRIMARY action and enabled=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSmartGestureShortcutPrimaryEnabled001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set smart gesture shortcut with PRIMARY action and enabled=true.
+     * @tc.expected: SmartGestureProperty is created, config.action is PRIMARY, IsPrimaryActionEnabled returns true.
+     */
+    ViewAbstract::SetSmartGestureShortcut(
+        static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY), true, true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_TRUE(smartGestureProperty->IsPrimaryActionEnabled());
+    EXPECT_TRUE(smartGestureProperty->IsPrimaryActionSelectable());
+}
+
+/**
+ * @tc.name: SetSmartGestureShortcutInvalidAction002
+ * @tc.desc: Test SetSmartGestureShortcut with invalid action=1, should still set PRIMARY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSmartGestureShortcutInvalidAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set smart gesture shortcut with invalid action=1 and enabled=true.
+     * @tc.expected: Config is set with PRIMARY action despite invalid input.
+     */
+    ViewAbstract::SetSmartGestureShortcut(1, true, true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_TRUE(smartGestureProperty->IsPrimaryActionEnabled());
+}
+
+/**
+ * @tc.name: SetSmartGestureShortcutDisabled003
+ * @tc.desc: Test SetSmartGestureShortcut with PRIMARY action and enabled=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSmartGestureShortcutDisabled003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set smart gesture shortcut with PRIMARY action and enabled=false.
+     * @tc.expected: SmartGestureProperty is created, IsPrimaryActionEnabled returns false.
+     */
+    ViewAbstract::SetSmartGestureShortcut(
+        static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY), false, false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_FALSE(smartGestureProperty->IsPrimaryActionEnabled());
+}
+
+/**
+ * @tc.name: SetSmartGestureShortcutSelectableDefault004
+ * @tc.desc: Test SetSmartGestureShortcut selectable defaults to enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSmartGestureShortcutSelectableDefault004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set smart gesture shortcut with enabled=true, selectable=true.
+     * @tc.expected: IsPrimaryActionSelectable returns true.
+     */
+    ViewAbstract::SetSmartGestureShortcut(
+        static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY), true, true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_TRUE(smartGestureProperty->IsPrimaryActionSelectable());
+
+    /**
+     * @tc.steps: step2. Set smart gesture shortcut with enabled=false, selectable=false.
+     * @tc.expected: IsPrimaryActionSelectable returns false.
+     */
+    ViewAbstract::SetSmartGestureShortcut(
+        static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY), false, false);
+
+    smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_FALSE(smartGestureProperty->IsPrimaryActionSelectable());
+}
+
+/**
+ * @tc.name: SetSmartGestureShortcutReset005
+ * @tc.desc: Test ResetSmartGestureShortcut clears the config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSmartGestureShortcutReset005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set smart gesture shortcut then reset.
+     * @tc.expected: After reset, IsPrimaryActionEnabled returns false.
+     */
+    ViewAbstract::SetSmartGestureShortcut(
+        static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY), true, true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_TRUE(smartGestureProperty->IsPrimaryActionEnabled());
+
+    /**
+     * @tc.steps: step2. Reset smart gesture shortcut.
+     * @tc.expected: IsPrimaryActionEnabled returns false after reset.
+     */
+    ViewAbstract::ResetSmartGestureShortcut();
+    smartGestureProperty = frameNode->GetSmartGestureProperty();
+    ASSERT_NE(smartGestureProperty, nullptr);
+    EXPECT_FALSE(smartGestureProperty->IsPrimaryActionEnabled());
+}
+#endif
 } // namespace OHOS::Ace::NG

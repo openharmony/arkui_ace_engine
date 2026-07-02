@@ -813,7 +813,7 @@ private:
     void OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio);
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
-    bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
+    bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node, bool isRecovery);
     int32_t GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetNavigationNode() const;
@@ -925,6 +925,8 @@ private:
     {
         return false;
     }
+
+    bool CheckNeedHandleIntent(bool needTransition);
 
     void RegisterForceSplitListener(PipelineContext* context, int32_t nodeId);
     void UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId);
