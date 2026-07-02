@@ -55,4 +55,14 @@ int32_t DisplayInfo::GetPhysicalHeight() const
 {
     return height_;
 }
+
+Rotation DisplayInfo::GetRotation() const
+{
+    return rotation_;
+}
+
+DisplaySourceMode DisplayInfo::GetDisplaySourceMode() const
+{
+    return displaySourceMode_;
+}
 }

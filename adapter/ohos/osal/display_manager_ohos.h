@@ -24,8 +24,14 @@ class DisplayManagerOhos : public DisplayManager {
     DECLARE_ACE_TYPE(DisplayManagerOhos, DisplayManager);
 
 public:
+    DisplayManagerOhos();
+    ~DisplayManagerOhos() override;
+
     bool ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t& rsScreenId) override;
     FoldDisplayMode GetFoldDisplayMode() override;
+    RefPtr<BaseDisplayInfo> GetCachedDisplayInfo(uint64_t displayId) override;
+    uint64_t RegisterDisplaySizeChangeCallback(DisplaySizeChangeCallback callback) override;
+    void UnregisterDisplaySizeChangeCallback(uint64_t callbackId) override;
 };
 
 } // namespace OHOS::Ace

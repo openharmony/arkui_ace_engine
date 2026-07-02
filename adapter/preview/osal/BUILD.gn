@@ -70,6 +70,7 @@ ohos_source_set("preview_osal_source") {
       "cpu_boost.cpp",
       "device_config.cpp",
       "display_info_utils.cpp",
+      "display_manager_preview.cpp",
       "download_manager_preview.cpp",
       "dynamic_module_helper.cpp",
       "event_report.cpp",
