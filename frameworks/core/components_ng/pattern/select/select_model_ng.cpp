@@ -1589,7 +1589,8 @@ void SelectModelNG::CreateSelect(
     InitSelect(AceType::RawPtr(select), params);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
         MaterialUtils::IsMaterialEnabled()) {
-        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+        LightEffectOptions lightEffectOptions;
+        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN, true, lightEffectOptions);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(material));
     }
 
