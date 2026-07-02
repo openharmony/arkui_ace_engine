@@ -53,7 +53,7 @@ bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 

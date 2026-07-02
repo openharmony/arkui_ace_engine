@@ -22,6 +22,8 @@
 #include <queue>
 #include <string>
 
+#include "base/utils/macros.h"
+
 namespace OHOS::Ace {
 class PipelineBase;
 // Each component type occupies 100 enum positions for easy extension
@@ -109,7 +111,7 @@ public:
     StatisticEventReporter();
     explicit StatisticEventReporter(int32_t instanceId);
     virtual ~StatisticEventReporter() = default;
-    void SendEvent(StatisticEventType eventType);
+    ACE_FORCE_EXPORT void SendEvent(StatisticEventType eventType);
     void TryReportStatisticEvents(PipelineBase* pipeline);
     void ForceReportStatisticEvents();
 private:

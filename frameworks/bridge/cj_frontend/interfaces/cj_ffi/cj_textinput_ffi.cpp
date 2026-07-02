@@ -16,10 +16,28 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textinput_ffi.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::TextFieldModelNG* GetTextInputTextFieldModel()
+{
+    static NG::TextFieldModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextInput");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find textinput dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -38,7 +56,7 @@ void NGNativeTextInputController::CaretPosition(int32_t caretPosition)
 void FfiOHOSAceFrameworkTextInputSetCustomKeyboard(void (*keybordBuild)())
 {
     auto func = CJLambda::Create(keybordBuild);
-    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(func), true);
+    GetTextInputTextFieldModel()->SetCustomKeyboard(std::move(func), true);
 }
 
 void NGNativeTextInputController::SetTextSelection(
@@ -101,7 +119,7 @@ void FfiOHOSAceFrameworkTextInputCreate(const char* placeholder, const char* tex
     }
     std::string placeHolderStr8(placeholder);
     std::string textStr8(text);
-    auto nativeController = TextFieldModel::GetInstance()->CreateTextInput(UtfUtils::Str8DebugToStr16(placeHolderStr8),
+    auto nativeController = GetTextInputTextFieldModel()->CreateTextInput(UtfUtils::Str8DebugToStr16(placeHolderStr8),
         UtfUtils::Str8DebugToStr16(textStr8));
     controller->SetController(nativeController);
 }

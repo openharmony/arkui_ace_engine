@@ -148,7 +148,7 @@ ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
 
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
-ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
@@ -158,7 +158,7 @@ ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
-ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVBAR_ETS_TAG[];
 ACE_EXPORT extern const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char PRIMARY_CONTENT_NODE_ETS_TAG[];
 
@@ -166,7 +166,7 @@ ACE_EXPORT extern const char PRIMARY_CONTENT_NODE_ETS_TAG[];
 ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
 
 // navDestination view
-ACE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char NAVDESTINATION_TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVDESTINATION_CONTENT_ETS_TAG[];
 
@@ -228,7 +228,7 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 
 // panel
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
-ACE_EXPORT extern const char PANEL_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PANEL_ETS_TAG[];
 ACE_EXPORT extern const char PANEL_CLOSE_ICON_ETS_TAG[];
 
 // pattern-lock
@@ -354,7 +354,7 @@ ACE_EXPORT extern const char BADGE_ETS_TAG[];
 // search
 ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
 ACE_EXPORT extern const char SEARCH_ETS_TAG[];
-extern const char SEARCH_Field_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SEARCH_Field_ETS_TAG[];
 
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
@@ -402,8 +402,8 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_MASK_TAG[];
-ACE_EXPORT extern const char SHEET_PAGE_TAG[];
-ACE_EXPORT extern const char SHEET_WRAPPER_TAG[];
+ACE_FORCE_EXPORT extern const char SHEET_PAGE_TAG[];
+ACE_FORCE_EXPORT extern const char SHEET_WRAPPER_TAG[];
 
 // full screen modal
 ACE_EXPORT extern const char MODAL_PAGE_TAG[];
@@ -485,14 +485,14 @@ ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
-ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TEXTAREA_ETS_TAG[];
 
 // textdrag
 ACE_EXPORT extern const char TEXTDRAG_ETS_TAG[];
 
 // textinput
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
-ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
 
 // texttimer
 ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[];
@@ -500,7 +500,7 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[];
 
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
-ACE_EXPORT extern const char SELECT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SELECT_ETS_TAG[];
 
 // select_popup
 ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[];

@@ -214,6 +214,9 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
+    static void SetHoverEffect(FrameNode* frameNode, HoverEffectType value);
+    static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
@@ -267,6 +270,10 @@ public:
     static void ResetCounterTextOverflowColor(FrameNode* frameNode);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& value);
+    static void SetShowUnit(FrameNode* frameNode, std::function<void()>&& unitFunction);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
@@ -367,6 +374,8 @@ public:
     static bool GetHalfLeading(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
+    static void SetPaddingJs(
+        FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp, bool hasRegist = false);
     static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);
     static bool GetCustomKeyboardOption(FrameNode* frameNode);
     static void SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value);
@@ -379,6 +388,7 @@ public:
     static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
     static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
     static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
+    static void SetMargin(FrameNode* frameNode);
     static PaddingProperty GetMargin(FrameNode* frameNode);
     static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
     static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
@@ -438,6 +448,8 @@ public:
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetUserAccessibilityText(FrameNode* frameNode);
+    static void SetBackBorder(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;
@@ -445,6 +457,7 @@ private:
     void SetTextRectWillChange();
     void SetDefaultPadding();
     void SetBackBorderRadius();
+    static void SetBackBorderRadius(FrameNode* frameNode);
 
     static void SetOnWillInsertValueEventMultiThread(FrameNode* frameNode,
         std::function<bool(const InsertValueInfo&)>&& func);

@@ -9000,11 +9000,11 @@ FrameNode::GetAccessibilityProperty<TabBarItemAccessibilityProperty>() const;
 template RefPtr<TextAccessibilityProperty> FrameNode::GetAccessibilityProperty<TextAccessibilityProperty>() const;
 template RefPtr<TextClockAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextClockAccessibilityProperty>() const;
-template RefPtr<TextFieldAccessibilityProperty>
+template ACE_FORCE_EXPORT RefPtr<TextFieldAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextFieldAccessibilityProperty>() const;
 template RefPtr<TextPickerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextPickerAccessibilityProperty>() const;
-template RefPtr<TextPickerRowAccessibilityProperty>
+template ACE_FORCE_EXPORT RefPtr<TextPickerRowAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextPickerRowAccessibilityProperty>() const;
 template RefPtr<TextTimerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextTimerAccessibilityProperty>() const;

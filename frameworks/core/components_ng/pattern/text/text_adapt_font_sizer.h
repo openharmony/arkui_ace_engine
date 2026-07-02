@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 class PipelineContext;
 
-class TextAdaptFontSizer : public virtual AceType {
+class ACE_FORCE_EXPORT TextAdaptFontSizer : public virtual AceType {
     DECLARE_ACE_TYPE(TextAdaptFontSizer, AceType);
 
 public:

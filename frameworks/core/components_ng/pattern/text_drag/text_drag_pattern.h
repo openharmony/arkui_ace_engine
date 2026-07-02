@@ -100,7 +100,7 @@ public:
     TextDragPattern() = default;
     ~TextDragPattern() override = default;
 
-    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+    ACE_FORCE_EXPORT static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
 
     static const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
         const float textStartY);

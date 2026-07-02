@@ -225,6 +225,8 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkselect",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgrid",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgriditem",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextinput",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextarea",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -271,6 +273,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkslider.abc",
       "${out_path}/arkui/ace_engine/arktimepicker.abc",
       "${out_path}/arkui/ace_engine/arkloadingprogress.abc",
+      "${out_path}/arkui/ace_engine/arktextinput.abc",
+      "${out_path}/arkui/ace_engine/arktextarea.abc",
       "${out_path}/arkui/ace_engine/arkalphabetindexer.abc",
       "${out_path}/arkui/ace_engine/arksymbolspan.abc",
       "${out_path}/arkui/ace_engine/arkimagespan.abc",

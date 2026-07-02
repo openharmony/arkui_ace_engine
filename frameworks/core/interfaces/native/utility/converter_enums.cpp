@@ -750,7 +750,7 @@ void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src)
 }
 
 template<>
-void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 {
     switch (src) {
         case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
@@ -817,7 +817,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputAction>& dst, const Ark_
 }
 
 template<>
-void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
 {
     switch (src) {
         case ARK_INPUT_TYPE_NORMAL: dst = TextInputType::TEXT; break;
@@ -837,7 +837,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
 }
 
 template<>
-void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
 {
     switch (src) {
         case ARK_TEXT_AREA_TYPE_NORMAL: dst = TextInputType::TEXT; break;
@@ -898,7 +898,7 @@ void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit
 }
 
 template<>
-void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src)
 {
     switch (src) {
         case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CleanNodeStyle::CONSTANT; break;
@@ -953,7 +953,7 @@ void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src
 }
 
 template<>
-void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
 {
     switch (src) {
         case ARK_CONTENT_TYPE_USER_NAME: dst = TextContentType::USER_NAME; break;
@@ -1486,7 +1486,7 @@ void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& sr
 }
 
 template<>
-void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src)
 {
     switch (src) {
         case ARK_LINE_BREAK_STRATEGY_BALANCED: dst = LineBreakStrategy::BALANCED; break;
@@ -1641,7 +1641,7 @@ void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src)
     }
 }
 template<>
-void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src)
 {
     switch (src) {
         case ARK_TEXT_CONTENT_STYLE_DEFAULT: dst = InputStyle::DEFAULT; break;
@@ -1650,7 +1650,7 @@ void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src)
     }
 }
 template<>
-void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src)
 {
     switch (src) {
         case ARK_TEXT_INPUT_STYLE_DEFAULT: dst = InputStyle::DEFAULT; break;

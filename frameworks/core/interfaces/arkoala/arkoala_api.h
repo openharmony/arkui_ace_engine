@@ -757,6 +757,12 @@ struct ArkUIShadowOptions {
     bool isFill;
 };
 
+struct ArkUITextEditCreateResourceParams {
+    void* stringValueRawPtr = nullptr;
+    void* placeholderRawPtr = nullptr;
+    bool parseValueResult = false;
+    bool parsePlaceholderResult = false;
+};
 struct ArkUIRichEditorTextStyle {
     uint32_t fontColor;
     ArkUI_Int32 fontStyle;
@@ -6082,17 +6088,26 @@ struct ArkUINavDestinationModifier {
 };
 
 struct ArkUITextAreaModifier {
+    void (*createTextArea)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
+        const ArkUITextEditCreateResourceParams* resParams);
+    void (*setTextAreaFocusableAndFocusNode)();
+    ArkUINodeHandle (*getTextAreaController)(ArkUINodeHandle node);
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setShowVoiceButton)(ArkUINodeHandle node, ArkUI_Uint32 enableVoiceButton);
+    void (*resetShowVoiceButton)(ArkUINodeHandle node);
     void (*setHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetHorizontalScrolling)(ArkUINodeHandle node);
     ArkUI_Int32 (*getHorizontalScrolling)(ArkUINodeHandle node);
     void (*setTextAreaStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
+    void (*setTextAreaHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffect);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);
     void (*resetTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode);
+    void (*setTextAreaMaxLinesJs)(ArkUINodeHandle node, ArkUI_Uint32 normalMaxViewLines,
+        ArkUI_Uint32 inlineMaxViewLines, ArkUI_Uint32 overflowMode);
     void (*resetTextAreaMaxLines)(ArkUINodeHandle node);
     void (*setTextAreaMinLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetTextAreaMinLines)(ArkUINodeHandle node);
@@ -6174,9 +6189,11 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node);
     void (*setTextAreaSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*resetTextAreaSelectedBackgroundColorJs)(ArkUINodeHandle node, void* colorRawPtr);
     void (*resetTextAreaSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setTextAreaCaretStyle)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
         ArkUI_Uint32 caretColor, void* widthRawPtr, void* colorRawPtr);
+    void (*setTextAreaCaretStyleJs)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr);
     void (*resetTextAreaCaretStyle)(ArkUINodeHandle node);
     void (*setTextAreaTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaTextOverflow)(ArkUINodeHandle node);
@@ -6196,12 +6213,16 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes);
     void (*resetTextAreaPadding)(ArkUINodeHandle node);
+    void (*setTextAreaPaddingJs)(ArkUINodeHandle node, void* padding, void* oldPadding, bool tmp, bool hasRegist);
+    void (*resetTextAreaPaddingJs)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextAreaFontFeature)(ArkUINodeHandle node);
+    void (*setTextAreaForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color, void* colorRawPtr);
+    void (*setTextAreaOnClick)(ArkUINodeHandle node, void* callback);
     void (*setTextAreaOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnChange)(ArkUINodeHandle node);
     void (*setTextAreaEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaEnterKeyType)(ArkUINodeHandle node);
-    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback, void* colorRawPtr);
     void (*resetTextAreaInputFilter)(ArkUINodeHandle node);
     void (*setTextAreaOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnTextSelectionChange)(ArkUINodeHandle node);
@@ -6229,6 +6250,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
     void (*setTextAreaBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, void* colorRawPtr);
+    void (*setTextAreaBackBorder)(ArkUINodeHandle node);
     void (*resetTextAreaBorder)(ArkUINodeHandle node);
     void (*setTextAreaBorderWidth)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -6241,9 +6263,11 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderRadius)(ArkUINodeHandle node);
+    void (*resetTextAreaBorderRadiusJS)(ArkUINodeHandle node);
     void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
+    void (*setTextAreaMarginJs)(ArkUINodeHandle node);
     void (*setTextAreaCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextAreaOnWillChange)(ArkUINodeHandle node, ArkUI_Int64 callback);
@@ -6259,9 +6283,13 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
-    void (*setTextAreaSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
+    void (*setTextAreaSelectionMenuOptions)(ArkUINodeHandle node, void* onCreateMenuCallback,
+        void* onMenuItemClickCallback, void* onPrepareMenuCallback, bool isJsView);
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setTextAreaHeightClear)(ArkUINodeHandle node);
+    void (*setTextAreaHeightCommon)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTextAreaWidthAuto)(ArkUINodeHandle node, ArkUI_Bool isClear, ArkUI_Bool isAuto);
+    void (*setTextAreaWidthCommon)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaWidth)(ArkUINodeHandle node);
     void (*setTextAreaEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
@@ -6303,6 +6331,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaScrollBarColor)(ArkUINodeHandle node);
     void (*resetTextAreaScrollBarColor)(ArkUINodeHandle node);
     void (*scrollToVisible)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
+    void (*setTextAreaCustomKeyboardFunc)(ArkUINodeHandle node, void* callback, bool supportAvoidance);
     void (*setTextAreaCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
     ArkUINodeHandle (*getTextAreaCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaCustomKeyboardOption)(ArkUINodeHandle node);
@@ -6338,6 +6367,10 @@ struct ArkUITextAreaModifier {
 };
 
 struct ArkUITextInputModifier {
+    void (*createTextInput)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
+        const ArkUITextEditCreateResourceParams* resParams);
+    void (*setTextInputOnChangeEvent)(void* callback);
+    void (*setTextInputFocusableAndFocusNode)();
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
@@ -6358,6 +6391,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputPasswordIcon)(ArkUINodeHandle node, const struct ArkUIPasswordIconType* passwordIcon);
     void (*resetTextInputPasswordIcon)(ArkUINodeHandle node);
     void (*setTextInputTextAlign)(ArkUINodeHandle node, ArkUI_Int32 textAlign);
+    void (*setTextInputTextAlignJs)(ArkUINodeHandle node, ArkUI_Int32 textAlign);
     void (*resetTextInputTextAlign)(ArkUINodeHandle node);
     void (*setTextInputStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetTextInputStyle)(ArkUINodeHandle node);
@@ -6383,7 +6417,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr,
         bool isCapi);
     void (*resetTextInputSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*resetTextInputSelectedBackgroundColorJs)(ArkUINodeHandle node, void* resRawPtr);
     void (*setTextInputShowError)(ArkUINodeHandle node, ArkUI_CharPtr error, ArkUI_Uint32 visible, void* resRawPtr);
+    void (*setTextInputShowUnit)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputShowError)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderFont)(ArkUINodeHandle node, const struct ArkUIPlaceholderFontType* placeholderFont,
         void* fontsizeResRawPtr, void* fontfamilyResRawPtr);
@@ -6480,6 +6516,7 @@ struct ArkUITextInputModifier {
     void (*getTextInputShowCounterOptions)(ArkUINodeHandle node, ArkUIShowCountOptions* options);
     void (*setTextInputOnEditChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextInputOnEditChange)(ArkUINodeHandle node);
+    void (*setOnSecurityStateChange)(ArkUINodeHandle node, void* callback);
     void (*setTextInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
     void (*resetTextInputFilter)(ArkUINodeHandle node);
     void (*setTextInputOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
@@ -6530,7 +6567,9 @@ struct ArkUITextInputModifier {
     ArkUI_Bool (*getTextInputHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
-    void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
+    void (*setTextInputCustomKeyboardFunc)(ArkUINodeHandle node, void* callback, bool supportAvoidance);
+    void (*setTextInputCustomKeyboard)(
+        ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance, bool isJsView);
     ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
@@ -6544,15 +6583,17 @@ struct ArkUITextInputModifier {
     void (*resetTextInputNumberOfLines)(ArkUINodeHandle node);
     void (*setTextInputMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes);
+    void (*setTextInputMarginJS)(ArkUINodeHandle node);
     void (*resetTextInputMargin)(ArkUINodeHandle node);
     void (*setTextInputCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     ArkUINodeHandle (*getTextInputController)(ArkUINodeHandle node);
     void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
-    void (*setTextInputSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
+    void (*setTextInputSelectionMenuOptions)(ArkUINodeHandle node, void* onCreateMenuCallback,
+        void* onMenuItemClickCallback, void* onPrepareMenuCallback, bool isJsView);
     void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setLayoutPolicyProperty)(ArkUINodeHandle node, ArkUI_Uint32 policy, bool isWidth);
     void (*setTextInputWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputWidth)(ArkUINodeHandle node);
     void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
@@ -6625,6 +6666,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputGradient)(ArkUINodeHandle node);
     void (*setTextInputColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
     void (*resetTextInputColorShaderColor)(ArkUINodeHandle node);
+    void (*setUserAccessibilityText)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
