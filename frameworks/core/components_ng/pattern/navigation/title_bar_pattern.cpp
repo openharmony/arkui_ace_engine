@@ -1074,13 +1074,7 @@ void TitleBarPattern::UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& ma
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto titleRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(titleRenderContext);
-    if (IsApplyShadowEnabled(material)) {
-        titleRenderContext->UpdateClipEdge(false);
-    } else {
-        titleRenderContext->UpdateClipEdge(true);
-    }
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(material));
 }
 
@@ -1196,13 +1190,7 @@ void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, co
     CHECK_NULL_VOID(menuNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto titleRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(titleRenderContext);
-    if (IsApplyShadowEnabled(material)) {
-        titleRenderContext->UpdateClipEdge(false);
-    } else {
-        titleRenderContext->UpdateClipEdge(true);
-    }
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
     InitColorPickerIfNeeded();
     InitTransparencyListenerIfNeeded();
     auto children = menuNode->GetChildren();
@@ -2166,6 +2154,15 @@ bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
     return options->applyShadow;
 }
 
+bool TitleBarPattern::ShouldEnableTitleBarClip(const RefPtr<UiMaterial>& material) const
+{
+    if (IsApplyShadowEnabled(material)) {
+        return false;
+    }
+    const auto& scrollEffectOptions = options_.bgOptions.scrollEffectOptions;
+    return !scrollEffectOptions.has_value() || scrollEffectOptions->scrollEffectType != ScrollEffectType::GRADUAL_BLUR;
+}
+
 ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
 {
     if (enableColorInvert && isColorPickerDark_.has_value()) {
@@ -2565,7 +2562,7 @@ void TitleBarPattern::InitScrollEffectOptions()
     if (!scrollEffectOptionsOpt.has_value()) {
         if (titleBarMaskNode_ || titleBarMaskBlurNode_) {
             ResetTitleBarMaskNodes();
-            UpdateTitleBarClipForMask(true);
+            UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
             titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -2577,7 +2574,7 @@ void TitleBarPattern::InitScrollEffectOptions()
     isScrollEffectEnabled_ = true;
     SetIsTitleBarStyleStartUpdate(false);
     SetIsTitleBarStyleEndUpdate(false);
-    UpdateTitleBarClipForMask(scrollEffectType != ScrollEffectType::GRADUAL_BLUR);
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
 
     if (!titleBarMaskBlurNode_) {
         titleBarMaskBlurNode_ = CreateTitleBarEffectNode("TitleBarMaskBlur");

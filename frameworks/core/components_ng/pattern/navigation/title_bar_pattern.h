@@ -507,6 +507,7 @@ private:
     void UpdateBackButtonColor();
     void UpdateBackgroundBlurStyle();
     void PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrollEffectType);
+    bool ShouldEnableTitleBarClip(const RefPtr<UiMaterial>& material) const;
     void UpdateTitleBarClipForMask(bool enableClip);
     void ResetTitleBarMaskBlendEffect();
     void UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType);
