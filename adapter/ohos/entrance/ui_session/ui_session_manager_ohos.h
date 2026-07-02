@@ -96,6 +96,9 @@ public:
         int32_t instanceId) override;
     void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) override;
     void RemoveSaveGetCurrentInstanceId(int32_t instanceId) override;
+    void SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+        PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+        PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction) override;
     std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() override;
     void GetWebViewLanguage() override;
     void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) override;
@@ -155,6 +158,9 @@ public:
 private:
     bool PostToCurrentTranslateManager(const char* caller,
         std::function<void(const std::shared_ptr<UiTranslateManager>&)>&& task);
+    void GetArkUIPageTranslateFunctions(PageTranslateTextFunction& getTextFunction,
+        PageTranslateTextFunction& startFunction, PageTranslateEndFunction& endFunction,
+        PageTranslateResetFunction& resetFunction, PageTranslateResultFunction& resultFunction);
 
     int32_t pageTranslateScope_ = 0;
     int32_t pageTranslateOwnerPid_ = -1;

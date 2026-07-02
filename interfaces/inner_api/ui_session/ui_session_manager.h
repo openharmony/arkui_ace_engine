@@ -60,6 +60,10 @@ public:
 
     using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
     using GetAbilityLanguageInfoFunction = std::function<int32_t(std::string&, std::string&)>;
+    using PageTranslateTextFunction = std::function<void(bool)>;
+    using PageTranslateEndFunction = std::function<void()>;
+    using PageTranslateResetFunction = std::function<void(int32_t)>;
+    using PageTranslateResultFunction = std::function<void(const std::string&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -193,6 +197,9 @@ public:
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
     virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual void SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+        PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+        PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction) {};
     virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
         std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
         return currentTranslateManager;
@@ -335,6 +342,12 @@ protected:
     std::mutex getWebInfoByRequestCallbackMutex_;
     GetAbilityLanguageInfoFunction getAbilityLanguageInfoCallback_;
     std::mutex getAbilityLanguageInfoCallbackMutex_;
+    PageTranslateTextFunction getArkUIPageTranslateTextFunction_;
+    PageTranslateTextFunction startArkUIPageTranslateFunction_;
+    PageTranslateEndFunction endArkUIPageTranslateFunction_;
+    PageTranslateResetFunction resetArkUIPageTranslateFunction_;
+    PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
+    std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
 };
 } // namespace OHOS::Ace

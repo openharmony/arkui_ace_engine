@@ -18,6 +18,7 @@
 #include <memory>
 
 #if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 
@@ -184,7 +185,9 @@ bool GetWebLangIfActive(const RefPtr<UINode>& node, std::string& lang)
     auto pattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_RETURN(pattern, false);
     if (pattern->GetActiveStatus()) {
-        lang = pattern->GetCurrentLanguage();
+        auto translateNode = AceType::DynamicCast<PageTranslateNode>(pattern);
+        CHECK_NULL_RETURN(translateNode, false);
+        lang = translateNode->GetCurrentLanguage();
         return true;
     }
     return false;

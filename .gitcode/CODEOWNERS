@@ -2559,6 +2559,7 @@ frameworks/core/components_ng/pattern/sheet/sheet_wrapper_paint_method.h @arkuic
 frameworks/core/components_ng/pattern/sheet/sheet_wrapper_pattern.h @arkuicodepulse
 frameworks/core/components_ng/pattern/panel/ @arkuicodepulse
 frameworks/core/components_ng/pattern/particle/ @arkuicodepulse
+frameworks/core/components_ng/pattern/page_translate/page_translate_node.h @arkui_framework_xnode
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @huawei_g_five
 frameworks/core/components_ng/pattern/picker_utils/ @arkui001

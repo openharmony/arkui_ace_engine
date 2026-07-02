@@ -593,15 +593,6 @@ public:
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual void OnCollectRemoved() {}
-    virtual std::string GetCurrentLanguage()
-    {
-        return nullptr;
-    };
-    virtual void GetTranslateText(
-        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
-    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
-    virtual void EndTranslate() {};
-    virtual void SendTranslateResult(std::string results) {};
     int32_t OnRecvCommand(const std::string& command);
     virtual std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content)
     {

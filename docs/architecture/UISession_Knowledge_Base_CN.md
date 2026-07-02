@@ -172,21 +172,30 @@ sequenceDiagram
     participant StubImpl as UIContentServiceStubImpl
     participant Manager as UiSessionManagerOhos
     participant Translate as UiTranslateManager
+    participant UIContent as UIContentImpl callback
+    participant Pipeline as PipelineContext
     participant Content as ContentChangeManager
     participant Report as ReportService
 
     SA->>StubImpl: StartPageTranslate(request)
     StubImpl->>Manager: StartPageTranslate(request)
     Manager->>Manager: ParsePageTranslateRequest(scope, extraData)
-    Manager->>Translate: StartPageTranslate(scope, extraData)
+    Manager->>Translate: StartPageTranslate(scope, extraData) for ArkWeb
+    Manager->>UIContent: startArkUIPageTranslateFunction
+    UIContent->>Pipeline: GetArkUIPageTranslateText(true)
+    Pipeline->>Translate: ForEachArkUITranslateFrameNode()
+    Pipeline->>Content: StartTextTranslateReport + ReportTranslateTextFrameNode
     Content->>Manager: SendPageTextToAI(nodeId, text, version)
     Manager->>Report: SendPageText(nodeId, text, version)
     SA->>StubImpl: SendPageTranslateResult(result)
     StubImpl->>Manager: SendPageTranslateResult(result)
-    Manager->>Translate: SendPageTranslateResult(result)
+    Manager->>Translate: SendPageTranslateResult(result) for ArkWeb
+    Manager->>UIContent: sendArkUIPageTranslateResultFunction
+    UIContent->>Pipeline: SendArkUIPageTranslateResult(result)
+    Pipeline->>Content: ApplyTranslateResult(nodeId, text, version)
 ```
 
-页面翻译请求支持 JSON 形式的 `scope` 与 `extraData`，scope 非数字或非法时返回 `PARAM_INVALID`。连续翻译通过 `pageTranslateScope_` 和 `pageTranslateStarted_` 保存会话状态；页面文本由 `ContentChangeManager` 计算版本后发给 `processMap_["translate"]` 中的远端进程。源码：`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:31`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:837`、`frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:376`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:903`。
+页面翻译请求支持 JSON 形式的 `scope` 与 `extraData`，scope 非数字或非法时返回 `PARAM_INVALID`。连续翻译通过 `pageTranslateScope_` 和 `pageTranslateStarted_` 保存会话状态。`UiSessionManagerOhos` 按 scope 分流：ArkWeb 通过当前 `UiTranslateManager` 调用 `PageTranslateNode`，ArkUI 通过 `UIContentImpl::SaveArkUIPageTranslateFunctions` 注册的回调进入当前 `PipelineContext`，再由 `ContentChangeManager` 计算版本、上报原文、应用译文和恢复原文。源码：`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:31`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:837`、`adapter/ohos/entrance/ui_content_impl.cpp:6257`、`frameworks/core/pipeline_ng/pipeline_context.cpp:7897`、`frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:376`。
 
 ### 流程 5：内容变化检测
 
@@ -250,6 +259,15 @@ sequenceDiagram
 
 OHOS 实现通过 `SaveTranslateManager` 将 `UiTranslateManager` 写入 `translateManagerMap_`，通过 `SaveGetCurrentInstanceIdCallback` 获取当前 instanceId，再由 `GetCurrentTranslateManager` 找到对应翻译管理器。源码：`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:610`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:617`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:629`。
 
+### 页面翻译职责边界
+
+| 类 | 职责 | 不应承担的职责 |
+|----|------|----------------|
+| `UiTranslateManagerImpl` | 保存当前实例的 `PageTranslateNode` 监听表；通过 `translateNode` 分发 ArkWeb 脚本翻译、语言查询、Web 图片查询；通过 `ForEachArkUITranslateFrameNode` 向当前 Pipeline 暴露 ArkUI `FrameNode` 遍历能力。 | 不直接获取 `PipelineContext`，不直接调用 `ContentChangeManager`，不维护 ArkUI 文本版本与译文缓存。 |
+| `PipelineContext` | 作为当前 UI 实例上下文，承接 ArkUI 页面翻译入口；注册/反注册翻译监听；在节点上树注册后通知 `ContentChangeManager`；执行 ArkUI Get/Start/End/Reset/Result。 | 不处理跨进程 report callback 生命周期，不解析 SA 连接状态。 |
+| `ContentChangeManager` | 管理 ArkUI 文本翻译的快照/连续上报缓存、文本 hash/version、可见性过滤、译文应用与原文恢复。 | 不管理 ArkWeb 脚本翻译，不选择当前 Ability 实例，不保存 SA callback。 |
+| `UiSessionManagerOhos` | 解析 SA 请求，维护连续翻译会话 scope 与死亡清理状态，按 scope 分发 ArkWeb/ArkUI 两条链路。 | 不直接遍历组件树，不持有 `FrameNode` 或 `ContentChangeManager`。 |
+
 ### 内容变化检测阈值
 
 `ContentChangeConfig` 默认值为最小上报间隔 100ms、文本面积比例 0.15、图片最小宽高 100px、过渡后延迟 600ms；`StartContentChangeReport` 会对非法比例或负数阈值回退到默认值。源码：`interfaces/inner_api/ui_session/param_config.h:47`、`frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:247`。
@@ -266,6 +284,7 @@ sequenceDiagram
     participant Remote as UIContentStub
     participant Manager as UiSessionManagerOhos
     participant TM as UiTranslateManagerImpl
+    participant Pipeline as PipelineContext
     participant CCM as ContentChangeManager
 
     SA->>Proxy: GetPageTranslateText / StartPageTranslate
@@ -276,8 +295,9 @@ sequenceDiagram
         Report->>Report: requestId check and clear callback
         Report->>Remote: END_PAGE_TRANSLATE cleanup
         Remote->>Manager: EndPageTranslate
-        Manager->>TM: Post UI cleanup
-        TM->>CCM: StopTextTranslateReport / reset runtime text
+        Manager->>TM: Reset ArkWeb runtime text
+        Manager->>Pipeline: EndArkUIPageTranslate
+        Pipeline->>CCM: StopTextTranslateReport / reset runtime text
     else page text reported
         Remote->>Manager: SendPageTextToAI
         Manager->>Report: SendPageText
@@ -298,7 +318,7 @@ sequenceDiagram
 | 原文已发出但译文长时间未回 | `SendPageText` 正常回调 SA 后为 `nodeId/version` 投递 result watchdog | watchdog 仅输出不含正文的 nodeId/version 告警；不强制结束连续翻译，不恢复原文，迟到译文仍按 nodeId/version 校验 | `lushi/translate:adapter/ohos/entrance/ui_session/ui_report_stub.cpp:541`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_report_stub.cpp:640`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_report_stub.cpp:825` |
 | 译文回填成功发送 | `SendPageTranslateResult` 解析 result 中可识别的 nodeId/version identity | IPC 发送成功后取消对应 result watchdog；单次 Get 释放 callback 并解除并发限制；解析失败不影响 IPC 失败返回码，但无法取消 watchdog | `lushi/translate:adapter/ohos/entrance/ui_session/ui_content_proxy.cpp:1253`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_content_proxy.cpp:1258`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_content_proxy.cpp:1272` |
 | 当前 Ability 语言地区查询 | `GetCurrentAbilityLanguageInfo` 在 proxy 侧使用同步 in-flight guard，再发送 `GET_CURRENT_ABILITY_LANGUAGE_INFO` IPC | 上一笔同步查询未返回前重复调用返回 `LAST_UNFINISH`，不得重复发送 IPC；`SendRequest` 返回或错误路径自动释放 guard；不注册 report callback、不改变翻译会话状态 | `lushi/translate:adapter/ohos/entrance/ui_session/ui_content_proxy.cpp:1296`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_content_stub.cpp:713`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:948` |
-| End/Reset 主动清理 | `EndPageTranslate` 清会话 scope 后投递 UI 线程；`ResetPageTranslate` 按 nodeId 或全量投递 UI 线程 | ArkWeb 分支复用旧 Reset；ArkUI 分支调用 `ContentChangeManager::StopTextTranslateReport` 或 `ResetTranslateTextNode` 恢复运行时译文 | `lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:860`、`lushi/translate:adapter/ohos/entrance/ace_translate_manager.cpp:194`、`lushi/translate:frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:345` |
+| End/Reset 主动清理 | `EndPageTranslate` 清会话 scope 后按 scope 分发；`ResetPageTranslate` 按 nodeId 或全量投递 UI 线程 | ArkWeb 分支复用 `UiTranslateManagerImpl::ResetTranslate`；ArkUI 分支通过 `PipelineContext::EndArkUIPageTranslate` 或 `ResetArkUIPageTranslate` 调用 `ContentChangeManager::StopTextTranslateReport` / `ResetTranslateTextNode` 恢复运行时译文 | `lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:906`、`lushi/translate:adapter/ohos/entrance/ace_translate_manager.cpp:194`、`lushi/translate:frameworks/core/pipeline_ng/pipeline_context.cpp:7930`、`lushi/translate:frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:345` |
 | SA/report 进程死亡 | `SaveReportStub` 为 SA report remote 增加 `UiReportProxyRecipient` 死亡监听 | 若死亡进程是唯一 translate owner，则调用 `ResetTranslate(-1)` 和 `ResetPageTranslate(-1)`，清 `pageTranslateStarted_` / `pageTranslateScope_`，并从 report/process map 删除该 pid | `lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:208`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:215`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp:224` |
 | UIContent remote 死亡 | `UiContentProxyRecipient::OnRemoteDied` 和 `UiReportProxyRecipient::OnRemoteDied` 是通用死亡回调包装 | 透传到注册的 handler，由上层清理缓存的 remote object 或 report object | `lushi/translate:adapter/ohos/entrance/ui_session/ui_content_proxy.cpp:1304`、`lushi/translate:adapter/ohos/entrance/ui_session/ui_report_proxy.cpp:448` |
 
