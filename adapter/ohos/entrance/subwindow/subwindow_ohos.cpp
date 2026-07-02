@@ -761,7 +761,6 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     if (!pattern->IsTipsAppearing()) {
         return;
     }
-    pattern->SetIsTipsAppearing(false);
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);

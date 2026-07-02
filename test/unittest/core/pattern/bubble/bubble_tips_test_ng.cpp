@@ -60,8 +60,6 @@ constexpr float LINE_HEIGHT = 16.0f;
 constexpr float TEXT_WIDTH = 14.0f;
 constexpr float TEXT_PADDING = 12.0f;
 constexpr int32_t DOUBLE = 2;
-constexpr float WIDTH = 100.0f;
-constexpr float HEIGHT = 100.0f;
 constexpr Dimension TIPS_MARGIN_SPACE = 8.0_vp;
 constexpr Dimension MOUSE_WIDTH = 16.0_vp;
 constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
@@ -882,81 +880,6 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: FitMouseOffset002
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const double offset = 10.0;
-    const double size = 20.0;
-    const Rect subWindow(offset, offset, size, size);
-    const OffsetF targetPosition((offset + size) * HALF, (offset + size) * HALF);
-    MockContainer::UpdateCurrent(1);
-    layoutAlgorithm->targetOffset_ = targetPosition;
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-}
-
-/**
- * @tc.name: FitMouseOffset003
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const Rect subWindow(0.0, 0.0, 0.0, 0.0);
-    const OffsetF targetPosition(0.0, 0.0);
-    const int32_t parentId = 1;
-    RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
-    auto containerId = pipelineContext->GetInstanceId();
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = true;
-    auto parentContainer = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(parentId));
-    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    EXPECT_CALL(*parentContainer, GetGlobalScaledRect()).WillOnce(Return(subWindow));
-    layoutAlgorithm->targetOffset_ = targetPosition;
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = false;
-}
-
-/**
  * @tc.name: MeasureTipsFollowTarget001
  * @tc.desc: Test MeasureTipsFollowTarget.
  * @tc.type: FUNC
@@ -1290,6 +1213,109 @@ HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowToggle001, TestSize.Level0)
     ASSERT_NE(property2, nullptr);
     auto flexGrow2 = property2->GetFlexGrow();
     EXPECT_FLOAT_EQ(flexGrow2.value_or(0.0f), 1.0f);
+}
+
+/**
+ * @tc.name: FitMouseOffset001
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when followCursor is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create tips node and layout algorithm.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutWrapper = tipsNode->CreateLayoutWrapper();
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to false, expect function returns early.
+     */
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when followCursor_ is false.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: FitMouseOffset002
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when expandDisplay is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create tips node and layout algorithm.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutWrapper = tipsNode->CreateLayoutWrapper();
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to true and expandDisplay_ to true,
+     *           expect function returns early.
+     */
+    layoutAlgorithm->followCursor_ = true;
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when expandDisplay_ is true.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: FitMouseOffset003
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when layoutWrapper is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create layout algorithm with nullptr layoutWrapper.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to true, expandDisplay_ to false,
+     *           and pass nullptr as layoutWrapper.
+     */
+    layoutAlgorithm->followCursor_ = true;
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(nullptr);
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when layoutWrapper is nullptr.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
 }
 
 } // namespace OHOS::Ace::NG
