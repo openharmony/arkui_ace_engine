@@ -1144,7 +1144,7 @@ HWTEST_F(BadgeTestNg, UpdateBadgePatternTest001, TestSize.Level1)
      * @tc.steps: step1. create badge and get frameNode.
      */
     CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    
+
     /**
      * @tc.steps: step2. call UpdateBadgeValue with different conditions
      */
@@ -2084,5 +2084,183 @@ HWTEST_F(BadgeTestNg, CreateByFrameNodeTest001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::GREEN);
     EXPECT_EQ(layoutProperty_->GetBadgeFontSize(), BADGE_FONT_SIZE);
     EXPECT_EQ(layoutProperty_->GetBadgeCircleSize(), BADGE_CIRCLE_SIZE);
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth001
+ * @tc.desc: Test LPX attribute registration when badgeOuterBorderWidth uses LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth001, TestSize.Level1)
+{
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+    Dimension lpxBorderWidth(10.0, DimensionUnit::LPX);
+    badgeParameters.badgeOuterBorderWidth = lpxBorderWidth;
+    badgeParameters.badgeOuterBorderColor = Color::RED;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                frameNode->lpxUpdateCallbacks_.end());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), lpxBorderWidth);
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth002
+ * @tc.desc: Test LPX attribute unregistration when badgeOuterBorderWidth uses VP unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth002, TestSize.Level1)
+{
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+    Dimension vpBorderWidth(10.0, DimensionUnit::VP);
+    badgeParameters.badgeOuterBorderWidth = vpBorderWidth;
+    badgeParameters.badgeOuterBorderColor = Color::RED;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+
+    EXPECT_FALSE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                 frameNode->lpxAttributes_.end());
+    EXPECT_FALSE(frameNode->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                 frameNode->lpxUpdateCallbacks_.end());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), vpBorderWidth);
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth003
+ * @tc.desc: Test LPX update callback updates textNode outer border width correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth003, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    Dimension lpxBorderWidth(10.0, DimensionUnit::LPX);
+    badgeParameters.badgeOuterBorderWidth = lpxBorderWidth;
+    badgeParameters.badgeOuterBorderColor = Color::RED;
+    badgeParameters.badgeValue = "test";
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    auto children = frameNode_->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    auto textNode = AceType::DynamicCast<FrameNode>(children.back());
+    ASSERT_NE(textNode, nullptr);
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+
+    auto callbackIt = frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH);
+    ASSERT_TRUE(callbackIt != frameNode_->lpxUpdateCallbacks_.end());
+
+    callbackIt->second();
+
+    auto outerBorderWidth = textRenderContext->GetOuterBorderWidth();
+    ASSERT_TRUE(outerBorderWidth.has_value());
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth004
+ * @tc.desc: Test LPX attribute handling when using default theme value
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth004, TestSize.Level1)
+{
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+
+    EXPECT_FALSE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                 frameNode->lpxAttributes_.end());
+    EXPECT_FALSE(frameNode->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                 frameNode->lpxUpdateCallbacks_.end());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), badgeTheme->GetBadgeOuterBorderWidth());
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth005
+ * @tc.desc: Test UpdateBadgeStyle with LPX outer border width
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth005, TestSize.Level1)
+{
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    BadgeParameters badgeParameters;
+    Dimension lpxBorderWidth(5.0, DimensionUnit::LPX);
+    badgeParameters.badgeOuterBorderWidth = lpxBorderWidth;
+
+    BadgeModelNG::UpdateBadgeStyle(badgeParameters, frameNode);
+
+    EXPECT_TRUE(frameNode->lpxAttributes_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                frameNode->lpxAttributes_.end());
+    EXPECT_TRUE(frameNode->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH) !=
+                frameNode->lpxUpdateCallbacks_.end());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), lpxBorderWidth);
+}
+
+/**
+ * @tc.name: BadgeLpxOuterBorderWidth006
+ * @tc.desc: Test LPX update callback handles empty children gracefully
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeLpxOuterBorderWidth006, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    Dimension lpxBorderWidth(10.0, DimensionUnit::LPX);
+    badgeParameters.badgeOuterBorderWidth = lpxBorderWidth;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    ASSERT_NE(frameNode_, nullptr);
+
+    auto callbackIt = frameNode_->lpxUpdateCallbacks_.find(LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH);
+    if (callbackIt != frameNode_->lpxUpdateCallbacks_.end()) {
+        callbackIt->second();
+    }
+
+    EXPECT_TRUE(frameNode_->GetChildren().empty());
 }
 } // namespace OHOS::Ace::NG

@@ -175,13 +175,24 @@ static void UpdateBadgeStyleProperties(BadgeParameters& badgeParameters, const R
     } else {
         layoutProperty->UpdateBadgeOuterBorderColor(badgeTheme->GetBadgeOuterBorderColor());
     }
-    if (badgeParameters.badgeOuterBorderWidth.has_value()) {
-        layoutProperty->UpdateBadgeOuterBorderWidth(badgeParameters.badgeOuterBorderWidth.value());
-    } else {
-        layoutProperty->UpdateBadgeOuterBorderWidth(badgeTheme->GetBadgeOuterBorderWidth());
-    }
-    ACE_CHECK_NODE_LPX_ATTRIBUTE(badgeParameters.badgeOuterBorderWidth.value_or(Dimension()),
-        LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH, frameNode);
+    Dimension badgeOuterBorderWidth =
+        badgeParameters.badgeOuterBorderWidth.value_or(badgeTheme->GetBadgeOuterBorderWidth());
+    layoutProperty->UpdateBadgeOuterBorderWidth(badgeOuterBorderWidth);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(badgeOuterBorderWidth, LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH, frameNode);
+    auto lpxUpdateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), badgeOuterBorderWidth]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CHECK_NULL_VOID(!frameNode->GetChildren().empty());
+        auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back());
+        CHECK_NULL_VOID(textNode);
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        BorderWidthProperty outerBorderWidth;
+        outerBorderWidth.SetBorderWidth(badgeOuterBorderWidth);
+        textRenderContext->SetOuterBorderWidth(outerBorderWidth);
+    };
+    ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(
+        badgeOuterBorderWidth, LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
     if (badgeParameters.isEnableAutoAvoidance.has_value()) {
         layoutProperty->UpdateIsEnableAutoAvoidance(badgeParameters.isEnableAutoAvoidance.value());
     } else {
