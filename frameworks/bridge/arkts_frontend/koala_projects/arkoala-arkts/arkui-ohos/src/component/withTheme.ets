@@ -50,3 +50,35 @@ export function WithThemeImpl(
         receiver.isFirstRender = false;
     })
 }
+
+@memo
+export function WithTheme(
+    @memo @memo_skip
+    style: ((attributes: WithThemeAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkWithThemeComponent>((): ArkWithThemeComponent => {
+        return new ArkWithThemeComponent()
+    })
+    NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (peer: ArkWithThemePeer): void => {
+        receiver.setPeer(peer)
+
+        const withThemeId = receiver.getPeer()?.getId() ?? 0;
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstRender)
+        style?.(receiver)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
+        receiver.setPeer(undefined)
+
+        GlobalStateManager.instance.namedState<int32>("themeScopeId", () => withThemeId);
+        const themeOptions = ArkThemeScopeManager.getInstance().getThemeOptionsById(withThemeId);
+        ArkThemeScopeManager.getInstance().updateColorMode(themeOptions?.colorMode ?? ThemeColorMode.SYSTEM);
+
+        content_?.()
+
+        ArkThemeScopeManager.getInstance().restoreColorMode();
+        ArkThemeScopeManager.getInstance().onScopeExit();
+
+        receiver.isFirstRender = false;
+    })
+}
