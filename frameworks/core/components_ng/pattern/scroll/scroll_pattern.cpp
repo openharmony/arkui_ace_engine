@@ -795,7 +795,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     auto userOffset = FireTwoDimensionOnWillScroll(currentOffset_ - willScrollPosition);
     currentOffset_ -= userOffset;
     if (NearZero(currentOffset_, CURRENT_OFFSET_EPSILON)) {
-        currentOffset_ = 0.0f;
+        currentOffset_ = 0.0;
     }
     ValidateOffset(source);
     HandleScrollPosition(userOffset);
