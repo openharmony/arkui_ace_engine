@@ -52,7 +52,7 @@ public:
     }
 
     ACE_FORCE_EXPORT static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
-    RefPtr<Paragraph> GetSingleParagraph() const;
+    ACE_FORCE_EXPORT RefPtr<Paragraph> GetSingleParagraph() const;
 
     void SetContentHeight(float height)
     {

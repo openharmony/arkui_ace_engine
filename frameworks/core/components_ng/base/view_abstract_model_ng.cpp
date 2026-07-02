@@ -52,6 +52,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/interfaces/native/node/bubble_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -1821,19 +1822,9 @@ void ViewAbstractModelNG::UpdateColor(const RefPtr<NG::FrameNode>& frameNode, co
 {
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    switch (type) {
-        case POPUPTYPE_TEXTCOLOR:
-            pattern->UpdateBubbleText(color);
-            break;
-        case POPUPTYPE_POPUPCOLOR:
-            pattern->UpdateBubbleBackGroundColor(color);
-            break;
-        case POPUPTYPE_MASKCOLOR:
-            pattern->UpdateMaskColor(color);
-            break;
-        default:
-            break;
-    }
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->updateColor(pattern, type, color);
 }
 
 void ViewAbstractModelNG::CreateWithColorResourceObj(
@@ -1868,21 +1859,10 @@ void ViewAbstractModelNG::CreateWithBoolResourceObj(
     CHECK_NULL_VOID(pattern);
     std::string key = "popupMask";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(maskResObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& maskResObj) {
-        std::string mask = pattern->GetResCacheMapByKey(key);
-        bool result;
-        if (mask.empty()) {
-            ResourceParseUtils::ParseResBool(maskResObj, result);
-            std::string maskValue = result ? "true" : "false";
-            pattern->AddResCache(key, maskValue);
-        } else {
-            result = mask == "true";
-        }
-        pattern->UpdateMask(result);
-    };
-    updateFunc(maskResObj);
-    pattern->AddResObj(key, maskResObj, std::move(updateFunc));
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->addBubbleMaskResObj(pattern, key, maskResObj);
+    }
 }
 
 std::string ViewAbstractModelNG::PopupOptionTypeStr(const PopupOptionsType& type)
@@ -1911,45 +1891,9 @@ void ViewAbstractModelNG::ParseOptionsDimension(const RefPtr<NG::FrameNode>& fra
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    switch (type) {
-        case POPUP_OPTIONTYPE_ARROWWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->UpdateArrowWidth(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_ARROWHEIGHT:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->UpdateArrowHeight(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_OUTLINEWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->SetOutlineWidth(dimension);
-                frameNode->MarkModifyDone();
-                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-            return;
-        case POPUP_OPTIONTYPE_BORDERWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->SetInnerBorderWidth(dimension);
-                frameNode->MarkModifyDone();
-                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-            return;
-        case POPUP_OPTIONTYPE_WIDTH:
-            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
-                pattern->UpdateWidth(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_RADIUS:
-            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
-                pattern->UpdateRadius(dimension);
-            }
-            return;
-        default:
-            return;
-    }
-    return;
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->parseOptionsDimension(pattern, dimensionResObj, type);
 }
 
 void ViewAbstractModelNG::RegisterRadiusesResObj(

@@ -8944,7 +8944,8 @@ ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
 // Explicit template instantiation for common use cases
 template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
 template RefPtr<BadgeAccessibilityProperty> FrameNode::GetAccessibilityProperty<BadgeAccessibilityProperty>() const;
-template RefPtr<BubbleAccessibilityProperty> FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<BubbleAccessibilityProperty>
+    FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
 template RefPtr<CheckBoxAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<CheckBoxAccessibilityProperty>() const;
 template RefPtr<CheckBoxGroupAccessibilityProperty>

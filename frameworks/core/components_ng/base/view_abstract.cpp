@@ -60,7 +60,7 @@
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/interfaces/native/node/bubble_modifier.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -4536,22 +4536,10 @@ void ViewAbstract::AddResObjWithCallBack(
         pattern->RemoveResObj(key);
         return;
     }
-    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                            const RefPtr<ResourceObject>& resObj) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(resObj);
-        std::string color = pattern->GetResCacheMapByKey(key);
-        Color result;
-        if (color.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, result);
-            pattern->AddResCache(key, result.ColorToString());
-        } else {
-            result = Color::FromString(color);
-        }
-        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
-    };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->addBubbleGradientResObj(pattern, key, resObj, index, isOutlineGradient);
+    }
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
@@ -4625,7 +4613,9 @@ void ViewAbstract::BindPopup(
 
     if (popupInfo.isCurrentOnShow) {
         // Entering / Normal / Exiting
-        bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && popupPattern);
+        bool popupShowing = modifier->isOnShow(popupPattern);
         popupInfo.markNeedUpdate = popupShowing || !isShow;
     } else {
         // Invisable
@@ -4638,12 +4628,12 @@ void ViewAbstract::BindPopup(
 
     // Create new popup.
     if (popupInfo.popupId == -1 || !popupNode) {
-        if (!isUseCustom) {
-            popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
-        } else {
+        if (isUseCustom) {
             CHECK_NULL_VOID(customNode);
-            popupNode = BubbleView::CreateCustomBubbleNode(targetTag, targetId, customNode, param);
         }
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        popupNode = modifier->createPopupNode(targetTag, targetId, customNode, param, isUseCustom);
         if (popupNode) {
             popupId = popupNode->GetId();
         }
@@ -4675,13 +4665,10 @@ void ViewAbstract::BindPopup(
         }
     } else {
         // use param to update PopupParm
-        if (!isUseCustom) {
-            BubbleView::UpdatePopupParam(popupId, param, targetNode);
-            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else {
-            BubbleView::UpdateCustomPopupParam(popupId, param);
-            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->updatePopupNode(popupId, param, targetNode, isUseCustom);
+        popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     // update PopupInfo props
     popupInfo.popupId = popupId;
@@ -4691,8 +4678,10 @@ void ViewAbstract::BindPopup(
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
-        popupPattern->SetPopupParam(param);
-        popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && popupPattern);
+        modifier->setPopupParam(popupPattern, param);
+        modifier->registerDoubleBindCallback(popupPattern, param->GetDoubleBindCallback());
         auto accessibilityProperty = popupNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
             accessibilityProperty->SetAccessibilityHoverPriority(param->IsBlockEvent());
@@ -4771,7 +4760,9 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
-    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param, spanString);
+    const auto* modifierTips = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifierTips);
+    popupNode = modifierTips->createBubbleNode(targetTag, targetId, param, spanString);
     popupId = popupNode ? popupNode->GetId() : popupId;
     if (!showInSubWindow) {
         auto destructor = [id = targetNode->GetId()]() {
@@ -4844,12 +4835,14 @@ void ViewAbstract::AddHoverEventForTips(
             return;
         }
         if (isHover) {
-            BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->updatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             if (showInSubWindow) {
                 auto pattern = popupNode->GetPattern<NG::BubblePattern>();
                 CHECK_NULL_VOID(pattern);
-                pattern->SetIsTipsAppearing(true);
+                modifier->setIsTipsAppearing(pattern, true);
                 SubwindowManager::GetInstance()->ShowTipsNG(
                     targetNode, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
                 return;
@@ -4894,8 +4887,9 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         CHECK_NULL_VOID(popup);
         ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetIsTipsAppearing(false);
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && pattern);
+        modifier->setIsTipsAppearing(pattern, false);
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_TIPS);
         if (subwindow) {
             auto overlayManager = subwindow->GetOverlayManager();
@@ -4922,7 +4916,9 @@ void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetMouseOffset(info.GetScreenLocation());
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->setMouseOffset(pattern, info.GetScreenLocation());
     };
     auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     mouseEvent->SetIstips(true);
@@ -4984,12 +4980,14 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
         return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
-    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
         return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
     }
-    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    auto overlayManager = modifier->getPopupOverlayManager(customNode, targetId);
     if (overlayManager) {
         auto popupInfo = overlayManager->GetPopupInfo(targetId);
         if (popupInfo.popupNode) {
@@ -4998,18 +4996,7 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         }
     }
     BindPopup(param, targetNode, customNode);
-    popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
-    if (!popupInfo.popupNode) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    if (!popupPattern) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupPattern does not exist.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    popupPattern->SetCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
-    return ERROR_CODE_NO_ERROR;
+    return modifier->finishOpenPopup(customNode, targetId);
 }
 
 int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
@@ -5032,7 +5019,9 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -5041,7 +5030,7 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popup is not on show.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    BubbleView::ResetBubbleProperty(popupInfo.popupNode->GetId());
+    modifier->resetBubbleProperty(popupInfo.popupNode->GetId());
     BindPopup(param, targetNode, customNode);
     return ERROR_CODE_NO_ERROR;
 }
@@ -5067,7 +5056,9 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto overlayManager = modifier->getPopupOverlayManager(customNode, targetId);
     if (!overlayManager) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -5090,11 +5081,13 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
 {
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     CHECK_NULL_RETURN(customNode, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithCustomNode(customNode);
     CHECK_NULL_RETURN(popupInfo.popupNode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);
-    param = popupPattern->GetPopupParam();
+    param = modifier->getPopupParam(popupPattern);
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
     if (targetId < 0) {

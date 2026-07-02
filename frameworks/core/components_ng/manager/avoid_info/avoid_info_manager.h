@@ -50,7 +50,7 @@ using UECAvoidInfoConsumer = std::function<int32_t(const AAFwk::Want& data)>;
 using RegisterUECAvoidInfoConsumerCallback = std::function<void(UECAvoidInfoConsumer&& consumer)>;
 using RequestAvoidInfoCallback = std::function<void()>;
 
-class AvoidInfoManager : public virtual AceType {
+class ACE_FORCE_EXPORT AvoidInfoManager : public virtual AceType {
     DECLARE_ACE_TYPE(AvoidInfoManager, AceType);
 public:
     AvoidInfoManager() = default;

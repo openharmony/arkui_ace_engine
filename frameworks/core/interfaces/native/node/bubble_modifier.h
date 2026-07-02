@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/stage/content_root_pattern.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUBBLE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUBBLE_MODIFIER_H
 
-namespace OHOS::Ace::NG {
-ACE_FORCE_EXPORT void ContentRootPattern::BeforeCreateLayoutWrapper() {}
-} // namespace OHOS::Ace::NG
+#include "core/components_ng/pattern/bubble/bridge/inner_modifier/bubble_inner_modifier.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+
+namespace OHOS::Ace::NG::NodeModifier {
+ACE_FORCE_EXPORT const ArkUIBubbleInnerModifier* GetBubbleInnerModifier();
+}
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BUBBLE_MODIFIER_H

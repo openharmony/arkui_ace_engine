@@ -345,7 +345,7 @@ const char BADGE_ETS_TAG[] = "Badge";
 
 // search
 const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
-const char SEARCH_ETS_TAG[] = "Search";
+ACE_FORCE_EXPORT const char SEARCH_ETS_TAG[] = "Search";
 ACE_FORCE_EXPORT const char SEARCH_Field_ETS_TAG[] = "SearchField";
 
 // formComponent
@@ -572,7 +572,7 @@ const char XCOMPONENT_ETS_TAG[] = "XComponent";
 // ability_component
 const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 // Popup
-const char POPUP_ETS_TAG[] = "Popup";
+ACE_FORCE_EXPORT const char POPUP_ETS_TAG[] = "Popup";
 
 // remote window
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";

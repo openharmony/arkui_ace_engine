@@ -353,7 +353,7 @@ ACE_EXPORT extern const char BADGE_ETS_TAG[];
 
 // search
 ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEARCH_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SEARCH_ETS_TAG[];
 ACE_FORCE_EXPORT extern const char SEARCH_Field_ETS_TAG[];
 
 // formComponent
@@ -582,7 +582,7 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 // Popup
-ACE_EXPORT extern const char POPUP_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char POPUP_ETS_TAG[];
 
 // remote window
 ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
