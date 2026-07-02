@@ -73,6 +73,8 @@ export enum LengthUnit {
 export class LengthMetrics {
     public unit: LengthUnit;
     public value: double;
+    public res: Resource | undefined = undefined;
+    private autoRefresh_: boolean | undefined;
     constructor(){
         this.value = 0;
         this.unit = LengthUnit.VP;
@@ -111,6 +113,13 @@ export class LengthMetrics {
         }
         return new LengthMetrics((returnResult.value as number), lengthUnit);
     }
+    public autoRefresh(value: boolean): LengthMetrics {
+        if (this.autoRefresh_ === value) {
+            return this;
+        }
+        this.autoRefresh_ = value;
+        return this;
+    }
   }
 
 const MAX_CHANNEL_VALUE = 0xFF;
@@ -129,6 +138,8 @@ export class ColorMetrics {
     private greenValue_: double = 0.0;
     private blueValue_: double = 0.0;
     private headRoom_: double = 1.0;
+    private res_: Resource | undefined = undefined;
+    private autoRefresh_: boolean = false;
     static readonly WHITE: int32 = 0xffffffff.toInt();
     static readonly BLACK: int32 = 0xff000000.toInt();
     static readonly BLUE: int32 = 0xff0000ff.toInt();
@@ -142,18 +153,23 @@ export class ColorMetrics {
     static readonly YELLOW: int32 = 0xffffff00.toInt();
     static readonly TRANSPARENT: string = '#00000000';
     get color(): string {
+        this.refreshColorValue();
         return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha.toDouble()) / MAX_CHANNEL_VALUE})`;
     }
     get red(): int32 {
+        this.refreshColorValue();
         return this.red_!;
     }
     get green(): int32 {
+        this.refreshColorValue();
         return this.green_!;
     }
     get blue(): int32 {
+        this.refreshColorValue();
         return this.blue_!;
     }
     get alpha(): int32 {
+        this.refreshColorValue();
         return this.alpha_!;
     }
     set red(red: int32) {
@@ -197,6 +213,22 @@ export class ColorMetrics {
     }
     private static clamp(value: number): number {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
+    }
+    private refreshColorValue(): void {
+        if (this.autoRefresh_ && this.res_ !== undefined) {
+            const chanels: Array<number> = SystemOps.colorMetricsResourceColor(this.res_ as Resource);
+            if (chanels === undefined || chanels.length <= 1) {
+                return;
+            }
+            this.red_ = chanels[1].toInt();
+            this.green_ = chanels[2].toInt();
+            this.blue_ = chanels[3].toInt();
+            this.alpha_ = chanels[4].toInt();
+        }
+    }
+    public autoRefresh(value: boolean): ColorMetrics {
+        this.autoRefresh_ = value;
+        return this;
     }
     constructor(){
         this.red_ = 0;
@@ -341,6 +373,7 @@ export class ColorMetrics {
         return new ColorMetrics(r, g, b, a);
     }
     private toNumeric(): number {
+        this.refreshColorValue();
         return (this.alpha_! << 24) + (this.red_! << 16) + (this.green_! << 8) + this.blue_!;
     }
     public blendColor(overlayColor: ColorMetrics): ColorMetrics {

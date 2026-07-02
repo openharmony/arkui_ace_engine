@@ -1477,9 +1477,9 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableDragBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDividerAttribute(value: NavigationDividerStyle | null): void {
+    setDividerAttribute(value: NavigationDividerStyle | null | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== null) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
             NavigationDividerStyle_serializer.write(thisSerializer, valueTmpValue)
@@ -1950,7 +1950,7 @@ export interface NavigationAttribute extends CommonMethod {
     enableDragBar(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDragBar')
     }
-    divider(value: NavigationDividerStyle | null): this {
+    divider(value: NavigationDividerStyle | null | undefined): this {
         throw new Error('Unimplemented method divider')
     }
     enableModeChangeAnimation(value: boolean | undefined): this {
@@ -2125,8 +2125,8 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         this.getPeer()?.setEnableDragBarAttribute(value_casted)
         return this
     }
-    public divider(value: NavigationDividerStyle | null): this {
-        const value_casted = value as (NavigationDividerStyle | null)
+    public divider(value: NavigationDividerStyle | null | undefined): this {
+        const value_casted = value as (NavigationDividerStyle | null | undefined)
         this.getPeer()?.setDividerAttribute(value_casted)
         return this
     }
