@@ -64,6 +64,67 @@ RefPtr<OffscreenCanvasPattern> GetOffscreenPattern(ArkUINodeHandle nativeNode)
     CHECK_NULL_RETURN(frameNode, nullptr);
     return frameNode->GetPattern<OffscreenCanvasPattern>();
 }
+void ApplyOffscreenFillObject(EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+    const RefPtr<OffscreenCanvasPattern>& pattern)
+{
+    auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
+    if (!typeVal->IsNumber()) {
+        return;
+    }
+    auto type = typeVal->ToNumber(vm)->Value();
+    if (type == GRADIENT_TYPE) {
+        auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
+        if (jsGradient != nullptr) {
+            pattern->SetFillGradient(*jsGradient->GetGradient());
+        }
+    } else if (type == PATTERN_TYPE) {
+        auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
+        if (jsPattern != nullptr) {
+            pattern->SetFillPattern(jsPattern->GetPattern());
+        }
+    }
+}
+
+void ApplyOffscreenStrokeObject(EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+    const RefPtr<OffscreenCanvasPattern>& pattern)
+{
+    auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
+    if (!typeVal->IsNumber()) {
+        return;
+    }
+    auto type = typeVal->ToNumber(vm)->Value();
+    if (type == GRADIENT_TYPE) {
+        auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
+        if (jsGradient != nullptr) {
+            pattern->SetStrokeGradient(*jsGradient->GetGradient());
+        }
+    } else if (type == PATTERN_TYPE) {
+        auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
+        if (jsPattern != nullptr) {
+            pattern->SetStrokePattern(jsPattern->GetPattern());
+        }
+    }
+}
+
+void CopyPixelsToImageData(const uint8_t* buffer, int32_t bufLen, int32_t imgWidth,
+    Ace::ImageData& imageData)
+{
+    imageData.data = std::vector<uint32_t>();
+    constexpr int32_t RED_IDX = 0;
+    constexpr int32_t GREEN_IDX = 1;
+    constexpr int32_t BLUE_IDX = 2;
+    constexpr int32_t ALPHA_IDX = 3;
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufLen > static_cast<int32_t>(idx + ALPHA_IDX)) {
+                imageData.data.emplace_back(Color::FromARGB(
+                    buffer[idx + ALPHA_IDX], buffer[idx + RED_IDX],
+                    buffer[idx + GREEN_IDX], buffer[idx + BLUE_IDX]).GetValue());
+            }
+        }
+    }
+}
 } // namespace
 
 namespace {
@@ -245,22 +306,7 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillStyle(ArkUIR
     }
     // Check for Gradient or Pattern object (__type marker).
     if (val->IsObject(vm)) {
-        auto obj = val->ToObject(vm);
-        auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
-        if (typeVal->IsNumber()) {
-            auto type = typeVal->ToNumber(vm)->Value();
-            if (type == GRADIENT_TYPE) {
-                auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
-                if (jsGradient != nullptr) {
-                    p->SetFillGradient(*jsGradient->GetGradient());
-                }
-            } else if (type == PATTERN_TYPE) {
-                auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
-                if (jsPattern != nullptr) {
-                    p->SetFillPattern(jsPattern->GetPattern());
-                }
-            }
-        }
+        ApplyOffscreenFillObject(vm, val->ToObject(vm), p);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -278,22 +324,7 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::StrokeStyle(ArkU
     }
     // Check for Gradient or Pattern object (__type marker).
     if (val->IsObject(vm)) {
-        auto obj = val->ToObject(vm);
-        auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
-        if (typeVal->IsNumber()) {
-            auto type = typeVal->ToNumber(vm)->Value();
-            if (type == GRADIENT_TYPE) {
-                auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
-                if (jsGradient != nullptr) {
-                    p->SetStrokeGradient(*jsGradient->GetGradient());
-                }
-            } else if (type == PATTERN_TYPE) {
-                auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
-                if (jsPattern != nullptr) {
-                    p->SetStrokePattern(jsPattern->GetPattern());
-                }
-            }
-        }
+        ApplyOffscreenStrokeObject(vm, val->ToObject(vm), p);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -533,7 +564,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIR
     if (radiusArg->IsArray(vm)) {
         Local<panda::ArrayRef> arr(radiusArg);
         size_t arrLen = ArkTSUtils::GetArrayLength(vm, arr);
-        for (size_t i = 0; i < arrLen && i < 4; ++i) {
+        constexpr size_t ROUND_RECT_CORNER_COUNT = 4;
+        for (size_t i = 0; i < arrLen && i < ROUND_RECT_CORNER_COUNT; ++i) {
             radii.push_back(arr->Get(vm, i)->ToNumber(vm)->Value() * density);
         }
     } else if (radiusArg->IsNumber()) {
@@ -665,18 +697,7 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::PutImageData(Ark
     panda::Local<panda::ArrayBufferRef> arrayBuffer = colorArray->GetArrayBuffer(vm);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer(vm));
     CHECK_NULL_RETURN(buffer, panda::JSValueRef::Undefined(vm));
-    int32_t bufLen = arrayBuffer->ByteLength(vm);
-    imageData.data = std::vector<uint32_t>();
-    constexpr int32_t ALPHA_IDX = 3;
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufLen > static_cast<int32_t>(idx + ALPHA_IDX)) {
-                imageData.data.emplace_back(Color::FromARGB(
-                    buffer[idx + ALPHA_IDX], buffer[idx], buffer[idx + 1], buffer[idx + 2]).GetValue());
-            }
-        }
-    }
+    CopyPixelsToImageData(buffer, arrayBuffer->ByteLength(vm), imgWidth, imageData);
     pattern->PutImageData(imageData);
     return panda::JSValueRef::Undefined(vm);
 }
