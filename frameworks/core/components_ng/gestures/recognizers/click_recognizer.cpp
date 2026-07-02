@@ -47,8 +47,6 @@ constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DOUBLE_CLICK_COUNT = 2;
 constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
-constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 5;
-constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
 
 } // namespace
 
