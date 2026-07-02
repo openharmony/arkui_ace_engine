@@ -27,6 +27,7 @@
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -380,7 +381,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // escape is gone, the request itself is stale and must be re-armed
     // next time a multi-select Pan starts on a fresh finger.
     if (fingersId_.empty()) {
-        escapeRequested_ = false;
+        isLocked_ = false;
     }
     if (currentFingers_ < fingers_) {
         if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
@@ -495,7 +496,6 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
-            FilterCoexistingGestureFingers();
             if (HandlePanAccept()) {
                 return;
             }
@@ -637,6 +637,7 @@ bool PanRecognizer::HandlePanAccept()
         }
         return true;
     }
+    SetScrollEscapeForPan();
     if (IsBridgeMode()) {
         OnAccepted();
         return false;
@@ -816,7 +817,7 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
-    escapeRequested_ = false;
+    isLocked_ = false;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
@@ -1518,5 +1519,48 @@ void PanRecognizer::FilterCoexistingGestureFingers()
         "PanRecognizer: escaped %{public}d parallel Pan(s) for %{public}zu finger(s)",
         affected, fingers.size());
     return;
+}
+
+void PanRecognizer::SetScrollEscapeForPan()
+{
+    auto fingers = GetCurrentFingerIds();
+    if (fingers.empty()) {
+        return;
+    }
+    if (!canCoexistWithScroll_) {
+        //need set escape for select pan.
+        for (const auto& item : responseLinkRecognizer_) {
+            if (item.Invalid()) {
+                continue;
+            }
+            auto innerRecognizer = item.Upgrade();
+            auto panRecognizer = AceType::DynamicCast<PanRecognizer>(innerRecognizer);
+            if (!panRecognizer) {
+                continue;
+            }
+            if (panRecognizer->CanCoexistWithScroll()) {
+                panRecognizer->SetEscapeModeForPan(fingers);
+                break;
+            }
+        }
+        return;
+    }
+    SetTriggeredIds(fingers);
+    isLocked_ = true;
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollablePattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetScrollPanEscape(fingers);
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "PanRecognizer: escaped scroll Pan(s) for %{public}zu finger(s)", fingers.size());
+}
+
+bool PanRecognizer::IsFingerEscaped(int32_t fingerId) const
+{
+    if (isLocked_) {
+        return !IsTriggeredIds(fingerId);
+    }
+    return NGGestureRecognizer::IsFingerEscaped(fingerId);
 }
 } // namespace OHOS::Ace::NG

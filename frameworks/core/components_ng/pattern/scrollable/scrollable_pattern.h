@@ -23,6 +23,7 @@
 #include <optional>
 #include <queue>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -243,6 +244,13 @@ public:
     {
         CHECK_NULL_RETURN(scrollableEvent_, nullptr);
         return scrollableEvent_->GetScrollable();
+    }
+
+    void SetScrollPanEscape(const std::unordered_set<int32_t>& fingerIds)
+    {
+        auto scrollable = GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->SetEscapeModeForScroll(fingerIds);
     }
 
     virtual bool OnScrollCallback(float offset, int32_t source);
