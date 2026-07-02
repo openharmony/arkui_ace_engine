@@ -64,6 +64,10 @@ constexpr int32_t LUMINANCE_SAMPLER_INTERVAL = 200;
 constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
 constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 220;
 const Color DEFAULT_LIGHT_EFFECT_COLOR = Color::FromString("#33FFFFFF");
+const Color SMOOTH_COMMON_BLUR_LIGHT_BG_COLOR = Color::FromString("#00F1F3F5");
+const Color SMOOTH_COMMON_BLUR_DARK_BG_COLOR = Color::FromString("#00000000");
+const Color SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR = Color::FromString("#F2F1F3F5");
+const Color SMOOTH_GRADUAL_BLUR_DARK_BG_COLOR = Color::FromString("#99000000");
 constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_BLUR_ZINDEX = -2;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_ZINDEX = -1;
@@ -1098,8 +1102,7 @@ void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
         return;
     }
     const Rosen::BrightnessBlender* blender = nullptr;
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+    if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
         auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
@@ -1213,8 +1216,7 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(menuNode);
     const Rosen::BrightnessBlender* blender = nullptr;
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+    if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
         auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
@@ -2142,6 +2144,17 @@ bool TitleBarPattern::IsColorInvertEnabled()
     return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
 }
 
+bool TitleBarPattern::IsBrightnessBlendEnabled()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    return transparencyLevel == UiMaterialTransparency::THIN;
+}
+
 bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
 {
     if (!material) {
@@ -2351,7 +2364,7 @@ void TitleBarPattern::ResetTitleBarMaskBlendEffect()
 void TitleBarPattern::UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType)
 {
     CHECK_NULL_VOID(titleBarMaskNode_);
-    if (scrollEffectType != ScrollEffectType::COMMON_BLUR) {
+    if (scrollEffectType != ScrollEffectType::COMMON_BLUR || !IsBrightnessBlendEnabled()) {
         ResetTitleBarMaskBlendEffect();
         return;
     }
@@ -2410,9 +2423,19 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     auto shadowSpreadRadius = static_cast<double>(Dimension(0.0, DimensionUnit::VP).ConvertToPx());
     auto shadowOffsetY = static_cast<float>(Dimension(4.0, DimensionUnit::VP).ConvertToPx());
     bool isDarkMode = GetCurrentColorMode(false) == ColorMode::DARK;
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    auto isGradualBlur = scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
+    auto isSmoothGradualBlur = materialLevel == UiMaterialLevel::SMOOTH && isGradualBlur;
+    auto isSmoothCommonBlur = materialLevel == UiMaterialLevel::SMOOTH && !isGradualBlur;
+    auto titleBarBgColor = tokenColors->CompBackgroundGray();
+    if (isSmoothGradualBlur) {
+        titleBarBgColor = isDarkMode ? SMOOTH_GRADUAL_BLUR_DARK_BG_COLOR : SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR;
+    } else if (isSmoothCommonBlur) {
+        titleBarBgColor = isDarkMode ? SMOOTH_COMMON_BLUR_DARK_BG_COLOR : SMOOTH_COMMON_BLUR_LIGHT_BG_COLOR;
+    }
 
     std::vector<std::pair<float, float>> linearGradientBlurFractionStops;
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
         linearGradientBlurFractionStops = {
             {1.0f, 0.0f}, {0.99764f, 0.450f}, {0.99010f, 0.478f}, {0.97627f, 0.508f},
             {0.95574f, 0.536f}, {0.92808f, 0.566f}, {0.89108f, 0.594f}, {0.84375f, 0.624f},
@@ -2435,12 +2458,12 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     auto originalGradientBlurPara = LinearGradientBlurPara(
         Dimension(0.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
     auto scrollEffectGradientBlurPara = LinearGradientBlurPara(
-        Dimension(12.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+        Dimension(isSmoothGradualBlur ? 0.0 : 12.0, DimensionUnit::VP), linearGradientBlurFractionStops,
+        GradientDirection::BOTTOM);
 
-    auto isGradualBlur = scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
     auto originalShadowOpacity = isGradualBlur ? (isDarkMode ? 0.2f : 0.8f) : 0.0f;
-    auto scrollEffectBlurRadius = isGradualBlur ? Dimension(12.0, DimensionUnit::VP)
-                                                 : Dimension(30.0, DimensionUnit::VP);
+    auto scrollEffectBlurRadius = isGradualBlur ? Dimension(isSmoothGradualBlur ? 0.0 : 12.0, DimensionUnit::VP)
+                                                 : Dimension(isSmoothCommonBlur ? 0.0 : 30.0, DimensionUnit::VP);
     NavigationTitleBarStyle originalBgStyle {
         .titleColor = tokenColors->FontPrimary(),
         .buttonTextColor = tokenColors->FontPrimary(),
@@ -2451,7 +2474,7 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
             .opacity = 1.0,
         },
         .backgroundStyle {
-            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .backgroundColor = titleBarBgColor,
             .brightness = 0,
             .blurRadius = Dimension(0.0),
             .opacity = isGradualBlur ? 0.0 : 1.0,
@@ -2476,7 +2499,7 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
             .opacity = 1.0,
         },
         .backgroundStyle {
-            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .backgroundColor = titleBarBgColor,
             .brightness = 0,
             .blurRadius = scrollEffectBlurRadius,
             .opacity = isGradualBlur ? (isDarkMode ? 0.4 : 0.8) : 1.0,
@@ -2529,6 +2552,11 @@ void TitleBarPattern::UpdateBackgroundBlurStyle()
             startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
         gradientBlurPara.blurRadius_ = Dimension(blurRadius, DimensionUnit::VP);
         gradientBlurPara.fractionStops_ = MASK_BLUR_STOPS;
+        if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            maskBlurRenderContext->UpdateBackBlurRadius(Dimension(0.0, DimensionUnit::VP));
+            maskBlurRenderContext->ResetRadiusGradientBlur();
+            return;
+        }
         maskBlurRenderContext->UpdateBackBlurRadius(Dimension());
         maskBlurRenderContext->UpdateRadiusGradientBlur(gradientBlurPara);
         return;

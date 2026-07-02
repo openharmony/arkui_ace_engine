@@ -31,6 +31,7 @@
 #include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/token_theme/token_colors.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -73,6 +74,27 @@ public:
 
 private:
     UiMaterialLevel backupLevel_;
+};
+
+class ScopeUiMaterialTransparency {
+public:
+    explicit ScopeUiMaterialTransparency(UiMaterialLevel level, UiMaterialTransparency transparency)
+    {
+        backupLevelMap_ = TransparencyUtils::GetLevelMap();
+        backupTransparencyLevelGet_ = TransparencyUtils::transparencyLevelGet_;
+        TransparencyUtils::GetLevelMap()[level] = transparency;
+        TransparencyUtils::transparencyLevelGet_ = true;
+    }
+
+    ~ScopeUiMaterialTransparency()
+    {
+        TransparencyUtils::GetLevelMap() = backupLevelMap_;
+        TransparencyUtils::transparencyLevelGet_ = backupTransparencyLevelGet_;
+    }
+
+private:
+    TransparencyLevelMap backupLevelMap_;
+    bool backupTransparencyLevelGet_ = false;
 };
 
 class ScopeUIMaterialState {
@@ -910,6 +932,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_GradualBlur_DisablesC
 HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_Disabled_RemovesEffectNodes, TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
@@ -1110,6 +1133,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, PrepareScrollEffectTitleBarBgStyles_SmoothMat
 HWTEST_F(TitleBarPatternTestTwoNg, UpdateBackgroundBlurStyle_CommonBlur_RenderSeparation, TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
@@ -1266,6 +1290,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, OnColorConfigurationUpdate_CommonBlur_MidScro
     TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
