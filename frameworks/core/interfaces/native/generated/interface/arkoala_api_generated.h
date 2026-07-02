@@ -32266,6 +32266,12 @@ typedef struct GENERATED_ArkUITextMenuItemIdAccessor {
     Ark_TextMenuItemId (*getTRANSLATE)();
     Ark_TextMenuItemId (*getSEARCH)();
     Ark_TextMenuItemId (*getSHARE)();
+    Ark_TextMenuItemId (*getUrl)();
+    Ark_TextMenuItemId (*getEmail)();
+    Ark_TextMenuItemId (*getPhoneNumber)();
+    Ark_TextMenuItemId (*getAddress)();
+    Ark_TextMenuItemId (*getDateTime)();
+    Ark_TextMenuItemId (*getAskAI)();
     Ark_TextMenuItemId (*getAutoFill)();
     Ark_TextMenuItemId (*getPasswordVault)();
 } GENERATED_ArkUITextMenuItemIdAccessor;

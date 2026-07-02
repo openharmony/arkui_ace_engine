@@ -106,6 +106,42 @@ Ark_TextMenuItemId GetSHAREImpl()
     peer->id = "OH_DEFAULT_SHARE";
     return peer;
 }
+Ark_TextMenuItemId GetUrlImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AI_MENU_URL";
+    return peer;
+}
+Ark_TextMenuItemId GetEmailImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AI_MENU_EMAIL";
+    return peer;
+}
+Ark_TextMenuItemId GetPhoneNumberImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AI_MENU_PHONE";
+    return peer;
+}
+Ark_TextMenuItemId GetAddressImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AI_MENU_ADDRESS";
+    return peer;
+}
+Ark_TextMenuItemId GetDateTimeImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_AI_MENU_DATETIME";
+    return peer;
+}
+Ark_TextMenuItemId GetAskAIImpl()
+{
+    auto peer = ConstructImpl();
+    peer->id = "OH_DEFAULT_ASK_CELIA";
+    return peer;
+}
 Ark_TextMenuItemId GetAutoFillImpl()
 {
     auto peer = ConstructImpl();
@@ -137,6 +173,12 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetTRANSLATEImpl,
         TextMenuItemIdAccessor::GetSEARCHImpl,
         TextMenuItemIdAccessor::GetSHAREImpl,
+        TextMenuItemIdAccessor::GetUrlImpl,
+        TextMenuItemIdAccessor::GetEmailImpl,
+        TextMenuItemIdAccessor::GetPhoneNumberImpl,
+        TextMenuItemIdAccessor::GetAddressImpl,
+        TextMenuItemIdAccessor::GetDateTimeImpl,
+        TextMenuItemIdAccessor::GetAskAIImpl,
         TextMenuItemIdAccessor::GetAutoFillImpl,
         TextMenuItemIdAccessor::GetPasswordVaultImpl,
     };
