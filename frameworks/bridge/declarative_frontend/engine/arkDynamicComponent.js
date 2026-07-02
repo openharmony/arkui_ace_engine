@@ -985,7 +985,7 @@ if (globalThis.LoadingProgress === undefined) {
  	       let module = globalThis.requireNapi('arkui.components.arkcanvas');
  	       module.exportView();
  	       module.loadComponent();
- 	       return globalThis.Canvas.create(params);
+ 	       globalThis.Canvas.create(params);
  	     },
  	     name: 'JSCanvas'
  	   }

@@ -225,7 +225,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_OnReadyCreateAndInvoke(
     }
     drawingContext->SetUnit(static_cast<OHOS::Ace::CanvasUnit>(unit));
 
-     auto callback = callbackRef.ToLocal();
+    auto callback = callbackRef.ToLocal();
     if (callback->IsFunction(vm)) {
         panda::Local<panda::JSValueRef> argv[] = { jsDrawingContext->GetLocalHandle() };
         panda::TryCatch trycatch(vm);

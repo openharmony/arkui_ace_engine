@@ -18,6 +18,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include <unordered_set>
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/decoration.h"
@@ -91,6 +92,120 @@ T* UnwrapNativePointer(EcmaVM* vm, const Local<panda::ObjectRef>& obj)
 
 constexpr uint32_t GRADIENT_TYPE = 0;
 constexpr uint32_t PATTERN_TYPE = 1;
+
+bool UpdateFontWeightFromProp(const std::string& fontProp, RefPtr<NG::CanvasPattern>& pattern)
+{
+    static const std::unordered_set<std::string> weightKeywords = {
+        "normal", "bold", "lighter", "bolder",
+        "100", "200", "300", "400", "500", "600", "700", "800", "900"
+    };
+    if (weightKeywords.find(fontProp) != weightKeywords.end()) {
+        pattern->UpdateFontWeight(Framework::ConvertStrToFontWeight(fontProp));
+        return true;
+    }
+    return false;
+}
+
+bool UpdateFontStyleFromProp(const std::string& fontProp, RefPtr<NG::CanvasPattern>& pattern)
+{
+    if (fontProp == "italic" || fontProp == "oblique") {
+        pattern->UpdateFontStyle(Framework::ConvertStrToFontStyle(fontProp));
+        return true;
+    }
+    return false;
+}
+
+bool UpdateFontFamilyFromProp(const std::string& fontProp, RefPtr<NG::CanvasPattern>& pattern)
+{
+    if (fontProp == "sans-serif" || fontProp == "serif" || fontProp == "monospace" ||
+        fontProp.find('\"') != std::string::npos || fontProp.find('\'') != std::string::npos) {
+        auto families = Framework::ConvertStrToFontFamilies(fontProp);
+        pattern->UpdateFontFamilies(families);
+        return true;
+    }
+    return false;
+}
+
+bool UpdateFontSizeFromProp(const std::string& fontProp, RefPtr<NG::CanvasPattern>& pattern)
+{
+    if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+        Dimension size;
+        if (fontProp.find("vp") != std::string::npos) {
+            size = StringUtils::StringToDimension(fontProp);
+        } else {
+            size = Dimension(StringUtils::StringToDouble(fontProp));
+        }
+        pattern->UpdateFontSize(size);
+        return true;
+    }
+    return false;
+}
+
+void ApplyFillStyleObject(EcmaVM* vm, const Local<panda::ObjectRef>& obj, ArkUINodeHandle nativeNode)
+{
+    auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
+    if (!typeVal->IsNumber()) {
+        return;
+    }
+    auto canvasPattern = GetCanvasPattern(nativeNode);
+    CHECK_NULL_VOID(canvasPattern);
+    auto type = typeVal->ToNumber(vm)->Value();
+    if (type == GRADIENT_TYPE) {
+        auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
+        if (jsGradient != nullptr) {
+            canvasPattern->SetFillGradient(jsGradient->GetGradient());
+        }
+    } else if (type == PATTERN_TYPE) {
+        auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
+        if (jsPattern != nullptr) {
+            canvasPattern->UpdateFillPattern(jsPattern->GetPattern());
+        }
+    }
+}
+
+void ApplyStrokeStyleObject(EcmaVM* vm, const Local<panda::ObjectRef>& obj, ArkUINodeHandle nativeNode)
+{
+    auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
+    if (!typeVal->IsNumber()) {
+        return;
+    }
+    auto canvasPattern = GetCanvasPattern(nativeNode);
+    CHECK_NULL_VOID(canvasPattern);
+    auto type = typeVal->ToNumber(vm)->Value();
+    if (type == GRADIENT_TYPE) {
+        auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
+        if (jsGradient != nullptr) {
+            canvasPattern->SetStrokeGradient(jsGradient->GetGradient());
+        }
+    } else if (type == PATTERN_TYPE) {
+        auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
+        if (jsPattern != nullptr) {
+            canvasPattern->UpdateStrokePattern(jsPattern->GetPattern());
+        }
+    }
+}
+
+void CopyPixelsToImageData(const uint8_t* buffer, int32_t bufferLength, int32_t imgWidth,
+    Ace::ImageData& imageData)
+{
+    imageData.data = std::vector<uint32_t>();
+    constexpr int32_t RED_IDX = 0;
+    constexpr int32_t GREEN_IDX = 1;
+    constexpr int32_t BLUE_IDX = 2;
+    constexpr int32_t ALPHA_IDX = 3;
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<int32_t>(idx + ALPHA_IDX)) {
+                uint8_t red = buffer[idx + RED_IDX];
+                uint8_t green = buffer[idx + GREEN_IDX];
+                uint8_t blue = buffer[idx + BLUE_IDX];
+                uint8_t alpha = buffer[idx + ALPHA_IDX];
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+}
 } // namespace
 
 namespace {
@@ -420,7 +535,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::RoundRect(ArkUIRuntimeCal
     if (radiusArg->IsArray(vm)) {
         Local<panda::ArrayRef> arr(radiusArg);
         size_t arrLen = ArkTSUtils::GetArrayLength(vm, arr);
-        for (size_t i = 0; i < arrLen && i < 4; ++i) {
+    constexpr size_t ROUND_RECT_CORNER_COUNT = 4;
+        for (size_t i = 0; i < arrLen && i < ROUND_RECT_CORNER_COUNT; ++i) {
             radii.push_back(arr->Get(vm, i)->ToNumber(vm)->Value() * density);
         }
     } else if (radiusArg->IsNumber()) {
@@ -621,26 +737,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::FillStyle(ArkUIRuntimeCal
         modifier->setCanvasFillColor(nativeNode, color.GetValue());
         return panda::JSValueRef::Undefined(vm);
     }
-    // Check for Gradient or Pattern object (__type marker).
     if (valueArg->IsObject(vm)) {
-        auto obj = valueArg->ToObject(vm);
-        auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
-        if (typeVal->IsNumber()) {
-            auto type = typeVal->ToNumber(vm)->Value();
-            auto canvasPattern = GetCanvasPattern(nativeNode);
-            CHECK_NULL_RETURN(canvasPattern, panda::JSValueRef::Undefined(vm));
-            if (type == GRADIENT_TYPE) {
-                auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
-                if (jsGradient != nullptr) {
-                    canvasPattern->SetFillGradient(jsGradient->GetGradient());
-                }
-            } else if (type == PATTERN_TYPE) {
-                auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
-                if (jsPattern != nullptr) {
-                    canvasPattern->UpdateFillPattern(jsPattern->GetPattern());
-                }
-            }
-        }
+        ApplyFillStyleObject(vm, valueArg->ToObject(vm), nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -664,26 +762,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::StrokeStyle(ArkUIRuntimeC
         modifier->setCanvasStrokeStyle(nativeNode, color.GetValue());
         return panda::JSValueRef::Undefined(vm);
     }
-    // Check for Gradient or Pattern object (__type marker).
     if (valueArg->IsObject(vm)) {
-        auto obj = valueArg->ToObject(vm);
-        auto typeVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__type"));
-        if (typeVal->IsNumber()) {
-            auto type = typeVal->ToNumber(vm)->Value();
-            auto canvasPattern = GetCanvasPattern(nativeNode);
-            CHECK_NULL_RETURN(canvasPattern, panda::JSValueRef::Undefined(vm));
-            if (type == GRADIENT_TYPE) {
-                auto* jsGradient = UnwrapNativePointer<Framework::JSCanvasGradient>(vm, obj);
-                if (jsGradient != nullptr) {
-                    canvasPattern->SetStrokeGradient(jsGradient->GetGradient());
-                }
-            } else if (type == PATTERN_TYPE) {
-                auto* jsPattern = UnwrapNativePointer<Framework::JSCanvasPattern>(vm, obj);
-                if (jsPattern != nullptr) {
-                    canvasPattern->UpdateStrokePattern(jsPattern->GetPattern());
-                }
-            }
-        }
+        ApplyStrokeStyleObject(vm, valueArg->ToObject(vm), nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -794,29 +874,14 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Font(ArkUIRuntimeCallInfo
     bool updateFontWeight = false;
     bool updateFontStyle = false;
     for (const auto& fontProp : fontProps) {
-        if (fontProp == "normal" || fontProp == "bold" || fontProp == "lighter" || fontProp == "bolder" ||
-            fontProp == "100" || fontProp == "200" || fontProp == "300" || fontProp == "400" ||
-            fontProp == "500" || fontProp == "600" || fontProp == "700" || fontProp == "800" ||
-            fontProp == "900") {
-            auto weight = Framework::ConvertStrToFontWeight(fontProp);
-            pattern->UpdateFontWeight(weight);
+        if (UpdateFontWeightFromProp(fontProp, pattern)) {
             updateFontWeight = true;
-        } else if (fontProp == "italic" || fontProp == "oblique") {
-            auto fontStyle = Framework::ConvertStrToFontStyle(fontProp);
-            pattern->UpdateFontStyle(fontStyle);
+        } else if (UpdateFontStyleFromProp(fontProp, pattern)) {
             updateFontStyle = true;
-        } else if (fontProp == "sans-serif" || fontProp == "serif" || fontProp == "monospace" ||
-                   fontProp.find('\"') != std::string::npos || fontProp.find('\'') != std::string::npos) {
-            auto families = Framework::ConvertStrToFontFamilies(fontProp);
-            pattern->UpdateFontFamilies(families);
-        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
-            Dimension size;
-            if (fontProp.find("vp") != std::string::npos) {
-                size = StringUtils::StringToDimension(fontProp);
-            } else {
-                size = Dimension(StringUtils::StringToDouble(fontProp));
-            }
-            pattern->UpdateFontSize(size);
+        } else if (UpdateFontFamilyFromProp(fontProp, pattern)) {
+            continue;
+        } else if (UpdateFontSizeFromProp(fontProp, pattern)) {
+            continue;
         }
     }
     if (!updateFontStyle) {
@@ -1255,7 +1320,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::SetTransform(ArkUIRuntime
     }
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
-    if (runtimeCallInfo->GetArgsNumber() < 2) {
+    constexpr size_t MIN_ARGS_FOR_TRANSFORM = 2;
+    if (runtimeCallInfo->GetArgsNumber() < MIN_ARGS_FOR_TRANSFORM) {
         pattern->ResetTransform();
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1386,7 +1452,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::SetLineDash(ArkUIRuntimeC
         }
     }
     // Duplicate if odd length (Canvas spec behavior)
-    if (segments.size() % 2 != 0) {
+    constexpr size_t DASH_SEGMENT_PAIR = 2;
+    if (segments.size() % DASH_SEGMENT_PAIR != 0) {
         segments.insert(segments.end(), segments.begin(), segments.end());
     }
     pattern->UpdateLineDash(segments);
@@ -1453,9 +1520,7 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::PutImageData(ArkUIRuntime
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     // Arg0: ImageData { width, height, data: Uint8ClampedArray }
     Local<JSValueRef> imgArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    if (!imgArg->IsObject(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
+    if (!imgArg->IsObject(vm)) return panda::JSValueRef::Undefined(vm);
     auto jsImageData = imgArg->ToObject(vm);
     auto jsImgWidth = jsImageData->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
     auto jsImgHeight = jsImageData->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
@@ -1491,20 +1556,7 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::PutImageData(ArkUIRuntime
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer(vm));
     CHECK_NULL_RETURN(buffer, panda::JSValueRef::Undefined(vm));
     int32_t bufferLength = arrayBuffer->ByteLength(vm);
-    imageData.data = std::vector<uint32_t>();
-    constexpr int32_t ALPHA_IDX = 3;
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<int32_t>(idx + ALPHA_IDX)) {
-                uint8_t red = buffer[idx];
-                uint8_t green = buffer[idx + 1];
-                uint8_t blue = buffer[idx + 2];
-                uint8_t alpha = buffer[idx + ALPHA_IDX];
-                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
-            }
-        }
-    }
+    CopyPixelsToImageData(buffer, arrayBuffer->ByteLength(vm), imgWidth, imageData);
     pattern->PutImageData(imageData);
     return panda::JSValueRef::Undefined(vm);
 }
