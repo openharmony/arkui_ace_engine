@@ -10083,14 +10083,39 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
 
 void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->SetScrollbarLayoutPolicy(static_cast<int32_t>(policy));
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto value = static_cast<int32_t>(policy);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), value]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetScrollbarLayoutPolicy(value);
+            }
+        }, TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetScrollbarLayoutPolicy");
 }
 
 void WebDelegate::SetIsSystemRtlEnable(bool enable)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->SetIsSystemRtlEnable(enable);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetIsSystemRtlEnable(enable);
+            }
+        }, TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIsSystemRtlEnable");
 }
 
 void WebDelegate::SetViewportScaleState()
