@@ -479,6 +479,11 @@ void AssignArkValue(Ark_Float64& dst, const double& src)
     dst = src;
 }
 
+void AssignArkValue(Ark_DecorationOptions& dst, const OHOS::Ace::TextDecorationOptions& src)
+{
+    dst.enableMultiType = Converter::ArkValue<Opt_Boolean>(src.enableMultiType);
+}
+
 void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx)
 {
     Ark_Padding arkPadding = {

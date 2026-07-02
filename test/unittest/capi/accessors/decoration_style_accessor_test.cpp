@@ -117,7 +117,7 @@ public:
     }
     void* CreatePeerInstance() override
     {
-        return accessor_->construct(nullptr);
+        return accessor_->construct0(nullptr);
     }
     void DestroyPeer(DecorationStylePeer* peer)
     {
@@ -138,7 +138,7 @@ HWTEST_F(DecorationStyleAccessorTest, getTypeTest, TestSize.Level1)
     for (auto& [input, value, expected] : testFixtureTextDecorationValues) {
         DestroyPeer(peer_);
         stylePtr->type = Converter::ArkValue<Opt_TextDecorationType>(value);
-        peer_ = accessor_->construct(stylePtr);
+        peer_ = accessor_->construct0(stylePtr);
         auto type = accessor_->getType(peer_);
         EXPECT_EQ(expected, type) <<
             "Input value is: " << input << ", method: getType";
@@ -158,7 +158,7 @@ HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
     for (auto& [input, value, expected] : testFixtureTextDecorationStyleValues) {
         DestroyPeer(peer_);
         stylePtr.style = Converter::ArkValue<Opt_TextDecorationStyle>(value);
-        peer_ = accessor_->construct(&stylePtr);
+        peer_ = accessor_->construct0(&stylePtr);
         auto style = accessor_->getStyle(peer_);
         EXPECT_EQ(expected, Converter::GetOpt(style)) <<
             "Input value is: " << input << ", method: getStyle";
@@ -180,7 +180,7 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTestValidValues, TestSize.Level1)
         [this, stylePtr](const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
         DestroyPeer(peer_);
         stylePtr->color = value;
-        peer_ = accessor_->construct(stylePtr);
+        peer_ = accessor_->construct0(stylePtr);
         auto arkResColor = accessor_->getColor(peer_);
         auto colorOpt = Converter::OptConvert<Color>(arkResColor);
         ASSERT_TRUE(colorOpt.has_value());
@@ -212,7 +212,7 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTestInvalidValues, TestSize.Level1
         [this, stylePtr](const std::string& input, const Opt_ResourceColor& value) {
         DestroyPeer(peer_);
         stylePtr->color = value;
-        peer_ = accessor_->construct(stylePtr);
+        peer_ = accessor_->construct0(stylePtr);
         auto arkResColor = accessor_->getColor(peer_);
         auto colorOpt = Converter::OptConvert<Color>(arkResColor);
         EXPECT_EQ(colorOpt, std::nullopt) <<

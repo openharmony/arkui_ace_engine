@@ -152,6 +152,7 @@ struct PreviewText;
 struct SwipeDirection;
 struct SymbolSpanStyle;
 struct TextBackgroundStyle;
+struct TextDecorationOptions;
 struct TextRange;
 struct TextStyleResult;
 
@@ -331,6 +332,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
+    void AssignArkValue(Ark_DecorationOptions& dst, const OHOS::Ace::TextDecorationOptions& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char* src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
