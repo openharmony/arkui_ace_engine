@@ -132,6 +132,32 @@ void TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool value)
     textPattern->SetFallbackLineSpacingAndIncludeFontPadding(flag);
 }
 
+void TextLayoutProperty::UpdateEnablePunctuationOverflowOptimize(const bool& value)
+{
+    if (propEnablePunctuationOverflowOptimize_.has_value() &&
+        NearEqual(propEnablePunctuationOverflowOptimize_.value(), value)) {
+        return;
+    }
+    propEnablePunctuationOverflowOptimize_ = value;
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    propNeedReCreateParagraph_ = true;
+    OnEnablePunctuationOverflowOptimizeUpdate(value);
+}
+
+void TextLayoutProperty::OnEnablePunctuationOverflowOptimizeUpdate(bool value)
+{
+    if (!value) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto flag = textPattern->GetPunctuationOverflowStyleOptimizeFlag();
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnEnablePunctuationOverflowOptimizeUpdate flag:%{public}d", flag);
+    textPattern->SetPunctuationOverflowByFlag(flag);
+}
+
 std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
 {
     auto jsonValue = JsonUtil::Create(true);

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2974,11 +2975,41 @@ HWTEST_F(SearchTestNg, SearchCompressLeadingPunctuation, TestSize.Level1)
 
 /**
  * @tc.name: SearchButtonPunctuationOverflow001
- * @tc.desc: Verify search button text PunctuationOverflow default value is true.
+ * @tc.desc: Verify search button text PunctuationOverflow is false by default.
  * @tc.type: FUNC
  */
 HWTEST_F(SearchTestNg, SearchButtonPunctuationOverflow001, TestSize.Level1)
 {
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    pipeline->fontManager_ = fontManager;
+    SearchModelNG searchModelNG;
+    searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    EXPECT_FALSE(buttonFrameNode->GetChildren().empty());
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_FALSE(textLayoutProperty->GetPunctuationOverflowValue(false));
+}
+
+/**
+ * @tc.name: SearchButtonPunctuationOverflow002
+ * @tc.desc: Verify search button text PunctuationOverflow is true when flag is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchButtonPunctuationOverflow002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    fontManager->punctuationOverflowStyleOptimizeFlag_ = true;
+    pipeline->fontManager_ = fontManager;
     SearchModelNG searchModelNG;
     searchModelNG.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

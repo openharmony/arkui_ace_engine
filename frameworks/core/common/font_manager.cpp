@@ -626,6 +626,8 @@ void FontManager::UpdateStyleOptimizeFlagInCurrentLanguage()
     CHECK_NULL_VOID(resourceAdapter);
     fallbackLineSpacingStyleOptimizeFlag_ =
         resourceAdapter->GetStringByName("text_fallback_line_spacing") == "true";
+    punctuationOverflowStyleOptimizeFlag_ =
+        resourceAdapter->GetStringByName(".text_punctuation_overflow") == "true";
 }
 
 bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
@@ -633,4 +635,8 @@ bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
     return fallbackLineSpacingStyleOptimizeFlag_;
 }
 
+bool FontManager::GetPunctuationOverflowStyleOptimizeFlag()
+{
+    return punctuationOverflowStyleOptimizeFlag_;
+}
 } // namespace OHOS::Ace

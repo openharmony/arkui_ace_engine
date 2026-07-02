@@ -482,7 +482,9 @@ public:
     bool IsMeasured() const;
     ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
     bool GetFallbackLineSpacingStyleOptimizeFlag();
+    bool GetPunctuationOverflowStyleOptimizeFlag();
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    bool SetPunctuationOverflowByFlag(bool flag);
     virtual void ClearParagraphCache() {};
 
     void BindJSTextController(std::function<void()>&& bindFunc) {
