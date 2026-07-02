@@ -618,7 +618,19 @@ ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
     return GridModelNG::GetSyncLoad(frameNode);
 }
 
-void SetGridEditModeOptions(ArkUINodeHandle node, void* options)
+void SetGridEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    EditModeOptions newOptions;
+    newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    newOptions.useDefaultMultiSelectStyle = options->useDefaultMultiSelectStyle;
+    newOptions.enableFingerMultiSelect = options->enableFingerMultiSelect;
+    GridModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void SetEditModeOptions(ArkUINodeHandle node, void* options)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
@@ -1847,6 +1859,7 @@ const ArkUIGridModifier* GetGridDynamicModifier()
             .setEditModeOptions = nullptr,
             .resetEditModeOptions = nullptr,
             .getEditModeOptions = nullptr,
+            .setGridEditModeOptions = nullptr,
             .setGridFadingEdge = nullptr,
             .resetGridFadingEdge = nullptr,
             .setOnGridScrollIndexCallBack = nullptr,
@@ -1985,9 +1998,10 @@ const ArkUIGridModifier* GetGridDynamicModifier()
         .setSyncLoad = SetGridSyncLoad,
         .resetSyncLoad = ResetGridSyncLoad,
         .getSyncLoad = GetGridSyncLoad,
-        .setEditModeOptions = SetGridEditModeOptions,
+        .setEditModeOptions = SetEditModeOptions,
         .resetEditModeOptions = ResetGridEditModeOptions,
         .getEditModeOptions = GetGridEditModeOptions,
+        .setGridEditModeOptions = SetGridEditModeOptions,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,

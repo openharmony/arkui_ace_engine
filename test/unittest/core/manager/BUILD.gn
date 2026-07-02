@@ -54,6 +54,7 @@ ace_unittest("drag_drop_manager_test_ng") {
     "drag_drop_manager_test_ng_coverage.cpp",
     "drag_drop_manager_test_ng_plus.cpp",
     "drag_drop_manager_test_ng_property_config.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
