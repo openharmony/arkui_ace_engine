@@ -48,6 +48,7 @@ struct SpringCurveOption {
 
 // for add item and scrollEdge(Edge.Bottom) in one layout
 constexpr int32_t LAST_ITEM = -1;
+constexpr double CURRENT_OFFSET_EPSILON = 0.001;
 
 enum class NestedScrollMode {
     SELF_ONLY = 0,
