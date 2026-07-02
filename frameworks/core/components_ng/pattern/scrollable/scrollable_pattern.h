@@ -496,8 +496,7 @@ public:
     virtual bool CanOverScroll(int32_t source)
     {
         auto canOverScroll =
-            (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
-                (!ScrollableIdle() || animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG));
+            IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable();
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -506,11 +505,13 @@ public:
     }
     bool CanOverScrollStart(int32_t source)
     {
-        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) || animateOverScrollStart_;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) && (!ScrollableIdle() ||
+            animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG || animateOverScrollStart_);
     }
     bool CanOverScrollEnd(int32_t source)
     {
-        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) || animateOverScrollEnd_;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) && (!ScrollableIdle() ||
+            animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG || animateOverScrollEnd_);
     }
     void SetCanStayOverScroll(bool canStayOverScroll)
     {

@@ -437,6 +437,103 @@ HWTEST_F(ScrollableTestNg, SetCanOverScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CanOverScrollDirection001
+ * @tc.desc: Test basic over-scroll capability under idle and scrolling states
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, CanOverScrollDirection001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    EXPECT_CALL(*scrollPn, IsScrollable).WillRepeatedly(Return(true));
+    scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING, false, EffectEdge::ALL);
+
+    auto scrollable = scrollPn->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->state_ = Scrollable::AnimationState::IDLE;
+    scrollable->isTouching_ = false;
+
+    EXPECT_TRUE(scrollPn->CanOverScroll(SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollable->isTouching_ = true;
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(scrollPn->CanOverScrollStart(SCROLL_FROM_AXIS));
+    EXPECT_FALSE(scrollPn->CanOverScrollEnd(SCROLL_FROM_AXIS));
+    EXPECT_FALSE(scrollPn->CanOverScrollStart(SCROLL_FROM_BAR));
+    EXPECT_FALSE(scrollPn->CanOverScrollEnd(SCROLL_FROM_BAR));
+}
+
+/**
+ * @tc.name: CanOverScrollDirection002
+ * @tc.desc: Test start and end over-scroll respect the configured effect edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, CanOverScrollDirection002, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    EXPECT_CALL(*scrollPn, IsScrollable).WillRepeatedly(Return(true));
+    scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+
+    auto scrollable = scrollPn->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->isTouching_ = true;
+
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING, false, EffectEdge::START);
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING, false, EffectEdge::END);
+    EXPECT_FALSE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING, false, EffectEdge::ALL);
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+}
+
+/**
+ * @tc.name: CanOverScrollDirection003
+ * @tc.desc: Test animation and scroll-bar over-drag enable directional over-scroll while idle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, CanOverScrollDirection003, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    EXPECT_CALL(*scrollPn, IsScrollable).WillRepeatedly(Return(true));
+    scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING, false, EffectEdge::ALL);
+
+    auto scrollable = scrollPn->GetScrollableEvent()->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->state_ = Scrollable::AnimationState::IDLE;
+    scrollable->isTouching_ = false;
+
+    scrollPn->animateCanOverScroll_ = true;
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollPn->animateCanOverScroll_ = false;
+    scrollPn->animateOverScrollStart_ = true;
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_FALSE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollPn->animateOverScrollStart_ = false;
+    scrollPn->animateOverScrollEnd_ = true;
+    EXPECT_FALSE(scrollPn->CanOverScrollStart(SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_UPDATE));
+
+    scrollPn->animateOverScrollEnd_ = false;
+    EXPECT_TRUE(scrollPn->CanOverScrollStart(SCROLL_FROM_BAR_OVER_DRAG));
+    EXPECT_TRUE(scrollPn->CanOverScrollEnd(SCROLL_FROM_BAR_OVER_DRAG));
+}
+
+/**
  * @tc.name: HandleScrollVelocity007
  * @tc.desc: Test nested HandleScrollVelocity for IsAtBottom
  * @tc.type: FUNC
