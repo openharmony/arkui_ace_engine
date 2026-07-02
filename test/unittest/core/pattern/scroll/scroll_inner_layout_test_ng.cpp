@@ -876,6 +876,41 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegionTrackWidth001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBarRegionTrackWidth002
+ * @tc.desc: Test user-defined zero vertical scrollBarWidth hides the track
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegionTrackWidth002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollBarWidth(Dimension(0.0));
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(scrollBar_->activeRect_.Width(), 0.0);
+    EXPECT_EQ(scrollBar_->barRect_.Width(), 0.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Width(), 0.0);
+}
+
+/**
+ * @tc.name: SetBarRegionTrackWidth003
+ * @tc.desc: Test user-defined zero horizontal scrollBarWidth hides the track
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetBarRegionTrackWidth003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    model.SetScrollBarWidth(Dimension(0.0));
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 0.0);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), 0.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Height(), 0.0);
+}
+
+/**
  * @tc.name: SetBarRegionTrackAlignment001
  * @tc.desc: Test trackRect keeps center aligned with activeRect in LEFT, RIGHT and BOTTOM modes
  * @tc.type: FUNC
