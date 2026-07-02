@@ -235,7 +235,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, AnimatedDrawableControllAnimation002, Tes
 }
 
 
-
 /**
  * @tc.name: OnAttachToMainRenderTree002
  * @tc.desc: Verify OnAttachToMainRenderTree with isRecycledImage=true and valid host.
@@ -303,7 +302,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, GetIsAnimation002, TestSize.Level1)
 
 
 // ========== Tests from image_pattern_test_image_loading.cpp ==========
-
 
 
 /**
@@ -575,7 +573,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, StartDecoding003, TestSize.Level1)
 }
 
 
-
 /**
  * @tc.name: UpdateImageSourceinfo001
  * @tc.desc: UpdateImageSourceinfo with new source and valid host.
@@ -607,7 +604,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, UpdateImageSourceinfo002, TestSize.Level1
     pattern->UpdateImageSourceinfo(sameSrc);
     EXPECT_NE(pattern->GetHost(), nullptr);
 }
-
 
 
 /**
@@ -707,8 +703,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, SetGetNeedLoadAlt001, TestSize.Level1)
 // ========== Tests from image_pattern_test_memory_callbacks.cpp ==========
 
 
-
-
 /**
  * @tc.name: ResetImage002
  * @tc.desc: Test ResetImage with altImage_ present does not remove content modifier.
@@ -766,7 +760,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, ResetAltImage002, TestSize.Level1)
     EXPECT_EQ(pattern->altImage_, nullptr);
     EXPECT_EQ(pattern->contentMod_, contentMod);
 }
-
 
 
 /**
@@ -840,7 +833,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, SetGetOrientation001, TestSize.Level1)
 }
 
 
-
 /**
  * @tc.name: SetGetExternalDecodeFormat001
  * @tc.desc: Test SetExternalDecodeFormat and GetExternalDecodeFormat with RGBA_8888.
@@ -856,7 +848,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, SetGetExternalDecodeFormat001, TestSize.L
     pattern->SetExternalDecodeFormat(PixelFormat::UNKNOWN);
     EXPECT_EQ(pattern->GetExternalDecodeFormat(), PixelFormat::UNKNOWN);
 }
-
 
 
 // ========== Tests from image_layout_property_test_ng.cpp ==========
@@ -1628,7 +1619,6 @@ HWTEST_F(ImagePatternPropertyLoadTest, PropertyRoundTrip011, TestSize.Level1)
 // ========== GROUP 2: ImageRenderProperty Untested Methods ==========
 
 
-
 /**
  * @tc.name: RenderPropertyRoundTrip003
  * @tc.desc: Test UpdateImageResizableSlice and GetImageResizableSlice.
@@ -1680,23 +1670,7 @@ HWTEST_F(ImagePatternPropertyLoadTest, RenderPropertyRoundTrip005, TestSize.Leve
 // ========== GROUP 3: String Converter Methods ==========
 
 
-
-
-
-
-
-
-
 // ========== GROUP 4: Core Methods ==========
-
-
-
-
-
-
-
-
-
 
 
 /**
