@@ -1002,7 +1002,7 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
        auto dragDropManager = weakManager.Upgrade();
        CHECK_NULL_VOID(dragDropManager);
        dragDropManager->SetStartAnimation(true);
-       if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
+       if (dragDropManager && dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
            DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
        }
     });
