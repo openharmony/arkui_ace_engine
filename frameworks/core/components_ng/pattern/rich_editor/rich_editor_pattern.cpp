@@ -10786,7 +10786,7 @@ void RichEditorPattern::InitScrollablePattern()
     if (barState != DisplayMode::AUTO) {
         barState = DisplayMode::ON;
     }
-    SetScrollBar(barState);
+    SetScrollBar(isSingleLineMode_ ? DisplayMode::OFF : barState);
     auto scrollBar = GetScrollBar();
     UpdateScrollBarColor(GetScrollBarColor());
     if (scrollBar) {
@@ -10977,7 +10977,7 @@ bool RichEditorPattern::HandleHorizontalScroll(bool needUpdateOffset)
             gestureHub->RemoveScrollableEvent(scrollableEvent);
         }
     }
-    scrollController_->InitFreeScrollController();
+    scrollController_->InitFreeScrollController(needUpdateOffset);
     scrollController_->SetScrollBar(barState);
     UpdateScrollBarColor(GetScrollBarColor());
     auto richEditorTheme = GetTheme<RichEditorTheme>();

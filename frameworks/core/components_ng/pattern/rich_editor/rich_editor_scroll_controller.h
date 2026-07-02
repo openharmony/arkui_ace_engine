@@ -63,9 +63,10 @@ public:
     bool NeedScroll();
     float GetScrollOffset();
     // add for horizontal scroll
+    bool NeedScroll(bool isVertical);
     bool IsFreeScrollEnabled() const;
     RefPtr<NGGestureRecognizer> GetScrollGestureRecognizer() const;
-    void InitFreeScrollController();
+    void InitFreeScrollController(bool forceRecreate = false);
     void HandleScrollCallback(float offset, int32_t source, bool isVertical);
     bool OnScrollWithAxisCallback(float offset, int32_t source, Axis axis);
     void HandleEndScrollCallback(bool isVertical);
@@ -95,6 +96,7 @@ public:
     void UpdateScrollBarColor(std::optional<Color> color);
     bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsPointInScrollBarRect(const Point& point, bool isVertical);
+    bool IsScrollDirectionValid(bool isVertical);
     void CheckScrollEnabled();
     void SetScrollBar(DisplayMode displayMode);
     void UpdateBorderRadius();
