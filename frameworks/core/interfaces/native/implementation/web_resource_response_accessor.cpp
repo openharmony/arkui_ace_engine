@@ -172,6 +172,7 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
                 auto np = resourceUrl.value().find_first_of("/");
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }
+            auto convContextPtr = reinterpret_cast<Converter::ConvContext*>(peer->convContext);
             peer->handler->SetResourceUrl(url);
             peer->responseDataType = RESPONSE_DATA_TYPE_RESOURCE;
 
