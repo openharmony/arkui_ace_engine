@@ -687,6 +687,7 @@ void CreateWithResourceObj(ArkUINodeHandle node, ArkUI_Int32 jsType, void* resOb
         frameNode, static_cast<JsProgressResourceType>(jsType), AceType::Claim(resourceObj));
 }
 
+#ifndef CROSS_PLATFORM
 void SetProgressValueImpl(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     GetProgressModelImpl()->SetValue(value);
@@ -815,6 +816,7 @@ void CreateWithResourceObjImpl(ArkUINodeHandle node, ArkUI_Int32 jsType, void* r
     GetProgressModelImpl()->CreateWithResourceObj(
         static_cast<JsProgressResourceType>(jsType), AceType::Claim(resourceObj));
 }
+#endif
 
 void SetBackgroundColorForHDR(
     ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* colorRawPtr)

@@ -24,6 +24,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/span/bridge/image_span/image_span_custom_modifier.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -173,3 +175,23 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanStaticModifier()
 }
 
 }
+namespace OHOS::Ace::NG::NodeModifier {
+void SetStaticBaselineOffset(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonPercent(convValue);
+    ImageSpanViewStatic::SetBaselineOffset(frameNode, convValue);
+}
+
+const ArkUIImageSpanCustomModifier* GetImageSpanCustomModifier()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIImageSpanCustomModifier modifier = {
+        .setStaticBaselineOffset = SetStaticBaselineOffset,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
+}
+} // namespace NodeModifier

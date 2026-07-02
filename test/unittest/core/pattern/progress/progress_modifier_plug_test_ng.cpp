@@ -309,12 +309,20 @@ HWTEST_F(ProgressModifierPlugTestNg, LinearProgressModifier002, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierPlugTestNg, StopAllLoopAnimation, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create ProgressModifier and stop all loop animation.
+     * @tc.expected: step1. Check the ProgressModifier animation status property value.
+     */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->StopAllLoopAnimation();
     EXPECT_FALSE(progressModifier->isLoading_);
     EXPECT_FALSE(progressModifier->isSweeping_);
+    /**
+     * @tc.steps: step1. Reset ProgressModifier animation status property and stop animation.
+     * @tc.expected: step1. Check the ProgressModifier animation status property value.
+     */
     progressModifier->isLoading_ = true;
     progressModifier->isSweeping_ = true;
     progressModifier->StopAllLoopAnimation();
@@ -329,6 +337,10 @@ HWTEST_F(ProgressModifierPlugTestNg, StopAllLoopAnimation, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierPlugTestNg, SetInVisibleArea, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
@@ -336,6 +348,10 @@ HWTEST_F(ProgressModifierPlugTestNg, SetInVisibleArea, TestSize.Level1)
     progressModifier->SetContentSize(progressContentSize);
     progressModifier->SetValue(20.0);
     progressModifier->SetLinearSweepEffect(true);
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
     EXPECT_FALSE(progressModifier->inVisibleArea_);
     EXPECT_FALSE(progressModifier->isLoading_);
     progressModifier->SetInVisibleArea(true);
