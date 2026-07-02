@@ -136,6 +136,7 @@ public:
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
     void DumpTextStyleInfo5();
+    void DumpTextStyleInfo6();
     void DumpInfoRes();
     void DumpSpanItem();
     void DumpScaleInfo();

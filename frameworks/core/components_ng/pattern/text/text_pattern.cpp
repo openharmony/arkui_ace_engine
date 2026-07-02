@@ -6273,6 +6273,21 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(" prop: ")
                 .append(textLayoutProp->HasFallbackLineSpacing() ? hasFallbackLineSpacing : "Na"));
     }
+    DumpTextStyleInfo6();
+}
+
+void TextPattern::DumpTextStyleInfo6()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto hasPunctuationOverflow = textLayoutProp->GetPunctuationOverflowValue(false) ? "true" : "false";
+    auto hasEnablePunctuationOverflowOptimize =
+        textLayoutProp->GetEnablePunctuationOverflowOptimizeValue(false) ? "true" : "false";
+    dumpLog.AddDesc(std::string("PunctuationOverflow: ")
+            .append(hasPunctuationOverflow)
+            .append(" EnablePunctuationOverflowOptimize: ")
+            .append(hasEnablePunctuationOverflowOptimize));
     DumpInfoRes();
 }
 
@@ -8930,7 +8945,6 @@ bool TextPattern::SetPunctuationOverflowByFlag(bool flag)
     if (!punctuationOverflowChanged) {
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_TEXT, "SetPunctuationOverflowByFlag flag:%{public}d", flag);
     textLayoutProperty->UpdatePunctuationOverflow(flag);
     return true;
 }

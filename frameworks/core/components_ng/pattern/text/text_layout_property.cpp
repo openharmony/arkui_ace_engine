@@ -154,7 +154,6 @@ void TextLayoutProperty::OnEnablePunctuationOverflowOptimizeUpdate(bool value)
     auto textPattern = host->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     auto flag = textPattern->GetPunctuationOverflowStyleOptimizeFlag();
-    TAG_LOGD(AceLogTag::ACE_TEXT, "OnEnablePunctuationOverflowOptimizeUpdate flag:%{public}d", flag);
     textPattern->SetPunctuationOverflowByFlag(flag);
 }
 
