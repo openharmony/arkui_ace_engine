@@ -1059,7 +1059,7 @@ float HandleCClickEventCurrentLocalX(const ArkUI_UIInputEvent* event)
     if (!clickEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1074,7 +1074,7 @@ float HandleCTouchEventCurrentLocalX(const ArkUI_UIInputEvent* event)
     if (!touchEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1090,7 +1090,7 @@ float HandleCMouseEventCurrentLocalX(const ArkUI_UIInputEvent* event)
     if (!mouseEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1106,7 +1106,7 @@ float HandleCAxisEventCurrentLocalX(const ArkUI_UIInputEvent* event)
     if (!axisEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1120,7 +1120,7 @@ float HandleTouchEventCurrentLocalX(const ArkUI_UIInputEvent* event)
 {
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
     if (touchEvent) {
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
         if (!fullImpl) {
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
@@ -1135,7 +1135,7 @@ float HandleAxisEventCurrentLocalX(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
     if (axisEvent) {
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
         if (!fullImpl) {
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
@@ -1152,7 +1152,7 @@ PointerEventResult HandleCTouchEventCurrentLocalXByIndex(const ArkUI_UIInputEven
     if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
         return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         return { ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
@@ -1208,7 +1208,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
             if (!mouseEvent || pointerIndex != 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
@@ -1222,7 +1222,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
             if (!axisEvent || pointerIndex != 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
@@ -1243,7 +1243,7 @@ float HandleCClickEventCurrentLocalY(const ArkUI_UIInputEvent* event)
     if (!clickEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1258,7 +1258,7 @@ float HandleCTouchEventCurrentLocalY(const ArkUI_UIInputEvent* event)
     if (!touchEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1274,7 +1274,7 @@ float HandleCMouseEventCurrentLocalY(const ArkUI_UIInputEvent* event)
     if (!mouseEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1290,7 +1290,7 @@ float HandleCAxisEventCurrentLocalY(const ArkUI_UIInputEvent* event)
     if (!axisEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
@@ -1304,7 +1304,7 @@ float HandleTouchEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
     if (touchEvent) {
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
         if (!fullImpl) {
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
@@ -1319,7 +1319,7 @@ float HandleAxisEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
     if (axisEvent) {
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+        auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
         if (!fullImpl) {
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
         }
@@ -1336,7 +1336,7 @@ PointerEventResult HandleCTouchEventCurrentLocalYByIndex(const ArkUI_UIInputEven
     if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
         return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
     if (!fullImpl) {
         return { ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
@@ -1392,7 +1392,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* ev
             if (!mouseEvent || pointerIndex != 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
@@ -1406,7 +1406,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* ev
             if (!axisEvent || pointerIndex != 0) {
                 RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
