@@ -24,6 +24,7 @@
 
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
@@ -59,6 +60,54 @@ constexpr int32_t NEW_THEME_SCOPE_ID = 200;
 constexpr int32_t NON_EXISTENT_ID = 99999;
 const std::string INSPECTOR_LABEL_VALUE = "test_inspector_label";
 const std::string EMPTY_INSPECTOR_LABEL = "";
+
+class ObserverCallbackFrontend : public MockFrontend {
+    DECLARE_ACE_TYPE(ObserverCallbackFrontend, MockFrontend);
+
+public:
+    bool IsDrawChildrenCallbackFuncExist(int32_t uniqueId) override
+    {
+        return observedUniqueId_ == uniqueId;
+    }
+
+    bool IsLayoutChildrenCallbackFuncExist(int32_t uniqueId) override
+    {
+        return observedUniqueId_ == uniqueId;
+    }
+
+    int32_t observedUniqueId_ = -1;
+};
+
+class NotDetachChildrenNode : public UINode {
+    DECLARE_ACE_TYPE(NotDetachChildrenNode, UINode);
+
+public:
+    static RefPtr<NotDetachChildrenNode> CreateTestNode(int32_t nodeId)
+    {
+        return AceType::MakeRefPtr<NotDetachChildrenNode>(nodeId);
+    }
+
+    explicit NotDetachChildrenNode(int32_t nodeId) : UINode("NotDetachChildrenNode", nodeId) {}
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override
+    {
+        return notDetach ? notDetachChildren_ : UINode::GetChildren(notDetach);
+    }
+
+    void AddNotDetachChild(const RefPtr<UINode>& child)
+    {
+        notDetachChildren_.emplace_back(child);
+        child->SetParent(AceType::WeakClaim(this), false);
+    }
+
+private:
+    std::list<RefPtr<UINode>> notDetachChildren_;
+};
 }
 
 class UINodeTestNg : public testing::Test {
@@ -1435,6 +1484,46 @@ HWTEST_F(UINodeTestNg, SetObserverParentForLayoutChildren001, TestSize.Level1)
     EXPECT_EQ(rootNode->GetObserverParentForLayoutChildren(), parentNode);
     rootNode->ClearObserverParentForLayoutChildren();
     EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), false);
+}
+
+/**
+ * @tc.name: UINodeTestAttachToMainTreeUpdateDrawLayoutChildObserver001
+ * @tc.desc: Test AttachToMainTree updates draw/layout child observer for children bypassing DoAddChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAttachToMainTreeUpdateDrawLayoutChildObserver001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare context and frontend callback for parent unique id
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto weakFrontendBackup = context->weakFrontend_;
+    auto frontend = AceType::MakeRefPtr<ObserverCallbackFrontend>();
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+    frontend->observedUniqueId_ = parent->GetId();
+    context->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps: step2. simulate components maintaining children without DoAddChild
+     * @tc.expected: child has no observer before attach
+     */
+    parent->children_.emplace_back(child);
+    child->SetParent(AceType::WeakClaim(AceType::RawPtr(parent)), false);
+    EXPECT_FALSE(child->IsObservedByDrawChildren());
+    EXPECT_FALSE(child->IsObservedByLayoutChildren());
+
+    /**
+     * @tc.steps: step3. attach parent to main tree
+     * @tc.expected: child observer is updated from parent during attach
+     */
+    parent->AttachToMainTree(false, AceType::RawPtr(context));
+    EXPECT_EQ(child->GetObserverParentForDrawChildren(), nullptr);
+    EXPECT_EQ(child->GetObserverParentForLayoutChildren(), nullptr);
+
+    parent->DetachFromMainTree();
+    context->weakFrontend_ = weakFrontendBackup;
 }
 
 /**

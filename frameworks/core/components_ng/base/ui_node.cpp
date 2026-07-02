@@ -813,8 +813,6 @@ void UINode::DoAddChild(
         }
     }
 
-    UpdateDrawLayoutChildObserver(child);
-
     child->SetParent(WeakClaim(this), false);
     if (!IsFree() && child->IsFree()) {
         child->MarkNodeTreeNotFree();
@@ -1040,6 +1038,10 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     OnAttachToMainTree(recursive);
 
     HandleColorModeChange();
+    auto parent = GetParent();
+    if (parent) {
+        parent->UpdateDrawLayoutChildObserver(Claim(this));
+    }
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : GetChildren()) {
@@ -1049,7 +1051,6 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         adoptChild->AttachToMainTree(isRecursive, context);
     }
     if (context && context->IsOpenInvisibleFreeze()) {
-        auto parent = GetParent();
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
@@ -2990,7 +2991,7 @@ void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)
     CHECK_NULL_VOID(parent);
     isObservedByDrawChildren_ = true;
     drawChildrenParent_ = parent;
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : GetChildren(true)) {
         child->SetObserverParentForDrawChildren(parent);
     }
 }
@@ -3000,7 +3001,7 @@ void UINode::SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent)
     CHECK_NULL_VOID(parent);
     isObservedByLayoutChildren_ = true;
     layoutChildrenParent_ = parent;
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : GetChildren(true)) {
         child->SetObserverParentForLayoutChildren(parent);
     }
 }
