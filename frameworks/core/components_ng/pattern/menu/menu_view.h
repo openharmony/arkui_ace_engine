@@ -119,6 +119,8 @@ public:
     static void SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
         bool isColorModeFollowTarget = true);
+    static void UpdateMenuBorderEffect(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(
@@ -134,8 +136,6 @@ private:
         const RefPtr<PipelineContext>& pipelineContext);
     static bool ApplySystemMaterialForMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<UiMaterial>& systemMaterial,
         const RefPtr<RenderContext>& renderContext);
-    static void UpdateMenuBorderEffect(
-        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,

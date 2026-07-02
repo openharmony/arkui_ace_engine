@@ -57,6 +57,8 @@ struct ArkUIMenuViewInnerModifier {
     void (*setMenuHoverScaleStatus)(int32_t targetId, MenuHoverScaleStatus status);
     MenuHoverScaleStatus (*getMenuHoverScaleStatus)(int32_t targetId);
     void (*setMenuSystemMaterial)(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    void (*updateMenuBorderEffect)(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 };
 
 namespace InnerModifier {

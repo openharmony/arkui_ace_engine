@@ -38,6 +38,7 @@ const ArkUIMenuViewInnerModifier* GetMenuViewInnerModifier()
         .setMenuHoverScaleStatus = NG::MenuView::SetMenuHoverScaleStatus,
         .getMenuHoverScaleStatus = NG::MenuView::GetMenuHoverScaleStatus,
         .setMenuSystemMaterial = NG::MenuView::SetMenuSystemMaterial,
+        .updateMenuBorderEffect = NG::MenuView::UpdateMenuBorderEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -2084,10 +2084,7 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        MenuParam menuParam;
-        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    }
+
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
