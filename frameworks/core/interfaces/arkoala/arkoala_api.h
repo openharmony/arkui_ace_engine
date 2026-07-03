@@ -4322,6 +4322,8 @@ struct ArkUIButtonModifier {
     void (*setJsButtonLocalizedBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetJsButtonBorderRadius)(ArkUINodeHandle node);
     void (*setJsButtonFontSize)(ArkUINodeHandle node, ArkUI_Float64 fontSizeValue, ArkUI_Int32 fontSizeUnit);
+    void (*setJsButtonFontColorUseColorPtr)(
+        ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, ArkUI_VoidPtr colorRawPtr);
 };
 
 struct ArkUIImageModifier {

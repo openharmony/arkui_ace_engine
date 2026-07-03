@@ -260,6 +260,19 @@ void SetButtonFontColorUseColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor*
     ButtonModelNG::SetFontColor(frameNode, result, true);
 }
 
+void SetJsButtonFontColorUseColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, void* colorRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(fontColor);
+    Color color = *(reinterpret_cast<const Color*>(fontColor));
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::FONT_COLOR);
+    }
+    ButtonModelNG::SetFontColor(frameNode, color, true);
+}
+
 void ResetButtonFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
@@ -1465,7 +1478,7 @@ void SetJsButtonBackgroundColorPtr(
         const auto* backgroundColorPtr = reinterpret_cast<const Color*>(backgroundColor);
 
         ButtonModelNG model;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        if (SystemProperties::ConfigChangePerform()) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
             if (!NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
                 return;
@@ -1662,7 +1675,7 @@ void SetJsButtonBackgroundColorPtrImpl(
     CHECK_NULL_VOID(backgroundColor);
     const auto* backgroundColorPtr = reinterpret_cast<const Color*>(backgroundColor);
 
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+    if (SystemProperties::ConfigChangePerform()) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         if (!NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
             return;
@@ -1739,14 +1752,12 @@ void SetJsButtonBorderRadiusImpl(ArkUINodeHandle node, ArkUI_Float64 value, ArkU
     GetButtonImpl()->SetBorderRadius(Dimension(value, static_cast<DimensionUnit>(unit)));
 }
 
-void SetButtonFontColorUseColorPtrImpl(ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, void* colorRawPtr)
+void SetJsButtonFontColorUseColorPtrImpl(ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, void* colorRawPtr)
 {
     CHECK_NULL_VOID(fontColor);
     Color result = *(reinterpret_cast<const Color*>(fontColor));
     if (SystemProperties::ConfigChangePerform()) {
-        CHECK_NULL_VOID(colorRawPtr);
-        RefPtr<ResourceObject> resObj;
-        resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        RefPtr<ResourceObject> resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         GetButtonImpl()->CreateWithColorResourceObj(resObj, ButtonColorType::FONT_COLOR);
     }
     GetButtonImpl()->SetFontColor(result);
@@ -1863,7 +1874,7 @@ const ArkUIButtonModifier* GetButtonDynamicModifier()
             .getButtonMinFontScale = nullptr,
             .getButtonMaxFontScale = nullptr,
             .setButtonFontColorPtr = nullptr,
-            .setButtonFontColorUseColorPtr = SetButtonFontColorUseColorPtrImpl,
+            .setButtonFontColorUseColorPtr = nullptr,
             .setButtonFontFamilyPtr = SetButtonFontFamilyPtrImpl,
             .setButtonLabelStylePtr = nullptr,
             .setButtonBackgroundColorWithColorSpacePtr = nullptr,
@@ -1884,6 +1895,7 @@ const ArkUIButtonModifier* GetButtonDynamicModifier()
             .setJsButtonLocalizedBorderRadius = nullptr,
             .resetJsButtonBorderRadius = nullptr,
             .setJsButtonFontSize = SetJsButtonFontSizeImpl,
+            .setJsButtonFontColorUseColorPtr = SetJsButtonFontColorUseColorPtrImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -1967,6 +1979,7 @@ const ArkUIButtonModifier* GetButtonDynamicModifier()
         .setJsButtonLocalizedBorderRadius = SetJsButtonLocalizedBorderRadius,
         .resetJsButtonBorderRadius = ResetJsButtonBorderRadius,
         .setJsButtonFontSize = SetJsButtonFontSize,
+        .setJsButtonFontColorUseColorPtr = SetJsButtonFontColorUseColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
