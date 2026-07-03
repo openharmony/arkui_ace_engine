@@ -1685,6 +1685,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     textProps->UpdateTextDecoration({theme->GetTextDecoration()});
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
+    textProps->UpdatePunctuationOverflow(true);
 }
 
 void SelectPattern::InitSpinner(
