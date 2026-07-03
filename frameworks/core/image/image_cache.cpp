@@ -32,24 +32,6 @@ ImageCache::ImageCache() = default;
 
 ImageCache::~ImageCache() = default;
 
-// TODO: Create a real ImageCache later
-#ifdef FLUTTER_2_5
-class MockImageCache : public ImageCache {
-    void Clear() override {};
-    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) override
-    {
-        return nullptr;
-    }
-};
-
-RefPtr<ImageCache> ImageCache::Create()
-{
-    return AceType::MakeRefPtr<MockImageCache>();
-}
-
-void ImageCache::Purge() {}
-#endif
-
 void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image)
 {
     if (key.empty() || capacity_ == 0) {
