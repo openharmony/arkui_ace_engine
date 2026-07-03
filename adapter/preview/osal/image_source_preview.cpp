@@ -137,7 +137,9 @@ uint32_t ImageSourcePreview::GetFrameCount()
 
 std::string ImageSourcePreview::GetEncodedFormat()
 {
-    return "";
+    // SkCodec only handles raster formats, not SVG. If codec_ exists, it's a raster image.
+    CHECK_NULL_RETURN(codec_, "");
+    return "image/png";
 }
 
 int32_t ImageSourcePreview::GetLoopCount()
