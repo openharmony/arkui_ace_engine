@@ -709,12 +709,52 @@ HWTEST_F(OverlayManagerTestFourNg, MountCustomKeyboard001, TestSize.Level1)
     ASSERT_NE(customKeyboard, nullptr);
     
     int32_t targetId = TARGET_ID;
-    overlayManager.MountCustomKeyboard(customKeyboard, targetId);
+    auto ret = overlayManager.MountCustomKeyboard(customKeyboard, targetId);
     
+    EXPECT_TRUE(ret);
     EXPECT_NE(overlayManager.customKeyboardMap_.find(targetId), overlayManager.customKeyboardMap_.end());
     EXPECT_EQ(overlayManager.customKeyboardMap_[targetId], customKeyboard);
     auto customKeyboardNode = overlayManager.customKeyboardNode_.Upgrade();
     EXPECT_EQ(customKeyboardNode, customKeyboard);
     EXPECT_EQ(overlayManager.oldTargetId_, targetId);
+}
+
+/**
+ * @tc.name: MountCustomKeyboard002
+ * @tc.desc: Test MountCustomKeyboard does not persist state when mount is blocked by modal uec.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, MountCustomKeyboard002, TestSize.Level1)
+{
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipeline = rootNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto contentNode = FrameNode::CreateFrameNode("CONTENT", TARGET_ID_NEW_THREE, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(rootNode);
+
+    auto modalNode = FrameNode::CreateFrameNode(
+        V2::MODAL_PAGE_TAG, TARGET_ID_NEW_ONE, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(modalNode, nullptr);
+    modalNode->MountToParent(rootNode);
+    rootNode->UpdateModalUiextensionCount(true);
+    modalNode->SetIsAllowAddChildBelowModalUec(false);
+
+    OverlayManager overlayManager(rootNode);
+    overlayManager.rootNodeWeak_ = rootNode;
+
+    auto customKeyboard = FrameNode::CreateFrameNode(
+        V2::KEYBOARD_ETS_TAG, TARGET_ID_NEW_TWO, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customKeyboard, nullptr);
+
+    int32_t targetId = TARGET_ID;
+    auto ret = overlayManager.MountCustomKeyboard(customKeyboard, targetId);
+
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(customKeyboard->GetParent(), nullptr);
+    EXPECT_EQ(overlayManager.customKeyboardMap_.find(targetId), overlayManager.customKeyboardMap_.end());
+    EXPECT_EQ(overlayManager.customKeyboardNode_.Upgrade(), nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -6213,13 +6213,15 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
-    RequestCustomKeyboardBuilder();
+    if (!RequestCustomKeyboardBuilder()) {
+        return false;
+    }
+    keyboardOverlay_ = overlayManager;
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->SetLastRequestKeyboardId(GetRequestKeyboardId());
     }
     isCustomKeyboardAttached_ = true;
-    keyboardOverlay_ = overlayManager;
     auto caretRectWithScale = GetCaretRect(false);
     auto caretHeight = caretRectWithScale.Height();
     auto safeHeight = caretHeight + caretRectWithScale.GetY();
@@ -6230,19 +6232,19 @@ bool TextFieldPattern::RequestCustomKeyboard()
     return true;
 }
 
-void TextFieldPattern::RequestCustomKeyboardBuilder()
+bool TextFieldPattern::RequestCustomKeyboardBuilder()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
+    CHECK_NULL_RETURN(overlayManager, false);
     SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+        return overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
+        return overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
     }
 }
 

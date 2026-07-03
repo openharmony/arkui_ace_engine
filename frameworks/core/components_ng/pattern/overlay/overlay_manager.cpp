@@ -5129,19 +5129,19 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     return keyboardOffsetInfo;
 }
 
-void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
+bool OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
 {
     ChangeBindKeyboardWithNode(targetId);
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
-        return;
+        return true;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, false);
     auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keyboardBuilder);
     if (!customKeyboard) {
-        return;
+        return false;
     }
-    MountCustomKeyboard(customKeyboard, targetId);
+    return MountCustomKeyboard(customKeyboard, targetId);
 }
 
 void OverlayManager::ChangeBindKeyboardWithNode(int32_t targetId)
@@ -5167,41 +5167,46 @@ void OverlayManager::ChangeBindKeyboardWithNode(int32_t targetId)
     }
 }
 
-void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
+bool OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
 {
     ChangeBindKeyboardWithNode(targetId);
 
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
-        return;
+        return true;
     }
     ACE_LAYOUT_SCOPED_TRACE("BindKeyboardWithNode[targetId:%d]", targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, false);
     auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
     if (!customKeyboard) {
-        return;
+        return false;
     }
     ACE_UINODE_TRACE(customKeyboard);
-    MountCustomKeyboard(customKeyboard, targetId);
+    return MountCustomKeyboard(customKeyboard, targetId);
 }
 
-void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId)
+bool OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, false);
     auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
-    CHECK_NULL_VOID(rootNd);
+    CHECK_NULL_RETURN(rootNd, false);
     auto pipeline = rootNd->GetContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
+    CHECK_NULL_RETURN(safeAreaManager, false);
     ACE_LAYOUT_SCOPED_TRACE("BindKeyboard[targetId:%d]", targetId);
     auto topOrder = GetTopOrder();
     auto levelOrder = GetLevelOrder(customKeyboard, topOrder);
+    bool mounted = false;
     if (safeAreaManager->IsAtomicService()) {
-        SetNodeBeforeAppbar(rootNode, customKeyboard, levelOrder);
+        mounted = SetNodeBeforeAppbar(rootNode, customKeyboard, levelOrder);
     } else {
-        MountToParentWithOrder(rootNode, customKeyboard, levelOrder, true);
+        mounted = MountToParentWithOrder(rootNode, customKeyboard, levelOrder, true);
+    }
+    if (!mounted) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Custom keyboard mount failed. targetId: %{public}d", targetId);
+        return false;
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
@@ -5219,6 +5224,7 @@ void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard
         auto keyboardOffsetInfo = overlayManager->CalcCustomKeyboardOffset(customKeyboard);
         renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
     });
+    return true;
 }
 
 void OverlayManager::CloseKeyboard(int32_t targetId)
@@ -6910,15 +6916,15 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
     MountToParentWithOrder(rootNode, node, levelOrder);
 }
 
-void OverlayManager::MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
+bool OverlayManager::MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
     std::optional<double> levelOrder, bool isCustKBContFeat)
 {
-    CHECK_NULL_VOID(node);
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(rootNode, false);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "%{public}s node mount to root node", node->GetTag().c_str());
     if (isKeyBoardContinue_ && isCustKBContFeat) {
         auto customKeyboardNode = customKeyboardNode_.Upgrade();
-        CHECK_NULL_VOID(customKeyboardNode);
+        CHECK_NULL_RETURN(customKeyboardNode, false);
         rootNode->RemoveChild(customKeyboardNode);
     }
     if (auto nextNode = GetNextNodeWithOrder(levelOrder)) {
@@ -6927,7 +6933,12 @@ void OverlayManager::MountToParentWithOrder(const RefPtr<UINode>& rootNode, cons
     } else {
         node->MountToParent(rootNode);
     }
+    if (!node->GetParent()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Node %{public}d mount to parent failed", node->GetId());
+        return false;
+    }
     PutLevelOrder(node, levelOrder);
+    return true;
 }
 
 void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)

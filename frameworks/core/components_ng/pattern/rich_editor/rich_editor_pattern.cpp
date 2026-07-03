@@ -6300,28 +6300,30 @@ bool RichEditorPattern::RequestCustomKeyboard()
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
     }
-    RequestCustomKeyboardBuilder();
+    if (!RequestCustomKeyboardBuilder()) {
+        return false;
+    }
+    keyboardOverlay_ = overlayManager;
     isCustomKeyboardAttached_ = true;
     contentChange_ = false;
-    keyboardOverlay_ = overlayManager;
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), caretHeight);
     return true;
 }
 
-void RichEditorPattern::RequestCustomKeyboardBuilder()
+bool RichEditorPattern::RequestCustomKeyboardBuilder()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
+    CHECK_NULL_RETURN(overlayManager, false);
     SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+        return overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        overlayManager->BindKeyboardWithNode(customKeyboardNode_, frameNode->GetId());
+        return overlayManager->BindKeyboardWithNode(customKeyboardNode_, frameNode->GetId());
     }
 }
 

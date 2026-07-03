@@ -338,7 +338,10 @@ HWTEST_F(TextFieldPatternTestTwo, HandleDoubleClickEvent001, TestSize.Level0)
     auto focusHub = pattern->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
-    pattern->customKeyboardBuilder_ = []() {};
+    pattern->customKeyboardBuilder_ = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);

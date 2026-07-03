@@ -2135,7 +2135,7 @@ private:
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
-    void RequestCustomKeyboardBuilder();
+    bool RequestCustomKeyboardBuilder();
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void CancelDelayProcessOverlay();

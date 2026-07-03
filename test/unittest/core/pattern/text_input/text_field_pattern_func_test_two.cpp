@@ -788,6 +788,39 @@ HWTEST_F(TextFieldPatternFuncTestTwo, TextPatternFunc047, TestSize.Level1)
     EXPECT_FALSE(state);
 }
 
+HWTEST_F(TextFieldPatternFuncTestTwo, TextPatternFunc047A, TestSize.Level1)
+{
+    CreateTextField();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->rootNodeWeak_.Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    auto modalNode = FrameNode::CreateFrameNode(
+        V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(modalNode, nullptr);
+    modalNode->MountToParent(rootNode);
+    rootNode->UpdateModalUiextensionCount(true);
+    modalNode->SetIsAllowAddChildBelowModalUec(false);
+
+    pattern_->customKeyboard_ = AceType::MakeRefPtr<CustomNode>(1, "");
+    auto state = pattern_->RequestCustomKeyboard();
+    EXPECT_FALSE(state);
+    EXPECT_FALSE(pattern_->isCustomKeyboardAttached_);
+    EXPECT_EQ(overlayManager->customKeyboardMap_.find(frameNode_->GetId()), overlayManager->customKeyboardMap_.end());
+
+    modalNode->SetIsAllowAddChildBelowModalUec(true);
+    state = pattern_->RequestCustomKeyboard();
+    EXPECT_TRUE(state);
+    EXPECT_TRUE(pattern_->isCustomKeyboardAttached_);
+    EXPECT_NE(overlayManager->customKeyboardMap_.find(frameNode_->GetId()), overlayManager->customKeyboardMap_.end());
+}
+
 HWTEST_F(TextFieldPatternFuncTestTwo, TextPatternFunc048, TestSize.Level1)
 {
     CreateTextField();
