@@ -35,7 +35,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -75,8 +75,8 @@ typedef bool (*CjOnMenuItemClick)(FfiTextMenuItem, int32_t, int32_t);
 namespace OHOS::Ace::Framework {
 RefPtr<ResourceObject> GetResourceObject(const NativeResourceObject& obj);
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const NativeResourceObject& obj);
-RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj, RefPtr<ResourceObject>& resourceObject);
-RefPtr<ResourceWrapper> CreateResourceWrapper();
+RefPtr<ResourceAdapter> CreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
+RefPtr<ResourceAdapter> CreateResourceAdapter();
 
 enum class Align {
     TOP_LEFT,
@@ -157,8 +157,8 @@ public:
             return false;
         }
         auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-        auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-        if (!resourceWrapper) {
+        auto resourceAdapter = CreateResourceAdapter(resourceObject);
+        if (!resourceAdapter) {
             return false;
         }
         if (obj.id == -1) {
@@ -171,13 +171,13 @@ public:
             }
             auto param = params->GetArrayItem(0);
             if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-                result = static_cast<T>(resourceWrapper->GetIntByName(param->GetString()));
+                result = static_cast<T>(resourceAdapter->GetIntByName(param->GetString()));
                 return true;
             }
             return false;
         }
         if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(resourceWrapper->GetInt(static_cast<uint32_t>(obj.id)));
+            result = static_cast<T>(resourceAdapter->GetInt(static_cast<uint32_t>(obj.id)));
             return true;
         }
         return false;

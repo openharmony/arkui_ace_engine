@@ -21,7 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 
@@ -124,24 +124,14 @@ bool UiMaterialTheme::GetThemeColor(
     auto moduleName = container->GetModuleName();
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, node->GetInstanceId());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(adapterInCache, false);
-        ResourceConfiguration resConfig;
-        resConfig.SetColorMode(colorMode);
-        ConfigurationChange configChange { .colorModeUpdate = true };
-        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
-    } else {
-        auto pipeline = node->GetContextWithCheck();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_RETURN(themeManager, false);
-        themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, false);
-    }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    color = resourceWrapper->GetColor(resId);
+    auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(adapterInCache, false);
+    ResourceConfiguration resConfig;
+    resConfig.SetColorMode(colorMode);
+    ConfigurationChange configChange { .colorModeUpdate = true };
+    resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    color = resourceAdapter->GetColor(resId);
     return true;
 }
 

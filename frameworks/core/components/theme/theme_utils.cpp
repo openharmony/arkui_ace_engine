@@ -18,9 +18,7 @@
 #include <regex>
 
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -30,7 +28,6 @@ constexpr uint32_t THEME_ID_MATCH_SIZE = 2;
 const std::regex THEME_ID_REGEX(R"(^\"@id([0-9]+)\"$)", std::regex::icase); // regex for "@id001"
 constexpr uint32_t THEME_ATTR_MIN_SIZE = 7;
 const std::regex THEME_ATTR_REGEX(R"(\?theme:([a-zA-Z0-9_]+))"); // regex for "?theme:attr_color_emphasis"
-constexpr uint32_t CUSTOM_STYLE_STRING_MAX_SIZE = 128;
 constexpr uint32_t OHOS_ID_MIN_SIZE = 7; // Input should contain "@ohos_id"
 constexpr uint32_t SYSTEM_RES_ID_START = 0x7000000;
 const std::regex OHOS_ID_REGEX(R"(^@ohos_id_([0-9]+)$)", std::regex::icase); // regex for "@ohos_id_001"
@@ -46,14 +43,6 @@ const std::regex SYS_MEDIA_RES_ID_REGEX(R"(^@sys\.media\.([0-9]+)$)", std::regex
 // regex for "@app.media.xxx", xxx represents resource name.
 const std::regex APP_MEDIA_RES_NAME_REGEX(R"(^@app\.media\.(\w+)$)", std::regex::icase);
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
-
-const std::set<uint32_t> FONT_WEIGHT_STYLE_ID = {
-    THEME_BUTTON_TEXT_FONTWEIGHT,
-    THEME_DIALOG_TITLE_TEXT_FONTWEIGHT,
-    THEME_TOAST_TEXT_TEXT_FONTWEIGHT,
-    THEME_TEXTFIELD_FONT_WEIGHT,
-    THEME_SEARCH_FONT_WEIGHT
-};
 
 } // namespace
 
@@ -103,41 +92,6 @@ IdParseResult ThemeUtils::ParseThemeIdReference(const std::string& str, const Re
     }
     // Not reference format, ignore.
     return result;
-}
-
-ResValueWrapper ThemeUtils::ParseStyleValue(
-    uint32_t styleId, const ResValueWrapper& model, const std::string& value)
-{
-    ResValueWrapper resultValue = { .type = model.type, .isPublic = model.isPublic };
-    if (FONT_WEIGHT_STYLE_ID.count(styleId) > 0) {
-        resultValue.value = static_cast<int32_t>(StringUtils::StringToFontWeight(value));
-        return resultValue;
-    }
-    switch (model.type) {
-        case ThemeConstantsType::COLOR:
-            resultValue.value = Color::FromString(value, COLOR_ALPHA_MASK);
-            break;
-        case ThemeConstantsType::DIMENSION:
-            resultValue.value = StringUtils::StringToDimension(value);
-            break;
-        case ThemeConstantsType::INT:
-            resultValue.value = StringUtils::StringToInt(value);
-            break;
-        case ThemeConstantsType::DOUBLE:
-            resultValue.value = StringUtils::StringToDouble(value);
-            break;
-        case ThemeConstantsType::STRING:
-            if (value.size() < CUSTOM_STYLE_STRING_MAX_SIZE) {
-                resultValue.value = value;
-            } else {
-                resultValue.type = ThemeConstantsType::ERROR;
-            }
-            break;
-        default:
-            resultValue.type = ThemeConstantsType::ERROR;
-            break;
-    }
-    return resultValue;
 }
 
 std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const RefPtr<ThemeConstants>& themeConstants)

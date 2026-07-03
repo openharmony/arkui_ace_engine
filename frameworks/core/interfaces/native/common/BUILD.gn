@@ -69,7 +69,6 @@ template("ace_core_interfaces_native") {
       defines += [ "INCLUDE_GENERATED_SOURCES" ]
     }
     deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
     ]
 

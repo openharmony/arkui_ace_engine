@@ -420,11 +420,10 @@ RefPtr<ResourceObject> GetResourceObject(const NativeResourceObject& obj) {
 **Correct Approach**:
 ```cpp
 // ✅ Always release resource after use
-RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj) {
+RefPtr<ResourceAdapter> CreateResourceAdapter(const NativeResourceObject& obj) {
     RefPtr<ResourceObject> resourceObj = ResourceManager::GetResource(obj);
-    auto wrapper = AceType::MakeRefPtr<ResourceWrapper>(resourceObj);
-    wrapper->AddRef();  // Will be released by wrapper
-    return wrapper;
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObj);
+    return resourceAdapter;
 }
 ```
 

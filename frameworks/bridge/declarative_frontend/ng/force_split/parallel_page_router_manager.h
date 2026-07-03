@@ -38,7 +38,7 @@ private:
     // For Arkts1.2
     void LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
-    RefPtr<ResourceWrapper> CreateResourceWrapper();
+    RefPtr<ResourceAdapter> CreateResourceAdapter();
     bool DetectHomePage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);
     bool JudgeHomePage(const RouterPageInfo& target);
     bool ShouldDetectHomePage(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& preLastPage);

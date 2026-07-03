@@ -14,19 +14,12 @@
  */
 
 #include "core/components/theme/theme_utils.h"
-#include "core/components/theme/theme_style.h"
 
 namespace OHOS::Ace {
 IdParseResult ThemeUtils::ParseThemeIdReference(const std::string& str, const RefPtr<ThemeConstants>& themeConstants)
 {
     IdParseResult result { .parseSuccess = false, .isIdRef = false, .id = 0, .refAttr = "" };
     return result;
-}
-
-ResValueWrapper ThemeUtils::ParseStyleValue(
-    uint32_t styleId, const ResValueWrapper& model, const std::string& value)
-{
-    return model;
 }
 
 std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const RefPtr<ThemeConstants>& themeConstants)

@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
 
 #include "base/memory/ace_type.h"
-#include "base/resource/asset_manager.h"
 #include "core/components/theme/theme.h"
 
 #include "ui/view/theme/theme_style.h"
@@ -51,8 +50,6 @@ public:
     }
 
     virtual void ParseSystemTheme() {}
-
-    virtual void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) {}
 
     virtual void SetColorScheme(ColorScheme colorScheme) {}
 

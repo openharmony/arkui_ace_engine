@@ -27,7 +27,7 @@ class BrightnessBlender;
 }
 
 namespace OHOS::Ace {
-class ResourceWrapper;
+class ResourceAdapter;
 struct SelectParam;
 }
 
@@ -149,14 +149,14 @@ public:
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
         DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
-        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
+        const RefPtr<ResourceAdapter>& resourceAdapter, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
         DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
-        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
+        const RefPtr<ResourceAdapter>& resourceAdapter, CalcDimension& result);
     static bool ParseStringArray(
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
@@ -618,8 +618,7 @@ public:
     static void ParseJsLengthMetricsToDimension(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsBool(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool& result);
-    static RefPtr<ResourceWrapper> CreateJsResourceWrapper(
-        const EcmaVM* vm, const Local<JSValueRef>& jsObj, RefPtr<ResourceObject>& resourceObject);
+    static RefPtr<ResourceAdapter> CreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);

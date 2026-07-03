@@ -32,8 +32,6 @@ struct IdParseResult {
     std::string refAttr = "";
 };
 
-struct ResValueWrapper;
-
 class ACE_FORCE_EXPORT ThemeUtils {
 public:
     ThemeUtils() = delete;
@@ -41,9 +39,6 @@ public:
 
     static IdParseResult ParseThemeIdReference(const std::string& str,
         const RefPtr<ThemeConstants>& themeConstants = nullptr);
-
-    static ResValueWrapper ParseStyleValue(
-        uint32_t styleId, const ResValueWrapper& model, const std::string& value);
 
     static std::string ProcessImageSource(const std::string& imageSrc, const RefPtr<ThemeConstants>& themeConstants);
 };

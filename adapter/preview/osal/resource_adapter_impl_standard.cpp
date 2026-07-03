@@ -592,6 +592,7 @@ ColorMode ResourceAdapterImpl::GetResourceColorMode() const
 RefPtr<ResourceAdapter> ResourceAdapterImpl::GetOverrideResourceAdapter(
     const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
 {
+    CHECK_NULL_RETURN(resourceManager_, nullptr);
     std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
     resourceManager_->GetOverrideResConfig(*overrideResConfig);
     if (configurationChange.colorModeUpdate) {

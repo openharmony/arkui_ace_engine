@@ -1053,7 +1053,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsInteger(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, unsigned int&)";
       "OHOS::Ace::NG::ArkTSUtils::UnwrapNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseStringArray(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>*, int)";
-      "OHOS::Ace::NG::ArkTSUtils::CreateJsResourceWrapper(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateResourceAdapter(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseBlurOption(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::BlurOption&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColor(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::SetSymbolModifier(std::__h::vector<OHOS::Ace::SelectParam, std::__h::allocator<OHOS::Ace::SelectParam>>&, unsigned int, panda::Local<panda::JSValueRef> const&)";
@@ -4476,7 +4476,6 @@
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::ResourceManager::*;
-      OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::RichEditorModel::*;
       OHOS::Ace::RichTextModel::*;
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
@@ -4865,7 +4864,6 @@
       vtable?for?OHOS::Ace::PressRecognizer;
       vtable?for?OHOS::Ace::ProgressDataPanelComponent;
       vtable?for?OHOS::Ace::RawRecognizer;
-      vtable?for?OHOS::Ace::ResourceWrapper;
       vtable?for?OHOS::Ace::RosenRenderContext;
       vtable?for?OHOS::Ace::RowSplitComponent;
       vtable?for?OHOS::Ace::Scheduler;
@@ -5012,7 +5010,6 @@
       VTT?for?OHOS::Ace::RenderBoxBase;
       VTT?for?OHOS::Ace::RenderCheckable;
       VTT?for?OHOS::Ace::RenderRefreshTarget;
-      VTT?for?OHOS::Ace::ResourceWrapper;
       VTT?for?OHOS::Ace::RosenRenderContext;
       VTT?for?OHOS::Ace::RowSplitComponent;
       VTT?for?OHOS::Ace::Scheduler;
