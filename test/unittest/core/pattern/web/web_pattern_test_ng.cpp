@@ -1437,11 +1437,7 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     webPattern->preScale_ = 0;
     webPattern->zoomErrorCount_ = 1;
     webPattern->HandleScaleGestureChange(event);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(webPattern->zoomErrorCount_, 1);
-    } else {
-        EXPECT_EQ(webPattern->zoomErrorCount_, 1);
-    }
+    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
 #endif
 }
 
