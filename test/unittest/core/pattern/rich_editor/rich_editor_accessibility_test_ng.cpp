@@ -241,6 +241,10 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level2
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
     EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
     auto spanItem = richEditorPattern->spans_.front();
+
+    /**
+     * @tc.steps: step4. test fontStyle
+     */
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
     EXPECT_EQ(fontStyle->GetFontWeight(), FONT_WEIGHT_BOLD);
@@ -254,6 +258,9 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level2
     EXPECT_EQ(fontStyle->GetLetterSpacing(), LETTER_SPACING);
     EXPECT_EQ(fontStyle->GetTextShadow(), SHADOWS);
 
+    /**
+     * @tc.steps: step5. test textLineStyle
+     */
     auto& textLineStyle = spanItem->textLineStyle;
     EXPECT_EQ(textLineStyle->GetBaselineOffset(), TEST_BASELINE_OFFSET);
     EXPECT_EQ(textLineStyle->GetTextAlign(), TextAlign::END);
@@ -265,7 +272,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level2
     EXPECT_EQ(textLineStyle->GetLineHeight(), LINE_HEIGHT_VALUE);
 
     /**
-     * @tc.steps: step4. test pattern GetSubComponentInfos
+     * @tc.steps: step6. test pattern GetSubComponentInfos
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);

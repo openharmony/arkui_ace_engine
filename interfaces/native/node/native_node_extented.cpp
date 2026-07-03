@@ -2216,7 +2216,7 @@ ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetColorStop(
     const OH_ArkUI_LinearGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
     int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0 && writeLength,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto size = static_cast<int32_t>(options->colorStop.size());
     *writeLength = size;
@@ -2328,7 +2328,7 @@ ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetColorStop(
     const OH_ArkUI_RadialGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
     int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0 && writeLength,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto size = static_cast<int32_t>(options->colorStop.size());
     *writeLength = size;
