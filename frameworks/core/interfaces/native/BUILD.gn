@@ -38,6 +38,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_arc_list_modifier.cpp",
       "node/node_arc_scroll_bar_modifier.cpp",
       "node/blank_modifier.cpp",
+      "node/bubble_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",

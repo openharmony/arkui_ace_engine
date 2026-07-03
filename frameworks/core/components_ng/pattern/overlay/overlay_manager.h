@@ -58,6 +58,7 @@ struct TextPickerSettingData;
 struct TimePickerSettingData;
 struct SheetStyle;
 struct ToastInfo;
+enum class ToastShowMode;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,
@@ -183,6 +184,10 @@ public:
     bool HasPopupInfo(int32_t targetId) const;
 
     void ErasePopupInfo(int32_t targetId);
+
+    void SetPopupInfo(int32_t targetId, const PopupInfo& popupInfo);
+    const std::unordered_map<int32_t, NG::PopupInfo>& GetPopupMap() const;
+    void ClearPopupMap();
 
     void SetDismissDialogId(int32_t id);
 
@@ -529,6 +534,8 @@ public:
     void SetFilterActive(bool actived);
 
     void SetDismissPopupId(int32_t targetId);
+
+    int32_t GetDismissPopupId() const;
 
     void DismissPopup();
 

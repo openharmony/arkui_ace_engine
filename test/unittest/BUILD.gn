@@ -970,6 +970,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/bubble/bridge/inner_modifier/bubble_inner_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_model_static.cpp",
@@ -1811,6 +1812,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_lazy_grid_layout_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/refresh/bridge/mock_node_refresh_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/bubble/mock_bubble_modifier.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

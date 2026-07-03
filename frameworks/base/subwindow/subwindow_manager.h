@@ -107,7 +107,7 @@ public:
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
     const RefPtr<Subwindow> GetCurrentWindow();
-    Rect GetParentWindowRect();
+    ACE_FORCE_EXPORT Rect GetParentWindowRect();
 
     RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow, bool isRestartDrag = false);
     void HidePreviewNG();
@@ -124,13 +124,13 @@ public:
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
-    void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
-    void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    ACE_FORCE_EXPORT void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    ACE_FORCE_EXPORT void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
-    void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
-    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    ACE_FORCE_EXPORT void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
+    ACE_FORCE_EXPORT void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         int32_t appearingTime, int32_t appearingTimeWithContinuousOperation);
-    void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
+    ACE_FORCE_EXPORT void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     ACE_FORCE_EXPORT void CloseMenu();
     ACE_FORCE_EXPORT void ClearMenu();
@@ -158,7 +158,7 @@ public:
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
-    void HideSubWindowNG();
+    ACE_FORCE_EXPORT void HideSubWindowNG();
     ACE_FORCE_EXPORT void HideDialogSubWindow(int32_t instanceId);
     ACE_FORCE_EXPORT void SetHotAreas(
         const std::vector<Rect>& rects, SubwindowType type, int32_t nodeId = -1, int32_t instanceId = -1);

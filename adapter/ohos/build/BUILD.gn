@@ -60,6 +60,7 @@ component_modules = [
   "text_picker",
   "select",
   "grid",
+  "bubble",
 ]
 
 if (!ace_engine_feature_wearable) {

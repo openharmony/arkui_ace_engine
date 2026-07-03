@@ -713,6 +713,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/bubble_modifier.cpp",
   ]
 
   sources += [

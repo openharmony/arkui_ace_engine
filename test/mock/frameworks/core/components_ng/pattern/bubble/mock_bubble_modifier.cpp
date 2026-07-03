@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/stage/content_root_pattern.h"
-
+#include "core/interfaces/native/node/bubble_modifier.h"
+#include "core/components_ng/pattern/bubble/bridge/inner_modifier/bubble_inner_modifier.h"
 namespace OHOS::Ace::NG {
-ACE_FORCE_EXPORT void ContentRootPattern::BeforeCreateLayoutWrapper() {}
+namespace NodeModifier {
+const ArkUIBubbleInnerModifier* GetBubbleInnerModifier()
+{
+    return InnerModifier::GetBubbleInnerModifier();
+}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

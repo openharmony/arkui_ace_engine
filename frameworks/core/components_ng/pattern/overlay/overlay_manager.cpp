@@ -64,6 +64,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/interfaces/native/node/bubble_modifier.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/date_picker/picker_setting_data.h"
@@ -96,6 +97,9 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
+
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
@@ -360,6 +364,11 @@ void OverlayManager::SetFilterActive(bool actived)
 void OverlayManager::SetDismissPopupId(int32_t targetId)
 {
     dismissPopupId_ = targetId;
+}
+
+int32_t OverlayManager::GetDismissPopupId() const
+{
+    return dismissPopupId_;
 }
 
 RefPtr<FrameNode> OverlayManager::GetGatherNode() const
@@ -839,12 +848,15 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
 {
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    popupPattern->ResetFocusState();
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetFocusState(popupPattern);
     auto levelOrder = GetLevelOrder(popupNode);
     auto isNeedFocus = IsTopOrder(levelOrder);
 
     // Fire onWillAppear callback
-    auto popupParam = popupPattern->GetPopupParam();
+    RefPtr<PopupParam> popupParam;
+    popupParam = modifier->getPopupParam(popupPattern);
     if (popupParam) {
         popupParam->FireOnWillAppear();
     }
@@ -858,7 +870,11 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
         // Fire onDidAppear callback
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
         if (popupPattern) {
-            auto popupParam = popupPattern->GetPopupParam();
+            const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+            RefPtr<PopupParam> popupParam;
+            if (modifier) {
+                popupParam = modifier->getPopupParam(popupPattern);
+            }
             if (popupParam) {
                 popupParam->FireOnDidAppear();
             }
@@ -868,10 +884,8 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
             overlayManager->FocusOverlayNode(popupNode);
         }
     };
-    if (popupPattern->GetHasTransition()) {
-        popupPattern->StartEnteringTransitionEffects(popupNode, onFinish);
-    } else {
-        popupPattern->StartEnteringAnimation(onFinish);
+    if (modifier) {
+        modifier->startEnteringAnimationOrTransition(popupPattern, popupNode, onFinish);
     }
 }
 
@@ -881,7 +895,11 @@ void OverlayManager::ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode)
     CHECK_NULL_VOID(popupPattern);
 
     // Fire onWillAppear callback
-    auto popupParam = popupPattern->GetPopupParam();
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    RefPtr<PopupParam> popupParam;
+    if (modifier) {
+        popupParam = modifier->getPopupParam(popupPattern);
+    }
     if (popupParam) {
         popupParam->FireOnWillAppear();
     }
@@ -892,16 +910,18 @@ void OverlayManager::ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode)
         CHECK_NULL_VOID(popupNode);
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(popupPattern);
-        auto popupParam = popupPattern->GetPopupParam();
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        RefPtr<PopupParam> popupParam;
+        if (modifier) {
+            popupParam = modifier->getPopupParam(popupPattern);
+        }
         if (popupParam) {
             popupParam->FireOnDidAppear();
         }
     };
 
-    if (popupPattern->GetHasTransition()) {
-        popupPattern->StartEnteringTransitionEffects(popupNode, onFinish);
-    } else {
-        popupPattern->StartEnteringAnimation(onFinish);
+    if (modifier) {
+        modifier->startEnteringAnimationOrTransition(popupPattern, popupNode, onFinish);
     }
 }
 
@@ -911,17 +931,9 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     auto rootNode = rootNodeWeak_.Upgrade();
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    if (popupPattern->GetHasTransition()) {
-        auto popupRenderContext = popupNode->GetRenderContext();
-        if (popupRenderContext && !popupRenderContext->HasDisappearTransition()) {
-            if (finish) {
-                finish();
-            }
-        } else {
-            popupPattern->StartExitingTransitionEffects(popupNode, finish);
-        }
-    } else {
-        popupPattern->StartExitingAnimation(finish);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->startExitAnimation(popupPattern, popupNode, finish);
     }
 }
 
@@ -1267,10 +1279,12 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     ACE_UINODE_TRACE(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    auto isShowInSubWindow = modifier->getShowInSubWindow(layoutProp);
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isTypeWithOption = modifier->getPrimaryButtonShow(paintProperty);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
@@ -1289,21 +1303,24 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto levelOrder = GetLevelOrder(popupNode);
     if (iter == rootChildren.rend()) {
         MountToParentWithService(rootNode, popupNode, levelOrder);
-    } else if (popupPattern->GetHasTransition()) {
+    } else if (modifier->getHasTransition(popupPattern)) {
         return;
     }
 
     // attach popupNode before entering animation
     auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();
     CHECK_NULL_VOID(popupEventHub);
-    popupEventHub->FireChangeEvent(true);
+    modifier->fireChangeEvent(popupEventHub, true);
+
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     popupMap_[targetId].isCurrentOnShow = true;
 
-    popupPattern->AddPipelineCallBack();
-    if (!IsContentUpdatePopup(popupPattern)) {
-        popupPattern->SetInteractiveDismiss(interactiveDismiss);
-        popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
+    modifier->addPipelineCallBack(popupPattern);
+    if (!(modifier && modifier->isContentUpdatePopup(popupPattern))) {
+        if (modifier) {
+            modifier->setInteractiveDismiss(popupPattern, interactiveDismiss);
+            modifier->updateOnWillDismiss(popupPattern, move(onWillDismiss));
+        }
     }
     if ((isTypeWithOption && !isShowInSubWindow) ||
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && popupInfo.focusable)) {
@@ -1328,7 +1345,9 @@ bool OverlayManager::IsContentUpdatePopup(const RefPtr<Pattern>& pattern)
     bool result = false;
     CHECK_NULL_RETURN(pattern, result);
     auto popupPattern = DynamicCast<BubblePattern>(pattern);
-    auto param = popupPattern->GetPopupParam();
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, result);
+    auto param = modifier->getPopupParam(popupPattern);
     if (param) {
         if (param->GetIsPartialUpdate().has_value()) {
             result = true;
@@ -1341,28 +1360,11 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
 {
     CHECK_NULL_VOID(popupNode);
     ACE_UINODE_TRACE(popupNode);
-    auto popupId = popupNode->GetId();
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto isBlock = layoutProp->GetBlockEventValue(true);
-    auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    if (isShowInSubWindow && popupPattern->IsOnShow()) {
-        std::vector<Rect> rects;
-        if (!isBlock) {
-            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
-                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
-            rects.emplace_back(rect);
-        } else {
-            auto parentWindowRect = popupPattern->GetHostWindowRect();
-            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
-                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
-            rects.emplace_back(parentWindowRect);
-            rects.emplace_back(rect);
-        }
-        auto subWindowMgr = SubwindowManager::GetInstance();
-        subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, popupPattern->GetContainerId());
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->setPopupHotAreas(popupPattern);
     }
 }
 
@@ -1383,12 +1385,14 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     ACE_UINODE_TRACE(popupNode);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isShowInSubWindow = modifier->getShowInSubWindow(layoutProp);
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isTypeWithOption = modifier->getPrimaryButtonShow(paintProperty);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
@@ -1411,71 +1415,21 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     }
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    if (popupPattern->GetTransitionStatus() == TransitionStatus::EXITING) {
+    if (modifier->checkAndSetExitingStatus(popupPattern)) {
         return;
     }
-    popupPattern->SetTransitionStatus(TransitionStatus::EXITING);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
 
-    // Fire onWillDisappear callback
-    auto popupParam = popupPattern->GetPopupParam();
-    if (popupParam) {
-        popupParam->FireOnWillDisappear();
-    }
-
-    auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
-        targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
-        rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
-        auto rootNode = rootNodeWk.Upgrade();
-        auto popupNode = popupNodeWk.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-        ACE_UINODE_TRACE(popupNode);
-
-        // Fire onDidDisappear callback
-        auto popupPattern = popupNode->GetPattern<BubblePattern>();
-        if (popupPattern) {
-            auto popupParam = popupPattern->GetPopupParam();
-            if (popupParam) {
-                popupParam->FireOnDidDisappear();
-            }
-        }
-
-        auto popupInfoIter = overlayManager->popupMap_.find(targetId);
-        auto targetIsInMap = popupInfoIter != overlayManager->popupMap_.end();
-        bool popupNodeIsInMap = false;
-        if (targetIsInMap) {
-            popupNodeIsInMap = overlayManager->popupMap_[targetId].popupNode == popupNode;
-            if (popupNodeIsInMap && overlayManager->popupMap_[targetId].isCurrentOnShow) {
-                return;
-            }
-        }
-        CHECK_NULL_VOID(popupPattern);
-        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-        auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();
-        CHECK_NULL_VOID(popupEventHub);
-        popupEventHub->FireChangeEvent(false);
-        auto popupRenderContext = popupNode->GetRenderContext();
-        CHECK_NULL_VOID(popupRenderContext);
-        popupRenderContext->UpdateChainedTransition(nullptr);
-        auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-        CHECK_NULL_VOID(accessibilityProperty);
-        accessibilityProperty->SetShowedState(0);
-        popupNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        overlayManager->RemoveChildWithService(rootNode, popupNode);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (popupNodeIsInMap) {
-            overlayManager->ErasePopupInfo(targetId);
-        }
-        if (isShowInSubWindow) {
-            auto subwindow = SubwindowManager::GetInstance();
-            subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId(), SubwindowType::TYPE_POPUP);
-            subwindow->HideSubWindowNG();
-        }
-        popupPattern->CallDoubleBindCallback("false");
-    };
+    // Fire onWillDisappear callback and create onFinish
+    BubbleHidePopupParams hideParams;
+    hideParams.isShowInSubWindow = isShowInSubWindow;
+    hideParams.isTypeWithOption = isTypeWithOption;
+    hideParams.isUseCustom = isUseCustom;
+    hideParams.focusable = focusable;
+    hideParams.targetId = targetId;
+    auto onFinish = modifier->createHidePopupOnFinish(popupPattern, this, hideParams,
+        popupNode, rootNode);
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     FireAutoSave(popupNode);
@@ -1496,7 +1450,9 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     CHECK_NULL_RETURN(popupInfo.popupNode, nullptr);
     auto bubbleRenderProp = popupInfo.popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_RETURN(bubbleRenderProp, nullptr);
-    auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto autoCancel = modifier->getAutoCancel(bubbleRenderProp);
     if (!autoCancel && !isForceClear) {
         return nullptr;
     }
@@ -1565,36 +1521,9 @@ void OverlayManager::HideCustomPopups()
         return;
     }
     auto tempPopupMap = popupMap_;
-    for (const auto& popup : tempPopupMap) {
-        auto popupInfo = popup.second;
-        if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
-            auto targetNodeId = popupInfo.target.Upgrade()->GetId();
-            auto popupNode = popupInfo.popupNode;
-            CHECK_NULL_VOID(popupNode);
-            ACE_UINODE_TRACE(popupNode);
-            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
-            auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();
-            CHECK_NULL_VOID(popupEventHub);
-            popupEventHub->FireChangeEvent(false);
-            // if use popup with option, skip
-            if (isTypeWithOption) {
-                continue;
-            }
-            popupInfo.markNeedUpdate = true;
-            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (showInSubWindow) {
-                auto pipelineContext = popupNode->GetContextRefPtr();
-                CHECK_NULL_VOID(pipelineContext);
-                auto containerId = pipelineContext->GetInstanceId();
-                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId, containerId);
-            } else {
-                HidePopup(targetNodeId, popupInfo);
-            }
-        }
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->hideCustomPopupsIteration(this, tempPopupMap);
     }
 }
 
@@ -1605,26 +1534,9 @@ void OverlayManager::HideAllPopups()
         return;
     }
     auto tempPopupMap = popupMap_;
-    for (const auto& popup : tempPopupMap) {
-        auto popupInfo = popup.second;
-        if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
-            auto targetNodeId = popupInfo.target.Upgrade()->GetId();
-            auto popupNode = popupInfo.popupNode;
-            CHECK_NULL_VOID(popupNode);
-            ACE_UINODE_TRACE(popupNode);
-            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            popupInfo.markNeedUpdate = true;
-            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (showInSubWindow) {
-                auto pipelineContext = popupNode->GetContextRefPtr();
-                CHECK_NULL_VOID(pipelineContext);
-                auto containerId = pipelineContext->GetInstanceId();
-                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId, containerId);
-            } else {
-                HidePopup(targetNodeId, popupInfo);
-            }
-        }
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->hideAllPopupsIteration(this, tempPopupMap);
     }
 }
 
@@ -1632,22 +1544,9 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all popup without animation enter");
     auto tempPopupMap = popupMap_;
-    for (const auto& popup : tempPopupMap) {
-        auto targetId = popup.first;
-        auto popupNode = popup.second.popupNode;
-        CHECK_NULL_CONTINUE(popupNode);
-        ACE_UINODE_TRACE(popupNode);
-        auto popupPattern = popupNode->GetPattern<BubblePattern>();
-        CHECK_NULL_CONTINUE(popupPattern);
-        popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-        popupPattern->CallDoubleBindCallback("false");
-        auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();
-        CHECK_NULL_CONTINUE(popupEventHub);
-        popupEventHub->FireChangeEvent(false);
-        auto popupRenderContext = popupNode->GetRenderContext();
-        CHECK_NULL_CONTINUE(popupRenderContext);
-        popupRenderContext->UpdateChainedTransition(nullptr);
-        ErasePopup(targetId);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->hideAllPopupsWithoutAnimationIteration(this, tempPopupMap);
     }
 }
 
@@ -1675,7 +1574,9 @@ void OverlayManager::ErasePopup(int32_t targetId)
         ACE_UINODE_TRACE(popupNode);
         auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
-        auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        auto isShowInSubWindow = modifier->erasePopupSetup(layoutProp);
         auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetShowedState(0);
@@ -1714,7 +1615,8 @@ PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& nod
         CHECK_NULL_RETURN(popupInfo.popupNode, popupInfoError);
         auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_RETURN(popupPattern, popupInfoError);
-        if (popupPattern->GetCustomNode() == node) {
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        if (modifier && modifier->isCustomNodeMatch(popupPattern, node)) {
             return popupInfo;
         }
         iter++;
@@ -1886,16 +1788,17 @@ void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
         CHECK_NULL_VOID(removeNode);
         auto bubblePattern = removeNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(bubblePattern);
-        if (bubblePattern->HasOnWillDismiss() && !isForceClear) {
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        if (modifier->handleOnWillDismissCleanup(bubblePattern, isForceClear)) {
             SetDismissPopupId(target);
-            bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
+            modifier->callOnWillDismissWithCheck(bubblePattern, static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
         } else {
             auto bubbleEventHub = removeNode->GetEventHub<BubbleEventHub>();
             CHECK_NULL_VOID(bubbleEventHub);
             bubbleEventHub->FireChangeEvent(false);
             popupMap_[target].isCurrentOnShow = false;
-            bubblePattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-            bubblePattern->CallDoubleBindCallback("false");
+            modifier->cleanupPopupInSubWindowElse(bubblePattern);
             rootNode->RemoveChild(removeNode);
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId(), SubwindowType::TYPE_POPUP);
@@ -1976,7 +1879,9 @@ void OverlayManager::UpdatePopupCustomNode()
         if (bubbleNode) {
             auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
             CHECK_NULL_VOID(bubblePattern);
-            auto customNode = bubblePattern->GetCustomNode();
+            const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+            auto customNode = modifier ?
+                modifier->getPopupCustomNode(bubblePattern) : nullptr;
             if (customNode && customNode->GetUpdateNodeConfig()) {
                 customNode->GetUpdateNodeConfig()();
             }
@@ -2167,7 +2072,8 @@ bool OverlayManager::GetNodeFocusable(const RefPtr<FrameNode>& node)
     if (InstanceOf<BubblePattern>(pattern)) {
         auto popupPattern = DynamicCast<BubblePattern>(pattern);
         CHECK_NULL_RETURN(popupPattern, true);
-        auto popupParam = popupPattern->GetPopupParam();
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        auto popupParam = modifier ? modifier->getPopupParam(popupPattern) : nullptr;
         CHECK_NULL_RETURN(popupParam, true);
         return popupParam->GetFocusable();
     }
@@ -2406,19 +2312,22 @@ bool OverlayManager::RemoveDialogWithContent(
 
 bool OverlayManager::PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay)
 {
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
     auto bubblePattern = overlay->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, false);
-    return !bubblePattern->GetInteractiveDismiss();
+    return modifier->popupInteractiveDismiss(bubblePattern);
 }
 
 bool OverlayManager::PopupCallBackOnWillDismiss(const RefPtr<FrameNode>& overlay)
 {
     auto bubblePattern = overlay->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, false);
-    if (bubblePattern->HasOnWillDismiss()) {
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier && modifier->handleOnWillDismissCleanup(bubblePattern, false)) {
         int32_t dismissPopupId = GetPopupIdByNode(overlay);
         SetDismissPopupId(dismissPopupId);
-        bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::BACK_PRESSED));
+        modifier->callOnWillDismissWithCheck(bubblePattern, static_cast<int32_t>(DismissReason::BACK_PRESSED));
         return true;
     }
     return false;
@@ -3117,10 +3026,12 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
     if (PopupCallBackOnWillDismiss(overlay)) {
         return true;
     }
-    auto popupPattern = DynamicCast<BubblePattern>(pattern);
     auto popupEventHub = overlay->GetEventHub<BubbleEventHub>();
     CHECK_NULL_RETURN(popupEventHub, false);
-    popupEventHub->FireChangeEvent(false);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->fireChangeEventOnOverlay(popupEventHub);
+    }
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_RETURN(container, false);
@@ -7496,6 +7407,21 @@ void OverlayManager::ErasePopupInfo(int32_t targetId)
     if (popupMap_.find(targetId) != popupMap_.end()) {
         popupMap_.erase(targetId);
     }
+}
+
+void OverlayManager::SetPopupInfo(int32_t targetId, const PopupInfo& popupInfo)
+{
+    popupMap_[targetId] = popupInfo;
+}
+
+const std::unordered_map<int32_t, NG::PopupInfo>& OverlayManager::GetPopupMap() const
+{
+    return popupMap_;
+}
+
+void OverlayManager::ClearPopupMap()
+{
+    popupMap_.clear();
 }
 
 void OverlayManager::ResetContextMenuDragHideFinished()
