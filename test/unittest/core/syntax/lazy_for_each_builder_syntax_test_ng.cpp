@@ -1635,4 +1635,404 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReduceCacheCountTest001, TestSize.Level1)
     EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
 }
 
+/**
+ * @tc.name: LazyForEachBuilderReleaseExpiringNode001
+ * @tc.desc: Test LazyForEachBuilder::ReleaseExpiringNode with non-existent reuseId
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReleaseExpiringNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ReleaseExpiringNode with non-existent reuseId
+     * @tc.expected: Should return false
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode("non_existent_reuse_id");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderReleaseExpiringNode002
+ * @tc.desc: Test LazyForEachBuilder::ReleaseExpiringNode with valid reuseId
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReleaseExpiringNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup test data with recyclable nodes
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "test_key";
+
+    // Create some test nodes
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    auto node3 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1003, AceType::MakeRefPtr<Pattern>());
+    auto node4 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1004, AceType::MakeRefPtr<Pattern>());
+    auto node5 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1005, AceType::MakeRefPtr<Pattern>());
+
+    // Record nodes as recyclable
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_2", AceType::WeakClaim(AceType::RawPtr(node2)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_3", AceType::WeakClaim(AceType::RawPtr(node3)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_4", AceType::WeakClaim(AceType::RawPtr(node4)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_5", AceType::WeakClaim(AceType::RawPtr(node5)));
+
+    // Add nodes to expiringItem_
+    lazyForEachBuilder->expiringItem_[key] = LazyForEachCacheChild(0, node1);
+    lazyForEachBuilder->expiringItem_[key + "_2"] = LazyForEachCacheChild(1, node2);
+    lazyForEachBuilder->expiringItem_[key + "_3"] = LazyForEachCacheChild(2, node3);
+    lazyForEachBuilder->expiringItem_[key + "_4"] = LazyForEachCacheChild(3, node4);
+    lazyForEachBuilder->expiringItem_[key + "_5"] = LazyForEachCacheChild(4, node5);
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode
+     * @tc.expected: Should return true and release at least 5 nodes
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderReleaseExpiringNode003
+ * @tc.desc: Test LazyForEachBuilder::ReleaseExpiringNode with insufficient nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReleaseExpiringNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup test data with insufficient nodes (< 5)
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "test_key";
+
+    // Create only 3 nodes
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    auto node3 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1003, AceType::MakeRefPtr<Pattern>());
+
+    // Record nodes as recyclable
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_2", AceType::WeakClaim(AceType::RawPtr(node2)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "_3", AceType::WeakClaim(AceType::RawPtr(node3)));
+
+    // Add nodes to expiringItem_
+    lazyForEachBuilder->expiringItem_[key] = LazyForEachCacheChild(0, node1);
+    lazyForEachBuilder->expiringItem_[key + "_2"] = LazyForEachCacheChild(1, node2);
+    lazyForEachBuilder->expiringItem_[key + "_3"] = LazyForEachCacheChild(2, node3);
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode with insufficient nodes
+     * @tc.expected: Should return false (less than MIN_RELEASE_COUNT)
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderRecordRecyclableNode001
+ * @tc.desc: Test LazyForEachBuilder::RecordRecyclableNode with new reuseId
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderRecordRecyclableNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Record recyclable node with new reuseId
+     */
+    std::string reuseId = "new_reuse_id";
+    std::string key = "test_key";
+    auto node = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node)));
+
+    /**
+     * @tc.steps: step3. Verify recyclableNodeSet_ contains the new reuseId
+     */
+    auto reuseIds = lazyForEachBuilder->GetReuseIdsCanBeRecycled();
+    EXPECT_TRUE(reuseIds.find(reuseId) != reuseIds.end());
+    EXPECT_EQ(reuseIds.size(), 1);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderRecordRecyclableNode002
+ * @tc.desc: Test LazyForEachBuilder::RecordRecyclableNode with existing reuseId
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderRecordRecyclableNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Record multiple nodes with same reuseId but different keys
+     */
+    std::string reuseId = "existing_reuse_id";
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    auto node3 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1003, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, "key1", AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, "key2", AceType::WeakClaim(AceType::RawPtr(node2)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, "key3", AceType::WeakClaim(AceType::RawPtr(node3)));
+
+    /**
+     * @tc.steps: step3. Verify recyclableNodeSet_ contains all keys under the reuseId
+     */
+    auto reuseIds = lazyForEachBuilder->GetReuseIdsCanBeRecycled();
+    EXPECT_TRUE(reuseIds.find(reuseId) != reuseIds.end());
+    EXPECT_EQ(reuseIds.size(), 1);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderRecordRecyclableNode003
+ * @tc.desc: Test LazyForEachBuilder::RecordRecyclableNode adding nodes to existing key
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderRecordRecyclableNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add multiple nodes with same reuseId and key
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "same_key";
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node2)));
+
+    /**
+     * @tc.steps: step3. Verify both nodes are recorded
+     */
+    auto reuseIds = lazyForEachBuilder->GetReuseIdsCanBeRecycled();
+    EXPECT_TRUE(reuseIds.find(reuseId) != reuseIds.end());
+}
+
+/**
+ * @tc.name: LazyForEachBuilderGetReuseIdsCanBeRecycled001
+ * @tc.desc: Test LazyForEachBuilder::GetReuseIdsCanBeRecycled with empty set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderGetReuseIdsCanBeRecycled001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Get reusable IDs when none are registered
+     * @tc.expected: Should return empty set
+     */
+    auto reuseIds = lazyForEachBuilder->GetReuseIdsCanBeRecycled();
+    EXPECT_TRUE(reuseIds.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilderGetReuseIdsCanBeRecycled002
+ * @tc.desc: Test LazyForEachBuilder::GetReuseIdsCanBeRecycled with multiple reuseIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderGetReuseIdsCanBeRecycled002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Register multiple recyclable nodes with different reuseIds
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->RecordRecyclableNode("reuse_id_1", "key1", AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode("reuse_id_2", "key2", AceType::WeakClaim(AceType::RawPtr(node2)));
+
+    /**
+     * @tc.steps: step3. Get all reusable IDs
+     * @tc.expected: Should return set containing both reuse IDs
+     */
+    auto reuseIds = lazyForEachBuilder->GetReuseIdsCanBeRecycled();
+    EXPECT_EQ(reuseIds.size(), 2);
+    EXPECT_TRUE(reuseIds.find("reuse_id_1") != reuseIds.end());
+    EXPECT_TRUE(reuseIds.find("reuse_id_2") != reuseIds.end());
+}
+
+/**
+ * @tc.name: LazyForEachBuilderSetLazyForEachNode001
+ * @tc.desc: Test LazyForEachBuilder::SetLazyForEachNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetLazyForEachNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LazyForEachNode and set it to builder
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachBuilder->SetLazyForEachNode(AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+
+    /**
+     * @tc.steps: step3. Verify the LazyForEachNode is set correctly
+     */
+    auto retrievedNode = lazyForEachBuilder->GetLazyForEachNode();
+    EXPECT_EQ(retrievedNode, lazyForEachNode);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderGetLazyForEachNode001
+ * @tc.desc: Test LazyForEachBuilder::GetLazyForEachNode when not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderGetLazyForEachNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Get LazyForEachNode without setting it
+     * @tc.expected: Should return nullptr
+     */
+    auto retrievedNode = lazyForEachBuilder->GetLazyForEachNode();
+    EXPECT_EQ(retrievedNode, nullptr);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderGetLazyForEachNode002
+ * @tc.desc: Test LazyForEachBuilder::GetLazyForEachNode after setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderGetLazyForEachNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder and LazyForEachNode
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set LazyForEachNode and then retrieve it
+     */
+    lazyForEachBuilder->SetLazyForEachNode(AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+    auto retrievedNode = lazyForEachBuilder->GetLazyForEachNode();
+
+    /**
+     * @tc.steps: step3. Verify the retrieved node matches the original
+     */
+    EXPECT_EQ(retrievedNode, lazyForEachNode);
+    EXPECT_EQ(retrievedNode->GetTag(), V2::JS_LAZY_FOR_EACH_ETS_TAG);
+}
+
+/**
+ * @tc.name: LazyForEachOnDataReloadedWithReuseImmediately001
+ * @tc.desc: Test LazyForEachBuilder::OnDataReloaded with reuseImmediately=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataReloadedWithReuseImmediately001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add some cached items
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", node2);
+
+    /**
+     * @tc.steps: step3. Call OnDataReloaded with reuseImmediately=false
+     * @tc.expected: Should clear cached items normally
+     */
+    lazyForEachBuilder->OnDataReloaded(false);
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachOnDataReloadedWithReuseImmediately002
+ * @tc.desc: Test LazyForEachBuilder::OnDataReloaded with reuseImmediately=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataReloadedWithReuseImmediately002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder and set LazyForEachNode
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachBuilder->SetLazyForEachNode(AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+
+    /**
+     * @tc.steps: step2. Add some cached items with valid nodes
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", node2);
+
+    /**
+     * @tc.steps: step3. Call OnDataReloaded with reuseImmediately=true
+     * @tc.expected: Should clear recyclableNodeSet_
+     */
+    lazyForEachBuilder->OnDataReloaded(true);
+    EXPECT_TRUE(lazyForEachBuilder->recyclableNodeSet_.empty());
+}
+
 } // namespace OHOS::Ace::NG

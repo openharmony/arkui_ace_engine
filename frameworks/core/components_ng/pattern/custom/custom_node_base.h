@@ -61,6 +61,7 @@ public:
     ReusableMemOptStrategy GetReusableMemOptStrategy();
     void TryEnableParentCustomNodeMemOpt();
     void SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback);
+    void SetEnableReleaseExpiringNodesFunction(std::function<void(bool, const std::vector<std::string>&)>&& callback);
 
     void SetThisFunc(std::function<void*()>&& getThisFunc);
     void* FireThisFunc();
@@ -169,6 +170,8 @@ protected:
     StaReusableMemOptStrategy staReusableMemOptStrategy_ = StaReusableMemOptStrategy::DEFAULT;
     // int32_t remainingTimeMs, bool isProgressive, bool shouldCollect
     std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc_;
+    // bool enable, const std::vector<std::string>& reuseIds
+    std::function<void(bool, const std::vector<std::string>&)> enableReleaseExpiringNodesFunc_;
     bool executeFireOnAppear_ = false;
     std::string reuseId_;
     std::string creatorId_;

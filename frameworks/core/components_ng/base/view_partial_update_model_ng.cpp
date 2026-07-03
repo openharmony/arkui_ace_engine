@@ -83,6 +83,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetIsV2(std::move(info.isV2));
     customNode->SetReusableMemOptStrategy(std::move(info.reusableMemOptStrategy));
     customNode->SetReleaseRecyclePoolFunction(std::move(info.releaseRecyclePoolFunc));
+    customNode->SetEnableReleaseExpiringNodesFunction(std::move(info.enableReleaseExpiringNodes));
     customNode->SetRecycleFunction(std::move(info.recycleCustomNodeFunc));
     customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
     customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
@@ -105,6 +106,14 @@ bool ViewPartialUpdateModelNG::MarkNeedUpdate(const WeakPtr<AceType>& node)
     }
     customNode->MarkNeedUpdate();
     return true;
+}
+
+bool ViewPartialUpdateModelNG::TryReleaseExpiringNode(const WeakPtr<AceType>& node, std::string reuseId)
+{
+    auto weakNode = AceType::DynamicCast<NG::CustomNode>(node);
+    auto customNode = weakNode.Upgrade();
+    CHECK_NULL_RETURN(customNode, false);
+    return customNode->ReleaseExpiringNode(reuseId);
 }
 
 void ViewPartialUpdateModelNG::FinishUpdate(

@@ -1106,6 +1106,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 if (this.hasRecyclePool()) {
                     recycledNode = this.getRecyclePool().popRecycleV2Component(reuseId);
                 }
+                if (!recycledNode && this.__isReleaseExpiringNodesEnabled__Internal(reuseId)) {
+                    this.tryReleaseExpiringNode(reuseId);
+                    recycledNode = this.getOrCreateRecyclePool().popRecycleV2Component(reuseId);
+                }
                 if (!recycledNode && globalPool) {
                     recycledNode = globalPool.pop(reuseId, componentClass);
                     if (recycledNode) {

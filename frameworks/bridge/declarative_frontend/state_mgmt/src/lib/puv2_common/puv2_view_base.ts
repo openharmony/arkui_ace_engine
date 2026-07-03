@@ -176,6 +176,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected __hasStartMemOpt__Internal: boolean = false;
 
+  protected __enableReleaseExpiringNodesFlag__Internal: boolean = false;
+
+  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> = new Set<string>();
+
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
     this.nativeViewPartialUpdate = new NativeViewPartialUpdate(this);
@@ -353,6 +357,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public finishUpdateFunc(elmtId: number): void {
     return this.nativeViewPartialUpdate.finishUpdateFunc(elmtId);
   }
+
+  public tryReleaseExpiringNode(reuseId: string): boolean {
+    const result = this.nativeViewPartialUpdate.tryReleaseExpiringNode(reuseId);
+    if (!result) {
+      this.__reuseIdForReleaseExpiringNodes__Internal.delete(reuseId);
+    }
+    return result;
+  }
  
   public setCardId(cardId: number): void {
     return this.nativeViewPartialUpdate.setCardId(cardId);
@@ -443,6 +455,34 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean { return true; }
+
+  /**
+   * @function __enableReleaseExpiringNodes__Internal
+   * @description
+   * Enable or disable release of expiring nodes from C++ side.
+   * @param {string[]} reuseIds - list of reuseId to track
+   */
+  public __enableReleaseExpiringNodes__Internal(enable: boolean, reuseIds: string[]): void {
+    this.__enableReleaseExpiringNodesFlag__Internal = enable;
+    if (enable) {
+      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal.add(reuseId));
+    } else {
+      this.__reuseIdForReleaseExpiringNodes__Internal = new Set();
+    }
+    
+  }
+
+  /**
+   * @function __isReleaseExpiringNodesEnabled__Internal
+   * @description
+   * Check if release of expiring nodes is enabled for the given reuseId.
+   * @param {string} reuseId - the reuseId to check
+   * @returns {boolean} - true if enabled for this reuseId, false if disabled or not in list
+   */
+  public __isReleaseExpiringNodesEnabled__Internal(reuseId: string): boolean {
+    return this.__enableReleaseExpiringNodesFlag__Internal &&
+           this.__reuseIdForReleaseExpiringNodes__Internal.has(reuseId);
+  }
 
   /**
    * @function __requestProgressiveRelease__Internal

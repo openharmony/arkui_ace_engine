@@ -48,6 +48,7 @@ struct NodeInfoPU {
     std::function<bool(int32_t)> hasNodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc;
+    std::function<void(bool, const std::vector<std::string>&)> enableReleaseExpiringNodes;
     std::function<void(bool, bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
@@ -79,6 +80,7 @@ public:
 
     virtual RefPtr<AceType> CreateNode(NodeInfoPU&& info) = 0;
     virtual bool MarkNeedUpdate(const WeakPtr<AceType>& node) = 0;
+    virtual bool TryReleaseExpiringNode(const WeakPtr<AceType>& node, std::string reuseId) = 0;
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;

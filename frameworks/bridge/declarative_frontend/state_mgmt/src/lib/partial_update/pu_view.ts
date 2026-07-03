@@ -1317,6 +1317,10 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.hasRecycleManager()) {
       node = this.getRecycleManager().popRecycleNode(name);
     }
+    if (!node && this.__isReleaseExpiringNodesEnabled__Internal(name)) {
+      this.tryReleaseExpiringNode(name);
+      node = this.getOrCreateRecycleManager().popRecycleNode(name);
+    }
     if (!node && globalPool) {
       node = globalPool.pop(name, componentClass);
       if (node) {

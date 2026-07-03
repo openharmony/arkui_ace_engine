@@ -76,16 +76,21 @@ private:
     void OnDataReloaded(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
-        NotifyAll(&V2::DataChangeListener::OnDataReloaded);
+        ContainerScope scope(instanceId_);
+        bool reuseImmediately = false;
+        if (args.Length() == 1 && args[0]->IsBoolean()) {
+            reuseImmediately = args[0]->ToBoolean();
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataReloaded, reuseImmediately);
     }
 
     void OnDataAdded(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataAdded, args);
@@ -94,7 +99,7 @@ private:
     void OnDataBulkAdded(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         ContainerScope scope(instanceId_);
@@ -110,7 +115,7 @@ private:
     void OnDataDeleted(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataDeleted, args);
@@ -119,7 +124,7 @@ private:
     void OnDataBulkDeleted(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         ContainerScope scope(instanceId_);
@@ -135,7 +140,7 @@ private:
     void OnDataChanged(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataChanged, args);
@@ -144,7 +149,7 @@ private:
     void OnDataMoved(const JSCallbackInfo& args)
     {
         useOldInterface = true;
-        if (useAnotherInterface(useNewInterface)) {
+        if (UseAnotherInterface(useNewInterface)) {
             return;
         }
         ContainerScope scope(instanceId_);
@@ -160,7 +165,7 @@ private:
     void OnDatasetChange(const JSCallbackInfo& args)
     {
         useNewInterface = true;
-        if (useAnotherInterface(useOldInterface)) {
+        if (UseAnotherInterface(useOldInterface)) {
             return;
         }
         ContainerScope scope(instanceId_);
@@ -197,21 +202,25 @@ private:
         const int CHANGEOP = 3;
         const int MOVEOP = 4;
         const int EXCHANGEOP = 5;
+        const int RELOAD = 6;
         switch (operationTypeMap[operationType]) {
             case ADDOP:
-                transferIndex(value, dataOperation);
-                transferCount(value, dataOperation);
-                transferKey(value, dataOperation);
+                TransferIndex(value, dataOperation);
+                TransferCount(value, dataOperation);
+                TransferKey(value, dataOperation);
                 break;
             case DELETEOP:
-                transferIndex(value, dataOperation);
-                transferCount(value, dataOperation);
+                TransferIndex(value, dataOperation);
+                TransferCount(value, dataOperation);
                 break;
             case CHANGEOP:
             case MOVEOP:
             case EXCHANGEOP:
-                transferIndex(value, dataOperation);
-                transferKey(value, dataOperation);
+                TransferIndex(value, dataOperation);
+                TransferKey(value, dataOperation);
+                break;
+            case RELOAD:
+                TransferReuseImmediately(value, dataOperation);
                 break;
         }
         if (dataOperation.count < 0) {
@@ -220,7 +229,7 @@ private:
         DataOperations.push_back(dataOperation);
     }
 
-    void transferIndex(JSRef<JSObject> value, V2::Operation& dataOperation)
+    void TransferIndex(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
         auto jsIndex = value->GetProperty("index");
         if (jsIndex->IsNumber()) {
@@ -246,7 +255,7 @@ private:
         }
     }
 
-    void transferCount(JSRef<JSObject> value, V2::Operation& dataOperation)
+    void TransferCount(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
         auto jsCount = value->GetProperty("count");
         if (jsCount->IsNumber()) {
@@ -254,7 +263,7 @@ private:
         }
     }
 
-    void transferKey(JSRef<JSObject> value, V2::Operation& dataOperation)
+    void TransferKey(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
         auto jsKey = value->GetProperty("key");
         if (jsKey->IsString()) {
@@ -293,7 +302,17 @@ private:
         }
     }
 
-    bool useAnotherInterface(bool forbid)
+    void TransferReuseImmediately(JSRef<JSObject> value, V2::Operation& dataOperation)
+    {
+        auto jsReuseImmediately = value->GetProperty("reuseImmediately");
+        if (jsReuseImmediately->IsBoolean()) {
+            dataOperation.reuseImmediately = jsReuseImmediately->ToBoolean();
+        } else {
+            dataOperation.reuseImmediately = false;
+        }
+    }
+
+    bool UseAnotherInterface(bool forbid)
     {
         if (forbid) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
