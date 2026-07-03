@@ -202,6 +202,10 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
     auto result = Converter::OptConvert<Color>(*color);
     CHECK_NULL_RETURN(result, errValue);
     ParseArrayNumber(*result, indexes, true);
+    auto idVal = Converter::Convert<int64_t>(color->id);
+    if (idVal >= 0 && idVal <= static_cast<int64_t>(UINT32_MAX)) {
+        indexes.emplace_back(static_cast<uint32_t>(idVal));
+    }
     return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
 Array_Number BlendColorByColorMetricsImpl(const Ark_Number* color,
