@@ -515,7 +515,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ScopeErrorHivewReport()
 {
     auto context = OHOS::Ace::PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::NAPI_SCOPE_ERROR);
+    context->GetStatisticEventReporter()->SendEventSafe(StatisticEventType::NAPI_SCOPE_ERROR);
 }
 
 void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
