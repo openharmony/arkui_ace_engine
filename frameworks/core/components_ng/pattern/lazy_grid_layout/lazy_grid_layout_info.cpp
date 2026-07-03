@@ -48,7 +48,7 @@ float LazyGridLayoutInfo::UpdatePosMapStart(int32_t updatedStart, int32_t update
             prevPos += lines * (estimateItemSize_ + spaceWidth_);
         }
     } else {
-        prevPos = (updatedStart / lanes_) * estimateItemSize_;
+        prevPos = (updatedStart / lanes_) * (estimateItemSize_ + spaceWidth_);
     }
     if (NearEqual(startIter->second.startPos, prevPos)) {
         return 0;

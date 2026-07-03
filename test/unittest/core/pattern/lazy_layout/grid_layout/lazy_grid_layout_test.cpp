@@ -2632,6 +2632,29 @@ HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: UpdatePosMapStartIncludesSpaceWidth001
+ * @tc.desc: Rebase from a non-zero first cached line must include row gap in the estimated line position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, UpdatePosMapStartIncludesSpaceWidth001, TestSize.Level1)
+{
+    LazyGridLayoutInfo layoutInfo;
+    layoutInfo.SetLanes(2);
+    layoutInfo.SetSpace(10.0f);
+    layoutInfo.SetTotalItemCount(6);
+    layoutInfo.SetPosMap(4, { 0, 200.0f, 300.0f });
+    layoutInfo.SetPosMap(5, { 1, 200.0f, 300.0f });
+
+    layoutInfo.UpdatePosMap(0.0f);
+
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[4].startPos, 220.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[4].endPos, 320.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[5].startPos, 220.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[5].endPos, 320.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.totalMainSize_, 320.0f);
+}
 /**
  * @tc.name: FirstFrameWindowSeedsWithUnknownBody001
  * @tc.desc: First layout with an already-scrolled viewport (body extent unknown): the forward window must fall back
