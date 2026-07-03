@@ -29,6 +29,7 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_paint_property.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -103,6 +105,40 @@ const DistortionParam TERMINAL_DISTORTION_PARAM {
     .rbCorner = { 1.0, 1.0 },
     .barrelDistortion = { 0.0, 0.0, 0.0, 0.0 },
 };
+void UpdateGridMenuItemThemeRecursively(const RefPtr<FrameNode>& node, const RefPtr<SelectTheme>& menuTheme)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(menuTheme);
+    if (auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>()) {
+        textLayoutProperty->UpdateTextColor(menuTheme->GetGridMenuFontColor());
+        auto renderContext = node->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateForegroundColor(menuTheme->GetGridMenuFontColor());
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (auto imageRenderProperty = node->GetPaintProperty<ImageRenderProperty>()) {
+        imageRenderProperty->UpdateSvgFillColor(menuTheme->GetGridMenuIconColor());
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (auto securityPaintProperty = node->GetPaintProperty<SecurityComponentPaintProperty>()) {
+        securityPaintProperty->UpdateFontColor(menuTheme->GetGridMenuFontColor());
+        if (node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            securityPaintProperty->UpdateIconColor(menuTheme->GetGridMenuIconColor());
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    for (const auto& child : node->GetChildren()) {
+        auto childFrame = AceType::DynamicCast<FrameNode>(child);
+        if (!childFrame) {
+            continue;
+        }
+        UpdateGridMenuItemThemeRecursively(childFrame, menuTheme);
+    }
+}
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -2484,8 +2520,10 @@ OffsetF MenuPattern::GetAdjustedExtensionMenuPosition(const OffsetF& menuPositio
     }
 
     OffsetF adjustedMenuPosition = menuPosition;
-    adjustedMenuPosition.SetX(selectMenuPaintRect.Left() +
-        (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f);
+    auto xPosition = std::clamp(
+        (selectMenuPaintRect.Left() + (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f),
+        0.0f, SystemProperties::GetDeviceWidth() - extensionMenuSize.Width());
+    adjustedMenuPosition.SetX(xPosition);
     if (finalPlacement == Placement::BOTTOM) {
         adjustedMenuPosition.SetY(selectTop);
     } else if (finalPlacement == Placement::TOP) {
@@ -3275,6 +3313,9 @@ void MenuPattern::OnColorConfigurationUpdate()
         auto optionNode = menuPattern->GetOptions();
         for (const auto& child : optionNode) {
             auto optionsPattern = child->GetPattern<MenuItemPattern>();
+            if (!optionsPattern) {
+                continue;
+            }
             optionsPattern->SetFontColor(menuTheme->GetFontColor());
 
             child->MarkModifyDone();
@@ -3350,6 +3391,8 @@ bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
         if (optionsPattern) {
             optionsPattern->SetFontColor(menuTheme->GetFontColor());
+        } else {
+            UpdateGridMenuItemThemeRecursively(child, menuTheme);
         }
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

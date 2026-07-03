@@ -97,12 +97,13 @@ struct ACE_FORCE_EXPORT OptionParam {
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
     bool disableSystemClick = false;
     uint32_t symbolId = 0;
-    std::optional<Color> symbolColor;
+    bool isTextMenuGridMenuItem = false;
 
     // Used for security controls.
     bool isPasteOption = false;
 
     bool isAIMenuOption = false;
+    bool isAIWriteOption = false;
     bool isAskCeliaOption = false;
     std::vector<OptionParam> subMenuItems = {};
 

@@ -1568,13 +1568,14 @@ HWTEST_F(SelectOverlayFourTestNg, MoreAnimation, TestSize.Level1)
         selectOverlayNode->isShowInDefaultMenu_[i] = false;
     }
     std::vector<OptionParam> params;
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params, paramIds);
     EXPECT_EQ(params.size(), 0);
     auto call = infoPtr->callerFrameNode.Upgrade();
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    selectOverlayNode->CreatExtensionMenu(std::move(params), call);
+    selectOverlayNode->CreatExtensionMenu(std::move(params), call, 0);
     selectOverlayNode->extensionMenu_ = FrameNode::GetOrCreateFrameNode("ExtensionMenu",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     selectOverlayNode->selectMenuInner_ = FrameNode::GetOrCreateFrameNode("SelectMenuInner",

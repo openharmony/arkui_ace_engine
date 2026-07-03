@@ -30,6 +30,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -660,6 +661,8 @@ HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, SyncSelectMenuPaintRectToExtension
     ASSERT_NE(host, nullptr);
     host->CreateToolBar();
     ASSERT_NE(host->selectMenu_, nullptr);
+    host->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(host->backButton_, nullptr);
 
     auto parentWrapper = CreateLayoutWrapper(host);
@@ -699,6 +702,8 @@ HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, SyncSelectMenuPaintRectToExtension
     ASSERT_NE(host, nullptr);
     host->CreateToolBar();
     ASSERT_NE(host->selectMenu_, nullptr);
+    host->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(host->backButton_, nullptr);
 
     auto parentWrapper = CreateLayoutWrapper(host);

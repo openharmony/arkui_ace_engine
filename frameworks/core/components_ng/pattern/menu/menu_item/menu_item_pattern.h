@@ -428,6 +428,18 @@ public:
     {
         pasteButton_ = pasteButton;
     }
+    inline RefPtr<FrameNode> GetPasteButton() const
+    {
+        return pasteButton_;
+    }
+    inline void SetIsTextMenuGridMenuItem(bool isTextMenuGridMenuItem)
+    {
+        isTextMenuGridMenuItem_ = isTextMenuGridMenuItem;
+    }
+    inline bool IsTextMenuGridMenuItem() const
+    {
+        return isTextMenuGridMenuItem_;
+    }
     inline void SetOptionFontColor(const Color& color)
     {
         optionFontColor_ = color;
@@ -679,6 +691,7 @@ friend class ServiceCollaborationMenuAceHelper;
     bool blockClick_ = false;
     bool hasOptionWidth_ = false;
     bool isHover_ = false;
+    bool isTextMenuGridMenuItem_ = false;
     bool isOptionPattern_ = false;  // if it is OptionPattern
     bool showDefaultSelectedIcon_ = false;
     bool isSelectOption_ = false;

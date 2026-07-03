@@ -1664,6 +1664,116 @@ HWTEST_F(SelectOverlaySevenTestNg, SelectOverlayNode_UpdateExtensionMenuVisibili
 }
 
 /**
+ * @tc.name: UpdateExtensionMenuVisibility001
+ * @tc.desc: Test UpdateExtensionMenuVisibility shows extension and back button when menu is visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, UpdateExtensionMenuVisibility001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.menuInfo.menuDisable = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->isExtensionMenu_ = true;
+    selectOverlayNode->extensionMenu_ = FrameNode::GetOrCreateFrameNode("ExtensionMenu",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("BackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    selectOverlayNode->extensionMenuStatus_ = FrameNodeStatus::GONE;
+    selectOverlayNode->backButtonStatus_ = FrameNodeStatus::GONE;
+    selectOverlayNode->UpdateExtensionMenuVisibility(infoPtr);
+
+    EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::VISIBLE);
+    EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::VISIBLE);
+}
+
+/**
+ * @tc.name: UpdateExtensionMenuVisibility002
+ * @tc.desc: Test UpdateExtensionMenuVisibility hides extension menu and clears more/back symbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, UpdateExtensionMenuVisibility002, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->isExtensionMenu_ = true;
+    selectOverlayNode->extensionMenu_ = FrameNode::GetOrCreateFrameNode("ExtensionMenu",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("BackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->moreOrBackSymbol_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+    ASSERT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
+    selectOverlayNode->moreOrBackSymbol_->MountToParent(selectOverlayNode->backButton_);
+
+    selectOverlayNode->extensionMenuStatus_ = FrameNodeStatus::VISIBLE;
+    selectOverlayNode->backButtonStatus_ = FrameNodeStatus::VISIBLE;
+    selectOverlayNode->UpdateExtensionMenuVisibility(infoPtr);
+
+    EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::GONE);
+    EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::GONE);
+    EXPECT_EQ(selectOverlayNode->moreOrBackSymbol_, nullptr);
+}
+
+/**
+ * @tc.name: MenuOnlyStatusChange001
+ * @tc.desc: Test MenuOnlyStatusChange hides menu immediately when menu is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, MenuOnlyStatusChange001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr, SelectOverlayMode::MENU_ONLY);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->MenuOnlyStatusChange(infoPtr, true);
+    auto layoutProperty = selectOverlayNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(selectOverlayNode->menuOnlyStatus_, FrameNodeStatus::GONE);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: MenuOnlyStatusChange002
+ * @tc.desc: Test MenuOnlyStatusChange shows menu when menu is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, MenuOnlyStatusChange002, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = false;
+    selectInfo.menuInfo.menuIsShow = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr, SelectOverlayMode::MENU_ONLY);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->menuOnlyStatus_ = FrameNodeStatus::GONE;
+
+    selectOverlayNode->MenuOnlyStatusChange(infoPtr, false);
+    auto layoutProperty = selectOverlayNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(selectOverlayNode->menuOnlyStatus_, FrameNodeStatus::VISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::GONE), VisibleType::VISIBLE);
+}
+
+/**
  * @tc.name: SelectOverlayNode_CreateSelectOverlayNodeWithThemeScopeId001
  * @tc.desc: Test CreateSelectOverlayNode sets themeScopeId from caller
  * @tc.type: FUNC

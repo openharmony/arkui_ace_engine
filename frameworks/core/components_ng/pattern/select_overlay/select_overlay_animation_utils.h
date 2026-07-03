@@ -40,6 +40,11 @@ inline bool UseNewAnimation(const RefPtr<FrameNode>& frameNode = nullptr)
     return UseNewMaterial(frameNode) && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH;
 }
 
+inline bool UseSmoothMaterial(const RefPtr<FrameNode>& frameNode = nullptr)
+{
+    return UseNewMaterial(frameNode) && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH;
+}
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_OVERLAY_SELECT_OVERLAY_ANIMATION_UTILS_H

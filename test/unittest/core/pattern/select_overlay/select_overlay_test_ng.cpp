@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <iostream>
 #include <vector>
 #include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
 #define private public
 #define protected public
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -43,6 +45,8 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -77,6 +81,157 @@ constexpr float RK356_HEIGHT = 1136.0f;
 const OffsetF OFFSET_ITEM1 = OffsetF(5, 5);
 const Rect WINDOW_RECT(0, 0, 280, 1280);
 constexpr int32_t TEST_THEME_SCOPE_ID = 0;
+const std::string NODE_TEST_SELECT_TEXT = "Test selected text";
+
+SelectOverlayInfo CreateDefaultNodeTestInfo()
+{
+    SelectOverlayInfo info;
+    info.firstHandle.paintRect = FIRST_HANDLE_REGION;
+    info.firstHandle.isShow = true;
+    info.firstHandle.isTouchable = true;
+    info.secondHandle.paintRect = SECOND_HANDLE_REGION;
+    info.secondHandle.isShow = true;
+    info.secondHandle.isTouchable = true;
+    info.isSingleHandle = false;
+    info.menuInfo.menuIsShow = true;
+    info.selectText = NODE_TEST_SELECT_TEXT;
+    return info;
+}
+
+RefPtr<SelectOverlayNode> CreateSelectOverlayNodeForNodeTest(SelectOverlayMode mode = SelectOverlayMode::ALL)
+{
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    return AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info, mode));
+}
+
+RefPtr<MockThemeManager> PrepareThemeManagerForNodeTest(const RefPtr<TextOverlayTheme>& textOverlayTheme,
+    const RefPtr<SelectTheme>& selectTheme = AceType::MakeRefPtr<SelectTheme>(),
+    const RefPtr<IconTheme>& iconTheme = AceType::MakeRefPtr<IconTheme>())
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        if (type == IconTheme::TypeId()) {
+            return iconTheme;
+        }
+        return textOverlayTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
+    return themeManager;
+}
+
+RefPtr<FrameNode> CreateCallerFrameNodeForNodeTest(
+    int32_t apiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), int32_t themeScopeId = 100)
+{
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    CHECK_NULL_RETURN(caller, nullptr);
+    caller->apiVersion_ = apiVersion;
+    caller->themeScopeId_ = themeScopeId;
+    return caller;
+}
+
+void InvokeUserClick(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto gestureEventHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    GestureEvent gestureEvent;
+    if (gestureEventHub->clickEventActuator_ && gestureEventHub->clickEventActuator_->userCallback_) {
+        auto clickCallback = gestureEventHub->clickEventActuator_->userCallback_->callback_;
+        clickCallback(gestureEvent);
+        return;
+    }
+    if (gestureEventHub->userParallelClickEventActuator_ &&
+        gestureEventHub->userParallelClickEventActuator_->userCallback_) {
+        auto clickCallback = gestureEventHub->userParallelClickEventActuator_->userCallback_->callback_;
+        clickCallback(gestureEvent);
+    }
+}
+
+RefPtr<FrameNode> FindFirstFrameNodeByTag(const RefPtr<UINode>& node, const std::string& tag)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode && frameNode->GetTag() == tag) {
+        return frameNode;
+    }
+    CHECK_NULL_RETURN(node, nullptr);
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindFirstFrameNodeByTag(child, tag);
+        if (result) {
+            return result;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> FindFirstMenuItemWithPasteButton(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode && frameNode->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+        if (menuItemPattern && menuItemPattern->GetPasteButton()) {
+            return frameNode;
+        }
+    }
+    CHECK_NULL_RETURN(node, nullptr);
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindFirstMenuItemWithPasteButton(child);
+        if (result) {
+            return result;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> CreateExtensionMenuForAnimationTest(const SizeF& extensionMenuSize,
+    const RectF& selectMenuPaintRect, size_t menuItemCount)
+{
+    auto extensionMenu = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(0, "SelectOverlayExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU));
+    CHECK_NULL_RETURN(extensionMenu, nullptr);
+    auto extensionMenuPattern = extensionMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(extensionMenuPattern, nullptr);
+    extensionMenuPattern->SetSelectMenuPaintRect(selectMenuPaintRect);
+
+    auto scrollNode = FrameNode::CreateFrameNode("ScrollNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto innerMenuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(0, "SelectOverlayInnerMenu", MenuType::MENU));
+    CHECK_NULL_RETURN(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(innerMenuPattern, nullptr);
+    for (size_t index = 0; index < menuItemCount; ++index) {
+        auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        CHECK_NULL_RETURN(menuItemNode, nullptr);
+        innerMenuPattern->AddMenuItemNode(menuItemNode);
+        menuItemNode->MountToParent(innerMenuNode);
+    }
+    innerMenuNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(extensionMenu);
+
+    auto extensionRenderContext = extensionMenu->GetRenderContext();
+    auto scrollRenderContext = scrollNode->GetRenderContext();
+    auto innerMenuRenderContext = innerMenuNode->GetRenderContext();
+    CHECK_NULL_RETURN(extensionRenderContext && scrollRenderContext && innerMenuRenderContext, nullptr);
+    extensionRenderContext->UpdatePaintRect(RectF(OffsetF(), extensionMenuSize));
+    scrollRenderContext->UpdatePaintRect(RectF(OffsetF(), extensionMenuSize));
+    innerMenuRenderContext->UpdatePaintRect(RectF(OffsetF(), extensionMenuSize));
+    return extensionMenu;
+}
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -1072,7 +1227,8 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility001, TestSize.Level1)
     selectInfo.menuOptionItems = menuOptionItems;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [](ThemeType type) -> RefPtr<Theme> { return SelectOverlayTestNg::GetMockThemeForTest(type); });
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -1081,8 +1237,6 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility001, TestSize.Level1)
      * @tc.steps: step2. Create default menu and extension menu .
      */
     selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
@@ -1119,7 +1273,8 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity001, TestSize.Level1)
     selectInfo.menuOptionItems = menuOptionItems;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [](ThemeType type) -> RefPtr<Theme> { return SelectOverlayTestNg::GetMockThemeForTest(type); });
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -1128,8 +1283,6 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity001, TestSize.Level1)
      * @tc.steps: step2. Create default menu and extension menu .
      */
     selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
@@ -1293,15 +1446,29 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw001, TestSize.Level1)
     selectInfo.menuOptionItems = menuOptionItems;
     selectInfo.singleLineHeight = NODE_ID;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
@@ -5219,7 +5386,7 @@ HWTEST_F(SelectOverlayTestNg, CreatExtensionMenu001, TestSize.Level1)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     std::vector<OptionParam> params;
-    selectOverlayNode->CreatExtensionMenu(std::move(params), nullptr);
+    selectOverlayNode->CreatExtensionMenu(std::move(params), nullptr, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
 }
 
@@ -6328,7 +6495,8 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams001, TestSize.Leve
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function correctly adds menu items and triggers GetSystemIconPath.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector contains the correct number of items.
@@ -6346,6 +6514,7 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams001, TestSize.Leve
     EXPECT_EQ(params[5].icon, iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG));
     EXPECT_EQ(params[6].icon, iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG));
     EXPECT_EQ(params[7].icon, iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG));
+    EXPECT_TRUE(params[7].isAIWriteOption);
 }
 
 /**
@@ -6391,15 +6560,27 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams002, TestSize.Leve
     ASSERT_NE(iconTheme, nullptr);
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(iconTheme));
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
 
     /**
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function does not add any items to params.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector is empty.
@@ -6443,15 +6624,27 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams003, TestSize.Leve
     ASSERT_NE(iconTheme, nullptr);
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(iconTheme));
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
 
     /**
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function correctly adds the OH_DEFAULT_PASTE menu item.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector contains one item.
@@ -6461,7 +6654,7 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams003, TestSize.Leve
     /**
      * @tc.expected: The OH_DEFAULT_PASTE menu item has the correct properties.
      */
-    EXPECT_EQ(params[0].value, "Paste");
+    EXPECT_EQ(params[0].value, "");
     EXPECT_EQ(params[0].icon, " "); // OH_DEFAULT_PASTE 的 icon 应为空
     EXPECT_TRUE(params[0].isPasteOption);
 }
@@ -6508,7 +6701,8 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams005, TestSize.Leve
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function correctly adds the menu item with symbol callback.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector contains one item.
@@ -6564,7 +6758,8 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams006, TestSize.Leve
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function correctly adds the menu item with symbol callback.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector contains one item.
@@ -6620,7 +6815,8 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams007, TestSize.Leve
      * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
      * @tc.expected: The function correctly adds the menu item with symbol callback.
      */
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params, paramIds);
 
     /**
      * @tc.expected: The params vector contains one item.
@@ -6631,6 +6827,167 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams007, TestSize.Leve
      * @tc.expected: The symbol callback is correctly set.
      */
     EXPECT_EQ(params[0].symbol, nullptr);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams008
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams keeps toolbar system items in extension menu when font scale is large.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams008, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    pipeline->SetFontScale(1.85f);
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_COPY, .content = "copy" });
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = "custom_item", .content = "custom item" });
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    node->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 1, params, paramIds);
+
+    ASSERT_EQ(params.size(), 2);
+    ASSERT_EQ(paramIds.size(), 2);
+    EXPECT_EQ(paramIds[0], OH_DEFAULT_COPY);
+    EXPECT_EQ(paramIds[1], "custom_item");
+    EXPECT_NE(params[0].symbol, nullptr);
+    EXPECT_FALSE(params[0].isTextMenuGridMenuItem);
+
+    pipeline->SetFontScale(backupFontScale);
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams009
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams skips toolbar system items in smooth material scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams009, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_COPY, .content = "copy" });
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = "custom_item", .content = "custom item" });
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    node->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 1, params, paramIds);
+
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(paramIds.size(), 1);
+    EXPECT_EQ(paramIds[0], "custom_item");
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams010
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams keeps auto fill system callback directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams010, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    int32_t onMenuItemClickCount = 0;
+    int32_t onAutoFillCount = 0;
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuCallback.onAutoFill = [&onAutoFillCount]() { onAutoFillCount++; };
+    info->onCreateCallback.onMenuItemClick = [&onMenuItemClickCount](const NG::MenuItemParam&) {
+        onMenuItemClickCount++;
+        return false;
+    };
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_AUTO_FILL, .content = "auto_fill" });
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    node->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 0, params, paramIds);
+
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(paramIds.size(), 1);
+    ASSERT_TRUE(static_cast<bool>(params[0].action));
+    params[0].action();
+    EXPECT_EQ(onAutoFillCount, 1);
+    EXPECT_EQ(onMenuItemClickCount, 0);
 }
 
 /**
@@ -6775,5 +7132,1495 @@ HWTEST_F(SelectOverlayTestNg, PasteButtonTest, TestSize.Level1)
     auto selectMenuInner = selectOverlayNode->selectMenuInner_;
     ASSERT_NE(selectMenuInner, nullptr);
     EXPECT_EQ(selectMenuInner->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_ConvertToIntMenuId002
+ * @tc.desc: Test ConvertToIntMenuId with built-in menu ids.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_ConvertToIntMenuId002, TestSize.Level1)
+{
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_CUT), static_cast<int32_t>(NativeMenuId::ID_CUT));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_COPY), static_cast<int32_t>(NativeMenuId::ID_COPY));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_PASTE), static_cast<int32_t>(NativeMenuId::ID_PASTE));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_SELECT_ALL),
+        static_cast<int32_t>(NativeMenuId::ID_SELECT_ALL));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_TRANSLATE),
+        static_cast<int32_t>(NativeMenuId::ID_TRANSLATE));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_SEARCH),
+        static_cast<int32_t>(NativeMenuId::ID_SEARCH));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_SHARE), static_cast<int32_t>(NativeMenuId::ID_SHARE));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_CAMERA_INPUT),
+        static_cast<int32_t>(NativeMenuId::ID_CAMERA_INPUT));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_AI_WRITE),
+        static_cast<int32_t>(NativeMenuId::ID_AI_WRITE));
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId(OH_DEFAULT_ASK_CELIA),
+        static_cast<int32_t>(NativeMenuId::ID_ASK_CELIA));
+}
+
+/**
+ * @tc.name: SelectOverlayNode_ConvertToIntMenuId003
+ * @tc.desc: Test ConvertToIntMenuId with numeric and invalid strings.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_ConvertToIntMenuId003, TestSize.Level1)
+{
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId("2048"), 2048);
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId("-12"), -12);
+    EXPECT_EQ(SelectOverlayNode::ConvertToIntMenuId("invalid_menu_id"), -1);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_ConvertToStrMenuId002
+ * @tc.desc: Test ConvertToStrMenuId with built-in menu ids.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_ConvertToStrMenuId002, TestSize.Level1)
+{
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_CUT)), OH_DEFAULT_CUT);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_COPY)), OH_DEFAULT_COPY);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_PASTE)), OH_DEFAULT_PASTE);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_SELECT_ALL)),
+        OH_DEFAULT_SELECT_ALL);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_TRANSLATE)),
+        OH_DEFAULT_TRANSLATE);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_SEARCH)),
+        OH_DEFAULT_SEARCH);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_SHARE)), OH_DEFAULT_SHARE);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_CAMERA_INPUT)),
+        OH_DEFAULT_CAMERA_INPUT);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_AI_WRITE)),
+        OH_DEFAULT_AI_WRITE);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(static_cast<int32_t>(NativeMenuId::ID_ASK_CELIA)),
+        OH_DEFAULT_ASK_CELIA);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_ConvertToStrMenuId003
+ * @tc.desc: Test ConvertToStrMenuId with out-of-range values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_ConvertToStrMenuId003, TestSize.Level1)
+{
+    auto minMenuId = static_cast<int32_t>(NativeMenuId::ID_CUT);
+    auto maxMenuId = static_cast<int32_t>(NativeMenuId::ID_PASSWORD_VAULT);
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(minMenuId - 1), std::to_string(minMenuId - 1));
+    EXPECT_EQ(SelectOverlayNode::ConvertToStrMenuId(maxMenuId + 1), std::to_string(maxMenuId + 1));
+}
+
+/**
+ * @tc.name: SelectOverlayNode_IsShowOnTargetAPIVersion001
+ * @tc.desc: Test IsShowOnTargetAPIVersion across API boundaries.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_IsShowOnTargetAPIVersion001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_TRUE(node->IsShowOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    EXPECT_FALSE(node->IsShowOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    EXPECT_FALSE(node->IsShowOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    EXPECT_FALSE(node->IsShowOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(backupContainerApiVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_IsShowTranslateOnTargetAPIVersion001
+ * @tc.desc: Test IsShowTranslateOnTargetAPIVersion across API boundaries.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_IsShowTranslateOnTargetAPIVersion001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_TRUE(node->IsShowTranslateOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    EXPECT_FALSE(node->IsShowTranslateOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    EXPECT_FALSE(node->IsShowTranslateOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
+    EXPECT_FALSE(node->IsShowTranslateOnTargetAPIVersion());
+
+    container->SetApiTargetVersion(backupContainerApiVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetMenuUiMaterial001
+ * @tc.desc: Test GetMenuUiMaterial creates immersive material and updates color mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetMenuUiMaterial001, TestSize.Level1)
+{
+    auto& darkMaterial = SelectOverlayNode::GetMenuUiMaterial(ColorMode::DARK);
+    ASSERT_NE(darkMaterial, nullptr);
+    EXPECT_EQ(darkMaterial->GetType(), static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ASSERT_NE(darkMaterial->GetImmersiveOptions(), nullptr);
+    EXPECT_EQ(darkMaterial->GetImmersiveOptions()->colorMode, ColorMode::DARK);
+
+    auto& lightMaterial = SelectOverlayNode::GetMenuUiMaterial(ColorMode::LIGHT);
+    ASSERT_NE(lightMaterial, nullptr);
+    ASSERT_NE(lightMaterial->GetImmersiveOptions(), nullptr);
+    EXPECT_EQ(lightMaterial->GetImmersiveOptions()->colorMode, ColorMode::LIGHT);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateNewMaterialProperties001
+ * @tc.desc: Test UpdateNewMaterialProperties applies immersive system material in exquisite mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_UpdateNewMaterialProperties001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    auto target = FrameNode::GetOrCreateFrameNode(
+        TEST_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+    target->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    node->UpdateNewMaterialProperties(target, ColorMode::DARK);
+    auto renderContext = target->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto systemMaterial = renderContext->GetSystemMaterial();
+    ASSERT_NE(systemMaterial, nullptr);
+    ASSERT_NE(systemMaterial->GetImmersiveOptions(), nullptr);
+    EXPECT_EQ(systemMaterial->GetType(), static_cast<int32_t>(MaterialType::IMMERSIVE));
+    EXPECT_EQ(systemMaterial->GetImmersiveOptions()->colorMode, ColorMode::DARK);
+
+    g_uiMaterialLevel = backupLevel;
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateNewMaterialProperties002
+ * @tc.desc: Test UpdateNewMaterialProperties falls back to low-end background in smooth mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_UpdateNewMaterialProperties002, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->menuBackgroundColorLowEnd_ = Color::FromRGB(12, 34, 56);
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    auto target = FrameNode::GetOrCreateFrameNode(
+        TEST_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+    target->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    node->UpdateNewMaterialProperties(target, ColorMode::LIGHT);
+    auto renderContext = target->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT),
+        textOverlayTheme->GetMenuBackgroundColorLowEnd());
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+
+    g_uiMaterialLevel = backupLevel;
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateNewMaterialProperties003
+ * @tc.desc: Test UpdateNewMaterialProperties is a no-op when new material is disabled by version.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_UpdateNewMaterialProperties003, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    auto target = FrameNode::GetOrCreateFrameNode(
+        TEST_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+    target->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    auto renderContext = target->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::RED);
+
+    node->UpdateNewMaterialProperties(target, ColorMode::DARK);
+    EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::RED);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetDefaultOptionsParams001
+ * @tc.desc: Test GetDefaultOptionsParams returns selected primary default items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetDefaultOptionsParams001, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuCallback.onCut = []() {};
+    info->menuCallback.onPaste = []() {};
+    info->menuCallback.onAutoFill = []() {};
+    info->menuCallback.autoFillSubMenuCallback.onPasswordVault = []() {};
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    for (auto& isShow : node->isShowInDefaultMenu_) {
+        isShow = true;
+    }
+    node->isShowInDefaultMenu_[0] = false;
+    node->isShowInDefaultMenu_[2] = false;
+    node->isShowInDefaultMenu_[11] = false;
+
+    std::vector<std::string> paramIds;
+    auto params = node->GetDefaultOptionsParams(info, paramIds);
+
+    ASSERT_EQ(params.size(), 3);
+    ASSERT_EQ(paramIds.size(), 3);
+    EXPECT_EQ(paramIds[0], OH_DEFAULT_CUT);
+    EXPECT_EQ(paramIds[1], OH_DEFAULT_PASTE);
+    EXPECT_EQ(paramIds[2], OH_DEFAULT_AUTO_FILL);
+    EXPECT_EQ(params[0].icon, iconTheme->GetIconPath(InternalResource::ResourceId::IC_CUT_SVG));
+    EXPECT_TRUE(params[1].isPasteOption);
+    ASSERT_EQ(params[2].subMenuItems.size(), 1);
+    EXPECT_EQ(params[2].subMenuItems[0].value, textOverlayTheme->GetPasswordVaultLabel());
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetDefaultOptionsParams002
+ * @tc.desc: Test GetDefaultOptionsParams returns flexible items and updates flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetDefaultOptionsParams002, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.aiMenuOptionType = TextDataDetectType::PHONE_NUMBER;
+    info->menuCallback.onCameraInput = []() {};
+    info->menuCallback.onAIWrite = []() {};
+    info->menuCallback.onAIMenuOption = [](const std::string&) {};
+    info->menuCallback.onAskCelia = []() {};
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    for (auto& isShow : node->isShowInDefaultMenu_) {
+        isShow = true;
+    }
+    node->isShowInDefaultMenu_[7] = false;
+    node->isShowInDefaultMenu_[8] = false;
+    node->isShowInDefaultMenu_[9] = false;
+    node->isShowInDefaultMenu_[10] = false;
+
+    std::vector<std::string> paramIds;
+    auto params = node->GetDefaultOptionsParams(info, paramIds);
+
+    ASSERT_EQ(params.size(), 4);
+    ASSERT_EQ(paramIds.size(), 4);
+    EXPECT_EQ(paramIds[0], OH_DEFAULT_CAMERA_INPUT);
+    EXPECT_EQ(paramIds[1], OH_DEFAULT_AI_WRITE);
+    EXPECT_EQ(paramIds[2], OH_DEFAULT_AI_MENU_PHONE);
+    EXPECT_EQ(paramIds[3], OH_DEFAULT_ASK_CELIA);
+    EXPECT_TRUE(params[1].isAIWriteOption);
+    EXPECT_TRUE(params[2].isAIMenuOption);
+    EXPECT_TRUE(params[3].isAskCeliaOption);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetDefaultOptionsParams003
+ * @tc.desc: Test GetDefaultOptionsParams returns empty when all default items are already shown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetDefaultOptionsParams003, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    for (auto& isShow : node->isShowInDefaultMenu_) {
+        isShow = true;
+    }
+
+    std::vector<std::string> paramIds;
+    auto params = node->GetDefaultOptionsParams(info, paramIds);
+    EXPECT_TRUE(params.empty());
+    EXPECT_TRUE(paramIds.empty());
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetDefaultOptionsParams004
+ * @tc.desc: Test GetDefaultOptionsParams uses empty icon path when IconTheme is unavailable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetDefaultOptionsParams004, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), nullptr);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuCallback.onCopy = []() {};
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    for (auto& isShow : node->isShowInDefaultMenu_) {
+        isShow = true;
+    }
+    node->isShowInDefaultMenu_[1] = false;
+
+    std::vector<std::string> paramIds;
+    auto params = node->GetDefaultOptionsParams(info, paramIds);
+    ASSERT_EQ(params.size(), 1);
+    EXPECT_EQ(paramIds[0], OH_DEFAULT_COPY);
+    EXPECT_EQ(params[0].icon, "");
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetSymbolFunc001
+ * @tc.desc: Test GetSymbolFunc applies AI gradient symbol and normal symbol correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetSymbolFunc001, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->aiMenuSymbolId_ = 1001;
+    textOverlayTheme->copySymbolId_ = 1002;
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+
+    auto aiSymbolFunc = node->GetSymbolFunc(OH_DEFAULT_AI_MENU_PHONE);
+    ASSERT_NE(aiSymbolFunc, nullptr);
+    auto aiSymbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(aiSymbolNode, nullptr);
+    aiSymbolFunc(WeakPtr<FrameNode>(aiSymbolNode));
+    auto aiLayoutProperty = aiSymbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(aiLayoutProperty, nullptr);
+    EXPECT_EQ(aiLayoutProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()), SymbolSourceInfo(1001));
+    EXPECT_TRUE(aiLayoutProperty->HasFontForegroudGradiantColor());
+
+    auto copySymbolFunc = node->GetSymbolFunc(OH_DEFAULT_COPY);
+    ASSERT_NE(copySymbolFunc, nullptr);
+    auto copySymbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(copySymbolNode, nullptr);
+    copySymbolFunc(WeakPtr<FrameNode>(copySymbolNode));
+    auto copyLayoutProperty = copySymbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(copyLayoutProperty, nullptr);
+    EXPECT_EQ(copyLayoutProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()), SymbolSourceInfo(1002));
+    EXPECT_FALSE(copyLayoutProperty->HasFontForegroudGradiantColor());
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetSymbolFunc002
+ * @tc.desc: Test GetSymbolFunc returns nullptr for unknown symbol id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetSymbolFunc002, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetSymbolFunc("unknown_symbol"), nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetSymbolFunc003
+ * @tc.desc: Test GetSymbolFunc keeps AIWrite symbol without gradient color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetSymbolFunc003, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->aiWriteSymbolId_ = 1003;
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+
+    auto aiWriteSymbolFunc = node->GetSymbolFunc(OH_DEFAULT_AI_WRITE);
+    ASSERT_NE(aiWriteSymbolFunc, nullptr);
+    auto aiWriteSymbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(aiWriteSymbolNode, nullptr);
+    aiWriteSymbolFunc(WeakPtr<FrameNode>(aiWriteSymbolNode));
+    auto aiWriteLayoutProperty = aiWriteSymbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(aiWriteLayoutProperty, nullptr);
+    EXPECT_EQ(aiWriteLayoutProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()), SymbolSourceInfo(1003));
+    EXPECT_FALSE(aiWriteLayoutProperty->HasFontForegroudGradiantColor());
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetSymbolFunc004
+ * @tc.desc: Test GetSymbolFunc applies gradient color for AskCelia symbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_GetSymbolFunc004, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    textOverlayTheme->askCeliaSymbolId_ = 1004;
+    PrepareThemeManagerForNodeTest(textOverlayTheme);
+
+    auto node = CreateSelectOverlayNodeForNodeTest();
+    ASSERT_NE(node, nullptr);
+
+    auto askCeliaSymbolFunc = node->GetSymbolFunc(OH_DEFAULT_ASK_CELIA);
+    ASSERT_NE(askCeliaSymbolFunc, nullptr);
+    auto askCeliaSymbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(askCeliaSymbolNode, nullptr);
+    askCeliaSymbolFunc(WeakPtr<FrameNode>(askCeliaSymbolNode));
+    auto askCeliaLayoutProperty = askCeliaSymbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(askCeliaLayoutProperty, nullptr);
+    EXPECT_EQ(askCeliaLayoutProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()), SymbolSourceInfo(1004));
+    EXPECT_TRUE(askCeliaLayoutProperty->HasFontForegroudGradiantColor());
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback006
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback enables extension grid menu in new animation scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback006, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCut = true;
+    info->menuInfo.showCopyAll = true;
+    info->menuCallback.onCopy = []() {};
+    info->menuCallback.onPaste = []() {};
+    info->menuCallback.onCut = []() {};
+    info->menuCallback.onSelectAll = []() {};
+    info->onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam&) { return false; };
+    info->onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>&) {
+        std::vector<MenuOptionsParam> items;
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_COPY, .content = "copy" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_PASTE, .content = "paste" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_CUT, .content = "cut" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_SELECT_ALL, .content = "select all" });
+        items.emplace_back(MenuOptionsParam { .id = "custom_item", .content = "custom item" });
+        return items;
+    };
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenuInner_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+
+    node->AddMenuItemByCreateMenuCallback(info, 1.0f);
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto outerMenuPattern = node->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_TRUE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_TRUE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(node->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    auto menuItems = innerMenuPattern->GetMenuItems();
+    ASSERT_GE(menuItems.size(), 3);
+    EXPECT_TRUE(menuItems[0]->GetPattern<MenuItemPattern>()->IsTextMenuGridMenuItem());
+    EXPECT_TRUE(menuItems[1]->GetPattern<MenuItemPattern>()->IsTextMenuGridMenuItem());
+    EXPECT_TRUE(menuItems[2]->GetPattern<MenuItemPattern>()->IsTextMenuGridMenuItem());
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback007
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback disables extension grid menu in smooth material scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback007, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCut = true;
+    info->menuInfo.showCopyAll = true;
+    info->menuCallback.onCopy = []() {};
+    info->menuCallback.onPaste = []() {};
+    info->menuCallback.onCut = []() {};
+    info->menuCallback.onSelectAll = []() {};
+    info->onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam&) { return false; };
+    info->onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>&) {
+        std::vector<MenuOptionsParam> items;
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_COPY, .content = "copy" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_PASTE, .content = "paste" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_CUT, .content = "cut" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_SELECT_ALL, .content = "select all" });
+        items.emplace_back(MenuOptionsParam { .id = "custom_item", .content = "custom item" });
+        return items;
+    };
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenuInner_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+
+    node->AddMenuItemByCreateMenuCallback(info, 1.0f);
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto outerMenuPattern = node->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_FALSE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_FALSE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_AddExtensionMenuOptionsLargeFont001
+ * @tc.desc: Test AddExtensionMenuOptions keeps toolbar system items but disables grid style when font scale is large.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNode_AddExtensionMenuOptionsLargeFont001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    pipeline->SetFontScale(1.85f);
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme, iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCut = true;
+    info->menuInfo.showCopyAll = true;
+    info->menuCallback.onCopy = []() {};
+    info->menuCallback.onPaste = []() {};
+    info->menuCallback.onCut = []() {};
+    info->menuCallback.onSelectAll = []() {};
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    node->CreateToolBar();
+    node->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(node->backButton_, nullptr);
+    for (auto& isShow : node->isShowInDefaultMenu_) {
+        isShow = true;
+    }
+
+    node->AddExtensionMenuOptions(info, 0);
+
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto outerMenuPattern = node->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_FALSE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_TRUE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(node->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    auto menuItems = innerMenuPattern->GetMenuItems();
+    ASSERT_EQ(menuItems.size(), 4);
+    for (const auto& menuItem : menuItems) {
+        auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+        ASSERT_NE(menuItemPattern, nullptr);
+        EXPECT_FALSE(menuItemPattern->IsTextMenuGridMenuItem());
+    }
+
+    pipeline->SetFontScale(backupFontScale);
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: AddMenuItemByCreateMenuCallback008
+ * @tc.desc: Test AddMenuItemByCreateMenuCallback disables grid style but keeps new animation enabled when font scale is large.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddMenuItemByCreateMenuCallback008, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    pipeline->SetFontScale(1.85f);
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, AceType::MakeRefPtr<SelectTheme>(), iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCopy = true;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCut = true;
+    info->menuInfo.showCopyAll = true;
+    info->menuCallback.onCopy = []() {};
+    info->menuCallback.onPaste = []() {};
+    info->menuCallback.onCut = []() {};
+    info->menuCallback.onSelectAll = []() {};
+    info->onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam&) { return false; };
+    info->onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>&) {
+        std::vector<MenuOptionsParam> items;
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_COPY, .content = "copy" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_PASTE, .content = "paste" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_CUT, .content = "cut" });
+        items.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_SELECT_ALL, .content = "select all" });
+        items.emplace_back(MenuOptionsParam { .id = "custom_item", .content = "custom item" });
+        return items;
+    };
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenuInner_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+
+    node->AddMenuItemByCreateMenuCallback(info, 1.0f);
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto outerMenuPattern = node->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_FALSE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_TRUE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(node->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    auto menuItems = innerMenuPattern->GetMenuItems();
+    ASSERT_GE(menuItems.size(), 5);
+    for (size_t index = 0; index < 4; ++index) {
+        auto menuItemPattern = menuItems[index]->GetPattern<MenuItemPattern>();
+        ASSERT_NE(menuItemPattern, nullptr);
+        EXPECT_FALSE(menuItemPattern->IsTextMenuGridMenuItem());
+    }
+
+    pipeline->SetFontScale(backupFontScale);
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: CreatExtensionMenu002
+ * @tc.desc: Test CreatExtensionMenu keeps grid style disabled when font scale is large.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CreatExtensionMenu002, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    pipeline->SetFontScale(1.85f);
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    textOverlayTheme->copySymbolId_ = 1001;
+    textOverlayTheme->pasteSymbolId_ = 1002;
+    textOverlayTheme->cutSymbolId_ = 1003;
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(node->backButton_, nullptr);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    params.emplace_back("paste", "", []() {});
+    params.emplace_back("cut", "", []() {});
+    params[0].symbol = node->GetSymbolFunc(OH_DEFAULT_COPY);
+    params[1].symbol = node->GetSymbolFunc(OH_DEFAULT_PASTE);
+    params[2].symbol = node->GetSymbolFunc(OH_DEFAULT_CUT);
+    params[0].isTextMenuGridMenuItem = true;
+    params[1].isTextMenuGridMenuItem = true;
+    params[2].isTextMenuGridMenuItem = true;
+    params[1].isPasteOption = true;
+
+    node->CreatExtensionMenu(std::move(params), caller, 3);
+
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto outerMenuPattern = node->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_FALSE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_TRUE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(node->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    EXPECT_FALSE(innerMenuPattern->gridMenuPasteItemBuilder_.has_value());
+
+    pipeline->SetFontScale(backupFontScale);
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeBuildGridMenuPasteItem001
+ * @tc.desc: Test text menu grid paste builder updates theme scope id and placeholder state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNodeBuildGridMenuPasteItem001, TestSize.Level1)
+{
+#ifndef OHOS_PLATFORM
+    GTEST_SKIP() << "OHOS platform only";
+#endif
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = container->GetApiTargetVersion();
+    auto backupApplicationApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    textOverlayTheme->copySymbolId_ = 1001;
+    textOverlayTheme->pasteSymbolId_ = 1002;
+    textOverlayTheme->cutSymbolId_ = 1003;
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme, iconTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto caller = CreateCallerFrameNodeForNodeTest(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), 321);
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(node->backButton_, nullptr);
+
+    std::vector<OptionParam> params;
+    params.emplace_back(textOverlayTheme->GetCopyLabel(), "", []() {});
+    params.emplace_back(textOverlayTheme->GetPasteLabel(), "", []() {});
+    params.emplace_back(textOverlayTheme->GetCutLabel(), "", []() {});
+    params[0].symbol = node->GetSymbolFunc(OH_DEFAULT_COPY);
+    params[1].symbol = node->GetSymbolFunc(OH_DEFAULT_PASTE);
+    params[2].symbol = node->GetSymbolFunc(OH_DEFAULT_CUT);
+    params[0].isTextMenuGridMenuItem = true;
+    params[1].isTextMenuGridMenuItem = true;
+    params[2].isTextMenuGridMenuItem = true;
+    params[1].isPasteOption = true;
+    params[1].enabled = false;
+
+    node->CreatExtensionMenu(std::move(params), caller, 3);
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(node->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    ASSERT_EQ(innerMenuPattern->GetMenuItems().size(), 3);
+    auto pasteMenuItemPattern = innerMenuPattern->GetMenuItems()[1]->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pasteMenuItemPattern, nullptr);
+#ifdef OHOS_PLATFORM
+    EXPECT_NE(pasteMenuItemPattern->GetPasteButton(), nullptr);
+#endif
+
+    OptionParam gridPasteParam;
+    gridPasteParam.value = textOverlayTheme->GetPasteLabel();
+    gridPasteParam.isPasteOption = true;
+    gridPasteParam.isTextMenuGridMenuItem = true;
+    gridPasteParam.enabled = false;
+    auto defaultGridItem = MenuView::CreateGridItem(gridPasteParam, 0);
+    ASSERT_NE(defaultGridItem, nullptr);
+    defaultGridItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    auto builtPasteItem = innerMenuPattern->BuildGridMenuPasteItem(
+        gridPasteParam, defaultGridItem, caller->GetThemeScopeId());
+    ASSERT_NE(builtPasteItem, nullptr);
+    EXPECT_EQ(builtPasteItem->GetTag(), V2::RELATIVE_CONTAINER_ETS_TAG);
+    EXPECT_EQ(builtPasteItem->GetThemeScopeId(), caller->GetThemeScopeId());
+    EXPECT_EQ(defaultGridItem->GetInspectorId().value_or(""), "__gridPasteDisplayColumn__");
+    ASSERT_NE(defaultGridItem->GetRenderContext(), nullptr);
+    EXPECT_EQ(static_cast<float>(defaultGridItem->GetRenderContext()->GetOpacityValue(1.0)), 0.0f);
+
+    auto overlayColumn = AceType::DynamicCast<FrameNode>(builtPasteItem->GetChildAtIndex(1));
+    ASSERT_NE(overlayColumn, nullptr);
+    EXPECT_EQ(overlayColumn->GetThemeScopeId(), caller->GetThemeScopeId());
+    auto pasteNode = AceType::DynamicCast<FrameNode>(overlayColumn->GetChildAtIndex(0));
+    ASSERT_NE(pasteNode, nullptr);
+    EXPECT_EQ(pasteNode->GetThemeScopeId(), caller->GetThemeScopeId());
+    auto pasteEventHub = pasteNode->GetEventHub<EventHub>();
+    ASSERT_NE(pasteEventHub, nullptr);
+    EXPECT_FALSE(pasteEventHub->IsEnabled());
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApplicationApiVersion);
+    container->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: ContinuePlayExtensionMenuDistortAnimation001
+ * @tc.desc: Test ContinuePlayExtensionMenuDistortAnimation updates transform center for different placements.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, ContinuePlayExtensionMenuDistortAnimation001, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+
+    auto selectMenuPaintRect = RectF(OffsetF(20.0f, 100.0f), SizeF(140.0f, 60.0f));
+    auto extensionMenu = CreateExtensionMenuForAnimationTest(SizeF(120.0f, 80.0f), selectMenuPaintRect, 2);
+    ASSERT_NE(extensionMenu, nullptr);
+    auto renderContext = extensionMenu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RectF selectMenuTargetRect(OffsetF(10.0f, 40.0f), SizeF(160.0f, 50.0f));
+
+    node->ContinuePlayExtensionMenuDistortAnimation(
+        extensionMenu, OffsetF(10.0f, 20.0f), Placement::TOP, selectMenuTargetRect);
+    ASSERT_TRUE(renderContext->GetTransformCenter().has_value());
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetX().Value(), 60.0f);
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetY().Value(), 80.0f);
+
+    node->ContinuePlayExtensionMenuDistortAnimation(
+        extensionMenu, OffsetF(10.0f, 140.0f), Placement::BOTTOM, selectMenuTargetRect);
+    ASSERT_TRUE(renderContext->GetTransformCenter().has_value());
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetX().Value(), 60.0f);
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetY().Value(), 0.0f);
+
+    node->ContinuePlayExtensionMenuDistortAnimation(
+        extensionMenu, OffsetF(10.0f, 80.0f), Placement::NONE, selectMenuTargetRect);
+    ASSERT_TRUE(renderContext->GetTransformCenter().has_value());
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetX().Value(), 0.0f);
+    EXPECT_EQ(renderContext->GetTransformCenter()->GetY().Value(), 0.0f);
+}
+
+/**
+ * @tc.name: PlayExtensionMenuDistortAnimation001
+ * @tc.desc: Test PlayExtensionMenuDistortAnimation handles bottom and overlap placements.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, PlayExtensionMenuDistortAnimation001, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenu_, nullptr);
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+
+    auto selectMenuPaintRect = RectF(OffsetF(30.0f, 100.0f), SizeF(140.0f, 60.0f));
+    node->selectMenu_->GetRenderContext()->UpdatePaintRect(selectMenuPaintRect);
+    node->selectMenuInner_->GetRenderContext()->UpdatePaintRect(selectMenuPaintRect);
+
+    auto extensionMenuBottom = CreateExtensionMenuForAnimationTest(SizeF(120.0f, 40.0f), selectMenuPaintRect, 2);
+    ASSERT_NE(extensionMenuBottom, nullptr);
+    node->extensionMenu_ = extensionMenuBottom;
+    node->PlayExtensionMenuDistortAnimation(extensionMenuBottom, OffsetF(30.0f, 130.0f));
+    EXPECT_NE(extensionMenuBottom->GetRenderContext(), nullptr);
+
+    auto extensionMenuOverlap = CreateExtensionMenuForAnimationTest(SizeF(120.0f, 100.0f), selectMenuPaintRect, 3);
+    ASSERT_NE(extensionMenuOverlap, nullptr);
+    node->extensionMenu_ = extensionMenuOverlap;
+    node->PlayExtensionMenuDistortAnimation(extensionMenuOverlap, OffsetF(30.0f, 80.0f));
+    EXPECT_NE(extensionMenuOverlap->GetRenderContext(), nullptr);
+}
+
+/**
+ * @tc.name: AddCreateMenuItems008
+ * @tc.desc: Test create menu paste button click triggers create menu callback and fallback paste callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems008, TestSize.Level1)
+{
+#ifndef OHOS_PLATFORM
+    GTEST_SKIP() << "OHOS platform only";
+#endif
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        }
+        return selectTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    pipeline->SetFontScale(1.0f);
+
+    int32_t onCreateMenuClickCount = 0;
+    int32_t onPasteCount = 0;
+    int32_t clickStart = -1;
+    int32_t clickEnd = -1;
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuCallback.onPaste = [&onPasteCount]() { onPasteCount++; };
+    info->onCreateCallback.onMenuItemClick = [&onCreateMenuClickCount, &clickStart, &clickEnd](const MenuItemParam& param) {
+        onCreateMenuClickCount++;
+        clickStart = param.start;
+        clickEnd = param.end;
+        return false;
+    };
+    info->onCreateCallback.textRangeCallback = [](int32_t& start, int32_t& end) {
+        start = 3;
+        end = 9;
+    };
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    menuOptionItems.emplace_back(MenuOptionsParam { .id = OH_DEFAULT_PASTE, .content = "paste" });
+    auto index = node->AddCreateMenuItems(menuOptionItems, info, 1000.0f);
+    EXPECT_EQ(index, 0);
+
+    auto pasteButton = AceType::DynamicCast<FrameNode>(node->selectMenuInner_->GetChildAtIndex(0));
+    ASSERT_NE(pasteButton, nullptr);
+    const auto& layoutConstraint = pasteButton->GetLayoutProperty()->GetCalcLayoutConstraint();
+    ASSERT_NE(layoutConstraint, nullptr);
+    ASSERT_TRUE(layoutConstraint->selfIdealSize.has_value());
+    EXPECT_TRUE(layoutConstraint->selfIdealSize->Height().has_value());
+    InvokeUserClick(pasteButton);
+    EXPECT_EQ(onCreateMenuClickCount, 0);
+    EXPECT_EQ(onPasteCount, 0);
+    EXPECT_EQ(clickStart, -1);
+    EXPECT_EQ(clickEnd, -1);
+
+    pipeline->SetFontScale(backupFontScale);
+}
+
+/**
+ * @tc.name: CreateToolBarPasteButton001
+ * @tc.desc: Test toolbar paste button uses adaptive height and disabled style when callback is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CreateToolBarPasteButton001, TestSize.Level1)
+{
+#ifndef OHOS_PLATFORM
+    GTEST_SKIP() << "OHOS platform only";
+#endif
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        }
+        return selectTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupFontScale = pipeline->GetFontScale();
+    pipeline->SetFontScale(1.85f);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCut = false;
+    info->menuInfo.showCopy = false;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCopyAll = false;
+    info->menuInfo.showTranslate = false;
+    info->menuInfo.showSearch = false;
+    info->menuInfo.showShare = false;
+    info->menuInfo.showCameraInput = false;
+    info->menuInfo.showAIWrite = false;
+    info->menuInfo.showAutoFill = false;
+    info->menuInfo.isAskCeliaEnabled = false;
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenuInner_, nullptr);
+    auto pasteButton = AceType::DynamicCast<FrameNode>(node->selectMenuInner_->GetChildAtIndex(0));
+    ASSERT_NE(pasteButton, nullptr);
+    const auto& layoutConstraint = pasteButton->GetLayoutProperty()->GetCalcLayoutConstraint();
+    ASSERT_NE(layoutConstraint, nullptr);
+    ASSERT_TRUE(layoutConstraint->selfIdealSize.has_value());
+    EXPECT_FALSE(layoutConstraint->selfIdealSize->Height().has_value());
+
+    pipeline->SetFontScale(backupFontScale);
+}
+
+/**
+ * @tc.name: CreatExtensionMenuPasteItem001
+ * @tc.desc: Test extension menu paste list item creates relative container and paste callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CreatExtensionMenuPasteItem001, TestSize.Level1)
+{
+#ifndef OHOS_PLATFORM
+    GTEST_SKIP() << "OHOS platform only";
+#endif
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme, iconTheme);
+
+    int32_t onPasteActionCount = 0;
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto caller = CreateCallerFrameNodeForNodeTest();
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(node->backButton_, nullptr);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    params.emplace_back(textOverlayTheme->GetPasteLabel(), "", [&onPasteActionCount]() { onPasteActionCount++; });
+    params[1].isPasteOption = true;
+    params[1].disableSystemClick = true;
+    node->CreatExtensionMenu(std::move(params), caller, 0);
+
+    ASSERT_NE(node->extensionMenu_, nullptr);
+    auto relativeContainer = FindFirstFrameNodeByTag(node->extensionMenu_, V2::RELATIVE_CONTAINER_ETS_TAG);
+    ASSERT_NE(relativeContainer, nullptr);
+    auto pasteMenuItem = FindFirstMenuItemWithPasteButton(node->extensionMenu_);
+    ASSERT_NE(pasteMenuItem, nullptr);
+    auto pastePattern = pasteMenuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pastePattern, nullptr);
+    auto pasteNode = pastePattern->GetPasteButton();
+    ASSERT_NE(pasteNode, nullptr);
+    InvokeUserClick(pasteNode);
+    EXPECT_EQ(onPasteActionCount, 1);
+}
+
+/**
+ * @tc.name: CreateMenuNodePasteItem001
+ * @tc.desc: Test right click paste item uses mouse-mode paste button path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CreateMenuNodePasteItem001, TestSize.Level1)
+{
+#ifndef OHOS_PLATFORM
+    GTEST_SKIP() << "OHOS platform only";
+#endif
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    ASSERT_NE(iconTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme, iconTheme);
+
+    int32_t onPasteCount = 0;
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    info->menuInfo.showCut = false;
+    info->menuInfo.showCopy = false;
+    info->menuInfo.showPaste = true;
+    info->menuInfo.showCopyAll = false;
+    info->menuInfo.showTranslate = false;
+    info->menuInfo.showSearch = false;
+    info->menuInfo.showShare = false;
+    info->menuInfo.showCameraInput = false;
+    info->menuInfo.showAIWrite = false;
+    info->menuInfo.showAutoFill = false;
+    info->menuInfo.isAskCeliaEnabled = false;
+    info->menuCallback.onPaste = [&onPasteCount]() { onPasteCount++; };
+
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    auto menuWrapper = node->CreateMenuNode(info);
+    ASSERT_NE(menuWrapper, nullptr);
+    auto relativeContainer = FindFirstFrameNodeByTag(menuWrapper, V2::RELATIVE_CONTAINER_ETS_TAG);
+    ASSERT_NE(relativeContainer, nullptr);
+    auto pasteMenuItem = FindFirstMenuItemWithPasteButton(menuWrapper);
+    ASSERT_NE(pasteMenuItem, nullptr);
+    auto pastePattern = pasteMenuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pastePattern, nullptr);
+    auto pasteNode = pastePattern->GetPasteButton();
+    ASSERT_NE(pasteNode, nullptr);
+    InvokeUserClick(pasteNode);
+    EXPECT_EQ(onPasteCount, 1);
+}
+
+/**
+ * @tc.name: UpdateMenuColors003
+ * @tc.desc: Test UpdateMenuColors updates more/back symbol color and handles rowless extension item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, UpdateMenuColors003, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto caller = CreateCallerFrameNodeForNodeTest(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), 200);
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    node->selectMenuInner_ = FrameNode::GetOrCreateFrameNode("SelectMenuInner",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    node->moreOrBackSymbol_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(node->moreOrBackSymbol_, nullptr);
+
+    auto extensionMenu = FrameNode::GetOrCreateFrameNode("ExtensionMenu",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto scrollNode = FrameNode::GetOrCreateFrameNode("ScrollNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto innerMenuNode = FrameNode::GetOrCreateFrameNode("InnerMenuNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto menuItem = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    menuItem->MountToParent(innerMenuNode);
+    innerMenuNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(extensionMenu);
+    node->extensionMenu_ = extensionMenu;
+
+    node->UpdateMenuColors();
+    auto layoutProperty = node->moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->GetSymbolColorList().has_value());
+    EXPECT_EQ(layoutProperty->GetSymbolColorList()->front(), textOverlayTheme->GetSymbolColor());
+}
+
+/**
+ * @tc.name: UpdateMenuColors004
+ * @tc.desc: Test UpdateMenuColors updates text and symbol colors for extension menu item row.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, UpdateMenuColors004, TestSize.Level1)
+{
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    ASSERT_NE(selectTheme, nullptr);
+    PrepareThemeManagerForNodeTest(textOverlayTheme, selectTheme);
+
+    auto info = std::make_shared<SelectOverlayInfo>(CreateDefaultNodeTestInfo());
+    auto caller = CreateCallerFrameNodeForNodeTest(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), 201);
+    ASSERT_NE(caller, nullptr);
+    info->callerFrameNode = caller;
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    ASSERT_NE(node, nullptr);
+    node->selectMenuInner_ = FrameNode::GetOrCreateFrameNode("SelectMenuInner",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+
+    auto extensionMenu = FrameNode::GetOrCreateFrameNode("ExtensionMenu",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto scrollNode = FrameNode::GetOrCreateFrameNode("ScrollNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto innerMenuNode = FrameNode::GetOrCreateFrameNode("InnerMenuNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto menuItem = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto row = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    symbolNode->MountToParent(row);
+    textNode->MountToParent(row);
+    row->MountToParent(menuItem);
+    menuItem->MountToParent(innerMenuNode);
+    innerMenuNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(extensionMenu);
+    node->extensionMenu_ = extensionMenu;
+
+    node->UpdateMenuColors();
+
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(textRenderContext->GetForegroundColor().value_or(Color::TRANSPARENT), selectTheme->GetMenuFontColor());
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    ASSERT_TRUE(symbolLayoutProperty->GetSymbolColorList().has_value());
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList()->front(), selectTheme->GetMenuIconColor());
 }
 } // namespace OHOS::Ace::NG

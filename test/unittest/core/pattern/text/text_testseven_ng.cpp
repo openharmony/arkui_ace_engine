@@ -1320,6 +1320,42 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGradientShaderStyle010
+ * @tc.desc: Test ResetGradientShaderStyle removes registered gradient resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
+{
+    SystemProperties::SetConfigChangePerform();
+    ASSERT_TRUE(SystemProperties::ConfigChangePerform());
+
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(GradientColor(Color::BLUE));
+    textModel.SetGradientShaderStyle(gradient);
+
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    const auto& keys = pattern->resourceMgr_->GetResKeyArray();
+    EXPECT_NE(std::find(keys.begin(), keys.end(), "TextGradient.gradient"), keys.end());
+
+    textModel.ResetGradientShaderStyle();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
+    EXPECT_EQ(pattern->resourceMgr_, nullptr);
+}
+
+/**
  * @tc.name: SetExternalDrawCallback001
  * @tc.desc: Test SetExternalDrawCallback with valid frameNode and callback.
  * @tc.type: FUNC
