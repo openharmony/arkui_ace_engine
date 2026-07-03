@@ -19,7 +19,6 @@
 #include "interop_js/arkts_esvalue.h"
 #include "load.h"
 #include "log/log.h"
-#include "picture_taihe.h"
 #include "picture_taihe_ani.h"
 #include "pixel_map_taihe_ani.h"
 #include "resource_manager.h"
@@ -230,16 +229,8 @@ std::shared_ptr<Media::Picture> GetNativePicture(ani_env* env, ani_object pictur
     if (env->Reference_IsUndefined(pictureAni, &isUndefined) != ANI_OK || static_cast<bool>(isUndefined)) {
         return nullptr;
     }
-
-    ani_long implPtr = 0;
-    if (env->Object_CallMethodByName_Long(pictureAni, "getImplPtr", ":l", &implPtr) == ANI_OK && implPtr != 0) {
-        auto* pictureImpl = reinterpret_cast<ANI::Image::PictureImpl*>(implPtr);
-        if (pictureImpl != nullptr) {
-            return pictureImpl->GetNativePtr();
-        }
-    }
-
-    return nullptr;
+    auto picture = Media::PictureTaiheAni::GetNativePicture(env, pictureAni);
+    return picture;
 }
 
 ani_object CreatePictureDrawableByNative(ani_env* env, void* native)
