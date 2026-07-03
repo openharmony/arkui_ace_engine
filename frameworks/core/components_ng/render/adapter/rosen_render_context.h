@@ -362,6 +362,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
+    void FlushImplicitTransaction();
     void SetIsBackground(bool isBackground) override;
     void SetHDRBrightness(float hdrBrightness) override;
     void SetHDRBrightness(float hdrBrightness, uint32_t type) override;
@@ -867,8 +868,6 @@ protected:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
-
-    void FlushImplicitTransaction();
 
     void RegisterDensityChangedCallback();
 
