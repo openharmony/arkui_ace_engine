@@ -73,10 +73,12 @@ const void* ImageSpanDynamicModule::GetCjModifier()
     return NG::NodeModifier::GetCJUIImageSpanModifier();
 }
 
+#ifndef CROSS_PLATFORM
 const void* ImageSpanDynamicModule::GetCustomModifier(const std::string& name)
 {
     return NG::NodeModifier::GetImageSpanCustomModifier();
 }
+#endif
 
 void* ImageSpanDynamicModule::GetModel()
 {

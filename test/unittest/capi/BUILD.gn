@@ -250,7 +250,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/web_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/menu_item_group_modifier.cpp",
-    "$ace_root/frameworks/core/interfaces/native/node/node_image_span_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/menu_item_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/menu_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/select_modifier.cpp",
