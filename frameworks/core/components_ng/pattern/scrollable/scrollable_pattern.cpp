@@ -2057,10 +2057,9 @@ void ScrollablePattern::SetMaxFlingVelocity(double max)
 
 double ScrollablePattern::GetMaxFlingVelocity() const
 {
-    double density = PipelineBase::GetCurrentDensity();
-    CHECK_NULL_RETURN(scrollableEvent_, maxFlingVelocity_ * density);
+    CHECK_NULL_RETURN(scrollableEvent_, 0.0);
     auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_RETURN(scrollable, maxFlingVelocity_ * density);
+    CHECK_NULL_RETURN(scrollable, 0.0);
     return scrollable->GetMaxFlingVelocity();
 }
 
