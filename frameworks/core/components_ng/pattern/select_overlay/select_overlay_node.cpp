@@ -312,11 +312,20 @@ void PrepareSelectOverlayGridPastePlaceholder(const RefPtr<FrameNode>& defaultGr
     defaultGridItem->UpdateInspectorId(GRID_PASTE_DISPLAY_COLUMN_ID);
 }
 
+RefPtr<FrameNode> CreateRelativeContainerFrameNode(int32_t nodeId)
+{
+    auto nodeModifiers = NG::NodeModifier::GetRelativeContainerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return Referenced::Claim<FrameNode>(frameNode);
+}
+
 RefPtr<FrameNode> CreateSelectOverlayGridPasteRelativeContainer(int32_t themeScopeId)
 {
-    auto relativeContainer = FrameNode::GetOrCreateFrameNode(
-        V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<RelativeContainerPattern>(); });
+    auto relativeContainer = CreateRelativeContainerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     UpdateSelectOverlayGridNodeThemeScopeId(relativeContainer, themeScopeId);
     auto accessibilityProperty = relativeContainer->GetAccessibilityProperty<AccessibilityProperty>();
     if (accessibilityProperty) {
@@ -2381,17 +2390,6 @@ void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<Frame
     });
     menuItemModifier->setBlockClick(menuItem, param.disableSystemClick);
     menuItemModifier->setPasteButton(menuItem, pasteNode);
-}
-
-RefPtr<FrameNode> CreateRelativeContainerFrameNode(int32_t nodeId)
-{
-    auto nodeModifiers = NG::NodeModifier::GetRelativeContainerModifier();
-    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
-    auto arkUINodeHandle = nodeModifiers->createFrameNode(nodeId);
-    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    return Referenced::Claim<FrameNode>(frameNode);
 }
 
 RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
