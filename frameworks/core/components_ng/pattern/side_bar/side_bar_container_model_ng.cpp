@@ -326,7 +326,6 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(const RefPtr<ResourceObject>& r
         } else {
             maxSideBarWidth = StringUtils::StringToCalcDimension(maxSideBarWidthValue);
         }
-        ResourceParseUtils::ParseResDimensionVpNG(resObj, maxSideBarWidth);
         maxSideBarWidth = maxSideBarWidth.IsNonNegative() ? maxSideBarWidth : DEFAULT_MAX_SIDE_BAR_WIDTH;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
         frameNode->MarkModifyDone();
@@ -672,7 +671,7 @@ void SideBarContainerModelNG::SetDividerStartMargin(const RefPtr<ResourceObject>
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();
     };
-    auto pattern = frameNode->GetPattern<Pattern>();
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
     if (startMarginResObj) {
         pattern->AddResObj(key, startMarginResObj, std::move(updateDividerStartMarginFunc));
@@ -707,7 +706,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& 
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();
     };
-    auto pattern = frameNode->GetPattern<Pattern>();
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
     if (endMarginResObj) {
         pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));
@@ -1360,7 +1359,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Re
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();
     };
-    auto pattern = frameNode->GetPattern<Pattern>();
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
     if (endMarginResObj) {
         pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));

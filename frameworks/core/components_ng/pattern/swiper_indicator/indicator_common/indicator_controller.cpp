@@ -20,22 +20,25 @@
 namespace OHOS::Ace::NG {
 void IndicatorController::ShowPrevious() const
 {
-    if (indicatorPattern_.Upgrade()) {
-        indicatorPattern_.Upgrade()->ShowPrevious();
+    auto indicatorPattern = indicatorPattern_.Upgrade();
+    if (indicatorPattern) {
+        indicatorPattern->ShowPrevious();
     }
 }
 
 void IndicatorController::ShowNext() const
 {
-    if (indicatorPattern_.Upgrade()) {
-        indicatorPattern_.Upgrade()->ShowNext();
+    auto indicatorPattern = indicatorPattern_.Upgrade();
+    if (indicatorPattern) {
+        indicatorPattern->ShowNext();
     }
 }
 
 void IndicatorController::ChangeIndex(int32_t index, bool useAnimation) const
 {
-    if (indicatorPattern_.Upgrade()) {
-        indicatorPattern_.Upgrade()->ChangeIndex(index, useAnimation);
+    auto indicatorPattern = indicatorPattern_.Upgrade();
+    if (indicatorPattern) {
+        indicatorPattern->ChangeIndex(index, useAnimation);
     }
 }
 

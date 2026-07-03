@@ -788,6 +788,7 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 bool SideBarContainerPattern::IsInContentRegion(const Offset& globalLocation)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto contentNode = GetContentNode(host);
     CHECK_NULL_RETURN(contentNode, false);
     return contentNode->GetTransformRectRelativeToWindow().IsInRegion(
@@ -1292,6 +1293,7 @@ void SideBarContainerPattern::SetContentClickEvent(bool showSideBar)
 void SideBarContainerPattern::UpdateSideBarStatus()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();

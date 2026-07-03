@@ -88,6 +88,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
     const RefPtr<SwiperController>& swiperController)
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     auto tabTheme = swiperNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
@@ -233,6 +234,7 @@ RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, nullptr);
     tabBarNode->MarkModifyDone();
     return tabsNode;
 }
