@@ -752,4 +752,133 @@ HWTEST_F(MenuAnimationTestNg, FixMenuOriginOffset001, TestSize.Level1)
     fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FIRST, SCALE_ANIMATION_SECOND);
     EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), -scaleOffset.GetY()));
 }
+
+/**
+ * @tc.name: PlayDistortAnimationContentModifier001
+ * @tc.desc: Test PlayDistortAnimation selects the builder child as the distort target when
+ *           UseContentModifier() is true and a child matches GetBuilderId().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuAnimationTestNg, PlayDistortAnimationContentModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a menu node attached to root, mount a non-builder first child and
+     *                   a builder child after it
+     * @tc.expected: menu node, children and menu pattern are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, TYPE));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(rootNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto firstChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    firstChild->MountToParent(menuNode);
+    auto builderChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(builderChild, nullptr);
+    builderChild->MountToParent(menuNode);
+
+    /**
+     * @tc.steps: step2. bind builderNode_ to builderChild so UseContentModifier() returns true
+     * @tc.expected: UseContentModifier() is true and GetBuilderId() equals builderChild's id
+     */
+    menuPattern->builderNode_ = builderChild;
+    EXPECT_TRUE(menuPattern->UseContentModifier());
+    EXPECT_EQ(menuPattern->GetBuilderId(), builderChild->GetId());
+
+    /**
+     * @tc.steps: step3. call PlayDistortAnimation; the new branch should pick builderChild
+     *                   (instead of the default first child) as the distort target
+     * @tc.expected: animation runs through and isShowDistortion_ is set to true
+     */
+    menuPattern->PlayDistortAnimation(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    EXPECT_TRUE(menuPattern->isShowDistortion_);
+}
+
+/**
+ * @tc.name: PlayDistortAnimationContentModifier002
+ * @tc.desc: Test PlayDistortAnimation falls back to the first child when UseContentModifier() is
+ *           true but no child matches GetBuilderId().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuAnimationTestNg, PlayDistortAnimationContentModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a menu node with a first child, bind builderNode_ to a node that is
+     *                   NOT mounted under the menu (no child id matches GetBuilderId())
+     * @tc.expected: menu node and first child are created, UseContentModifier() is true
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, TYPE));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(rootNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto firstChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    firstChild->MountToParent(menuNode);
+    auto orphanBuilder = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(orphanBuilder, nullptr);
+    menuPattern->builderNode_ = orphanBuilder;
+    EXPECT_TRUE(menuPattern->UseContentModifier());
+
+    /**
+     * @tc.steps: step2. call PlayDistortAnimation; the inner id check never matches a child
+     * @tc.expected: animation keeps the first child as target and finishes, isShowDistortion_ is true
+     */
+    menuPattern->PlayDistortAnimation(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    EXPECT_TRUE(menuPattern->isShowDistortion_);
+}
+
+/**
+ * @tc.name: PlayDistortAnimationNoContentModifier001
+ * @tc.desc: Test PlayDistortAnimation keeps the original first-child path when
+ *           UseContentModifier() is false (no content modifier set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuAnimationTestNg, PlayDistortAnimationNoContentModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a menu node with a first child, leave builderNode_ empty
+     * @tc.expected: UseContentModifier() is false (the new branch is skipped)
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, TYPE));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(rootNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto firstChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    firstChild->MountToParent(menuNode);
+    EXPECT_FALSE(menuPattern->UseContentModifier());
+
+    /**
+     * @tc.steps: step2. call PlayDistortAnimation on the original (non-content-modifier) path
+     * @tc.expected: animation finishes and isShowDistortion_ is set to true
+     */
+    menuPattern->PlayDistortAnimation(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    EXPECT_TRUE(menuPattern->isShowDistortion_);
+}
 } // namespace OHOS::Ace::NG
