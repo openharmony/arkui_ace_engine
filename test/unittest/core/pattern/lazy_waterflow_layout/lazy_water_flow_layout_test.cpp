@@ -1073,8 +1073,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ScrollAxisFallbackFullRange_001, TestSize
     ASSERT_NE(scrollableFrameNode_, nullptr);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
-    // Cache is synchronously filled by Measure (Option A), so no predict gap remains.
-    EXPECT_FALSE(pattern_->layoutInfo_->NeedPredict());
+    EXPECT_TRUE(pattern_->layoutInfo_->NeedPredict());
 
     ScrollModelNG::SetAxis(AceType::RawPtr(scrollableFrameNode_), Axis::HORIZONTAL);
     pattern_->OnModifyDone();
@@ -1977,8 +1976,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, TopDataChangeUsesAnchorLaneDelta_001, Tes
 
 /**
  * @tc.name: PredictBuild_001
- * @tc.desc: Verify LazyVWaterFlowLayout synchronously fills the half-screen cache during Measure
- *           (no idle predict pass needed for the standard scroll case).
+ * @tc.desc: Verify LazyVWaterFlowLayout fills the half-screen cache from an idle predict pass.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowLayoutCoreTest, PredictBuild_001, TestSize.Level1)
@@ -1995,9 +1993,23 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, PredictBuild_001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
     EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 0);
-    // Cache extends past the visible end by half a viewport thanks to Option A in ResolveBackBoundary.
-    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 13);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 9);
+    auto firstCacheOnlyChild = GetChildFrameNode(frameNode_, 10);
+    ASSERT_NE(firstCacheOnlyChild, nullptr);
+    EXPECT_FALSE(firstCacheOnlyChild->IsActive());
     EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 1500.0f);
+    EXPECT_TRUE(pattern_->layoutInfo_->NeedPredict());
+
+    FlushIdleTask();
+
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 13);
+    auto idleCachedChild = GetChildFrameNode(frameNode_, 13);
+    ASSERT_NE(idleCachedChild, nullptr);
+    EXPECT_TRUE(idleCachedChild->IsActive());
+    EXPECT_NE(pattern_->layoutInfo_->GetPos(13), nullptr);
     EXPECT_FALSE(pattern_->layoutInfo_->NeedPredict());
 }
 
@@ -2036,8 +2048,12 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeDeactivatesOldVisibl
     EXPECT_TRUE(oldVisibleCachedItemOutOfViewport);
     auto oldVisiblePos = pattern_->layoutInfo_->GetPos(14);
     EXPECT_TRUE(oldVisiblePos == nullptr || GreatOrEqual(oldVisiblePos->startPos, pattern_->layoutInfo_->cacheEndPos_));
-    // Item 12 falls inside the new layout's cache range (visible 0-9 + half-screen back = up to ~13),
-    // so it stays alive as a cache child. Item 14 lies past the cache window and is deactivated.
+    // Item 12 is outside the visible range in the normal frame; idle predict may reactivate it later as cache.
+    EXPECT_FALSE(oldVisibleCachedChild->IsActive());
+    EXPECT_FALSE(oldVisibleChild->IsActive());
+
+    EXPECT_TRUE(pattern_->layoutInfo_->NeedPredict());
+    FlushIdleTask();
     EXPECT_TRUE(oldVisibleCachedChild->IsActive());
     EXPECT_FALSE(oldVisibleChild->IsActive());
 }
@@ -2073,6 +2089,9 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeSyncsCachedItemGeome
     FlushUITasks();
 
     ASSERT_LT(pattern_->layoutInfo_->layoutedEndIndex_, cachedOnlyIndex);
+    ASSERT_TRUE(pattern_->layoutInfo_->NeedPredict());
+    FlushIdleTask();
+
     ASSERT_LE(cachedOnlyIndex, pattern_->layoutInfo_->cachedEndIndex_);
     auto cachedItemPos = pattern_->layoutInfo_->GetPos(cachedOnlyIndex);
     ASSERT_NE(cachedItemPos, nullptr);
@@ -2238,8 +2257,6 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, PredictDeadlineMissContinues_001, TestSiz
     CreateDone();
 
     ASSERT_NE(pattern_, nullptr);
-    // Option A fills the cache synchronously, so force a forward gap to exercise the predict path.
-    pattern_->layoutInfo_->cacheEndPos_ += LAZY_WATER_FLOW_SCROLL_HEIGHT;
     ASSERT_TRUE(pattern_->layoutInfo_->NeedPredict());
 
     pattern_->ProcessIdleTask(0); // missed deadline; re-post path runs, NeedPredict stays true
