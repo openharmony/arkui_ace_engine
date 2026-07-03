@@ -31,8 +31,8 @@ import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOpti
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../component/common';
 import { OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode } from '../component/common';
 import { AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from '../component/common';
-import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from '../component/enums'
-import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges, ColorMetrics as arkui_component_units_ColorMetrics } from '../component/units'
+import { Color, HitTestMode, ImageSize, Alignment, LocalizedAlignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from '../component/enums'
+import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges, ColorMetrics as arkui_component_units_ColorMetrics } from '../component/units'
 import { Resource } from "global.resource"
 import { LengthMetrics } from "../Graphics"
 import {  PixelMap, UniformDataType } from "#external"
@@ -100,7 +100,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
         return this
     }
-    public layoutWeight(value: number | string | undefined): this {
+    public layoutWeight(value: double | string | undefined): this {
         this.getPeer().setLayoutWeightAttribute(value);
         return this
     }
@@ -116,7 +116,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setSafeAreaPaddingAttribute(value);
         return this
     }
-    public margin(value: Padding | Length | LocalizedPadding | undefined): this {
+    public margin(value: Margin | Length | LocalizedMargin | undefined): this {
         this.getPeer().setMarginAttribute(value);
         return this
     }
@@ -154,7 +154,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public compositingFilter(value: Filter | undefined): this {
         return this
     }
-    public opacity(value: number | Resource | undefined): this {
+    public opacity(value: double | Resource | undefined): this {
          if (value != null) {
             this.getPeer().setOpacityAttribute(value);
         }
@@ -165,6 +165,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+        this.getPeer()?.setBorderStyleAttribute(value);
         return this
     }
     public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
@@ -393,15 +394,15 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setVisibilityAttribute(value);
         return this
     }
-    public flexGrow(value: number | undefined): this {
+    public flexGrow(value: double | undefined): this {
         this.getPeer().setFlexGrowAttribute(value);
         return this
     }
-    public flexShrink(value: number | undefined): this {
+    public flexShrink(value: double | undefined): this {
         this.getPeer().setFlexShrinkAttribute(value);
         return this
     }
-    public flexBasis(value: number | string | undefined): this {
+    public flexBasis(value: double | string | undefined): this {
         this.getPeer().setFlexBasisAttribute(value);
         return this
     }
@@ -409,7 +410,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setAlignSelfAttribute(value);
         return this
     }
-    public displayPriority(value: number | undefined): this {
+    public displayPriority(value: double | undefined): this {
         this.getPeer().setDisplayPriorityAttribute(value);
         return this
     }
@@ -417,7 +418,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setDirectionAttribute(value);
         return this
     }
-    public align(value: Alignment | undefined): this {
+    public align(value: Alignment | LocalizedAlignment | undefined): this {
         this.getPeer().setAlignAttribute(value);
         return this
     }
@@ -442,7 +443,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setAlignRulesAttribute(value);
         return this
     }
-    public aspectRatio(value: number | undefined): this {
+    public aspectRatio(value: double | undefined): this {
         this.getPeer().setAspectRatioAttribute(value);
         return this
     }
@@ -655,6 +656,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
+        this.getPeer()?.setExpandSafeAreaAttribute(types, edges);
         return this
     }
     public background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
@@ -716,6 +718,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+        this.getPeer()?.setChainModeAttribute(direction, style);
         return this
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
