@@ -706,6 +706,11 @@ void FormPattern::UpdateImageNode()
     layoutConstraint.maxSize = idealSize;
     imageNode->UpdateLayoutConstraint(layoutConstraint);
     pixelLayoutProperty->UpdateImageSourceInfo(pixelSourceInfo);
+    if (!isDynamic_) {
+        auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    }
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_VOID(externalContext);
     externalContext->SetVisible(true);

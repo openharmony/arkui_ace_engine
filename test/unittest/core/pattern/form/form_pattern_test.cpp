@@ -2295,4 +2295,45 @@ HWTEST_F(FormPatternTest, FormPatternTest_FireFormSurfaceNodeCallback_001, TestS
     pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
     EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
 }
+
+/**
+ * @tc.name: FormPatternTest_UpdateImageNode_Interpolation_001
+ * @tc.desc: UpdateImageNode sets MEDIUM interpolation for static form, keeps default for dynamic form
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_UpdateImageNode_Interpolation_001, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnAttachToFrameNode();
+
+    std::shared_ptr<Media::MockPixelMap> mockPixelMap = std::make_shared<Media::MockPixelMap>();
+    EXPECT_CALL(*mockPixelMap, GetWidth()).WillRepeatedly(Return(200));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).WillRepeatedly(Return(200));
+    pattern->pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mockPixelMap));
+    EXPECT_NE(pattern->pixelMap_, nullptr);
+
+    pattern->cardInfo_.width.SetValue(200);
+    pattern->cardInfo_.height.SetValue(200);
+    pattern->cardInfo_.borderWidth = 0;
+
+    pattern->isDynamic_ = false;
+    pattern->UpdateImageNode();
+    auto imageNode = pattern->GetFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+    EXPECT_NE(imageNode, nullptr);
+    auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE),
+        ImageInterpolation::MEDIUM);
+
+    pattern->isDynamic_ = true;
+    pattern->UpdateImageNode();
+    imageNode = pattern->GetFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+    EXPECT_NE(imageNode, nullptr);
+    imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE),
+        ImageInterpolation::NONE);
+}
 } // namespace OHOS::Ace::NG
