@@ -35,7 +35,7 @@ void FormVisibleManager::RemoveFormVisibleChangeNode(int32_t nodeId)
 
 void FormVisibleManager::HandleFormVisibleChangeEvent(bool isVisible)
 {
-    auto nodes = FrameNode::GetNodesById(onFormVisibleChangeNodeIds_);
+    auto nodes = FrameNode::GetNodesByIdWithCleanup(onFormVisibleChangeNodeIds_);
     for (auto& pair : onFormVisibleChangeEvents_) {
         if (pair.second) {
             pair.second(isVisible);
