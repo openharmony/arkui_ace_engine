@@ -881,15 +881,32 @@ void LazyWaterFlowLayoutAlgorithm::SyncLaneGeometry()
     }
 }
 
-// Fill/Clear use the cache window so scroll frames synchronously materialize the half-screen buffer.
+// Fill visible content during normal layout, then let idle predict extend into the cache window.
 float LazyWaterFlowLayoutAlgorithm::ResolveFrontBoundary() const
 {
-    return cacheStartPos_;
+    return IsPredictPass() ? cacheStartPos_ : viewStart_;
 }
 
 float LazyWaterFlowLayoutAlgorithm::ResolveBackBoundary() const
 {
-    return cacheEndPos_;
+    if (ShouldProbeBodyBelowViewport()) {
+        return ProbeBackBoundary();
+    }
+    return IsPredictPass() ? cacheEndPos_ : viewEnd_;
+}
+
+// Body just below the viewport with nothing measured yet: NeedPredict cannot bootstrap from an empty
+// posMap_, so the normal pass probes one row instead of synchronously filling the half-screen cache.
+bool LazyWaterFlowLayoutAlgorithm::ShouldProbeBodyBelowViewport() const
+{
+    return !IsPredictPass() && LessOrEqual(viewEnd_, 0.0f) && GreatNotEqual(cacheEndPos_, 0.0f);
+}
+
+float LazyWaterFlowLayoutAlgorithm::ProbeBackBoundary() const
+{
+    // Just past the body origin: each lane fills exactly its first item.
+    constexpr float BODY_PROBE_EXTENT = 1.0f;
+    return std::min(cacheEndPos_, BODY_PROBE_EXTENT);
 }
 
 int32_t LazyWaterFlowLayoutAlgorithm::CheckReset()
@@ -1118,8 +1135,9 @@ std::optional<float> LazyWaterFlowLayoutAlgorithm::MeasureChild(
     auto rawIndex = GetRawIndexForItem(index);
     auto startPos = referenceEdge == ReferenceEdge::START ? referencePos : referencePos - cachedSize.value_or(0.0f);
     auto endPos = referenceEdge == ReferenceEdge::START ? referencePos + cachedSize.value_or(0.0f) : referencePos;
-    const bool maybeVisible = endPos > viewStart_ && startPos < viewEnd_;
-    auto child = GetOrCreateChildWrapper(layoutWrapper, rawIndex, maybeVisible);
+    const bool maybeVisible = IsChildMaybeVisible(startPos, endPos, cachedSize.has_value(), referenceEdge);
+    const bool allowCacheCreate = AllowProbeCacheCreate(startPos, cachedSize.has_value(), referenceEdge);
+    auto child = GetOrCreateChildWrapper(layoutWrapper, rawIndex, maybeVisible, allowCacheCreate);
     if (!child) {
         return cachedSize;
     }
@@ -1139,6 +1157,25 @@ std::optional<float> LazyWaterFlowLayoutAlgorithm::MeasureChild(
     return childMainSize;
 }
 
+bool LazyWaterFlowLayoutAlgorithm::IsChildMaybeVisible(
+    float startPos, float endPos, bool sizeKnown, ReferenceEdge referenceEdge) const
+{
+    if (sizeKnown) {
+        return endPos > viewStart_ && startPos < viewEnd_;
+    }
+    // Unknown size: only the reference edge is real; assume visible whenever the item can reach the viewport.
+    return referenceEdge == ReferenceEdge::START ? LessNotEqual(startPos, viewEnd_)
+                                                 : GreatNotEqual(endPos, viewStart_);
+}
+
+// Only unmeasured probe-row items need a real node; known heights fill the lane without one.
+bool LazyWaterFlowLayoutAlgorithm::AllowProbeCacheCreate(
+    float startPos, bool sizeKnown, ReferenceEdge referenceEdge) const
+{
+    return !sizeKnown && referenceEdge == ReferenceEdge::START && ShouldProbeBodyBelowViewport() &&
+        LessOrEqual(startPos, ProbeBackBoundary());
+}
+
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetExistingChildWrapper(
     LayoutWrapper* layoutWrapper, int32_t rawIndex) const
 {
@@ -1148,7 +1185,7 @@ RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetExistingChildWrapper(
 }
 
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetOrCreateChildWrapper(
-    LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible) const
+    LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible, bool allowCacheCreate) const
 {
     CHECK_NULL_RETURN(layoutWrapper, nullptr);
     // maybeVisible drives whether LazyForEach assigns the node to the active or cache set; getting it wrong
@@ -1158,7 +1195,7 @@ RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetOrCreateChildWrapper(
     }
     auto isCacheItem = !maybeVisible;
     auto child = layoutWrapper->GetChildByIndex(rawIndex, isCacheItem);
-    if (!child) {
+    if (!child && (IsPredictPass() || allowCacheCreate)) {
         child = layoutWrapper->GetOrCreateChildByIndex(rawIndex, !isCacheItem, isCacheItem);
     }
     return child;
@@ -1298,16 +1335,17 @@ void LazyWaterFlowLayoutAlgorithm::FinishMeasureItems(LayoutWrapper* layoutWrapp
 void LazyWaterFlowLayoutAlgorithm::ApplyAdjustedMeasureWindow(LayoutWrapper* layoutWrapper, float consumedOffset)
 {
     LazyWaterFlowLayoutUtils::ShiftMeasureWindow(consumedOffset, viewStart_, viewEnd_, cacheStartPos_, cacheEndPos_);
-    // The shifted cache window is the one the parent will display after consuming adjustOffset; refill its edges
-    // so the next frame doesn't show a gap before the user scrolls.
+    // Refill the shifted window edges so the next frame shows no gap before idle extends the cache.
     auto fillMaxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, 0.0f);
+    const auto frontBoundary = ResolveFrontBoundary();
+    const auto backBoundary = ResolveBackBoundary();
     const int32_t endIndex = layoutInfo_->EndIndex();
     if (endIndex >= 0) {
-        FillBack(layoutWrapper, cacheEndPos_, endIndex + 1, totalItemCount_ - 1, fillMaxMainSize);
+        FillBack(layoutWrapper, backBoundary, endIndex + 1, totalItemCount_ - 1, fillMaxMainSize);
     }
     const int32_t startIndex = layoutInfo_->StartIndex();
     if (startIndex > 0) {
-        FillFront(layoutWrapper, cacheStartPos_, startIndex - 1, 0, fillMaxMainSize);
+        FillFront(layoutWrapper, frontBoundary, startIndex - 1, 0, fillMaxMainSize);
     }
     layoutInfo_->SyncItemPositions(mainGap_);
     layoutInfo_->EstimateItemSize();

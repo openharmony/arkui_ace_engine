@@ -127,6 +127,8 @@ private:
     void SyncLaneGeometry();
     float ResolveFrontBoundary() const;
     float ResolveBackBoundary() const;
+    bool ShouldProbeBodyBelowViewport() const;
+    float ProbeBackBoundary() const;
     /**
      * @brief Decide how to handle a NotifyDataChange before this frame's fill.
      *
@@ -148,9 +150,11 @@ private:
 
     RefPtr<LayoutWrapper> GetExistingChildWrapper(LayoutWrapper* layoutWrapper, int32_t rawIndex) const;
     RefPtr<LayoutWrapper> GetOrCreateChildWrapper(
-        LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible) const;
+        LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible, bool allowCacheCreate = false) const;
     void UpdateMeasuredLaneItem(int32_t index, int32_t laneIdx, const RefPtr<LayoutWrapper>& child,
         float childMainSize, const std::optional<float>& cachedSize);
+    bool IsChildMaybeVisible(float startPos, float endPos, bool sizeKnown, ReferenceEdge referenceEdge) const;
+    bool AllowProbeCacheCreate(float startPos, bool sizeKnown, ReferenceEdge referenceEdge) const;
     std::optional<float> MeasureChild(
         LayoutWrapper* layoutWrapper, int32_t index, int32_t laneIdx, float referencePos, ReferenceEdge referenceEdge);
     void ReMeasureItemsInLane(LayoutWrapper* layoutWrapper, int32_t laneIdx);
