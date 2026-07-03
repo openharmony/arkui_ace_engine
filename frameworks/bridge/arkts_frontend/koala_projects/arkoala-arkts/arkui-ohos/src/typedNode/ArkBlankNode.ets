@@ -24,17 +24,17 @@ export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
         if (param.length > 1) {
             throw new Error('more than 1 parameters');
         }
-        let min_casted: number | string | undefined = undefined;
+        let minCasted: double | string | undefined = undefined;
         if (param.length === 1) {
-            min_casted = param[0] as (number | string | undefined);
+            minCasted = param[0] as (double | string | undefined);
         }
-        this.getPeer()?.setBlankOptionsAttribute(min_casted);
+        this.getPeer()?.setBlankOptionsAttribute(minCasted);
         return this;
     }
 
-    initialize(min?: number | string): this {
-        const min_casted = min as (number | string | undefined);
-        this.getPeer()?.setBlankOptionsAttribute(min_casted);
+    initialize(min?: double | string): this {
+        const minCasted = min as (double | string | undefined);
+        this.getPeer()?.setBlankOptionsAttribute(minCasted);
         return this;
     }
 
@@ -42,9 +42,13 @@ export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
         return this.peer as ArkBlankPeer;
     }
 
+    allowChildCount(): number {
+        return 0;
+    }
+
     color(value: ResourceColor | undefined): this {
-        const value_casted = value as (ResourceColor | undefined);
-        this.getPeer()?.setColorAttribute(value_casted);
+        const valueCasted = value as (ResourceColor | undefined);
+        this.getPeer()?.setColorAttribute(valueCasted);
         return this;
     }
 }
