@@ -9959,6 +9959,9 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     info->SetMetadata(autoFillTypeAndMetaData.metadata);
     info->SetTag(host->GetTag());
     auto utf8TextValue = UtfUtils::Str16DebugToStr8(contentController_->GetTextUtf16Value());
+    if (utf8TextValue.empty()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "DumpViewDataPageNode empty value, nodeId:%{public}d", host->GetId());
+    }
     if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
         info->SetValue(utf8TextValue);
@@ -10024,12 +10027,17 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         DoProcessAutoFill(RequestAutoFillReason::REQUEST_AGAIN_NOT_FOCUS);
     }
     auto type = GetAutoFillType();
+    if (nodeWrap->GetValue().empty()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "empty value, nodeId:%{public}d", host->GetId());
+    }
     bool fromOtherAccount = viewDataWrap->GetOtherAccount();
     if (!(type == AceAutoFillType::ACE_NEW_PASSWORD && type == autoFillType) && !fromOtherAccount) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value, type:%{public}d",
+            static_cast<int32_t>(type));
         lastAutoFillTextValue_ = nodeWrap->GetValue();
     }
     if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "equal and skip fill, nodeId:%{public}d", host->GetId());
         return;
     }
     RemoveFillContentMap();

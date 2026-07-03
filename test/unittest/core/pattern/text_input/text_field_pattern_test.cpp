@@ -2385,7 +2385,13 @@ HWTEST_F(TextFieldPatternTest, TextPattern093, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. GetFocusHub.
+     */
     pattern->GetFocusHub()->currentFocus_ = false;
+    /**
+     * @tc.steps: step3. TwinklingByFocus.
+     */
     pattern->TwinklingByFocus();
 }
 
