@@ -112,7 +112,6 @@ public:
     void Scale(double x, double y);
     void SetTransform(TransformParam& param);
     void SetTransform(const std::optional<Matrix2DPeer*>& optMatrix);
-    void SetTransform(unsigned int id, const TransformParam& transform);
     void Transform(TransformParam& param);
     void Translate(double x, double y);
     void SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap);
@@ -368,13 +367,9 @@ private:
     void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params);
     Dimension GetDimensionValue(const std::string& str);
     Dimension GetDimensionValue(const Dimension& dimension);
-    Ace::Pattern GetPattern(unsigned int id);
-    std::shared_ptr<Ace::Pattern> GetPatternPtr(int32_t id);
     void ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params);
     bool IsValidLetterSpacing(const std::string& letterSpacing);
 
-    static std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> pattern_;
-    static unsigned int patternCount_;
     double density_ = 1.0;
     std::vector<OHOS::Ace::PaintState> savePaintState_;
     OHOS::Ace::PaintState paintState_;

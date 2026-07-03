@@ -170,8 +170,6 @@ static bool ProcessColorFromString(std::string colorStr, Color& color)
 } // namespace
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> CanvasRendererPeerImpl::pattern_;
-unsigned int CanvasRendererPeerImpl::patternCount_ = 0;
 CanvasRendererPeerImpl::CanvasRendererPeerImpl()
 {
     instanceId_ = Container::CurrentIdSafely();
@@ -359,11 +357,8 @@ void CanvasRendererPeerImpl::CreatePattern(
     auto pixelMap = bitmap->GetPixelMap();
     pattern->SetPixelMap(pixelMap);
 #endif
-    pattern_[patternCount_] = pattern;
-    canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
-    canvasPattern->SetId(patternCount_);
     canvasPattern->SetUnit(GetUnit());
-    patternCount_++;
+    canvasPattern->SetPattern(pattern);
 }
 std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const RadialGradientParam& params)
 {
@@ -678,13 +673,6 @@ void CanvasRendererPeerImpl::SetTransform(const std::optional<Matrix2DPeer*>& op
     auto param = matrix->GetTransform();
     renderingContext2DModel_->SetTransform(param, false);
 }
-void CanvasRendererPeerImpl::SetTransform(unsigned int id, const TransformParam& transform)
-{
-    CHECK_NULL_VOID(renderingContext2DModel_);
-    if (id >= 0 && id <= patternCount_) {
-        renderingContext2DModel_->SetTransform(pattern_[id], transform);
-    }
-}
 void CanvasRendererPeerImpl::Transform(TransformParam& param)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
@@ -823,8 +811,9 @@ void CanvasRendererPeerImpl::SetFillStyle(CanvasPatternPeer* canvasPatternPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasPatternPeer);
-    auto id = canvasPatternPeer->GetId();
-    renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+    auto pattern = canvasPatternPeer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    renderingContext2DModel_->SetFillPattern(pattern);
     fillStyleType_ = ParamType::CANVAS_PATTERN;
     fillStylePattern_ = canvasPatternPeer;
 }
@@ -870,8 +859,9 @@ void CanvasRendererPeerImpl::SetStrokeStyle(CanvasPatternPeer* canvasPatternPeer
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasPatternPeer);
-    auto id = canvasPatternPeer->GetId();
-    renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+    auto pattern = canvasPatternPeer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    renderingContext2DModel_->SetStrokePattern(pattern);
     strokeStyleType_ = ParamType::CANVAS_PATTERN;
     strokeStylePattern_ = canvasPatternPeer;
 }
@@ -1211,20 +1201,6 @@ Dimension CanvasRendererPeerImpl::GetDimensionValue(const Dimension& dimension)
         return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
-}
-Ace::Pattern CanvasRendererPeerImpl::GetPattern(unsigned int id)
-{
-    if (id < 0 || id >= pattern_.size()) {
-        return Ace::Pattern();
-    }
-    return *(pattern_[id].get());
-}
-std::shared_ptr<Ace::Pattern> CanvasRendererPeerImpl::GetPatternPtr(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Ace::Pattern>();
-    }
-    return pattern_[id];
 }
 void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params)
 {

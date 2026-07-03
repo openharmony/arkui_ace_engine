@@ -49,12 +49,6 @@ public:
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);
         ASSERT_NE(mockPatternKeeper_, nullptr);
-        rendererKeeper_ = Referenced::MakeRefPtr<GeneratedModifier::CanvasRendererPeerImpl>();
-        ASSERT_NE(rendererKeeper_, nullptr);
-        rendererKeeper_->SetCanvasPattern(mockPatternKeeper_);
-        auto peerImpl = reinterpret_cast<CanvasPatternPeer*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetCanvasRenderer(rendererKeeper_);
         ASSERT_NE(mockPattern_, nullptr);
     }
 
@@ -62,13 +56,11 @@ public:
     {
         AccessorTestBaseParent::TearDown();
         mockPatternKeeper_ = nullptr;
-        rendererKeeper_ = nullptr;
         mockPattern_ = nullptr;
     }
 
     MockCanvasPattern* mockPattern_ = nullptr;
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
-    RefPtr<GeneratedModifier::CanvasRendererPeerImpl> rendererKeeper_ = nullptr;
 };
 
 /**
