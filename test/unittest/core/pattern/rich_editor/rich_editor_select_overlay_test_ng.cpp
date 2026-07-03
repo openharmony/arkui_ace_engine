@@ -154,6 +154,42 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnHandleMoveStart003
+ * @tc.desc: test ChangeHandleHeight condition in OnHandleMoveStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->OnBind(manager);
+    auto& textSelector = richEditorPattern->textSelector_;
+    textSelector.baseOffset = 5;
+    textSelector.destinationOffset = 10;
+    GestureEvent event;
+    event.SetGlobalLocation(Offset(100.0f, 200.0f));
+    // Branch: !IsSingleHandle() && !HasUnsupportedTransform() => ChangeHandleHeight called
+    richEditorPattern->selectOverlay_->isSingleHandle_ = false;
+    textSelector.firstHandle = RectF(0, 10, 5, 20);
+    richEditorPattern->selectOverlay_->OnHandleMoveStart(event, true);
+    EXPECT_NE(textSelector.firstHandle.GetY(), 10.0f);
+    // Branch: IsSingleHandle()=true => ChangeHandleHeight not called
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    textSelector.firstHandle = RectF(0, 10, 5, 20);
+    richEditorPattern->selectOverlay_->OnHandleMoveStart(event, true);
+    EXPECT_FLOAT_EQ(textSelector.firstHandle.GetY(), 10.0f);
+    // Branch: !IsSingleHandle() && HasUnsupportedTransform()=true => ChangeHandleHeight not called
+    richEditorNode_->GetRenderContext()->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 45.0f, 0.0f));
+    richEditorPattern->selectOverlay_->isSingleHandle_ = false;
+    textSelector.firstHandle = RectF(0, 10, 5, 20);
+    richEditorPattern->selectOverlay_->OnHandleMoveStart(event, true);
+    EXPECT_FLOAT_EQ(textSelector.firstHandle.GetY(), 10.0f);
+}
+
+/**
  * @tc.name: SwitchCaretState001
  * @tc.desc: test SwitchCaretState
  * @tc.type: FUNC
@@ -440,6 +476,63 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level0)
     firstHandleInfo = selectOverlay->GetFirstHandleInfo();
     ASSERT_TRUE(firstHandleInfo.has_value());
     EXPECT_FALSE(firstHandleInfo.value().isShow);
+}
+
+/**
+ * @tc.name: GetSelectOverlayInfoWithTransformTouchability
+ * @tc.desc: test isTouchable correctly set after SetTransformPaintInfo refreshes isShow when hasTransform=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfoWithTransformTouchability, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
+    geometryNode->SetContentSize(SizeF(150.0f, 150.0f));
+    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
+    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+    selectOverlay->hasTransform_ = true;
+
+    // Branch: CheckHandleIsVisibleWithTransform returns true, isTouchable follows overwritten isShow
+    selectOverlay->SetUsingMouse(false);
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    auto firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_TRUE(firstHandleInfo.value().isShow);
+    EXPECT_TRUE(firstHandleInfo.value().isTouchable);
+    auto secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_TRUE(secondHandleInfo.value().isShow);
+    EXPECT_TRUE(secondHandleInfo.value().isTouchable);
+
+    // Branch: IsUsingMouse=true, dragHandleIndex=FIRST makes initial isShow=true overwritten to false
+    selectOverlay->dragHandleIndex_ = DragHandleIndex::FIRST;
+    selectOverlay->SetUsingMouse(true);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
+    EXPECT_FALSE(firstHandleInfo.value().isTouchable);
+
+    // Branch: IsUsingMouse=true, dragHandleIndex=SECOND makes initial isShow=true overwritten to false
+    selectOverlay->dragHandleIndex_ = DragHandleIndex::SECOND;
+    secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_FALSE(secondHandleInfo.value().isShow);
+    EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+
+    // Branch: NearEqual(epsilon, 0.0f), dragHandleIndex=SECOND makes initial isShow=true overwritten to false
+    selectOverlay->SetUsingMouse(false);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 0, 20);
+    secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_FALSE(secondHandleInfo.value().isShow);
+    EXPECT_FALSE(secondHandleInfo.value().isTouchable);
 }
 
 /**
