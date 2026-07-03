@@ -256,6 +256,15 @@ struct ArkUICornerRadius {
     ArkUI_Float32 bottomRight;
 };
 
+struct ArkUIColorHeadRoom {
+    ArkUI_Float32 red;
+    ArkUI_Float32 green;
+    ArkUI_Float32 blue;
+    ArkUI_Float32 alpha;
+    ArkUI_Float32 headRoom;
+    ArkUI_Int32 colorSpace;
+};
+
 struct ArkUIBorderWidth {
     ArkUI_Float32 top;
     ArkUI_Float32 right;
@@ -8218,6 +8227,7 @@ struct ArkUITextPickerModifier {
     void (*setJsSelecteds)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 size);
     void (*setJsHasSelectAttr)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setJsSelectedBackgroundStyle)(ArkUINodeHandle node, void* value);
+    void (*setTextPickerBackgroundColorHdr)(ArkUINodeHandle node, ArkUIColorHeadRoom color);
     void* (*createObject)();
     void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
         void* scrollStopEvent, void* enterSelectedAreaEvent, void* textPickerDialog, void* textPickerDialogEvent,
@@ -8715,6 +8725,19 @@ struct ArkUISelectModifier {
     void (*setJsSelectDividerStyle)(
         ArkUINodeHandle node, void* divider, const ArkUISelectDividerArgs* dividerArgs, ArkUI_Int32 mode);
     void (*resetJsSelectFontColor)(ArkUINodeHandle node);
+    void (*setJsSelectedOptionFontColorPtrHdr)(ArkUINodeHandle node, ArkUIColorHeadRoom color,
+        ArkUI_VoidPtr selectOptionFontColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsOptionFontColorPtrHdr)(
+        ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionFontColorRawPtr, ArkUI_Bool isNormal);
+    void (*setJsMenuBgColorPtrHdr)(
+        ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr menuBgColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsSelectBackgroundColorHdr)(
+        ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr);
+    void (*setJsSelectFontColorPtrHdr)(ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr fontColorRawPtr);
+    void (*setJsOptionBgColorPtrHdr)(
+        ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue);
+    void (*setJsSelectedOptionBgColorPtrHdr)(
+        ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue);
 };
 
 /** Common for all API variants.*/

@@ -1009,6 +1009,9 @@ HWTEST_F(TextPickerEventTestNg, LinearFontSize005, TestSize.Level1)
  */
 HWTEST_F(TextPickerEventTestNg, UpdateButtonMargin001, TestSize.Level1)
 {
+    /**
+     * @tc.step: step1. get dialogTheme.
+     */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -1048,6 +1051,9 @@ HWTEST_F(TextPickerEventTestNg, UpdateButtonMargin001, TestSize.Level1)
  */
 HWTEST_F(TextPickerEventTestNg, UpdateButtonMargin002, TestSize.Level1)
 {
+    /**
+     * @tc.step: step1. get dialogTheme.
+     */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();

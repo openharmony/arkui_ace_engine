@@ -365,8 +365,9 @@ void SetJsOnChange(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkU
     }
     Local<panda::FunctionRef> jsFunc = callbackArg->ToObject(vm);
     std::function<void(const std::vector<std::string>&, const std::vector<double>&)> onChange =
-        [vm, func = panda::CopyableGlobal(vm, jsFunc)](
+        [func = panda::CopyableGlobal(vm, jsFunc)](
             const std::vector<std::string>& value, const std::vector<double>& index) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -405,8 +406,10 @@ void SetJsOnScrollStop(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
     }
     Local<panda::FunctionRef> jsFunc = callbackArg->ToObject(vm);
     std::function<void(const std::vector<std::string>&, const std::vector<double>&)> onScrollStop =
-        [vm, func = panda::CopyableGlobal(vm, jsFunc)](
+        [func = panda::CopyableGlobal(vm, jsFunc)](
             const std::vector<std::string>& value, const std::vector<double>& index) {
+            auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("TextPicker.onScrollStop");
@@ -636,7 +639,8 @@ void ParseTextPickerValueObject(
     panda::Local<panda::FunctionRef> jsFunc = changeEventVal->ToObject(vm);
     WeakPtr<FrameNode> targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     std::function<void(const std::vector<std::string>&)> callback =
-        [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode](const std::vector<std::string>& value) {
+        [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode](const std::vector<std::string>& value) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -672,7 +676,8 @@ void ParseTextPickerSelectedObject(
     panda::Local<panda::FunctionRef> jsFunc = changeEventVal->ToObject(vm);
     WeakPtr<FrameNode> targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     std::function<void(const std::vector<double>&)> callback =
-        [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode](const std::vector<double>& index) {
+        [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode](const std::vector<double>& index) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -1655,8 +1660,9 @@ ArkUINativeModuleValue TextPickerBridge::SetOnEnterSelectedArea(ArkUIRuntimeCall
     }
     Local<panda::FunctionRef> jsFunc = callbackArg->ToObject(vm);
     std::function<void(const std::vector<std::string>&, const std::vector<double>&)> onChange =
-        [vm, func = panda::CopyableGlobal(vm, jsFunc)](
+        [func = panda::CopyableGlobal(vm, jsFunc)](
             const std::vector<std::string>& value, const std::vector<double>& index) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -1699,6 +1705,19 @@ ArkUINativeModuleValue TextPickerBridge::SetJsBackgroundColor(ArkUIRuntimeCallIn
     Color backgroundColor;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, backgroundColor)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto headRoomOptional = backgroundColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(backgroundColor.GetColorSpace());
+        GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerBackgroundColorHdr(nativeNode, colorRom);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerBackgroundColor(

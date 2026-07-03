@@ -361,6 +361,7 @@ if (globalThis.TextPicker === undefined) {
       getUINativeModule().loadNativeModule('TextPicker');
       const module = globalThis.requireNapi('arkui.components.arktextpicker');
       module.exportView();
+      module.loadComponent();
       getUINativeModule().textpicker.create(params);
     },
  	name: 'JSTextPicker'
@@ -717,6 +718,7 @@ if (globalThis.DatePicker === undefined) {
       getUINativeModule().loadNativeModule('DatePicker');
       const module = globalThis.requireNapi('arkui.components.arkdatepicker');
       module.exportView();
+      module.loadComponent();
       getUINativeModule().datePicker.create(params);
     },
     name: 'JSDatePicker'

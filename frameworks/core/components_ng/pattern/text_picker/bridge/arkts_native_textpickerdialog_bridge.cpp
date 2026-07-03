@@ -268,7 +268,8 @@ void TextPickerDialogAppearEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, TextPick
     auto onDidAppear = ArkTSUtils::GetProperty(vm, paramObject, "onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction(vm)) {
         Local<panda::FunctionRef> jsFunc = onDidAppear->ToObject(vm);
-        didAppearEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+        didAppearEvent = [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -281,7 +282,8 @@ void TextPickerDialogAppearEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, TextPick
     auto onWillAppear = ArkTSUtils::GetProperty(vm, paramObject, "onWillAppear");
     if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction(vm)) {
         Local<panda::FunctionRef> jsFunc = onWillAppear->ToObject(vm);
-        willAppearEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+        willAppearEvent = [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -310,7 +312,8 @@ void TextPickerDialogDisappearEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, TextP
     auto onDidDisappear = ArkTSUtils::GetProperty(vm, paramObject, "onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction(vm)) {
         Local<panda::FunctionRef> jsFunc = onDidDisappear->ToObject(vm);
-        didDisappearEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+        didDisappearEvent = [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -323,7 +326,8 @@ void TextPickerDialogDisappearEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, TextP
     auto onWillDisappear = ArkTSUtils::GetProperty(vm, paramObject, "onWillDisappear");
     if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction(vm)) {
         Local<panda::FunctionRef> jsFunc = onWillDisappear->ToObject(vm);
-        willDisappearEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+        willDisappearEvent = [func = panda::CopyableGlobal(vm, jsFunc), node = targetNode]() {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -591,7 +595,8 @@ ArkUINativeModuleValue TextPickerDialogBridge::JsShow(ArkUIRuntimeCallInfo* runt
     WeakPtr<FrameNode> targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!onCancel->IsUndefined() && onCancel->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsFunc = onCancel;
-        cancelEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode]() {
+        cancelEvent = [func = panda::CopyableGlobal(vm, jsFunc), targetNode]() {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -604,7 +609,8 @@ ArkUINativeModuleValue TextPickerDialogBridge::JsShow(ArkUIRuntimeCallInfo* runt
     auto onAccept = ArkTSUtils::GetProperty(vm, paramObject, "onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsFunc = onAccept->ToObject(vm);
-        acceptEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+        acceptEvent = [func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -632,7 +638,8 @@ ArkUINativeModuleValue TextPickerDialogBridge::JsShow(ArkUIRuntimeCallInfo* runt
     auto onChange = ArkTSUtils::GetProperty(vm, paramObject, "onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsFunc = onChange->ToObject(vm);
-        changeEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+        changeEvent = [func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -661,7 +668,8 @@ ArkUINativeModuleValue TextPickerDialogBridge::JsShow(ArkUIRuntimeCallInfo* runt
     auto onScrollStop = ArkTSUtils::GetProperty(vm, paramObject, "onScrollStop");
     if (!onScrollStop->IsUndefined() && onScrollStop->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsFunc = onScrollStop->ToObject(vm);
-        scrollStopEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+        scrollStopEvent = [func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -690,7 +698,8 @@ ArkUINativeModuleValue TextPickerDialogBridge::JsShow(ArkUIRuntimeCallInfo* runt
     auto onEnterSelectedArea = ArkTSUtils::GetProperty(vm, paramObject, "onEnterSelectedArea");
     if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> jsFunc = onEnterSelectedArea->ToObject(vm);
-        enterSelectedAreaEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+        enterSelectedAreaEvent = [func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
