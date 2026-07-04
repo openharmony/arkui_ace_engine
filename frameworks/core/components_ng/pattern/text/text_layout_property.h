@@ -82,6 +82,11 @@ public:
 
     ~TextLayoutProperty() override = default;
 
+    bool NeedReadFontScaleFromEnv() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<TextLayoutProperty>();

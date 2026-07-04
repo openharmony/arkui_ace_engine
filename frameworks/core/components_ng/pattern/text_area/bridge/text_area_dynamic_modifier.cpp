@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 
+#include <optional>
+
 #include "bridge/common/utils/utils.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -21,6 +23,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_area/bridge/text_area_model_common.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1162,9 +1165,12 @@ ArkUI_Float32 GetTextAreaLetterSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFpWithEnv(pattern->GetEnvFontScale());
+    std::optional<float> envFontScale;
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty) {
+        envFontScale = layoutProperty->GetEnvFontScale();
+    }
+    return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFpWithEnv(envFontScale);
 }
 
 void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)

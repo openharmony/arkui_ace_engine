@@ -851,7 +851,8 @@ float CleanNodeResponseArea::GetIconSize()
     auto envFontScale = std::optional<float>();
     auto pattern = hostPattern_.Upgrade();
     if (pattern) {
-        envFontScale = pattern->GetEnvFontScale();
+        auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        envFontScale = layoutProperty ? layoutProperty->GetEnvFontScale() : std::nullopt;
     }
     return static_cast<float>(iconSize_.ConvertToPxDistributeWithEnv(std::optional<float>(), std::optional<float>(),
         true, envFontScale));
@@ -1313,7 +1314,7 @@ void CleanNodeResponseArea::LoadingImageProperty()
                 minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
             }
             iconSize_ = Dimension(iconSizeValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
-                pattern->GetEnvFontScale());
+                textFieldLayoutProperty->GetEnvFontScale());
         }
     }
     if (textFieldLayoutProperty->HasIconSrc()) {
@@ -1495,7 +1496,8 @@ void VoiceNodeResponseArea::ParseTheme(
     auto envFontScale = std::optional<float>();
     auto pattern = hostPattern_.Upgrade();
     if (pattern) {
-        envFontScale = pattern->GetEnvFontScale();
+        auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        envFontScale = layoutProperty ? layoutProperty->GetEnvFontScale() : std::nullopt;
     }
     micIconSize_ = theme->GetMicIconSize().ConvertToPxDistributeWithEnv(
         symbolProperty->GetMinFontScale().value_or(0.0f), MAX_FONT_SCALE, true, envFontScale);

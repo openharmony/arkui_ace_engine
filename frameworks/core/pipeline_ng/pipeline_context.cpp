@@ -91,6 +91,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -8483,9 +8484,9 @@ std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<Frame
 float PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_RETURN(host, GetFontScale());
-    auto pattern = host->GetPattern();
-    CHECK_NULL_RETURN(pattern, GetFontScale());
-    auto envFontScale = pattern->GetEnvFontScale();
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, GetFontScale());
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     return envFontScale.has_value() ? envFontScale.value() : GetFontScale();
 }
 
