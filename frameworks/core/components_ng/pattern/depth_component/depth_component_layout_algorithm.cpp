@@ -73,11 +73,10 @@ void DepthComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    AdjustDepthComponentFrameSize(layoutWrapper, frameSize);
+    AdjustFrameSize(layoutWrapper, frameSize);
 }
 
-void DepthComponentLayoutAlgorithm::AdjustDepthComponentFrameSize(
-    LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize)
+void DepthComponentLayoutAlgorithm::AdjustFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto depthLayoutProperty = AceType::DynamicCast<DepthComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());

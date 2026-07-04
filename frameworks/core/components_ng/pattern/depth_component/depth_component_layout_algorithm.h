@@ -33,7 +33,7 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
-    void AdjustDepthComponentFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize);
+    void AdjustFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize);
 };
 
 } // namespace OHOS::Ace::NG

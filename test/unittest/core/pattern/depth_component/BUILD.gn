@@ -1,0 +1,38 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+# NOTE: do NOT add `defines = [ "ENABLE_ROSEN_BACKEND" ]` here.
+# ace_unittest_config forces ACE_UNITTEST. DepthComponentPattern's Rosen helpers
+# (GetRSDepthNode / TransferCameraParams / ...) are declared/defined under
+# `ENABLE_ROSEN_BACKEND && !ACE_UNITTEST`, so they are compiled out; defining
+# ENABLE_ROSEN_BACKEND would not increase coverage and would pull Rosen deps.
+# GLTF/3D helpers (KIT_3D_ENABLE) are likewise out of scope for host unit tests.
+ace_unittest("depth_component_test_ng") {
+  module_name = "DepthComponent-Test"
+  type = "new"
+  sources = [
+    # DepthComponent sources (not part of the shared ace_components_pattern lib).
+    "$ace_root/frameworks/core/components_ng/pattern/depth_component/depth_component_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/depth_component/depth_component_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/depth_component/depth_component_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/depth_component/depth_component_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/depth_component/depth_component_pattern.cpp",
+    # TDD fixtures.
+    "depth_component_test_base.cpp",
+    "depth_component_pattern_test.cpp",
+    "depth_component_layout_algorithm_test.cpp",
+    "depth_component_property_event_test.cpp",
+  ]
+}
