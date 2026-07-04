@@ -142,6 +142,21 @@ bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
     }
 }
 
+void ForceSplitManager::NotifyMediaQueryUpdate()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    // OnSurfaceChanged on the declarative frontend only triggers the media query update
+    // path (it forwards to delegate_->OnSurfaceChanged() -> OnMediaQueryUpdate()); the
+    // width/height arguments are ignored there. Pass the current root size for semantic
+    // consistency and safety for any frontend that does consume them.
+    auto width = static_cast<int32_t>(context->GetRootWidth());
+    auto height = static_cast<int32_t>(context->GetRootHeight());
+    frontend->OnSurfaceChanged(width, height);
+}
+
 void ForceSplitManager::ChangeForceSplitModeTo(ForceSplitMode mode)
 {
     bool preIsDraggable = IsDraggable(mode_);
@@ -161,6 +176,7 @@ void ForceSplitManager::ChangeForceSplitModeTo(ForceSplitMode mode)
     }
     splitRatio_ = splitRatio;
     OnForceSplitRatioUpdate(splitRatio_);
+    NotifyMediaQueryUpdate();
 }
 
 void ForceSplitManager::OnForceSplitEnableChange()
@@ -168,6 +184,7 @@ void ForceSplitManager::OnForceSplitEnableChange()
     UpdateIsInForceSplitMode();
     FlushArkUIHook();
     NotifyForceSplitStateChange();
+    NotifyMediaQueryUpdate();
 }
 
 void ForceSplitManager::FlushArkUIHook()

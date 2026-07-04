@@ -221,6 +221,7 @@ private:
     void RegisterSurfaceChangeCallbackIfNeeded();
     void ChangeForceSplitModeIfNeeded();
     void FlushArkUIHook();
+    void NotifyMediaQueryUpdate();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
     void NotifyWindowFirstTimeDraggableRatioIfNeeded(float ratio);
