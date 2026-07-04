@@ -37,6 +37,9 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::NG {
+
+using PixelMapCallback = std::function<void(const RefPtr<PixelMap>&)>;
+
 class MovingPhotoPattern : public Pattern {
     DECLARE_ACE_TYPE(MovingPhotoPattern, Pattern);
 
@@ -314,7 +317,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
-    void GetPixelMap();
+    void LoadPixelMapAsync(const PixelMapCallback& callback);
     int64_t GetUriCoverPosition();
     void HandleAnalyzerPlayEvent(bool canPlay);
     bool IsRefreshMovingPhotoReturn(bool status);
@@ -322,7 +325,6 @@ private:
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<MovingPhotoController> controller_;
-    RefPtr<PixelMap> pixelMap_;
 
     SharedFd fd_;
     bool notifyTransitionFlag_ = false;
