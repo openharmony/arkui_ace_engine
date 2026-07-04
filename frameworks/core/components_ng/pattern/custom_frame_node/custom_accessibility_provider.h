@@ -51,6 +51,10 @@ public:
         void (*callback)(int32_t errorCode)) override;
     void SendThirdAccessibilityProvider(
         const std::weak_ptr<ThirdAccessibilityManager>& thirdAccessibilityManager) override;
+    std::weak_ptr<ThirdAccessibilityManager> GetThirdAccessibilityManager() override
+    {
+        return thirdAccessibilityManager_;
+    }
 
 private:
     WeakPtr<CustomPattern> weakPattern_;

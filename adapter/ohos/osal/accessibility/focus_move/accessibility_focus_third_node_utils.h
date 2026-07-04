@@ -22,6 +22,9 @@
 namespace OHOS::Ace {
 class AccessibilityProvider;
 }
+namespace OHOS::Ace::NG {
+class CustomAccessibilityProperty;
+}
 
 namespace OHOS::Ace::Framework {
 
@@ -74,6 +77,7 @@ public:
 private:
     template<typename T>
     std::vector<std::shared_ptr<T>> GetChildrenTemplate();
+    RefPtr<NG::CustomAccessibilityProperty> GetCustomProperty();
     std::shared_ptr<ArkUI_AccessibilityElementInfo> nodeInfo_;
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
 };

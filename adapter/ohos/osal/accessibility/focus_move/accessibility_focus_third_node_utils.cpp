@@ -17,6 +17,7 @@
 #include "adapter/ohos/osal/js_third_provider_interaction_operation.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_provider.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -26,6 +27,15 @@ ThirdRulesCheckNode::ThirdRulesCheckNode(std::shared_ptr<ArkUI_AccessibilityElem
     : FocusRulesCheckNode(accessibilityId), nodeInfo_(std::move(nodeInfo)),
     accessibilityProvider_(accessibilityProvider)
 {
+}
+
+RefPtr<NG::CustomAccessibilityProperty> ThirdRulesCheckNode::GetCustomProperty()
+{
+    auto provider = accessibilityProvider_.Upgrade();
+    CHECK_NULL_RETURN(provider, nullptr);
+    auto thirdManager = provider->GetThirdAccessibilityManager().lock();
+    CHECK_NULL_RETURN(thirdManager, nullptr);
+    return thirdManager->GetThirdCustomProperty(GetAccessibilityId());
 }
 
 bool ThirdRulesCheckNode::GetPropText(Accessibility::PropValue& value)

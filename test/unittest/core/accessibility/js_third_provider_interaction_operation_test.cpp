@@ -875,4 +875,223 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, FindNativeInfoById001, TestSiz
     EXPECT_EQ(ret, true);
 }
 
+// ==================== SetThirdCustomProperty / GetThirdCustomProperty ====================
+
+/**
+ * @tc.name: SetThirdCustomProperty001
+ * @tc.desc: SetThirdCustomProperty with valid property, then Get returns the same instance
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, SetThirdCustomProperty001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    auto property = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    property->SetAccessibilityText("text");
+    int64_t elementId = 100;
+    jsInteractionOperation->SetThirdCustomProperty(elementId, property);
+    auto retrieved = jsInteractionOperation->GetThirdCustomProperty(elementId);
+    ASSERT_NE(retrieved, nullptr);
+    EXPECT_EQ(retrieved->GetAccessibilityText(), "text");
+}
+
+/**
+ * @tc.name: SetThirdCustomProperty002
+ * @tc.desc: SetThirdCustomProperty with nullptr property removes existing entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, SetThirdCustomProperty002, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    auto property = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    int64_t elementId = 100;
+    jsInteractionOperation->SetThirdCustomProperty(elementId, property);
+    ASSERT_NE(jsInteractionOperation->GetThirdCustomProperty(elementId), nullptr);
+
+    // Treat nullptr as removal
+    jsInteractionOperation->SetThirdCustomProperty(elementId, nullptr);
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(elementId), nullptr);
+}
+
+/**
+ * @tc.name: SetThirdCustomProperty003
+ * @tc.desc: SetThirdCustomProperty with the same elementId overwrites existing entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, SetThirdCustomProperty003, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    auto property1 = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    property1->SetAccessibilityText("first");
+    auto property2 = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    property2->SetAccessibilityText("second");
+
+    int64_t elementId = 200;
+    jsInteractionOperation->SetThirdCustomProperty(elementId, property1);
+    jsInteractionOperation->SetThirdCustomProperty(elementId, property2);
+
+    auto retrieved = jsInteractionOperation->GetThirdCustomProperty(elementId);
+    ASSERT_NE(retrieved, nullptr);
+    EXPECT_EQ(retrieved->GetAccessibilityText(), "second");
+}
+
+/**
+ * @tc.name: GetThirdCustomProperty001
+ * @tc.desc: GetThirdCustomProperty returns nullptr when elementId not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, GetThirdCustomProperty001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(9999), nullptr);
+}
+
+// ==================== RemoveThirdCustomProperty ====================
+
+/**
+ * @tc.name: RemoveThirdCustomProperty001
+ * @tc.desc: RemoveThirdCustomProperty removes existing entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, RemoveThirdCustomProperty001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    auto property = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    int64_t elementId = 300;
+    jsInteractionOperation->SetThirdCustomProperty(elementId, property);
+    ASSERT_NE(jsInteractionOperation->GetThirdCustomProperty(elementId), nullptr);
+
+    jsInteractionOperation->RemoveThirdCustomProperty(elementId);
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(elementId), nullptr);
+}
+
+/**
+ * @tc.name: RemoveThirdCustomProperty002
+ * @tc.desc: RemoveThirdCustomProperty with non-existing elementId does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, RemoveThirdCustomProperty002, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    jsInteractionOperation->RemoveThirdCustomProperty(9999);
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(9999), nullptr);
+}
+
+// ==================== ClearAllThirdCustomProperties ====================
+
+/**
+ * @tc.name: ClearAllThirdCustomProperties001
+ * @tc.desc: ClearAllThirdCustomProperties removes all entries
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ClearAllThirdCustomProperties001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    auto property1 = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    auto property2 = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    jsInteractionOperation->SetThirdCustomProperty(1, property1);
+    jsInteractionOperation->SetThirdCustomProperty(2, property2);
+
+    jsInteractionOperation->ClearAllThirdCustomProperties();
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(1), nullptr);
+    EXPECT_EQ(jsInteractionOperation->GetThirdCustomProperty(2), nullptr);
+}
+
+// ==================== Destructor calls ClearAllThirdCustomProperties ====================
+
+/**
+ * @tc.name: JsThirdProviderInteractionOperationDestructor001
+ * @tc.desc: Destructor clears all custom properties so no entries leak
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationDestructor001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    // Use scope to trigger destructor at end of block
+    {
+        auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+            ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+        auto property = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+        jsInteractionOperation->SetThirdCustomProperty(42, property);
+        ASSERT_NE(jsInteractionOperation->GetThirdCustomProperty(42), nullptr);
+        ASSERT_FALSE(jsInteractionOperation->thirdCustomProperties_.empty());
+    }
+    // After destruction, the map should be empty; we cannot read it directly anymore,
+    // but the destructor should have run ClearAllThirdCustomProperties without crashing.
+}
+
+// ==================== ThirdAccessibilityManager default GetThirdCustomProperty ====================
+
+/**
+ * @tc.name: DefaultGetThirdCustomProperty001
+ * @tc.desc: Default ThirdAccessibilityManager::GetThirdCustomProperty returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, DefaultGetThirdCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a default ThirdAccessibilityManager and call GetThirdCustomProperty
+     * @tc.expected: returns nullptr by default base implementation
+     */
+    auto manager = AceType::MakeRefPtr<ThirdAccessibilityManager>();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->GetThirdCustomProperty(1), nullptr);
+}
+
+// ==================== AccessibilityProvider default GetThirdAccessibilityManager ====================
+
+/**
+ * @tc.name: ProviderDefaultGetThirdAccessibilityManager001
+ * @tc.desc: Default AccessibilityProvider::GetThirdAccessibilityManager returns empty weak_ptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, ProviderDefaultGetThirdAccessibilityManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AccessibilityProvider via a base-typed ref and call GetThirdAccessibilityManager
+     * @tc.expected: returns empty weak_ptr (default impl)
+     */
+    auto provider = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    ASSERT_NE(provider, nullptr);
+    auto weakThirdManager = provider->AccessibilityProvider::GetThirdAccessibilityManager();
+    EXPECT_TRUE(weakThirdManager.expired());
+}
+
 } // namespace OHOS::Ace::NG
