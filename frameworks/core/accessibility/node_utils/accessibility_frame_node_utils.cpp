@@ -16,6 +16,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -240,17 +241,22 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
         .isFromAccessibility = true
     };
     auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
+    bool ret = false;
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
-        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
+        ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
         auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
-        return ret;
     }
-    return false;
+
+    auto listPattern = AceType::DynamicCast<NG::ListPattern>(parentPattern);
+    if (listPattern) {
+        listPattern->StartSnapAnimation(SnapAnimationOptions {});
+    }
+    return ret;
 }
 
 bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
