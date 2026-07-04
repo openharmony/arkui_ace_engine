@@ -19,12 +19,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/span/bridge/image_span/image_span_custom_modifier.h"
 #include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/components_ng/pattern/text/span/image_span_view_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -375,16 +371,6 @@ void CreateImageSpan()
     ImageSpanView::Create();
 }
 
-
-void SetStaticBaselineOffset(Ark_NativePointer node, const Opt_LengthMetrics* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonPercent(convValue);
-    ImageSpanViewStatic::SetBaselineOffset(frameNode, convValue);
-}
-
 } // namespace
 
 namespace NodeModifier {
@@ -453,14 +439,5 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
     return &modifier;
 }
 
-const ArkUIImageSpanCustomModifier* GetImageSpanCustomModifier()
-{
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIImageSpanCustomModifier modifier = {
-        .setStaticBaselineOffset = SetStaticBaselineOffset,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
-}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
