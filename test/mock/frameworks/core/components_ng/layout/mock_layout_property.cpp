@@ -19,6 +19,7 @@
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/position_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 LayoutProperty::LayoutProperty() = default;
@@ -225,6 +226,21 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value) 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
     return TextDirection::AUTO;
+}
+
+std::optional<float> LayoutProperty::GetEnvFontScale() const
+{
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {
+        return std::nullopt;
+    }
+    auto& [fontScaleEnv, fontScaleEnvDirty] = envReaderCache_.fontScale;
+    if (fontScaleEnvDirty) {
+        fontScaleEnv = pipeline->ResolveFontScaleFromEnv(host);
+        fontScaleEnvDirty = false;
+    }
+    return fontScaleEnv;
 }
 
 void LayoutProperty::UpdateLayoutWeight(float value) {}

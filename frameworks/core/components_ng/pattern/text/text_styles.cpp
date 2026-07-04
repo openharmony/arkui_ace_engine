@@ -61,6 +61,12 @@ namespace {
         }                                                                                              \
     } while (false)
 
+std::optional<float> GetEnvFontScale(const RefPtr<Pattern>& pattern)
+{
+    auto layoutProperty = pattern ? pattern->GetLayoutProperty<LayoutProperty>() : nullptr;
+    return layoutProperty ? layoutProperty->GetEnvFontScale() : std::nullopt;
+}
+
 void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolStyle, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme)
 {
@@ -155,7 +161,7 @@ void UpdateTextStyleFromFontAndTextLine(const std::unique_ptr<FontStyle>& fontSt
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
     if (pattern) {
-        textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+        textStyle.SetEnvFontScale(GetEnvFontScale(pattern));
     }
     if (convertFontSizeToPx) {
         UPDATE_DIMENSION_STYLE_TO_PX(fontStyle, FontSize, FontSize);
@@ -219,7 +225,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
 
         if (pattern) {
-            textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+            textStyle.SetEnvFontScale(GetEnvFontScale(pattern));
         }
 
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
