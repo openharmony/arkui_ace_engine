@@ -14,6 +14,7 @@
  */
 
 #include "video_state_machine_pattern_test_common.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1356,6 +1357,119 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDest
     }
     // Reaching here without crash means the destructor works correctly.
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternPlaybackCompleteFromPrepared001
+ * @tc.desc: When PLAYBACK_COMPLETE arrives in PREPARED with pending PLAY,
+ *           synthesize PLAYING first so both onStart and onFinished fire,
+ *           and clear the pending PLAY command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPlaybackCompleteFromPrepared001, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->duration_ = 100;
+    pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
+    pattern->stateManager_->SetPendingCommand(VideoPlaybackCommand::PLAY);
+
+    bool startFired = false;
+    bool finishFired = false;
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
+    eventHub->SetOnStart([&startFired](const std::string& /* param */) { startFired = true; });
+    eventHub->SetOnFinish([&finishFired](const std::string& /* param */) { finishFired = true; });
+
+    pattern->OnPlayerStatus(PlaybackStatus::PLAYBACK_COMPLETE);
+
+    EXPECT_EQ(pattern->stateManager_->GetCurrentState(), VideoPlaybackState::COMPLETED);
+    EXPECT_TRUE(startFired);
+    EXPECT_TRUE(finishFired);
+    EXPECT_EQ(pattern->stateManager_->GetPendingCommand(), VideoPlaybackCommand::NONE);
+    EXPECT_EQ(pattern->currentPos_, 100u);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternPlaybackCompleteFromPrepared002
+ * @tc.desc: When PLAYBACK_COMPLETE arrives in PREPARED without pending PLAY,
+ *           the state must stay PREPARED and no playback events should fire.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPlaybackCompleteFromPrepared002, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
+
+    bool startFired = false;
+    bool finishFired = false;
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
+    eventHub->SetOnStart([&startFired](const std::string& /* param */) { startFired = true; });
+    eventHub->SetOnFinish([&finishFired](const std::string& /* param */) { finishFired = true; });
+
+    pattern->OnPlayerStatus(PlaybackStatus::PLAYBACK_COMPLETE);
+
+    EXPECT_EQ(pattern->stateManager_->GetCurrentState(), VideoPlaybackState::PREPARED);
+    EXPECT_FALSE(startFired);
+    EXPECT_FALSE(finishFired);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternPlaybackCompleteFromPlaying001
+ * @tc.desc: Normal path: PLAYBACK_COMPLETE from PLAYING only fires onFinished.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPlaybackCompleteFromPlaying001, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->duration_ = 100;
+    pattern->stateManager_->state_ = VideoPlaybackState::PLAYING;
+
+    bool startFired = false;
+    bool finishFired = false;
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
+    ASSERT_TRUE(eventHub);
+    eventHub->SetOnStart([&startFired](const std::string& /* param */) { startFired = true; });
+    eventHub->SetOnFinish([&finishFired](const std::string& /* param */) { finishFired = true; });
+
+    pattern->OnPlayerStatus(PlaybackStatus::PLAYBACK_COMPLETE);
+
+    EXPECT_EQ(pattern->stateManager_->GetCurrentState(), VideoPlaybackState::COMPLETED);
+    EXPECT_FALSE(startFired);
+    EXPECT_TRUE(finishFired);
+    EXPECT_EQ(pattern->currentPos_, 100u);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternOnStartRenderFrameCbResetPending001
+ * @tc.desc: OnStartRenderFrameCb must be ignored when a RESET command is pending.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnStartRenderFrameCbResetPending001, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->isInitialState_ = true;
+    pattern->stateManager_->SetPendingCommand(VideoPlaybackCommand::RESET);
+
+    pattern->OnStartRenderFrameCb();
+
+    EXPECT_TRUE(pattern->isInitialState_);
 }
 
 } // namespace OHOS::Ace::NG

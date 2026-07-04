@@ -1033,6 +1033,12 @@ void VideoStateMachinePattern::ChangePlayerStatus(const PlaybackStatus& status)
             break;
         }
         case PlaybackStatus::PLAYBACK_COMPLETE:
+            // Player may report EOS without STARTED after seek-to-end + Play.
+            // Synthesize PLAYING first to fire onStart and clear pending PLAY.
+            if (stateManager_->IsPrepared() &&
+                stateManager_->GetPendingCommand() == VideoPlaybackCommand::PLAY) {
+                stateManager_->HandleStateTransition(VideoPlaybackCommand::PLAY);
+            }
             stateManager_->HandleStateTransition(VideoPlaybackCommand::COMPLETE);
             break;
         default:
@@ -1124,6 +1130,13 @@ void VideoStateMachinePattern::OnResolutionChange() const
 
 void VideoStateMachinePattern::OnStartRenderFrameCb()
 {
+    // A stale start-render-frame callback from a previous Play task may arrive after Reset is requested.
+    // Ignore it to avoid writing invalid video size into the layout property during reset.
+    if (stateManager_->GetPendingCommand() == VideoPlaybackCommand::RESET) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] OnStartRenderFrameCb ignored: RESET is pending", hostId_);
+        return;
+    }
     isInitialState_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
