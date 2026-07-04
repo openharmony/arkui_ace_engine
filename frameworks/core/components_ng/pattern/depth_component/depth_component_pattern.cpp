@@ -152,7 +152,9 @@ void DepthComponentPattern::OnModifyDone()
         SetupBackgroundImageNode();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
         pendingCleanupGltf_ = false;
-        if (surfaceRenderContext_.empty()) {
+        auto backgroundImage = GetBackgroundImageSource();
+        bool deferForImageLoad = backgroundImage.IsValid() && !backgroundImage.IsSvg();
+        if (surfaceRenderContext_.empty() || !deferForImageLoad) {
             CleanupGltfResources(true);
         } else {
             pendingCleanupGltf_ = true;
@@ -236,12 +238,7 @@ void DepthComponentPattern::SetupBackgroundImageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto backgroundImage = GetBackgroundImageSource();
-    if (!backgroundImage.IsValid()) {
-        RemoveBackgroundImageNode();
-        return;
-    }
-
-    if (backgroundImage.IsSvg()) {
+    if (!backgroundImage.IsValid() || backgroundImage.IsSvg()) {
         RemoveBackgroundImageNode();
         return;
     }
