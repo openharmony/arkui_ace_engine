@@ -47,8 +47,9 @@ bool ScrollableItem::MaybeRelease()
     if (!SystemProperties::GetEnableScrollableItemPool()) {
         return true;
     }
+    auto maybeRelease = maybeRelease_;
     deleter_(this);
-    return maybeRelease_;
+    return maybeRelease;
 }
 
 } // namespace OHOS::Ace::NG
