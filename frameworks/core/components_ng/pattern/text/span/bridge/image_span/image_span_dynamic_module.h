@@ -29,7 +29,9 @@ public:
     const void* GetDynamicModifier() override;
     const void* GetStaticModifier() override;
     const void* GetCjModifier() override;
+#ifndef CROSS_PLATFORM
     const void* GetCustomModifier(const std::string& name = "") override;
+#endif
     void* GetModel() override;
 };
 
