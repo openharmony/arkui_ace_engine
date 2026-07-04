@@ -120,6 +120,14 @@ private:
         const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager,
         const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator);
 
+    void DumpSetThirdCustomProperty(
+        const DumpInfoArgument& argument,
+        const std::vector<std::string>& params,
+        const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator);
+    void DumpGetThirdCustomProperty(
+        int64_t elementId,
+        const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator);
+
     AccessibilityHoverForThirdState hoverForThirdState_;
     std::unordered_map<int64_t, std::weak_ptr<JsThirdProviderInteractionOperation>>
         jsThirdProviderOperator_;

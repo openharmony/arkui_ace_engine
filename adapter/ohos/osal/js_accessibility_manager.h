@@ -556,12 +556,29 @@ public:
         AccessibilityElementInfo& nodeInfo,
         int64_t parentAccessibilityId);
 
+    void AddAccessibilityVirtualNode(const int64_t elementId,
+        const std::vector<AccessibilityVirtualNode>& nodes, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+    void RemoveAccessibilityVirtualNode(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+
     void AddVirtualNodeChildrenToInfos(
         std::list<AccessibilityElementInfo>& infos,
         const RefPtr<NG::FrameNode>& hostNode,
         const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
         const CommonProperty& commonProperty,
         int64_t virtualNodeAccessibilityId);
+    void FillEventInfoWithVirtualNode(
+        const RefPtr<NG::FrameNode>& parentNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        AccessibilityEventInfo& eventInfo,
+        const RefPtr<NG::PipelineContext>& context,
+        int64_t elementId);
+    void SendEventToAccessibilityWithVirtualNode(
+        const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::FrameNode>& parentNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const RefPtr<PipelineBase>& context);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -827,6 +844,33 @@ private:
     void DumpGetCheckListTest(const std::vector<std::string>& params);
 
     void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
+
+    void DumpSetCustomPropertyTest(const DumpInfoArgument& argument);
+    void DumpGetCustomPropertyTest(int64_t nodeId);
+    bool ParseSetCustomPropertyParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseGetCustomPropertyParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+
+    void DumpAddVirtualNodeTest(const DumpInfoArgument& argument);
+    void DumpRemoveVirtualNodeTest(const DumpInfoArgument& argument);
+    void DumpGetVirtualNodeTest(const DumpInfoArgument& argument);
+    bool ParseAddVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseRemoveVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseGetVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParsePerformVirtualNodeActionParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+
+    void DumpPerformVirtualNodeActionTest(const DumpInfoArgument& argument);
+    void DumpVirtualAccessibilityNodeTree(const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode, int32_t depth);
+
+    void UpdateAccessibilityElementInfo(const int64_t elementId,
+        const AccessibilityVirtualNode& accessibilityVirtualNode, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
 
     void GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
             const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node);

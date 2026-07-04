@@ -886,17 +886,44 @@ void JsThirdProviderInteractionOperation::UpdateCustomAccessibilityProperty(
     const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        "ArkUI third UpdateAccessibilityElementInfo by id: %{public}" PRId64 ", requestId: %{public}d",
+        elementId, requestId);
+
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        elementId, splitElementId, splitTreeId);
+
+    auto customProperty = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
+    customProperty->SetAccessibilityText(accessibilityVirtualNode.GetAccessibilityText());
+    customProperty->SetAccessibilityLevel(accessibilityVirtualNode.GetAccessibilityLevel());
+    customProperty->SetRole(accessibilityVirtualNode.GetCustomComponentType());
+    customProperty->SetCheckable(accessibilityVirtualNode.GetCheckable());
+    customProperty->SetChecked(accessibilityVirtualNode.GetChecked());
+    customProperty->SetEnabled(accessibilityVirtualNode.GetEnabled());
+    customProperty->SetSelected(accessibilityVirtualNode.GetSelected());
+    customProperty->SetAccessibilityGroup(accessibilityVirtualNode.GetAccessibilityGroup());
+
+    SetThirdCustomProperty(splitElementId, customProperty);
+    callback.SetUpdateCustomAccessibilityPropertyResult(Accessibility::OperateVirtualNodeResult::SUCCESS, requestId);
 }
 
 void JsThirdProviderInteractionOperation::AddAccessibilityVirtualNode(
     const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "third not support, requestId: %{public}d", requestId);
+    callback.SetAddAccessibilityVirtualNodeResult(
+        Accessibility::OperateVirtualNodeResult::VIRTUAL_NODE_NOT_SUPPORT, requestId);
 }
 
 void JsThirdProviderInteractionOperation::RemoveAccessibilityVirtualNode(const int64_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "third not support, requestId: %{public}d", requestId);
+    callback.SetRemoveAccessibilityVirtualNodeResult(
+        Accessibility::OperateVirtualNodeResult::VIRTUAL_NODE_NOT_SUPPORT, requestId);
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(

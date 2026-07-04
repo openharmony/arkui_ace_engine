@@ -262,6 +262,8 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
     "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_third.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_third_node_utils.cpp",
+    "$ace_root/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_virtual_node_utils.cpp",
+    "$ace_root/adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.cpp",
     "$ace_root/adapter/ohos/osal/js_accessibility_manager.cpp",
     "$ace_root/adapter/ohos/osal/js_third_accessibility_hover_ng.cpp",
     "$ace_root/adapter/ohos/osal/js_third_provider_interaction_operation.cpp",
