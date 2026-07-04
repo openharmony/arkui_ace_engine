@@ -372,6 +372,9 @@ void SelectPattern::ConfigMenuParam()
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_VOID(menuViewModifier);
     menuViewModifier->setMenuSystemMaterial(menuNode, menuParam);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        menuViewModifier->updateMenuBorderEffect(menuNode, menuWrapper_, menuParam);
+    }
     wrapperPattern->SetMenuParam(menuParam);
 }
 
