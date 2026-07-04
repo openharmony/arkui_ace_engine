@@ -304,6 +304,9 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
         CleanRefereeBeforeTouchTestForPost(touchPoint, currentReferee);
         return;
     }
+    if (activeRecognizerManager_) {
+        activeRecognizerManager_->CleanFinishedRecognizersWithStaleFingers(touchPoint.id, downFingerIds_);
+    }
     if (currentReferee->QueryAllDone(touchPoint.id)) {
         currentReferee->CleanGestureScope(touchPoint.id);
         if (touchTestResults_.empty() && currentReferee->QueryAllDone()) {
