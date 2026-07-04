@@ -2139,6 +2139,10 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     data.gatherNode = gatherNode;
     // create textNode
     DragAnimationHelper::CreateTextNode(data);
+    auto gatherNodeOffset = isExpandDisplay
+        ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
+        : positionToWindow;
+    DragEventActuator::UpdateGatherAnimatePosition(gatherNode, gatherNodeOffset);
 
     // mount node
     auto subWindowOverlayManager = subWindow->GetOverlayManager();
@@ -2150,10 +2154,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // update position
     UpdateNodePositionBeforeStartAnimation(frameNode, data);
-    auto gatherNodeOffset = isExpandDisplay
-        ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
-        : positionToWindow;
-    DragEventActuator::UpdateGatherAnimatePosition(gatherNode, gatherNodeOffset);
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(data.textNode);
