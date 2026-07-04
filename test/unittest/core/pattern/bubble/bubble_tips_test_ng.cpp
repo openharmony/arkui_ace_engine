@@ -39,6 +39,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components/common/properties/placement.h"
 
 using namespace testing;
@@ -1316,6 +1317,59 @@ HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
      */
     EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
     EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect001
+ * @tc.desc: Test InitTargetSizeAndPosition uses visible rect when target is partially clipped by parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create tips node with TARGET anchor.
+     */
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = true;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. get target node and set up parent-child hierarchy.
+     */
+    auto targetNode = FrameNode::GetFrameNode(layoutAlgorithm->targetTag_, layoutAlgorithm->targetNodeId_);
+    ASSERT_NE(targetNode, nullptr);
+
+    // target geometry: 200x200 at (100,100)
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 150x150 at (0,0) — clips the target to 50x50
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 150.0f, 150.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(false, nullptr);
+
+    /**
+     * @tc.expected: targetSize_ should be the visible portion (50x50), not the full frame (200x200).
+     */
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(50.0f, 50.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
 }
 
 } // namespace OHOS::Ace::NG

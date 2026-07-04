@@ -380,6 +380,7 @@ private:
     bool isTips_ = false;
     bool followCursor_ = false;
     bool resetTipsSize_ = false;
+    bool targetFullyInvisible_ = false;
     Placement tipsPlacement_ = Placement::BOTTOM_LEFT;
 
     BubbleDumpInfo dumpInfo_;
