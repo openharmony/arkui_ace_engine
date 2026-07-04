@@ -853,7 +853,12 @@ export class FrameNode implements MaterializedBase {
             index_casted = index;
         }
         const oldParent = this.getParent();
-        if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+        const isOldParentCrossLanguage = oldParent && (oldParent!.getType() === 'ProxyFrameNode') &&
+            (oldParent!.checkIfCanCrossLanguageTreeOperating());
+        const isTargetParentCrossLanguage = (targetParent!.getType() === 'ProxyFrameNode') &&
+            (targetParent!.checkIfCanCrossLanguageTreeOperating());
+        if ((oldParent && !(oldParent.isModifiable() || isOldParentCrossLanguage)) ||
+            !(targetParent.isModifiable() || isTargetParentCrossLanguage) || !targetParent.checkValid(this)) {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
@@ -1117,8 +1122,34 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         return 'ProxyFrameNode';
     }
     moveTo(targetParent: FrameNode, index?: int): void {
-        const error = Error('The FrameNode is not modifiable.');
-        throw new BusinessError(100021, error);
+        if (!this.checkIfCanCrossLanguageTreeOperating()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        if (targetParent === undefined || targetParent === null) {
+            return;
+        }
+        let index_casted: int = -1;
+        if (index !== undefined && index !== null) {
+            index_casted = index;
+        }
+        const oldParent = this.getParent();
+        const isOldParentCrossLanguage = oldParent && (oldParent!.getType() === 'ProxyFrameNode') &&
+            (oldParent!.checkIfCanCrossLanguageTreeOperating());
+        const isTargetParentCrossLanguage = (targetParent!.getType() === 'ProxyFrameNode') &&
+            (targetParent!.checkIfCanCrossLanguageTreeOperating());
+        if ((oldParent && !(oldParent.isModifiable() || isOldParentCrossLanguage)) ||
+            !(targetParent.isModifiable() || isTargetParentCrossLanguage) || !targetParent.checkValid(this)) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        const targetParent_casted = targetParent as (FrameNode);
+        let result = FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error('The current node has already been adopted.');
+            throw new BusinessError(100027, error);
+        }
+        return;
     }
     public getRenderNode(): RenderNode | null {
         return null;
