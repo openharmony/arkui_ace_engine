@@ -237,6 +237,7 @@ export class FrameNode implements MaterializedBase {
     public nodeType_?: string | undefined = undefined;
     private nodeAdapterRef_ ?: NodeAdapter;
     protected _supportMultiThread: boolean = false;
+    shouldInitRenderNode_: boolean = false;
 
     getType(): string {
         return 'CustomFrameNode';
@@ -302,7 +303,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
             if (isCustomFrameNode) {
-                this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.shouldInitRenderNode_ = true;
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode(this._supportMultiThread)
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
@@ -311,10 +312,6 @@ export class FrameNode implements MaterializedBase {
                 const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string, this._supportMultiThread);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
-            }
-            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
-            if (this.renderNode_ && isCustomFrameNode) {
-                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
@@ -908,6 +905,14 @@ export class FrameNode implements MaterializedBase {
     }
     public getRenderNode(): RenderNode | null {
         ArkUIAniModule._CheckThreadValid(true, 0);
+        if (this.shouldInitRenderNode_ && (!this.isDisposed_) && (!this.renderNode_)) {
+            this.shouldInitRenderNode_ = false;
+            this.renderNode_ = new RenderNode('CustomFrameNode')
+            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            if (this.renderNode_) {
+                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+            }
+        }
         return (this.renderNode_ && this.renderNode_?.peer?.ptr) ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
