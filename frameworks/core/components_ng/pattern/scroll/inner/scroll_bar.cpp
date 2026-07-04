@@ -252,7 +252,8 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPt
             std::max(NormalizeToPx(startReservedHeight_, context), avoidStart) + scrollBarMarginStart;
         double height = std::max(size.Height() - reserved, 0.0);
         auto hoverWidth = isUserNormalWidth_ ? barWidth_ : NormalizeToPx(hoverWidth_, context);
-        auto trackWidth = std::max(NormalizeToPx(normalBackgroundWidth_, context), barWidth_);
+        auto trackWidth =
+            barWidth_ != 0 ? std::max(NormalizeToPx(normalBackgroundWidth_, context), barWidth_) : 0;
         if (positionMode_ == PositionMode::LEFT) {
             auto padding = NormalizeToPx(padding_.Left(), context);
             auto trackX = padding - (trackWidth - barWidth_) * FACTOR_HALF;
