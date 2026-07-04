@@ -495,8 +495,8 @@ private:
     VirtualNodeContainerIdManager(const VirtualNodeContainerIdManager&) = delete;
     VirtualNodeContainerIdManager& operator=(const VirtualNodeContainerIdManager&) = delete;
 
-    // Find next available container ID
-    uint8_t FindNextAvailableId();
+    // Find next available container ID. Caller MUST already hold mutex_.
+    uint8_t FindNextAvailableIdLocked();
 
     // Container ID range
     static constexpr uint8_t MIN_CONTAINER_ID = 1;
