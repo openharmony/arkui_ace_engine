@@ -26,15 +26,16 @@ namespace {
 const Dimension PANEL_RADIUS = 32.0_vp;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr double HALF_VALUS = 2.0;
+const char PANEL_ETS_TAG[] = "Panel";
 } // namespace
 
 void SlidingPanelModelNG::Create(bool isShow)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PANEL_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", PANEL_ETS_TAG, nodeId);
     auto panelNode = GetOrCreateSlidingPanelNode(
-        V2::PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
+        PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
 
     // Create Column node to mount to Panel.
     auto columnId = panelNode->GetColumnId();

@@ -1397,6 +1397,7 @@
       "OHOS::Ace::NG::FocusView::FocusViewDidShow(OHOS::Ace::RefPtr<OHOS::Ace::NG::FocusHub> const&)";
       "OHOS::Ace::NG::FocusView::LostViewFocus()";
       "OHOS::Ace::NG::FocusView::SetIsViewRootScopeFocused(bool)";
+      "OHOS::Ace::NG::FocusView::FocusViewClose(bool)";
       "OHOS::Ace::NG::FontCollection::Current()";
       "OHOS::Ace::NG::ForceSplitManager::AddForceSplitRatioListener(int, std::__h::function<void (float)>&&)";
       "OHOS::Ace::NG::ForceSplitManager::RemoveForceSplitRatioListener(int)";
@@ -3416,6 +3417,7 @@
       "OHOS::Ace::SpanString::ToLineHeightSpan(OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> const&, int, int)";
       "OHOS::Ace::SpanString::ToParagraphStyleSpan(OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> const&, int, int)";
       "OHOS::Ace::SpanString::ToUrlSpan(OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> const&, int, int)";
+      "OHOS::Ace::SpringAnimation::SpringAnimation(OHOS::Ace::RefPtr<OHOS::Ace::SpringProperty> const&)";
       "OHOS::Ace::SpringChainProperty::GetDefaultOverSpringProperty()";
       "OHOS::Ace::SpringCurve::SpringCurve(float, float, float, float)";
       "OHOS::Ace::SpringMotion::Reset(double, double, double, OHOS::Ace::RefPtr<OHOS::Ace::SpringProperty> const&)";
@@ -4864,6 +4866,7 @@
       vtable?for?OHOS::Ace::ScrollPositionController;
       vtable?for?OHOS::Ace::ScrollSpringEffect;
       vtable?for?OHOS::Ace::SequencedRecognizer;
+      vtable?for?OHOS::Ace::SlidingPanelSizeChangeEvent;
       vtable?for?OHOS::Ace::SoleChildElement;
       vtable?for?OHOS::Ace::StackElement;
       vtable?for?OHOS::Ace::SubwindowManager;
@@ -5011,6 +5014,7 @@
       VTT?for?OHOS::Ace::ScrollPositionController;
       VTT?for?OHOS::Ace::ScrollSpringEffect;
       VTT?for?OHOS::Ace::SequencedRecognizer;
+      VTT?for?OHOS::Ace::SlidingPanelSizeChangeEvent;
       VTT?for?OHOS::Ace::SoleChildElement;
       VTT?for?OHOS::Ace::StackElement;
       VTT?for?OHOS::Ace::TapGesture;

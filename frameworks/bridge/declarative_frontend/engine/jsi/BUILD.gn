@@ -290,7 +290,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_navigation_utils.cpp",
       "nativeModule/arkts_native_node_adapter_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
-      "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_particle_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_polygon_bridge.cpp",

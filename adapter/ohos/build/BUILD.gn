@@ -62,6 +62,7 @@ component_modules = [
   "select",
   "grid",
   "bubble",
+  "panel",
 ]
 
 if (!ace_engine_feature_wearable) {

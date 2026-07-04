@@ -14,226 +14,35 @@
  */
 #include "core/interfaces/native/node/panel_modifier.h"
 
-#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
+#include "ui/base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t DEFAULT_PANEL_MODE = 1;
-constexpr double DEFAULT_HEIGHT = 48;
-constexpr uint32_t DEFAULT_PANEL_BACKGROUND_COLOR = 0x08182431;
-constexpr int32_t DEFAULT_PANEL_TYPE = 1;
-constexpr double DEFAULT_CUSTOM_HEIGHT = 0;
-
-void SetPanelMode(ArkUINodeHandle node, int32_t value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto mode = static_cast<PanelMode>(value);
-    SlidingPanelModelNG::SetPanelMode(frameNode, mode);
-}
-
-void ResetPanelMode(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto mode = static_cast<PanelMode>(DEFAULT_PANEL_MODE);
-    SlidingPanelModelNG::SetPanelMode(frameNode, mode);
-}
-
-void SetPanelFullHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelFullHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
-}
-void ResetPanelFullHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::ResetPanelFullHeight(frameNode);
-}
-
-void SetPanelHalfHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelHalfHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
-}
-void ResetPanelHalfHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::ResetPanelHalfHeight(frameNode);
-}
-
-void SetPanelMiniHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
-}
-
-void ResetPanelMiniHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(DEFAULT_HEIGHT, DimensionUnit::VP));
-}
-
-void SetPanelBackgroundMask(ArkUINodeHandle node, uint32_t color)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, Color(color));
-}
-
-void ResetPanelBackgroundMask(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, Color(DEFAULT_PANEL_BACKGROUND_COLOR));
-}
-
-void SetPanelType(ArkUINodeHandle node, int32_t value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto type = static_cast<PanelType>(value);
-    SlidingPanelModelNG::SetPanelType(frameNode, type);
-}
-
-void ResetPanelType(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto type = static_cast<PanelType>(DEFAULT_PANEL_TYPE);
-    SlidingPanelModelNG::SetPanelType(frameNode, type);
-}
-
-void SetPanelCustomHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelCustomHeight(
-        frameNode, CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
-}
-
-void SetPanelCustomHeightByString(ArkUINodeHandle node, const char* value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelCustomHeight(frameNode, CalcDimension(value));
-}
-
-void ResetPanelCustomHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelCustomHeight(frameNode, CalcDimension(DEFAULT_CUSTOM_HEIGHT));
-}
-
-void SetShowCloseIcon(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetShowCloseIcon(frameNode, value);
-}
-
-void ResetShowCloseIcon(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetShowCloseIcon(frameNode, false);
-}
-
-void SetDragBar(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetHasDragBar(frameNode, value);
-}
-
-void ResetDragBar(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetHasDragBar(frameNode, true);
-}
-
-void SetShow(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetIsShow(frameNode, value);
-}
-
-void ResetShow(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetIsShow(frameNode, true);
-}
-
 namespace NodeModifier {
 const ArkUIPanelModifier* GetPanelModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIPanelModifier modifier = {
-        .setPanelMode = SetPanelMode,
-        .resetPanelMode = ResetPanelMode,
-        .setPanelFullHeight = SetPanelFullHeight,
-        .resetPanelFullHeight = ResetPanelFullHeight,
-        .setPanelHalfHeight = SetPanelHalfHeight,
-        .resetPanelHalfHeight = ResetPanelHalfHeight,
-        .setPanelMiniHeight = SetPanelMiniHeight,
-        .resetPanelMiniHeight = ResetPanelMiniHeight,
-        .setPanelBackgroundMask = SetPanelBackgroundMask,
-        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
-        .setPanelType = SetPanelType,
-        .resetPanelType = ResetPanelType,
-        .setPanelCustomHeight = SetPanelCustomHeight,
-        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
-        .resetPanelCustomHeight = ResetPanelCustomHeight,
-        .setShowCloseIcon = SetShowCloseIcon,
-        .resetShowCloseIcon = ResetShowCloseIcon,
-        .setDragBar = SetDragBar,
-        .resetDragBar = ResetDragBar,
-        .setShow = SetShow,
-        .resetShow = ResetShow,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUIPanelModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Panel");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find panel dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUIPanelModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIPanelModifier* GetCJUIPanelModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIPanelModifier modifier = {
-        .setPanelMode = SetPanelMode,
-        .resetPanelMode = ResetPanelMode,
-        .setPanelFullHeight = SetPanelFullHeight,
-        .resetPanelFullHeight = ResetPanelFullHeight,
-        .setPanelHalfHeight = SetPanelHalfHeight,
-        .resetPanelHalfHeight = ResetPanelHalfHeight,
-        .setPanelMiniHeight = SetPanelMiniHeight,
-        .resetPanelMiniHeight = ResetPanelMiniHeight,
-        .setPanelBackgroundMask = SetPanelBackgroundMask,
-        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
-        .setPanelType = SetPanelType,
-        .resetPanelType = ResetPanelType,
-        .setPanelCustomHeight = SetPanelCustomHeight,
-        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
-        .resetPanelCustomHeight = ResetPanelCustomHeight,
-        .setShowCloseIcon = SetShowCloseIcon,
-        .resetShowCloseIcon = ResetShowCloseIcon,
-        .setDragBar = SetDragBar,
-        .resetDragBar = ResetDragBar,
-        .setShow = SetShow,
-        .resetShow = ResetShow,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const CJUIPanelModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Panel");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find panel dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const CJUIPanelModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
 }
 } // namespace OHOS::Ace::NG
