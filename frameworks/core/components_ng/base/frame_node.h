@@ -1628,6 +1628,7 @@ public:
     void RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback);
     void UnRegisterLpxUpdateCallback(LpxAttribute attribute);
     void FireLpxUpdateCallbacks();
+    bool IsNeedLazyLayout() const;
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;

@@ -101,7 +101,9 @@ void LazyWaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         extendedViewStart_ = viewStart_;
         extendedViewEnd_ = viewEnd_;
     }
-    MeasureItems(layoutWrapper);
+    if (!needSkipLayout_) {
+        MeasureItems(layoutWrapper);
+    }
     SetFrameSize(layoutWrapper, contentIdealSize, padding);
 }
 
@@ -356,10 +358,22 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     headerAdjustOffset_ = 0.0f;
     startReferenceViewportOffset_ = 0.0f;
     if (!posRef.has_value()) {
-        posRef = GetReferencePos(layoutWrapper->GetHostNode());
+        auto host = layoutWrapper->GetHostNode();
+        // When LazyWaterFlowLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
+        // component tree. LazyWaterFlowLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
+        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
+        // However, if total item count is less than 1 row, load all items directly.
+        int32_t lanesCount = static_cast<int32_t>(crossLens_.size());
+        if ((totalItemCount_ > lanesCount) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
+            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, Axis::VERTICAL)) {
+            needSkipLayout_ = true;
+            return;
+        }
+        posRef = GetReferencePos(host);
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
         ApplyFallbackReferencePos(layoutWrapper, posRef);
+        needSkipLayout_ = false;
         return;
     }
 
@@ -391,6 +405,7 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     cacheEndPos_ = viewEnd_ + cacheExtent;
     MakeViewportBodyLocal();
     UpdateHeaderAdjustOffset();
+    needSkipLayout_ = false;
 }
 
 void LazyWaterFlowLayoutAlgorithm::UpdateGap(

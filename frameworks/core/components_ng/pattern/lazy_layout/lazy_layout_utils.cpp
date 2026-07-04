@@ -94,6 +94,23 @@ void LazyLayoutUtils::ValidateLazyLayoutParentWithAxis(
     }
 }
 
+bool LazyLayoutUtils::ValidateAndSetLazyLayoutParent(const RefPtr<FrameNode>& host, Axis axis)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    if (IsScrollableParent(parent, axis)) {
+        host->SetNeedLazyLayout(true);
+        return true;
+    } else if (IsAllowedIntermediateNode(parent)) {
+        if (ValidateAndSetLazyLayoutParent(parent, axis)) {
+            host->SetNeedLazyLayout(true);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool IsInExtraTags(const std::string& tag, const std::vector<std::string>& extraAllowedTags)
 {
     for (const auto& allowedTag : extraAllowedTags) {

@@ -78,7 +78,7 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasurePredictItems(layoutWrapper, padding);
     } else if (needAllLayout_) {
         MeasureGridItemAll(layoutWrapper);
-    } else {
+    } else if (!needSkipLayout_) {
         MeasureGridItemLazy(layoutWrapper);
     }
 
@@ -328,11 +328,22 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
 {
     headerAdjustOffset_ = 0.0f;
     if (!posRef.has_value()) {
-        posRef = LazyLayoutUtils::GetViewPosReference(layoutWrapper->GetHostNode(),
-            { LAZY_V_GRID_LAYOUT_ETS_TAG });
+        auto host = layoutWrapper->GetHostNode();
+        // When LazyGridLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
+        // component tree. LazyGridLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
+        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
+        // However, if total item count is less than 1 row, load all items directly.
+        if ((totalItemCount_ > lanes_) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
+            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, axis_)) {
+            needAllLayout_ = false;
+            needSkipLayout_ = true;
+            return;
+        }
+        posRef = LazyLayoutUtils::GetViewPosReference(host, { LAZY_V_GRID_LAYOUT_ETS_TAG });
     }
     if (!posRef.has_value() || posRef.value().axis != axis_) {
         needAllLayout_ = true;
+        needSkipLayout_ = false;
         stickyTopInset_ = 0.0f;
         stickyBottomInset_ = 0.0f;
         return;
@@ -366,6 +377,7 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
         cacheEndPos_ -= headerMainSize;
     }
     needAllLayout_ = false;
+    needSkipLayout_ = false;
     // When not in own idle task but parent is doing predictive layout in idle,
     // inherit deadline and cache positions
     if (!layoutInfo_->deadline_.has_value() && posRef.value().deadline.has_value()) {

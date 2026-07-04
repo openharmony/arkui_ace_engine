@@ -160,6 +160,7 @@ private:
     bool hadMeasuredItems_ = true;
     float realMainSize_ = 0.0f;
     bool needAllLayout_ = true;
+    bool needSkipLayout_ = false;
     int32_t lanes_ = 1;
 
     float viewStart_ = 0.0f;

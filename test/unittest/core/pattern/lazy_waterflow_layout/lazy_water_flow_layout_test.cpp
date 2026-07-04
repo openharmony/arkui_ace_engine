@@ -42,10 +42,12 @@
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2730,6 +2732,88 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParent_001, TestSize.Le
     ASSERT_NE(stackNode, nullptr);
     EXPECT_FALSE(LazyLayoutUtils::IsVerticalScrollableParent(stackNode));
     CreateDone();
+}
+
+/**
+ * @tc.name: SkipLayoutWhenNotOnMainTree001
+ * @tc.desc: Test LazyWaterFlowLayoutAlgorithm UpdateReferencePos logic when conditions for skip layout are met.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, SkipLayoutWhenNotOnMainTree001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
+    
+    // Test case 1: totalItemCount > lanes, conditions should trigger skip layout
+    algorithm->totalItemCount_ = 10;
+    algorithm->needSkipLayout_ = false;
+    
+    // Create minimal test node structure
+    auto parentPattern = AceType::MakeRefPtr<WaterFlowPattern>();
+    parentPattern->SetAxis(Axis::VERTICAL);
+    auto parentLayoutProperty = AceType::MakeRefPtr<WaterFlowLayoutProperty>();
+    auto parentGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    parentGeometryNode->SetFrameSize(SizeF(LAZY_WATER_FLOW_SCROLL_WIDTH, LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    
+    auto parentFrameNode =
+        FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, -1, parentPattern, parentLayoutProperty);
+    parentFrameNode->geometryNode_ = parentGeometryNode;
+    parentFrameNode->onMainTree_ = true;
+    
+    LayoutConstraintF parentConstraint;
+    parentConstraint.maxSize = SizeF(LAZY_WATER_FLOW_SCROLL_WIDTH, LAZY_WATER_FLOW_SCROLL_HEIGHT);
+    parentConstraint.percentReference = SizeF(LAZY_WATER_FLOW_SCROLL_WIDTH, LAZY_WATER_FLOW_SCROLL_HEIGHT);
+    parentLayoutProperty->layoutConstraint_ = parentConstraint;
+    
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
+    auto layoutProperty = AceType::MakeRefPtr<LazyWaterFlowLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    frameNode->onMainTree_ = false;
+    frameNode->MountToParent(parentFrameNode, DEFAULT_NODE_SLOT, true); // silently = true to avoid AttachToMainTree
+    
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(LAZY_WATER_FLOW_SCROLL_WIDTH, LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    geometryNode->SetParentLayoutConstraint(parentConstraint);
+    frameNode->geometryNode_ = geometryNode;
+    
+    // Set crossLens for lanes calculation
+    algorithm->crossLens_ = { LAZY_WATER_FLOW_SCROLL_WIDTH / 2, LAZY_WATER_FLOW_SCROLL_WIDTH / 2 }; // 2 lanes
+    
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->SetLayoutAlgorithm(algorithmWrapper);
+    
+    // Verify all preconditions
+    int32_t lanesCount = static_cast<int32_t>(algorithm->crossLens_.size());
+    EXPECT_TRUE(algorithm->totalItemCount_ > lanesCount);
+    EXPECT_FALSE(frameNode->IsOnMainTree());
+    EXPECT_FALSE(frameNode->IsNeedLazyLayout());
+    
+    auto parent = frameNode->GetParentFrameNode();
+    ASSERT_NE(parent, nullptr);
+    EXPECT_EQ(parent->GetTag(), V2::WATERFLOW_ETS_TAG);
+    
+    std::optional<ViewPosReference> posRef;
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // After calling ValidateAndSetLazyLayoutParent, isNeedLazyLayout should be set to true
+    EXPECT_TRUE(frameNode->IsNeedLazyLayout());
+    
+    // With all conditions met, needSkipLayout should be true
+    EXPECT_TRUE(algorithm->needSkipLayout_);
+    
+    // Test case 2: totalItemCount <= lanes, should NOT skip layout
+    algorithm->needSkipLayout_ = true;
+    algorithm->totalItemCount_ = 2;
+    algorithm->crossLens_ = { LAZY_WATER_FLOW_SCROLL_WIDTH / 2, LAZY_WATER_FLOW_SCROLL_WIDTH / 2 }; // 2 lanes
+    frameNode->layoutProperty_->needLazyLayout_ = false; // reset for test
+    
+    posRef.reset();
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // When totalItemCount <= lanes, skip condition should not be triggered
+    EXPECT_FALSE(algorithm->needSkipLayout_);
 }
 
 } // namespace OHOS::Ace::NG

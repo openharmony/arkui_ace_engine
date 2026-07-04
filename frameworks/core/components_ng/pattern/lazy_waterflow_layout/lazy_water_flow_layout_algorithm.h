@@ -256,6 +256,7 @@ private:
     // RefillLaneWindow took the top-anchor short-circuit (lanes re-based to 0). UpdateStartAnchorAdjust must
     // skip the anchor diff so the pure internal coord re-base does not leak as a parent scroll shift.
     bool topAnchorRebased_ = false;
+    bool needSkipLayout_ = false;
     // Viewport is fully outside known content; keep the visible window empty and preserve last total height.
     bool keepEmptyLanesOutsideContent_ = false;
 };

@@ -75,7 +75,7 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasurePredictItems(layoutWrapper, layoutProperty, contentIdealSize);
     } else if (needAllLayout_) {
         MeasureAllItems(layoutWrapper);
-    } else {
+    } else if (!needSkipLayout_) {
         MeasureItemsLazy(layoutWrapper);
     }
 
@@ -149,10 +149,22 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
 {
     headerAdjustOffset_ = 0.0f;
     if (!posRef.has_value()) {
-        posRef = LazyLayoutUtils::GetViewPosReference(layoutWrapper->GetHostNode());
+        auto host = layoutWrapper->GetHostNode();
+        // When LazyColumnLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
+        // component tree. LazyColumnLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
+        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
+        // However, if total item count is less than 1 row, load all items directly.
+        if ((totalItemCount_ > 1) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
+            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, Axis::VERTICAL)) {
+            needAllLayout_ = false;
+            needSkipLayout_ = true;
+            return;
+        }
+        posRef = LazyLayoutUtils::GetViewPosReference(host);
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
         needAllLayout_ = true;
+        needSkipLayout_ = false;
         stickyTopInset_ = 0.0f;
         stickyBottomInset_ = 0.0f;
         return;
@@ -187,6 +199,7 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
         cacheEndPos_ -= headerMainSize;
     }
     needAllLayout_ = false;
+    needSkipLayout_ = false;
     // When not in own idle task but parent is doing predictive layout in idle,
     // inherit deadline and cache positions
     if (!layoutInfo_->deadline_.has_value() && posRef.value().deadline.has_value()) {
