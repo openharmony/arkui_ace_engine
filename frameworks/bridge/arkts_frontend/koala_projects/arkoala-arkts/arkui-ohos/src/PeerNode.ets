@@ -471,6 +471,10 @@ export class PeerNode extends IncrementalNode {
                     this._uiStateStyle!.value = state
                 })
             }, curState)
+            if (StateUpdateLoop.canRequestFrame) {
+                ArkUIAniModule._CustomNode_RequestFrame();
+                StateUpdateLoop.canRequestFrame = false;
+            }
             return this._uiStateStyle!;
         }
         else {
