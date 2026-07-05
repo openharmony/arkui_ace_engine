@@ -495,8 +495,14 @@ export struct SubHeader {
       return '';
     }
     if (Util.isResourceType(this.operationItem[0].accessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.operationItem[0].accessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.operationItem[0].accessibilityText as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeader', `getStringSync failed, code: ${code}, message: ${message}`);
+      }
     } else if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
       return this.operationItem[0].accessibilityText as string;
     } else {
