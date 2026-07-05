@@ -6591,8 +6591,8 @@ RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& mat
     CHECK_NULL_RETURN(newMaterial, material);
     auto newOptions = newMaterial->GetImmersiveOptions();
     CHECK_NULL_RETURN(newOptions, material);
-    ConvertToImmersiveOptionsECSub(options);
-    newMaterial->SetImmersiveOptions(*options);
+    ConvertToImmersiveOptionsECSub(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
     return newMaterial;
 }
 
