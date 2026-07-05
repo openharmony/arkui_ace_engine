@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/properties/ui_material.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -2618,6 +2619,10 @@ void JSViewAbstract::ParseSheetStyle(
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
+    }
+    if (sheetStyle.systemMaterial &&
+        !MaterialUtils::IsImmersiveMaterialSupported(sheetStyle.systemMaterial.GetRawPtr())) {
+        sheetStyle.systemMaterial = nullptr;
     }
 
     JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);

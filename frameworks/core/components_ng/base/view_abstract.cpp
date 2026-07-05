@@ -6617,6 +6617,9 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
     }
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
+    }
     renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
 
@@ -6714,6 +6717,9 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
 void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
+    }
     auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
     auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
     auto immersiveOptionsPtr = material ? material->CopyImmersiveOptions() : nullptr;

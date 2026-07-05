@@ -146,6 +146,17 @@ std::optional<MaterialType> MaterialUtils::GetTypeFromMaterial(const UiMaterial*
     }
     return MaterialType::NONE;
 }
+
+bool MaterialUtils::IsImmersiveMaterialSupported(const UiMaterial* material)
+{
+    auto materialTypeOpt = GetTypeFromMaterial(material);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    if (!SystemProperties::IsDeviceSystemMaterialSupported() && materialType == MaterialType::IMMERSIVE) {
+        return false;
+    }
+    return true;
+}
+
 ColorMode MaterialUtils::GetResourceColorMode(NG::PipelineContext* pipeline)
 {
     CHECK_NULL_RETURN(pipeline, ColorMode::LIGHT);
