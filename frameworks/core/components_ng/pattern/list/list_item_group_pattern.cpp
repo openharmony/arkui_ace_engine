@@ -71,7 +71,6 @@ void ApplyLowEndHeaderFooterMaterial(const RefPtr<FrameNode>& node, const RefPtr
         .applyShadow = options->applyShadow,
         .dipScale = static_cast<float>(pipeline->GetDipScale()),
         .interactive = options->interactive.value_or(false),
-        .lightEffectOptions = options->lightEffectOptions,
     };
     renderContext->SetImmersiveMaterialConfig(config);
     renderContext->SetSystemMaterial(material->Copy());

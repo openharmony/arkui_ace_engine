@@ -36,6 +36,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
@@ -598,13 +599,10 @@ void SheetPresentationPattern::SetSheetCloseIconMaterial()
 {
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    ImmersiveOptions options;
-    options.style = UiMaterialStyle::ULTRA_THIN;
-    options.applyShadow = true;
+    ImmersiveOptions options { .style = UiMaterialStyle::ULTRA_THIN, .applyShadow = true, .interactive = true };
     if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
         options.colorInvert = true;
-        options.interactive = true;
-        LightEffectOptions lightEffectOptions;
+        LightEffectOptions lightEffectOptions {};
         options.lightEffectOptions = lightEffectOptions;
     }
     material->SetImmersiveOptions(options);
@@ -623,6 +621,13 @@ void SheetPresentationPattern::SetSheetCloseIconMaterial()
     CHECK_NULL_VOID(symbolLayoutProperty);
     symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+    auto buttonEventHub = sheetCloseIcon->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        buttonEventHub->SetStateEffect(true);
+    } else {
+        buttonEventHub->SetStateEffect(false);
+    }
 }
 
 void SheetPresentationPattern::ClearSheetCloseIconMaterial()
@@ -630,6 +635,9 @@ void SheetPresentationPattern::ClearSheetCloseIconMaterial()
     auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), nullptr);
+    auto buttonEventHub = sheetCloseIcon->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(true);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
