@@ -598,6 +598,8 @@ public:
         return taskExecutor_;
     }
 
+    bool CheckThreadSafe();
+
     RefPtr<Frontend> GetFrontend() const;
 
     int32_t GetInstanceId() const

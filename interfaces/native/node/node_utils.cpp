@@ -1104,6 +1104,21 @@ const char* OH_ArkUI_NativeModule_GetErrorMessage()
     const auto* impl = OHOS::Ace::NodeModel::GetFullImplForErrorMessage();
     return impl != nullptr ? impl->getBasicAPI()->getErrorMessage() : "";
 }
+
+ArkUI_ErrorCode OH_ArkUI_NodeUtils_SetUiDvsyncSwitch(ArkUI_ContextHandle uiContext, bool enable)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "context parameter is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
+    auto* context = reinterpret_cast<ArkUIContext*>(uiContext);
+    auto result = impl->getNodeModifiers()->getFrameNodeModifier()->setUiDvsyncSwitch(context, enable);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(result);
+}
 #ifdef __cplusplus
 };
 #endif

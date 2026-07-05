@@ -1738,7 +1738,7 @@ RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
     return nullptr;
 }
 
-bool NG::PipelineContext::CheckThreadSafe()
+bool PipelineBase::CheckThreadSafe()
 {
     return false;
 }

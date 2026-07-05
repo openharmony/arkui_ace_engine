@@ -2193,4 +2193,28 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest004, TestSize.Level1)
     nodeAPI->disposeNode(gridNode);
 }
 
+/**
+ * @tc.name: SetUiDvsyncSwitchAPITest001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_SetUiDvsyncSwitch function with null context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, SetUiDvsyncSwitchAPITest001, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_NodeUtils_SetUiDvsyncSwitch(nullptr, true);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SetUiDvsyncSwitchAPITest002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_SetUiDvsyncSwitch function with invalid context id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, SetUiDvsyncSwitchAPITest002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = -1 });
+    auto ret = OH_ArkUI_NodeUtils_SetUiDvsyncSwitch(uiContext, true);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete uiContext;
+}
 } // namespace OHOS::Ace
