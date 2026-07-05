@@ -606,6 +606,7 @@ export class EditableTitleBarV2 extends ViewV2 {
                         item: this.imageItem,
                         attribute: ItemType.Image,
                         editableTitleBarTheme: this.editableTitleBarTheme,
+                        isImageItem: true
                     }, undefined, l7, () => {
                     }, { page: 'library/src/main/ets/components/editabletitlebarv2.ets', line: 439, col: 5 });
                     ViewV2.create(n7);
@@ -613,7 +614,8 @@ export class EditableTitleBarV2 extends ViewV2 {
                         return {
                             item: this.imageItem,
                             attribute: ItemType.Image,
-                            editableTitleBarTheme: this.editableTitleBarTheme
+                            editableTitleBarTheme: this.editableTitleBarTheme,
+                            isImageItem: true
                         };
                     };
                     n7.paramsGenerator_ = o7;
@@ -621,7 +623,8 @@ export class EditableTitleBarV2 extends ViewV2 {
                     this.updateStateVarsOfChildByElmtId(l7, {
                         item: this.imageItem,
                         attribute: ItemType.Image,
-                        editableTitleBarTheme: this.editableTitleBarTheme
+                        editableTitleBarTheme: this.editableTitleBarTheme,
+                        isImageItem: true
                     });
                 }
             }, { name: 'ImageMenuItem' });
@@ -1218,6 +1221,7 @@ class ImageMenuItem extends ViewV2 {
             (i4 && 'editableTitleBarTheme' in i4) ? i4.editableTitleBarTheme : new EditableTitleBarTheme());
         this.dialogId = null;
         this.buttonGestureModifier = null;
+        this.initParam('isImageItem', (i4 && 'isImageItem' in i4) ? i4.isImageItem : false);
         this.envCallback = {
             onConfigurationUpdated: (o4) => {
                 if (o4 === undefined || !this.isFollowingSystemFontScale) {
@@ -1253,6 +1257,7 @@ class ImageMenuItem extends ViewV2 {
         this.resetParam('editableTitleBarTheme',
             (g4 && 'editableTitleBarTheme' in g4) ? g4.editableTitleBarTheme : new EditableTitleBarTheme());
         this.buttonGestureModifier = null;
+        this.resetParam('isImageItem', (g4 && 'isImageItem' in g4) ? g4.isImageItem : false);
     }
 
     aboutToAppear() {
@@ -1266,7 +1271,7 @@ class ImageMenuItem extends ViewV2 {
             hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${d4}, message: ${e4}`);
         }
         this.buttonGestureModifier = new ButtonGestureModifier(this.dialogId, () => {
-            this.EditableTitleBarDialogBuilder();
+            this.EditableTitleBarDialogBuilder(this.isImageItem ?? false);
         });
         try {
             this.callbackId =
@@ -1460,7 +1465,7 @@ class ImageMenuItem extends ViewV2 {
         return '';
     }
 
-    EditableTitleBarDialogBuilder(e3 = null) {
+    EditableTitleBarDialogBuilder(isImageItem, e3 = null) {
         {
             this.observeComponentCreation2((f3, g3) => {
                 if (g3) {
@@ -1468,6 +1473,7 @@ class ImageMenuItem extends ViewV2 {
                         itemEditableDialog: this.item,
                         textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                         fontSize: this.fontSize,
+                        isImageItem: isImageItem
                     }, undefined, f3, () => {
                     }, { page: 'library/src/main/ets/components/editabletitlebarv2.ets', line: 932, col: 5 });
                     ViewV2.create(h3);
@@ -1475,7 +1481,8 @@ class ImageMenuItem extends ViewV2 {
                         return {
                             itemEditableDialog: this.item,
                             textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
-                            fontSize: this.fontSize
+                            fontSize: this.fontSize,
+                            isImageItem: isImageItem
                         };
                     };
                     h3.paramsGenerator_ = i3;
@@ -1483,7 +1490,8 @@ class ImageMenuItem extends ViewV2 {
                     this.updateStateVarsOfChildByElmtId(f3, {
                         itemEditableDialog: this.item,
                         textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
-                        fontSize: this.fontSize
+                        fontSize: this.fontSize,
+                        isImageItem: isImageItem
                     });
                 }
             }, { name: 'EditableTitleBarDialogContent' });
@@ -1840,6 +1848,9 @@ class ImageMenuItem extends ViewV2 {
         if ('editableTitleBarTheme' in b2) {
             this.updateParam('editableTitleBarTheme', b2.editableTitleBarTheme);
         }
+        if ('isImageItem' in b2) {
+            this.updateParam('isImageItem', b2.isImageItem);
+        }
     }
 
     rerender() {
@@ -1877,6 +1888,9 @@ __decorate([
 __decorate([
     Local
 ], ImageMenuItem.prototype, 'buttonGestureModifier', void 0);
+__decorate([
+    Param
+], ImageMenuItem.prototype, 'isImageItem', void 0);
 
 class EditableTitleBarDialogContent extends ViewV2 {
     constructor(v1, w1, x1, y1 = -1, z1, a2) {
@@ -1896,6 +1910,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
         this.initParam('fontSize', (w1 && 'fontSize' in w1) ? w1.fontSize : 1);
         this.maxLines = 1;
         this.windowStandardHeight = 0;
+        this.initParam('isImageItem', (w1 && 'isImageItem' in w1) ? w1.isImageItem : false);
         this.finalizeConstruction();
     }
 
@@ -1906,6 +1921,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
             (u1 && 'textEditableTitleBarDialog' in u1) ? u1.textEditableTitleBarDialog : '');
         this.resetParam('fontSize', (u1 && 'fontSize' in u1) ? u1.fontSize : 1);
         this.maxLines = 1;
+        this.resetParam('isImageItem', (u1 && 'isImageItem' in u1) ? u1.isImageItem : false);
     }
 
     initialRender() {
@@ -1932,7 +1948,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
                     }, Column);
                     this.observeComponentCreation2((i1, j1) => {
                         If.create();
-                        if (this.itemEditableDialog.symbolStyle !== undefined) {
+                        if (this.itemEditableDialog.symbolStyle !== undefined && !this.isImageItem) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((q1, r1) => {
                                     SymbolGlyph.create();
@@ -1970,7 +1986,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((k1, l1) => {
                                     If.create();
-                                    if (Util.isSymbolResource(this.itemEditableDialog.value)) {
+                                    if (Util.isSymbolResource(this.itemEditableDialog.value) && !this.isImageItem) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((o1, p1) => {
                                                 SymbolGlyph.create(this.itemEditableDialog.value);
@@ -2109,7 +2125,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
                     }, Column);
                     this.observeComponentCreation2((s, t) => {
                         If.create();
-                        if (this.itemEditableDialog.symbolStyle !== undefined) {
+                        if (this.itemEditableDialog.symbolStyle !== undefined && !this.isImageItem) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((a1, b1) => {
                                     SymbolGlyph.create();
@@ -2130,7 +2146,7 @@ class EditableTitleBarDialogContent extends ViewV2 {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((u, v) => {
                                     If.create();
-                                    if (Util.isSymbolResource(this.itemEditableDialog.value)) {
+                                    if (Util.isSymbolResource(this.itemEditableDialog.value) && !this.isImageItem) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((y, z) => {
                                                 SymbolGlyph.create(this.itemEditableDialog.value);
@@ -2207,6 +2223,9 @@ class EditableTitleBarDialogContent extends ViewV2 {
         if ('fontSize' in j) {
             this.updateParam('fontSize', j.fontSize);
         }
+        if ('isImageItem' in j) {
+            this.updateParam('isImageItem', j.isImageItem);
+        }
     }
 
     rerender() {
@@ -2226,6 +2245,9 @@ __decorate([
 __decorate([
     Local
 ], EditableTitleBarDialogContent.prototype, 'maxLines', void 0);
+__decorate([
+    Param
+], EditableTitleBarDialogContent.prototype, 'isImageItem', void 0);
 
 function getNumberByResource(d, e) {
     try {
