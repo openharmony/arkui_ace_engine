@@ -244,6 +244,7 @@ public:
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void OnRebuildFrame() override;
     void InitTouchEvent();
     void InitHoverEvent();
     void HandlePressedStyle();
