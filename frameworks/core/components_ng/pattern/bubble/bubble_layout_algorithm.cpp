@@ -647,6 +647,9 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         if (isCaretMode_) {
             InitCaretTargetSizeAndPosition();
         }
+        if (targetFullyInvisible_) {
+            return;
+        }
         // subtract the global offset of the overlay node,
         // because the final node position is set relative to the overlay node.
         auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
@@ -721,6 +724,11 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     BubbleAvoidanceRule(childWrapper, bubbleProp, frameNode, showInSubWindow, layoutWrapper);
+    if (targetFullyInvisible_) {
+        childWrapper->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
+        childOffset_ = OffsetF(0.0f, 0.0f);
+        return;
+    }
     UpdateTouchRegion();
     auto childShowOffset = OffsetF(childOffset_.GetX() - bubbleArrowHeight_.ConvertToPx(),
         childOffset_.GetY() - bubbleArrowHeight_.ConvertToPx());
@@ -2363,8 +2371,42 @@ void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
     }
 }
 
+void BubbleLayoutAlgorithm::UpdateTargetVisibleRect(const RefPtr<FrameNode>& targetNode, bool showInSubWindow)
+{
+    bool useVisibleRect = (isTips_ && !followCursor_) || (!isTips_ && showInSubWindow);
+    if (!useVisibleRect || !targetNode->GetAncestorNodeOfFrame(true)) {
+        return;
+    }
+    RectF visibleRect;
+    RectF frameRect;
+    targetNode->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        targetFullyInvisible_ = true;
+    } else {
+        // visibleRect is window-relative, same as GetPaintRectOffset above
+        targetSize_ = visibleRect.GetSize();
+        targetOffset_ = OffsetF(visibleRect.GetX(), visibleRect.GetY());
+    }
+}
+
+void BubbleLayoutAlgorithm::AdjustTargetOffsetForSubWindow(const RefPtr<PipelineContext>& pipelineContext)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
+        pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
+    targetOffset_ += displayWindowOffset;
+    auto currentWindowType = isTips_ ? SubwindowType::TYPE_TIPS : SubwindowType::TYPE_POPUP;
+    auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        pipelineContext->GetInstanceId(), currentWindowType);
+    if (currentSubwindow) {
+        auto subwindowRect = currentSubwindow->GetRect();
+        targetOffset_ -= subwindowRect.GetOffset();
+    }
+}
+
 void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper)
 {
+    targetFullyInvisible_ = false;
     if (followCursor_) {
         return;
     }
@@ -2384,7 +2426,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         targetSize_ = geometryNode->GetFrameSize();
         targetOffset_ = targetNode->GetPaintRectOffset(false, false, true);
     }
-
+    UpdateTargetVisibleRect(targetNode, showInSubWindow);
     RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
     if (!pipelineContext) {
         auto host = layoutWrapper->GetHostNode();
@@ -2395,18 +2437,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s, "
         "followTransformOfTarget_: %{public}d",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str(), followTransformOfTarget_);
-    // Show in SubWindow
     if (showInSubWindow) {
-        auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
-            pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
-        targetOffset_ += displayWindowOffset;
-        auto currentWindowType = isTips_ ? SubwindowType::TYPE_TIPS : SubwindowType::TYPE_POPUP;
-        auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-            pipelineContext->GetInstanceId(), currentWindowType);
-        if (currentSubwindow) {
-            auto subwindowRect = currentSubwindow->GetRect();
-            targetOffset_ -= subwindowRect.GetOffset();
-        }
+        AdjustTargetOffsetForSubWindow(pipelineContext);
     }
     dumpInfo_.targetOffset = targetOffset_;
     dumpInfo_.targetSize = targetSize_;

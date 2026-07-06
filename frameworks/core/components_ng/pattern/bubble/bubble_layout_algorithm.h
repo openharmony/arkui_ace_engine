@@ -272,6 +272,8 @@ private:
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitCaretTargetSizeAndPosition();
+    void UpdateTargetVisibleRect(const RefPtr<FrameNode>& targetNode, bool showInSubWindow);
+    void AdjustTargetOffsetForSubWindow(const RefPtr<PipelineContext>& pipelineContext);
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitBubbleArrow(const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
@@ -380,6 +382,7 @@ private:
     bool isTips_ = false;
     bool followCursor_ = false;
     bool resetTipsSize_ = false;
+    bool targetFullyInvisible_ = false;
     Placement tipsPlacement_ = Placement::BOTTOM_LEFT;
 
     BubbleDumpInfo dumpInfo_;
