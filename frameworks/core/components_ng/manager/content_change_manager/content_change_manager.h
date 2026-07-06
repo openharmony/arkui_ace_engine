@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/macros.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 #include <memory>
@@ -56,7 +57,7 @@ public:
     void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
-    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
+    ACE_FORCE_EXPORT void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);
     void OnTransitionAdded(int32_t nodeId);
     void OnTransitionRemoved(int32_t nodeId);

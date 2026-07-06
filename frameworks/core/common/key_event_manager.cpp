@@ -27,7 +27,8 @@
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/reporter/reporter.h"
 #include "core/event/focus_axis_event.h"
@@ -743,7 +744,12 @@ bool KeyEventManager::RemoveOverlayByESC(const KeyEvent& keyEvent)
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {
-            return overlayManager->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
+            if (overlayManager->RemoveOverlay(false)) {
+                return true;
+            }
+            auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+            CHECK_NULL_RETURN(sheetModifier, false);
+            return sheetModifier->removeSheetByESC();
         }
     }
     return false;

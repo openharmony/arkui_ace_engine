@@ -27,9 +27,9 @@
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"

@@ -96,6 +96,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         { "Search", "search" },
+        { "Sheet", "sheet" },
         { "Sidebar", "sidebar" },
         { "Slider", "slider" },
         { "Stepper", "stepper" },

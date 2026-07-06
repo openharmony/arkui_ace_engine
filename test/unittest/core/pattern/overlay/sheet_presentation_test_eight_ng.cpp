@@ -31,8 +31,9 @@
 #include "base/geometry/rect.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;

@@ -22,7 +22,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
