@@ -93,11 +93,17 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
         NG::TailIndentsArray indentsArray;
         if (src.tailIndents.value.selector == 0) {
             auto singleValue = Converter::Convert<Dimension>(src.tailIndents.value.value0);
+            if (singleValue.IsNegative() || singleValue.Unit() == DimensionUnit::PERCENT) {
+                singleValue.Reset();
+            }
             indentsArray.push_back(singleValue);
         } else if (src.tailIndents.value.selector == 1) {
             auto& arrayValue = src.tailIndents.value.value1;
             for (int i = 0; i < arrayValue.length; i++) {
                 auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+                if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                    dim.Reset();
+                }
                 indentsArray.push_back(dim);
             }
         }
@@ -283,7 +289,7 @@ Opt_Array_F64 GetTailIndentsImpl(Ark_ParagraphStyle peer)
     }
 
     auto& indentsArray = style.tailIndents->indentsArray.value();
-    std::vector<float> vpValues;
+    std::vector<double> vpValues;
     for (const auto& dim : indentsArray) {
         vpValues.push_back(dim.ConvertToVp());
     }
