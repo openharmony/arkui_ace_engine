@@ -4292,7 +4292,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        if (value instanceof CustomBuilder) {
+        if (value instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
             continuationBufferBufArgsSerializer.writeInt8((0).toByte());
             const valueForIdx0 = value as CustomBuilder;
             continuationBufferBufArgsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueForIdx0));

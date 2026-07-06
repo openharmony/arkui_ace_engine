@@ -1227,7 +1227,7 @@ export class PromptActionImpl extends PromptAction {
         options?: promptAction.DialogOptions): Promise<int32> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
-        if (builder instanceof CustomBuilder) {
+        if (builder instanceof ((memoContext: Any, memoId: Any) => never)) {
             const peerNode = createUiDetachedRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
             }, builder as CustomBuilder, this.instanceId_);

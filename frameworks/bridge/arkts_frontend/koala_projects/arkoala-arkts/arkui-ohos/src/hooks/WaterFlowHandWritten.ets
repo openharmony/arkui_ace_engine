@@ -42,7 +42,7 @@ export class WaterFlowHandWritten {
                 options.footer = undefined;
             } else if (options.footer !== undefined) {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
-                if (options.footer instanceof CustomBuilder) {
+                if (options.footer instanceof ((memoContext: Any, memoId: Any) => never)) {
                     const valueBuilder = options.footer as CustomBuilder;
                     const old = GlobalStateManager.instance;
                     let manager: StateManager = createStateManager()!;

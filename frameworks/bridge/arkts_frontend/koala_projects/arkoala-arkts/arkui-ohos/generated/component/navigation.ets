@@ -1585,7 +1585,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     const valueTmpValueForIdx0ForIdx1 = valueTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
@@ -1635,7 +1635,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         if (items !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const itemsTmpValue = items!
-            if (itemsTmpValue instanceof CustomBuilder) {
+            if (itemsTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const itemsTmpValueForIdx1 = itemsTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(itemsTmpValueForIdx1))
@@ -1674,7 +1674,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof CustomBuilder) {
+            if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))

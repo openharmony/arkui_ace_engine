@@ -10036,7 +10036,7 @@ export class ParticleUpdaterOptionsInner_serializer {
         if (valueHolderForConfig !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForConfigTmpValue = valueHolderForConfig!
-            if ((valueHolderForConfigTmpValue instanceof [ double, double ]) && ((valueHolderForConfigTmpValue.length) == (2))) {
+            if ((valueHolderForConfigTmpValue instanceof Tuple2) && ((valueHolderForConfigTmpValue.length) == (2))) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForConfigTmpValueForIdx0 = valueHolderForConfigTmpValue as [ double, double ]
                 const valueHolderForConfigTmpValueForIdx0_0 = valueHolderForConfigTmpValueForIdx0[0]
