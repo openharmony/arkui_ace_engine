@@ -77,7 +77,8 @@ private:
 };
 
 // Helper function for tailIndent tests
-ParagraphStylePeer CreatePeerWithTailIndent(const std::vector<double>& indentValues, DimensionUnit unit = DimensionUnit::VP)
+ParagraphStylePeer CreatePeerWithTailIndent(const std::vector<double>& indentValues,
+    DimensionUnit unit = DimensionUnit::VP)
 {
     static auto accessor = GENERATED_ArkUIAccessors::getParagraphStyleAccessor();
     Opt_ParagraphStyleInterface localParam {};
@@ -229,7 +230,8 @@ HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest002, TestSize.Level1)
  */
 HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest003, TestSize.Level1)
 {
-    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_VALUE_1, TEST_TAIL_INDENT_NEGATIVE, TEST_TAIL_INDENT_VALUE_2});
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_VALUE_1,
+        TEST_TAIL_INDENT_NEGATIVE, TEST_TAIL_INDENT_VALUE_2});
     ASSERT_NE(accessor_->getTailIndents, nullptr);
     auto testVal = accessor_->getTailIndents(localPeer);
     ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
