@@ -275,6 +275,20 @@ HWTEST_F(DepthComponentPatternTestNg, OnModifyDone002, TestSize.Level1)
     EXPECT_TRUE(pattern->HasBackgroundImageNode());
 }
 
+/**
+ * @tc.name: OnModifyDone003
+ * @tc.desc: SVG background leaves no background image node through OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, OnModifyDone003, TestSize.Level1)
+{
+    auto host = CreateNode(MakeSvgSource());
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    MountToStageNode(host);
+    pattern->OnModifyDone();
+    EXPECT_FALSE(pattern->HasBackgroundImageNode());
+}
+
 // ===================== SetupBackgroundImageNode =====================
 
 /**
