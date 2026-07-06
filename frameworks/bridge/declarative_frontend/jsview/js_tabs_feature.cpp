@@ -62,14 +62,13 @@ void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo
         if (!jsTabsController) {
             continue;
         }
-        auto tabsController = jsTabsController->GetTabsController().Upgrade();
         if (touchType == TouchType::DOWN) {
-            if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && tabsController) {
-                tabsController->CancelShowTabBar();
+            if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom) {
+                jsTabsController->CancelShowTabBar();
             }
         } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            if (!scrollInfo.isScrolling && tabsController) {
-                tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
+            if (!scrollInfo.isScrolling) {
+                jsTabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
             }
         }
     }
@@ -106,9 +105,8 @@ void HandleOnScrollStartEvent(WeakPtr<JSScroller> jsScrollerWeak)
         if (!jsTabsController) {
             continue;
         }
-        auto tabsController = jsTabsController->GetTabsController().Upgrade();
-        if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && !scrollInfo.isTouching && tabsController) {
-            tabsController->CancelShowTabBar();
+        if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && !scrollInfo.isTouching) {
+            jsTabsController->CancelShowTabBar();
         }
     }
 }
@@ -127,10 +125,9 @@ void HandleOnScrollStopEvent(WeakPtr<JSScroller> jsScrollerWeak)
         if (!jsTabsController) {
             continue;
         }
-        auto tabsController = jsTabsController->GetTabsController().Upgrade();
-        if (!scrollInfo.parentScroller.has_value() && !scrollInfo.isTouching && tabsController) {
+        if (!scrollInfo.parentScroller.has_value() && !scrollInfo.isTouching) {
             // start show tab bar when parent scrollable component stop scroll.
-            tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
+            jsTabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
         }
     }
 }
@@ -154,26 +151,23 @@ void HandleOnDidScrollEvent(
             scrollInfo.isAtBottom = isAtBottom;
             continue;
         }
-        auto tabsController = jsTabsController->GetTabsController().Upgrade();
-        if (tabsController) {
-            auto offset = dimension.ConvertToPx() / SCROLL_RATIO;
-            if (NonPositive(offset) ||
-                !(source == ScrollSource::SCROLLER || source == ScrollSource::SCROLLER_ANIMATION)) {
-                tabsController->UpdateTabBarHiddenOffset(offset);
-            }
+        auto offset = dimension.ConvertToPx() / SCROLL_RATIO;
+        if (NonPositive(offset) ||
+            !(source == ScrollSource::SCROLLER || source == ScrollSource::SCROLLER_ANIMATION)) {
+            jsTabsController->UpdateTabBarHiddenOffset(offset);
+        }
 
-            auto isChildReachTop = !scrollInfo.isAtTop && isAtTop;
-            auto isChildReachBottom = !scrollInfo.isAtBottom && isAtBottom;
-            auto isParentAtTop = true;
-            auto isParentAtBottom = true;
-            if (scrollInfo.parentScroller.has_value()) {
-                auto iter = scrollInfoMap.find(scrollInfo.parentScroller.value());
-                isParentAtTop = iter == scrollInfoMap.end() || iter->second.isAtTop;
-                isParentAtBottom = iter == scrollInfoMap.end() || iter->second.isAtBottom;
-            }
-            if ((isChildReachTop && isParentAtTop) || (isChildReachBottom && isParentAtBottom)) {
-                tabsController->StartShowTabBar();
-            }
+        auto isChildReachTop = !scrollInfo.isAtTop && isAtTop;
+        auto isChildReachBottom = !scrollInfo.isAtBottom && isAtBottom;
+        auto isParentAtTop = true;
+        auto isParentAtBottom = true;
+        if (scrollInfo.parentScroller.has_value()) {
+            auto iter = scrollInfoMap.find(scrollInfo.parentScroller.value());
+            isParentAtTop = iter == scrollInfoMap.end() || iter->second.isAtTop;
+            isParentAtBottom = iter == scrollInfoMap.end() || iter->second.isAtBottom;
+        }
+        if ((isChildReachTop && isParentAtTop) || (isChildReachBottom && isParentAtBottom)) {
+            jsTabsController->StartShowTabBar();
         }
         scrollInfo.isAtTop = isAtTop;
         scrollInfo.isAtBottom = isAtBottom;
@@ -234,9 +228,7 @@ void HandleOnChangeEvent(WeakPtr<JSTabsController> jsTabsControllerWeak, int32_t
     }
     auto jsTabsController = jsTabsControllerWeak.Upgrade();
     CHECK_NULL_VOID(jsTabsController);
-    auto tabsController = jsTabsController->GetTabsController().Upgrade();
-    CHECK_NULL_VOID(tabsController);
-    tabsController->StartShowTabBar();
+    jsTabsController->StartShowTabBar();
 }
 
 void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, const JSRef<JSObject>& jsScrollerVal,
@@ -278,7 +270,6 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSObject>& jsTabsControllerVal, 
 {
     auto* jsTabsController = jsTabsControllerVal->Unwrap<JSTabsController>();
     CHECK_NULL_VOID(jsTabsController);
-    auto tabsController = jsTabsController->GetTabsController().Upgrade();
     auto jsTabsControllerWeak = AceType::WeakClaim(jsTabsController);
     auto* jsScroller = jsScrollerVal->Unwrap<JSScroller>();
     CHECK_NULL_VOID(jsScroller);
@@ -294,9 +285,7 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSObject>& jsTabsControllerVal, 
         if (scrollInfoMap.empty()) {
             bindInfoMap_.erase(jsTabsControllerWeak);
         }
-        if (tabsController) {
-            tabsController->StartShowTabBar();
-        }
+        jsTabsController->StartShowTabBar();
     }
 
     if (parentJsScrollerVal.has_value()) {
@@ -317,9 +306,7 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSObject>& jsTabsControllerVal, 
             if (scrollInfoMap.empty()) {
                 bindInfoMap_.erase(jsTabsControllerWeak);
             }
-            if (tabsController) {
-                tabsController->StartShowTabBar();
-            }
+            jsTabsController->StartShowTabBar();
         }
     }
 }

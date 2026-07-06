@@ -2164,7 +2164,8 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
@@ -2212,7 +2213,8 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
@@ -8934,7 +8936,10 @@ ArkUINativeModuleValue CommonBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCal
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));

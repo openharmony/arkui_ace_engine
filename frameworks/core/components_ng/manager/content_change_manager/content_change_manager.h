@@ -33,7 +33,7 @@ class FrameNode;
 class ContentChangeDumpManager;
 #endif
 
-class ContentChangeManager final : public AceType {
+class ACE_FORCE_EXPORT ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
     enum ContentIgnoreEventType : uint32_t {

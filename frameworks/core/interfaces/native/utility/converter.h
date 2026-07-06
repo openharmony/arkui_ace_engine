@@ -714,7 +714,7 @@ namespace Converter {
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ACE_FORCE_EXPORT KeyboardOptions Convert(const Ark_KeyboardOptions& src);
-    template<> IconStyle Convert(const Ark_TabBarIconStyle& src);
+    template<> ACE_FORCE_EXPORT IconStyle Convert(const Ark_TabBarIconStyle& src);
     template<> NG::LeadingMarginSpanOptions Convert(const Ark_LeadingMarginSpanDrawInfo& src);
     template<> NG::DrawableLeadingMargin Convert(const Ark_LeadingMarginSpan& src);
     template<> LightSource Convert(const Ark_LightSource& src);
@@ -779,8 +779,8 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_PathShape& src);
     template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> ACE_FORCE_EXPORT RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
-    template<> RefPtr<Curve> Convert(const Ark_String& src);
-    template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
+    template<> ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
     template<> RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src);
     template<> RefPtr<SpanBase> Convert(const Ark_ImageAttachment& src);
@@ -870,7 +870,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src);
-    template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src);
     template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);
     template<> void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
@@ -878,7 +878,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
     template<> void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src);
-    template<> void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
@@ -974,16 +974,17 @@ namespace Converter {
     template<> void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& value);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
-    template<> void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src);
     template<> void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFluidLightMode& src);
     template<> void AssignCast(std::optional<KeyboardGradientMode>& dst, const Ark_KeyboardGradientMode& src);
     template<> void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& src);
-    template<> void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src);
-    template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
-    template<> void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<>
     ACE_FORCE_EXPORT void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
@@ -1029,8 +1030,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src);
     template<> void AssignCast(std::optional<PresetFillType>& dst, const Ark_PresetFillType& src);
     template<> void AssignCast(std::optional<PreviewScaleMode>& dst, const Ark_PreviewScaleMode& src);
-    template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
-    template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src);
     template<> void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src);
     template<> void AssignCast(std::optional<RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src);
     template<> void AssignCast(std::optional<SymbolEffectType>& dst, const Ark_ReplaceEffectType& src);
@@ -1041,7 +1042,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<ScrollSnapAnimationSpeed>& dst, const Ark_ScrollSnapAnimationSpeed& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
-    template<> void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src);
     template<> void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src);
     template<> void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
@@ -1068,8 +1069,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src);
     template<> void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
-    template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
-    template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
     template<> void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
     template<> void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAlign& src);
@@ -1103,7 +1104,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, uiMaterial_MaterialPeer* const& src);
-    template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_ImmersiveMaterial& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_ImmersiveMaterial& src);
     template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);
@@ -1132,7 +1134,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
-    template<> void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
     template<> void AssignCast(std::optional<SuperscriptStyle>& dst, const Ark_SuperscriptStyle& src);
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src);

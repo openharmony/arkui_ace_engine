@@ -17,7 +17,9 @@
 
 #include "arkoala_api_generated.h"
 #include "base/memory/ace_type.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/swiper_indicator/bridge/indicator_controller_modifier_api.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_controller.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
@@ -27,50 +29,76 @@ public:
     void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::NG::IndicatorController>& controller,
         OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& indicatorNode)
     {
-        if (auto contr = controller_.Upgrade(); contr) {
-            contr->ResetIndicatorControllor(controller, indicatorNode);
-        }
-        controller_ = controller;
-        controller->SetSwiperNode(swiperNode_.Upgrade());
+        auto modifier = GetIndicatorControllerModifier();
+        CHECK_NULL_VOID(modifier);
+        auto handle = GetControllerHandle(modifier);
+        CHECK_NULL_VOID(handle);
+        modifier->setController(handle, controller, indicatorNode);
     }
 
     std::function<void()> SetSwiperNodeBySwiper(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& node)
     {
-        if (auto contr = controller_.Upgrade(); contr) {
-            contr->SetSwiperNode(node);
-        }
-        if (node != swiperNode_) {
-            swiperNode_ = node;
-        }
-        return nullptr;
+        auto modifier = GetIndicatorControllerModifier();
+        CHECK_NULL_RETURN(modifier, nullptr);
+        auto handle = GetControllerHandle(modifier);
+        CHECK_NULL_RETURN(handle, nullptr);
+        return modifier->setSwiperNodeBySwiper(handle, node);
     }
 
     void ShowNext()
     {
-        if (auto contr = controller_.Upgrade(); contr) {
-            contr->ShowNext();
-        }
+        auto modifier = GetIndicatorControllerModifier();
+        CHECK_NULL_VOID(modifier);
+        auto handle = GetControllerHandle(modifier);
+        CHECK_NULL_VOID(handle);
+        modifier->showNext(handle);
     }
 
     void ShowPrevious()
     {
-        if (auto contr = controller_.Upgrade(); contr) {
-            contr->ShowPrevious();
-        }
+        auto modifier = GetIndicatorControllerModifier();
+        CHECK_NULL_VOID(modifier);
+        auto handle = GetControllerHandle(modifier);
+        CHECK_NULL_VOID(handle);
+        modifier->showPrevious(handle);
     }
 
     void ChangeIndex(int32_t index, bool useAnimation)
     {
-        if (auto contr = controller_.Upgrade(); contr) {
-            contr->ChangeIndex(index, useAnimation);
-        }
+        auto modifier = GetIndicatorControllerModifier();
+        CHECK_NULL_VOID(modifier);
+        auto handle = GetControllerHandle(modifier);
+        CHECK_NULL_VOID(handle);
+        modifier->changeIndex(handle, index, useAnimation);
     }
 protected:
     IndicatorComponentControllerPeer() {}
     friend OHOS::Ace::NG::PeerUtils;
     ~IndicatorComponentControllerPeer() override = default;
 
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::IndicatorController> controller_;
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> swiperNode_;
+private:
+    static const OHOS::Ace::NG::ArkUIIndicatorControllerModifier* GetIndicatorControllerModifier()
+    {
+        static const OHOS::Ace::NG::ArkUIIndicatorControllerModifier* cachedModifier = nullptr;
+        if (cachedModifier == nullptr) {
+            auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("IndicatorComponent");
+            CHECK_NULL_RETURN(module, nullptr);
+            cachedModifier = reinterpret_cast<const OHOS::Ace::NG::ArkUIIndicatorControllerModifier*>(
+                module->GetCustomModifier("indicator_controller"));
+        }
+        return cachedModifier;
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::AceType> GetControllerHandle(
+        const OHOS::Ace::NG::ArkUIIndicatorControllerModifier* modifier)
+    {
+        CHECK_NULL_RETURN(modifier, nullptr);
+        if (!controllerHandle_) {
+            controllerHandle_ = modifier->createControllerHandle();
+        }
+        return controllerHandle_;
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::AceType> controllerHandle_;
 };
 // } // namespace OHOS::Ace::NG

@@ -33,6 +33,7 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
+constexpr char THEME_PATTERN_SWIPER_LOCAL[] = "swiper_pattern";
 } // namespace
 
 RefPtr<SwiperIndicatorTheme> SwiperIndicatorTheme::Builder::Build(
@@ -54,7 +55,7 @@ void SwiperIndicatorTheme::Builder::ParsePattern(
     theme->upSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
     theme->downSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
 
-    RefPtr<ThemeStyle> swiperPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWIPER);
+    RefPtr<ThemeStyle> swiperPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWIPER_LOCAL);
     if (!swiperPattern) {
         LOGW("find pattern of swiper fail");
         return;

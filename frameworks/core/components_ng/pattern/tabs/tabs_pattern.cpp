@@ -61,6 +61,9 @@ constexpr uint32_t MASK_COLOR_DARK = 0x99000000;
 
 const RefPtr<Curve> FOLLOW_HAND_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0, 1.0, 224.0, 25.0);
 constexpr int32_t FOLLOW_HAND_ANIMATION_PART2_DELAY = 150;
+const char TAB_BAR_ETS_TAG[] = "TabBar";
+const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 } // namespace
 
 void TabsPattern::OnAttachToFrameNode()
@@ -652,7 +655,7 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto swiperFocusNode = swiperNode->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusNode, nullptr);
 
-    if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == TAB_BAR_ETS_TAG) {
         if (tabBarPosition == BarPosition::START) {
             if (step == FocusStep::TAB || (axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
                 (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
@@ -810,7 +813,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         swiperPattern->SetOnHiddenChangeForParent();
         auto parent = tabsNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
-        while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        while (parent && parent->GetTag() != NAVDESTINATION_VIEW_ETS_TAG) {
             parent = parent->GetAncestorNodeOfFrame(false);
         }
         if (!parent) {
@@ -1210,7 +1213,7 @@ void TabsPattern::InitFloatingBar()
     if (isBarOverlap && isHorizontal && isBarPositionEnd && isFloatingStyle) {
         isFloatingBar_ = true;
         if (!tabsNode->HasBackgroundMaskNode()) {
-            auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(V2::TABS_BACKGROUND_MASK_ETS_TAG,
+            auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(TABS_BACKGROUND_MASK_ETS_TAG,
                 tabsNode->GetBackgroundMaskId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
             backgroundMaskNode->MountToParent(tabsNode, BG_MASK_INDEX);
             backgroundMaskNode->SetHitTestMode(HitTestMode::HTMNONE);
