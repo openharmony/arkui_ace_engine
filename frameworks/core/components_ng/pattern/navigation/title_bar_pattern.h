@@ -539,6 +539,7 @@ private:
     void UpdateIsBackgroundDark();
     void OnLuminanceUpdate(uint32_t luminance);
     bool IsColorInvertEnabled();
+    bool IsBrightnessBlendEnabled();
     static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
     void InitColorPickerIfNeeded();
     void UnregisterColorPicker();
