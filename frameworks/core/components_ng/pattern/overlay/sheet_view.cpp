@@ -376,7 +376,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
 
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
     titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
-    titleProp->UpdatePunctuationOverflow(true);
+    titleProp->UpdateEnablePunctuationOverflowOptimize(true);
     if (sheetStyle.sheetTitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
     }
@@ -433,7 +433,7 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
 
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
     titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
-    titleProp->UpdatePunctuationOverflow(true);
+    titleProp->UpdateEnablePunctuationOverflowOptimize(true);
     if (sheetStyle.sheetSubtitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetSubtitle.value());
     }

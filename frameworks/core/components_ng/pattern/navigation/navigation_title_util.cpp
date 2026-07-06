@@ -991,7 +991,7 @@ void NavigationTitleUtil::SetBackButtonText(const RefPtr<TitleBarNode>& titleBar
 void NavigationTitleUtil::InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdatePunctuationOverflow(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }

@@ -211,7 +211,7 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(
     textLayoutProperty->UpdateFontSize(dialogTheme->GetDialogFontSize());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(dialogTheme->GetMaxLines());
-    textLayoutProperty->UpdatePunctuationOverflow(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         auto& textStyle = textLayoutProperty->GetTextLineStyle();
         CHECK_NULL_VOID(textStyle);

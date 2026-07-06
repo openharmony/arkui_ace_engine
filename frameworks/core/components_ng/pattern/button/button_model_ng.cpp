@@ -852,7 +852,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
-    textLayoutProperty->UpdatePunctuationOverflow(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textLayoutProperty->UpdateOrphanCharOptimization(true);
         textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);
