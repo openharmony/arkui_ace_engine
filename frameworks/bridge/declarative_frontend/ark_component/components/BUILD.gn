@@ -125,6 +125,7 @@ special_components = [
   "arkbutton",
   "arktextinput",
   "arktextarea",
+  "arkpanel",
 ]
 
 if (qrcodegen_support) {

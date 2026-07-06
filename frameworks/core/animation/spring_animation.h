@@ -27,7 +27,7 @@ class SpringAnimation : public Animation<float> {
     DECLARE_ACE_TYPE(SpringAnimation, Animation);
 
 public:
-    explicit SpringAnimation(const RefPtr<SpringProperty>& property);
+    ACE_FORCE_EXPORT explicit SpringAnimation(const RefPtr<SpringProperty>& property);
     SpringAnimation(const RefPtr<SpringProperty>& property, float velocity);
     SpringAnimation(const RefPtr<SpringProperty>& property, float velocity, float valueThreshold);
     ~SpringAnimation() override = default;

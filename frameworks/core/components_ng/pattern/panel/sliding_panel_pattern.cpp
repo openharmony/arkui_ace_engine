@@ -28,6 +28,8 @@ constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 constexpr int32_t FRAME_RATE = 120;
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
+const char PANEL_CLOSE_ICON_ETS_TAG[] = "CloseIcon";
+const char DRAG_BAR_ETS_TAG[] = "DragBar";
 
 } // namespace
 
@@ -693,7 +695,7 @@ RefPtr<FrameNode> SlidingPanelPattern::GetDragBarNode()
 
 RefPtr<FrameNode> SlidingPanelPattern::GetCloseIconNode()
 {
-    auto closeIcon = GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
+    auto closeIcon = GetChildNodeByTag(PANEL_CLOSE_ICON_ETS_TAG);
     CHECK_NULL_RETURN(closeIcon, nullptr);
     return AceType::DynamicCast<FrameNode>(closeIcon);
 }
@@ -918,10 +920,10 @@ void SlidingPanelPattern::AddOrRemoveDragBarNode(const RefPtr<SlidingPanelLayout
     bool isFirstChildDragBar = false;
     if (!child.empty()) {
         auto firstNode = columnNode->GetChildren().front();
-        isFirstChildDragBar = firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+        isFirstChildDragBar = firstNode->GetTag() == DRAG_BAR_ETS_TAG;
     }
     if (isHasDragBar && !isFirstChildDragBar) {
-        auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        auto dragBarNode = FrameNode::GetOrCreateFrameNode(DRAG_BAR_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DragBarPattern>(); });
         auto paintProperty = dragBarNode->GetPaintProperty<DragBarPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
@@ -952,9 +954,9 @@ void SlidingPanelPattern::AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayo
     auto isShowCloseIcon = layoutProperty->GetShowCloseIcon().value_or(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto closeIcon = GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
+    auto closeIcon = GetChildNodeByTag(PANEL_CLOSE_ICON_ETS_TAG);
     if (isShowCloseIcon && !closeIcon) {
-        auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
+        auto closeIcon = FrameNode::GetOrCreateFrameNode(PANEL_CLOSE_ICON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
         auto closeIconLayoutProperty = closeIcon->GetLayoutProperty<CloseIconLayoutProperty>();
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -979,7 +981,7 @@ void SlidingPanelPattern::ResetLayoutWeight()
     auto child = columnNode->GetChildren();
     if (!child.empty()) {
         auto firstNode = columnNode->GetChildren().front();
-        if (firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG) {
+        if (firstNode->GetTag() == DRAG_BAR_ETS_TAG) {
             firstNode = columnNode->GetChildAtIndex(1);
         }
         auto contentNode = DynamicCast<FrameNode>(firstNode);

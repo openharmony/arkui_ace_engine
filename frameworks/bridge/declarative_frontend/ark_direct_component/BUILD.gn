@@ -175,6 +175,15 @@ ohos_abc("arkdatepicker") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkpanel") {
+  sources = [ "./src/arkpanel.ts" ]
+  output_name = "arkpanel"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arklazygridlayout") {
   sources = [ "./src/arklazygridlayout.ts" ]
   output_name = "arklazygridlayout"
