@@ -38,6 +38,7 @@ struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static void ValidateLazyLayoutParent(const RefPtr<FrameNode>& host, const std::string& componentName);
     static void ValidateLazyLayoutParentWithAxis(
         const RefPtr<FrameNode>& host, const std::string& componentName, Axis axis);
+    static bool ValidateAndSetLazyLayoutParent(const RefPtr<FrameNode>& host, Axis axis);
     static std::optional<ViewPosReference> GetViewPosReference(
         const RefPtr<FrameNode>& frameNode,
         const std::vector<std::string>& extraAllowedTags = {});

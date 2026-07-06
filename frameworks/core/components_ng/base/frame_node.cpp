@@ -2900,8 +2900,7 @@ void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
             pattern->OnInActive();
             continue;
         }
-        auto layoutProperty = GetLayoutProperty();
-        if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+        if (IsNeedLazyLayout()) {
             NotifyLazyChildrenOnInActive(child);
         }
     }
@@ -2909,10 +2908,15 @@ void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
 
 void FrameNode::NotifyLazyChildren()
 {
-    auto layoutProperty = GetLayoutProperty();
-    if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+    if (IsNeedLazyLayout()) {
         NotifyLazyChildrenOnInActive(Claim(this));
     }
+}
+
+bool FrameNode::IsNeedLazyLayout() const
+{
+    auto layoutProperty = GetLayoutProperty();
+    return (layoutProperty && layoutProperty->GetNeedLazyLayout());
 }
 
 void FrameNode::SetActive(bool active, bool needRebuildRenderContext)

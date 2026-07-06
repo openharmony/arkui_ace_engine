@@ -24,12 +24,16 @@
 
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2683,5 +2687,86 @@ HWTEST_F(LazyGridLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.L
     algorithm.GetEndIndexInfo(index, pos);
     EXPECT_EQ(index, 9);
     EXPECT_FLOAT_EQ(pos, 0.0f);
+}
+
+/**
+ * @tc.name: SkipLayoutWhenNotOnMainTree001
+ * @tc.desc: Test LazyGridLayoutAlgorithm UpdateReferencePos logic when conditions for skip layout are met.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, SkipLayoutWhenNotOnMainTree001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo);
+    algorithm->SetAxis(Axis::VERTICAL);
+    
+    // Test case 1: totalItemCount > lanes, conditions should trigger skip layout
+    algorithm->totalItemCount_ = 10;
+    algorithm->lanes_ = 2;
+    algorithm->needSkipLayout_ = false;
+    algorithm->needAllLayout_ = true;
+    
+    // Create minimal test node structure
+    auto parentPattern = AceType::MakeRefPtr<WaterFlowPattern>();
+    parentPattern->SetAxis(Axis::VERTICAL);
+    auto parentLayoutProperty = AceType::MakeRefPtr<WaterFlowLayoutProperty>();
+    auto parentGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    parentGeometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    
+    auto parentFrameNode =
+        FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, -1, parentPattern, parentLayoutProperty);
+    parentFrameNode->geometryNode_ = parentGeometryNode;
+    parentFrameNode->onMainTree_ = true;
+    
+    LayoutConstraintF parentConstraint;
+    parentConstraint.maxSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    parentConstraint.percentReference = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    parentLayoutProperty->layoutConstraint_ = parentConstraint;
+    
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LazyGridLayoutPattern>());
+    auto layoutProperty = AceType::MakeRefPtr<LazyGridLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    frameNode->onMainTree_ = false;
+    frameNode->MountToParent(parentFrameNode, DEFAULT_NODE_SLOT, true); // silently = true to avoid AttachToMainTree
+    
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    geometryNode->SetParentLayoutConstraint(parentConstraint);
+    frameNode->geometryNode_ = geometryNode;
+    
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->SetLayoutAlgorithm(algorithmWrapper);
+    
+    // Verify all preconditions
+    EXPECT_TRUE(algorithm->totalItemCount_ > algorithm->lanes_);
+    EXPECT_FALSE(frameNode->IsOnMainTree());
+    EXPECT_FALSE(frameNode->IsNeedLazyLayout());
+    
+    auto parent = frameNode->GetParentFrameNode();
+    ASSERT_NE(parent, nullptr);
+    EXPECT_EQ(parent->GetTag(), V2::WATERFLOW_ETS_TAG);
+    
+    std::optional<ViewPosReference> posRef;
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // After calling ValidateAndSetLazyLayoutParent, isNeedLazyLayout should be set to true
+    EXPECT_TRUE(frameNode->IsNeedLazyLayout());
+    
+    // With all conditions met, needSkipLayout should be true and posMap should be empty
+    EXPECT_TRUE(algorithm->needSkipLayout_);
+    EXPECT_TRUE(layoutInfo->posMap_.empty());
+    
+    // Test case 2: totalItemCount <= lanes, should NOT skip layout
+    algorithm->needSkipLayout_ = true;
+    algorithm->totalItemCount_ = 2;
+    algorithm->lanes_ = 2;
+    frameNode->layoutProperty_->needLazyLayout_ = false; // reset for test
+    
+    posRef.reset();
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // When totalItemCount <= lanes, skip condition should not be triggered
+    EXPECT_FALSE(algorithm->needSkipLayout_);
 }
 } // namespace OHOS::Ace::NG

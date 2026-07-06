@@ -122,6 +122,7 @@ private:
     // False only on the very first layout (previous total == 0); a recycled child re-entering still counts as laid.
     bool hadMeasuredItems_ = true;
     bool needAllLayout_ = true;
+    bool needSkipLayout_ = false;
     bool forwardLayout_ = true;
     float referencePos_ = 0.0f;
     float startPos_ = 0.0f;
