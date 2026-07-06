@@ -567,7 +567,7 @@ let BarState;
   BarState[BarState.On = 2] = 'On';
 })(BarState || (BarState = {}));
 
-let EdgeEffect;
+var EdgeEffect;
 (function (EdgeEffect) {
   EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
   EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
