@@ -126,8 +126,9 @@ void ParseSelectObject(const EcmaVM* vm, Local<JSValueRef>& jsVal)
     CHECK_NULL_VOID(jsVal->IsFunction(vm));
     auto targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     panda::Local<panda::FunctionRef> func = jsVal->ToObject(vm);
-    std::function<void(int32_t)> callback = [vm, node = targetNode, func = panda::CopyableGlobal(vm, func)](
-                                                int32_t index) {
+    std::function<void(int32_t)> callback = [node = targetNode, func = panda::CopyableGlobal(vm, func)](int32_t index) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         ACE_SCORING_EVENT("Select.SelectChangeEvent");
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -144,8 +145,10 @@ void ParseValueObject(const EcmaVM* vm, Local<JSValueRef>& jsVal)
     CHECK_NULL_VOID(jsVal->IsFunction(vm));
     auto targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     panda::Local<panda::FunctionRef> func = jsVal->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, node = targetNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(const std::string&)> callback = [node = targetNode, func = panda::CopyableGlobal(vm, func)](
                                                            const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         ACE_SCORING_EVENT("Select.ValueChangeEvent");
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -211,6 +214,20 @@ void ParseJsSelectedOptionFontColor(
         }
     }
     auto selectOptionFontColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = textColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(textColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsSelectedOptionFontColorPtrHdr(
+            nativeNode, colorRom, selectOptionFontColorRawPtr, isValidValue);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsSelectedOptionFontColorPtr(
         nativeNode, textColor.GetValue(), selectOptionFontColorRawPtr, isValidValue);
 }
@@ -236,6 +253,20 @@ void ParseJsOptionFontColor(
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
     auto optionFontColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = textColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(textColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsOptionFontColorPtrHdr(
+            nativeNode, colorRom, optionFontColorRawPtr, isNormal);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsOptionFontColorPtr(
         nativeNode, textColor.GetValue(), optionFontColorRawPtr, isNormal);
 }
@@ -258,6 +289,20 @@ void ParseJsBackgroundColor(
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set menu background color %{public}s",
         menuBackgroundColor.ColorToString().c_str());
     auto menuBackgroundColorRawPtr = AceType::RawPtr(menuBackgroundColorResObj);
+    auto headRoomOptional = menuBackgroundColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(menuBackgroundColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsMenuBgColorPtrHdr(
+            nativeNode, colorRom, menuBackgroundColorRawPtr, isValidValue);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsMenuBgColorPtr(
         nativeNode, menuBackgroundColor.GetValue(), menuBackgroundColorRawPtr, isValidValue);
 }
@@ -272,6 +317,20 @@ void ParseJsSelectBackgroundColor(
         backgroundColor = Color::TRANSPARENT;
     }
     auto menuBackgroundColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = backgroundColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(backgroundColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsSelectBackgroundColorHdr(
+            nativeNode, colorRom, menuBackgroundColorRawPtr);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsSelectBackgroundColor(
         nativeNode, backgroundColor.GetValue(), menuBackgroundColorRawPtr);
 }
@@ -290,6 +349,20 @@ void ParseJsFontColor(
         isNormal = true;
     }
     auto fontColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = textColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(textColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsSelectFontColorPtrHdr(
+            nativeNode, colorRom, fontColorRawPtr);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsSelectFontColorPtr(
         nativeNode, textColor.GetValue(), fontColorRawPtr);
 }
@@ -313,6 +386,20 @@ void ParseJsOptionBgColor(
         isValidValue = false;
     }
     auto optionBgColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = bgColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(bgColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsOptionBgColorPtrHdr(
+            nativeNode, colorRom, optionBgColorRawPtr, isValidValue);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsOptionBgColorPtr(
         nativeNode, bgColor.GetValue(), optionBgColorRawPtr, isValidValue);
 }
@@ -337,6 +424,20 @@ void ParseJsSelectedOptionBgColor(
         }
     }
     auto optionBgColorRawPtr = AceType::RawPtr(resObj);
+    auto headRoomOptional = bgColor.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        ArkUIColorHeadRoom colorRom;
+        auto colorWithHeadRoom = headRoomOptional.value();
+        colorRom.red = static_cast<ArkUI_Float32>(colorWithHeadRoom.red);
+        colorRom.green = static_cast<ArkUI_Float32>(colorWithHeadRoom.green);
+        colorRom.blue = static_cast<ArkUI_Float32>(colorWithHeadRoom.blue);
+        colorRom.alpha = static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha);
+        colorRom.headRoom = static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom);
+        colorRom.colorSpace = static_cast<ArkUI_Int32>(bgColor.GetColorSpace());
+        GetArkUINodeModifiers()->getSelectModifier()->setJsSelectedOptionBgColorPtrHdr(
+            nativeNode, colorRom, optionBgColorRawPtr, isValidValue);
+        return;
+    }
     GetArkUINodeModifiers()->getSelectModifier()->setJsSelectedOptionBgColorPtr(
         nativeNode, bgColor.GetValue(), optionBgColorRawPtr, isValidValue);
 }
@@ -1866,12 +1967,15 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = secondArg->ToObject(vm);
-    auto onSelect = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
+    auto targetNode = AceType::WeakClaim(frameNode);
+    auto onSelect = [targetNode, isJsView, func = panda::CopyableGlobal(vm, func)](
                         int32_t index, const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(targetNode);
         panda::Local<panda::JSValueRef> params[NUM_2];
         params[NUM_0] = panda::NumberRef::New(vm, index);
         params[NUM_1] = panda::StringRef::NewFromUtf8(vm, value.c_str());

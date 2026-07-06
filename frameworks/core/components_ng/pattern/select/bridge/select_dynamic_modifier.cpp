@@ -2213,6 +2213,154 @@ void ResetJsSelectFontColor(ArkUINodeHandle node)
     }
 }
 
+void SetJsSelectedOptionFontColorPtrHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr selectOptionFontColorRawPtr, ArkUI_Bool isValidValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetSelectedOptionFontColorByUser(frameNode, isValidValue);
+        if (selectOptionFontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(selectOptionFontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, fontColorResObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        }
+    }
+    Color fontColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    fontColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetSelectedOptionFontColor(frameNode, fontColor);
+}
+
+void SetJsOptionFontColorPtrHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionFontColorRawPtr, ArkUI_Bool isNormal)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetOptionFontColorByUser(frameNode, isNormal);
+        if (optionFontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(optionFontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, fontColorResObj, SelectColorType::OPTION_FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_FONT_COLOR);
+        }
+    }
+    Color fontColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    fontColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetOptionFontColor(frameNode, fontColor);
+}
+
+void SetJsMenuBgColorPtrHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr menuBgColorRawPtr, ArkUI_Bool isValidValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color menuBgColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    menuBgColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetMenuBackgroundColor(frameNode, menuBgColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, isValidValue);
+        if (menuBgColorRawPtr) {
+            auto* menuBgColor = reinterpret_cast<ResourceObject*>(menuBgColorRawPtr);
+            auto menuBgColorResObj = AceType::Claim(menuBgColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, menuBgColorResObj, SelectColorType::MENU_BACKGROUND_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::MENU_BACKGROUND_COLOR);
+        }
+    }
+}
+
+void SetJsSelectBackgroundColorHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (optionBgColorRawPtr) {
+            auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
+            auto bgColorResObj = AceType::Claim(bgColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, bgColorResObj, SelectColorType::BACKGROUND_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::BACKGROUND_COLOR);
+        }
+    }
+    Color backgroundColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::BackgroundColor(frameNode, backgroundColor);
+}
+
+void SetJsSelectFontColorPtrHdr(ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr fontColorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color fontColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    fontColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetFontColor(frameNode, fontColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetFontColorByUser(frameNode, true);
+        if (fontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, fontColorResObj, SelectColorType::FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::FONT_COLOR);
+        }
+    }
+}
+
+void SetJsOptionBgColorPtrHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color optionBgColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    optionBgColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetOptionBgColor(frameNode, optionBgColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetOptionBgColorByUser(frameNode, isValidValue);
+        if (optionBgColorRawPtr) {
+            auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
+            auto bgColorResObj = AceType::Claim(bgColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, bgColorResObj, SelectColorType::OPTION_BG_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_BG_COLOR);
+        }
+    }
+}
+
+void SetJsSelectedOptionBgColorPtrHdr(
+    ArkUINodeHandle node, ArkUIColorHeadRoom color, ArkUI_VoidPtr optionBgColorRawPtr, ArkUI_Bool isValidValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetSelectedOptionBgColorByUser(frameNode, isValidValue);
+        if (optionBgColorRawPtr) {
+            auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
+            auto bgColorResObj = AceType::Claim(bgColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, bgColorResObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        }
+    }
+    Color optionBgColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    optionBgColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    SelectModelNG::SetSelectedOptionBgColor(frameNode, optionBgColor);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectDynamicModifier()
 {
@@ -2346,6 +2494,13 @@ const ArkUISelectModifier* GetSelectDynamicModifier()
             .setJsSelectDivider = nullptr,
             .setJsSelectDividerStyle = nullptr,
             .resetJsSelectFontColor = nullptr,
+            .setJsSelectedOptionFontColorPtrHdr = nullptr,
+            .setJsOptionFontColorPtrHdr = nullptr,
+            .setJsMenuBgColorPtrHdr = nullptr,
+            .setJsSelectBackgroundColorHdr = nullptr,
+            .setJsSelectFontColorPtrHdr = nullptr,
+            .setJsOptionBgColorPtrHdr = nullptr,
+            .setJsSelectedOptionBgColorPtrHdr = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -2478,6 +2633,13 @@ const ArkUISelectModifier* GetSelectDynamicModifier()
         .setJsSelectDivider = SetJsSelectDivider,
         .setJsSelectDividerStyle = SetJsSelectDividerStyle,
         .resetJsSelectFontColor = ResetJsSelectFontColor,
+        .setJsSelectedOptionFontColorPtrHdr = SetJsSelectedOptionFontColorPtrHdr,
+        .setJsOptionFontColorPtrHdr = SetJsOptionFontColorPtrHdr,
+        .setJsMenuBgColorPtrHdr = SetJsMenuBgColorPtrHdr,
+        .setJsSelectBackgroundColorHdr = SetJsSelectBackgroundColorHdr,
+        .setJsSelectFontColorPtrHdr = SetJsSelectFontColorPtrHdr,
+        .setJsOptionBgColorPtrHdr = SetJsOptionBgColorPtrHdr,
+        .setJsSelectedOptionBgColorPtrHdr = SetJsSelectedOptionBgColorPtrHdr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

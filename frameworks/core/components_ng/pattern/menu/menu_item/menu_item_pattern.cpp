@@ -3842,7 +3842,7 @@ void MenuItemPattern::UpdateOptionStyle()
             ApplyTextModifier(optionSelectedApply_);
         }
         if (customModifier) {
-            customModifier->updateSelectedOptionFontFromPattern(menuNode, host);
+            customModifier->updateSelectedOptionFontFromPattern(selectNode, host);
         }
     } else {
         if (SystemProperties::ConfigChangePerform()) {
@@ -3854,7 +3854,7 @@ void MenuItemPattern::UpdateOptionStyle()
             ApplyTextModifier(optionApply_);
         }
         if (customModifier) {
-            customModifier->updateOptionFontFromPattern(menuNode, host);
+            customModifier->updateOptionFontFromPattern(selectNode, host);
         }
     }
     host->MarkModifyDone();

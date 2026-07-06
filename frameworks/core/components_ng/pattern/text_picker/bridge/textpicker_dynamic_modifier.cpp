@@ -1697,6 +1697,15 @@ void SetTextPickerBackgroundColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color)
     GetTextPickerModelImpl()->SetBackgroundColor(Color(color));
 }
 
+void SetTextPickerBackgroundColorHdr(ArkUINodeHandle node, ArkUIColorHeadRoom color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    TextPickerModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void SetTextPickerOnScrollStopExtImpl(ArkUINodeHandle node, void* callback)
 {
     auto onChange =
@@ -1842,6 +1851,7 @@ const ArkUITextPickerModifier* GetTextPickerDynamicModifier()
             .setJsSelecteds = nullptr,
             .setJsHasSelectAttr = nullptr,
             .setJsSelectedBackgroundStyle = nullptr,
+            .setTextPickerBackgroundColorHdr = nullptr,
             .createObject = CreateObjectImpl,
             .show = ShowImpl,
         };
@@ -1945,6 +1955,7 @@ const ArkUITextPickerModifier* GetTextPickerDynamicModifier()
         .setJsSelecteds = SetJsSelecteds,
         .setJsHasSelectAttr = SetJsHasSelectAttr,
         .setJsSelectedBackgroundStyle = SetJsSelectedBackgroundStyle,
+        .setTextPickerBackgroundColorHdr = SetTextPickerBackgroundColorHdr,
         .createObject = CreateObject,
         .show = Show,
     };
