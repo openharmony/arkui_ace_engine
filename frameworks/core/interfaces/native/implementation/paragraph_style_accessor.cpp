@@ -49,8 +49,8 @@ void ParseShaderStyle(const Opt_ShaderStyleProxy& proxy, OHOS::Ace::SpanParagrap
     }
 }
 
-void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailIndentsOpt, 
-                      OHOS::Ace::SpanParagraphStyle& paragraphStyle)
+void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailIndentsOpt,
+    OHOS::Ace::SpanParagraphStyle& paragraphStyle)
 {
     if (tailIndentsOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
