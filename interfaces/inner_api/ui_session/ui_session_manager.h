@@ -67,6 +67,7 @@ public:
     using PageTranslateEndFunction = std::function<void()>;
     using PageTranslateResetFunction = std::function<void(int32_t)>;
     using PageTranslateResultFunction = std::function<void(const std::vector<TranslateResult>&)>;
+    using PageSceneDetectFunction = std::function<void(int32_t, const std::string&, bool)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -279,6 +280,28 @@ public:
     virtual void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) {};
     virtual void SetStopContentChangeDetectCallback(std::function<void()>&&) {};
     virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) {};
+    virtual int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual int32_t UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual int32_t GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual bool GetPageSceneRulesRegistered()
+    {
+        return false;
+    };
+    virtual void ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult) {};
+    virtual void CompleteGetPageScene(int32_t processId) {};
+    virtual void NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach) {};
+    virtual void NotifyPageSceneContentChanged() {};
+    virtual void FlushPageSceneNodeChanged() {};
+    virtual void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) {};
 
 protected:
     UiSessionManager() = default;
@@ -295,6 +318,7 @@ protected:
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> pageSceneRuleRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     std::mutex webFocusEventRegisteredMutex_;
     InspectorFunction inspectorFunction_ = 0;
@@ -352,6 +376,8 @@ protected:
     PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
     std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
+    PageSceneDetectFunction pageSceneDetectFunction_;
+    std::mutex pageSceneDetectFunctionMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

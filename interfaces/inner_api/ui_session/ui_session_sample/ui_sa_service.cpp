@@ -15,10 +15,13 @@
 
 #include "ui_sa_service.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <sys/time.h>
 
 #include "ipc_skeleton.h"
@@ -56,7 +59,11 @@ constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
 constexpr int32_t GET_SPECIFIED_CONTENT_OFFSETS_PARAMS = 3;
 constexpr int32_t HIGHLIGHT_SPECIFIED_CONTENT_PARAMS = 3;
+constexpr size_t PAGE_SCENE_RULE_PARAM_INDEX = 1;
+constexpr size_t PAGE_SCENE_RULE_SET_ID_PARAM_INDEX = 1;
 constexpr double PERCENT_VALUE = 100.0;
+const char PAGE_SCENE_RULE_FILE[] = "page_scene_rules.json";
+const char DEFAULT_PAGE_SCENE_RULE_SET_ID[] = "default_scene_rules";
 
 std::string GetCurrentTimestampStr()
 {
@@ -162,6 +169,52 @@ std::string UnescapeContent(const std::string& param)
     }
     return result;
 }
+
+bool HasToFileParam(const std::vector<std::string>& params)
+{
+    return std::find(params.begin(), params.end(), "-tofile") != params.end();
+}
+
+void RemoveToFileParam(std::vector<std::string>& params)
+{
+    params.erase(std::remove(params.begin(), params.end(), "-tofile"), params.end());
+}
+
+bool ReadTextFile(const std::string& filePath, std::string& content)
+{
+    std::ifstream input(filePath);
+    if (!input.is_open()) {
+        LOGW("[PageScene] open file failed, filePath=%{public}s", filePath.c_str());
+        return false;
+    }
+    std::ostringstream buffer;
+    buffer << input.rdbuf();
+    content = buffer.str();
+    return !content.empty();
+}
+
+void WriteTextFile(const std::string& tag, const std::string& fileNamePrefix, const std::string& content)
+{
+    auto filePath = UI_SA_PATH + fileNamePrefix + "_" + GetCurrentTimestampStr() + ".json";
+    std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
+    if (!ostream || !ostream->is_open()) {
+        LOGW("%{public}s filePath is invalid", tag.c_str());
+        return;
+    }
+    ostream->write(content.c_str(), content.length());
+    LOGI("%{public}s data is saved to %{public}s", tag.c_str(), filePath.c_str());
+}
+
+std::string ReadPageSceneRuleJson()
+{
+    std::string ruleJson;
+    auto filePath = UI_SA_PATH + PAGE_SCENE_RULE_FILE;
+    if (!ReadTextFile(filePath, ruleJson)) {
+        LOGW("[PageScene] read page scene rules failed, filePath=%{public}s", filePath.c_str());
+        return "";
+    }
+    return ruleJson;
+}
 } // namespace
 
 const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
@@ -185,6 +238,9 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
     { "RegisterSelectTextEventCallback", &UiSaService::HandleRegisterSelectTextEventCallback },
     { "UnregisterSelectTextEventCallback", &UiSaService::HandleUnregisterSelectTextEventCallback },
+    { "RegisterPageSceneRules", &UiSaService::HandleRegisterPageSceneRules },
+    { "UnregisterPageSceneRules", &UiSaService::HandleUnregisterPageSceneRules },
+    { "GetPageScene", &UiSaService::HandleGetPageScene },
     { "GetSpecifiedContentOffsets", &UiSaService::HandleGetSpecifiedContentOffsets },
     { "HighlightSpecifiedContent", &UiSaService::HandleHighlightSpecifiedContent },
 };
@@ -204,6 +260,20 @@ void UiSaService::OnStart()
 }
 
 void UiSaService::OnStop() {}
+
+bool UiSaService::EnsureConnected(const sptr<IUiContentService>& service)
+{
+    CHECK_NULL_RETURN(service, false);
+    if (service->IsConnect()) {
+        return true;
+    }
+    auto cb = [](std::string res) {
+        LOGI("[PageScene] auto connect success, focus window info = %{public}s", res.c_str());
+    };
+    int32_t result = service->Connect(cb, eventHandler_);
+    LOGI("[PageScene] auto Connect result=%{public}d", result);
+    return result == NO_ERROR || service->IsConnect();
+}
 
 // If the current window ID is not in the corresponding map, clear the original map and insert it again. Otherwise,
 // return.
@@ -517,6 +587,73 @@ void UiSaService::HandleUnregisterSelectTextEventCallback(
 {
     service->UnregisterSelectTextEventCallback();
     LOGI("[SelectTextEvent] call UnregisterSelectTextEventCallback");
+}
+
+void UiSaService::HandleRegisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (!EnsureConnected(service)) {
+        LOGW("[PageScene] RegisterPageSceneRules connect failed");
+        return;
+    }
+    bool toFile = HasToFileParam(params);
+    RemoveToFileParam(params);
+    std::string ruleJson = params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                                                       : ReadPageSceneRuleJson();
+    if (ruleJson.empty()) {
+        LOGW("[PageScene] RegisterPageSceneRules rule json is empty");
+        return;
+    }
+    auto eventCallback = [toFile](const std::string& data) {
+        LOGI("[PageScene] event length=%{public}zu", data.length());
+        if (toFile && !data.empty()) {
+            WriteTextFile("[PageSceneEvent]", "page_scene_event", data);
+        }
+    };
+    int32_t result = service->RegisterPageSceneRules(ruleJson, eventCallback);
+    LOGI("[PageScene] call RegisterPageSceneRules result=%{public}d", result);
+}
+
+void UiSaService::HandleUnregisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    bool toFile = HasToFileParam(params);
+    RemoveToFileParam(params);
+    std::string ruleSetId = params.size() > PAGE_SCENE_RULE_SET_ID_PARAM_INDEX
+                                ? params[PAGE_SCENE_RULE_SET_ID_PARAM_INDEX]
+                                : DEFAULT_PAGE_SCENE_RULE_SET_ID;
+    int32_t result = service->UnregisterPageSceneRules(ruleSetId);
+    LOGI("[PageScene] call UnregisterPageSceneRules ruleSetId=%{public}s, result=%{public}d", ruleSetId.c_str(),
+        result);
+    if (toFile) {
+        std::ostringstream resultJson;
+        resultJson << "{\"command\":\"UnregisterPageSceneRules\",\"ruleSetId\":\"" << ruleSetId
+                   << "\",\"result\":" << result << "}";
+        WriteTextFile("[PageSceneUnregister]", "page_scene_unregister", resultJson.str());
+    }
+}
+
+void UiSaService::HandleGetPageScene(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (!EnsureConnected(service)) {
+        LOGW("[PageScene] GetPageScene connect failed");
+        return;
+    }
+    bool toFile = HasToFileParam(params);
+    RemoveToFileParam(params);
+    std::string ruleJsonOrRuleSetId = params.size() > PAGE_SCENE_RULE_PARAM_INDEX
+                                           ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                           : ReadPageSceneRuleJson();
+    if (ruleJsonOrRuleSetId.empty()) {
+        LOGW("[PageScene] GetPageScene rule json or ruleSetId is empty");
+        return;
+    }
+    auto eventCallback = [toFile](const std::string& data) {
+        LOGI("[PageScene] get result length=%{public}zu", data.length());
+        if (toFile && !data.empty()) {
+            WriteTextFile("[PageSceneGet]", "page_scene_get", data);
+        }
+    };
+    int32_t result = service->GetPageScene(ruleJsonOrRuleSetId, eventCallback);
+    LOGI("[PageScene] call GetPageScene result=%{public}d", result);
 }
 
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)

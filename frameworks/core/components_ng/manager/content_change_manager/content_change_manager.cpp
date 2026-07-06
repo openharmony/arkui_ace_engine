@@ -587,70 +587,92 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
-    auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
-    lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
+    if (contentChangeEnabled) {
+        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
+        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
+        lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         OnScrollRemoved(keyNode->GetId());
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnScrollChangeEnd");
     scrollingNodes_.erase(keyNode->GetId());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddScrollRecord(std::make_tuple(false, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    if (contentChangeEnabled) {
+        dumpMgr_->AddScrollRecord(std::make_tuple(false, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    }
 #endif
     if (!scrollingNodes_.empty()) {
         return;
     }
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
+    if (contentChangeEnabled) {
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::SCROLL, keyNode->GetId(), keyNode->GetTag()));
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::SCROLL, keyNode->GetId(), keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
 
     ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperChangeEnd");
-    changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
+    if (contentChangeEnabled) {
+        changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
+    }
+    NotifyPageSceneContentChanged(false);
 }
 
 void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if ((!contentChangeEnabled && !pageSceneEnabled) || !keyNode) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
-    auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    if (isShow) {
-        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
-    } else {
-        simpleTree->Put("$type", keyNode->GetTag().c_str());
-    }
-    simpleTree->Put("show", isShow);
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::DIALOG, simpleTree->ToString());
+    if (contentChangeEnabled) {
+        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
+        if (isShow) {
+            keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
+        } else {
+            simpleTree->Put("$type", keyNode->GetTag().c_str());
+        }
+        simpleTree->Put("show", isShow);
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::DIALOG, simpleTree->ToString());
 #ifndef IS_RELEASE_VERSION
-    int32_t nodeId = keyNode->GetId() * (isShow ? 1 : -1);
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::DIALOG, nodeId, keyNode->GetTag()));
+        int32_t nodeId = keyNode->GetId() * (isShow ? 1 : -1);
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::DIALOG, nodeId, keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
@@ -678,12 +700,19 @@ void ContentChangeManager::OnVsyncStart()
 
 void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
 
-    ProcessSwiperNodes();
-    StopTextAABBCollecting(rootRect);
+    if (contentChangeEnabled) {
+        ProcessSwiperNodes();
+        StopTextAABBCollecting(rootRect);
+    }
+    if (pageSceneEnabled) {
+        FlushPageSceneNodeChanged();
+    }
 }
 
 void ContentChangeManager::ProcessSwiperNodes()
@@ -800,6 +829,40 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
     textCollecting_ = false;
 }
 
+bool ContentChangeManager::NeedPageSceneDetect() const
+{
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    return uiSessionManager && uiSessionManager->GetPageSceneRulesRegistered();
+}
+
+bool ContentChangeManager::NeedContentChangeReportOrPageSceneDetect() const
+{
+    return IsContentChangeDetectEnable() || NeedPageSceneDetect();
+}
+
+void ContentChangeManager::NotifyPageSceneContentChanged(bool flushNow)
+{
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    if (!uiSessionManager || !uiSessionManager->GetPageSceneRulesRegistered()) {
+        return;
+    }
+    uiSessionManager->NotifyPageSceneContentChanged();
+    if (flushNow) {
+        FlushPageSceneNodeChanged();
+    }
+}
+
+void ContentChangeManager::FlushPageSceneNodeChanged()
+{
+    if (IsScrolling() || IsTransitioning() || IsSwiperScrolling()) {
+        return;
+    }
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    if (uiSessionManager && uiSessionManager->GetPageSceneRulesRegistered()) {
+        uiSessionManager->FlushPageSceneNodeChanged();
+    }
+}
+
 void ContentChangeManager::OnSwiperScrollEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
@@ -821,12 +884,16 @@ bool ContentChangeManager::IsSwiperScrolling() const
 
 void ContentChangeManager::OnScrollChangeStart(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if ((!contentChangeEnabled && !pageSceneEnabled) || !keyNode) {
         return;
     }
     scrollingNodes_.emplace(keyNode->GetId());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddScrollRecord(std::make_tuple(true, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    if (contentChangeEnabled) {
+        dumpMgr_->AddScrollRecord(std::make_tuple(true, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    }
 #endif
 }
 
@@ -839,7 +906,7 @@ void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
 
 void ContentChangeManager::OnTransitionAdded(int32_t nodeId)
 {
-    if (!IsContentChangeDetectEnable()) {
+    if (!NeedContentChangeReportOrPageSceneDetect()) {
         return;
     }
     transitioningNodes_.emplace(nodeId);

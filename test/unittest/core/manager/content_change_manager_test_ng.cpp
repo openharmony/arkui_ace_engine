@@ -2005,4 +2005,134 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest026, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
     EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
 }
+
+/**
+ * @tc.name: ContentChangeManagerTest027
+ * @tc.desc: Test OnVsyncEnd flushes PageScene when only PageScene is registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest027, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    ResetScrollingNodes();
+    ResetTransitioningNodes();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    EXPECT_CALL(*mockUiSessionManager, GetPageSceneRulesRegistered()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, NotifyPageSceneContentChanged()).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, FlushPageSceneNodeChanged()).Times(1);
+
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest028
+ * @tc.desc: Test stable ContentChange report points trigger PageScene without ContentChange report
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest028, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode("frameNode", NORMAL_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    ResetScrollingNodes();
+    ResetTransitioningNodes();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    EXPECT_CALL(*mockUiSessionManager, GetPageSceneRulesRegistered()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, NotifyPageSceneContentChanged()).Times(3);
+    EXPECT_CALL(*mockUiSessionManager, FlushPageSceneNodeChanged()).Times(3);
+
+    contentChangeMgr->OnPageTransitionEnd(node);
+    contentChangeMgr->OnScrollChangeStart(node);
+    EXPECT_TRUE(contentChangeMgr->IsScrolling());
+    contentChangeMgr->OnScrollChangeEnd(node);
+    EXPECT_FALSE(contentChangeMgr->IsScrolling());
+    contentChangeMgr->OnDialogChangeEnd(node, true);
+
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+    ResetScrollingNodes();
+    ResetTransitioningNodes();
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest029
+ * @tc.desc: Test swiper stable point defers PageScene flush to OnVsyncEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest029, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode("frameNode", NORMAL_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    contentChangeMgr->changedSwiperNodes_.clear();
+    ResetTransitioningNodes();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    EXPECT_CALL(*mockUiSessionManager, GetPageSceneRulesRegistered()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, NotifyPageSceneContentChanged()).Times(1);
+    EXPECT_CALL(*mockUiSessionManager, FlushPageSceneNodeChanged()).Times(1);
+
+    contentChangeMgr->OnSwiperChangeEnd(node, false);
+    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest030
+ * @tc.desc: Test PageScene flush waits until swiper scrolling becomes stable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest030, TestSize.Level1)
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, NORMAL_NODE_ID, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(node, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    ResetScrollingNodes();
+    ResetTransitioningNodes();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    EXPECT_CALL(*mockUiSessionManager, GetPageSceneRulesRegistered()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, NotifyPageSceneContentChanged()).Times(NEVER_ONCE);
+    EXPECT_CALL(*mockUiSessionManager, FlushPageSceneNodeChanged()).Times(1);
+
+    contentChangeMgr->OnSwiperScrollStart(node);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+
+    contentChangeMgr->OnSwiperScrollEnd(node);
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->OnVsyncEnd(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+
+    Mock::VerifyAndClearExpectations(mockUiSessionManager);
+}
 } // namespace OHOS::Ace::NG

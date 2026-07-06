@@ -17,9 +17,15 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include <atomic>
 #include <functional>
 #include <map>
+#include <mutex>
+#include <set>
 #include <shared_mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "refbase.h"
 #include "iremote_object.h"
@@ -152,6 +158,16 @@ public:
     void GetWebInfoByRequest(int32_t webId, const std::string& request) override;
     void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
+    int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson) override;
+    int32_t UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId) override;
+    int32_t GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId) override;
+    bool GetPageSceneRulesRegistered() override;
+    void ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult) override;
+    void CompleteGetPageScene(int32_t processId) override;
+    void NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach) override;
+    void NotifyPageSceneContentChanged() override;
+    void FlushPageSceneNodeChanged() override;
+    void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) override;
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
@@ -162,12 +178,51 @@ private:
         PageTranslateTextFunction& startFunction, PageTranslateEndFunction& endFunction,
         PageTranslateResetFunction& resetFunction, PageTranslateResultFunction& resultFunction);
 
+    struct PageSceneRuleInfo {
+        std::string ruleId;
+        std::string sceneType;
+        std::string ruleJson;
+        std::set<std::string> nodeTypes;
+        bool supported = false;
+        bool enabled = true;
+        bool reportOnRegister = true;
+        bool reportOnTextInputAttached = true;
+    };
+
+    struct PageSceneRuleSetInfo {
+        std::string ruleSetId;
+        std::string ruleJson;
+        bool arkuiEnabled = true;
+        std::vector<PageSceneRuleInfo> rules;
+    };
+
+    PageSceneRuleSetInfo ExtractPageSceneRuleSetInfo(const std::string& ruleJson) const;
+    std::string ExtractPageSceneRuleSetId(const std::string& ruleJson) const;
+    bool IsPageSceneRuleMatched(const PageSceneRuleInfo& rule, const std::string& sceneType,
+        bool requireRegisterPolicy, bool isAttach, const std::string& nodeType) const;
+    bool HasPageSceneRule(
+        const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
+        bool isAttach, const std::string& nodeType) const;
+    std::vector<std::string> GetPageSceneRuleJsons(
+        const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
+        bool isAttach, const std::string& nodeType) const;
+    bool HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const;
+    std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeChange(
+        const std::string& nodeTag, const std::string& sceneType, bool isAttach);
+    void ErasePendingPageSceneRulesLocked(int32_t processId);
+    void TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult);
+
     int32_t pageTranslateScope_ = 0;
     int32_t pageTranslateOwnerPid_ = -1;
     bool pageTranslateStarted_ = false;
     std::mutex pageTranslateSessionMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     std::shared_mutex reportObjectMutex_;
+    std::mutex pageSceneMutex_;
+    std::atomic<int32_t> pageSceneInputNodeCount_ = 0;
+    std::unordered_map<int32_t, PageSceneRuleSetInfo> pageSceneRuleSets_;
+    std::set<int32_t> pendingPageSceneGets_;
+    std::set<std::pair<int32_t, std::string>> pendingPageSceneDetectRules_;
 };
 
 } // namespace OHOS::Ace

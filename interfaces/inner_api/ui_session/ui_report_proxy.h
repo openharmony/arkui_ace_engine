@@ -104,6 +104,7 @@ public:
     void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
+    void ReportPageSceneEvent(const std::string& sceneJson) override;
     void SendWebInfoRequestResult(
         uint32_t windowId,
         int32_t webId,

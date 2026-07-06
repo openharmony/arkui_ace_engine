@@ -95,6 +95,10 @@ private:
     void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
+    bool NeedPageSceneDetect() const;
+    bool NeedContentChangeReportOrPageSceneDetect() const;
+    void NotifyPageSceneContentChanged(bool flushNow);
+    void FlushPageSceneNodeChanged();
     void ReportImageEvent();
     void RemoveImageReportTask();
     void PostImageReportTask(uint32_t delay);

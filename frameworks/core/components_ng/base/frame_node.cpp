@@ -197,6 +197,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8f;
 constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+
 } // namespace
 namespace OHOS::Ace::NG {
 namespace {
@@ -1912,10 +1913,16 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         context->AddDirtyPropertyNode(Claim(this));
     }
     if (!hasPendingRequest_) {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
+#endif
         return;
     }
     context->RequestFrame();
     hasPendingRequest_ = false;
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
+#endif
 }
 
 void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -2194,6 +2201,9 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
+#endif
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)

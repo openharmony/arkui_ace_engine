@@ -29,6 +29,9 @@ public:
     MOCK_METHOD2(OnRouterChange, void(const std::string& path, const std::string& event));
     MOCK_METHOD0(GetSelectTextEventRegistered, bool());
     MOCK_METHOD2(ReportContentChangeEvent, void(ChangeType type, const std::string& simpleTree));
+    MOCK_METHOD0(GetPageSceneRulesRegistered, bool());
+    MOCK_METHOD0(NotifyPageSceneContentChanged, void());
+    MOCK_METHOD0(FlushPageSceneNodeChanged, void());
     MOCK_METHOD0(GetComponentChangeEventRegistered, bool());
     MOCK_METHOD3(SendPageTextToAI, void(int32_t nodeId, const std::string& text, int64_t version));
     MOCK_METHOD1(GetPageTranslateText, int32_t(const std::string& request));

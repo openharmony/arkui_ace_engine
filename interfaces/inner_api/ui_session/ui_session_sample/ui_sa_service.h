@@ -57,12 +57,16 @@ public:
     void HandleUnregisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleRegisterSelectTextEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleUnregisterSelectTextEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleRegisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleUnregisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetPageScene(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetSpecifiedContentOffsets(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleHighlightSpecifiedContent(sptr<IUiContentService> service, std::vector<std::string> params);
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);
 
     UiSaService();
+    bool EnsureConnected(const sptr<IUiContentService>& service);
 
     using DumpHandler = void(UiSaService::*)(sptr<IUiContentService>, std::vector<std::string>);
     static const std::map<std::string, DumpHandler> DUMP_MAP;

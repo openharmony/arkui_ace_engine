@@ -267,6 +267,11 @@ public:
     void UnregisterContentChangeCallback();
     void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
+    void RegisterPageSceneEventCallback(const PageSceneEventCallback& eventCallback);
+    void UnregisterPageSceneEventCallback();
+    bool RegisterGetPageSceneCallback(const PageSceneEventCallback& eventCallback);
+    void UnregisterGetPageSceneCallback();
+    void ReportPageSceneEvent(const std::string& sceneJson) override;
 
     void SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler);
 
@@ -316,6 +321,9 @@ private:
     std::function<void(uint32_t, std::string)> exeAppAIFunctionCallback_;
     std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
     std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
+    std::mutex pageSceneCallbackMutex_;
+    PageSceneEventCallback pageSceneEventCallback_;
+    PageSceneEventCallback getPageSceneCallback_;
 
     GetWebInfoByRequestCallback getWebInfoByRequestCallback_;
 

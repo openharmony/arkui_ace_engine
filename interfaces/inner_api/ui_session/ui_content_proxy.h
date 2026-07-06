@@ -111,6 +111,11 @@ public:
     virtual int32_t ResetPageTranslate(int32_t nodeId = -1) override;
     virtual int32_t SendPageTranslateResult(const std::string& result) override;
     virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) override;
+    virtual int32_t RegisterPageSceneRules(
+        const std::string& ruleJson, const PageSceneEventCallback& eventCallback) override;
+    virtual int32_t UnregisterPageSceneRules(const std::string& ruleSetId) override;
+    virtual int32_t GetPageScene(
+        const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback) override;
 
 private:
     int32_t SendPageTranslateRequest(uint32_t code, const char* caller, const std::string& request,
