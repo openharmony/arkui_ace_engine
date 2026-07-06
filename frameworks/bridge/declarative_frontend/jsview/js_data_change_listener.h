@@ -19,6 +19,7 @@
 #include <functional>
 #include <set>
 #include <string>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
@@ -336,30 +337,34 @@ private:
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), const std::list<V2::Operation>& args)
     {
         ContainerScope scope(instanceId_);
-        for (auto it = listeners_.begin(); it != listeners_.end();) {
+        auto listeners = listeners_;
+        for (auto it = listeners.begin(); it != listeners.end();) {
             auto listener = it->Upgrade();
             if (!listener) {
-                it = listeners_.erase(it);
+                it = listeners.erase(it);
                 continue;
             }
             ++it;
             ((*listener).*method)(args);
         }
+        listeners_ = std::move(listeners);
     }
 
     template<class... Args>
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), Args... args)
     {
         ContainerScope scope(instanceId_);
-        for (auto it = listeners_.begin(); it != listeners_.end();) {
+        auto listeners = listeners_;
+        for (auto it = listeners.begin(); it != listeners.end();) {
             auto listener = it->Upgrade();
             if (!listener) {
-                it = listeners_.erase(it);
+                it = listeners.erase(it);
                 continue;
             }
             ++it;
             ((*listener).*method)(args...);
         }
+        listeners_ = std::move(listeners);
     }
 
     std::set<WeakPtr<V2::DataChangeListener>> listeners_;
