@@ -207,6 +207,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest003, TestSize.Level1)
      * @tc.steps: step2. build navigation
      */
     auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(mockNavPathStack, nullptr);
     auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
     ASSERT_NE(navigationNode, nullptr);
     const std::string navigationId = "navigationId";
@@ -266,10 +267,13 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest004, TestSize.Level1)
      */
     auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preNode, nullptr);
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(contentNode, nullptr);
     preNode->contentNode_ = contentNode;
     auto preFrameNode = AceType::DynamicCast<FrameNode>(preNode);
+    ASSERT_NE(preFrameNode, nullptr);
     navigationManager->SetNavNodeInTransition(nullptr, preFrameNode);
     navigationManager->SetPreNodeNeverSet(false);
     /**
