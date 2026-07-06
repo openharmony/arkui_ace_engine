@@ -180,8 +180,8 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
 #endif // WRONG_GEN_v140
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && MaterialUtils::IsMaterialEnabled() &&
-        !sheetStyle.systemMaterial) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        MaterialUtils::IsMaterialEnabled() && !sheetStyle.systemMaterial) {
         sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THICK);
     }
     if (sheetStyle.systemMaterial &&
