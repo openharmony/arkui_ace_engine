@@ -97,7 +97,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
@@ -467,7 +466,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSNavDestination::JSBind(globalObj);
     JSNavRouter::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
-    JSSlidingPanel::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);

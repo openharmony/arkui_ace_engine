@@ -793,3 +793,17 @@ if (globalThis.Select === undefined) {
     name: 'JSSelect'
   }
 }
+
+// @ts-ignore
+if (globalThis.Panel === undefined) {
+  globalThis.Panel = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Panel');
+      let module = globalThis.requireNapi('arkui.components.arkpanel');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().panel.create(params);
+    },
+    name: 'JSPanel'
+  }
+}

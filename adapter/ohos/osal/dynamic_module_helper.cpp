@@ -124,6 +124,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "TextPickerDialog", "textpicker" },
         { "Select", "select" },
         { "Bubble", "bubble" },
+        { "Panel", "panel" },
 #if defined(CROSS_PLATFORM)
         { "ArcScrollBar", "arcscrollbar" },
         { "ArcList", "arclist" },
