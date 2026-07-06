@@ -256,6 +256,15 @@ struct ArkUICornerRadius {
     ArkUI_Float32 bottomRight;
 };
 
+struct ArkUIColorHeadRoom {
+    ArkUI_Float32 red;
+    ArkUI_Float32 green;
+    ArkUI_Float32 blue;
+    ArkUI_Float32 alpha;
+    ArkUI_Float32 headRoom;
+    ArkUI_Int32 colorSpace;
+};
+
 struct ArkUIBorderWidth {
     ArkUI_Float32 top;
     ArkUI_Float32 right;
@@ -8812,6 +8821,16 @@ struct ArkUIPanelModifier {
     void (*resetDragBar)(ArkUINodeHandle node);
     void (*setShow)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetShow)(ArkUINodeHandle node);
+    void (*createPanel)(ArkUI_Bool isShow);
+    void (*pop)();
+    void (*setModeChangeEvent)(void* modeChangeEvent);
+    void (*setBackgroundColorForHDR)(ArkUINodeHandle node, ArkUIColorHeadRoom color);
+    void (*setPanelBackgroundColorWithColorSpace)(ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+    void (*setPanelBorderWidth)(ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setPanelBorderStyle)(ArkUI_Int32 borderStyle);
+    void (*setPanelBorderColor)(ArkUI_Uint32 color);
+    void (*setOnSizeChange)(void* onSizeChange);
+    void (*setOnHeightChange)(void* onHeightChange);
 };
 
 struct ArkUIRadioModifier {
