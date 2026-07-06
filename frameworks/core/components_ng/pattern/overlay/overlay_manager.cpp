@@ -4052,7 +4052,8 @@ void OverlayManager::UpdateSheetRender(
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle, isPartialUpdate);
     auto sheetParent = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     // if sheet first transition, set blur on effectComponent.
-    bool setBlurOnEffectComponent = sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle) && !sheetParent;
+    bool setBlurOnEffectComponent =
+        sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle) && !sheetParent;
     // if use effectComponent, set blur on effectComponent, not on sheetpage
     if (sheetStyle.backgroundBlurStyle.has_value() && !setBlurOnEffectComponent) {
         if (sheetParent && sheetParent->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
