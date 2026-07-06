@@ -25,8 +25,8 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

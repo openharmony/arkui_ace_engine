@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_WRAPPER_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_WRAPPER_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/node_paint_method.h"
 

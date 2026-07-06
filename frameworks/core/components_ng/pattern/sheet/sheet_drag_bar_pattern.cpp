@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/modifier.h"
 #include "interfaces/inner_api/ace_kit/include/ui/animation/curves.h"

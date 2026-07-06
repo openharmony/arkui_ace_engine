@@ -18,9 +18,9 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

@@ -21,7 +21,7 @@
 #include "ui/base/referenced.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 
 namespace OHOS::Ace::NG {

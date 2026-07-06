@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_manager.h"
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -32,13 +32,17 @@ SINGLETON_INSTANCE_IMPL(NG::SheetManager);
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr char NAVDESTINATION_VIEW_TAG[] = "NavDestination";
+constexpr char SHEET_PAGE_TAG[] = "SheetPage";
+constexpr char SHEET_WRAPPER_TAG[] = "SheetWrapper";
+
 std::string GetTagFromRootNodeType(RootNodeType rootNodeType)
 {
     switch (rootNodeType) {
         case RootNodeType::PAGE_ETS_TAG:
             return V2::PAGE_ETS_TAG;
         case RootNodeType::NAVDESTINATION_VIEW_ETS_TAG:
-            return V2::NAVDESTINATION_VIEW_ETS_TAG;
+            return NAVDESTINATION_VIEW_TAG;
         case RootNodeType::WINDOW_SCENE_ETS_TAG:
             return V2::WINDOW_SCENE_ETS_TAG;
         default:
@@ -102,7 +106,7 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
             overlayManager->DeleteModal(id);
             SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType, id);
         };
-    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
+    targetNode->PushDestroyCallbackWithTag(destructor, SHEET_WRAPPER_TAG);
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace
@@ -237,7 +241,7 @@ RefPtr<OverlayManager> SheetManager::FindPageNodeOverlay(
             }
             break;
         }
-        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG && !isNav) {
+        if (parent->GetTag() == NAVDESTINATION_VIEW_TAG && !isNav) {
             auto node = AceType::DynamicCast<FrameNode>(parent);
             CHECK_NULL_RETURN(node, nullptr);
             auto pattern = node->GetPattern<NavDestinationPattern>();
@@ -274,7 +278,7 @@ RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(int32_t rootNodeId, Root
         auto pattern = node->GetPattern<PagePattern>();
         return pattern->GetOverlayManager();
     }
-    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (tag == NAVDESTINATION_VIEW_TAG) {
         auto node = AceType::DynamicCast<FrameNode>(frameNode);
         CHECK_NULL_RETURN(node, nullptr);
         auto pattern = node->GetPattern<NavDestinationPattern>();
@@ -299,7 +303,7 @@ bool SheetManager::RemoveSheetByESC()
         TAG_LOGE(AceLogTag::ACE_SHEET, "focus sheet id is null, can't respond to esc");
         return false;
     }
-    auto sheetNode = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetFocusId_.value());
+    auto sheetNode = FrameNode::GetFrameNode(SHEET_PAGE_TAG, sheetFocusId_.value());
     CHECK_NULL_RETURN(sheetNode, false);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(sheetPattern, false);
@@ -360,7 +364,7 @@ void SheetManager::RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, 
         SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType, id);
         SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(id));
     };
-    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
+    targetNode->PushDestroyCallbackWithTag(destructor, SHEET_WRAPPER_TAG);
 }
 
 std::unique_ptr<State> SheetManager::CreateBreakPointState(WidthBreakpoint width,

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_paint_method.h"
 
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/overlay/sheet_theme.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
+#include "core/components_ng/pattern/sheet/sheet_theme.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
