@@ -440,6 +440,7 @@ export struct EditableTitleBarV2 {
       item: this.imageItem!,
       attribute: ItemType.Image,
       editableTitleBarTheme: this.editableTitleBarTheme,
+      isImageItem: true
     })
   }
 
@@ -661,6 +662,7 @@ struct ImageMenuItem {
   @Param editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
   dialogId: number | null = null;
   @Local buttonGestureModifier: ButtonGestureModifier | null = null;
+  @Param isImageItem?: boolean = false;
 
   aboutToAppear() {
     try {
@@ -674,7 +676,7 @@ struct ImageMenuItem {
     }
 
     this.buttonGestureModifier = new ButtonGestureModifier(this.dialogId, () => {
-      this.EditableTitleBarDialogBuilder();
+      this.EditableTitleBarDialogBuilder(this.isImageItem ?? false);
     });
 
     try {
@@ -928,11 +930,12 @@ struct ImageMenuItem {
   }
 
   @Builder
-  EditableTitleBarDialogBuilder(): void {
+  EditableTitleBarDialogBuilder(isImageItem: boolean): void {
     EditableTitleBarDialogContent({
       itemEditableDialog: this.item,
       textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
       fontSize: this.fontSize,
+      isImageItem: isImageItem
     })
   }
 
@@ -1038,11 +1041,12 @@ struct EditableTitleBarDialogContent {
   @Param fontSize: number = 1;
   @Local maxLines: number = 1;
   windowStandardHeight: number = 0;
+  @Param isImageItem?: boolean = false;
 
   build() {
     if (this.textEditableTitleBarDialog) {
       Column() {
-        if (this.itemEditableDialog.symbolStyle !== undefined) {
+        if (this.itemEditableDialog.symbolStyle !== undefined && !this.isImageItem) {
           SymbolGlyph()
             .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemEditableDialog.symbolStyle)
@@ -1055,7 +1059,7 @@ struct EditableTitleBarDialogContent {
             .fontSize(SYMBOL_TITLE_SIZE)
             .direction(Direction.Ltr)
         } else {
-          if (Util.isSymbolResource(this.itemEditableDialog.value)) {
+          if (Util.isSymbolResource(this.itemEditableDialog.value) && !this.isImageItem) {
             SymbolGlyph(this.itemEditableDialog.value as Resource)
               .margin({
                 top: $r('sys.float.padding_level24'),
@@ -1099,7 +1103,7 @@ struct EditableTitleBarDialogContent {
       .borderRadius(($r('sys.float.corner_radius_level10')))
     } else {
       Column() {
-        if (this.itemEditableDialog.symbolStyle !== undefined) {
+        if (this.itemEditableDialog.symbolStyle !== undefined && !this.isImageItem) {
           SymbolGlyph()
             .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemEditableDialog.symbolStyle)
@@ -1107,7 +1111,7 @@ struct EditableTitleBarDialogContent {
             .symbolEffect(new SymbolEffect(), false)
             .fontSize(SYMBOL_TITLE_SIZE)
         } else {
-          if (Util.isSymbolResource(this.itemEditableDialog.value)) {
+          if (Util.isSymbolResource(this.itemEditableDialog.value) && !this.isImageItem) {
             SymbolGlyph(this.itemEditableDialog.value as Resource)
               .fontColor([$r('sys.color.icon_primary')])
               .fontSize(SYMBOL_TITLE_SIZE)
