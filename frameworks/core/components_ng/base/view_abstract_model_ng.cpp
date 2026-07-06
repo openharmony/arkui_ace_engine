@@ -41,9 +41,7 @@
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -61,6 +59,7 @@
 #include "core/components_ng/property/overlay_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
 #ifdef SMART_GESTURE_SUPPORTED
@@ -1252,13 +1251,15 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetModifier);
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
+        overlayManager = sheetModifier->findPageNodeOverlay(targetNode, isShow, false);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
+    sheetModifier->registerDestroyCallback(targetNode, sheetStyle, instanceId);
 
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
@@ -1269,7 +1270,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
                 std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
                 std::move(sheetSpringBack), targetNode);
         } else {
-            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
+            sheetModifier->closeSheetInSubWindow(targetNode->GetId());
         }
         return;
     }
@@ -1283,12 +1284,14 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
 void ViewAbstractModelNG::DismissSheet()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlayDismissSheet();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlayDismissSheet(sheet);
 }
 
 void ViewAbstractModelNG::DismissContentCover()
@@ -1302,12 +1305,14 @@ void ViewAbstractModelNG::DismissContentCover()
 
 void ViewAbstractModelNG::SheetSpringBack()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlaySheetSpringBack();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlaySheetSpringBack(sheet);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

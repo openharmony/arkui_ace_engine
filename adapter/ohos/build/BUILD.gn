@@ -39,6 +39,7 @@ component_modules = [
   "texttimer",
   "navigator",
   "search",
+  "sheet",
   "stepper",
   "radio",
   "slider",

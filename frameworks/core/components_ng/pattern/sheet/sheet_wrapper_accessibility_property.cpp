@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/sheet/sheet_wrapper_accessibility_property.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
 #include "core/components_ng/property/accessibility_property_helper.h"
 
 namespace OHOS::Ace::NG {

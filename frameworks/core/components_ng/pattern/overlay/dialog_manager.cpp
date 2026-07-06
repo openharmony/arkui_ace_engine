@@ -20,12 +20,12 @@
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/render/render_context.h"
@@ -65,7 +65,9 @@ RefPtr<OverlayManager> DialogManager::FindPageNodeOverlay(const RefPtr<FrameNode
     if (currentNode == nullptr || !currentNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node does not exist or not on main tree.");
     } else {
-        return SheetManager::FindPageNodeOverlay(currentNode, true, true);
+        auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+        CHECK_NULL_RETURN(sheetModifier, nullptr);
+        return sheetModifier->findPageNodeOverlay(currentNode, true, true);
     }
     return nullptr;
 }

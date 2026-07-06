@@ -22,13 +22,13 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager_static.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 
 namespace OHOS::Ace {
 SINGLETON_INSTANCE_IMPL(NG::DialogManagerStatic);
@@ -69,7 +69,9 @@ RefPtr<OverlayManager> DialogManagerStatic::FindPageNodeOverlay(const RefPtr<Fra
     if (currentNode == nullptr || !currentNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node does not exist or not on main tree.");
     } else {
-        return SheetManager::FindPageNodeOverlay(currentNode, true, true);
+        auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+        CHECK_NULL_RETURN(sheetModifier, nullptr);
+        return sheetModifier->findPageNodeOverlay(currentNode, true, true);
     }
     return nullptr;
 }

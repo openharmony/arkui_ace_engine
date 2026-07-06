@@ -113,6 +113,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Slider", "slider" },
         { "FolderStack", "folderstack" },
         { "Search", "search" },
+        { "Sheet", "sheet" },
         { "TimePicker", "timepicker" },
         { "ImageSpan", "span" },
         { "SymbolSpan", "span" },
