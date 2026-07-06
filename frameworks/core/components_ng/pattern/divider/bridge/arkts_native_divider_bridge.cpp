@@ -66,7 +66,7 @@ ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runti
         auto theme = GetTheme<DividerTheme>();
         CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
         CalcDimension strokeWidth = theme->GetStokeWidth();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             strokeWidth = 1.0_px;
         }
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false)) {

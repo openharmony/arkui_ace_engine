@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

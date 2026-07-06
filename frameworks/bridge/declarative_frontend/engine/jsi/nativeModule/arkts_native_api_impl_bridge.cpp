@@ -569,8 +569,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Select" },
         { "Panel" },
         { "RelativeContainer" },
-        {"Blank"},
-        {"Divider"},
+        { "Blank" },
+        { "Divider" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));

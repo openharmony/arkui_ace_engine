@@ -20,7 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 
 namespace OHOS::Ace {
 #ifndef CROSS_PLATFORM

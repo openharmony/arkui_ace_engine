@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 
 #include "base/utils/layout_break_point.h"
 #include "core/common/container.h"

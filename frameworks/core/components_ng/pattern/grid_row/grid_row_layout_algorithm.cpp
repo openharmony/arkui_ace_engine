@@ -20,7 +20,7 @@
 
 #include "grid_row_event_hub.h"
 #include "core/components_ng/property/flex_property.h"
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
 

@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {

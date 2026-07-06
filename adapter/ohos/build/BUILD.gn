@@ -90,11 +90,7 @@ foreach(module, component_modules) {
   module_path = module
   if (module == "span") {
     module_path = "text/span"
-  }else if (module == "gridlayout") {
-    module_path = "grid_row"
-  } else if (module == "spacing") {
-    module_path = "divider"
-  } 
+  }
   ohos_shared_library(module_name) {
     deps = []
     if (is_ohos) {

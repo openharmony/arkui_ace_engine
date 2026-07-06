@@ -127,6 +127,11 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, nodeArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
 
+    bool isJsView = ArkTSUtils::IsJsView(vm, nodeArg);
+    if (isJsView) {
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    }
+
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
     std::string calcStr;
