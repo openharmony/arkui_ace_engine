@@ -3667,6 +3667,7 @@ test/unittest/core/pattern/counter/ @huawei_g_five
 test/unittest/core/pattern/custom/ @arkuilayout1
 test/unittest/core/pattern/custom_frame_node/ @arkui_framework_xnode
 test/unittest/core/pattern/data_panel/ @huawei_g_five
+test/unittest/core/pattern/depth_component/ @arkuipopupwindow_all
 test/unittest/core/pattern/dialog/ @arkuipopupwindow_all
 test/unittest/core/pattern/divider/ @arkuilayout1
 test/unittest/core/pattern/dynamiclayout/ @arkuilayout1
