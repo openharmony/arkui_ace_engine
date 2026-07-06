@@ -1503,6 +1503,9 @@ void WebPattern::EnableSecurityLayer(bool isNeedSecurityLayer)
         return;
     }
     renderContextForSurface_->SetSecurityLayer(isNeedSecurityLayer);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->FlushImplicitTransaction();
 }
 
 void WebPattern::OnAttachToMainTree()
