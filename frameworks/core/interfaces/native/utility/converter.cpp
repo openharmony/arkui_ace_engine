@@ -2593,7 +2593,7 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
-    auto value = Converter::Convert<double>(src.value);
+    auto value = Converter::Convert<float>(src.value);
     auto dimensionUnit = Converter::OptConvert<DimensionUnit>(src.unit).value_or(ConverterState::defDimensionUnit);
     return Dimension(value, dimensionUnit);
 }

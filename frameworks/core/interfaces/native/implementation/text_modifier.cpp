@@ -508,17 +508,25 @@ void SetTailIndentsImpl(Ark_NativePointer node,
     }
     NG::TailIndents tailIndents;
     NG::TailIndentsArray indentsArray;
+
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+        double doubleValue = static_cast<double>(metrics.value);
+        auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
+            .value_or(DimensionUnit::VP);
+        return Dimension(doubleValue, unit);
+    };
+
     if (value->value.selector == 0) {
-        auto singleValue = Converter::Convert<Dimension>(value->value.value0);
-        if (singleValue.IsNegative() || singleValue.Unit() == DimensionUnit::PERCENT) {
-            singleValue.Reset();
+        auto dim = convertDimensionWithPrecision(value->value.value0);
+        if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+            dim.Reset();
         }
-        indentsArray.emplace_back(singleValue);
+        indentsArray.emplace_back(dim);
     } else if (value->value.selector == 1) {
         auto& arrayValue = value->value.value1;
         indentsArray.reserve(arrayValue.length);
         for (int32_t i = 0; i < arrayValue.length; i++) {
-            auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+            auto dim = convertDimensionWithPrecision(*(arrayValue.array + i));
             if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
                 dim.Reset();
             }

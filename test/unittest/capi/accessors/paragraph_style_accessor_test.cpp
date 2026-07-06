@@ -43,6 +43,7 @@ constexpr auto TEST_WORD_BREAK = WordBreak::BREAK_ALL;
 constexpr auto TEST_TAIL_INDENT_VALUE_1 = 50.0;
 constexpr auto TEST_TAIL_INDENT_VALUE_2 = 30.0;
 constexpr auto TEST_TAIL_INDENT_NEGATIVE = -10.0;
+constexpr auto TEST_TAIL_INDENT_PERCENT_VALUE = 10.0;
 }
 
 class ParagraphStyleAccessorTest
@@ -237,6 +238,22 @@ HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest003, TestSize.Level1)
     EXPECT_DOUBLE_EQ(testVal.value.array[0], TEST_TAIL_INDENT_VALUE_1);
     EXPECT_DOUBLE_EQ(testVal.value.array[1], 0.0);
     EXPECT_DOUBLE_EQ(testVal.value.array[2], TEST_TAIL_INDENT_VALUE_2);
+}
+
+/**
+ * @tc.name: getTailIndentsTest004
+ * @tc.desc: Test percent value validation - should be reset to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest004, TestSize.Level1)
+{
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_PERCENT_VALUE}, DimensionUnit::PERCENT);
+    ASSERT_NE(accessor_->getTailIndents, nullptr);
+    auto testVal = accessor_->getTailIndents(localPeer);
+    ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    ASSERT_NE(testVal.value.array, nullptr);
+    EXPECT_EQ(testVal.value.length, 1);
+    EXPECT_DOUBLE_EQ(testVal.value.array[0], 0.0);
 }
 
 } // namespace OHOS::Ace::NG
