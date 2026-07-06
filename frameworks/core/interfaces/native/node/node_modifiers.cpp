@@ -308,7 +308,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getComponent3DModifier = nullptr,
     #endif
         .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
-        .getCustomNodeExtModifier = nullptr,
+        .getCustomNodeExtModifier = NodeModifier::GetCustomNodeExtModifier,
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
