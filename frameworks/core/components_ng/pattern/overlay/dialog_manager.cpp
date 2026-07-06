@@ -206,7 +206,8 @@ bool DialogManager::ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& sy
     }
 
     auto immersiveOptions = systemMaterial->GetImmersiveOptions();
-    return immersiveOptions && immersiveOptions->applyShadow;
+    CHECK_NULL_RETURN(immersiveOptions, true);
+    return immersiveOptions->applyShadow;
 }
 
 bool DialogManager::HandleSmoothImmersiveMaterial(

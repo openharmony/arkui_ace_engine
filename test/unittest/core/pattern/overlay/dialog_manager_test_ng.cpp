@@ -349,7 +349,7 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest011, TestSize.Level1)
     // immersiveOptions is null by default
 
     auto result = DialogManager::ShouldApplySystemMaterialShadow(material);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
     DialogManagerTestNg::SetUpTestCase();
 }
 
