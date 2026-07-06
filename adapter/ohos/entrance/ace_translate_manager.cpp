@@ -17,8 +17,8 @@
 
 #include <cinttypes>
 
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
 #include "base/utils/time_util.h"
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -205,7 +205,7 @@ void UiTranslateManagerImpl::ResetPageTranslate(int32_t nodeId)
 
 void UiTranslateManagerImpl::SendPageTranslateResult(const std::string& result)
 {
-    std::vector<PageTranslateRequestUtil::TranslateResult> translateResults;
+    std::vector<TranslateResult> translateResults;
     if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
         LOGW("SendPageTranslateResult parse result failed");
         return;

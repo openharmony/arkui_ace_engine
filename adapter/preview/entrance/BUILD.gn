@@ -39,6 +39,8 @@ ohos_source_set("preview_entrance_source") {
 
     sources = [
       "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_session/ui_translate_request_util.cpp",
       "ace_ability.cpp",
       "ace_application_info.cpp",
       "ace_container.cpp",
@@ -65,7 +67,6 @@ ohos_source_set("preview_entrance_source") {
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
-      "ui_session/ui_session_json_util.cpp",
       "ui_session/ui_session_manager_preview.cpp",
       "vibrator/vibrator_utils.cpp",
       "window_free_container.cpp",
@@ -76,7 +77,7 @@ ohos_source_set("preview_entrance_source") {
       "$ace_napi:ace_napi",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     ]
-    external_deps = []
+    external_deps = [ "cJSON:cjson_static" ]
     include_dirs = [
       "//foundation/window/window_manager",
       "//foundation/ability/ability_runtime",

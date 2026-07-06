@@ -25,7 +25,7 @@
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_request_guard.h"
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 
 #include "accesstoken_kit.h"
@@ -1415,12 +1415,12 @@ HWTEST_F(UIContentStubTest, UIContentStubTest046, TestSize.Level1)
     };
 
     for (const auto& item : testData) {
-        std::vector<PageTranslateRequestUtil::TranslateResult> results;
+        std::vector<TranslateResult> results;
         EXPECT_EQ(PageTranslateRequestUtil::ParseTranslateResults(item.result, results), item.expected);
         EXPECT_EQ(results.size(), item.expectedSize);
     }
 
-    std::vector<PageTranslateRequestUtil::TranslateResult> results;
+    std::vector<TranslateResult> results;
     ASSERT_TRUE(PageTranslateRequestUtil::ParseTranslateResults(
         R"({"results":[{"nodeId":6,"version":3000000000,"translatedText":"\u6807\u9898"},)"
         R"({"nodeId":13,"version":2,"text":"输入框提示"}]})",

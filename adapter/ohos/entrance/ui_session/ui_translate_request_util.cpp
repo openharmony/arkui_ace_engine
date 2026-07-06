@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_json_util.h"
 

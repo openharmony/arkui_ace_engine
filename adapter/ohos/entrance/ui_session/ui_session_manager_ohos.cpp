@@ -15,7 +15,7 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_trace.h"
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 
 namespace OHOS::Ace {
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;

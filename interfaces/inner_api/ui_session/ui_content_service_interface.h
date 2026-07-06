@@ -25,6 +25,7 @@
 #include "param_config.h"
 #include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
+#include "ui_translate_type.h"
 #include "event_handler.h"
 
 namespace OHOS {
@@ -40,38 +41,6 @@ using PageTranslateTextCallback = std::function<void(int32_t, const std::string&
 
 constexpr int32_t DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS = 1500;
 constexpr int32_t DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS = 5000;
-
-enum class TranslateContentScope : int32_t {
-    ARKWEB_ONLY = 1 << 0,
-    ARKUI_ONLY = 1 << 1,
-    XCOMPONENT = 1 << 2,
-    CANVAS_NODE = 1 << 3,
-    ARKUI_ARKWEB = static_cast<int32_t>(ARKUI_ONLY) | static_cast<int32_t>(ARKWEB_ONLY),
-    PAGE_ALL = static_cast<int32_t>(ARKUI_ARKWEB) | static_cast<int32_t>(XCOMPONENT) |
-               static_cast<int32_t>(CANVAS_NODE),
-};
-
-struct TranslateTextRequest {
-    TranslateContentScope scope = TranslateContentScope::ARKUI_ARKWEB;
-    std::string extraData;
-};
-
-struct TranslateTextNode {
-    int32_t nodeId = -1;
-    std::string text;
-    int64_t version = 0;
-};
-
-struct TranslateResult {
-    int32_t nodeId = -1;
-    std::string translatedText;
-    int64_t version = 0;
-};
-
-struct AbilityLanguageInfo {
-    std::string language;
-    std::string region;
-};
 
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
