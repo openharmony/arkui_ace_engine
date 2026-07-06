@@ -4687,9 +4687,9 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
 
     AccessibilityElementInfo nodeInfo;
     Framework::CommonProperty commonProperty;
-    // not virtual
+    // not virtual: property focus state should be reported even without render context focus
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
-    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
     // is virtual，but no parent
     AccessibilityElementInfo nodeInfo1;
     frameNode->SetAccessibilityNodeVirtual();
@@ -4699,6 +4699,87 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
     frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
     ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest002
+ * @tc.desc: Render context focus true short-circuits to focus true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // render context reports focus true while property focus state is false: expect true (short-circuit)
+    mockRenderContext->UpdateAccessibilityFocus(true);
+    accessibilityProperty->SetAccessibilityFocusState(false);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest003
+ * @tc.desc: Focus is false when both render context and property focus are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // neither source reports focus: expect false
+    accessibilityProperty->SetAccessibilityFocusState(false);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest004
+ * @tc.desc: Focus is true when focus draw level is TOP and property focus state is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // when focus draw level is TOP the render context focus is not set on this node,
+    // focus must still be reported from the property focus state
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
 }
 
 /**
