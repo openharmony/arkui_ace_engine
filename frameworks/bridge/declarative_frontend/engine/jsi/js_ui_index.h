@@ -105,6 +105,8 @@ namespace OHOS::Ace::Framework {
     FUNCTION("$refreshing", $REFRESHING)       \
     FUNCTION("changeEvent", CHANGE_EVENT)       \
     FUNCTION("refreshingContent", REFRESHING_CONTENT)       \
+    FUNCTION("headerKey", HEADER_KEY)       \
+    FUNCTION("headerValue", HEADER_VALUE)       \
     FUNCTION("pos", POS)       \
     FUNCTION("position", POSITION)       \
     FUNCTION("globalPos", GLOBAL_POS)       \
