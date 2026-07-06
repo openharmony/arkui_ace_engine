@@ -5714,6 +5714,24 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+std::vector<RefPtr<FrameNode>> FrameNode::GetNodesByIdWithCleanup(std::unordered_set<int32_t>& set)
+{
+    std::vector<int32_t> ids(set.begin(), set.end());
+    std::vector<RefPtr<FrameNode>> nodes;
+    for (auto nodeId : ids) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            set.erase(nodeId);
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        if (frameNode) {
+            nodes.emplace_back(frameNode);
+        }
+    }
+    return nodes;
+}
+
 std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int32_t>& set)
 {
     std::vector<FrameNode*> nodes;

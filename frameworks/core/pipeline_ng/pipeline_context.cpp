@@ -5572,7 +5572,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     if (onVisibleAreaChangeNodeIds_.empty()) {
         return;
     }
-    auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
+    auto nodes = FrameNode::GetNodesByIdWithCleanup(onVisibleAreaChangeNodeIds_);
     ACE_SCOPED_TRACE("HandleVisibleAreaChangeEvent_nodeCount:%d", static_cast<int32_t>(nodes.size()));
     for (auto&& frameNode : nodes) {
         frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp, false, isDisappearChangeNodeMinDepth_);
@@ -5612,7 +5612,7 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     if (onAreaChangeNodeIds_.empty()) {
         return;
     }
-    auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
+    auto nodes = FrameNode::GetNodesByIdWithCleanup(onAreaChangeNodeIds_);
     ACE_SCOPED_TRACE("HandleOnAreaChangeEvent_nodeCount:%d", static_cast<int32_t>(nodes.size()));
     for (auto&& frameNode : nodes) {
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp, areaChangeNodeMinDepth_);

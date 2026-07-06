@@ -649,6 +649,12 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+std::vector<RefPtr<FrameNode>> FrameNode::GetNodesByIdWithCleanup(std::unordered_set<int32_t>& set)
+{
+    std::vector<RefPtr<FrameNode>> nodes;
+    return nodes;
+}
+
 void FrameNode::OnMixedMountChildAdded(const RefPtr<UINode>& child)
 {
     (void)child;

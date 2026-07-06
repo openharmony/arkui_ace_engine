@@ -3808,4 +3808,88 @@ HWTEST_F(FrameNodeTestNg, ProcessAllVisibleCallbackWithTag006, TestSize.Level1)
     frameNode->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.3, 0.4);
     EXPECT_EQ(callbackCount, 0);
 }
+
+/**
+ * @tc.name: GetNodesByIdWithCleanup001
+ * @tc.desc: GetNodesByIdWithCleanup returns empty vector when input set is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup001, TestSize.Level1)
+{
+    std::unordered_set<int32_t> emptySet;
+    auto result = FrameNode::GetNodesByIdWithCleanup(emptySet);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(emptySet.empty());
+}
+
+/**
+ * @tc.name: GetNodesByIdWithCleanup002
+ * @tc.desc: GetNodesByIdWithCleanup returns nodes for valid FrameNode ids in ElementRegister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup002, TestSize.Level1)
+{
+    auto validId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode("testTag", validId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::unordered_set<int32_t> nodeIds = { validId };
+    auto result = FrameNode::GetNodesByIdWithCleanup(nodeIds);
+    EXPECT_EQ(result.size(), 1u);
+    EXPECT_EQ(nodeIds.size(), 1u);
+    EXPECT_NE(result[0], nullptr);
+}
+
+/**
+ * @tc.name: GetNodesByIdWithCleanup003
+ * @tc.desc: GetNodesByIdWithCleanup erases ids not found in ElementRegister from the input set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup003, TestSize.Level1)
+{
+    auto invalidId = ElementRegister::GetInstance()->MakeUniqueId();
+    std::unordered_set<int32_t> nodeIds = { invalidId };
+    auto result = FrameNode::GetNodesByIdWithCleanup(nodeIds);
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(nodeIds.empty());
+}
+
+/**
+ * @tc.name: GetNodesByIdWithCleanup004
+ * @tc.desc: GetNodesByIdWithCleanup skips UINode that is not a FrameNode (DynamicCast fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup004, TestSize.Level1)
+{
+    auto nonFrameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto testNode = TestNode::CreateTestNode(nonFrameId);
+    ElementRegister::GetInstance()->AddUINode(testNode);
+    std::unordered_set<int32_t> nodeIds = { nonFrameId };
+    auto result = FrameNode::GetNodesByIdWithCleanup(nodeIds);
+    EXPECT_TRUE(result.empty());
+    EXPECT_EQ(nodeIds.size(), 1u);
+}
+
+/**
+ * @tc.name: GetNodesByIdWithCleanup005
+ * @tc.desc: GetNodesByIdWithCleanup handles mixed valid FrameNode, invalid id, and non-FrameNode UINode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup005, TestSize.Level1)
+{
+    auto validId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto nonFrameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto invalidId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode("validTag", validId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto testNode = TestNode::CreateTestNode(nonFrameId);
+    ElementRegister::GetInstance()->AddUINode(testNode);
+    std::unordered_set<int32_t> nodeIds = { validId, nonFrameId, invalidId };
+    auto result = FrameNode::GetNodesByIdWithCleanup(nodeIds);
+    EXPECT_EQ(result.size(), 1u);
+    EXPECT_NE(result[0], nullptr);
+    EXPECT_EQ(nodeIds.size(), 2u);
+    EXPECT_TRUE(nodeIds.find(validId) != nodeIds.end());
+    EXPECT_TRUE(nodeIds.find(nonFrameId) != nodeIds.end());
+    EXPECT_TRUE(nodeIds.find(invalidId) == nodeIds.end());
+}
 } // namespace OHOS::Ace::NG
