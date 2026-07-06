@@ -48,8 +48,8 @@ export class DatePickerComponentOptions {
 }
 class DatePickerConstant {
 }
-DatePickerConstant.MIN_YEAR = 0;
-DatePickerConstant.MAX_YEAR = 10000;
+DatePickerConstant.MIN_YEAR = 1;
+DatePickerConstant.MAX_YEAR = 9999;
 DatePickerConstant.DEFAULT_START_YEAR = 1970;
 DatePickerConstant.DEFAULT_END_YEAR = 2100;
 DatePickerConstant.MIN_MONTH = 0;
@@ -739,7 +739,8 @@ export class DatePickerComponent extends ViewPU {
         if (prevLunar !== this.lunar) {
             if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
                 // Switching from gregorian to lunar: convert gregorian date to lunar date
-                this.lunarCalendar.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
+                const gregorianDate = this.createDateFromParams(this.selectedYear, this.selectedMonth, this.selectedDay);
+                this.lunarCalendar.setTime(gregorianDate);
                 this.selectedMonth = this.lunarCalendar.get('month');
                 this.selectedDay = this.lunarCalendar.get('date');
             }
@@ -810,7 +811,7 @@ export class DatePickerComponent extends ViewPU {
             let month2Start = null;
             for (let month = 0; month < 12; month++) {
                 for (let day = 1; day <= 31; day++) {
-                    const testDate = new Date(gregorianYear, month, day);
+                    const testDate = this.createDateFromParams(gregorianYear, month, day);
                     this.lunarCalendar.setTime(testDate);
                     const currentLunarMonth = this.lunarCalendar.get('month');
                     const currentLunarDay = this.lunarCalendar.get('date');
@@ -856,7 +857,7 @@ export class DatePickerComponent extends ViewPU {
             // Priority 1: Search in gregorianYear
             for (let month = 0; month < 12; month++) {
                 for (let day = 1; day <= 31; day++) {
-                    const testDate = new Date(gregorianYear, month, day);
+                    const testDate = this.createDateFromParams(gregorianYear, month, day);
                     calendar.setTime(testDate);
                     const currentLunarYear = calendar.get('year');
                     const currentLunarMonth = calendar.get('month');
@@ -872,13 +873,14 @@ export class DatePickerComponent extends ViewPU {
                 const year = gregorianYear + yearOffset;
                 for (let month = 0; month < 12; month++) {
                     for (let day = 1; day <= 31; day++) {
-                        const testDate = new Date(year, month, day);
+                        const testDate = this.createDateFromParams(year, month, day);
                         calendar.setTime(testDate);
                         const currentLunarMonth = calendar.get('month');
                         const currentLunarDay = calendar.get('date');
                         if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
                             // Verify this date is within our valid range
-                            if (testDate.getFullYear() >= this.startYear && testDate.getFullYear() <= this.endYear) {
+                            const testYear = testDate.getFullYear();
+                            if (testYear >= this.startYear && testYear <= this.endYear) {
                                 return testDate;
                             }
                         }
@@ -1211,15 +1213,16 @@ export class DatePickerComponent extends ViewPU {
     }
     validateDate(date) {
         try {
-            const year = date.getFullYear();
+            const jsYear = date.getFullYear();
             const month = date.getMonth();
             const day = date.getDate();
             // Check for Invalid Date (NaN values)
-            if (isNaN(year) || isNaN(month) || isNaN(day)) {
+            if (isNaN(jsYear) || isNaN(month) || isNaN(day)) {
                 return undefined;
             }
+            let actualYear = jsYear;
             // Check if year, month, day are in valid ranges
-            if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
+            if (actualYear < DatePickerConstant.MIN_YEAR || actualYear > DatePickerConstant.MAX_YEAR) {
                 return undefined;
             }
             if (month < DatePickerConstant.MIN_MONTH || month > DatePickerConstant.MAX_MONTH) {
@@ -1228,15 +1231,15 @@ export class DatePickerComponent extends ViewPU {
             if (day < DatePickerConstant.MIN_DAY || day > 31) {
                 return undefined;
             }
-            const daysInMonth = this.getDaysInMonth(year, month);
+            const daysInMonth = this.getDaysInMonth(actualYear, month);
             if (day > daysInMonth) {
                 return undefined;
             }
-            // Detect JavaScript auto-correction by checking year jump
-            // If year jumped significantly (> 1 year), it indicates abnormal input
-            // Create expected Date without correction
+            // Create corrected date using setFullYear to preserve exact year
+            const correctedDate = new Date();
+            correctedDate.setFullYear(actualYear, month, day);
+            // Verify the date matches what was input (no overflow correction)
             const originalTime = date.getTime();
-            const correctedDate = new Date(year, month, day);
             const correctedTime = correctedDate.getTime();
             // If time difference > 365 days, indicates year jump due to abnormal month/day
             const timeDiff = Math.abs(originalTime - correctedTime);
@@ -1274,7 +1277,7 @@ export class DatePickerComponent extends ViewPU {
             const month = date.getMonth();
             const day = date.getDate();
             const originalTime = date.getTime();
-            const correctedTime = new Date(year, month, day, hour, minute, second).getTime();
+            const correctedTime = this.createDateWithTime(year, month, day, hour, minute, second).getTime();
             // If time difference > 1 hour, indicates abnormal minute/second overflow
             const timeDiff = Math.abs(originalTime - correctedTime);
             const oneHourInMs = 60 * 60 * 1000;
@@ -1290,7 +1293,15 @@ export class DatePickerComponent extends ViewPU {
         }
     }
     createDateFromParams(year, month, day) {
-        return new Date(year, month, day);
+        const date = new Date();
+        date.setFullYear(year, month, day);
+        return date;
+    }
+    createDateWithTime(year, month, day, hour, minute, second) {
+        const date = new Date();
+        date.setFullYear(year, month, day);
+        date.setHours(hour, minute, second);
+        return date;
     }
     onOptionsChange() {
         // Restore defaults for undefined/null values
@@ -1502,11 +1513,11 @@ export class DatePickerComponent extends ViewPU {
         }
         // Calculate lunar date range when in lunar mode
         if (this.lunar && this.lunarCalendar !== null) {
-            const startGregorian = new Date(this.startYear, this.startMonth, this.startDay);
+            const startGregorian = this.createDateFromParams(this.startYear, this.startMonth, this.startDay);
             this.lunarCalendar.setTime(startGregorian);
             this.lunarStartMonth = this.lunarCalendar.get('month');
             this.lunarStartDay = this.lunarCalendar.get('date');
-            const endGregorian = new Date(this.endYear, this.endMonth, this.endDay);
+            const endGregorian = this.createDateFromParams(this.endYear, this.endMonth, this.endDay);
             this.lunarCalendar.setTime(endGregorian);
             this.lunarEndMonth = this.lunarCalendar.get('month');
             this.lunarEndDay = this.lunarCalendar.get('date');

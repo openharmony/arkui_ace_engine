@@ -87,8 +87,8 @@ export class DatePickerComponentOptions {
 }
 
 class DatePickerConstant {
-  public static readonly MIN_YEAR: int = 0;
-  public static readonly MAX_YEAR: int = 10000;
+  public static readonly MIN_YEAR: int = 1;
+  public static readonly MAX_YEAR: int = 9999;
   public static readonly DEFAULT_START_YEAR: int = 1970;
   public static readonly DEFAULT_END_YEAR: int = 2100;
   public static readonly MIN_MONTH: int = 0;
@@ -265,13 +265,14 @@ export struct DatePickerComponent {
       this.lunarCalendar = null;
     }
     
-    // Convert date when switching between lunar and gregorian modes
+// Convert date when switching between lunar and gregorian modes
     if (prevLunar !== this.lunar) {
       if (!prevLunar && this.lunar && this.lunarCalendar !== null) {
         // Switching from gregorian to lunar: convert gregorian date to lunar date
-        this.lunarCalendar!.setTime(new Date(this.selectedYear, this.selectedMonth, this.selectedDay));
-        this.selectedMonth = this.lunarCalendar!.get('month')!.toInt();
-        this.selectedDay = this.lunarCalendar!.get('date')!.toInt();
+        const gregorianDate: Date = this.createDateFromParams(this.selectedYear, this.selectedMonth, this.selectedDay);
+        this.lunarCalendar!.setTime(gregorianDate);
+        this.selectedMonth = this.lunarCalendar!.get('month').toInt();
+        this.selectedDay = this.lunarCalendar!.get('date').toInt();
       } else if (prevLunar && !this.lunar && prevLunarCalendar !== null) {
         // Switching from lunar to gregorian: convert lunar date to gregorian date
         // Use prevLunarCalendar for conversion since current lunarCalendar is null
@@ -352,11 +353,11 @@ export struct DatePickerComponent {
     
       for (let m: int = 0; m < 12; m++) {
         for (let d: int = 1; d <= 31; d++) {
-          const testDate = new Date(gregorianYear, m, d);
+          const testDate: Date = this.createDateFromParams(gregorianYear, m, d);
           if (this.lunarCalendar !== null) {
             this.lunarCalendar!.setTime(testDate);
-            const currentLunarMonth: int = this.lunarCalendar!.get('month');
-            const currentLunarDay: int = this.lunarCalendar!.get('date');
+            const currentLunarMonth: int = this.lunarCalendar!.get('month').toInt();
+            const currentLunarDay: int = this.lunarCalendar!.get('date').toInt();
         
             if (currentLunarMonth === lunarMonth && currentLunarDay === 1 && month1Start === null) {
               month1Start = testDate;
@@ -409,7 +410,7 @@ export struct DatePickerComponent {
       // Priority 1: Search in gregorianYear
       for (let month: int = 0; month < 12; month++) {
         for (let day: int = 1; day <= 31; day++) {
-          const testDate: Date = new Date(gregorianYear, month, day);
+          const testDate: Date = this.createDateFromParams(gregorianYear, month, day);
           calendar.setTime(testDate);
           const currentLunarYear: int = calendar.get('year').toInt();
           const currentLunarMonth: int = calendar.get('month').toInt();
@@ -427,14 +428,15 @@ export struct DatePickerComponent {
         const year: int = gregorianYear + yearOffset;
         for (let month: int = 0; month < 12; month++) {
           for (let day: int = 1; day <= 31; day++) {
-            const testDate: Date = new Date(year, month, day);
+            const testDate: Date = this.createDateFromParams(year, month, day);
             calendar.setTime(testDate);
             const currentLunarMonth: int = calendar.get('month').toInt();
             const currentLunarDay: int = calendar.get('date').toInt();
             
             if (currentLunarMonth === lunarMonth && currentLunarDay === lunarDay) {
               // Verify this date is within our valid range
-              if (testDate.getFullYear() >= this.startYear && testDate.getFullYear() <= this.endYear) {
+              const testYear: int = testDate.getFullYear().toInt();
+              if (testYear >= this.startYear && testYear <= this.endYear) {
                 return testDate;
               }
             }
@@ -822,17 +824,19 @@ export struct DatePickerComponent {
   
   private validateDate(date: Date): Date | undefined {
     try {
-      const year: int = date.getFullYear().toInt();
+      const jsYear: int = date.getFullYear().toInt();
       const month: int = date.getMonth().toInt();
       const day: int = date.getDate().toInt();
     
       // Check for Invalid Date (NaN values)
-      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+      if (isNaN(jsYear) || isNaN(month) || isNaN(day)) {
         return undefined;
       }
     
+      let actualYear: int = jsYear;
+    
       // Check if year, month, day are in valid ranges
-      if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
+      if (actualYear < DatePickerConstant.MIN_YEAR || actualYear > DatePickerConstant.MAX_YEAR) {
         return undefined;
       }
       if (month < DatePickerConstant.MIN_MONTH || month > DatePickerConstant.MAX_MONTH) {
@@ -842,15 +846,17 @@ export struct DatePickerComponent {
         return undefined;
       }
     
-      const daysInMonth: int = this.getDaysInMonth(year, month);
+      const daysInMonth: int = this.getDaysInMonth(actualYear, month);
       if (day > daysInMonth) {
         return undefined;
       }
     
-      // Detect JavaScript auto-correction by checking year jump
-      // If year jumped significantly (> 1 year), it indicates abnormal input
+      // Create corrected date using setFullYear to preserve exact year
+      const correctedDate: Date = new Date();
+      correctedDate.setFullYear(actualYear, month, day);
+    
+      // Verify the date matches what was input (no overflow correction)
       const originalTime: number = date.getTime();
-      const correctedDate: Date = new Date(year, month, day);
       const correctedTime: number = correctedDate.getTime();
     
       // If time difference > 365 days, indicates year jump due to abnormal month/day
@@ -894,7 +900,7 @@ export struct DatePickerComponent {
       const day: int = date.getDate().toInt();
     
       const originalTime: number = date.getTime();
-      const correctedTime: number = new Date(year, month, day, hour, minute, second).getTime();
+      const correctedTime: number = this.createDateWithTime(year, month, day, hour, minute, second).getTime();
     
       // If time difference > 1 hour, indicates abnormal minute/second overflow
       const timeDiff: number = Math.abs(originalTime - correctedTime);
@@ -912,7 +918,16 @@ export struct DatePickerComponent {
   }
   
   private createDateFromParams(year: int, month: int, day: int): Date {
-    return new Date(year, month, day);
+    const date: Date = new Date();
+    date.setFullYear(year, month, day);
+    return date;
+  }
+  
+  private createDateWithTime(year: int, month: int, day: int, hour: int, minute: int, second: int): Date {
+    const date: Date = new Date();
+    date.setFullYear(year, month, day);
+    date.setHours(hour, minute, second);
+    return date;
   }
   
   private onOptionsChange(str: string): void {
@@ -1127,12 +1142,12 @@ export struct DatePickerComponent {
     
     // Calculate lunar date range when in lunar mode
     if (this.lunar && this.lunarCalendar !== null) {
-      const startGregorian: Date = new Date(this.startYear, this.startMonth, this.startDay);
+      const startGregorian: Date = this.createDateFromParams(this.startYear, this.startMonth, this.startDay);
       this.lunarCalendar!.setTime(startGregorian);
       this.lunarStartMonth = this.lunarCalendar!.get('month').toInt();
       this.lunarStartDay = this.lunarCalendar!.get('date').toInt();
       
-      const endGregorian: Date = new Date(this.endYear, this.endMonth, this.endDay);
+      const endGregorian: Date = this.createDateFromParams(this.endYear, this.endMonth, this.endDay);
       this.lunarCalendar!.setTime(endGregorian);
       this.lunarEndMonth = this.lunarCalendar!.get('month').toInt();
       this.lunarEndDay = this.lunarCalendar!.get('date').toInt();
@@ -1989,7 +2004,7 @@ private onHourChange(selectedIndex: int): void {
     return Math.max(Math.floor(calculatedRadius), 0).toInt();
   }
   
-  build(): void {
+  build() {
     Row() {
       if (this.displayMode === DisplayMode.DATE || this.displayMode === DisplayMode.DATE_TIME) {
         if (this.dateMode === DateMode.DATE) {
