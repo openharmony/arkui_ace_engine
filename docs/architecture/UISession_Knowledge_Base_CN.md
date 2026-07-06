@@ -1,8 +1,8 @@
 # UISession UI会话知识库
 
 > 文档版本：v1.0
-> 更新时间：2026-06-13
-> 源码版本：OpenHarmony ace_engine (master 分支)
+> 更新时间：2026-07-06
+> 源码版本：OpenHarmony ace_engine (master / PageScene 特性分支)
 
 ## 概述
 
@@ -427,42 +427,94 @@ hdc shell hidumper -ls | grep 16666
 hdc shell ps -ef | grep ui_sa
 ```
 
-若是在已有开发板上临时验证，需要手动推送 `ui_sa` 库和配置。`ui_sa.cfg` 指定 `sa_main` 按 `/system/profile/16666.json` 拉起，profile 中 `libpath` 为 `libui_sa.z.so`，因此库需要放到系统可加载路径，当前真机验证使用 `/system/lib64/platformsdk/`。源码：`interfaces/inner_api/ui_session/ui_session_sample/ui_sa.cfg:3`、`interfaces/inner_api/ui_session/ui_session_sample/ui_sa.cfg:4`、`interfaces/inner_api/ui_session/ui_session_sample/16666.json:5`、`interfaces/inner_api/ui_session/ui_session_sample/16666.json:6`。
+若是在已有开发板上临时验证，需要手动推送 `ui_sa` 库和配置。`ui_sa.cfg` 指定 `sa_main` 按 `/system/profile/16666.json` 拉起，profile 中 `libpath` 为 `libui_sa.z.so`，因此库需要放到 `sa_main` 可加载的平台库路径。推送前必须先确认设备已有库路径和本地产物架构，不要只按经验写死路径：32 位 `sa_main` 通常使用 `/system/lib/platformsdk/`，64 位 `sa_main` 通常使用 `/system/lib64/platformsdk/`。当前 32 位 RK3568 验证板实测 `libui_sa.z.so`、`libui_session.z.so`、`libace_compatible.z.so` 均在 `/system/lib/platformsdk/`。源码：`interfaces/inner_api/ui_session/ui_session_sample/ui_sa.cfg:3`、`interfaces/inner_api/ui_session/ui_session_sample/ui_sa.cfg:4`、`interfaces/inner_api/ui_session/ui_session_sample/16666.json:5`、`interfaces/inner_api/ui_session/ui_session_sample/16666.json:6`。
 
 ```bash
-# 1. 查找本地构建产物，也可用 out/rk3568 全局 find 确认实际路径。
-find out/rk3568 -name libui_sa.z.so -o -name 16666.json -o -name ui_sa.cfg
+# 1. 查找本地构建产物，并确认与设备位数一致。当前 32 位板实测产物在 out/rk3568/arkui/ace_engine/。
+find out/rk3568 -name libui_sa.z.so -o -name libui_session.z.so -o -name libace_compatible.z.so -o -name 16666.json -o -name ui_sa.cfg
+file <path-to-libui_sa.z.so> <path-to-libui_session.z.so> <path-to-libace_compatible.z.so>
 
-# 2. 设备侧准备临时目录和可写系统分区。不同产品镜像 remount 命令可能略有差异。
+# 2. 查询设备实际加载路径。必须以查询结果为准，不要盲目推送到 /system/lib64 或 /system/lib。
+hdc shell "file /system/bin/sa_main 2>/dev/null || true"
+hdc shell "find /system -name libui_sa.z.so -o -name libui_session.z.so -o -name libace_compatible.z.so 2>/dev/null"
+hdc shell "ls -l /system/lib/platformsdk/libui_sa.z.so /system/lib/platformsdk/libui_session.z.so /system/lib/platformsdk/libace_compatible.z.so 2>/dev/null"
+
+# 3. 设备侧准备临时目录和可写系统分区。不同产品镜像 remount 命令可能略有差异。
 hdc shell mount -o rw,remount /
 hdc shell mkdir -p /data/sofiles
+hdc shell mkdir -p /data/local/tmp/pagescene_backup
 
-# 3. 推送库和配置文件。
+# 4. 备份并推送库和配置文件。下面以当前 32 位 RK3568 实测路径为例。
+hdc shell "cp -n /system/lib/platformsdk/libui_sa.z.so /data/local/tmp/pagescene_backup/libui_sa.z.so.bak 2>/dev/null || true"
+hdc shell "cp -n /system/lib/platformsdk/libui_session.z.so /data/local/tmp/pagescene_backup/libui_session.z.so.bak 2>/dev/null || true"
+hdc shell "cp -n /system/lib/platformsdk/libace_compatible.z.so /data/local/tmp/pagescene_backup/libace_compatible.z.so.bak 2>/dev/null || true"
 hdc file send <path-to-libui_sa.z.so> /data/sofiles/libui_sa.z.so
-hdc shell cp /data/sofiles/libui_sa.z.so /system/lib64/platformsdk/libui_sa.z.so
+hdc file send <path-to-libui_session.z.so> /data/sofiles/libui_session.z.so
+hdc file send <path-to-libace_compatible.z.so> /data/sofiles/libace_compatible.z.so
+hdc shell cp /data/sofiles/libui_sa.z.so /system/lib/platformsdk/libui_sa.z.so
+hdc shell cp /data/sofiles/libui_session.z.so /system/lib/platformsdk/libui_session.z.so
+hdc shell cp /data/sofiles/libace_compatible.z.so /system/lib/platformsdk/libace_compatible.z.so
+hdc shell chmod 755 /system/lib/platformsdk/libui_sa.z.so /system/lib/platformsdk/libui_session.z.so /system/lib/platformsdk/libace_compatible.z.so
 hdc file send interfaces/inner_api/ui_session/ui_session_sample/16666.json /system/profile/16666.json
 hdc file send interfaces/inner_api/ui_session/ui_session_sample/ui_sa.cfg /system/etc/init/ui_sa.cfg
 
-# 4. 补充 SA 账号和组。重复执行前先 grep，避免重复追加。
-hdc shell "grep -q '^ui_sa:' /system/etc/group || echo 'ui_sa:x:16666:' >> /system/etc/group"
-hdc shell "grep -q '^ui_sa:' /system/etc/passwd || echo 'ui_sa:x:16666:::16666:::/bin/false' >> /system/etc/passwd"
+# 5. 补充 SA 账号和组。重复执行前先 grep，避免重复追加。
+hdc shell "grep -q '^ui_sa:' /system/etc/group || printf 'ui_sa:x:16666:\n' >> /system/etc/group"
+hdc shell "grep -q '^ui_sa:' /system/etc/passwd || printf 'ui_sa:x:16666:16666:::/bin/false\n' >> /system/etc/passwd"
 
-# 5. 开发板验证可临时放宽 SELinux，并创建 sample 输出目录。
+# 6. 开发板验证可临时放宽 SELinux，并创建 sample 输出目录。
 hdc shell "sed -i 's/^SELINUX=.*/SELINUX=permissive/g' /system/etc/selinux/config"
 hdc shell "cat /system/etc/selinux/config | grep SELINUX="
 hdc shell mkdir -p /data/service/el1/public/ui_sa
 hdc shell chown ui_sa:ui_sa /data/service/el1/public/ui_sa
 hdc shell chmod 770 /data/service/el1/public/ui_sa
 
-# 6. 重启后确认 SA 已注册。
+# 7. 重启后确认 SA 已注册。
 hdc shell reboot
 hdc shell power-shell wakeup
 hdc shell "power-shell setmode 602"
+hdc shell "power-shell timeout -o 18000000"
+hdc shell "param set ohos.ctl.start ui_sa"
 hdc shell hidumper -ls | grep 16666
 hdc shell ps -ef | grep ui_sa
 ```
 
-若 `hdc` 只能在 Windows 主机上执行，可先用 `scp -P 2222` 把本地构建产物复制到 Windows 主机，再在 Windows 侧执行同样的 `hdc file send` / `hdc shell` 命令；不要把个人密码写入仓内文档或脚本。
+若 `hdc` 只能在 Windows 主机上执行，可先用 `scp -P 2222` 把本地构建产物复制到 Windows 主机，再在 Windows 侧执行同样的 `hdc file send` / `hdc shell` 命令；验证产物和临时配置统一放到 Windows 工作目录，例如 `C:\Users\<user>\Desktop\PageScene\so` 和 `C:\Users\<user>\Desktop\PageScene\logs`，不要散放在桌面根目录。不要把个人密码写入仓内文档或脚本。
+
+反向 SSH 到 Windows 主机执行 HDC 时，推荐把环境变量写在本地 shell 临时会话中，避免把个人信息写入仓内脚本。以下脚本只适用于已经确认三份库均位于 `/system/lib/platformsdk/` 的 32 位开发板；其他设备必须先执行前面的 `find /system` 查询并替换目标路径。
+
+```bash
+WIN_USER=<windows_user>
+WIN_PORT=2222
+HDC='C:\path\to\hdc.exe'
+DEVICE=<device_id>
+WIN_SO='C:\Users\<windows_user>\Desktop\PageScene\so'
+WIN_LOG='C:\Users\<windows_user>\Desktop\PageScene\logs'
+
+scp -P ${WIN_PORT} out/rk3568/arkui/ace_engine/libui_sa.z.so ${WIN_USER}@127.0.0.1:${WIN_SO}/
+scp -P ${WIN_PORT} out/rk3568/arkui/ace_engine/libui_session.z.so ${WIN_USER}@127.0.0.1:${WIN_SO}/
+scp -P ${WIN_PORT} out/rk3568/arkui/ace_engine/libace_compatible.z.so ${WIN_USER}@127.0.0.1:${WIN_SO}/
+
+ssh -p ${WIN_PORT} ${WIN_USER}@127.0.0.1 \
+  "powershell -NoProfile -Command \"New-Item -ItemType Directory -Force '${WIN_SO}','${WIN_LOG}' | Out-Null; \
+  & '${HDC}' -t '${DEVICE}' shell 'find /system -name libui_sa.z.so -o -name libui_session.z.so -o -name libace_compatible.z.so 2>/dev/null'; \
+  & '${HDC}' -t '${DEVICE}' shell 'ls -l /system/lib/platformsdk/libui_sa.z.so /system/lib/platformsdk/libui_session.z.so /system/lib/platformsdk/libace_compatible.z.so 2>/dev/null'; \
+  & '${HDC}' -t '${DEVICE}' shell 'mount -o rw,remount /'; \
+  & '${HDC}' -t '${DEVICE}' shell 'mkdir -p /data/local/tmp/pagescene_backup'; \
+  & '${HDC}' -t '${DEVICE}' shell 'cp -n /system/lib/platformsdk/libui_sa.z.so /data/local/tmp/pagescene_backup/libui_sa.z.so.bak 2>/dev/null || true'; \
+  & '${HDC}' -t '${DEVICE}' shell 'cp -n /system/lib/platformsdk/libui_session.z.so /data/local/tmp/pagescene_backup/libui_session.z.so.bak 2>/dev/null || true'; \
+  & '${HDC}' -t '${DEVICE}' shell 'cp -n /system/lib/platformsdk/libace_compatible.z.so /data/local/tmp/pagescene_backup/libace_compatible.z.so.bak 2>/dev/null || true'; \
+  & '${HDC}' -t '${DEVICE}' file send '${WIN_SO}\libui_sa.z.so' '/system/lib/platformsdk/libui_sa.z.so'; \
+  & '${HDC}' -t '${DEVICE}' file send '${WIN_SO}\libui_session.z.so' '/system/lib/platformsdk/libui_session.z.so'; \
+  & '${HDC}' -t '${DEVICE}' file send '${WIN_SO}\libace_compatible.z.so' '/system/lib/platformsdk/libace_compatible.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'chmod 755 /system/lib/platformsdk/libui_sa.z.so /system/lib/platformsdk/libui_session.z.so /system/lib/platformsdk/libace_compatible.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'grep -q ^ui_sa: /system/etc/group || printf \"ui_sa:x:16666:\n\" >> /system/etc/group'; \
+  & '${HDC}' -t '${DEVICE}' shell 'grep -q ^ui_sa: /system/etc/passwd || printf \"ui_sa:x:16666:16666:::/bin/false\n\" >> /system/etc/passwd'; \
+  & '${HDC}' -t '${DEVICE}' shell 'sed -i s/enforcing/permissive/g /system/etc/selinux/config'; \
+  & '${HDC}' -t '${DEVICE}' shell 'mkdir -p /data/service/el1/public/ui_sa && chown ui_sa:ui_sa /data/service/el1/public/ui_sa && chmod 770 /data/service/el1/public/ui_sa'\""
+```
+
+真机验证时，除了 `16666.json` 和原始 `ui_sa.cfg`，还需要保证 `ui_sa` 进程具备向 samgr 注册本地 SA 的权限。若前台手动执行 `sa_main /system/profile/16666.json` 或 init 拉起日志出现 `AddSystemProcess PERMISSION DENIED` / `failed to add local abilitymanager`，需要在 `/system/etc/init/ui_sa.cfg` 的 `permission` 和 `permission_acls` 中补充 `ohos.permission.MANAGE_SYSTEM_ABILITY` 后重新推送并重启。手动拉起必须使用 init 识别的控制参数 `ohos.ctl.start`，例如 `hdc shell "param set ohos.ctl.start ui_sa"`；不要使用 `ctl.start`，该参数不会触发 OpenHarmony init 的服务控制 hook。最终以 `hdc shell "hidumper -ls | grep 16666"` 能看到 16666 为 SA 注册成功判据；若 `hidumper` 返回 `no such system ability 16666`，说明 sample SA 尚未被 init/samgr 纳入可调度上下文，不能继续判定 UISession 接口验证通过。
 
 若需要保存树文件，必须先确保 sample 写入目录存在并归属 `ui_sa`：
 
@@ -470,6 +522,63 @@ hdc shell ps -ef | grep ui_sa
 hdc shell mkdir -p /data/service/el1/public/ui_sa
 hdc shell chown ui_sa:ui_sa /data/service/el1/public/ui_sa
 ```
+
+#### window_manager remote object 验证补丁
+
+`hidumper -s 16666 -a "Connect"` 若日志出现 `through uiSa, get UIContentRemoteObj. ret=0` 后紧跟 `through uiSa, tempRemoteObj is null`，说明 `ui_sa` 已经通过 samgr 拉起，且 WindowManager IPC 返回成功，但焦点窗口对应的 `UIContent::GetRemoteObj()` 为空。该问题不在 `ui_sa` 注册通路，而在 WindowManager 返回 UIContent remote object 的窗口选择或兜底策略。
+
+验证补丁和完整应用、编译、推送步骤已固化到 `docs/architecture/UISession/`：
+
+- `docs/architecture/UISession/window_manager_get_ui_content_remote_obj.patch`
+- `docs/architecture/UISession/WindowManager_UIContentRemoteObj_Verification_CN.md`
+
+unified/sceneboard 架构下，当前验证链路为：`UiSaService::Dump` 获取焦点窗口 ID，调用 `WindowManager::GetUIContentRemoteObj`；WindowManager 依次经过 `wm/src/window_manager.cpp`、`wm/src/window_adapter.cpp`、`window_scene/session_manager/src/scene_session_manager.cpp`、`window_scene/session/host/src/session.cpp`、`window_scene/session/container/src/zidl/session_stage_stub.cpp`，最后进入 `wm/src/window_session_impl.cpp` 的 `WindowSessionImpl::GetUIContentRemoteObj`。窗口侧原逻辑只对当前窗口执行 `GetUIContentSharedPtr()->GetRemoteObj()`，如果焦点窗口不是承载 ArkUI 主内容的窗口，`Ace::UIContent` 基类默认实现可能返回空；真正的 `UIContentImpl::GetRemoteObj()` 返回应用侧 `IUiContentService` stub 实例。源码：`interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp:241`、`interfaces/inner_api/ace/ui_content.h:518`、`adapter/ohos/entrance/ui_content_impl.h:383`。
+
+验证性补丁建议放在 window_manager 仓的 `wm/src/window_session_impl.cpp`：当当前窗口 remote object 为空时，遍历同进程 `WindowSessionImpl::windowSessionMap_`，寻找其他窗口的 `GetUIContentSharedPtr()->GetRemoteObj()` 非空对象作为 fallback 返回，并打印 `current uiContent remote is null`、`get fallback uiContent remote` 或 `uiContent remote is nullptr, no fallback found`。这是为了验证 `ui_sa` 到应用进程的 UISession IPC 链路；是否作为正式修复需要由 window_manager 评估焦点窗口、子窗口和安全边界后决定。
+
+separated WMS 架构还需要补 WMS IPC 和 WMS 到应用进程窗口对象回调。缺口表现为 `IWindowManager::GetUIContentRemoteObj` 默认返回 `WS_OK` 但不写 remote object，`ui_sa` 侧日志出现 `ret=0` 后 `tempRemoteObj is null`。验证补丁链路为：`WindowManagerService::GetUIContentRemoteObj -> WindowRoot::GetWindowNode(persistentId) -> WindowNode::GetWindowToken() -> IWindow::GetUIContentRemoteObj -> WindowAgent::GetUIContentRemoteObj -> WindowImpl::GetUIContentRemoteObj -> UIContent::GetRemoteObj()`。WMS IPC reply 应先写 `errCode`，成功时再写 remote object，客户端读取顺序保持一致。涉及 window_manager 仓文件包括 `wmserver/include/zidl/window_manager_interface.h`、`wmserver/src/zidl/window_manager_stub.cpp`、`wmserver/src/zidl/window_manager_proxy.cpp`、`wmserver/src/window_manager_service.cpp`、`wm/include/zidl/window_interface.h`、`wm/src/zidl/window_stub.cpp`、`wm/src/zidl/window_proxy.cpp`、`wm/src/window_agent.cpp`、`wm/src/window_impl.cpp`。
+
+32 位开发板上，当前验证板实测应用进程和 `ui_sa` 加载的是 `/system/lib/libwm.z.so`，separated WMS 服务加载的是 `/system/lib/libwms.z.so`。推送前仍应先用 `find /system -name libwm.z.so -o -name libwms.z.so`、目标进程 `/proc/<pid>/maps` 或直接 `ls -l /system/lib/libwm.z.so /system/lib/libwms.z.so` 确认实际加载路径，再替换对应文件；不要把 window_manager 产物盲目推到 platformsdk 目录。
+
+```bash
+# OpenHarmony 根目录
+./build.sh --product-name rk3568 \
+  --build-target //foundation/window/window_manager/wm:libwm \
+  --build-target //foundation/window/window_manager/wmserver:libwms \
+  --ccache
+file out/rk3568/src/window/window_manager/libwm.z.so \
+  out/rk3568/src/window/window_manager/libwms.z.so
+
+scp -P ${WIN_PORT} out/rk3568/src/window/window_manager/libwm.z.so ${WIN_USER}@127.0.0.1:${WIN_SO}/
+scp -P ${WIN_PORT} out/rk3568/src/window/window_manager/libwms.z.so ${WIN_USER}@127.0.0.1:${WIN_SO}/
+ssh -p ${WIN_PORT} ${WIN_USER}@127.0.0.1 \
+  "powershell -NoProfile -Command \"& '${HDC}' -t '${DEVICE}' shell 'ls -l /system/lib/libwm.z.so /system/lib/libwms.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'mkdir -p /data/local/tmp/pagescene_backup /data/local/tmp/pagescene_push'; \
+  & '${HDC}' -t '${DEVICE}' shell 'cp -n /system/lib/libwm.z.so /data/local/tmp/pagescene_backup/libwm.z.so.bak 2>/dev/null || true; cp -n /system/lib/libwms.z.so /data/local/tmp/pagescene_backup/libwms.z.so.bak 2>/dev/null || true'; \
+  & '${HDC}' -t '${DEVICE}' shell 'mount -o rw,remount /'; \
+  & '${HDC}' -t '${DEVICE}' file send '${WIN_SO}\libwm.z.so' '/data/local/tmp/pagescene_push/libwm.z.so'; \
+  & '${HDC}' -t '${DEVICE}' file send '${WIN_SO}\libwms.z.so' '/data/local/tmp/pagescene_push/libwms.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'cp /data/local/tmp/pagescene_push/libwm.z.so /system/lib/libwm.z.so; cp /data/local/tmp/pagescene_push/libwms.z.so /system/lib/libwms.z.so; chmod 755 /system/lib/libwm.z.so /system/lib/libwms.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'sha256sum /system/lib/libwm.z.so /system/lib/libwms.z.so'; \
+  & '${HDC}' -t '${DEVICE}' shell 'sync; reboot'\""
+```
+
+重启后按以下顺序确认验证路径：
+
+```bash
+hdc shell "param set ohos.ctl.start ui_sa"
+hdc shell "hidumper -ls | grep 16666"
+hdc shell "ps -ef | grep ui_sa"
+hdc shell "power-shell wakeup"
+hdc shell "power-shell setmode 602"
+hdc shell "power-shell timeout -o 18000000"
+hdc shell "hidumper -s WindowManagerService -a \"-a\""
+hdc shell "hidumper -s 16666 -a Connect"
+hdc shell "hidumper -s 16666 -a GetVisibleInspectorTree"
+hdc shell "hilog | grep -E 'GetUIContentRemoteObj from app|WindowAgent GetUIContentRemoteObj|get uiContent remote success|tempRemoteObj is null|connect success|GetVisibleInspectorTree'"
+```
+
+通过判据：`hidumper -ls` 能看到 `16666`，WMS dump 中目标应用窗口是焦点窗口，`Connect` 不再出现 `tempRemoteObj is null`；日志出现 `GetUIContentRemoteObj from app, persistentId:<目标窗口>, err:0, remote:1`、`WindowAgent GetUIContentRemoteObj ... remote:1`、`get uiContent remote success`，后续 `GetVisibleInspectorTree`、`GetCurrentPageName` 或 PageScene sample 命令能进入应用侧 `IUiContentService`。2026-06-30 实测：`myapplication0` 为焦点窗口 `WinId 12` 时，`ui_sa` 日志显示 `connect success, foucs window info = bundleName:com.example.myapplication,moduleName:entry,abilityName:EntryAbility`，`GetVisibleInspectorTree` 返回 `appInfo.BundleName=com.example.myapplication`、`WindowID=12`、`WindowName=myapplication0`。
 
 #### 调用方式
 
@@ -481,6 +590,7 @@ sample 通过 `hidumper -s 16666 -a "<命令> [参数...]"` 驱动。`UiSaServic
 # 验证前先让目标 ArkUI 应用窗口处于前台焦点；重启后建议先点亮并保持常亮。
 hdc shell power-shell wakeup
 hdc shell "power-shell setmode 602"
+hdc shell "power-shell timeout -o 18000000"
 
 # 建立连接，触发 IUiContentService::Connect
 hdc shell hidumper -s 16666 -a "Connect"
@@ -574,6 +684,23 @@ hdc shell hidumper -s 16666 -a "GetCurrentAbilityLanguageInfo"
 5. 如需访问 Pipeline 或节点树，在 `UIContentImpl::InitializeCallback` 或相关初始化路径注册回调，并通过 `TaskExecutor` 投递到 UI 线程。
 6. 如需远端结果回调，更新 `ReportService` 相关 proxy/stub，并维护 `processMap_` 中对应能力 key 的请求进程集合。
 7. 补充 `test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.*` 和相关单元测试。
+
+### 页面场景规则化感知能力（PageScene 分支）
+
+页面场景规则化感知是 `PageScene` 分支上的 SDD 设计中能力，设计文档位于 `.codespec/changes/ui-session-page-scene-awareness/`，Stage 2 已明确首批场景、接口、规则模型和验证计划。当前主线可能尚未包含全部实现，核对代码时以特性分支源码为准。
+
+设计边界：
+
+1. 能力通过 UISession innerAPI 面向系统 SA，不新增 ArkTS/Public API。
+2. 能力独立于 `ContentChange` / `ComponentChange`；仅在匹配时机上参考 ContentChange 的“注册后启动检测、后续节点变化触发检测”模式。现有 ContentChange 启动链路在 `UIContentImpl::SetContentChangeDetectCallback` 中投递到 UI 线程，再调用 `ContentChangeManager::StartContentChangeReport`。源码：`adapter/ohos/entrance/ui_content_impl.cpp:6817`、`frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp:246`。
+3. 首批场景为 `TEXT_EDITOR`：当前页面或子内容源中存在 2 个及以上文本输入类控件时上报。ArkUI 侧文本输入类控件规划包含 `TextInput`、`TextArea`、`Search`、`RichEditor`，对应创建或使用位置可参考 `frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp:45`、`frameworks/core/components_ng/pattern/search/search_model_ng.cpp:101`、`frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp:27`。
+4. 规则由 SA 通过 `ruleJson` 下发，首版条件操作符 `COUNT_GTE` 表示 `COUNT Greater Than or Equal`，即命中节点数量大于等于阈值；`ruleJson.webRules` 是 Web 专用预留字段，Web 来源启用时由宿主原样透传给 Web 控件，具体规格不在当前特性中设计。
+5. 上报结果规划包含 `currentPageName`、`source.type`、`nodes[].rect`、`nodes[].focusable`；默认不包含输入文本正文，`report.includeText=true` 时命中节点 `nodes[]` 携带 `text`，字段值优先为用户已输入文本，输入为空时为框内占位提示文本；本阶段不设计完整控件树上报，也不提供完整树上报开关。
+6. Web / UIExtension 当前只作为子来源接收宿主透传的规则生命周期请求；其中 Web 注册透传使用 `webRules`，UIExtension 透传规则生命周期请求；不设计、不实现、不验证子来源内部匹配、命中结果回传和 `source.type=WEB/UI_EXTENSION` 上报。
+7. PageScene 注册后，ArkUI 侧把输入类节点上下树变化先记为待检测规则，真正检测统一收敛到页面稳定点：`ContentChangeManager::OnVsyncEnd` 调用 `FlushPageSceneNodeChanged`，并在滚动、Swiper 滚动或页面转场未稳定时延后。Pipeline 只调用 `ContentChangeManager::OnVsyncEnd`，不直接依赖 PageScene 规则判断。
+8. PageScene 只复用 ContentChange 的页面级稳定上报点：页面切换结束、滚动结束、Swiper/Tabs 切换结束、弹窗显示隐藏结束。即使只注册 PageScene、未注册 ContentChange，这些稳定点也会触发 PageScene 待检测规则；Text/Image 这类具体控件 ContentChange 事件仍只在 ContentChange 注册后生效，不作为 PageScene-only 的检测入口。
+
+按现有 UISession 扩展步骤，后续实现需要修改 `IUiContentService` transaction 和方法、`UiContentStub::OnRemoteRequest` 分发、`UIContentServiceStubImpl` 转发、`UiSessionManager` 状态、`UiSessionManagerOhos` 上报路由、`ReportService` 回调以及 `UIContentImpl::InitUISessionManagerCallbacks` 中的 UI 线程回调注册。相关源码入口：`interfaces/inner_api/ui_session/ui_content_service_interface.h:82`、`adapter/ohos/entrance/ui_session/ui_content_stub.cpp:42`、`interfaces/inner_api/ui_session/ui_session_manager.h:277`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h:150`、`adapter/ohos/entrance/ui_content_impl.cpp:6209`。
 
 ### 如何新增本应用进程 dump 注入能力
 
