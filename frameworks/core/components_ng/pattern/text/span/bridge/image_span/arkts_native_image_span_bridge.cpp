@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/log/ace_scoring_log.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -287,6 +288,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnComplete(ArkUIRuntimeCallInfo *runt
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("ImageSpan.onComplete");
         PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "width", "height", "componentWidth", "componentHeight", "loadingStatus", "contentWidth",
             "contentHeight", "contentOffsetX", "contentOffsetY" };
@@ -346,6 +348,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnError(ArkUIRuntimeCallInfo *runtime
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
+        ACE_SCORING_EVENT("ImageSpan.onError");
         PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "componentWidth", "componentHeight", "message" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
