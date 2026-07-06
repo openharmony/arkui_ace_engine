@@ -19,9 +19,6 @@
 #include <cstring>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#if defined(ENABLE_ROSEN_BACKEND)
-#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
-#endif
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
@@ -2428,10 +2425,10 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(contentNode, false);
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (NeedDistortion() && !isDialogShow_) {
+    if (NeedDistortion() && isDistortAnimationExecuting_.value_or(false)) {
         renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
-    CHECK_EQUAL_RETURN(isDialogShow_, false, false);
+    CHECK_NULL_RETURN(!isDistortAnimationExecuting_.has_value(), false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
@@ -2444,7 +2441,6 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             dialogPattern->PlayFlowLight();
         }
     });
-    isDialogShow_ = false;
     return true;
 }
 
@@ -3494,6 +3490,7 @@ void DialogPattern::PlayFlowLight()
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
     });
     AnimationUtils::Animate(option3, [columnNode, param3]() {
         // Move light effect to target position
@@ -3597,6 +3594,7 @@ void DialogPattern::PlayDistortion()
         }
     });
 
+    isDistortAnimationExecuting_ = true;
     /**
      * Stage 5: Add barrel distortion
      * Add slight barrel distortion effect, parameter {0.5, 0.5}
@@ -3635,6 +3633,15 @@ void DialogPattern::PlayDistortion()
         for (const auto& childContext : childContexts) {
             childContext->UpdateForegroundFilterDistortionParam(param3);
         }
+    }, [weakRender = WeakPtr<RenderContext>(renderContext), weak = WeakClaim(this)]() {
+        // Clear SDF shape after animation completes
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "dialog completes distortion animation.");
+        auto render = weakRender.Upgrade();
+        CHECK_NULL_VOID(render);
+        render->SetSDFShape(nullptr);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isDistortAnimationExecuting_ = false;
     });
 
     /**
