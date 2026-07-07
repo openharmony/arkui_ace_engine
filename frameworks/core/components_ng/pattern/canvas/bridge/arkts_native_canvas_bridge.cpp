@@ -23,12 +23,13 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-extern "C" void OHOS_ACE_OnReadyCreateAndInvoke(
-    void* vmRaw, void* callbackRefRaw, void* patternRaw, int32_t instanceId, int32_t unit);
+extern "C" void OHOS_ACE_CreateDrawingRenderingContext(
+    void* vmRaw, void** outJsHandle, void** outCppPtr);
 
 // Local definition of JSRenderingContextBase to avoid including js_rendering_context_base.h,
 // which transitively includes bindings_defines.h (requires USE_ARK_ENGINE).
-// The canvas bridge .so is compiled without USE_ARK_ENGINE.
+// The canvas bridge .so is compiled with USE_ARK_ENGINE but does not link
+// js_rendering_context_base.cpp.
 namespace OHOS::Ace::Framework {
 class JSRenderingContextBase : public virtual AceType {
     DECLARE_ACE_TYPE(JSRenderingContextBase, AceType);
@@ -41,6 +42,7 @@ public:
     virtual void SetCanvasPattern(const RefPtr<AceType>& canvas) = 0;
     virtual void SetInstanceId(int32_t id) = 0;
     virtual int32_t GetInstanceId() = 0;
+    virtual void SetUnit(CanvasUnit unit) = 0;
 
     bool IsBuiltIn() const
     {
@@ -86,22 +88,6 @@ void CanvasBridge::RegisterCanvasAttributes(Local<panda::ObjectRef> object, Ecma
 }
 
 namespace {
-// RAII wrapper for napi handle scope — avoids including js_utils.h.
-class ScopeRAII {
-public:
-    explicit ScopeRAII(napi_env env) : env_(env)
-    {
-        napi_open_handle_scope(env_, &scope_);
-    }
-    ~ScopeRAII()
-    {
-        napi_close_handle_scope(env_, scope_);
-    }
-private:
-    napi_env env_;
-    napi_handle_scope scope_;
-};
-
 // Read the C++ binding pointer stored in internal field 0 of a Panda ObjectRef.
 // Mirrors what JsiObject::Unwrap<T>() does, but without dragging in jsi_types.cpp
 // (which is not linked into libarkui_canvas.z.so).
@@ -125,6 +111,22 @@ void ThrowBusinessErrorInline(EcmaVM* vm, const std::string& msg, int32_t code)
     errorObj->Set(vm, codeKey, codeVal);
     panda::JSNApi::ThrowException(vm, errorObj);
 }
+
+// RAII wrapper for napi handle scope — avoids including js_utils.h.
+class ScopeRAII {
+public:
+    explicit ScopeRAII(napi_env env) : env_(env)
+    {
+        napi_open_handle_scope(env_, &scope_);
+    }
+    ~ScopeRAII()
+    {
+        napi_close_handle_scope(env_, scope_);
+    }
+private:
+    napi_env env_;
+    napi_handle_scope scope_;
+};
 
 // Convert a Panda Local<JSValueRef> into a napi_value, then forward it to
 // CanvasPattern::SetImageAIOptions. Mirrors the napi conversion that the old
@@ -264,12 +266,36 @@ ArkUINativeModuleValue CanvasBridge::SetCanvasOnReady(ArkUIRuntimeCallInfo* runt
             return;
         }
 
-        // Delegate to libace_compatible.z.so which creates a JSDrawingRenderingContext
-        // JS object (with proper prototype, .canvas, .invalidate(), etc.) and invokes
-        // the callback with it. This avoids the NativePointerRef wrapping issue.
-        OHOS_ACE_OnReadyCreateAndInvoke(reinterpret_cast<void*>(vm),
-            const_cast<void*>(reinterpret_cast<const void*>(&func)),
-            AceType::RawPtr(pattern), Container::CurrentId(), static_cast<int32_t>(unit));
+        // Create JSDrawingRenderingContext via exported interface from libace_compatible.z.so,
+        // then set properties and invoke callback locally within canvas so.
+        void* jsHandleRaw = nullptr;
+        void* cppPtrRaw = nullptr;
+        OHOS_ACE_CreateDrawingRenderingContext(
+            reinterpret_cast<void*>(vm), &jsHandleRaw, &cppPtrRaw);
+        if (!jsHandleRaw || !cppPtrRaw) {
+            return;
+        }
+        auto* drawingContext = reinterpret_cast<Framework::JSRenderingContextBase*>(cppPtrRaw);
+        drawingContext->SetInstanceId(Container::CurrentId());
+        drawingContext->SetCanvasPattern(pattern);
+        drawingContext->SetUnit(unit);
+        auto* canvasModifier = GetArkUINodeModifiers()->getCanvasModifier();
+        if (canvasModifier && canvasModifier->setUpdateContextCallback) {
+            std::function<void(CanvasUnit)> cb =
+                [drawingContext](CanvasUnit u) { drawingContext->SetUnit(u); };
+            canvasModifier->setUpdateContextCallback(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)), &cb);
+        }
+        if (canvasModifier && canvasModifier->setRSCanvasForDrawingContext) {
+            canvasModifier->setRSCanvasForDrawingContext(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)));
+        }
+        Local<panda::ObjectRef> jsDrawingContext(
+            reinterpret_cast<uintptr_t>(jsHandleRaw));
+        std::vector<Local<JSValueRef>> argv;
+        argv.emplace_back(jsDrawingContext);
+        func->Call(vm, func.ToLocal(), argv.data(), argv.size());
+
     };
     GetArkUINodeModifiers()->getCanvasModifier()->setCanvasOnReady(
         nativeNode, reinterpret_cast<void*>(&callback));

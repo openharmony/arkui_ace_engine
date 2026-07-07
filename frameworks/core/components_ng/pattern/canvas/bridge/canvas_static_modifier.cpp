@@ -26,6 +26,22 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+// Provide AssignCast specialization for CanvasUnit locally (was in converter_enums.cpp)
+// so that canvas BUILD.gn no longer needs to compile converter_enums.cpp.
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = Ace::CanvasUnit::DEFAULT; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = Ace::CanvasUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
+    }
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)

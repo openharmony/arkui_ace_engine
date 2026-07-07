@@ -86,6 +86,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_api.cpp",
       "node/node_api_multi_thread.cpp",
       "node/node_button_modifier.cpp",
+      "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_common_modifier_multi_thread.cpp",

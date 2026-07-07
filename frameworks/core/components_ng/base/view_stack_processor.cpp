@@ -117,12 +117,6 @@ void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView
     elementsStack_.push(element);
 }
 
-void ViewStackProcessor::ImplicitPopBeforeContinue()
-{
-    if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
-        Pop();
-    }
-}
 
 void ViewStackProcessor::PushPtr(int64_t elementPtr)
 {
@@ -139,6 +133,13 @@ bool ViewStackProcessor::ShouldPopImmediately()
     }
     // for custom node and atomic node, just pop top node when next node is coming.
     return GetMainElementNode()->IsAtomicNode();
+}
+
+void ViewStackProcessor::ImplicitPopBeforeContinue()
+{
+    if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
+        Pop();
+    }
 }
 
 void ViewStackProcessor::FlushImplicitAnimation()

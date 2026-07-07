@@ -71,15 +71,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    [[maybe_unused]] constexpr int32_t NUM_0 = 0;
-    [[maybe_unused]] constexpr int32_t NUM_1 = 1;
-    [[maybe_unused]] constexpr int32_t NUM_2 = 2;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-    [[maybe_unused]] constexpr double NUM_DOUBLE_0 = 0.;
-    [[maybe_unused]] constexpr double NUM_DOUBLE_1 = 1.;
-    [[maybe_unused]] constexpr double NUM_DOUBLE_100 = 100.;
-    [[maybe_unused]] constexpr int32_t NUM_PERCENT_100 = 100;
+    constexpr double NUM_DOUBLE_0 = 0.;
+    constexpr double NUM_DOUBLE_1 = 1.;
+    constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
