@@ -14,13 +14,39 @@
  */
 
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
-
+#include "core/common/ace_application_info.h"
+#include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "base/log/log.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr char UI_NODE_GC_FEATURE_NAME[] = "ui_node_gc";
+constexpr char UI_NODE_GC_CAPABILITY_NAME[] = "IsUINodeGcEnabledForApp";
+using IsUINodeGcEnabledForAppFunc = bool (*)(const char*);
+} // namespace
+
 ParseErrCode UINodeGcParamParser::ParseFeatureParam(xmlNode& node)
 {
+    void* funcPtr = nullptr;
+    auto errorCode = ExtraModulesManager::GetInstance().GetCapability(
+        UI_NODE_GC_FEATURE_NAME, UI_NODE_GC_CAPABILITY_NAME, &funcPtr);
+    if (errorCode != ErrCode::SUCCESS || funcPtr == nullptr) {
+        LOGW("Get uiNode GC capability failed, ret:%{public}d, func is null:%{public}d",
+            static_cast<int32_t>(errorCode), static_cast<int32_t>(funcPtr == nullptr));
+        FeatureParamManager::GetInstance().SetUINodeGcEnabled(false);
+        return PARSE_EXEC_SUCCESS;
+    }
+
+    auto isUINodeGcEnabledForApp = reinterpret_cast<IsUINodeGcEnabledForAppFunc>(funcPtr);
+    const auto& bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    if (!isUINodeGcEnabledForApp(bundleName.c_str())) {
+        LOGI("UINode GC is disabled for bundleName:%{public}s", bundleName.c_str());
+        FeatureParamManager::GetInstance().SetUINodeGcEnabled(false);
+        return PARSE_EXEC_SUCCESS;
+    }
+
     bool xmlEnable = ExtractPropertyValue("enable", node) == "true";
     // Priority ： (xml false) > (meta data ture & false) > (xml true)
     if (!parseWithMetaData_ || !xmlEnable) {
@@ -36,5 +62,4 @@ ParseErrCode UINodeGcParamParser::ParseMetaData(const AppExecFwk::Metadata& meta
     FeatureParamManager::GetInstance().SetUINodeGcEnabled(metaData.value == "true");
     return PARSE_EXEC_SUCCESS;
 }
-
 }  // namespace OHOS::Ace

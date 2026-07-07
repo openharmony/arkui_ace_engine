@@ -69,9 +69,9 @@ FeatureParamManager::~FeatureParamManager() = default;
 void FeatureParamManager::Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData)
 {
     MetaDataParseEntry(metaData);
+    ExtraModulesManager::GetInstance().Init();
     FeatureParamParseEntry(bundleName);
     UICorrectionParamParseEntry(bundleName);
-    ExtraModulesManager::GetInstance().Init();
 }
 
 void FeatureParamManager::MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData)
