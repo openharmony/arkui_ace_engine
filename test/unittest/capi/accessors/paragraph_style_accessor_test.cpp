@@ -71,37 +71,35 @@ public:
         return accessor_->construct(&param_);
     }
 
+    static ParagraphStylePeer* CreatePeerWithTailIndent(const std::vector<double>& indentValues,
+        DimensionUnit unit = DimensionUnit::VP)
+    {
+        Opt_ParagraphStyleInterface localParam {};
+        Converter::ConvContext ctx;
+        
+        auto& interface = TypeHelper::WriteTo(localParam);
+        interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
+        
+        auto& tailIndentUnion = TypeHelper::WriteTo(interface.tailIndents);
+        if (indentValues.size() == 1) {
+            tailIndentUnion.selector = 0;
+            tailIndentUnion.value0 = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[0], unit));
+        } else {
+            tailIndentUnion.selector = 1;
+            auto arrayData = ctx.AllocateArray<Array_LengthMetrics>(indentValues.size());
+            for (size_t i = 0; i < indentValues.size(); i++) {
+                arrayData.array[i] = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[i], unit));
+            }
+            tailIndentUnion.value1 = arrayData;
+        }
+        
+        return accessor_->construct(&localParam);
+    }
+
 private:
     Opt_ParagraphStyleInterface param_ = {};
     Converter::ConvContext ctx_;
 };
-
-// Helper function for tailIndent tests
-ParagraphStylePeer CreatePeerWithTailIndent(const std::vector<double>& indentValues,
-    DimensionUnit unit = DimensionUnit::VP)
-{
-    static auto accessor = GENERATED_ArkUIAccessors::getParagraphStyleAccessor();
-    Opt_ParagraphStyleInterface localParam {};
-    Converter::ConvContext ctx;
-    
-    auto& interface = TypeHelper::WriteTo(localParam);
-    interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
-    
-    auto& tailIndentUnion = TypeHelper::WriteTo(interface.tailIndents);
-    if (indentValues.size() == 1) {
-        tailIndentUnion.value.selector = 0;
-        tailIndentUnion.value.value0 = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[0], unit));
-    } else {
-        tailIndentUnion.value.selector = 1;
-        auto arrayData = ctx.AllocateArray<Array_LengthMetrics>(indentValues.size());
-        for (size_t i = 0; i < indentValues.size(); i++) {
-            arrayData.array[i] = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[i], unit));
-        }
-        tailIndentUnion.value.value1 = arrayData;
-    }
-    
-    return accessor->construct(&localParam);
-}
 
 /**
  * @tc.name: getTextAlignTest
