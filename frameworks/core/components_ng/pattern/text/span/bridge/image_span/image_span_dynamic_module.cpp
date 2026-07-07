@@ -35,7 +35,9 @@ struct CJUIImageSpanModifier;
 namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanDynamicModifier();
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier();
+#ifdef INCLUDE_GENERATED_SOURCES
 const ArkUIImageSpanCustomModifier* GetImageSpanCustomModifier();
+#endif
 } // namespace NodeModifier
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
@@ -76,7 +78,11 @@ const void* ImageSpanDynamicModule::GetCjModifier()
 #ifndef CROSS_PLATFORM
 const void* ImageSpanDynamicModule::GetCustomModifier(const std::string& name)
 {
+#ifdef INCLUDE_GENERATED_SOURCES
     return NG::NodeModifier::GetImageSpanCustomModifier();
+#else
+    return nullptr;
+#endif
 }
 #endif
 

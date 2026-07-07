@@ -2522,6 +2522,13 @@ HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
     spanModelNG.SetEnableDeviceFontWeightCategory(false);
     auto result = spanNode->spanItem_->GetFontWeightConfigs();
     auto json = JsonUtil::ParseJsonString(result);
+    /**
+     * @tc.steps: step3.
+        Verify the JSON result contains enableVariableFontWeight and enableDeviceFontWeightCategory
+     * @tc.expected: step3.
+        enableVariableFontWeight is true
+        enableDeviceFontWeightCategory is false
+     */
     ASSERT_NE(json, nullptr);
     EXPECT_TRUE(json->Contains("enableVariableFontWeight"));
     EXPECT_EQ(json->GetValue("enableVariableFontWeight")->GetString(), "true");
