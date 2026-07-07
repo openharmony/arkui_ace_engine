@@ -131,17 +131,17 @@ void CopyPixelsToImageData(const uint8_t* buffer, int32_t bufLen, int32_t imgWid
     Ace::ImageData& imageData)
 {
     imageData.data = std::vector<uint32_t>();
-    constexpr int32_t RED_IDX = 0;
-    constexpr int32_t GREEN_IDX = 1;
-    constexpr int32_t BLUE_IDX = 2;
-    constexpr int32_t ALPHA_IDX = 3;
+    constexpr int32_t redIdx = 0;
+    constexpr int32_t greenIdx = 1;
+    constexpr int32_t blueIdx = 2;
+    constexpr int32_t alphaIdx = 3;
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufLen > static_cast<int32_t>(idx + ALPHA_IDX)) {
+            if (bufLen > static_cast<int32_t>(idx + alphaIdx)) {
                 imageData.data.emplace_back(Color::FromARGB(
-                    buffer[idx + ALPHA_IDX], buffer[idx + RED_IDX],
-                    buffer[idx + GREEN_IDX], buffer[idx + BLUE_IDX]).GetValue());
+                    buffer[idx + alphaIdx], buffer[idx + redIdx],
+                    buffer[idx + greenIdx], buffer[idx + blueIdx]).GetValue());
             }
         }
     }
@@ -240,7 +240,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::MoveTo(ArkUIRunt
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -253,7 +254,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::LineTo(ArkUIRunt
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -417,7 +419,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillRect(ArkUIRu
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -432,7 +437,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::StrokeRect(ArkUI
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -447,7 +455,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ClearRect(ArkUIR
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -465,7 +476,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillText(ArkUIRu
     RefPtr<ResourceObject> resObj;
     ArkTSUtils::ParseJsString(vm, runtimeCallInfo->GetCallArgRef(NUM_1), text, resObj);
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_2, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_3, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -487,7 +499,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Scale(ArkUIRunti
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -512,7 +525,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Translate(ArkUIR
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -526,7 +540,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rect(ArkUIRuntim
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -636,7 +653,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIR
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -647,8 +667,8 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIR
     if (radiusArg->IsArray(vm)) {
         Local<panda::ArrayRef> arr(radiusArg);
         size_t arrLen = ArkTSUtils::GetArrayLength(vm, arr);
-        constexpr size_t ROUND_RECT_CORNER_COUNT = 4;
-        for (size_t i = 0; i < arrLen && i < ROUND_RECT_CORNER_COUNT; ++i) {
+        constexpr size_t roundRectCornerCount = 4;
+        for (size_t i = 0; i < arrLen && i < roundRectCornerCount; ++i) {
             double r = arr->Get(vm, i)->ToNumber(vm)->Value();
             if (std::isnan(r) || std::isinf(r)) {
                 return panda::JSValueRef::Undefined(vm);
