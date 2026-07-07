@@ -20,12 +20,13 @@
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 
 namespace OHOS::Ace::NG {
+const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 void RelativeContainerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_UINODE_TRACE(nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(RELATIVE_CONTAINER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
@@ -79,7 +80,7 @@ void RelativeContainerModelNG::ResetResObj(const std::string& key)
 
 RefPtr<FrameNode> RelativeContainerModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(RELATIVE_CONTAINER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     CHECK_NULL_RETURN(frameNode, frameNode);
     return frameNode;

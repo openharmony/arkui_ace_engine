@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 
-#include "core/components_v2/grid_layout/grid_container_utils.h"
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
 
 namespace {
 std::string GetAlignItemsStr(OHOS::Ace::FlexAlign alignItems)

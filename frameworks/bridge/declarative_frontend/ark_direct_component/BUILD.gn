@@ -149,6 +149,33 @@ ohos_abc("arkcounter") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkblank") {
+  sources = [ "./src/arkblank.ts" ]
+  output_name = "arkblank"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkdivider") {
+  sources = [ "./src/arkdivider.ts" ]
+  output_name = "arkdivider"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkrelativecontainer") {
+  sources = [ "./src/arkrelativecontainer.ts" ]
+  output_name = "arkrelativecontainer"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkqrcode") {
   sources = [ "./src/arkqrcode.ts" ]
   output_name = "arkqrcode"
@@ -161,6 +188,24 @@ ohos_abc("arkqrcode") {
 ohos_abc("arkloadingprogress") {
   sources = [ "./src/arkloadingprogress.ts" ]
   output_name = "arkloadingprogress"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgridrow") {
+  sources = [ "./src/arkgridrow.ts" ]
+  output_name = "arkgridrow"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgridcol") {
+  sources = [ "./src/arkgridcol.ts" ]
+  output_name = "arkgridcol"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

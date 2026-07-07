@@ -12,7 +12,31 @@
 # limitations under the License.
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 import("$ace_root/frameworks/core/components_ng/components_plugin.gni")
+
+build_component_ng("relative_container_pattern_ng") {
+  is_component_model = true
+  sources = [
+    "relative_container_layout_algorithm.cpp",
+    "relative_container_model_ng.cpp",
+  ]
+
+  ark_sources = [
+    "bridge/arkts_native_relative_container_bridge.cpp",
+    "bridge/relative_container_dynamic_modifier.cpp",
+    "bridge/relative_container_dynamic_module.cpp",
+  ]
+
+  if (!is_arkui_x) {
+    ark_sources += [
+      "bridge/relative_container_model_impl.cpp",
+    ]
+    if (!ace_engine_feature_wearable) {
+        ark_sources += [ "bridge/relative_container_static_modifier.cpp" ]
+    }
+  }
+}
 
 build_component_plugin("relative_container_source") {
   js_source = "arkui_relative_container"

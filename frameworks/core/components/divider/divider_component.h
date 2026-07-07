@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT DividerComponent : public RenderComponent {
+class ACE_FORCE_EXPORT DividerComponent : public RenderComponent {
     DECLARE_ACE_TYPE(DividerComponent, RenderComponent);
 
 public:

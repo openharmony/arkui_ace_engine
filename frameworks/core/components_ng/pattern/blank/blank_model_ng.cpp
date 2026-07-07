@@ -21,14 +21,15 @@
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
 namespace OHOS::Ace::NG {
+const char BLANK_ETS_TAG[] = "Blank";
 void BlankModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BLANK_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", BLANK_ETS_TAG, nodeId);
     ACE_UINODE_TRACE(nodeId);
     auto blankNode = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
+        BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
     auto blankProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -45,7 +46,7 @@ RefPtr<FrameNode> BlankModelNG::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
+        BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     auto blankProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameNode->GetLayoutProperty<BlankLayoutProperty>()->UpdateFlexGrow(1.0f);

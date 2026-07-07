@@ -15,9 +15,26 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_col_ffi.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
 using namespace OHOS::Ace;
+
+namespace OHOS::Ace {
+NG::GridColModelNG* GetGridColModel()
+{
+    static NG::GridColModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridCol");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find gridcol dynamic module");
+        }
+        model = reinterpret_cast<NG::GridColModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 namespace {
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
@@ -68,7 +85,7 @@ V2::GridContainerSize ParserGridContainerSize(GridRowColumnOption columnNumber, 
 extern "C" {
 void FfiOHOSAceFrameworkGridColCreate()
 {
-    GridColModel::GetInstance()->Create();
+    GetGridColModel()->Create();
 }
 
 void FfiOHOSAceFrameworkGridColCreateWithInt32(int32_t span, int32_t offset, int32_t order)
@@ -76,7 +93,7 @@ void FfiOHOSAceFrameworkGridColCreateWithInt32(int32_t span, int32_t offset, int
     auto spanSize = ParserGridContainerSize(span, 1);
     auto offsetSize = ParserGridContainerSize(offset, 0);
     auto orderSize = ParserGridContainerSize(order, 0);
-    GridColModel::GetInstance()->Create(spanSize, offsetSize, orderSize);
+    GetGridColModel()->Create(spanSize, offsetSize, orderSize);
 }
 
 void FfiOHOSAceFrameworkGridColCreateWithOption(
@@ -85,42 +102,42 @@ void FfiOHOSAceFrameworkGridColCreateWithOption(
     auto spanSize = ParserGridContainerSize(span, 1);
     auto offsetSize = ParserGridContainerSize(offset, 0);
     auto orderSize = ParserGridContainerSize(order, 0);
-    GridColModel::GetInstance()->Create(spanSize, offsetSize, orderSize);
+    GetGridColModel()->Create(spanSize, offsetSize, orderSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetSpan(int32_t span)
 {
     auto spanSize = ParserGridContainerSize(span, 1);
-    GridColModel::GetInstance()->SetSpan(spanSize);
+    GetGridColModel()->SetSpan(spanSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetSpanWithOption(GridRowColumnOption span)
 {
     auto spanSize = ParserGridContainerSize(span, 1);
-    GridColModel::GetInstance()->SetSpan(spanSize);
+    GetGridColModel()->SetSpan(spanSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetOffset(int32_t offset)
 {
     auto offsetSize = ParserGridContainerSize(offset, 0);
-    GridColModel::GetInstance()->SetOffset(offsetSize);
+    GetGridColModel()->SetOffset(offsetSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetOffsetWithOption(GridRowColumnOption offset)
 {
     auto offsetSize = ParserGridContainerSize(offset, 0);
-    GridColModel::GetInstance()->SetOffset(offsetSize);
+    GetGridColModel()->SetOffset(offsetSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetOrder(int32_t order)
 {
     auto orderSize = ParserGridContainerSize(order, 0);
-    GridColModel::GetInstance()->SetOrder(orderSize);
+    GetGridColModel()->SetOrder(orderSize);
 }
 
 void FfiOHOSAceFrameworkGridColSetOrderWithOption(GridRowColumnOption order)
 {
     auto orderSize = ParserGridContainerSize(order, 0);
-    GridColModel::GetInstance()->SetOrder(orderSize);
+    GetGridColModel()->SetOrder(orderSize);
 }
 }

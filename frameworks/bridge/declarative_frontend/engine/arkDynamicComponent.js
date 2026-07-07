@@ -315,6 +315,34 @@ if (globalThis.QRCode === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.GridRow === undefined) {
+  globalThis.GridRow = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('GridRow');
+      let module = globalThis.requireNapi('arkui.components.arkgridrow');
+      module.exportView();
+      module.loadComponent();
+      globalThis.GridRow.create(params);
+    },
+    name: 'JSGridRow'
+  }
+}
+
+// @ts-ignore
+if (globalThis.GridCol === undefined) {
+  globalThis.GridCol = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('GridCol');
+      let module = globalThis.requireNapi('arkui.components.arkgridcol');
+      module.exportView();
+      module.loadComponent();
+      globalThis.GridCol.create(params);
+    },
+    name: 'JSGridCol'
+  }
+}
+
+// @ts-ignore
 if (globalThis.FolderStack === undefined) {
   globalThis.FolderStack = {
     create: function(params) {
@@ -461,6 +489,48 @@ if (globalThis.PatternLock === undefined) {
       getUINativeModule().patternlock.create(value);
     },
     name: 'JSPatternLock'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Blank === undefined) {
+  globalThis.Blank = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Blank');
+      let module = globalThis.requireNapi('arkui.components.arkblank');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().blank.create(value);
+    },
+    name: 'JSBlank'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Divider === undefined) {
+  globalThis.Divider = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Divider');
+      let module = globalThis.requireNapi('arkui.components.arkdivider');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().divider.create(params);
+    },
+    name: 'JSDivider'
+  }
+}
+
+// @ts-ignore
+if (globalThis.RelativeContainer === undefined) {
+  globalThis.RelativeContainer = {
+    create: function() {
+      getUINativeModule().loadNativeModule('RelativeContainer');
+      let module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().relativeContainer.create();
+    },
+    name: 'JSRelativeContainer'
   }
 }
 

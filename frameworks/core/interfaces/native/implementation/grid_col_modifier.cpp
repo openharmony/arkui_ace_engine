@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,156 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng_static.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
-int g_defaultValue = 0;
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
-namespace {
-constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
-constexpr size_t XS = 0;
-constexpr size_t SM = 1;
-constexpr size_t MD = 2;
-constexpr size_t LG = 3;
-constexpr size_t XL = 4;
-constexpr size_t XXL = 5;
-}
-namespace OHOS::Ace::NG {
-namespace Converter {
-    void InheritGridContainerSize(V2::GridContainerSize& gridContainerSize,
-        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], int32_t defaultVal)
-    {
-        if (!containerSizeArray[0].has_value() || containerSizeArray[0].value() < 0) {
-            containerSizeArray[0] = defaultVal;
-        }
-        for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
-            if (!containerSizeArray[i].has_value() || containerSizeArray[i].value() < 0) {
-                containerSizeArray[i] = containerSizeArray[i - 1].value();
-            }
-        }
-        gridContainerSize.xs = containerSizeArray[XS].value();
-        gridContainerSize.sm = containerSizeArray[SM].value();
-        gridContainerSize.md = containerSizeArray[MD].value();
-        gridContainerSize.lg = containerSizeArray[LG].value();
-        gridContainerSize.xl = containerSizeArray[XL].value();
-        gridContainerSize.xxl = containerSizeArray[XXL].value();
-    }
-    template<>
-    V2::GridContainerSize Convert(const Ark_GridColColumnOption& value)
-    {
-        V2::GridContainerSize toValue;
-        std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
-        containerSizeArray[XS] = Converter::OptConvert<int32_t>(value.xs);
-        containerSizeArray[SM] = Converter::OptConvert<int32_t>(value.sm);
-        containerSizeArray[MD] = Converter::OptConvert<int32_t>(value.md);
-        containerSizeArray[LG] = Converter::OptConvert<int32_t>(value.lg);
-        containerSizeArray[XL] = Converter::OptConvert<int32_t>(value.xl);
-        containerSizeArray[XXL] = Converter::OptConvert<int32_t>(value.xxl);
-        InheritGridContainerSize(toValue, containerSizeArray, g_defaultValue);
-        return toValue;
-    }
-    template<>
-    V2::GridContainerSize Convert(const Ark_Int32& value)
-    {
-        V2::GridContainerSize toValue;
-        int32_t iValue = Converter::Convert<int32_t>(value);
-        toValue.lg = iValue;
-        toValue.md = iValue;
-        toValue.sm = iValue;
-        toValue.xl = iValue;
-        toValue.xs = iValue;
-        toValue.xxl = iValue;
-        return toValue;
-    }
-} // namespace Converter
-} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace GridColModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = GridColModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // GridColModifier
-namespace GridColInterfaceModifier {
-void SetGridColOptionsImpl(Ark_NativePointer node,
-                           const Opt_GridColOptions* option)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optGridColOptions = Converter::OptConvertPtr<Ark_GridColOptions>(option);
-    if (optGridColOptions) {
-        auto arkGridColOptions = *optGridColOptions;
-        g_defaultValue = 1;
-        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
-    } else {
-        GridColModelNGStatic::SetSpan(frameNode, std::nullopt);
-        GridColModelNGStatic::SetOffset(frameNode, std::nullopt);
-        GridColModelNGStatic::SetOrder(frameNode, std::nullopt);
-    }
-}
-} // GridColInterfaceModifier
-namespace GridColAttributeModifier {
-void SetSpanImpl(Ark_NativePointer node,
-                 const Opt_Union_I32_GridColColumnOption* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
-    g_defaultValue = 1;
-    gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
-}
-void SetGridColOffsetImpl(Ark_NativePointer node,
-                          const Opt_Union_I32_GridColColumnOption* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
-}
-void SetOrderImpl(Ark_NativePointer node,
-                  const Opt_Union_I32_GridColColumnOption* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
-}
-} // GridColAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIGridColModifier* GetGridColStaticModifier();
+#endif
+
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()
 {
-    static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
-        GridColModifier::ConstructImpl,
-        GridColInterfaceModifier::SetGridColOptionsImpl,
-        GridColAttributeModifier::SetSpanImpl,
-        GridColAttributeModifier::SetGridColOffsetImpl,
-        GridColAttributeModifier::SetOrderImpl,
-    };
-    return &ArkUIGridColModifierImpl;
+    static const GENERATED_ArkUIGridColModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetGridColStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridCol");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIGridColModifier*>(module->GetStaticModifier());
+#endif
+    }
+    return cachedModifier;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

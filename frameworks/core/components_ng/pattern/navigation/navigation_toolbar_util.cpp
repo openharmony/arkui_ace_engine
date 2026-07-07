@@ -24,7 +24,9 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -606,6 +608,7 @@ bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vec
     BarItemNodeParam itemNodeParam = { enabled, isHideItemText };
     return CreateToolbarItemNodeAndMenuNode(itemNodeParam, std::move(params), fieldProperty, containerNode, barNode);
 }
+
 } //namespace
 
 void NavigationToolbarUtil::CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDestinationNodeBase>& nodeBase)
@@ -613,8 +616,7 @@ void NavigationToolbarUtil::CreateToolBarDividerNodeIfNeeded(const RefPtr<NavDes
     auto dividerNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarDividerNode());
     if (!dividerNode) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        dividerNode = FrameNode::GetOrCreateFrameNode(
-            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        dividerNode = CreateDividerFrameNode(dividerNodeId);
         nodeBase->AddChild(dividerNode);
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_VOID(dividerLayoutProperty);

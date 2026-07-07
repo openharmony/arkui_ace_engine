@@ -17,6 +17,8 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/blank_modifier.h"
+#include "core/interfaces/native/node/divider_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -88,12 +90,9 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
-#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
+#include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
-#include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -496,10 +495,10 @@ void* createCircleNode(ArkUI_Int32 nodeId)
 
 void* createRelativeContainerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RelativeContainerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetRelativeContainerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 void* createGridNode(ArkUI_Int32 nodeId)
 {
@@ -524,18 +523,18 @@ void* createGridItemNode(ArkUI_Int32 nodeId)
 
 void* createBlankNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = BlankModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetBlankModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createDividerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = DividerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetDividerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
@@ -566,18 +565,20 @@ void* createSearchNode(ArkUI_Int32 nodeId)
 
 void* createGridRowNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridRowModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gridRowModifier = nodeModifier->getGridRowModifier();
+    CHECK_NULL_RETURN(gridRowModifier, nullptr);
+    return gridRowModifier->createFrameNode(nodeId);
 }
 
 void* createGridColNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gridColModifier = nodeModifier->getGridColModifier();
+    CHECK_NULL_RETURN(gridColModifier, nullptr);
+    return gridColModifier->createFrameNode(nodeId);
 }
 
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)

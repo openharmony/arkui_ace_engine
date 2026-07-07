@@ -16,11 +16,26 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_divider_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+NG::DividerModelNG* GetDividerModel()
+{
+    static NG::DividerModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Divider");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find divider dynamic module");
+        }
+        model = reinterpret_cast<NG::DividerModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 namespace {
 const std::vector<LineCap> LINECAP = { LineCap::BUTT, LineCap::ROUND, LineCap::SQUARE };
 } // namespace
@@ -28,12 +43,12 @@ const std::vector<LineCap> LINECAP = { LineCap::BUTT, LineCap::ROUND, LineCap::S
 extern "C" {
 void FfiOHOSAceFrameworkDividerCreate()
 {
-    DividerModel::GetInstance()->Create();
+    GetDividerModel()->Create();
 }
 
 void FfiOHOSAceFrameworkDividerSetVertical(bool isVertical)
 {
-    DividerModel::GetInstance()->Vertical(isVertical);
+    GetDividerModel()->Vertical(isVertical);
 }
 
 void FfiOHOSAceFrameworkDividerSetLineCap(int32_t style)
@@ -43,18 +58,17 @@ void FfiOHOSAceFrameworkDividerSetLineCap(int32_t style)
         return;
     }
 
-    DividerModel::GetInstance()->LineCap(LINECAP[style]);
+    GetDividerModel()->LineCap(LINECAP[style]);
 }
 
 void FfiOHOSAceFrameworkDividerSetStrokeWidth(double width, int32_t unit)
 {
     Dimension widthDime(width, static_cast<DimensionUnit>(unit));
-
-    DividerModel::GetInstance()->StrokeWidth(widthDime);
+    GetDividerModel()->StrokeWidth(widthDime);
 }
 
 void FfiOHOSAceFrameworkDividerSetDividerColor(uint32_t color)
 {
-    DividerModel::GetInstance()->DividerColor(Color(color));
+    GetDividerModel()->DividerColor(Color(color));
 }
 }

@@ -31,9 +31,7 @@
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -43,8 +41,8 @@ const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
 constexpr int32_t DIVIDER_INDEX = 5;
-const char DIVIDER_ETS_TAG[] = "Divider";
 const char SEARCH_Field_ETS_TAG[] = "SearchField";
+
 } // namespace
 
 void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentNode,
@@ -120,8 +118,7 @@ void SearchModelNG::CreateDividerMultiThread(const RefPtr<SearchNode>& parentNod
     }
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(nodeId);
     CHECK_NULL_VOID(dividerNode);
     ACE_UINODE_TRACE(dividerNode);
     dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);

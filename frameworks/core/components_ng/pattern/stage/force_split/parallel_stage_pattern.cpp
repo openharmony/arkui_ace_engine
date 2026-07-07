@@ -19,8 +19,9 @@
 #include "core/common/force_split/force_split_constants.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -28,6 +29,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,6 +72,7 @@ void LogHomePageChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set HomePage");
     }
 }
+
 }
 
 void ParallelStagePattern::SetHomePage(const RefPtr<FrameNode>& pageNode)
@@ -304,8 +307,7 @@ void ParallelStagePattern::CreateDividerNodeIfNeeded()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hostNode = AceType::DynamicCast<FrameNode>(host);
-    dividerNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    dividerNode_ = CreateDividerFrameNode(dividerNodeId);
     auto dividerLayoutProperty = dividerNode_->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_VOID(dividerLayoutProperty);
     dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);

@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
+#include "core/common/plugin_manager.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
@@ -38,7 +39,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
@@ -48,7 +48,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse_shape.h"
@@ -59,9 +58,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
@@ -125,7 +122,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
 #ifdef VIDEO_SUPPORTED
@@ -351,7 +347,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRepeatVirtualScroll::JSBind(globalObj);
     JSRepeatVirtualScroll2::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
-    JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
@@ -418,9 +413,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
     JSGridContainer::JSBind(globalObj);
-    JSGridRow::JSBind(globalObj);
-    JSGridCol::JSBind(globalObj);
-    JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
     JSPath::JSBind(globalObj);
@@ -476,7 +468,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
-    JSRelativeContainer::JSBind(globalObj);
     JSPatternLockControllerBinding::JSBind(globalObj);
 #endif
     // add missing binds to ng build

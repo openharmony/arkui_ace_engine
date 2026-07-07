@@ -416,7 +416,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<VerticalAlign>& dst, const Ark_Im
 }
 
 template<>
-void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
 {
     switch (src) {
         case ARK_LINE_CAP_STYLE_BUTT: dst = LineCap::BUTT; break;
@@ -1696,7 +1696,7 @@ ACE_FORCE_EXPORT void AssignCast(
 }
 
 template<>
-void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
 {
     switch (src) {
         case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;

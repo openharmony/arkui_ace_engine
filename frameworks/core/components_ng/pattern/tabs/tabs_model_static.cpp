@@ -28,7 +28,6 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -43,6 +42,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -107,8 +107,7 @@ void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<Swipe
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, tabsNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, tabsNode->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(tabsNode->GetDividerId());
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(

@@ -13,11 +13,39 @@
  * limitations under the License.
  */
 
-class RelativeContainerModifier extends ArkRelativeContainerComponent implements AttributeModifier<RelativeContainerAttribute> {
+class LazyArkRelativeContainerComponent extends ArkComponent {
+  static module: RelativeContainerComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkRelativeContainerComponent.module === undefined) {
+      LazyArkRelativeContainerComponent.module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
+    }
+
+    this.lazyComponent = LazyArkRelativeContainerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  guideLine(value: any): this {
+    this.lazyComponent.guideLine(value);
+    return this;
+  }
+
+  barrier(value: any): this {
+    this.lazyComponent.barrier(value);
+    return this;
+  }
+}
+
+class RelativeContainerModifier extends LazyArkRelativeContainerComponent implements AttributeModifier<RelativeContainerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: RelativeContainerAttribute): void {

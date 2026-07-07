@@ -64,6 +64,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
     }
     static const std::unordered_map<std::string, std::string> soMap = {
         { "Button", "button" },
+        { "Blank", "spacing" },
+        { "Divider", "spacing" },
         { "CalendarPicker", "calendarpicker" },
         { "CalendarPickerDialog", "calendarpicker" },
         { "Checkbox", "checkbox" },
@@ -82,6 +84,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Gauge", "gauge" },
         { "Grid", "grid" },
         { "GridItem", "grid" },
+        { "GridCol", "gridlayout" },
+        { "GridRow", "gridlayout" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },
@@ -93,6 +97,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "QRCode", "qrcode" },
         { "Radio", "radio" },
         { "Rating", "rating" },
+        { "RelativeContainer", "relativecontainer" },
         { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         { "Search", "search" },

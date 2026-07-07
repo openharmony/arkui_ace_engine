@@ -1310,7 +1310,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['GridRow', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridRow', (node: NodePtr, type: ModifierType): ArkGridRowComponent => {
-        return new ArkGridRowComponent(node, type);
+        getUINativeModule().loadNativeModule('GridRow');
+        let module = globalThis.requireNapi('arkui.components.arkgridrow');
+        return module.createComponent(node, type);
       });
       node.initialize();
       return node;
@@ -1327,14 +1329,18 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['GridCol', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridCol', (node: NodePtr, type: ModifierType): ArkGridColComponent => {
-        return new ArkGridColComponent(node, type);
+        getUINativeModule().loadNativeModule('GridCol');
+        let module = globalThis.requireNapi('arkui.components.arkgridcol');
+        return module.createComponent(node, type);
       });
       node.initialize();
       return node;
     }],
     ['Blank', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Blank', (node: NodePtr, type: ModifierType): ArkBlankComponent => {
-        return new ArkBlankComponent(node, type);
+        getUINativeModule().loadNativeModule('Blank');
+ 	      let module = globalThis.requireNapi('arkui.components.arkblank');
+ 	      return module.createComponent(node, type);
       })
     }],
     ['Image', (context: UIContext): FrameNode => {
@@ -1371,7 +1377,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['RelativeContainer', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'RelativeContainer', (node: NodePtr, type: ModifierType): ArkRelativeContainerComponent => {
-        return new ArkRelativeContainerComponent(node, type);
+        getUINativeModule().loadNativeModule('RelativeContainer');
+ 	      let module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
+ 	      return module.createComponent(node, type);
       })
     }],
     ['List', (context: UIContext): FrameNode => {
@@ -1386,7 +1394,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Divider', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Divider', (node: NodePtr, type: ModifierType): ArkDividerComponent => {
-        return new ArkDividerComponent(node, type);
+        getUINativeModule().loadNativeModule('Divider');
+ 	      let module = globalThis.requireNapi('arkui.components.arkdivider');
+ 	      return module.createComponent(node, type);
       })
     }],
     ['LoadingProgress', (context: UIContext): FrameNode => {
@@ -1453,8 +1463,8 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     ['QRCode', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
         getUINativeModule().loadNativeModule('QRCode');
- 	    let module = globalThis.requireNapi('arkui.components.arkqrcode');
- 	    return module.createComponent(node, type);
+ 	      let module = globalThis.requireNapi('arkui.components.arkqrcode');
+ 	      return module.createComponent(node, type);
       })
     }],
     ['Badge', (context: UIContext): FrameNode => {

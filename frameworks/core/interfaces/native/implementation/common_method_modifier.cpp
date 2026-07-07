@@ -35,7 +35,6 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
@@ -2422,6 +2421,16 @@ const ArkUICounterModifier* GetCounterModifier()
     }
     return cachedModifier;
 }
+const ArkUIBlankModifier* GetBlankDynamicModifier()
+{
+    static const ArkUIBlankModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIBlankModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
+}
 void SetWidthInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
 {
     Validator::ValidateNonNegative(value);
@@ -2500,7 +2509,12 @@ void SetBlankHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
     if (!value.has_value()) {
         return;
     }
-    BlankModelNG::SetHeight(frameNode, value.value());
+    auto arkUIBlankModifier = GetBlankDynamicModifier();
+    CHECK_NULL_VOID(arkUIBlankModifier);
+    auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    ArkUI_Float32 height = value.value().Value();
+    ArkUI_Int32 unit = static_cast<ArkUI_Int32>(value.value().Unit());
+    arkUIBlankModifier->setBlankHeight(node, height, unit);
 }
 void SetHeightImpl(Ark_NativePointer node,
                    const Opt_Union_Length_LayoutPolicy* value)

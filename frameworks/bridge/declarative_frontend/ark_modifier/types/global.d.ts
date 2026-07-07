@@ -71,6 +71,14 @@ interface BadgeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface BlankComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface DividerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -110,6 +118,13 @@ interface GaugeComponentModule {
 }
 
 interface NavigatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+interface GridRowComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridColComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -178,6 +193,10 @@ interface RadioComponentModule {
 }
 
 interface RatingComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface RelativeContainerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

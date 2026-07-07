@@ -13,15 +13,43 @@
  * limitations under the License.
  */
 
-class BlankModifier extends ArkBlankComponent implements AttributeModifier<BlankAttribute> {
+class LazyArkBlankComponent extends ArkComponent {
+  static module: BlankComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkBlankComponent.module === undefined) {
+      LazyArkBlankComponent.module = globalThis.requireNapi('arkui.components.arkblank');
+    }
+
+    this.lazyComponent = LazyArkBlankComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  color(value: ResourceColor): this {
+    this.lazyComponent.color(value);
+    return this;
+  }
+
+  height(value: Length): this {
+    this.lazyComponent.height(value);
+    return this;
+  }
+}
+
+class BlankModifier extends LazyArkBlankComponent implements AttributeModifier<BlankAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: BlankAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<BlankAttribute, ArkBlankComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<BlankAttribute, LazyArkBlankComponent, ArkComponent>(instance, this);
   }
 }

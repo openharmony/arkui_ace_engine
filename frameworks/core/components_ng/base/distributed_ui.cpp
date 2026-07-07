@@ -20,7 +20,6 @@
 #include "base/json/node_object.h"
 #include "base/ressched/ressched_report.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -47,6 +46,7 @@
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -65,6 +65,7 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnBackPressed([]() { return true; });
 }
+
 } // namespace
 
 SerializeableObjectArray DistributedUI::DumpUITree()
@@ -548,8 +549,7 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::DIVIDER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+                    return CreateDividerFrameNode(nodeId);
                 } },
         };
 

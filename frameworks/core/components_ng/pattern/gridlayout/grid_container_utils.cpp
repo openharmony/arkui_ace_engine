@@ -1,0 +1,409 @@
+/*
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/components_ng/pattern/gridlayout/grid_container_utils.h"
+
+#include "base/utils/layout_break_point.h"
+#include "core/common/container.h"
+#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/container_modal/container_modal_constants.h"
+#include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
+
+namespace OHOS::Ace::V2 {
+namespace {
+constexpr int XS = 0;
+constexpr int SM = 1;
+constexpr int MD = 2;
+constexpr int LG = 3;
+constexpr int XL = 4;
+constexpr int XXL = 5;
+constexpr int BREAKPOINTSIZE = 5;
+constexpr int32_t PARAMS_NUM_TWO = 2;
+constexpr int32_t PARAMS_NUM_THREE = 3;
+constexpr int32_t PARAMS_NUM_FOUR = 4;
+constexpr int32_t PARAMS_NUM_FIVE = 5;
+RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
+{
+    auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
+    sizeInfo->Reset();
+    for (const auto& breakpoint : breakpoints.breakpoints) {
+        sizeInfo->sizeInfo.push_back(Framework::StringToDimension(breakpoint));
+    }
+    return sizeInfo;
+}
+
+} // namespace
+
+int GridContainerUtils::CalcBreakPoint(const RefPtr<GridSizeInfo> &threshold, double windowWidth)
+{
+    int index = 0;
+    for (const auto &cur : threshold->sizeInfo) {
+        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
+GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
+    const WindowMode& mode, const RefPtr<PipelineBase>& pipeline)
+{
+    auto threshold = ParseBreakpoints(breakpoints);
+    double windowWidth = 0.0;
+    if (breakpoints.reference == BreakPointsReference::WindowSize) {
+        if (!pipeline) {
+            TAG_LOGI(AceLogTag::ACE_GRIDROW, "pipeline is null");
+            return GridSizeType::UNDEFINED;
+        }
+        windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
+        if (mode == WindowMode::WINDOW_MODE_FLOATING &&
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            windowWidth =
+                pipeline->CalcPageWidth(windowWidth - 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+            int index = CalcBreakPoint(threshold, windowWidth);
+            return static_cast<GridSizeType>(index);
+        }
+        windowWidth = pipeline->CalcPageWidth(windowWidth);
+        std::vector<double> breakPoint(BREAKPOINTSIZE, -1.0);
+        std::transform(threshold->sizeInfo.begin(), threshold->sizeInfo.end(), breakPoint.begin(), [](Dimension x) {
+            return x.ConvertToVp();
+        });
+        auto custlayoutBreakpoints = WidthLayoutBreakPoint(breakPoint);
+        auto breakpoint = GetWidthBreakpoint(custlayoutBreakpoints, pipeline, breakpoints.userDefine);
+        return static_cast<GridSizeType>(breakpoint);
+    } else {
+        windowWidth = size.Width();
+    }
+    int index = CalcBreakPoint(threshold, windowWidth);
+    return static_cast<GridSizeType>(index);
+}
+
+WidthBreakpoint GetCalcWidthBreakpoint(
+    const OHOS::Ace::WidthLayoutBreakPoint &finalBreakpoints, double density, double width)
+{
+    WidthBreakpoint breakpoint;
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    }
+    return breakpoint;
+}
+
+WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
+    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline, bool userDefine)
+{
+    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0); // GridRow Default
+    auto configBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    if (userDefine) {  // cust has value
+        finalBreakpoints = custlayoutBreakpoints;
+    } else if (configBreakpoints != WidthLayoutBreakPoint()) {  // ccm has value
+        finalBreakpoints = configBreakpoints;
+    }
+    double density = pipeline->GetCurrentDensity();
+    return GetCalcWidthBreakpoint(
+        finalBreakpoints, density, pipeline->CalcPageWidth(pipeline->GetDisplayWindowRectInfo().GetSize().Width()));
+}
+
+std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const Gutter& gutter)
+{
+    switch (sizeType) {
+        case GridSizeType::XS:
+            return std::pair<Dimension, Dimension>(gutter.xXs, gutter.yXs);
+        case GridSizeType::SM:
+            return std::pair<Dimension, Dimension>(gutter.xSm, gutter.ySm);
+        case GridSizeType::MD:
+            return std::pair<Dimension, Dimension>(gutter.xMd, gutter.yMd);
+        case GridSizeType::LG:
+            return std::pair<Dimension, Dimension>(gutter.xLg, gutter.yLg);
+        case GridSizeType::XL:
+            return std::pair<Dimension, Dimension>(gutter.xXl, gutter.yXl);
+        case GridSizeType::XXL:
+            return std::pair<Dimension, Dimension>(gutter.xXXl, gutter.yXXl);
+        default:
+            return std::pair<Dimension, Dimension>(gutter.xXs, gutter.yXs);
+    }
+}
+
+int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum)
+{
+    switch (sizeType) {
+        case GridSizeType::XS:
+            return columnNum.xs;
+        case GridSizeType::SM:
+            return columnNum.sm;
+        case GridSizeType::MD:
+            return columnNum.md;
+        case GridSizeType::LG:
+            return columnNum.lg;
+        case GridSizeType::XL:
+            return columnNum.xl;
+        case GridSizeType::XXL:
+            return columnNum.xxl;
+        default:
+            return columnNum.xs;
+    }
+}
+
+double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double width)
+{
+    auto xGutter = gutter.first;
+    if (columnNum != 0) {
+        return (width - (columnNum - 1) * xGutter) / columnNum;
+    }
+    return 0.0;
+}
+
+void GridContainerUtils::InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    int32_t *containerSizeArray, int32_t size)
+{
+    for (auto i = 0; i < size; ++i) {
+        if (containerSizeArray[i] > 0) {
+            containerSizeArray[0] = containerSizeArray[i];
+            break;
+        }
+    }
+    if (containerSizeArray[0] <= 0) {
+        return;
+    }
+    for (auto i = 1; i < size; ++i) {
+        if (containerSizeArray[i] <= 0) {
+            containerSizeArray[i] = containerSizeArray[i - 1];
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS];
+    gridContainerSize->sm = containerSizeArray[SM];
+    gridContainerSize->md = containerSizeArray[MD];
+    gridContainerSize->lg = containerSizeArray[LG];
+    gridContainerSize->xl = containerSizeArray[XL];
+    gridContainerSize->xxl = containerSizeArray[XXL];
+}
+
+void GridContainerUtils::InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!containerSizeArray[0].has_value()) {
+        containerSizeArray[0] = V2::DEFAULT_COLUMN_NUMBER;
+    }
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
+        if (!containerSizeArray[i].has_value()) {
+            containerSizeArray[i] = containerSizeArray[i - 1].value();
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS].value();
+    gridContainerSize->sm = containerSizeArray[SM].value();
+    gridContainerSize->md = containerSizeArray[MD].value();
+    gridContainerSize->lg = containerSizeArray[LG].value();
+    gridContainerSize->xl = containerSizeArray[XL].value();
+    gridContainerSize->xxl = containerSizeArray[XXL].value();
+}
+
+void GridContainerUtils::InheritGridColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    for (size_t i = 0; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (containerSizeArray[i].has_value()) {
+            containerSizeArray[0] = containerSizeArray[i].value();
+            break;
+        }
+    }
+    CHECK_NULL_VOID(containerSizeArray[0].has_value());
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (!containerSizeArray[i].has_value()) {
+            containerSizeArray[i] = containerSizeArray[i - 1].value();
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS].value();
+    gridContainerSize->sm = containerSizeArray[SM].value();
+    gridContainerSize->md = containerSizeArray[MD].value();
+    gridContainerSize->lg = containerSizeArray[LG].value();
+    gridContainerSize->xl = containerSizeArray[XL].value();
+    gridContainerSize->xxl = containerSizeArray[XXL].value();
+}
+
+void GridContainerUtils::SaveGridRowGutterOptionxResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[0]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXs = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXs", gutterSizeArrayResObj[0], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[1]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xSm = result;
+        };
+        gutter->AddResource("gridrow.gutter.xSm", gutterSizeArrayResObj[1], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_TWO]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xMd = result;
+        };
+        gutter->AddResource("gridrow.gutter.xMd", gutterSizeArrayResObj[PARAMS_NUM_TWO], std::move(updateFunc));
+    }
+}
+
+void GridContainerUtils::SaveGridRowGutterOptionxResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_THREE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xLg = result;
+        };
+        gutter->AddResource("gridrow.gutter.xLg", gutterSizeArrayResObj[PARAMS_NUM_THREE], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FOUR]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXl", gutterSizeArrayResObj[PARAMS_NUM_FOUR], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FIVE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->xXXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.xXXl", gutterSizeArrayResObj[PARAMS_NUM_FIVE], std::move(updateFunc));
+    }
+}
+
+void GridContainerUtils::SaveGridRowGutterOptionyResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[0]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXs = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXs", gutterSizeArrayResObj[0], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[1]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->ySm = result;
+        };
+        gutter->AddResource("gridrow.gutter.ySm", gutterSizeArrayResObj[1], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_TWO]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yMd = result;
+        };
+        gutter->AddResource("gridrow.gutter.yMd", gutterSizeArrayResObj[PARAMS_NUM_TWO], std::move(updateFunc));
+    }
+}
+
+void GridContainerUtils::SaveGridRowGutterOptionyResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_THREE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yLg = result;
+        };
+        gutter->AddResource("gridrow.gutter.yLg", gutterSizeArrayResObj[PARAMS_NUM_THREE], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FOUR]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXl", gutterSizeArrayResObj[PARAMS_NUM_FOUR], std::move(updateFunc));
+    }
+    if (gutterSizeArrayResObj[PARAMS_NUM_FIVE]) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            gutter->yXXl = result;
+        };
+        gutter->AddResource("gridrow.gutter.yXXl", gutterSizeArrayResObj[PARAMS_NUM_FIVE], std::move(updateFunc));
+    }
+}
+
+void GridContainerUtils::InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
+    std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT],
+    RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
+{
+    if (!gutterSizeArray[0].has_value()) {
+        gutterSizeArray[0] = CalcDimension(0);
+    }
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
+        if (!gutterSizeArray[i].has_value()) {
+            gutterSizeArray[i] = gutterSizeArray[i - 1].value();
+        }
+        if (!gutterSizeArrayResObj[i]) {
+            gutterSizeArrayResObj[i] = gutterSizeArrayResObj[i - 1];
+        }
+    }
+    if (isHorizontal) {
+        gutter->xXs = gutterSizeArray[XS].value();
+        gutter->xSm = gutterSizeArray[SM].value();
+        gutter->xMd = gutterSizeArray[MD].value();
+        gutter->xLg = gutterSizeArray[LG].value();
+        gutter->xXl = gutterSizeArray[XL].value();
+        gutter->xXXl = gutterSizeArray[XXL].value();
+        SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+        SaveGridRowGutterOptionxResObjLgXlXXl(gutter, gutterSizeArrayResObj);
+        return;
+    }
+    gutter->yXs = gutterSizeArray[XS].value();
+    gutter->ySm = gutterSizeArray[SM].value();
+    gutter->yMd = gutterSizeArray[MD].value();
+    gutter->yLg = gutterSizeArray[LG].value();
+    gutter->yXl = gutterSizeArray[XL].value();
+    gutter->yXXl = gutterSizeArray[XXL].value();
+    SaveGridRowGutterOptionyResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    SaveGridRowGutterOptionyResObjLgXlXXl(gutter, gutterSizeArrayResObj);
+}
+} // namespace OHOS::Ace::V2

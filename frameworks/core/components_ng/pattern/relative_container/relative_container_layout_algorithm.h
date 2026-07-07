@@ -33,7 +33,7 @@ using GuidelineParams = std::pair<LineDirection, float>;
 using BarrierParams = std::pair<BarrierDirection, std::vector<std::string>>;
 
 
-class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(RelativeContainerLayoutAlgorithm, LayoutAlgorithm);
 
 public:

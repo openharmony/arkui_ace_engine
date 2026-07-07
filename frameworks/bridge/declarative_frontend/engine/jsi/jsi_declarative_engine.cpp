@@ -864,6 +864,11 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Select", "arkui.components.arkselect" },
         { "Navigator", "arkui.components.arknavigator" },
         { "Panel", "arkui.components.arkpanel" },
+        { "Divider", "arkui.components.arkdivider" },
+        { "RelativeContainer", "arkui.components.arkrelativecontainer" },
+        { "Blank", "arkui.components.arkblank" },
+        { "GridRow", "arkui.components.arkgridrow" },
+        { "GridCol", "arkui.components.arkgridcol" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");

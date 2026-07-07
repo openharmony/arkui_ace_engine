@@ -49,7 +49,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -312,11 +312,20 @@ void PrepareSelectOverlayGridPastePlaceholder(const RefPtr<FrameNode>& defaultGr
     defaultGridItem->UpdateInspectorId(GRID_PASTE_DISPLAY_COLUMN_ID);
 }
 
+RefPtr<FrameNode> CreateRelativeContainerFrameNode(int32_t nodeId)
+{
+    auto nodeModifiers = NG::NodeModifier::GetRelativeContainerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return Referenced::Claim<FrameNode>(frameNode);
+}
+
 RefPtr<FrameNode> CreateSelectOverlayGridPasteRelativeContainer(int32_t themeScopeId)
 {
-    auto relativeContainer = FrameNode::GetOrCreateFrameNode(
-        V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<RelativeContainerPattern>(); });
+    auto relativeContainer = CreateRelativeContainerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     UpdateSelectOverlayGridNodeThemeScopeId(relativeContainer, themeScopeId);
     auto accessibilityProperty = relativeContainer->GetAccessibilityProperty<AccessibilityProperty>();
     if (accessibilityProperty) {
@@ -2388,9 +2397,7 @@ void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<Frame
 RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
     bool isUsingMouse)
 {
-    auto relativeContainer =
-        FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    auto relativeContainer = CreateRelativeContainerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(relativeContainer, nullptr);
     auto relativeContainerLayoutProperty = relativeContainer->GetLayoutProperty();
     CHECK_NULL_RETURN(relativeContainerLayoutProperty, nullptr);

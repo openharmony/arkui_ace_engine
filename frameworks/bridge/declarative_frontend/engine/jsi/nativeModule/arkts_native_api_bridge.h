@@ -56,7 +56,6 @@ public:
     // ArkTSCard end
 private:
     static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -100,9 +99,6 @@ private:
     static void RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard start
     static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);

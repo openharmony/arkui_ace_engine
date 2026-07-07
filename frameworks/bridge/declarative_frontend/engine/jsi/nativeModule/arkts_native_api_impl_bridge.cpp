@@ -23,18 +23,14 @@
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.h"
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_embedded_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
@@ -64,7 +60,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_canvas_bridge.h"
@@ -525,6 +520,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "FlowItem" },
         { "Grid" },
         { "GridItem" },
+        { "GridCol" },
+        { "GridRow" },
         { "WaterFlow" },
         { "LazyVWaterFlowLayout" },
         { "ColumnSplit" },
@@ -571,6 +568,9 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "TextPickerDialog" },
         { "Select" },
         { "Panel" },
+        { "RelativeContainer" },
+        { "Blank" },
+        { "Divider" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -634,15 +634,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 
     RegisterStackAttributes(object, vm);
 
-    RegisterBlankAttributes(object, vm);
-
     RegisterSpanAttributes(object, vm);
 
-    RegisterGridColAttributes(object, vm);
-
     RegisterColumnAttributes(object, vm);
-
-    RegisterGridRowAttributes(object, vm);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
     linearIndicator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIndicatorStyle"),
@@ -833,9 +827,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::ResetTextBackgroundStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerSpan"), containerSpan);
 
-    RegisterRelativeContainerAttributes(object, vm);
-
-    RegisterDividerAttributes(object, vm);
     RegisterNavigationAttributes(object, vm);
     RegisterImageAttributes(object, vm);
     RegisterNavRouterAttributes(object, vm);
@@ -893,28 +884,6 @@ void ArkUINativeModule::RegisterThemeAttributes(Local<panda::ObjectRef> object, 
     theme->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeFromCache"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ThemeBridge::RemoveFromCache));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "theme"), theme);
-}
-
-void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto divider = panda::ObjectRef::New(vm);
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetStrokeWidth));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetStrokeWidth));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetLineCap));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetLineCap));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetColor));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetColor));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVertical"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::SetVertical));
-    divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVertical"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetVertical));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "divider"), divider);
 }
 
 void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -3108,13 +3077,9 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     if (!isLiteSetRegistered) {
         RegisterArkUINativeModuleFormLite(object, vm);
     }
-    RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
-    RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
-    RegisterGridColAttributes(object, vm);
-    RegisterGridRowAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
@@ -3122,7 +3087,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
     RegisterRectAttributes(object, vm);
-    RegisterRelativeContainerAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
     RegisterSpanAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
@@ -4410,24 +4374,6 @@ void ArkUINativeModule::RegisterRowAttributes(Local<panda::ObjectRef> object, Ec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
 }
 
-void ArkUINativeModule::RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto blank = panda::ObjectRef::New(vm);
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetColor));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankHeight));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankHeight));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankMin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankMin));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankMin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankMin));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
-}
-
 void ArkUINativeModule::RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto span = panda::ObjectRef::New(vm);
@@ -4506,68 +4452,5 @@ void ArkUINativeModule::RegisterSpanAttributes(Local<panda::ObjectRef> object, E
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHover"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetOnHover));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "span"), span);
-}
-
-void ArkUINativeModule::RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto gridCol = panda::ObjectRef::New(vm);
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpan"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetSpan));
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpan"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetSpan));
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridColOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetGridColOffset));
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridColOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetGridColOffset));
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOrder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetOrder));
-    gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOrder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::ResetOrder));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridCol"), gridCol);
-}
-
-void ArkUINativeModule::RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto gridRow = panda::ObjectRef::New(vm);
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetAlignItems));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetAlignItems));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDirection"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetDirection));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDirection"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetDirection));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBreakpoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetBreakpoints));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBreakpoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetBreakpoints));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumns"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetColumns));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumns"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetColumns));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGutter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetGutter));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGutter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetGutter));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBreakpointChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetOnBreakpointChange));
-    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBreakpointChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetOnBreakpointChange));
-
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridRow"), gridRow);
-}
-
-void ArkUINativeModule::RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto relativeContainer = panda::ObjectRef::New(vm);
-    relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGuideLine"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::SetGuideLine));
-    relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGuideLine"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::ResetGuideLine));
-    relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarrier"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::SetBarrier));
-    relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarrier"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::ResetBarrier));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "relativeContainer"), relativeContainer);
 }
 } // namespace OHOS::Ace::NG

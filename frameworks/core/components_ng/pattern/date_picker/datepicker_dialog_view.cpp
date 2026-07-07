@@ -38,7 +38,9 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_utils.h"
@@ -464,8 +466,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
         dividerNodeId = pickerPattern->GetDividerId();
     }
 
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(dividerNodeId);
     CHECK_NULL_RETURN(dividerNode, nullptr);
 
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();

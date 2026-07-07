@@ -29,7 +29,9 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -458,8 +460,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(TextPickerUtil::DIVIDER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(dividerNode, nullptr);
 
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -963,7 +964,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
 }
-
 
 void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<PipelineContext>& pipeline)

@@ -102,6 +102,8 @@ foreach(item, arkui_modules) {
 # TODO: Unify arkui_modules and special_components arrays in future refactoring
 special_components = [
   "arkimagespan",
+  "arkblank",
+  "arkdivider",
   "arkgauge",
   "arkbadge",
   "arkgrid",
@@ -130,6 +132,9 @@ special_components = [
   "arktextinput",
   "arktextarea",
   "arkpanel",
+  "arkrelativecontainer",
+  "arkgridrow",
+  "arkgridcol",
 ]
 
 if (qrcodegen_support) {

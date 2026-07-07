@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 using AlignRules = std::map<AlignDirection, AlignRule>;
 using AlignRulesMap = std::map<std::string, AlignRules>;
-class ACE_EXPORT RenderRelativeContainer : public RenderNode {
+class ACE_FORCE_EXPORT RenderRelativeContainer : public RenderNode {
     DECLARE_ACE_TYPE(RenderRelativeContainer, RenderNode);
 
 public:

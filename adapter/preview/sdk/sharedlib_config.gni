@@ -200,6 +200,16 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_spacing"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_relativecontainer"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_calendarpicker"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -211,6 +221,11 @@ common_bin = [
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gauge"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gridlayout"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

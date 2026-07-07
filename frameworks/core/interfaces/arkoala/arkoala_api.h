@@ -4502,6 +4502,7 @@ struct ArkUIRowModifier {
 };
 
 struct ArkUIDividerModifier {
+    void (*createModel)(void);
     void (*setDividerStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetDividerStrokeWidth)(ArkUINodeHandle node);
     void (*setDividerLineCap)(ArkUINodeHandle node, ArkUI_Int32 lineCap);
@@ -4510,6 +4511,7 @@ struct ArkUIDividerModifier {
     void (*resetDividerColor)(ArkUINodeHandle node);
     void (*setDividerVertical)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetDividerVertical)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIFlexModifier {
@@ -7005,12 +7007,14 @@ struct ArkUIWebModifier {
 };
 
 struct ArkUIBlankModifier {
+    void (*createModel)();
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* blankRawPtr);
     void (*resetColor)(ArkUINodeHandle node);
     void (*setBlankHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetBlankHeight)(ArkUINodeHandle node);
     void (*setBlankMin)(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit);
     void (*resetBlankMin)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUICounterModifier {
@@ -8852,15 +8856,18 @@ struct ArkUIAny {
 };
 
 struct ArkUIGridColModifier {
+    void (*create)(void* span, void* offset, void* order);
     void (*setSpan)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetSpan)(ArkUINodeHandle node);
     void (*setGridColOffset)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetGridColOffset)(ArkUINodeHandle node);
     void (*setOrder)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetOrder)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIGridRowModifier {
+    void (*create)(void* columns, void* gutter, void* breakpoints, ArkUI_Int32 direction);
     void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetAlignItems)(ArkUINodeHandle node);
     void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
@@ -8874,6 +8881,8 @@ struct ArkUIGridRowModifier {
     void (*resetGutter)(ArkUINodeHandle node);
     void (*setOnBreakpointChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnBreakpointChange)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*setHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUIPanelModifier {
@@ -9728,12 +9737,14 @@ struct ArkUIGraphicsAPI {
 };
 
 struct ArkUIRelativeContainerModifier {
+    void (*createModel)();
     void (*setGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size, void* rawPtr);
     void (*setBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32 size);
     void (*getGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32* size);
     void (*getBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32* size);
     void (*resetGuideline)(ArkUINodeHandle node);
     void (*resetBarrier)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIContainerSpanModifier {

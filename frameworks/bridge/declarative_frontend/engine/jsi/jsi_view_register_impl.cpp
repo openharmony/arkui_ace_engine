@@ -39,7 +39,6 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
-#include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -52,7 +51,6 @@
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_distortion_component.h"
 #include "bridge/declarative_frontend/jsview/js_depth_component.h"
-#include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
@@ -63,9 +61,7 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
@@ -104,7 +100,6 @@
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_with_env.h"
-#include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
@@ -443,12 +438,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Row", JSRow::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
-    { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
-    { "GridRow", JSGridRow::JSBind },
-    { "GridCol", JSGridCol::JSBind },
-    { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
@@ -469,7 +460,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
@@ -519,7 +509,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
-    { "Divider", JSDivider::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
     { "RepeatVirtualScroll2Native", JSRepeatVirtualScroll2::JSBind },
@@ -530,10 +519,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
-    { "GridRow", JSGridRow::JSBind },
-    { "GridCol", JSGridCol::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
-    { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
@@ -641,7 +627,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "NativeWaterFlowSection", JSWaterFlowSectionsBinding::JSBind },
-    { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },

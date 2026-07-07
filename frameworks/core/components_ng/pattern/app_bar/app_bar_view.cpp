@@ -27,7 +27,9 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_utils.h"
@@ -79,6 +81,7 @@ void AssembleUiExtensionParams(
     }
 }
 #endif
+
 } // namespace
 
 void AppBarView::SetOnBackPressedConsumed()
@@ -374,8 +377,7 @@ RefPtr<FrameNode> AppBarView::BuildIcon(bool isMenuIcon)
 
 RefPtr<FrameNode> AppBarView::BuildDivider()
 {
-    auto divider = FrameNode::CreateFrameNode(
-        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto divider = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     auto theme = GetAppBarTheme();
     CHECK_NULL_RETURN(theme, nullptr);
 

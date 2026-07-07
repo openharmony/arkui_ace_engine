@@ -4102,7 +4102,6 @@
       OHOS::Ace::BackEndEventIdManager::*;
       OHOS::Ace::BackgroundImageSize::*;
       OHOS::Ace::Base64Util::Decode*;
-      OHOS::Ace::BlankModel::*;
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::BoxComponent::*;
       OHOS::Ace::CalendarPickerModel::*;
@@ -4132,7 +4131,6 @@
       OHOS::Ace::DatePickerDialogModel::*;
       OHOS::Ace::DatePickerModel::*;
       OHOS::Ace::Dimension::*;
-      OHOS::Ace::DividerModel::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::DrawableDescriptor::*;
@@ -4358,6 +4356,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
+      OHOS::Ace::NG::NodeModifier::GetDividerModifier*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::NG::PaddingPropertyF::*;
@@ -4378,6 +4377,7 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
+      OHOS::Ace::NG::RosenRenderContext::GetRSNode*;
       OHOS::Ace::NG::RotationGesture::*;
       OHOS::Ace::NG::SaveButtonModelNG::*;
       OHOS::Ace::NG::ScaleProperty::*;
@@ -4466,7 +4466,13 @@
       OHOS::Ace::RefreshModel::*;
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
-      OHOS::Ace::RelativeContainerModel::*;
+      OHOS::Ace::NG::RelativeContainerModelNG::CreateFrameNode*;
+      OHOS::Ace::NG::CalcSize::IsWidthDimensionUnitAuto*;
+      OHOS::Ace::NG::CalcSize::IsHeightDimensionUnitAuto*;
+      OHOS::Ace::NG::CalcSize::IsDimensionUnitAuto*;
+      OHOS::Ace::NG::GeneratedModifier::GetRelativeContainerModifier*;
+      OHOS::Ace::NG::GetCJUIRelativeContainerDynamicModifier*;
+      OHOS::Ace::RenderRelativeContainer::Create*;
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::ResourceManager::*;
@@ -4671,6 +4677,8 @@
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??DividerMode??Ark?DividerMode??std????h??optional?OHOS??Ace??DividerMode????Ark?DividerMode?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??EllipsisMode??Ark?EllipsisMode??std????h??optional?OHOS??Ace??EllipsisMode????Ark?EllipsisMode?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??FlexDirection??Ark?FlexDirection??std????h??optional?OHOS??Ace??FlexDirection????Ark?FlexDirection?const??;
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::LineCap, Ark_LineCapStyle>(std::__h::optional<OHOS::Ace::LineCap>&, Ark_LineCapStyle const&)";
+      void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??LineDirection??Ark?Axis??std????h??optional?OHOS??Ace??LineDirection????Ark?Axis?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??FontStyle??Ark?FontStyle??std????h??optional?OHOS??Ace??FontStyle????Ark?FontStyle?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??FontWeight??Ark?FontWeight??std????h??optional?OHOS??Ace??FontWeight????Ark?FontWeight?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??FontWeight??Ark?Resource??std????h??optional?OHOS??Ace??FontWeight????Ark?Resource?const??;
@@ -4740,6 +4748,7 @@
       vtable?for?OHOS::Ace::Container;
       vtable?for?OHOS::Ace::CounterComponent;
       vtable?for?OHOS::Ace::DisplayComponent;
+      vtable?for?OHOS::Ace::DividerComponent;
       vtable?for?OHOS::Ace::DrawableDescriptor;
       vtable?for?OHOS::Ace::FlexElement;
       vtable?for?OHOS::Ace::FocusCollaborationElement;
@@ -4773,7 +4782,6 @@
       vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::CustomNode;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
-      vtable?for?OHOS::Ace::NG::DividerPattern;
       vtable?for?OHOS::Ace::NG::EventHub;
       vtable?for?OHOS::Ace::NG::ExtensionHandler;
       vtable?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
@@ -4905,6 +4913,7 @@
       VTT?for?OHOS::Ace::Container;
       VTT?for?OHOS::Ace::CounterComponent;
       VTT?for?OHOS::Ace::DisplayComponent;
+      VTT?for?OHOS::Ace::DividerComponent;
       VTT?for?OHOS::Ace::DragRecognizer;
       VTT?for?OHOS::Ace::DrawableDescriptor;
       VTT?for?OHOS::Ace::FlexElement;
@@ -4933,7 +4942,6 @@
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::ClickRecognizer;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
-      VTT?for?OHOS::Ace::NG::DividerPattern;
       VTT?for?OHOS::Ace::NG::EventHub;
       VTT?for?OHOS::Ace::NG::ExtensionHandler;
       VTT?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
