@@ -93,10 +93,13 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
     auto imageChildren = pattern->GetImageChildren();
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     for (const auto& child : imageChildren) {
+        if (index >= rectsForPlaceholders.size()) {
+            break;
+        }
         auto rect = rectsForPlaceholders.at(index);
         auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
-        auto pattern = child->GetPattern();
-        PaintFrameNode(context, child, pattern, offset);
+        auto childPattern = child->GetPattern();
+        PaintFrameNode(context, child, childPattern, offset);
         ++index;
     }
 }

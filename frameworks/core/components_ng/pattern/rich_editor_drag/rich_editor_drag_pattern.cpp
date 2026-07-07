@@ -150,7 +150,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
         auto imageIndex = placeholderIndex[index];
-        if (imageIndex >= static_cast<int32_t>(rectsForPlaceholders.size())) {
+        if (imageIndex < 0 || imageIndex >= static_cast<int32_t>(rectsForPlaceholders.size())) {
             break;
         }
         auto rect = rectsForPlaceholders.at(imageIndex);
