@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
@@ -25,6 +26,9 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 
 namespace OHOS::Ace::NG {
+
+#define REFRESH_ATTRIBUTE "RefreshAttribute."
+
 namespace {
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t DEFAULT_FRICTION = 62;
@@ -114,6 +118,13 @@ void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
     auto contentNode = reinterpret_cast<FrameNode*>(content);
     CHECK_NULL_VOID(contentNode);
     RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
+}
+
+void ResetRefreshContent(ArkUINodeHandle node)
+{
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(REFRESH_ATTRIBUTE "ResetRefreshContent", 1);
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
 }
 
 void SetPullDownRatio(ArkUINodeHandle node, ArkUI_Float32 ratio)
@@ -432,6 +443,8 @@ void ResetPullUpToCancelRefreshImpl(ArkUINodeHandle node)
 
 void SetRefreshContentImpl(ArkUINodeHandle node, ArkUINodeHandle content) {}
 
+void ResetRefreshContentImpl(ArkUINodeHandle node) {}
+
 void SetPullDownRatioImpl(ArkUINodeHandle node, ArkUI_Float32 ratio)
 {
     std::optional<float> ratioValue = ratio;
@@ -608,6 +621,7 @@ const ArkUIRefreshModifier* GetRefreshModifier()
             .setPullUpToCancelRefresh = SetPullUpToCancelRefreshImpl,
             .resetPullUpToCancelRefresh = ResetPullUpToCancelRefreshImpl,
             .setRefreshContent = SetRefreshContentImpl,
+            .resetRefreshContent = ResetRefreshContentImpl,
             .setPullDownRatio = SetPullDownRatioImpl,
             .resetPullDownRatio = ResetPullDownRatioImpl,
             .getPullDownRatio = GetPullDownRatioImpl,
@@ -656,6 +670,7 @@ const ArkUIRefreshModifier* GetRefreshModifier()
         .setPullUpToCancelRefresh = SetPullUpToCancelRefresh,
         .resetPullUpToCancelRefresh = ResetPullUpToCancelRefresh,
         .setRefreshContent = SetRefreshContent,
+        .resetRefreshContent = ResetRefreshContent,
         .setPullDownRatio = SetPullDownRatio,
         .resetPullDownRatio = ResetPullDownRatio,
         .getPullDownRatio = GetPullDownRatio,

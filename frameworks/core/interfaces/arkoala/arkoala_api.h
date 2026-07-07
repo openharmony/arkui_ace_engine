@@ -7591,6 +7591,7 @@ struct ArkUIRefreshModifier {
     void (*setPullUpToCancelRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetPullUpToCancelRefresh)(ArkUINodeHandle node);
     void (*setRefreshContent)(ArkUINodeHandle node, ArkUINodeHandle content);
+    void (*resetRefreshContent)(ArkUINodeHandle node);
     void (*setPullDownRatio)(ArkUINodeHandle node, ArkUI_Float32 ratio);
     void (*resetPullDownRatio)(ArkUINodeHandle node);
     ArkUI_Float32 (*getPullDownRatio)(ArkUINodeHandle node);
