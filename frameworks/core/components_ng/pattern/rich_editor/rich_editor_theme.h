@@ -277,6 +277,14 @@ protected:
     Color urlDefaultColor_ = Color(0x99000000);
     Color urlHoverColor_ = Color(0x99000000);
     Color urlPressColor_ = Color(0x99000000);
+    Color placeholderColor_ = Color(0x99000000);
+    Color caretColor_ = Color(0xff007dff);
+    Color selectedBackgroundColor_ = Color(0xff007dff);
+    Color dragBackgroundColor_ = Color::WHITE;
+    Color popIconColor_ = Color(0x99000000);
+    Color menuTitleColor_ = Color(0x99000000);
+    Color menuTextColor_ = Color(0x99000000);
+    Color menuIconColor_ = Color(0x99000000);
 
 private:
     float disabledAlpha_ = 0.0f;
@@ -287,16 +295,8 @@ private:
 
     // UX::insert cursor offset up by 24vp
     Dimension insertCursorOffset_ = 24.0_vp;
-    Color placeholderColor_ = Color(0x99000000);
-    Color caretColor_ = Color(0xff007dff);
-    Color selectedBackgroundColor_ = Color(0xff007dff);
-    Color dragBackgroundColor_ = Color::WHITE;
     Dimension dragCornerRadius_ = 18.0_vp;
     Color previewUnderlineColor_ = Color(0xff007dff);
-    Color popIconColor_ = Color(0x99000000);
-    Color menuTitleColor_ = Color(0x99000000);
-    Color menuTextColor_ = Color(0x99000000);
-    Color menuIconColor_ = Color(0x99000000);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
     std::string aiWriteBundleName_;
