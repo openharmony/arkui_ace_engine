@@ -756,6 +756,9 @@ public:
     ForceSplitDisplayState BuildForceSplitDisplayStateFromLogicalStacks();
     //-------for force split------- end------
 
+    void SetPendingHomeRestoreInfo(const std::string& info);
+    void ApplyHomeRestoreInfo();
+
 private:
     void UpdateCanForceSplitLayout();
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -1170,6 +1173,7 @@ private:
     float forceSplitDividerWidth_ = 1.0f;
     float secondaryPartitionWidth_ = 0.0f;
     //-------for force split------- end  ------
+    std::string pendingHomeRestoreInfo_;
 };
 
 } // namespace OHOS::Ace::NG

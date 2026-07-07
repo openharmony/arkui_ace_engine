@@ -3394,8 +3394,9 @@ void NavigationGroupNode::CreateHomeDestinationIfNeeded()
     auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnWillAppear();
-    AddChild(destNode, 0);
     customHomeDestination_ = destNode;
+    pattern->ApplyHomeRestoreInfo();
+    AddChild(destNode, 0);
 }
 
 bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGroupNode>& navDestination) const

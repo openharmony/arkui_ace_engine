@@ -45,6 +45,7 @@
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 using namespace testing;
@@ -1921,5 +1922,194 @@ HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg004, TestSize.Level1)
     EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(pageNode));
     EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(modelNode));
     EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(sheetNode));
+}
+
+/**
+ * @tc.name: SetPendingHomeRestoreInfoTest
+ * @tc.desc: SetPendingHomeRestoreInfo should store info into pendingHomeRestoreInfo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, SetPendingHomeRestoreInfoTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetPendingHomeRestoreInfo("{\"homeIndex\":3}");
+    EXPECT_EQ(pattern->pendingHomeRestoreInfo_, "{\"homeIndex\":3}");
+}
+
+/**
+ * @tc.name: ApplyHomeRestoreInfoEmptyPendingTest
+ * @tc.desc: ApplyHomeRestoreInfo should return early when pendingHomeRestoreInfo_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, ApplyHomeRestoreInfoEmptyPendingTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->pendingHomeRestoreInfo_ = "";
+    pattern->ApplyHomeRestoreInfo();
+    EXPECT_TRUE(pattern->pendingHomeRestoreInfo_.empty());
+}
+
+/**
+ * @tc.name: ApplyHomeRestoreInfoWithHomeDestinationTest
+ * @tc.desc: ApplyHomeRestoreInfo should push pending info to homeDestination and clear pending
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, ApplyHomeRestoreInfoWithHomeDestinationTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto homeDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(homeDestNode, nullptr);
+    hostNode->useHomeDestination_ = true;
+    hostNode->customHomeDestination_ = homeDestNode;
+
+    const std::string homeInfo = "[{\"componentId\":\"Tabs-0\",\"info\":\"{\\\"index\\\":3}\"}]";
+    pattern->SetPendingHomeRestoreInfo(homeInfo);
+    pattern->ApplyHomeRestoreInfo();
+
+    EXPECT_TRUE(pattern->pendingHomeRestoreInfo_.empty());
+    auto resultIt = homeDestNode->restoreInfo_.find("Tabs-0");
+    EXPECT_TRUE(resultIt != homeDestNode->restoreInfo_.end());
+    EXPECT_EQ(resultIt->second, "{\"index\":3}");
+}
+
+/**
+ * @tc.name: ApplyHomeRestoreInfoWithoutHomeDestinationTest
+ * @tc.desc: ApplyHomeRestoreInfo should not clear pending when homeDestination is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, ApplyHomeRestoreInfoWithoutHomeDestinationTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    hostNode->useHomeDestination_ = true;
+    hostNode->customHomeDestination_ = nullptr;
+
+    const std::string homeInfo = "[{\"componentId\":\"Tabs-0\",\"info\":\"{\\\"index\\\":3}\"}]";
+    pattern->SetPendingHomeRestoreInfo(homeInfo);
+    pattern->ApplyHomeRestoreInfo();
+
+    EXPECT_EQ(pattern->pendingHomeRestoreInfo_, homeInfo);
+}
+
+/**
+ * @tc.name: RestoreJsStackIfNeededPendingWhenNoHomeDestinationTest
+ * @tc.desc: RestoreJsStackIfNeeded should save homeInfo to pending when homeDestination does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, RestoreJsStackIfNeededPendingWhenNoHomeDestinationTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto recoverableMgr = pipeline->GetRecoverableManager();
+    ASSERT_NE(recoverableMgr, nullptr);
+
+    hostNode->useHomeDestination_ = true;
+    hostNode->customHomeDestination_ = nullptr;
+
+    const std::string homeInfo = "[{\"componentId\":\"Tabs-0\",\"info\":\"{\\\"index\\\":3}\"}]";
+    recoverableMgr->SetNavigationHomeInfo(hostNode->GetCurId(), homeInfo);
+
+    pattern->RestoreJsStackIfNeeded();
+
+    EXPECT_EQ(pattern->pendingHomeRestoreInfo_, homeInfo);
+    EXPECT_TRUE(recoverableMgr->homeNavigationInfo_.find(hostNode->GetCurId()) ==
+        recoverableMgr->homeNavigationInfo_.end());
+}
+
+/**
+ * @tc.name: RestoreJsStackIfNeededDirectSetWhenHomeDestinationExistsTest
+ * @tc.desc: RestoreJsStackIfNeeded should set restore info directly on homeDestination when it exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, RestoreJsStackIfNeededDirectSetWhenHomeDestinationExistsTest, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+
+    auto homeDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(homeDestNode, nullptr);
+    hostNode->useHomeDestination_ = true;
+    hostNode->customHomeDestination_ = homeDestNode;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto recoverableMgr = pipeline->GetRecoverableManager();
+    ASSERT_NE(recoverableMgr, nullptr);
+
+    const std::string homeInfo = "[{\"componentId\":\"Tabs-0\",\"info\":\"{\\\"index\\\":3}\"}]";
+    recoverableMgr->SetNavigationHomeInfo(hostNode->GetCurId(), homeInfo);
+
+    pattern->RestoreJsStackIfNeeded();
+
+    EXPECT_TRUE(pattern->pendingHomeRestoreInfo_.empty());
+    auto resultIt = homeDestNode->restoreInfo_.find("Tabs-0");
+    EXPECT_TRUE(resultIt != homeDestNode->restoreInfo_.end());
+    EXPECT_EQ(resultIt->second, "{\"index\":3}");
 }
 } // namespace OHOS::Ace::NG

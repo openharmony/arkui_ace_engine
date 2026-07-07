@@ -48,7 +48,7 @@ public:
     void RemoveRestoreByPage(bool isNavigationType, int32_t pageId);
     bool GetRestoreByPage(bool isNavigationType, int32_t pageId, std::string& result);
 
-    std::string GetNavigationHomeInfo(const std::string& navigationId);
+    std::string TakeNavigationHomeInfo(const std::string& navigationId);
     void SetNavigationHomeInfo(const std::string& navigationId, const std::string& homeInfo);
 
 private:
