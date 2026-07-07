@@ -295,6 +295,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
             pattern->GetNakedCharPosition(), paragraphData);
         autofillController->SetAutoFillOriginTextColor(textStyle.GetTextColor());
     } else {
+#endif
         if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
             CreateParagraph(textStyle, pattern->GetDragContents(), content,
                 isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
@@ -302,14 +303,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
             CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
                 pattern->GetNakedCharPosition(), paragraphData);
         }
-    }
-#else
-    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), content,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
-    } else {
-        CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
-            pattern->GetNakedCharPosition(), paragraphData);
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     }
 #endif
     return true;
