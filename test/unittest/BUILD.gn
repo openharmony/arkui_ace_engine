@@ -126,6 +126,9 @@ config("ace_unittest_config") {
     "ACE_UNITTEST",
     "OHOS_STANDARD_SYSTEM",
   ]
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_AUTO_FILL_CONTROLLER" ]
+  }
 
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
@@ -177,6 +180,9 @@ config("ace_unittest_config_ext") {
     "ACE_UNITTEST",
     "OHOS_STANDARD_SYSTEM",
   ]
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_AUTO_FILL_CONTROLLER" ]
+  }
 
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]

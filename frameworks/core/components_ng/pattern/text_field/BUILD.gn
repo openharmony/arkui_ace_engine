@@ -16,7 +16,6 @@ import(
 
 build_component_ng("text_field_pattern_ng") {
   sources = [
-    "auto_fill_controller.cpp",
     "content_controller.cpp",
     "text_component_decorator.cpp",
     "text_field_accessibility_property.cpp",
@@ -56,6 +55,7 @@ build_component_ng("text_field_pattern_ng") {
     "imf:extra_config_napi",
     "ability_base:want",
   ]
+  auto_fill_controller_sources = [ "auto_fill_controller.cpp" ]
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     external_deps = [
       "ability_runtime:abilitykit_native",

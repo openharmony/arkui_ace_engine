@@ -27,6 +27,7 @@ advance_components_support = false
 connect_server_support = false
 enable_rosen_backend = true
 enable_standard_input = false
+enable_auto_fill_controller = true
 video_components_support = false
 web_components_support = false
 preview_support = true
@@ -109,6 +110,10 @@ if (defined(model_component_support) && model_component_support) {
 
 if (defined(enable_rosen_backend) && enable_rosen_backend) {
   defines += [ "ENABLE_ROSEN_BACKEND" ]
+}
+
+if (defined(enable_auto_fill_controller) && enable_auto_fill_controller) {
+  defines += [ "ENABLE_AUTO_FILL_CONTROLLER" ]
 }
 
 if (defined(window_scene_support) && window_scene_support) {

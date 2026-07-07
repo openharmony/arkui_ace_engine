@@ -1596,6 +1596,7 @@ void TextFieldPattern::ClearFocusStyle()
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -1611,6 +1612,7 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
         DoProcessAutoFill(RequestAutoFillReason::FIELD_FOCUS_EVENT);
     }
+#endif
 }
 
 void TextFieldPattern::CheckAndUpdateInputTypeForOTP()
@@ -2340,9 +2342,11 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
 
 void TextFieldPattern::HandleOnPasswordVault()
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPasswordVault");
     ProcessAutoFillAndKeyboard(RequestAutoFillReason::TEXT_MENU_MANUAL_REQUEST, SourceType::NONE, true, false,
         AceAutoFillTriggerType::MANUAL_REQUEST);
+#endif
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -2513,7 +2517,11 @@ bool TextFieldPattern::IsShowAutoFill()
     if (ScreenLockManager::IsScreenLocked()) {
         return false;
     }
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     return SystemProperties::IsAutoFillSupport();
+#else
+    return false;
+#endif
 }
 
 void TextFieldPattern::HandleOnTextMethodInput(
@@ -3686,6 +3694,7 @@ void TextFieldPattern::ProcessAutoFillOnPaste()
 void TextFieldPattern::ProcessAutoFillAndKeyboard(RequestAutoFillReason autoFillReason, SourceType sourceType,
     bool ignoreFillType, bool isNewPassWord, AceAutoFillTriggerType triggerType)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "ProcessAutoFillAndKeyboard, autoFillReason:%{public}d", autoFillReason);
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup, ignoreFillType, isNewPassWord, triggerType);
@@ -3705,10 +3714,12 @@ void TextFieldPattern::ProcessAutoFillAndKeyboard(RequestAutoFillReason autoFill
     if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
         NotifyOnEditChanged(true);
     }
+#endif
 }
 
 void TextFieldPattern::DoProcessAutoFill(RequestAutoFillReason autoFillReason, SourceType sourceType)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
     if (!IsNeedProcessAutoFill()) {
         if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
@@ -3717,6 +3728,11 @@ void TextFieldPattern::DoProcessAutoFill(RequestAutoFillReason autoFillReason, S
         return;
     }
     ProcessAutoFillAndKeyboard(autoFillReason, sourceType);
+#else
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
+        NotifyOnEditChanged(true);
+    }
+#endif
 }
 
 bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillType)
@@ -3862,6 +3878,7 @@ bool TextFieldPattern::CheckAutoFill(bool ignoreFillType, AceAutoFillTriggerType
 bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool ignoreFillType, bool isNewPassWord,
     AceAutoFillTriggerType triggerType)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     if (!CheckAutoFill(ignoreFillType, triggerType)) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "don't need to auto fill.");
         return false;
@@ -3911,6 +3928,9 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool ignoreFillType, bool 
         SetFillRequestFinish(false);
     }
     return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+#else
+    return false;
+#endif
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -4089,6 +4109,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autoFillController = GetOrCreateAutoFillController();
     auto autoFillAnimationStatus =
         autoFillController ? autoFillController->GetAutoFillAnimationStatus() : AutoFillAnimationStatus::INIT;
@@ -4096,6 +4117,7 @@ void TextFieldPattern::StartTwinkling()
         autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         return;
     }
+#endif
     // Ignore the result because all ops are called on this same thread (ACE UI).
     // The only reason failed is that the task has finished.
     cursorTwinklingTask_.Cancel();
@@ -6507,6 +6529,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     TwinklingByFocus();
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autoFillController = GetOrCreateAutoFillController();
     bool needAutoFillOnSelected = autoFillController &&
         autoFillController->GetAutoFillInsertStatus() == AutoFillInsertStatus::INSERTING;
@@ -6515,6 +6538,9 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
         autoFillController->UpdateAutoFillInsertInfo(-1, -1, AutoFillInsertStatus::INIT);
     }
     bool isSelected = IsSelected() || needAutoFillOnSelected;
+#else
+    bool isSelected = IsSelected();
+#endif
     auto caretStart = isSelected ? start : selectController_->GetCaretIndex();
     if (isIMEOrAutoFill && !BeforeIMEInsertValue(insertValue, caretStart)) {
         if (info.reason == InputReason::AUTO_FILL) {
@@ -9999,6 +10025,7 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
 void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillType:%{public}d, triggerType:%{public}d",
         static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
     SetFillRequestFinish(true);
@@ -10038,6 +10065,9 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     }
     RemoveFillContentMap();
     BeforeAutoFillAnimation(UtfUtils::Str8DebugToStr16(nodeWrap->GetValue()), type);
+#else
+    return;
+#endif
 }
 
 void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
@@ -10065,10 +10095,12 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
             NotifyOnEditChanged(true);
         }
     }
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autoFillController = GetOrCreateAutoFillController();
     if (autoFillController && autoFillController->GetAutoFillInsertStatus() == AutoFillInsertStatus::PENDING) {
         autoFillController->UpdateAutoFillInsertInfo(-1, -1, AutoFillInsertStatus::INIT);
     }
+#endif
 #endif
 }
 
@@ -13298,6 +13330,7 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
     }
 }
 
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type)
 {
     auto host = GetHost();
@@ -13349,6 +13382,9 @@ void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, co
         onFinishCallback();
     }
 }
+#else
+void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type) {}
+#endif
 
 void TextFieldPattern::RemoveFillContentMap()
 {
