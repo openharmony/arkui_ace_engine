@@ -179,7 +179,13 @@ function isValidResource(context, value) {
       return false;
     }
   }
-  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+  let stringValue = '';
+  try {
+    stringValue = resourceManager.getStringSync(value.id);
+  } catch (err) {
+    stringValue = '';
+  }
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(stringValue)) {
     return false;
   } else {
     return true;
