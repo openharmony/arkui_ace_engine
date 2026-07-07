@@ -1317,11 +1317,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest103, TestSize.Level1)
 }
 
 /**
- * @tc.name: LogTouchTestRecognizerStates001
+ * @tc.name: LogTouchTestRecognizerStates007
  * @tc.desc: Test LogTouchTestRecognizerStates with empty eventTreeList
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates007, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);

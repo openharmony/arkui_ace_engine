@@ -35,6 +35,15 @@ struct RectCallbackListImpl {
     std::vector<RectCallback> callbacks;
 };
 
+// Container::SetCurrentUsePartialUpdate is defined in container.cpp which has external
+// dependencies (iremote_object.h). Provide a minimal stub for testing.
+void Container::SetCurrentUsePartialUpdate(bool useIt)
+{
+    auto container = Container::Current();
+    if (container) {
+        container->usePartialUpdate_ = useIt;
+    }
+}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {

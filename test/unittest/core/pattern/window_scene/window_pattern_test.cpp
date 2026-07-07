@@ -360,6 +360,12 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateActive, TestSize.Level1)
     EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
 }
 
+/**
+ * @tc.name: OnAttachToFrameNode_StateDisconnect_MultiScenario
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_DISCONNECT with different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateDisconnect_MultiScenario, TestSize.Level1)
 {
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);

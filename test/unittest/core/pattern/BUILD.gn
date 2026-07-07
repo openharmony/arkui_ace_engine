@@ -96,7 +96,7 @@ group("core_pattern_unittest") {
       "navrouter:navrouter_test_ng",
       "node_container:node_container_test_ng",
 
-      # "overlay:overlay_manager_test_ng",
+      "overlay:overlay_manager_test_ng",
       "panel:panel_test_ng",
       "particle:particle_test_ng",
       "patternlock:patternlock_test_ng",
@@ -129,7 +129,7 @@ group("core_pattern_unittest") {
       "stage:stage_test_ng",
       #"stepper:stepper_test_ng",
 
-      # "swiper:swiper_test_ng",
+      "swiper:swiper_test_ng",
       "symbol:symbol_test_ng",
       #"tabs:tabs_test_ng",
       "text:span_test_ng",
@@ -149,7 +149,7 @@ group("core_pattern_unittest") {
       "toggle:toggle_test_ng",
       "ui_extension:ui_extension_component_test_ng",
 
-      # "union_effect_container:union_effect_container_test",
+      "union_effect_container:union_effect_container_test",
       "video:video_test_ng",
       "view_context:view_context_test_ng",
       "waterflow:water_flow_test_generated",
@@ -157,7 +157,7 @@ group("core_pattern_unittest") {
       "waterflow:water_flow_test_segmented",
       "waterflow:water_flow_test_sw",
 
-      # "window_scene:window_scene_test",
+      "window_scene:window_scene_test",
       "withtheme:withtheme_test_ng",
       "xcomponent:xcomponent_test_ng",
       "xcomponent:xcomponent_test_set_rate_range",
