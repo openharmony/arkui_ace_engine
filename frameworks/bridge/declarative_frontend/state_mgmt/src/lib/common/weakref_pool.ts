@@ -69,7 +69,6 @@ class WeakRefPool {
     Promise.resolve(true)
       .then(() => {
         stateMgmtConsole.debug(`asyncRegisterToFinalizationRegistry ${obj.constructor.name} `);
-        WeakRefPool.getOrCreateCleanupInfo(obj);
         WeakRefPool.addMonitorComputedId(obj);
       })
       .catch(error => {
@@ -89,28 +88,29 @@ class WeakRefPool {
   }
 
   public static addMonitorComputedId<T extends object>(obj: T): void {
-    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
-    const monitorIds = MonitorV2.getMonitorIds(obj);
     const computedIds = ComputedV2.getComputedIds(obj);
-    
-    if (cleanupInfo.computedId) {
-      stateMgmtConsole.debug(`addMonitorComputedId: addComputedId ${obj.constructor.name} add ${JSON.stringify(computedIds)} to ${JSON.stringify(Array.from(cleanupInfo.computedId))}`);
+    const monitorIds = MonitorV2.getMonitorIds(obj);
+    // No @Computed / @Monitor: nothing to register, so skip getOrCreateCleanupInfo.
+    // FinalizationRegistry registration happens on demand - via addMonitorComputedId
+    // below when ids exist, or via getWeakRef/addTagCallback when a dependency is
+    // first recorded - so an object that never needs cleanup is never registered.
+    if (computedIds.length === 0 && monitorIds.length === 0) {
+      return;
+    }
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    if (computedIds.length > 0) {
+      cleanupInfo.computedId ??= new Set<number>();
       computedIds.forEach(id => {
-        cleanupInfo.computedId.add(id);
+        cleanupInfo.computedId!.add(id);
       });
-    } else {
-      cleanupInfo.computedId = new Set(computedIds);
     }
-
-    if (cleanupInfo.monitorId) {
-      stateMgmtConsole.debug(`addMonitorComputedId: addMonitorId ${obj.constructor.name} add ${JSON.stringify(monitorIds)} to ${JSON.stringify(Array.from(cleanupInfo.monitorId))}`);
+    if (monitorIds.length > 0) {
+      cleanupInfo.monitorId ??= new Set<number>();
       monitorIds.forEach(id => {
-        cleanupInfo.monitorId.add(id);
+        cleanupInfo.monitorId!.add(id);
       });
-    } else {
-      cleanupInfo.monitorId = new Set(monitorIds);
     }
-    stateMgmtConsole.debug(`addMonitorComputedId monitorId: ${JSON.stringify(Array.from(cleanupInfo.monitorId))} computedId: ${JSON.stringify(Array.from(cleanupInfo.computedId))}`);
+    stateMgmtConsole.debug(`addMonitorComputedId ${obj.constructor.name} monitorId: ${JSON.stringify(Array.from(cleanupInfo.monitorId ?? []))} computedId: ${JSON.stringify(Array.from(cleanupInfo.computedId ?? []))}`);
   }
 
   public static addTagCallback<T extends object>(obj: T, tag: unknown, callback: () => void): void {
