@@ -55,20 +55,26 @@ void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailInd
     if (tailIndentsOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
     }
-    
     NG::TailIndents tailIndents;
     NG::TailIndentsArray indentsArray;
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+        double doubleValue = static_cast<double>(metrics.value);
+        auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
+            .value_or(DimensionUnit::VP);
+        return Dimension(doubleValue, unit);
+    };
     
     if (tailIndentsOpt.value.selector == 0) {
-        auto dim = Converter::Convert<Dimension>(tailIndentsOpt.value.value0);
+        auto dim = convertDimensionWithPrecision(tailIndentsOpt.value.value0);
         if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
             dim.Reset();
         }
         indentsArray.push_back(dim);
     } else if (tailIndentsOpt.value.selector == 1) {
         auto& arrayValue = tailIndentsOpt.value.value1;
+        CHECK_NULL_VOID(arrayValue.array);
         for (int i = 0; i < arrayValue.length; i++) {
-            auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+            auto dim = convertDimensionWithPrecision(*(arrayValue.array + i));
             if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
                 dim.Reset();
             }

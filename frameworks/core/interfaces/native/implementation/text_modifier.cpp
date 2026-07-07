@@ -524,6 +524,7 @@ void SetTailIndentsImpl(Ark_NativePointer node,
         indentsArray.emplace_back(dim);
     } else if (value->value.selector == 1) {
         auto& arrayValue = value->value.value1;
+        CHECK_NULL_VOID(arrayValue.array);
         indentsArray.reserve(arrayValue.length);
         for (int32_t i = 0; i < arrayValue.length; i++) {
             auto dim = convertDimensionWithPrecision(*(arrayValue.array + i));
