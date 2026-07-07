@@ -837,9 +837,6 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeShown_;
-#elif defined(ENABLE_STANDARD_INPUT)
-        return false;
-#else
         return connection_;
 #endif
     }

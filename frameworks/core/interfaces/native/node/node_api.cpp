@@ -31,7 +31,6 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/drag_adapter_impl.h"
@@ -2260,21 +2259,11 @@ void ShowCrash(ArkUI_CharPtr message)
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
 }
 
-namespace {
-const ArkUICanvasRenderingContext2DModifier* GetCanvasRenderingContext2DModifierViaDynamic()
-{
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("CanvasRenderingContext2D");
-    CHECK_NULL_RETURN(module, nullptr);
-    return reinterpret_cast<const ArkUICanvasRenderingContext2DModifier*>(
-        module->GetCustomModifier("CanvasRenderingContext2D"));
-}
-} // namespace
-
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
     .version = ARKUI_EXTENDED_API_VERSION,
     .getUtilsModifier = NodeModifier::GetUtilsModifier, // getUtilsModifier
-    .getCanvasRenderingContext2DModifier = GetCanvasRenderingContext2DModifierViaDynamic,
+    .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
     .setCallbackMethod = SetCallbackMethod,
     .setCustomMethodFlag = SetCustomMethodFlag,
     .getCustomMethodFlag = GetCustomMethodFlag,
@@ -2748,7 +2737,7 @@ const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
     static CJUIExtendedNodeAPI impl_extended = {
         .version = ARKUI_EXTENDED_API_VERSION,
         .getUtilsModifier = NodeModifier::GetUtilsModifier,
-        .getCanvasRenderingContext2DModifier = GetCanvasRenderingContext2DModifierViaDynamic,
+        .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
         .setCallbackMethod = SetCallbackMethod,
         .setCustomMethodFlag = SetCustomMethodFlag,
         .getCustomMethodFlag = GetCustomMethodFlag,

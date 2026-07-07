@@ -23,7 +23,7 @@ class CanvasPath2D;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class __attribute__((visibility("default"))) CanvasPathPeerImpl : public OHOS::Ace::Referenced {
+class ACE_FORCE_EXPORT CanvasPathPeerImpl : public OHOS::Ace::Referenced {
 public:
     struct ArcParam {
         double x;

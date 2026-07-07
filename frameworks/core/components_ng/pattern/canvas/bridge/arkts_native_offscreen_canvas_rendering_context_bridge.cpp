@@ -15,15 +15,36 @@
 #include "frameworks/core/components_ng/pattern/canvas/bridge/arkts_native_offscreen_canvas_rendering_context_bridge.h"
 
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
+#include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 
+#include <cmath>
+
 namespace OHOS::Ace::NG {
 
 namespace {
+
+// Returns true and sets `value` only when the argument is a finite number
+// (not NaN, not Infinity, not undefined/null).  Mirrors the old
+// GetDoubleArg(..., isJudgeSpecialValue_=true) behaviour.
+bool GetValidDoubleArg(ArkUIRuntimeCallInfo* info, size_t index, double& value)
+{
+    auto arg = info->GetCallArgRef(index);
+    if (arg->IsUndefined() || arg->IsNull()) {
+        return false;
+    }
+    double v = arg->ToNumber(info->GetVM())->Value();
+    if (std::isnan(v) || std::isinf(v)) {
+        return false;
+    }
+    value = v;
+    return true;
+}
+
 constexpr size_t NUM_0 = 0;
 constexpr size_t NUM_1 = 1;
 constexpr size_t NUM_2 = 2;
@@ -219,9 +240,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::MoveTo(ArkUIRunt
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double a1 = static_cast<double>(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value()) * density;
-    double a2 = static_cast<double>(runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value()) * density;
-    p->MoveTo(a1, a2);
+    double x = 0.0, y = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->MoveTo(x * density, y * density);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::LineTo(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -230,9 +253,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::LineTo(ArkUIRunt
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double a1 = static_cast<double>(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value()) * density;
-    double a2 = static_cast<double>(runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value()) * density;
-    p->LineTo(a1, a2);
+    double x = 0.0, y = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->LineTo(x * density, y * density);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Fill(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -333,9 +358,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::LineWidth(ArkUIR
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
-    double val = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() *
-        PipelineBase::GetCurrentDensity();
-    p->SetLineWidth(val);
+    double val = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, val)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->SetLineWidth(val * PipelineBase::GetCurrentDensity());
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::GlobalAlpha(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -343,7 +370,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::GlobalAlpha(ArkU
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
-    double val = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value();
+    double val = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, val)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     p->SetAlpha(val);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -365,11 +395,16 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Arc(ArkUIRuntime
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     ArcParam param;
-    param.x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    param.y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    param.radius = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    param.startAngle = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value();
-    param.endAngle = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value();
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.radius) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.startAngle) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.endAngle)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.x *= density;
+    param.y *= density;
+    param.radius *= density;
     auto lastArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     param.anticlockwise = lastArg->IsBoolean() && lastArg->ToBoolean(vm)->Value();
     pattern->Arc(param);
@@ -382,11 +417,12 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillRect(ArkUIRu
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    pattern->FillRect(OHOS::Ace::Rect(x, y, w, h));
+    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pattern->FillRect(OHOS::Ace::Rect(x * density, y * density, w * density, h * density));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -396,11 +432,12 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::StrokeRect(ArkUI
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    pattern->StrokeRect(OHOS::Ace::Rect(x, y, w, h));
+    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pattern->StrokeRect(OHOS::Ace::Rect(x * density, y * density, w * density, h * density));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -410,11 +447,12 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ClearRect(ArkUIR
     auto pattern = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    pattern->ClearRect(OHOS::Ace::Rect(x, y, w, h));
+    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pattern->ClearRect(OHOS::Ace::Rect(x * density, y * density, w * density, h * density));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -427,14 +465,19 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::FillText(ArkUIRu
     RefPtr<ResourceObject> resObj;
     ArkTSUtils::ParseJsString(vm, runtimeCallInfo->GetCallArgRef(NUM_1), text, resObj);
     double density = PipelineBase::GetCurrentDensity();
-    double x = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    double y = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
+    double x = 0.0, y = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_2, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_3, y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     std::optional<double> maxWidth;
     auto maxWidthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     if (maxWidthArg->IsNumber()) {
-        maxWidth = maxWidthArg->ToNumber(vm)->Value() * density;
+        double mw = maxWidthArg->ToNumber(vm)->Value();
+        if (!std::isnan(mw) && !std::isinf(mw)) {
+            maxWidth = mw * density;
+        }
     }
-    pattern->FillText(text, x, y, maxWidth);
+    pattern->FillText(text, x * density, y * density, maxWidth);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -444,8 +487,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Scale(ArkUIRunti
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
-    p->Scale(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value(),
-        runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value());
+    double x = 0.0, y = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->Scale(x, y);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rotate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -453,7 +499,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rotate(ArkUIRunt
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
-    p->Rotate(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value());
+    double angle = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, angle)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->Rotate(angle);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Translate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -462,8 +512,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Translate(ArkUIR
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    p->Translate(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density,
-        runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density);
+    double x = 0.0, y = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->Translate(x * density, y * density);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -473,10 +526,12 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Rect(ArkUIRuntim
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    p->AddRect(OHOS::Ace::Rect(runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density,
-        runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density,
-        runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density,
-        runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density));
+    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    p->AddRect(OHOS::Ace::Rect(x * density, y * density, w * density, h * density));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -487,13 +542,19 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Ellipse(ArkUIRun
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     EllipseParam param;
-    param.x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    param.y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    param.radiusX = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    param.radiusY = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    param.rotation = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value();
-    param.startAngle = runtimeCallInfo->GetCallArgRef(NUM_6)->ToNumber(vm)->Value();
-    param.endAngle = runtimeCallInfo->GetCallArgRef(NUM_7)->ToNumber(vm)->Value();
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.radiusX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.radiusY) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.rotation) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_6, param.startAngle) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_7, param.endAngle)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.x *= density;
+    param.y *= density;
+    param.radiusX *= density;
+    param.radiusY *= density;
     auto la = runtimeCallInfo->GetCallArgRef(NUM_8);
     param.anticlockwise = la->IsBoolean() && la->ToBoolean(vm)->Value();
     p->Ellipse(param);
@@ -507,12 +568,20 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::BezierCurveTo(Ar
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     BezierCurveParam param;
-    param.cp1x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    param.cp1y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    param.cp2x = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    param.cp2y = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    param.x = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value() * density;
-    param.y = runtimeCallInfo->GetCallArgRef(NUM_6)->ToNumber(vm)->Value() * density;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.cp1x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.cp1y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.cp2x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.cp2y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_6, param.y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.cp1x *= density;
+    param.cp1y *= density;
+    param.cp2x *= density;
+    param.cp2y *= density;
+    param.x *= density;
+    param.y *= density;
     p->BezierCurveTo(param);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -524,10 +593,16 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::QuadraticCurveTo
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     QuadraticCurveParam param;
-    param.cpx = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    param.cpy = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    param.x = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    param.y = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.cpx) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.cpy) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.x) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.y)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.cpx *= density;
+    param.cpy *= density;
+    param.x *= density;
+    param.y *= density;
     p->QuadraticCurveTo(param);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -539,11 +614,18 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::ArcTo(ArkUIRunti
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
     ArcToParam param;
-    param.x1 = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    param.y1 = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    param.x2 = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    param.y2 = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
-    param.radius = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value() * density;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.x1) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.y1) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.x2) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.y2) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.radius)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.x1 *= density;
+    param.y1 *= density;
+    param.x2 *= density;
+    param.y2 *= density;
+    param.radius *= density;
     p->ArcTo(param);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -554,10 +636,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIR
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double x = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value() * density;
-    double y = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value() * density;
-    double w = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value() * density;
-    double h = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value() * density;
+    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     // Radius: single number or array of up to 4 values
     std::vector<double> radii;
     auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_5);
@@ -566,16 +649,23 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::RoundRect(ArkUIR
         size_t arrLen = ArkTSUtils::GetArrayLength(vm, arr);
         constexpr size_t ROUND_RECT_CORNER_COUNT = 4;
         for (size_t i = 0; i < arrLen && i < ROUND_RECT_CORNER_COUNT; ++i) {
-            radii.push_back(arr->Get(vm, i)->ToNumber(vm)->Value() * density);
+            double r = arr->Get(vm, i)->ToNumber(vm)->Value();
+            if (std::isnan(r) || std::isinf(r)) {
+                return panda::JSValueRef::Undefined(vm);
+            }
+            radii.push_back(r * density);
         }
     } else if (radiusArg->IsNumber()) {
-        double r = radiusArg->ToNumber(vm)->Value() * density;
-        radii = { r, r, r, r };
+        double r = radiusArg->ToNumber(vm)->Value();
+        if (std::isnan(r) || std::isinf(r)) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        radii = { r * density, r * density, r * density, r * density };
     }
     if (radii.empty()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    p->AddRoundRect(OHOS::Ace::Rect(x, y, w, h), radii);
+    p->AddRoundRect(OHOS::Ace::Rect(x * density, y * density, w * density, h * density), radii);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -586,12 +676,16 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::Transform(ArkUIR
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
     TransformParam param;
     double density = PipelineBase::GetCurrentDensity();
-    param.scaleX = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value();
-    param.skewX = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value();
-    param.skewY = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value();
-    param.scaleY = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value();
-    param.translateX = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value() * density;
-    param.translateY = runtimeCallInfo->GetCallArgRef(NUM_6)->ToNumber(vm)->Value() * density;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.scaleX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.skewX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.skewY) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.scaleY) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.translateX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_6, param.translateY)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.translateX *= density;
+    param.translateY *= density;
     p->Transform(param);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -601,14 +695,21 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::SetTransform(Ark
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
+    // setTransform(a, b, c, d, e, f): Canvas matrix [a b c d e f] maps to
+    // scaleX=a, skewY=b, skewX=c, scaleY=d, translateX=e, translateY=f
+    // (b=skewY, c=skewX — the same order as the old JSCanvasRenderer::JsSetTransform)
     TransformParam param;
     double density = PipelineBase::GetCurrentDensity();
-    param.scaleX = runtimeCallInfo->GetCallArgRef(NUM_1)->ToNumber(vm)->Value();
-    param.skewX = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value();
-    param.skewY = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value();
-    param.scaleY = runtimeCallInfo->GetCallArgRef(NUM_4)->ToNumber(vm)->Value();
-    param.translateX = runtimeCallInfo->GetCallArgRef(NUM_5)->ToNumber(vm)->Value() * density;
-    param.translateY = runtimeCallInfo->GetCallArgRef(NUM_6)->ToNumber(vm)->Value() * density;
+    if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, param.scaleX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_2, param.skewY) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_3, param.skewX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_4, param.scaleY) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_5, param.translateX) ||
+        !GetValidDoubleArg(runtimeCallInfo, NUM_6, param.translateY)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    param.translateX *= density;
+    param.translateY *= density;
     p->SetTransform(param);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -630,11 +731,21 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::SetLineDash(ArkU
     Local<JSValueRef> dashArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::vector<double> segments;
     if (dashArg->IsArray(vm)) {
-        double density = PipelineBase::GetCurrentDensity();
         Local<panda::ArrayRef> arr(dashArg);
         size_t len = ArkTSUtils::GetArrayLength(vm, arr);
         for (size_t i = 0; i < len; ++i) {
-            segments.push_back(arr->Get(vm, i)->ToNumber(vm)->Value() * density);
+            double v = arr->Get(vm, i)->ToNumber(vm)->Value();
+            if (std::isnan(v) || std::isinf(v)) {
+                continue;
+            }
+            segments.push_back(v);
+        }
+    }
+    // Apply density scaling only for API >= 10 (matches old JSCanvasRenderer::JsSetLineDash)
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        double density = PipelineBase::GetCurrentDensity();
+        for (auto& seg : segments) {
+            seg *= density;
         }
     }
     p->SetLineDash(segments);
@@ -678,7 +789,10 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::PutImageData(Ark
     auto parseCoord = [&](size_t idx, int32_t& out) {
         auto arg = runtimeCallInfo->GetCallArgRef(idx);
         if (arg->IsNumber()) {
-            out = static_cast<int32_t>(arg->ToNumber(vm)->Value() * density);
+            double v = arg->ToNumber(vm)->Value();
+            if (!std::isnan(v) && !std::isinf(v)) {
+                out = static_cast<int32_t>(v * density);
+            }
         }
     };
     parseCoord(NUM_2, imageData.x);

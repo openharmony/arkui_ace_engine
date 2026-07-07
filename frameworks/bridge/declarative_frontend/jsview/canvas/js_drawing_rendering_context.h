@@ -64,7 +64,7 @@ public:
         return instanceId_;
     }
 
-    void SetUnit(CanvasUnit unit);
+    void SetUnit(CanvasUnit unit) override;
 
     CanvasUnit GetUnit()
     {

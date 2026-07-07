@@ -117,7 +117,6 @@ foreach(module, component_modules) {
   component_modules_libs += [ ":$module_name" ]
 }
 
-
 # Install packages
 group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS

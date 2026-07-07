@@ -826,8 +826,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCanvasImageData::JSBind(globalObj);
         JSMatrix2d::JSBind(globalObj);
         JSRenderImage::JSBind(globalObj, nativeEngine);
-    } else if ((*func).first == "TextTimer") {
-        JSTextTimerController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

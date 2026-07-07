@@ -33,11 +33,11 @@ build_component_ng("canvas_pattern_ng") {
     "offscreen_canvas_paint_method.cpp",
     "offscreen_canvas_pattern.cpp",
     "offscreen_canvas_rendering_context_2d_model_ng.cpp",
-    "$ace_root/frameworks/base/utils/time_util.cpp",
-    "$ace_root/frameworks/core/interfaces/native/node/canvas_rendering_context_2d_modifier.cpp",
-    "$ace_root/frameworks/core/interfaces/native/utility/converter.cpp",
-    "$ace_root/frameworks/core/interfaces/native/utility/converter_enums.cpp",
-    "$ace_root/frameworks/base/utils/string_utils.cpp",
+    # "$ace_root/frameworks/base/utils/time_util.cpp",
+    #"$ace_root/frameworks/core/interfaces/native/node/canvas_rendering_context_2d_modifier.cpp",
+    #"$ace_root/frameworks/core/interfaces/native/utility/converter.cpp",
+    # "$ace_root/frameworks/core/interfaces/native/utility/converter_enums.cpp",
+    #"$ace_root/frameworks/base/utils/string_utils.cpp",
   ]
   ark_sources = [
     "bridge/arkts_native_canvas_bridge.cpp",
