@@ -31,6 +31,8 @@ static napi_value Init(napi_env env, napi_value exports)
         // —— WaterFlow 示例 —— //
         {"CreateWaterFlowInfiniteScrollingEarly", nullptr, Manager::CreateWaterFlowInfiniteScrollingEarly, nullptr,
          nullptr, nullptr, napi_default, nullptr},
+        {"CreateWaterFlowCapiShowcase", nullptr, Manager::CreateWaterFlowCapiShowcase, nullptr, nullptr, nullptr,
+         napi_default, nullptr},
 
         // —— Grid 示例 —— //
         {"CreateScrollableGrid", nullptr, Manager::CreateScrollableGrid, nullptr, nullptr, nullptr, napi_default,

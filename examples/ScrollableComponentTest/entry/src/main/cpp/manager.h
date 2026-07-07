@@ -36,6 +36,7 @@ public:
     ~Manager(){};
 
     static napi_value CreateWaterFlowInfiniteScrollingEarly(napi_env env, napi_callback_info info);
+    static napi_value CreateWaterFlowCapiShowcase(napi_env env, napi_callback_info info);
     static napi_value CreateScrollableGrid(napi_env env, napi_callback_info info);
     static napi_value CreateAlphabetIndexedList(napi_env env, napi_callback_info info);
     static napi_value CreateRefreshList(napi_env env, napi_callback_info info);

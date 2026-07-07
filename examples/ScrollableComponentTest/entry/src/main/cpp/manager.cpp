@@ -108,6 +108,12 @@ napi_value Manager::CreateWaterFlowInfiniteScrollingEarly(napi_env env, napi_cal
                             []() -> ArkUI_NodeHandle { return WaterFlow::CreateWaterFlowInfiniteScrollingEarly(); });
 }
 
+napi_value Manager::CreateWaterFlowCapiShowcase(napi_env env, napi_callback_info info)
+{
+    return CreateNativeNode(env, info, "CreateWaterFlowCapiShowcase",
+                            []() -> ArkUI_NodeHandle { return WaterFlow::CreateWaterFlowCapiShowcase(); });
+}
+
 napi_value Manager::CreateScrollableGrid(napi_env env, napi_callback_info info)
 {
     return CreateNativeNode(env, info, "CreateScrollableGrid",

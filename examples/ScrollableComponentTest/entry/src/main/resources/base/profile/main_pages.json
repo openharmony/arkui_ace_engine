@@ -36,6 +36,7 @@
     "pages/waterflow/demo01/scrollBarColor",
     "pages/waterflow/waterFlowModifier/scrollBarColor",
     "pages/waterflow/CAPI/WaterFlowInfiniteScrollingEarly",
+    "pages/waterflow/CAPI/WaterFlowCapiShowcase",
     "pages/Swiper/SwiperMainPage",
     "pages/Swiper/OnContentWillScrollNormal",
     "pages/Swiper/OnContentWillScrollNestList",

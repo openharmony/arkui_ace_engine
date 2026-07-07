@@ -16,6 +16,7 @@
 import { NodeContent } from '@kit.ArkUI';
 
 export const CreateWaterFlowInfiniteScrollingEarly: (content: NodeContent) => void;
+export const CreateWaterFlowCapiShowcase: (content: NodeContent) => void;
 export const CreateScrollableGrid: (content: NodeContent) => void;
 export const CreateAlphabetIndexedList: (content: NodeContent) => void;
 export const CreateRefreshList: (content: NodeContent) => void;
