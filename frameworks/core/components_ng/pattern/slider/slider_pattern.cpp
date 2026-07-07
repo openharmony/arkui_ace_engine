@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "ui/properties/ui_material_structs.h"
+#include "ui/properties/ui_material_enums.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/animation/curve.h"
 
@@ -29,6 +30,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -3346,6 +3348,16 @@ bool SliderPattern::IsHighGradeMaterial() const
     return SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE;
 }
 
+bool SliderPattern::IsHighGradeStrongMaterial() const
+{
+    if (!IsHighGradeMaterial()) {
+        return false;
+    }
+    // Only the high-grade (EXQUISITE) material at the strong transparency (THICK) is allowed.
+    return TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(UiMaterialLevel::EXQUISITE)) ==
+           static_cast<int32_t>(UiMaterialTransparency::THIN);
+}
+
 bool SliderPattern::IsMiddleGradeMaterial() const
 {
     return SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::GENTLE;
@@ -4281,7 +4293,7 @@ void SliderPattern::HandleHighGradeLongPress()
     auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
-    bool useParticle = IsHighGradeMaterial() && sliderMode == SliderModel::SliderMode::INSET &&
+    bool useParticle = IsHighGradeStrongMaterial() && sliderMode == SliderModel::SliderMode::INSET &&
                        blockType == SliderModelNG::BlockStyleType::DEFAULT;
     CreateDragFrameNode();
     CreateSelectedTrackFrameNode();

@@ -415,6 +415,7 @@ private:
 
     bool HasSystemMaterial() const;
     bool IsHighGradeMaterial() const;
+    bool IsHighGradeStrongMaterial() const;
     bool IsMiddleGradeMaterial() const;
     void CreateDragFrameNode();
     void CreateDragPointNode();
