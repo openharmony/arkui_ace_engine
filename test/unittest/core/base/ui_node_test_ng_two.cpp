@@ -1345,6 +1345,9 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
  */
 HWTEST_F(UINodeTestNgTwo, IsAutoFillContainerNode001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create FrameNodes and test their auto-fill container status.
+     */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     EXPECT_TRUE(testNode1->IsAutoFillContainerNode());
