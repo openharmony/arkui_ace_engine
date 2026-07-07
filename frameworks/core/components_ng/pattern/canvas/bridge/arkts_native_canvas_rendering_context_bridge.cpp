@@ -34,15 +34,6 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-// TODO: Unify drawing method dispatch — some methods use modifier->setCanvasXxx()
-// (BeginPath, MoveTo, LineTo, Arc, Fill, Stroke, FillRect, FillText, LineWidth,
-// GlobalAlpha, AntiAlias, FillStyle, StrokeStyle) while others call pattern->Xxx()
-// directly (BezierCurveTo, ArcTo, Ellipse, Rect, RoundRect, etc.). After Bug-2
-// removed VP→PX from the modifier, the modifier functions are thin wrappers
-// around CanvasPattern. Consider removing the modifier indirection for
-// drawing calls and calling pattern->Xxx() uniformly.
-
 namespace {
 
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
@@ -189,18 +180,18 @@ void CopyPixelsToImageData(const uint8_t* buffer, int32_t bufferLength, int32_t 
     Ace::ImageData& imageData)
 {
     imageData.data = std::vector<uint32_t>();
-    constexpr int32_t RED_IDX = 0;
-    constexpr int32_t GREEN_IDX = 1;
-    constexpr int32_t BLUE_IDX = 2;
-    constexpr int32_t ALPHA_IDX = 3;
+    constexpr int32_t redIdx = 0;
+    constexpr int32_t greenIdx = 1;
+    constexpr int32_t blueIdx = 2;
+    constexpr int32_t alphaIdx = 3;
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<int32_t>(idx + ALPHA_IDX)) {
-                uint8_t red = buffer[idx + RED_IDX];
-                uint8_t green = buffer[idx + GREEN_IDX];
-                uint8_t blue = buffer[idx + BLUE_IDX];
-                uint8_t alpha = buffer[idx + ALPHA_IDX];
+            if (bufferLength > static_cast<int32_t>(idx + alphaIdx)) {
+                uint8_t red = buffer[idx + redIdx];
+                uint8_t green = buffer[idx + greenIdx];
+                uint8_t blue = buffer[idx + blueIdx];
+                uint8_t alpha = buffer[idx + alphaIdx];
                 imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
             }
         }
