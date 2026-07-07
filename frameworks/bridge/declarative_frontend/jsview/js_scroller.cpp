@@ -371,21 +371,12 @@ void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 
 void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 {
-    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLER "CurrentOffset", 1);
     JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
-        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "CurrentOffset",
-            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_SCROLLER_NULL),
-            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL));
         return;
     }
     auto scrollController = jsScroller->GetController().Upgrade();
-    if (scrollController == nullptr) {
-        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "CurrentOffset",
-            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL),
-            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL));
-        return;
-    }
+    CHECK_NULL_VOID(scrollController);
     auto retObj = JSRef<JSObject>::New();
     ContainerScope scope(jsScroller->GetInstanceId());
     auto offset = scrollController->GetCurrentOffset();
