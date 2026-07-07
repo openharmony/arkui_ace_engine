@@ -188,6 +188,10 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resourceObj);
+    static bool ParseLengthMetricsToDimensionForTabs(
+        const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimensionForTabs(const EcmaVM* vm,
+        const Local<panda::JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
@@ -219,6 +223,11 @@ public:
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
+    static bool ParseJsMediaWithBundleName(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName);
+    static bool ParseJsMediaWithBundleName(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName, RefPtr<ResourceObject>& resourceObject);
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result,
         RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);

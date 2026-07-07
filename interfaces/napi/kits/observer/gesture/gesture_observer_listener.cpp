@@ -32,7 +32,8 @@
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper/bridge/swiper_custom_modifier.h"
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
 #include "ace_engine/interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
@@ -103,9 +104,13 @@ struct EventTargetInfoWrapper {
         if (scrollablePattern) {
             return scrollablePattern->IsAtTop();
         }
-        auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern);
-        if (swiperPattern) {
-            return swiperPattern->IsAtStart();
+        auto host = pattern->GetHost();
+        if (host) {
+            auto* modifier = OHOS::Ace::NG::GetSwiperCustomModifier();
+            if (modifier && modifier->isAtStart) {
+                return modifier->isAtStart(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host)));
+            }
         }
         return false;
     }
@@ -120,9 +125,13 @@ struct EventTargetInfoWrapper {
         if (scrollablePattern) {
             return scrollablePattern->IsAtBottom();
         }
-        auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern);
-        if (swiperPattern) {
-            return swiperPattern->IsAtEnd();
+        auto host = pattern->GetHost();
+        if (host) {
+            auto* modifier = OHOS::Ace::NG::GetSwiperCustomModifier();
+            if (modifier && modifier->isAtEnd) {
+                return modifier->isAtEnd(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host)));
+            }
         }
         return false;
     }
@@ -477,10 +486,19 @@ static napi_value GetEventTargetInfo(napi_env env, napi_callback_info info)
     auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>();
     if (scrollablePattern) {
         pattern = scrollablePattern;
-    }
-    auto swiperPattern = attachNode->GetPattern<NG::SwiperPattern>();
-    if (swiperPattern) {
-        pattern = swiperPattern;
+    } else {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
+        if (module) {
+            auto* modifier = reinterpret_cast<const ArkUISwiperCustomModifier*>(
+                module->GetCustomModifier("customModifier"));
+            if (modifier && modifier->getSwiperController) {
+                auto controller = modifier->getSwiperController(
+                    reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(attachNode)));
+                if (controller) {
+                    pattern = attachNode->GetPattern();
+                }
+            }
+        }
     }
     result = CreateEventTargetInfo(env, pattern, attachNode->GetInspectorIdValue(""));
     napi_value newResult = nullptr;

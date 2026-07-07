@@ -68,7 +68,6 @@
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #endif
@@ -122,10 +121,9 @@
 #include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
-#include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/js_tab_content.h"
-#include "bridge/declarative_frontend/jsview/js_tabs.h"
-#include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_controller_binding.h"
+#include "bridge/declarative_frontend/jsview/js_swiper_controller_binding.h"
+#include "bridge/declarative_frontend/jsview/js_indicator_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
@@ -461,9 +459,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Piece", JSPiece::JSBind },
-    { "Swiper", JSSwiper::JSBind },
-    { "Indicator", JSIndicator::JSBind },
-    { "SwiperController", JSSwiperController::JSBind },
+    { "SwiperController", JSSwiperControllerBinding::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
@@ -524,8 +520,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
-    { "Swiper", JSSwiper::JSBind },
-    { "Indicator", JSIndicator::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
     { "RepeatVirtualScroll2Native", JSRepeatVirtualScroll2::JSBind },
@@ -549,8 +543,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-    { "Tabs", JSTabs::JSBind },
-    { "TabContent", JSTabContent::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
     { "DepthComponent", JSDepthComponent::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },
@@ -618,9 +610,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeCustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScrollerBinding::JSBind },
     { "ListScroller", JSListScroller::JSBind },
-    { "SwiperController", JSSwiperController::JSBind },
-    { "IndicatorController", JSIndicatorController::JSBind },
-    { "TabsController", JSTabsController::JSBind },
+    { "SwiperController", JSSwiperControllerBinding::JSBind },
+    { "IndicatorController", JSIndicatorControllerBinding::JSBind },
+    { "TabsController", JSTabsControllerBinding::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityController", JSAbilityComponentController::JSBind },
@@ -752,9 +744,9 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
-    JSSwiperController::JSBind(globalObj);
-    JSIndicatorController::JSBind(globalObj);
-    JSTabsController::JSBind(globalObj);
+    JSSwiperControllerBinding::JSBind(globalObj);
+    JSIndicatorControllerBinding::JSBind(globalObj);
+    JSTabsControllerBinding::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -807,8 +799,8 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
-    JSSwiperController::JSBind(globalObj);
-    JSIndicatorController::JSBind(globalObj);
+    JSSwiperControllerBinding::JSBind(globalObj);
+    JSIndicatorControllerBinding::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -857,7 +849,7 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         return;
     }
     if ((*func).first == "Swiper") {
-        JSSwiperController::JSBind(globalObj);
+        JSSwiperControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
@@ -887,9 +879,9 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         return;
     }
     if ((*func).first == "Swiper") {
-        JSSwiperController::JSBind(globalObj);
+        JSSwiperControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Tabs") {
-        JSTabsController::JSBind(globalObj);
+        JSTabsControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "AbilityComponent") {
@@ -1002,11 +994,10 @@ void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull)
     JSNodeContent::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     if (isFull) {
-        JSIndicator::JSBind(globalObj);
-        JSSwiperController::JSBind(globalObj);
+        JSSwiperControllerBinding::JSBind(globalObj);
         JSTextClockControllerBinding::JSBind(globalObj);
         JSTextTimerController::JSBind(globalObj);
-        JSIndicatorController::JSBind(globalObj);
+        JSIndicatorControllerBinding::JSBind(globalObj);
     }
 }
 

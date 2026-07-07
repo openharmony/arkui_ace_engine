@@ -81,6 +81,14 @@ constexpr float SPRING_DURATION = 600.0f;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 constexpr int32_t INDEX_DIFF_TWO = 2;
 constexpr int32_t FIRST_CAPTURE_DELAY_TIME = 30;
+const char SWIPER_INDICATOR_ETS_TAG[] = "SwiperIndicator";
+const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
+const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
+const char SWIPER_LEFT_CAPTURE_ETS_TAG[] = "SwiperLeftCapture";
+const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
+const char TABS_ETS_TAG[] = "Tabs";
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
+const char JS_FOR_EACH_ETS_TAG[] = "JSForEach";
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
 const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
@@ -409,14 +417,14 @@ void SwiperPattern::InitCapture()
         uint32_t number = static_cast<uint32_t>(indicatorId_.has_value()) + static_cast<uint32_t>(HasLeftButtonNode()) +
                           static_cast<uint32_t>(HasRightButtonNode()) + 1;
         auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
-            V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
         auto imageLayoutProperty = leftCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdatePixelRound(CAPTURE_PIXEL_ROUND_VALUE);
         leftCaptureNode->MarkModifyDone();
         host->AddChild(leftCaptureNode, -number);
 
-        auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
+        auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         imageLayoutProperty = rightCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
@@ -694,7 +702,7 @@ void SwiperPattern::UpdateDigitalIndicator()
     auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
     CHECK_NULL_VOID(indicatorNode);
 
-    if (indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (indicatorNode->GetTag() != SWIPER_INDICATOR_ETS_TAG) {
         return;
     }
 
@@ -1111,7 +1119,7 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
-        needFocusNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+        needFocusNode = GetFocusHubChild(SWIPER_INDICATOR_ETS_TAG);
     }
     CHECK_NULL_VOID(needFocusNode);
     lastWeakShowNode_ = AceType::WeakClaim(AceType::RawPtr(curShowFrame));
@@ -1167,20 +1175,20 @@ WeakPtr<FocusHub> SwiperPattern::PreviousFocus(const RefPtr<FocusHub>& curFocusN
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     if (HasLeftButtonNode()) {
-        leftArrowNode = GetFocusHubChild(V2::SWIPER_LEFT_ARROW_ETS_TAG);
+        leftArrowNode = GetFocusHubChild(SWIPER_LEFT_ARROW_ETS_TAG);
         CHECK_NULL_RETURN(leftArrowNode, nullptr);
     }
     if (HasIndicatorNode()) {
-        indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+        indicatorNode = GetFocusHubChild(SWIPER_INDICATOR_ETS_TAG);
         CHECK_NULL_RETURN(indicatorNode, nullptr);
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_LEFT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
         (!IsLoop() && GetLoopIndex(currentIndex_) == 0) ? curFocusNode->SetParentFocusable(false)
                                                         : curFocusNode->SetParentFocusable(true);
         return nullptr;
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_INDICATOR_ETS_TAG) {
         if (!HasLeftButtonNode() || (!IsLoop() && GetLoopIndex(currentIndex_) == 0) ||
             props->GetHoverShowValue(false)) {
             isLastIndicatorFocused_ = true;
@@ -1191,7 +1199,7 @@ WeakPtr<FocusHub> SwiperPattern::PreviousFocus(const RefPtr<FocusHub>& curFocusN
         leftArrowNode->SetParentFocusable(true);
         return AceType::WeakClaim(AceType::RawPtr(leftArrowNode));
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_RIGHT_ARROW_ETS_TAG) {
         if (HasIndicatorNode()) {
             isLastIndicatorFocused_ = true;
             indicatorNode->SetParentFocusable(true);
@@ -1217,14 +1225,14 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     if (HasIndicatorNode()) {
-        indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+        indicatorNode = GetFocusHubChild(SWIPER_INDICATOR_ETS_TAG);
         CHECK_NULL_RETURN(indicatorNode, nullptr);
     }
     if (HasRightButtonNode()) {
-        rightArrowNode = GetFocusHubChild(V2::SWIPER_RIGHT_ARROW_ETS_TAG);
+        rightArrowNode = GetFocusHubChild(SWIPER_RIGHT_ARROW_ETS_TAG);
         CHECK_NULL_RETURN(rightArrowNode, nullptr);
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_LEFT_ARROW_ETS_TAG) {
         if (HasIndicatorNode()) {
             isLastIndicatorFocused_ = true;
             indicatorNode->SetParentFocusable(true);
@@ -1238,7 +1246,7 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
         rightArrowNode->SetParentFocusable(true);
         return AceType::WeakClaim(AceType::RawPtr(rightArrowNode));
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_INDICATOR_ETS_TAG) {
         if (!HasRightButtonNode() || (!IsLoop() && GetLoopIndex(currentIndex_) == TotalCount() - 1) ||
             props->GetHoverShowValue(false)) {
             isLastIndicatorFocused_ = true;
@@ -1249,7 +1257,7 @@ WeakPtr<FocusHub> SwiperPattern::NextFocus(const RefPtr<FocusHub>& curFocusNode)
         rightArrowNode->SetParentFocusable(true);
         return AceType::WeakClaim(AceType::RawPtr(rightArrowNode));
     }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == SWIPER_RIGHT_ARROW_ETS_TAG) {
         isLastIndicatorFocused_ = false;
         (!IsLoop() && GetLoopIndex(currentIndex_) == TotalCount() - 1) ? curFocusNode->SetParentFocusable(false)
                                                                        : curFocusNode->SetParentFocusable(true);
@@ -2857,10 +2865,10 @@ void SwiperPattern::InitIndicator()
             return;
         }
         if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
+            indicatorNode = FrameNode::GetOrCreateFrameNode(SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 []() { return AceType::MakeRefPtr<ArcSwiperIndicatorPattern>(); });
         } else {
-            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
+            indicatorNode = FrameNode::GetOrCreateFrameNode(SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
         }
         swiperNode->UINode::AddChild(indicatorNode);
@@ -2875,7 +2883,7 @@ void SwiperPattern::InitIndicator()
         if ((indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) ||
             (indicatorType == SwiperIndicatorType::DOT && lastSwiperIndicatorType_ == SwiperIndicatorType::DIGIT)) {
             RemoveIndicatorNode();
-            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
+            indicatorNode = FrameNode::GetOrCreateFrameNode(SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
             swiperNode->UINode::AddChild(indicatorNode);
         }
@@ -2907,10 +2915,10 @@ void SwiperPattern::InitArrow()
         if (!IsShowArrow()) {
             return;
         }
-        leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, GetLeftButtonId(),
+        leftArrow = FrameNode::GetOrCreateFrameNode(SWIPER_LEFT_ARROW_ETS_TAG, GetLeftButtonId(),
             []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
         swiperNode->AddChild(leftArrow);
-        rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, GetRightButtonId(),
+        rightArrow = FrameNode::GetOrCreateFrameNode(SWIPER_RIGHT_ARROW_ETS_TAG, GetRightButtonId(),
             []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
         swiperNode->AddChild(rightArrow);
     } else {
@@ -3161,8 +3169,8 @@ bool SwiperPattern::IsContentFocused()
             return false;
         }
         auto frameName = child->GetFrameName();
-        if (frameName == V2::SWIPER_INDICATOR_ETS_TAG || frameName == V2::SWIPER_RIGHT_ARROW_ETS_TAG ||
-            frameName == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        if (frameName == SWIPER_INDICATOR_ETS_TAG || frameName == SWIPER_RIGHT_ARROW_ETS_TAG ||
+            frameName == SWIPER_LEFT_ARROW_ETS_TAG) {
             ret = false;
         }
         return true;
@@ -4293,7 +4301,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f, id: %{public}d",
             offset.GetX(), offset.GetY(), swiperPattern->swiperId_);
         ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
-            swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
+            swiperPattern->hasTabsAncestor_ ? TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
         swiperPattern->UpdateTranslateForSwiperItem(swiperPattern->itemPosition_, offset);
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
         swiperPattern->UpdateTranslateForCaptureNode(offset);
@@ -4377,7 +4385,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         "%{public}d",
         finalOffset.GetX(), finalOffset.GetY(), !IsItemOverlay(), swiperId_);
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
-        hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
+        hasTabsAncestor_ ? TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
         !IsItemOverlay());
     fastAnimationRunning_ = false;
     propertyAnimationIsRunning_ = false;
@@ -4779,7 +4787,7 @@ void SwiperPattern::OnSpringAnimationFinish()
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f, id: %{public}d",
         currentIndexOffset_, swiperId_);
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish spring animation, offset: %f",
-        hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, currentIndexOffset_);
+        hasTabsAncestor_ ? TABS_ETS_TAG : V2::SWIPER_ETS_TAG, currentIndexOffset_);
     springAnimationIsRunning_ = false;
     isTouchDownSpringAnimation_ = false;
     OnSpringAndFadeAnimationFinish();
@@ -4975,7 +4983,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f, id:%{public}d",
                 delta, swiperPattern->swiperId_);
             ACE_SCOPED_TRACE_COMMERCIAL(
-                "%s start spring animation", swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
+                "%s start spring animation", swiperPattern->hasTabsAncestor_ ? TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
             swiperPattern->FireScrollStateEvent(ScrollState::FLING);
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -5814,7 +5822,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad)
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
+        if (child->GetTag() != JS_FOR_EACH_ETS_TAG) {
             continue;
         }
         auto pipeline = GetContext();
@@ -5986,7 +5994,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 
     for (auto child : host->GetChildren()) {
         auto frameNode = DynamicCast<FrameNode>(child);
-        if (!frameNode || child->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        if (!frameNode || child->GetTag() == SWIPER_INDICATOR_ETS_TAG) {
             continue;
         }
         groupedItems_.insert(frameNode);
@@ -7465,7 +7473,7 @@ void SwiperPattern::SetOnHiddenChangeForParent()
     auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
-        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
         parent = parent->GetAncestorNodeOfFrame(false);
@@ -7489,7 +7497,7 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         pagePattern->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
 
-    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationePattern);
         auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
@@ -7505,7 +7513,7 @@ void SwiperPattern::RemoveOnHiddenChange()
     auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
-        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
         parent = parent->GetAncestorNodeOfFrame(false);
@@ -7516,7 +7524,7 @@ void SwiperPattern::RemoveOnHiddenChange()
         CHECK_NULL_VOID(pagePattern);
         pagePattern->RemoveOnHiddenChange(host->GetId());
     }
-    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+    if (parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationePattern);
         auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
@@ -8225,9 +8233,9 @@ std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t i
             continue;
         }
         auto tag = swiperItemNode->GetTag();
-        if (tag == V2::SWIPER_INDICATOR_ETS_TAG ||
-            tag == V2::SWIPER_LEFT_ARROW_ETS_TAG ||
-            tag == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        if (tag == SWIPER_INDICATOR_ETS_TAG ||
+            tag == SWIPER_LEFT_ARROW_ETS_TAG ||
+            tag == SWIPER_RIGHT_ARROW_ETS_TAG) {
             break;
         }
         infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), candidateIndex));

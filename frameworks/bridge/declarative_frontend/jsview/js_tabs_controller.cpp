@@ -20,10 +20,11 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#ifndef NG_BUILD
 #include "core/common/dynamic_module_helper.h"
+#ifndef NG_BUILD
 #include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #endif
 
@@ -98,6 +99,20 @@ const ArkUIInnerTabsModifier* GetTabsInnerModifier()
     return cachedModifier;
 }
 #endif
+
+const NG::NodeModifier::ArkUITabsControllerModifier* GetTabsControllerModifier()
+{
+    static const NG::NodeModifier::ArkUITabsControllerModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find tabs dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUITabsControllerModifier*>(
+            module->GetCustomModifier("tabsController"));
+    }
+    return cachedModifier;
+}
 } // namespace
 
 JSTabsController::JSTabsController()
@@ -105,17 +120,17 @@ JSTabsController::JSTabsController()
     controller_ = CreateController();
 }
 
-void JSTabsController::JSBind(BindingTarget globalObj)
+void JSTabsControllerBinding::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabsController>::Declare("TabsController");
     JSClass<JSTabsController>::Method("changeIndex", &JSTabsController::ChangeIndex);
-    JSClass<JSTabsController>::CustomMethod("preloadItems", &JSTabsController::PreloadItems);
-    JSClass<JSTabsController>::CustomMethod("setTabBarTranslate", &JSTabsController::SetTabBarTranslate);
-    JSClass<JSTabsController>::CustomMethod("setTabBarOpacity", &JSTabsController::SetTabBarOpacity);
-    JSClass<JSTabsController>::Bind(globalObj, JSTabsController::Constructor, JSTabsController::Destructor);
+    JSClass<JSTabsController>::CustomMethod("preloadItems", &JSTabsControllerBinding::PreloadItems);
+    JSClass<JSTabsController>::CustomMethod("setTabBarTranslate", &JSTabsControllerBinding::SetTabBarTranslate);
+    JSClass<JSTabsController>::CustomMethod("setTabBarOpacity", &JSTabsControllerBinding::SetTabBarOpacity);
+    JSClass<JSTabsController>::Bind(globalObj, JSTabsControllerBinding::Constructor, JSTabsController::Destructor);
 }
 
-void JSTabsController::Constructor(const JSCallbackInfo& args)
+void JSTabsControllerBinding::Constructor(const JSCallbackInfo& args)
 {
     auto jsCalendarController = Referenced::MakeRefPtr<JSTabsController>();
     jsCalendarController->IncRefCount();
@@ -146,14 +161,8 @@ RefPtr<AceType> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     ContainerScope scope(instanceId_);
-    auto tabsController = tabsControllerWeak_.Upgrade();
-    if (tabsController) {
-        const auto& updateCubicCurveCallback = tabsController->GetUpdateCubicCurveCallback();
-        if (updateCubicCurveCallback != nullptr) {
-            updateCubicCurveCallback();
-        }
-        TAG_LOGI(AceLogTag::ACE_TABS, "changeIndex %{public}d", index);
-        tabsController->SwipeTo(index);
+    if (auto* modifier = GetTabsControllerModifier()) {
+        modifier->changeIndex(controllerHandle_, index);
     }
 
 #ifndef NG_BUILD
@@ -165,7 +174,7 @@ void JSTabsController::ChangeIndex(int32_t index)
 #endif
 }
 
-void JSTabsController::PreloadItems(const JSCallbackInfo& args)
+void JSTabsControllerBinding::PreloadItems(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     auto engine = EngineHelper::GetCurrentEngine();
@@ -176,8 +185,8 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
     asyncContext->env = env;
     napi_value promise = nullptr;
     napi_create_promise(env, &asyncContext->deferred, &promise);
-    auto tabsController = tabsControllerWeak_.Upgrade();
-    if (!tabsController) {
+    auto* modifier = GetTabsControllerModifier();
+    if (!modifier || !controllerHandle_) {
         ReturnPromise(args, promise);
         return;
     }
@@ -198,16 +207,19 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
         CHECK_NULL_VOID(asyncContext);
         HandleDeferred(asyncContext, errorCode, message);
     };
-    tabsController->SetPreloadFinishCallback(onPreloadFinish);
-    tabsController->PreloadItems(indexSet);
+    modifier->setPreloadFinishCallback(controllerHandle_, onPreloadFinish);
+    std::vector<int32_t> indexVec(indexSet.begin(), indexSet.end());
+    modifier->preloadItems(controllerHandle_, indexVec.data(), static_cast<int32_t>(indexVec.size()));
     ReturnPromise(args, promise);
 }
 
-void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
+void JSTabsControllerBinding::SetTabBarTranslate(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
-    auto tabsController = tabsControllerWeak_.Upgrade();
-    CHECK_NULL_VOID(tabsController);
+    auto* modifier = GetTabsControllerModifier();
+    if (!modifier || !controllerHandle_) {
+        return;
+    }
 
     if (args.Length() <= 0) {
         return;
@@ -224,26 +236,32 @@ void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
             JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X)), translateX);
             JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y)), translateY);
             JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z)), translateZ);
-            auto options = NG::TranslateOptions(translateX, translateY, translateZ);
-            tabsController->SetTabBarTranslate(options);
+            modifier->setTabBarTranslate(
+                controllerHandle_, translateX.Value(), translateY.Value(), translateZ.Value(),
+                static_cast<int32_t>(translateX.Unit()), static_cast<int32_t>(translateY.Unit()),
+                static_cast<int32_t>(translateZ.Unit()));
             return;
         }
     }
     CalcDimension value;
     if (JSViewAbstract::ParseJsDimensionVp(translate, value)) {
-        auto options = NG::TranslateOptions(value, value, value);
-        tabsController->SetTabBarTranslate(options);
+        modifier->setTabBarTranslate(controllerHandle_, value.Value(), value.Value(), value.Value(),
+            static_cast<int32_t>(value.Unit()), static_cast<int32_t>(value.Unit()),
+            static_cast<int32_t>(value.Unit()));
     } else {
-        auto options = NG::TranslateOptions(0.0f, 0.0f, 0.0f);
-        tabsController->SetTabBarTranslate(options);
+        modifier->setTabBarTranslate(controllerHandle_, 0.0, 0.0, 0.0,
+            static_cast<int32_t>(DimensionUnit::VP), static_cast<int32_t>(DimensionUnit::VP),
+            static_cast<int32_t>(DimensionUnit::VP));
     }
 }
 
-void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
+void JSTabsControllerBinding::SetTabBarOpacity(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
-    auto tabsController = tabsControllerWeak_.Upgrade();
-    CHECK_NULL_VOID(tabsController);
+    auto* modifier = GetTabsControllerModifier();
+    if (!modifier || !controllerHandle_) {
+        return;
+    }
 
     if (args.Length() <= 0) {
         return;
@@ -251,9 +269,51 @@ void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
     double opacity = 0.0;
     if (JSViewAbstract::ParseJsDouble(args[0], opacity)) {
         opacity = std::clamp(opacity, 0.0, 1.0);
-        tabsController->SetTabBarOpacity(opacity);
+        modifier->setTabBarOpacity(controllerHandle_, opacity);
     } else {
-        tabsController->SetTabBarOpacity(1.0f);
+        modifier->setTabBarOpacity(controllerHandle_, 1.0);
+    }
+}
+
+void JSTabsController::SetControllerHandle(const RefPtr<AceType>& handle)
+{
+    auto* modifier = GetTabsControllerModifier();
+    if (modifier && controllerHandle_) {
+        modifier->startShowTabBar(controllerHandle_, 0);
+        modifier->setOnChangeImpl(controllerHandle_, std::function<void(int32_t)>());
+    }
+    controllerHandle_ = handle;
+    if (modifier && onChangeImpl_ && controllerHandle_) {
+        modifier->setOnChangeImpl(controllerHandle_, onChangeImpl_);
+    }
+}
+
+void JSTabsController::SetOnChangeImpl(const std::function<void(int32_t)>& onChangeImpl)
+{
+    onChangeImpl_ = onChangeImpl;
+    if (auto* modifier = GetTabsControllerModifier()) {
+        modifier->setOnChangeImpl(controllerHandle_, onChangeImpl);
+    }
+}
+
+void JSTabsController::StartShowTabBar(int32_t delay)
+{
+    if (auto* modifier = GetTabsControllerModifier()) {
+        modifier->startShowTabBar(controllerHandle_, delay);
+    }
+}
+
+void JSTabsController::CancelShowTabBar()
+{
+    if (auto* modifier = GetTabsControllerModifier()) {
+        modifier->cancelShowTabBar(controllerHandle_);
+    }
+}
+
+void JSTabsController::UpdateTabBarHiddenOffset(float offset)
+{
+    if (auto* modifier = GetTabsControllerModifier()) {
+        modifier->updateTabBarHiddenOffset(controllerHandle_, static_cast<double>(offset));
     }
 }
 

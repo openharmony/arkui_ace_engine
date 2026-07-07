@@ -28,7 +28,7 @@ class FrameNode;
 class EventHub;
 class GeometryNode;
 
-class FocusState : public virtual AceType {
+class ACE_FORCE_EXPORT FocusState : public virtual AceType {
     DECLARE_ACE_TYPE(FocusState, AceType);
 
 public:

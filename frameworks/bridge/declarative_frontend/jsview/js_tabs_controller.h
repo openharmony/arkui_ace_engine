@@ -17,52 +17,32 @@
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_TABS_CONTROLLER_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings_defines.h"
-#include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components_ng/pattern/tabs/tabs_controller.h"
+#include "core/components_ng/pattern/tabs/bridge/tabs_controller_modifier_api.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSTabsController : public Referenced {
+constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
+
+class ACE_FORCE_EXPORT JSTabsController : public Referenced {
 public:
     JSTabsController();
     ~JSTabsController() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTabsController* controller);
     static RefPtr<AceType> CreateController();
 
     void ChangeIndex(int32_t index);
-
-    void PreloadItems(const JSCallbackInfo& args);
-
-    void SetTabBarTranslate(const JSCallbackInfo& args);
-
-    void SetTabBarOpacity(const JSCallbackInfo& args);
 
     const RefPtr<AceType>& GetController() const
     {
         return controller_;
     }
 
-    void SetTabsController(const RefPtr<NG::TabsControllerNG>& tabsController)
-    {
-        auto oldTabsController = tabsControllerWeak_.Upgrade();
-        if (oldTabsController) {
-            // old controller bind another tabs.
-            oldTabsController->StartShowTabBar();
-            oldTabsController->SetOnChangeImpl(nullptr);
-        }
-        if (tabsController) {
-            tabsController->SetOnChangeImpl(onChangeImpl_);
-        }
-        tabsControllerWeak_ = tabsController;
-    }
+    void SetControllerHandle(const RefPtr<AceType>& handle);
 
-    const WeakPtr<NG::TabsControllerNG>& GetTabsController() const
+    const RefPtr<AceType>& GetControllerHandle() const
     {
-        return tabsControllerWeak_;
+        return controllerHandle_;
     }
 
     void SetInstanceId(int32_t id)
@@ -70,20 +50,20 @@ public:
         instanceId_ = id;
     }
 
-    void SetOnChangeImpl(const OnChangeFunc& onChangeImpl)
-    {
-        onChangeImpl_ = onChangeImpl;
-        auto tabsController = tabsControllerWeak_.Upgrade();
-        if (tabsController) {
-            tabsController->SetOnChangeImpl(onChangeImpl);
-        }
-    }
+    void SetOnChangeImpl(const std::function<void(int32_t)>& onChangeImpl);
+
+    void StartShowTabBar(int32_t delay = 0);
+
+    void CancelShowTabBar();
+
+    void UpdateTabBarHiddenOffset(float offset);
 
 private:
+    friend class JSTabsControllerBinding;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<AceType> controller_;
-    WeakPtr<NG::TabsControllerNG> tabsControllerWeak_; // used by ng structure
-    OnChangeFunc onChangeImpl_;
+    RefPtr<AceType> controllerHandle_;
+    std::function<void(int32_t)> onChangeImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTabsController);
 };

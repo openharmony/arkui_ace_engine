@@ -32,6 +32,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
@@ -2183,19 +2184,19 @@ ACE_FORCE_EXPORT RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEff
 }
 
 template<>
-RefPtr<Curve> Convert(const Ark_String& src)
+ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_String& src)
 {
     return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
 }
 
 template<>
-RefPtr<Curve> Convert(const Ark_curves_ICurve& src)
+ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_curves_ICurve& src)
 {
     return src ? src->handler : nullptr;
 }
 
 template<>
-void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
 {
     auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
     if (curve) {
@@ -2786,6 +2787,129 @@ static RefPtr<T> GetTheme()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     return pipelineContext->GetTheme<T>();
+}
+
+template<>
+ACE_FORCE_EXPORT IconStyle Convert(const Ark_TabBarIconStyle& src)
+{
+    IconStyle iconStyle;
+    auto selectedColor = OptConvert<Color>(src.selectedColor);
+    if (selectedColor) {
+        iconStyle.selectedColor = selectedColor.value();
+    }
+    auto unselectedColor = OptConvert<Color>(src.unselectedColor);
+    if (unselectedColor) {
+        iconStyle.unselectedColor = unselectedColor.value();
+    }
+    return iconStyle;
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src)
+{
+    switch (src) {
+        case ARK_SELECTED_MODE_INDICATOR:
+            dst = SelectedMode::INDICATOR;
+            break;
+        case ARK_SELECTED_MODE_BOARD:
+            dst = SelectedMode::BOARD;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_SelectedMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src)
+{
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        dst = BoardStyle();
+        dst->borderRadius = borderRadius.value();
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
+{
+    switch (src) {
+        case ARK_LAYOUT_MODE_AUTO:
+            dst = LayoutMode::AUTO;
+            break;
+        case ARK_LAYOUT_MODE_VERTICAL:
+            dst = LayoutMode::VERTICAL;
+            break;
+        case ARK_LAYOUT_MODE_HORIZONTAL:
+            dst = LayoutMode::HORIZONTAL;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_LayoutMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src)
+{
+    dst = IndicatorStyle();
+    auto tabTheme = GetTheme<TabTheme>();
+    if (tabTheme) {
+        dst->color = tabTheme->GetActiveIndicatorColor();
+        dst->height = tabTheme->GetActiveIndicatorWidth();
+        dst->marginTop = tabTheme->GetSubTabIndicatorGap();
+    }
+    std::optional<Color> color = Converter::OptConvert<Color>(src.color);
+    if (color) {
+        dst->color = color.value();
+    }
+    std::optional<Dimension> height = Converter::OptConvert<Dimension>(src.height);
+    Validator::ValidateNonNegative(height);
+    Validator::ValidateNonPercent(height);
+    if (height) {
+        dst->height = height.value();
+    }
+    std::optional<Dimension> width = Converter::OptConvert<Dimension>(src.width);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    if (width) {
+        dst->width = width.value();
+    }
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        dst->borderRadius = borderRadius.value();
+    }
+    std::optional<Dimension> marginTop = Converter::OptConvert<Dimension>(src.marginTop);
+    Validator::ValidateNonNegative(marginTop);
+    Validator::ValidateNonPercent(marginTop);
+    if (marginTop) {
+        dst->marginTop = marginTop.value();
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
+{
+    dst = LabelStyle();
+    dst->textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
+    if (maxLines) {
+        maxLines = std::max(maxLines.value(), 1);
+    }
+    dst->maxLines = maxLines;
+    dst->heightAdaptivePolicy = Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
+    auto minFontSize = Converter::OptConvertFromF64ResourceStr(src.minFontSize, DimensionUnit::FP);
+    Validator::ValidateNonNegative(minFontSize);
+    Validator::ValidateNonPercent(minFontSize);
+    dst->minFontSize = minFontSize;
+    auto maxFontSize = Converter::OptConvertFromF64ResourceStr(src.maxFontSize, DimensionUnit::FP);
+    Validator::ValidateNonNegative(maxFontSize);
+    Validator::ValidateNonPercent(maxFontSize);
+    dst->maxFontSize = maxFontSize;
+    dst->unselectedColor = Converter::OptConvert<Color>(src.unselectedColor);
+    dst->selectedColor = Converter::OptConvert<Color>(src.selectedColor);
 }
 
 template<>
