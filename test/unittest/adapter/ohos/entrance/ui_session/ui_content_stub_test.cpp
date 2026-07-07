@@ -1647,4 +1647,32 @@ HWTEST_F(UIContentStubTest, UIContentStubTest053, TestSize.Level1)
     EXPECT_TRUE(guardAfterRelease.IsAcquired());
 }
 
+/**
+ * @tc.name: UIContentStubTest054
+ * @tc.desc: Test SEND_IMAGES accepts valid size=0 and dispatches to SendShowingImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContentStubTest, UIContentStubTest054, TestSize.Level1)
+{
+    sptr<UiReportStub> report = std::make_shared<UiReportStub>();
+    int32_t callCount = 0;
+    size_t receivedSize = 0;
+    auto callback = [&callCount, &receivedSize](
+        std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {
+        ++callCount;
+        receivedSize = maps.size();
+    };
+    report->RegisterGetShowingImageCallback(callback);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(u"ohos.ace.ReportService");
+    data.WriteInt32(0);
+
+    EXPECT_EQ(report->OnRemoteRequest(ReportService::SEND_IMAGES, data, reply, option), 0);
+    EXPECT_EQ(callCount, 1);
+    EXPECT_EQ(receivedSize, 0u);
+}
+
 }

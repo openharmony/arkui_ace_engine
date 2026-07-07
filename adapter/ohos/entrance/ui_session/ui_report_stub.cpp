@@ -44,7 +44,7 @@ void AddArkUIImagesByIds(OHOS::MessageParcel& data,
     std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& componentImages)
 {
     uint64_t componentImagesSize = data.ReadUint64();
-    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 20;
     if (componentImagesSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
         return;
     }
@@ -63,7 +63,7 @@ void AddArkWebImagesByIds(OHOS::MessageParcel& data,
     std::map<int32_t, std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>>& webImages)
 {
     uint64_t webImagesAllMapSize = data.ReadUint64();
-    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 20;
     if (webImagesAllMapSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
         return;
     }
@@ -182,6 +182,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             int32_t size = 0;
             if (!data.ReadInt32(size)) {
                 LOGW("SendShowingImage size read failed");
+                break;
+            }
+            constexpr int32_t SEND_IMAGES_SIZE_UPPERBOUND = 1000;
+            if (size < 0 || size > SEND_IMAGES_SIZE_UPPERBOUND) {
+                LOGW("SendShowingImage size is negative or greater than upper bound: %{public}d", size);
                 break;
             }
             for (int32_t i = 0; i < size; i++) {
