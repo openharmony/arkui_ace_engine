@@ -190,9 +190,8 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
 // the JS handle and the C++ pointer. The caller (canvas so) is responsible
 // for setting properties and invoking the callback.
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_CreateDrawingRenderingContext(
-    void* vmRaw, void** outJsHandle, void** outCppPtr)
+    void** outJsHandle, void** outCppPtr)
 {
-    auto vm = reinterpret_cast<EcmaVM*>(vmRaw);
     auto jsDrawingContext = OHOS::Ace::Framework::JSClass<
         OHOS::Ace::Framework::JSDrawingRenderingContext>::NewInstance();
     auto drawingContext = OHOS::Ace::Referenced::Claim(

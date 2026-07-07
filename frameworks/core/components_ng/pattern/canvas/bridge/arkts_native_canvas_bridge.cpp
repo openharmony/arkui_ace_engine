@@ -24,12 +24,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 extern "C" void OHOS_ACE_CreateDrawingRenderingContext(
-    void* vmRaw, void** outJsHandle, void** outCppPtr);
+    void** outJsHandle, void** outCppPtr);
 
-// Local definition of JSRenderingContextBase to avoid including js_rendering_context_base.h,
-// which transitively includes bindings_defines.h (requires USE_ARK_ENGINE).
-// The canvas bridge .so is compiled with USE_ARK_ENGINE but does not link
-// js_rendering_context_base.cpp.
 namespace OHOS::Ace::Framework {
 class JSRenderingContextBase : public virtual AceType {
     DECLARE_ACE_TYPE(JSRenderingContextBase, AceType);
@@ -163,6 +159,56 @@ void ParseCanvasParams(EcmaVM* vm, const Local<panda::ObjectRef>& paramsObj, Fra
         ApplyImageAIOptions(vm, aiOptionsVal, frameNode);
     }
 }
+
+void InvokeOnReadyCallback(EcmaVM* vm, FrameNode* frameNode,
+    panda::CopyableGlobal<panda::FunctionRef>& func,
+    bool needDrawingContext, CanvasUnit unit, bool isJsView)
+{
+    panda::LocalScope pandaScope(vm);
+    panda::TryCatch trycatch(vm);
+    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+    if (!needDrawingContext) {
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+        }
+        return;
+    }
+    if (!frameNode) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
+    if (!pattern) {
+        return;
+    }
+    void* jsHandleRaw = nullptr;
+    void* cppPtrRaw = nullptr;
+    OHOS_ACE_CreateDrawingRenderingContext(
+        reinterpret_cast<void*>(vm), &jsHandleRaw, &cppPtrRaw);
+    if (!jsHandleRaw || !cppPtrRaw) {
+        return;
+    }
+    auto* drawingContext = reinterpret_cast<Framework::JSRenderingContextBase*>(cppPtrRaw);
+    drawingContext->SetInstanceId(Container::CurrentId());
+    drawingContext->SetCanvasPattern(pattern);
+    drawingContext->SetUnit(unit);
+    auto* canvasModifier = GetArkUINodeModifiers()->getCanvasModifier();
+    if (canvasModifier && canvasModifier->setUpdateContextCallback) {
+        std::function<void(CanvasUnit)> cb =
+            [drawingContext](CanvasUnit u) { drawingContext->SetUnit(u); };
+        canvasModifier->setUpdateContextCallback(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)), &cb);
+    }
+    if (canvasModifier && canvasModifier->setRSCanvasForDrawingContext) {
+        canvasModifier->setRSCanvasForDrawingContext(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)));
+    }
+    Local<panda::ObjectRef> jsDrawingContext(
+        reinterpret_cast<uintptr_t>(jsHandleRaw));
+    std::vector<Local<JSValueRef>> argv;
+    argv.emplace_back(jsDrawingContext);
+    func->Call(vm, func.ToLocal(), argv.data(), argv.size());
+}
 } // namespace
 
 ArkUINativeModuleValue CanvasBridge::CreateCanvas(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -244,58 +290,11 @@ ArkUINativeModuleValue CanvasBridge::SetCanvasOnReady(ArkUIRuntimeCallInfo* runt
         }
         return panda::JSValueRef::Undefined(vm);
     }
-    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-
-    std::function<void(bool, CanvasUnit)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView](
-                                                         bool needDrawingContext, CanvasUnit unit) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        if (!needDrawingContext) {
-            auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
-            if (isJsView) {
-                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
-            }
-            return;
-        }
-        if (!frameNode) {
-            return;
-        }
-        auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
-        if (!pattern) {
-            return;
-        }
-
-        // Create JSDrawingRenderingContext via exported interface from libace_compatible.z.so,
-        // then set properties and invoke callback locally within canvas so.
-        void* jsHandleRaw = nullptr;
-        void* cppPtrRaw = nullptr;
-        OHOS_ACE_CreateDrawingRenderingContext(
-            reinterpret_cast<void*>(vm), &jsHandleRaw, &cppPtrRaw);
-        if (!jsHandleRaw || !cppPtrRaw) {
-            return;
-        }
-        auto* drawingContext = reinterpret_cast<Framework::JSRenderingContextBase*>(cppPtrRaw);
-        drawingContext->SetInstanceId(Container::CurrentId());
-        drawingContext->SetCanvasPattern(pattern);
-        drawingContext->SetUnit(unit);
-        auto* canvasModifier = GetArkUINodeModifiers()->getCanvasModifier();
-        if (canvasModifier && canvasModifier->setUpdateContextCallback) {
-            std::function<void(CanvasUnit)> cb =
-                [drawingContext](CanvasUnit u) { drawingContext->SetUnit(u); };
-            canvasModifier->setUpdateContextCallback(
-                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)), &cb);
-        }
-        if (canvasModifier && canvasModifier->setRSCanvasForDrawingContext) {
-            canvasModifier->setRSCanvasForDrawingContext(
-                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)));
-        }
-        Local<panda::ObjectRef> jsDrawingContext(
-            reinterpret_cast<uintptr_t>(jsHandleRaw));
-        std::vector<Local<JSValueRef>> argv;
-        argv.emplace_back(jsDrawingContext);
-        func->Call(vm, func.ToLocal(), argv.data(), argv.size());
-
+    panda::Local<panda::FunctionRef> funcLocal = callbackArg->ToObject(vm);
+    panda::CopyableGlobal<panda::FunctionRef> func(vm, funcLocal);
+    std::function<void(bool, CanvasUnit)> callback = [vm, frameNode, func, isJsView](
+        bool needDrawingContext, CanvasUnit unit) {
+        InvokeOnReadyCallback(vm, frameNode, func, needDrawingContext, unit, isJsView);
     };
     GetArkUINodeModifiers()->getCanvasModifier()->setCanvasOnReady(
         nativeNode, reinterpret_cast<void*>(&callback));

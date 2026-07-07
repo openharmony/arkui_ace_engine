@@ -22,7 +22,6 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
-#include "core/interfaces/native/ani/canvas_ani_modifier.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -68,7 +67,6 @@ struct ArkUICanvasRuntimeBridge {
     void (*setCanvasUpdateContextCallback)(
         const RefPtr<AceType>& pattern, std::function<void(CanvasUnit)>&& callback);
     void (*setCanvasRSCanvasForDrawingContext)(const RefPtr<AceType>& pattern);
-    const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
 };
 
 } // namespace OHOS::Ace

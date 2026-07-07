@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
-#include "core/interfaces/native/ani/canvas_ani_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {

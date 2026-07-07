@@ -234,6 +234,33 @@ constexpr size_t NUM_5 = 5;
 constexpr size_t NUM_6 = 6;
 constexpr size_t NUM_7 = 7;
 constexpr size_t NUM_8 = 8;
+
+void ParsePutImageDataCoords(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    Ace::ImageData& imageData, int32_t imgWidth, int32_t imgHeight)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    double density = GetDensity();
+    auto parseCoord = [&runtimeCallInfo, &vm, &density](size_t idx, int32_t& out) {
+        auto arg = runtimeCallInfo->GetCallArgRef(idx);
+        if (arg->IsNumber()) {
+            double v = arg->ToNumber(vm)->Value();
+            if (!std::isnan(v) && !std::isinf(v)) {
+                out = static_cast<int32_t>(v * density);
+            }
+        }
+    };
+    parseCoord(NUM_2, imageData.x);
+    parseCoord(NUM_3, imageData.y);
+    parseCoord(NUM_4, imageData.dirtyX);
+    parseCoord(NUM_5, imageData.dirtyY);
+    parseCoord(NUM_6, imageData.dirtyWidth);
+    parseCoord(NUM_7, imageData.dirtyHeight);
+    // Clamp dirty region
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
+                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
+                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
+}
 } // namespace
 
 namespace {
@@ -470,7 +497,11 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Arc(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
     ArkUICanvasArcOptions options;
-    double xVal = 0.0, yVal = 0.0, radiusVal = 0.0, startAngleVal = 0.0, endAngleVal = 0.0;
+    double xVal = 0.0;
+    double yVal = 0.0;
+    double radiusVal = 0.0;
+    double startAngleVal = 0.0;
+    double endAngleVal = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, xVal) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_2, yVal) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, radiusVal) ||
@@ -565,7 +596,10 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Rect(ArkUIRuntimeCallInfo
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -587,7 +621,10 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::RoundRect(ArkUIRuntimeCal
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -736,7 +773,10 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::FillRect(ArkUIRuntimeCall
     auto* modifier = GetModifier();
     CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double xVal = 0.0, yVal = 0.0, wVal = 0.0, hVal = 0.0;
+    double xVal = 0.0;
+    double yVal = 0.0;
+    double wVal = 0.0;
+    double hVal = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, xVal) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, yVal) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, wVal) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, hVal)) {
         return panda::JSValueRef::Undefined(vm);
@@ -762,7 +802,10 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::StrokeRect(ArkUIRuntimeCa
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -784,7 +827,10 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::ClearRect(ArkUIRuntimeCal
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y) ||
         !GetValidDoubleArg(runtimeCallInfo, NUM_3, w) || !GetValidDoubleArg(runtimeCallInfo, NUM_4, h)) {
         return panda::JSValueRef::Undefined(vm);
@@ -1338,7 +1384,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Scale(ArkUIRuntimeCallInf
     }
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1379,7 +1426,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::Translate(ArkUIRuntimeCal
     auto pattern = GetCanvasPattern(nativeNode);
     CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
     double density = GetDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_1, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_2, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1504,7 +1552,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::FillText(ArkUIRuntimeCall
     RefPtr<ResourceObject> resObj;
     ArkTSUtils::ParseJsString(vm, runtimeCallInfo->GetCallArgRef(NUM_1), text, resObj);
     double density = GetDensity();
-    double xVal = 0.0, yVal = 0.0;
+    double xVal = 0.0;
+    double yVal = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_2, xVal) || !GetValidDoubleArg(runtimeCallInfo, NUM_3, yVal)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1538,7 +1587,8 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::StrokeText(ArkUIRuntimeCa
     RefPtr<ResourceObject> resObj;
     ArkTSUtils::ParseJsString(vm, runtimeCallInfo->GetCallArgRef(NUM_1), text, resObj);
     double density = GetDensity();
-    double x = 0.0, y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
     if (!GetValidDoubleArg(runtimeCallInfo, NUM_2, x) || !GetValidDoubleArg(runtimeCallInfo, NUM_3, y)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1671,27 +1721,7 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::PutImageData(ArkUIRuntime
     int32_t imgHeight = jsImgHeight->ToNumber(vm)->Value();
     Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
     // Parse optional x, y (arg indices 2-3) and dirtyX/Y/Width/Height (indices 4-7)
-    double density = GetDensity();
-    auto parseCoord = [&](size_t idx, int32_t& out) {
-        auto arg = runtimeCallInfo->GetCallArgRef(idx);
-        if (arg->IsNumber()) {
-            double v = arg->ToNumber(vm)->Value();
-            if (!std::isnan(v) && !std::isinf(v)) {
-                out = static_cast<int32_t>(v * density);
-            }
-        }
-    };
-    parseCoord(NUM_2, imageData.x);
-    parseCoord(NUM_3, imageData.y);
-    parseCoord(NUM_4, imageData.dirtyX);
-    parseCoord(NUM_5, imageData.dirtyY);
-    parseCoord(NUM_6, imageData.dirtyWidth);
-    parseCoord(NUM_7, imageData.dirtyHeight);
-    // Clamp dirty region
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
-                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
-                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
+    ParsePutImageDataCoords(runtimeCallInfo, imageData, imgWidth, imgHeight);
     // Read pixels from Uint8ClampedArray
     panda::Local<panda::Uint8ClampedArrayRef> colorArray = jsImgData->ToObject(vm);
     panda::Local<panda::ArrayBufferRef> arrayBuffer = colorArray->GetArrayBuffer(vm);
