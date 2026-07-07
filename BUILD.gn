@@ -118,6 +118,19 @@ config("ace_config") {
     cflags += [ "--coverage" ]
     ldflags += [ "--coverage" ]
   }
+
+  if (ace_engine_enable_reduce_eh_frame) {
+    cflags += [
+      "-fno-unwind-tables",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-omit-frame-pointer",
+    ]
+    cflags_cc += [
+      "-fno-unwind-tables",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-omit-frame-pointer",
+    ]
+  }
 }
 
 config("ace_test_config") {
