@@ -1635,6 +1635,15 @@ void SetJsDivider(ArkUINodeHandle node, void* divider)
     TextPickerModelNG::SetDivider(frameNode, dividers);
 }
 
+void SetTextPickerBackgroundColorHdr(ArkUINodeHandle node, ArkUIColorHeadRoom color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
+    TextPickerModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void* CreateObject()
 {
     auto object = TextPickerDialogModel::GetInstance()->CreateObject();
@@ -1695,15 +1704,6 @@ void SetTextPickerDefaultPickerItemHeightImpl(ArkUINodeHandle node, float dVal, 
 void SetTextPickerBackgroundColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     GetTextPickerModelImpl()->SetBackgroundColor(Color(color));
-}
-
-void SetTextPickerBackgroundColorHdr(ArkUINodeHandle node, ArkUIColorHeadRoom color)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    Color backgroundColor = Color::FromFloat(color.red, color.green, color.blue, color.alpha, color.headRoom);
-    backgroundColor.SetColorSpace(static_cast<ColorSpace>(color.colorSpace));
-    TextPickerModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
 void SetTextPickerOnScrollStopExtImpl(ArkUINodeHandle node, void* callback)
