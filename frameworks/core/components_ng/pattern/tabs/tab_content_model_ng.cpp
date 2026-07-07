@@ -1406,7 +1406,7 @@ void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<v
 void TabContentModelNG::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdatePunctuationOverflow(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }

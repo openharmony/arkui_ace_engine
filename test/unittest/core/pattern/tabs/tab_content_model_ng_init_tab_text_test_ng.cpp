@@ -54,46 +54,49 @@ HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextNullTextProperty001, Tes
 }
 
 /**
- * @tc.name: InitTabTextPunctuationOverflowLowApiVersion001
- * @tc.desc: InitTabText with low API version should set PunctuationOverflow to true and return early
+ * @tc.name: InitTabTextEnablePunctuationOverflowOptimizeLowApiVersion001
+ * @tc.desc: InitTabText with low API version should set EnablePunctuationOverflowOptimize to true and return early
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextPunctuationOverflowLowApiVersion001, TestSize.Level1)
+HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextEnablePunctuationOverflowOptimizeLowApiVersion001,
+    TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    EXPECT_FALSE(textLayoutProperty->HasPunctuationOverflow());
+    EXPECT_FALSE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
 
     TabContentModelNG::InitTabText(textLayoutProperty);
 
-    EXPECT_TRUE(textLayoutProperty->HasPunctuationOverflow());
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 /**
- * @tc.name: InitTabTextPunctuationOverflowSetBeforeApiCheck001
- * @tc.desc: PunctuationOverflow is set before API version check so it is true regardless of API version
+ * @tc.name: InitTabTextEnablePunctuationOverflowOptimizeSetBeforeApiCheck001
+ * @tc.desc: EnablePunctuationOverflowOptimize is set before API version check so it is true regardless of API version
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextPunctuationOverflowSetBeforeApiCheck001, TestSize.Level1)
+HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextEnablePunctuationOverflowOptimizeSetBeforeApiCheck001,
+    TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     TabContentModelNG::InitTabText(textLayoutProperty);
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 /**
- * @tc.name: InitTabTextCheckNullVoidBeforePunctuationOverflow001
- * @tc.desc: Verify CHECK_NULL_VOID is before UpdatePunctuationOverflow so null input safely returns
+ * @tc.name: InitTabTextCheckNullVoidBeforeEnablePunctuationOverflowOptimize001
+ * @tc.desc: Verify CHECK_NULL_VOID is before UpdateEnablePunctuationOverflowOptimize so null input safely returns
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextCheckNullVoidBeforePunctuationOverflow001, TestSize.Level1)
+HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextCheckNullVoidBeforeEnablePunctuationOverflowOptimize001,
+    TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
@@ -102,18 +105,19 @@ HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextCheckNullVoidBeforePunct
 }
 
 /**
- * @tc.name: InitTabTextHighApiVersionPunctuationOverflow001
- * @tc.desc: InitTabText with high API version sets PunctuationOverflow to true
+ * @tc.name: InitTabTextHighApiVersionEnablePunctuationOverflowOptimize001
+ * @tc.desc: InitTabText with high API version sets EnablePunctuationOverflowOptimize to true
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextHighApiVersionPunctuationOverflow001, TestSize.Level1)
+HWTEST_F(TabContentModelNGInitTabTextTestNg, InitTabTextHighApiVersionEnablePunctuationOverflowOptimize001,
+    TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     TabContentModelNG::InitTabText(textLayoutProperty);
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 } // namespace OHOS::Ace::NG

@@ -59,11 +59,11 @@ HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyNullTextProperty001, TestSiz
 }
 
 /**
- * @tc.name: InitTextPropertyPunctuationOverflowLowApiVersion001
- * @tc.desc: InitTextProperty with low API version should set PunctuationOverflow to true and return early
+ * @tc.name: InitTextPropertyEnablePunctuationOverflowOptimizeLowApiVersion001
+ * @tc.desc: InitTextProperty with low API version should set EnablePunctuationOverflowOptimize to true and return early
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyPunctuationOverflowLowApiVersion001, TestSize.Level1)
+HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyEnablePunctuationOverflowOptimizeLowApiVersion001, TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
@@ -72,15 +72,16 @@ HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyPunctuationOverflowLowApiVer
 
     NavigationTitleUtil::InitTextProperty(textLayoutProperty);
 
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 /**
- * @tc.name: InitTextPropertyPunctuationOverflowHighApiVersion001
- * @tc.desc: InitTextProperty with high API version should set PunctuationOverflow and OrphanCharOptimization
+ * @tc.name: InitTextPropertyEnablePunctuationOverflowOptimizeHighApiVersion001
+ * @tc.desc: InitTextProperty with high API version should set EnablePunctuationOverflowOptimize and
+ * OrphanCharOptimization
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyPunctuationOverflowHighApiVersion001, TestSize.Level1)
+HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyEnablePunctuationOverflowOptimizeHighApiVersion001, TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
@@ -89,15 +90,17 @@ HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyPunctuationOverflowHighApiVe
 
     NavigationTitleUtil::InitTextProperty(textLayoutProperty);
 
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 /**
- * @tc.name: InitTextPropertyCheckNullVoidMovedBeforePunctuationOverflow001
- * @tc.desc: Verify CHECK_NULL_VOID is executed before UpdatePunctuationOverflow so null input does not crash
+ * @tc.name: InitTextPropertyCheckNullVoidMovedBeforeEnablePunctuationOverflowOptimize001
+ * @tc.desc: Verify CHECK_NULL_VOID is executed before UpdateEnablePunctuationOverflowOptimize so null input does not
+ * crash
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyCheckNullVoidMovedBeforePunctuationOverflow001, TestSize.Level1)
+HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyCheckNullVoidMovedBeforeEnablePunctuationOverflowOptimize001,
+    TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
@@ -105,23 +108,23 @@ HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyCheckNullVoidMovedBeforePunc
 }
 
 /**
- * @tc.name: InitTextPropertyPunctuationOverflowDefaultNotSet001
- * @tc.desc: Verify PunctuationOverflow is not set before calling InitTextProperty
+ * @tc.name: InitTextPropertyEnablePunctuationOverflowOptimizeDefaultNotSet001
+ * @tc.desc: Verify EnablePunctuationOverflowOptimize is not set before calling InitTextProperty
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyPunctuationOverflowDefaultNotSet001, TestSize.Level1)
+HWTEST_F(NavigationTitleUtilTestNg, InitTextPropertyEnablePunctuationOverflowOptimizeDefaultNotSet001, TestSize.Level1)
 {
     AceApplicationInfo::GetInstance().SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    EXPECT_FALSE(textLayoutProperty->HasPunctuationOverflow());
+    EXPECT_FALSE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
 
     NavigationTitleUtil::InitTextProperty(textLayoutProperty);
 
-    EXPECT_TRUE(textLayoutProperty->HasPunctuationOverflow());
-    EXPECT_TRUE(textLayoutProperty->GetPunctuationOverflowValue(false));
+    EXPECT_TRUE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 } // namespace OHOS::Ace::NG
