@@ -1980,6 +1980,9 @@ HWTEST_F(SelectPatternTheTestNg, SetOptionBgColorByUser001, TestSize.Level1)
  */
 HWTEST_F(SelectPatternTheTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectParam.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     selectModelInstance.Create(params);
@@ -1998,6 +2001,9 @@ HWTEST_F(SelectPatternTheTestNg, OnLanguageConfigurationUpdate001, TestSize.Leve
  */
 HWTEST_F(SelectPatternTheTestNg, ShowOptions001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectParam.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     selectModelInstance.Create(params);
