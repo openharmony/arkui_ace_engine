@@ -16,6 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_OVERLAY_MODIFIER_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -135,16 +136,25 @@ public:
 
     void SetTrackRect(const Rect& trackRect)
     {
+        CHECK_EQUAL_VOID(trackRect_, trackRect);
         trackRect_ = trackRect;
+        if (needPaintTrack_) {
+            SetOverlayChange();
+        }
     }
 
     void SetTrackColor(Color trackColor)
     {
+        CHECK_EQUAL_VOID(trackColor_, trackColor);
         trackColor_ = trackColor;
+        if (needPaintTrack_) {
+            SetOverlayChange();
+        }
     }
 
     void SetNeedPaintTrack(bool needPaintTrack)
     {
+        CHECK_EQUAL_VOID(needPaintTrack_, needPaintTrack);
         needPaintTrack_ = needPaintTrack;
         SetOverlayChange();
     }
