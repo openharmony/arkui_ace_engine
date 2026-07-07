@@ -39,8 +39,6 @@ void JSDrawingRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSDrawingRenderingContext>::CustomProperty(
         "canvas", &JSDrawingRenderingContext::JsGetCanvas, &JSDrawingRenderingContext::JsSetCanvas);
     JSClass<JSDrawingRenderingContext>::CustomMethod("invalidate", &JSDrawingRenderingContext::SetInvalidate);
-    JSClass<JSDrawingRenderingContext>::CustomMethod(
-        "__setCanvasComponent__", &JSDrawingRenderingContext::JsSetCanvasComponent);
 
     JSClass<JSDrawingRenderingContext>::Bind(
         globalObj, JSDrawingRenderingContext::Constructor, JSDrawingRenderingContext::Destructor);
@@ -184,6 +182,16 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
             reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)), antialias);
     }
     return context2d_;
+}
+
+void JSDrawingRenderingContext::JsSetCanvasComponent(const JSCallbackInfo& info)
+{
+    auto* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto canvasPattern = frameNode->GetPattern<NG::CanvasPattern>();
+    CHECK_NULL_VOID(canvasPattern);
+    auto pattern = AceType::Claim<AceType>(Referenced::RawPtr(canvasPattern));
+    SetCanvasPattern(pattern);
 }
 } // namespace OHOS::Ace::Framework
 
