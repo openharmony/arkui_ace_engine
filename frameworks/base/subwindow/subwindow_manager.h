@@ -83,6 +83,7 @@ public:
     void AddContainerId(uint32_t windowId, int32_t containerId);
     void RemoveContainerId(uint32_t windowId);
     int32_t GetContainerId(uint32_t windowId);
+    int32_t GetWindowIdByContainerId(int32_t containerId);
 
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
@@ -291,6 +292,7 @@ private:
 
     std::mutex mutex_;
     std::unordered_map<uint32_t, int32_t> containerMap_;
+    std::unordered_map<int32_t, uint32_t> reverseContainerMap_;
 
     std::mutex parentMutex_;
     std::unordered_map<int32_t, int32_t> parentContainerMap_;
