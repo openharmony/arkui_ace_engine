@@ -53,12 +53,17 @@ void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Already have container of this windowId, windowId: %{public}u", windowId);
     }
     containerMap_.emplace(windowId, containerId);
+    reverseContainerMap_.emplace(containerId, windowId);
 }
 
 void SubwindowManager::RemoveContainerId(uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    containerMap_.erase(windowId);
+    auto it = containerMap_.find(windowId);
+    if (it != containerMap_.end()) {
+        reverseContainerMap_.erase(it->second);
+        containerMap_.erase(it);
+    }
 }
 
 int32_t SubwindowManager::GetContainerId(uint32_t windowId)
@@ -67,6 +72,17 @@ int32_t SubwindowManager::GetContainerId(uint32_t windowId)
     auto result = containerMap_.find(windowId);
     if (result != containerMap_.end()) {
         return result->second;
+    } else {
+        return -1;
+    }
+}
+
+int32_t SubwindowManager::GetWindowIdByContainerId(int32_t containerId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto result = reverseContainerMap_.find(containerId);
+    if (result != reverseContainerMap_.end()) {
+        return static_cast<int32_t>(result->second);
     } else {
         return -1;
     }
