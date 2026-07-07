@@ -17,7 +17,9 @@
 #include "core/common/container.h"
 
 #include "base/utils/utils.h"
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
+#endif
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -42,6 +44,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -49,6 +52,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         DoAutoFillDraw(context);
         return;
     }
+#endif
     if (textFieldPattern->IsInlineMode() || TextOverflow::ELLIPSIS == paragraph->GetParagraphStyle().textOverflow ||
         !textFadeoutEnabled_) {
         DoNormalDraw(context);
@@ -114,9 +118,11 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     SetDefaultFontStyle(textStyle);
     SetDefaultTextOverflow(textStyle);
     SetDefaultTextDecoration(textStyle);
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     SetDefaultAutoFillTranslationOffset();
     SetDefaultAutoFillTextScrollOffset();
     SetDefaultAutoFillCharIndex();
+#endif
 }
 
 void TextFieldContentModifier::SetDefaultPropertyValue()
@@ -130,10 +136,12 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextFieldTheme>();
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     if (theme) {
         autoFillEmphasizeCharTextColor_ = theme->GetAutoFillIconEmphasizeColor();
         autoFillDefaultCharInitTextColor_ = theme->GetTextColor();
     }
+#endif
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
 
     textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
@@ -673,6 +681,7 @@ void TextFieldContentModifier::UpdateTextFadeout(
     canvas.DetachBrush();
 }
 
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 void TextFieldContentModifier::SetAutoFillTranslationOffset(const float value)
 {
     CHECK_NULL_VOID(autoFillTranslationOffset_);
@@ -775,4 +784,5 @@ void TextFieldContentModifier::DoAutoFillDraw(DrawingContext& context)
     }
     canvas.Restore();
 }
+#endif
 } // namespace OHOS::Ace::NG

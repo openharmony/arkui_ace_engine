@@ -9656,6 +9656,7 @@ void RichEditorPattern::HandleOnPaste()
 
 bool RichEditorPattern::ProcessAutoFill(AceAutoFillTriggerType triggerType)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     if (auto focusHub = GetFocusHub(); focusHub && !HasFocus()) {
         focusHub->RequestFocusImmediately();
         isOnlyRequestFocus_ = true;
@@ -9693,6 +9694,9 @@ bool RichEditorPattern::ProcessAutoFill(AceAutoFillTriggerType triggerType)
         onUIExtNodeDestroy, onUIExtNodeBindingCompleted, triggerType);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ProcessAutoFill, result = %{public}d", resultCode);
     return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+#else
+    return false;
+#endif
 }
 
 void RichEditorPattern::ProcessAutoFillOnPaste()

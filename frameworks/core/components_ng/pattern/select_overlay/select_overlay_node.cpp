@@ -1691,9 +1691,11 @@ std::vector<OptionParam> GetAutoFillSubOptionsParams(const std::shared_ptr<Selec
     RefPtr<TextOverlayTheme>& theme)
 {
     std::vector<OptionParam> params;
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     params.emplace_back(theme->GetPasswordVaultLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.autoFillSubMenuCallback.onPasswordVault),
         "", info->menuInfo.showAutoFill, theme->GetPasswordVaultSymbolId());
+#endif
     return params;
 }
 
@@ -2694,6 +2696,7 @@ RefPtr<UINode> GetExtensionInnerMenu(RefPtr<FrameNode>& extensionMenu)
 
 void GetAutoFillSubMenuOptionsParams(std::vector<MenuOptionsParam>& subMenuOptionsParams)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
@@ -2701,6 +2704,7 @@ void GetAutoFillSubMenuOptionsParams(std::vector<MenuOptionsParam>& subMenuOptio
     if (TextSystemMenu::IsShowAutoFill()) {
         subMenuOptionsParams.push_back({ .id = OH_DEFAULT_PASSWORD_VAULT, .content = theme->GetPasswordVaultLabel() });
     }
+#endif
 }
 
 std::vector<MenuOptionsParam> GetMenuOptionsParamsWithEditMenuOption(
@@ -4423,6 +4427,7 @@ void SelectOverlayNode::ShowCopyAll(
 void SelectOverlayNode::ShowPasswordVault(
     float maxWidth, float& allocatedSize, const std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     if (info->menuInfo.showAutoFill) {
         float buttonWidth = 0.0f;
         ButtonBasicInfo buttonBasicInfo = { .data = label, .buttonType = SelectOverlayMenuButtonType::NORMAL };
@@ -4436,6 +4441,7 @@ void SelectOverlayNode::ShowPasswordVault(
             button.Reset();
         }
     }
+#endif
 }
 
 void SelectOverlayNode::AddSystemAutoFillSubMenuOptions(float maxWidth, const std::shared_ptr<SelectOverlayInfo>& info)
@@ -4910,9 +4916,11 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
 void SelectOverlayNode::AddSubMenuItemByCreateMenuCallback(const std::shared_ptr<SelectOverlayInfo>& info,
     float maxWidth)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     std::vector<MenuOptionsParam> autoFillSubMenuOptionsParams;
     GetAutoFillSubMenuOptionsParams(autoFillSubMenuOptionsParams);
     AddCreateMenuItems(autoFillSubMenuOptionsParams, info, maxWidth);
+#endif
 }
 
 void SelectOverlayNode::UpdateSubMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info)

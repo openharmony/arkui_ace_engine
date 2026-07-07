@@ -36,7 +36,9 @@
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
+#endif
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -85,6 +87,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
     UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -95,6 +98,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         UpdateTextStyleTextOverflowAndWordBreak(
             textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
     } else {
+#endif
         if (!pattern->GetTextUtf16Value().empty()) {
             UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
                 textFieldPaintProperty->HasTextColorFlagByUser());
@@ -115,7 +119,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
                 return;
             }
         }
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     }
+#endif
     ConstructTextStylesAppend(frameNode, textStyle, pattern, showPlaceHolder);
 }
 
@@ -1216,6 +1222,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
 void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content,
     bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = textStyle.GetTextAlign();
@@ -1237,6 +1244,7 @@ void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyl
         paragraph_->PopStyle();
     }
     paragraph_->Build();
+#endif
 }
 
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(
