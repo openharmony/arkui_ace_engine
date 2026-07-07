@@ -122,6 +122,7 @@ Color ArcListItemPattern::GetBlendGgColor()
 
 void ArcListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode)
 {
+    CHECK_NULL_VOID(itemNode);
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = GetContext();
@@ -137,6 +138,7 @@ void ArcListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNo
 
 void ArcListItemPattern::HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode)
 {
+    CHECK_NULL_VOID(itemNode);
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = GetContext();

@@ -144,6 +144,10 @@ BarDirection ScrollBar::CheckBarDirection(const Point& point)
 
 void ScrollBar::FlushBarWidth(const RefPtr<PipelineContext>& context)
 {
+    if (NearZero(viewPortSize_.Width()) && NearZero(viewPortSize_.Height())) {
+        return;
+    }
+
     if (shapeMode_ == ShapeMode::RECT) {
         SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_, SCROLL_FROM_NONE, context);
     } else {
