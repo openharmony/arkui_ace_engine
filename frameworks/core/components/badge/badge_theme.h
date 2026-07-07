@@ -148,6 +148,14 @@ public:
 
     const Dimension& GetBadgeAgeCircleSize() const
     {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, badgeAgeSize_);
+        auto fontManager = pipelineContext->GetFontManager();
+        CHECK_NULL_RETURN(fontManager, badgeAgeSize_);
+        if (fontManager->GetFallbackLineSpacingStyleOptimizeFlag() &&
+            pipelineContext->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return badgeAgeSizeForMinorLanguage_;
+        }
         return badgeAgeSize_;
     }
 
@@ -201,7 +209,8 @@ private:
     Dimension badgeOuterBorderWidth_;
     Dimension badgeSize_ = 16.0_vp;
     Dimension badgeSizeForMinorLanguage_ = 18.0_vp;
-    Dimension badgeAgeSize_;
+    Dimension badgeAgeSize_ = 23.0_vp;
+    Dimension badgeAgeSizeForMinorLanguage_ = 26.0_vp;
     Dimension badgeAgeAddPadding_;
     Dimension littleBadgeSize_;
     Dimension numericalBadgePadding_;

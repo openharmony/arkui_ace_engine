@@ -183,6 +183,8 @@ HWTEST_F(BadgeWithThemeTestNg, BadgeThemeGetBadgeCircleSize001, TestSize.Level1)
 
     auto result = theme->GetBadgeCircleSize();
     EXPECT_EQ(result, Dimension(16.0_vp));
+    auto ageCircleSize = theme->GetBadgeAgeCircleSize();
+    EXPECT_EQ(ageCircleSize, Dimension(23.0_vp));
 
     pipeline->SetApiTargetVersion(backupApiVersion);
 }
@@ -206,6 +208,8 @@ HWTEST_F(BadgeWithThemeTestNg, BadgeThemeGetBadgeCircleSize002, TestSize.Level1)
 
     auto result = theme->GetBadgeCircleSize();
     EXPECT_EQ(result, Dimension(18.0_vp));
+    auto ageCircleSize = theme->GetBadgeAgeCircleSize();
+    EXPECT_EQ(ageCircleSize, Dimension(26.0_vp));
 
     pipeline->SetApiTargetVersion(backupApiVersion);
 }
@@ -229,6 +233,8 @@ HWTEST_F(BadgeWithThemeTestNg, BadgeThemeGetBadgeCircleSize003, TestSize.Level1)
 
     auto result = theme->GetBadgeCircleSize();
     EXPECT_EQ(result, Dimension(16.0_vp));
+    auto ageCircleSize = theme->GetBadgeAgeCircleSize();
+    EXPECT_EQ(ageCircleSize, Dimension(23.0_vp));
 
     pipeline->SetApiTargetVersion(backupApiVersion);
 }
@@ -253,6 +259,8 @@ HWTEST_F(BadgeWithThemeTestNg, BadgeThemeGetBadgeCircleSize004, TestSize.Level1)
     EXPECT_FALSE(pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
     auto result = theme->GetBadgeCircleSize();
     EXPECT_EQ(result, Dimension(16.0_vp));
+    auto ageCircleSize = theme->GetBadgeAgeCircleSize();
+    EXPECT_EQ(ageCircleSize, Dimension(23.0_vp));
 
     pipeline->SetApiTargetVersion(backupApiVersion);
 }
