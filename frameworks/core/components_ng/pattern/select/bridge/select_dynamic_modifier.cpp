@@ -1768,8 +1768,10 @@ void ShowSelectMenu(const RefPtr<NG::FrameNode>& frameNode)
 
 void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
     SelectModelStatic::SetBackgroundColor(frameNode, color);
+#endif
 }
 
 void SetBuilderFunc(FrameNode* frameNode, SelectMakeCallback&& makeFunc)
@@ -1786,6 +1788,7 @@ void ResetBuilderFunc(FrameNode* frameNode)
 
 void SetDividerImpl(FrameNode* frameNode, const Opt_DividerOptions* options)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
     auto divider = SelectModelStatic::GetDefaultDivider(frameNode);
     if (options->tag == INTEROP_TAG_UNDEFINED) {
@@ -1817,6 +1820,7 @@ void SetDividerImpl(FrameNode* frameNode, const Opt_DividerOptions* options)
     }
     std::optional<SelectDivider> dividerOpt = divider;
     SelectModelStatic::SetDivider(frameNode, dividerOpt);
+#endif
 }
 
 void SetOnSelect(FrameNode* frameNode, SelectEvent&& onSelect)
@@ -1827,14 +1831,17 @@ void SetOnSelect(FrameNode* frameNode, SelectEvent&& onSelect)
 
 void SetAvoidTarget(RefPtr<PopupParam>& popupParam, const Opt_AvoidanceMode& avoidTarget)
 {
+#ifndef CROSS_PLATFORM
     auto avoidTargetOpt = Converter::OptConvert<AvoidanceMode>(avoidTarget);
     if (avoidTargetOpt.has_value()) {
         popupParam->SetAvoidTarget(avoidTargetOpt.value());
     }
+#endif
 }
 
 void CastAvoidTarget(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src)
 {
+#ifndef CROSS_PLATFORM
     switch (src) {
         case ARK_AVOIDANCE_MODE_COVER_TARGET:
             dst = AvoidanceMode::COVER_TARGET;
@@ -1845,6 +1852,7 @@ void CastAvoidTarget(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode&
         default:
             LOGE("Unexpected enum value in Ark_AvoidanceMode: %{public}d", src);
     }
+#endif
 }
 
 void SetSelectChangeEvent(void* callback)
