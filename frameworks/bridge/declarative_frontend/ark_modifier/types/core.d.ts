@@ -193,6 +193,7 @@ type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;
 type Length = string | number | Resource;
 type Dimension = string | number | Resource;
+type VP = number;
 type Padding = Length | { top?: Length; bottom?: Length; left?: Length; right?: Length };
 type Margin = Length | { top?: Length; bottom?: Length; left?: Length; right?: Length };
 type SizeOptions = { width?: Length; height?: Length };
@@ -287,6 +288,143 @@ type BaseGestureEvent = object;
 type GestureJudgeResult = 'continue' | 'reject' | 'pending';
 type BarState = 'off' | 'on' | 'auto';
 type ComputedBarAttribute = object;
+type Curve = object;
+type ICurve = object;
+type IndicatorStyle = object;
+type ContentDidScrollCallback = (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void;
+type ContentWillScrollCallback = (result: SwiperContentWillScrollResult) => boolean;
+type OnTabsContentDidScrollCallback = (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void;
+type ResponsiveFillType = object;
+type ComponentContentBase = object;
+type ComponentContent = object;
+type SubTabBarIndicatorStyle = object;
+type DrawableTabBarIndicator = object;
+type SelectedMode = object;
+type BoardStyle = object;
+type TabBarLabelStyle = object;
+type TabBarSymbol = object;
+type LayoutMode = object;
+type TabBarIconStyle = object;
+type barFloatingStyleOptions = object;
+
+declare class Indicator {
+    left(value: LengthMetrics | undefined): this;
+    top(value: LengthMetrics | undefined): this;
+    right(value: LengthMetrics | undefined): this;
+    bottom(value: LengthMetrics | undefined): this;
+    start(value: LengthMetrics | undefined): this;
+    end(value: LengthMetrics | undefined): this;
+}
+
+declare class DotIndicator extends Indicator {
+    itemWidth(value: Length | undefined): this;
+    itemHeight(value: Length | undefined): this;
+    selectedItemWidth(value: Length | undefined): this;
+    selectedItemHeight(value: Length | undefined): this;
+    mask(value: boolean | undefined): this;
+    color(value: ResourceColor | undefined): this;
+    selectedColor(value: ResourceColor | undefined): this;
+    maxDisplayCount(maxDisplayCount: number | undefined): this;
+    space(space: LengthMetrics | undefined): this;
+}
+
+declare class DigitIndicator extends Indicator {
+    fontColor(value: ResourceColor | undefined): this;
+    selectedFontColor(value: ResourceColor | undefined): this;
+    digitFont(value: Font | undefined): this;
+    selectedDigitFont(value: Font | undefined): this;
+}
+
+interface SwiperAutoFill {
+    minSize: VP;
+}
+
+interface AutoPlayOptions {
+    stopWhenTouched: boolean;
+}
+
+interface ItemFillPolicy {
+    fillType?: ResponsiveFillType;
+}
+
+interface SwiperContentTransitionProxy {
+    selectedIndex: number;
+    index: number;
+    position: number;
+    mainAxisLength: number;
+    finishTransition(): void;
+}
+
+interface SwiperContentAnimatedTransition {
+    timeout?: number;
+    transition: Callback<SwiperContentTransitionProxy>;
+}
+
+interface SwiperContentWillScrollResult {
+    currentIndex: number;
+    comingIndex: number;
+    offset: number;
+}
+
+enum PageFlipMode {
+    CONTINUOUS = 0,
+    SINGLE = 1
+}
+
+enum TabsNestedScrollMode {
+    SELF_ONLY = 0,
+    SELF_FIRST = 1
+}
+
+enum AnimationMode {
+    CONTENT_FIRST = 0,
+    ACTION_FIRST = 1,
+    NO_ANIMATION = 2,
+    CONTENT_FIRST_WITH_JUMP = 3,
+    ACTION_FIRST_WITH_JUMP = 4
+}
+
+enum TabsCacheMode {
+    CACHE_BOTH_SIDE = 0,
+    CACHE_LATEST_SWITCHED = 1
+}
+
+interface TabsAnimationEvent {
+    currentOffset: number;
+    targetOffset: number;
+    velocity: number;
+}
+
+interface BarGridColumnOptions {
+    sm?: number;
+    md?: number;
+    lg?: number;
+    margin?: Dimension;
+    gutter?: Dimension;
+}
+
+declare class SubTabBarStyle {
+    constructor(content: ResourceStr | ComponentContentBase);
+    static of(content: ResourceStr | ComponentContentBase): SubTabBarStyle;
+    indicator(value: SubTabBarIndicatorStyle | DrawableTabBarIndicator): SubTabBarStyle;
+    selectedMode(value: SelectedMode): SubTabBarStyle;
+    board(value: BoardStyle): SubTabBarStyle;
+    labelStyle(style: TabBarLabelStyle): SubTabBarStyle;
+    padding(value: Padding | Dimension | LocalizedPadding): SubTabBarStyle;
+    id(value: string): SubTabBarStyle;
+}
+
+declare class BottomTabBarStyle {
+    constructor(icon: ResourceStr | TabBarSymbol, text: ResourceStr);
+    static of(icon: ResourceStr | TabBarSymbol, text: ResourceStr): BottomTabBarStyle;
+    labelStyle(style: TabBarLabelStyle): BottomTabBarStyle;
+    padding(value: Padding | Dimension | LocalizedPadding): BottomTabBarStyle;
+    layoutMode(value: LayoutMode): BottomTabBarStyle;
+    verticalAlign(value: VerticalAlign): BottomTabBarStyle;
+    symmetricExtensible(value: boolean): BottomTabBarStyle;
+    id(value: string): BottomTabBarStyle;
+    iconStyle(style: TabBarIconStyle): BottomTabBarStyle;
+}
 type ItemDragInfo = object;
 type EdgeEffect = 'spring' | 'fade' | 'none';
 type EdgeEffectOptions = object;
@@ -639,6 +777,6 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 }
 
 declare class ScrollResult {
-    get offsetRemain(): double;
-    set offsetRemain(offsetRemain: double);
+    get offsetRemain(): number;
+    set offsetRemain(offsetRemain: number);
 }

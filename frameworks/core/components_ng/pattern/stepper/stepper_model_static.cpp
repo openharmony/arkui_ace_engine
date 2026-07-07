@@ -15,11 +15,28 @@
 
 #include "core/components_ng/pattern/stepper/stepper_model_static.h"
 
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
 #include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SwipeToSwiperNode(const RefPtr<FrameNode>& swiperNode, int32_t index)
+{
+    CHECK_NULL_VOID(swiperNode);
+    auto modifier = GetSwiperCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->swipeTo(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)), index);
+}
+
+void SetSwiperCurveLinear(const RefPtr<FrameNode>& swiperNode)
+{
+    CHECK_NULL_VOID(swiperNode);
+    auto modifier = GetSwiperCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setCurveLinear(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)));
+}
+} // namespace
 
 RefPtr<FrameNode> StepperModelStatic::CreateFrameNode(int32_t nodeId)
 {
@@ -45,13 +62,9 @@ void StepperModelStatic::SetIndex(FrameNode* frameNode, const std::optional<int3
         swiperNode = AceType::DynamicCast<FrameNode>(
             stepperNode->GetChildAtIndex(stepperNode->GetChildIndexById(stepperNode->GetSwiperId())));
         CHECK_NULL_VOID(swiperNode);
-        auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
-        swiperController->SwipeTo(value);
+        SwipeToSwiperNode(swiperNode, value);
     }
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    if (swiperPaintProperty) {
-        swiperPaintProperty->UpdateCurve(Curves::LINEAR);
-    }
+    SetSwiperCurveLinear(swiperNode);
 }
 
 void StepperModelStatic::SetOnFinish(FrameNode* frameNode, RoutineCallbackEvent&& eventOnFinish)
@@ -96,20 +109,9 @@ void StepperModelStatic::SetOnPrevious(FrameNode* frameNode, IndexCallbackEvent&
 
 RefPtr<FrameNode> StepperModelStatic::CreateSwiperChild(int32_t id, uint32_t index)
 {
-    auto swiperNode =
-        FrameNode::GetOrCreateFrameNode(SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
-    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateDisableSwipe(true);
-    swiperLayoutProperty->UpdateLoop(false);
-    swiperLayoutProperty->UpdateCachedCount(0);
-    swiperLayoutProperty->UpdateIndex(static_cast<int32_t>(index));
-    swiperLayoutProperty->UpdateShowIndicator(false);
-    swiperNode->MarkModifyDone();
-    return swiperNode;
+    auto modifier = GetSwiperCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createStepperSwiperNode(id, index)));
 }
 
 void StepperModelStatic::SetOnChangeEvent(FrameNode* frameNode, IndexChangeEvent&& onChangeEvent)

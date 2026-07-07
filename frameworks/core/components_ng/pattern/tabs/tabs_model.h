@@ -41,7 +41,6 @@ enum class TabsCacheMode {
     CACHE_LATEST_SWITCHED
 };
 
-namespace {
 enum class TabJsResType {
     BAR_BACKGROUND_COLOR,
     BAR_WIDTH,
@@ -57,7 +56,6 @@ enum class TabJsResType {
     INACTIVE_COLOR,
     BlurStyle_INACTIVE_COLOR
 };
-}
 
 struct TabsItemDivider final {
     int32_t themeScopeId = NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;

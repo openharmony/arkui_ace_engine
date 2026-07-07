@@ -118,6 +118,8 @@ public:
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t sensitivity);
+    static void SetDisableTransitionAnimation(FrameNode* frameNode, bool isDisable);
     static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
     static void ResetDisplayMode(FrameNode* frameNode);
@@ -225,6 +227,11 @@ public:
     static void CallSwiperShowNext(FrameNode* frameNode);
     static void AddDigitIndicatorLpx(FrameNode* frameNode, const SwiperDigitalParameters& params);
     static void AddDotIndicatorLpx(FrameNode* frameNode, const SwiperParameters& params);
+    static void ProcessNextMarginWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessPreviousMarginWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetIndicatorController(FrameNode* frameNode, RefPtr<JSIndicatorControllerBase> controller);
+    static void SetJSIndicatorController(FrameNode* frameNode, std::function<void()> resetFunc);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG
