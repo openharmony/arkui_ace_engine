@@ -97,6 +97,44 @@ bool GetTitleOrToolBarTranslateAndHeight(const RefPtr<FrameNode>& barNode, float
     height = renderContext->GetPaintRectWithoutTransform().Height();
     return true;
 }
+
+void CollectJsViewName(const RefPtr<UINode>& uiNode, std::string& jsViewNames)
+{
+    auto customNode = AceType::DynamicCast<CustomNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    std::string jsViewName = customNode->GetJSViewName();
+    if (jsViewName.empty()) {
+        return;
+    }
+    if (!jsViewNames.empty()) {
+        jsViewNames += "/";
+    }
+    jsViewNames += jsViewName;
+}
+
+std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode)
+{
+    std::string jsViewName{};
+    while (uiNode) {
+        if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            // this is a navDestination node
+            return jsViewName;
+        }
+        if (uiNode->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            // this is a jsView node
+            CollectJsViewName(uiNode, jsViewName);
+        }
+        // this is an UINode, go deep further for navDestination node
+        auto children = uiNode->GetChildren();
+        if (children.empty()) {
+            return "";
+        }
+        uiNode = children.front();
+    }
+    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
+    return "";
+}
 }
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
@@ -1160,5 +1198,10 @@ void NavDestinationPattern::CallSavedStateToJS(const std::string& savedState)
     CHECK_NULL_VOID(stack);
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     stack->SaveStateToJsCallback(hostNode->GetIndex(), GetName(), GetNavDestinationId(), savedState);
+}
+
+std::string NavDestinationPattern::GetJSViewName()
+{
+    return GetNavDestinationJsViewName(GetCustomNode());
 }
 } // namespace OHOS::Ace::NG

@@ -566,6 +566,39 @@ std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& p
     return pageName;
 }
 
+std::string PipelineContext::GetNavDestinationJSViewName(const RefPtr<PageInfo>& pageInfo) const
+{
+    CHECK_NULL_RETURN(pageInfo, "");
+    int32_t pageId = pageInfo->GetPageId();
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    CHECK_RUN_ON(UI);
+    auto it = pageToNavigationNodes_.find(pageId);
+    if (it == pageToNavigationNodes_.end() || it->second.empty()) {
+        return "";
+    }
+
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+
+    CHECK_NULL_RETURN(navigationNode, "");
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_RETURN(navigationPattern, "");
+    
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, "");
+
+    RefPtr<NavDestinationGroupNode> navDestinationNode = nullptr;
+    navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navigationStack->Get()));
+    CHECK_NULL_RETURN(navDestinationNode, "");
+
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, "");
+
+    return navDestinationPattern->GetJSViewName();
+}
+
 std::string PipelineContext::GetCurrentPageName()
 {
     auto pageInfo = GetLastPageInfo();

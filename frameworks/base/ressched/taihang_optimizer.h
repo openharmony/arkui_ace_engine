@@ -32,7 +32,7 @@ public:
     bool IsInited();
     void SetEnable(bool value);
     bool IsEnable();
-    bool CheckSwiperPageValid(const std::string& pageName);
+    bool CheckSwiperPageValid(const std::string& pageFullPath, int32_t test);
     void ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index);

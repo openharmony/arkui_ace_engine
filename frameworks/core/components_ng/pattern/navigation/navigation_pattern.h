@@ -973,7 +973,6 @@ private:
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
-    static std::string GetNavDestinationJsViewName(RefPtr<UINode> uiNode);
 
     //-------for force split------- begin------
     bool IsNavBarValid();

@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr char KEY_WINDOW_ID[] = "windowId";
 constexpr char KEY_PAGE_NAME[] = "pageName";
+constexpr char KEY_COMPONENT_NAME[] = "componentName";
 constexpr char KEY_PATH[] = "path";
 constexpr char KEY_INDEX[] = "index";
 constexpr char KEY_COMPONENT_TYPE[] = "componentType";
@@ -66,8 +67,16 @@ bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::s
     return !pageName.empty();
 }
 
+bool CheckComponentName(std::unordered_map<std::string, std::string>& extInfo, std::string& componentName)
+{
+    auto iter = extInfo.find(KEY_COMPONENT_NAME);
+    CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
+    componentName = iter->second;
+    return true;
+}
+
 bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
-    int32_t& windowId, std::string& pageName)
+    int32_t& windowId, std::string& pageName, std::string& componentName)
 {
     if (!CheckNumber(extInfo, KEY_COMPONENT_TYPE)) {
         LOGE("CheckParameterValid parameter component type is invalid");
@@ -83,6 +92,11 @@ bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
     }
     if (!CheckPageName(extInfo, pageName)) {
         LOGE("CheckParameterValid parameter pageName is invalid");
+        return false;
+    }
+
+    if (!CheckComponentName(extInfo, componentName)) {
+        LOGE("CheckParameterValid parameter componentName is invalid");
         return false;
     }
     if (!CheckWindowId(extInfo, windowId)) {
@@ -111,8 +125,9 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
 {
     std::string pageName;
+    std::string componentName;
     int32_t windowId = -1;
-    if (!CheckParameterValid(extInfo, windowId, pageName)) {
+    if (!CheckParameterValid(extInfo, windowId, pageName, componentName)) {
         return;
     }
 
@@ -128,12 +143,16 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
     }
     auto pageInfo = context->GetLastPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    auto url = pageInfo->GetPageUrl();
+    auto pageFullPath = pageInfo->GetFullPath();
     auto currentPageName = context->GetNavDestinationPageName(pageInfo);
+    auto currentComponentName = context->GetNavDestinationJSViewName(pageInfo);
     // In extInfo, pagename is set to url or navDestination pagename.
-    if (pageName != url && pageName != currentPageName) {
-        LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, url:%{public}s,"
-            "currentPageName:%{public}s", pageName.c_str(), url.c_str(), currentPageName.c_str());
+    if (!IsPageMatch(pageName, componentName, pageFullPath, currentPageName, currentComponentName)) {
+        LOGE("OnComponentPreMake page name or component name does not match,"
+            "pageName:%{public}s, pageFullPath:%{public}s, currentPageName:%{public}s, "
+            "componentName:%{public}s, currentComponentName:%{public}s",
+            pageName.c_str(), pageFullPath.c_str(), currentPageName.c_str(),
+            componentName.c_str(), currentComponentName.c_str());
         return;
     }
 
@@ -180,5 +199,15 @@ int32_t ResschedEventListener::GetContainerId(int32_t windowId)
     auto iter = containerMap_.find(windowId);
     CHECK_EQUAL_RETURN(iter, containerMap_.end(), DEFAULT_CONTAINER_ID);
     return iter->second;
+}
+
+bool ResschedEventListener::IsPageMatch(const std::string& pageName, const std::string& componentName,
+    const std::string& pageFullPath, const std::string& currentPageName, const std::string& currentComponentName) const
+{
+    CHECK_EQUAL_RETURN(pageName, pageFullPath, true);
+    CHECK_EQUAL_RETURN(pageName, currentPageName, true);
+    CHECK_EQUAL_RETURN(componentName.empty(), true, false);
+    CHECK_EQUAL_RETURN(componentName, currentComponentName, true);
+    return false;
 }
 } // namespace OHOS::Ace

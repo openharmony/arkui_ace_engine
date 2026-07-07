@@ -4629,5 +4629,83 @@ HWTEST_F(PipelineContextTestNg, DumpSimplifyTreeJsonFromTopNavNode001, TestSize.
     context_->DumpSimplifyTreeJsonFromTopNavNode(context_->rootNode_, root, navNodeList, config);
     EXPECT_TRUE(root->Contains("$children"));
 }
+
+/**
+ * @tc.name: GetNavDestinationJSViewName001
+ * @tc.desc: Test GetNavDestinationJSViewName when pageInfo not add to pageToNavigationNodes_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, GetNavDestinationJSViewName001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and make sure pointers are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: call GetNavDestinationJSViewName.
+     * @tc.expect: function executes return empty.
+     */
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    context_->pageToNavigationNodes_.clear();
+
+    auto result = context_->GetNavDestinationJSViewName(pageInfo);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetNavDestinationJSViewName002
+ * @tc.desc: Test GetNavDestinationJSViewName when navigationGroupNode is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, GetNavDestinationJSViewName002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and make sure pointers are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: call GetNavDestinationJSViewName.
+     * @tc.expect: function executes return empty.
+     */
+    auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(pageId, "testUrl", "testPath");
+
+    context_->pageToNavigationNodes_.clear();
+    context_->AddNavigationNode(pageId, nullptr);
+
+    auto result = context_->GetNavDestinationJSViewName(pageInfo);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetNavDestinationJSViewName003
+ * @tc.desc: Test GetNavDestinationJSViewName when normal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, GetNavDestinationJSViewName003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and make sure pointers are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: call GetNavDestinationJSViewName.
+     * @tc.expect: function executes return normal.
+     */
+    auto node = NavigationGroupNode::GetOrCreateGroupNode(
+        TEST_TAG, 121, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+
+    auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(pageId, "testUrl", "testPath");
+
+    context_->pageToNavigationNodes_.clear();
+    context_->pageToNavigationNodes_[pageId].push_back(node);
+
+    auto result = context_->GetNavDestinationJSViewName(pageInfo);
+    EXPECT_EQ(result, "");
+}
 } // namespace NG
 } // namespace OHOS::Ace
