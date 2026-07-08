@@ -72,6 +72,11 @@ public:
         return selectionText_;
     }
 
+    std::u16string GetSelectAllText() override
+    {
+        return selectionText_;
+    }
+
     void SetSelectionText(const std::u16string& text)
     {
         selectionText_ = text;

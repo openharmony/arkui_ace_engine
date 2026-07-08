@@ -110,6 +110,50 @@ std::u16string SelectionContainerPattern::GetSelectionText()
     return selectedText;
 }
 
+std::u16string SelectionContainerPattern::GetSelectAllText()
+{
+    auto childList = GetChildList();
+    std::u16string selectedText;
+    bool isFirst = true;
+    for (const auto& weakChild : childList) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        if (!child->HasSelectableText()) {
+            continue;
+        }
+        auto childSelectedText = child->GetSelectAllText();
+        if (childSelectedText.empty()) {
+            continue;
+        }
+        if (!isFirst) {
+            auto separator = GetTextJoinSeparator();
+            if (!separator.empty()) {
+                selectedText.append(separator);
+            }
+        }
+        selectedText.append(childSelectedText);
+        isFirst = false;
+    }
+    return selectedText;
+}
+
+std::u16string SelectionContainerPattern::GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam)
+{
+    if (menuItemParam.menuOptionsParam.id == OH_DEFAULT_SELECT_ALL) {
+        return GetSelectAllText();
+    }
+    return GetSelectionText();
+}
+
+void SelectionContainerPattern::DismissMenuAfterCopy()
+{
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+        return;
+    }
+    HideMenu(true);
+}
+
 RefPtr<FrameNode> SelectionContainerPattern::GetHostNode() const
 {
     return GetHost();
@@ -445,7 +489,8 @@ void SelectionContainerPattern::OnSelectionMenuOptionsUpdate(const NG::OnCreateM
             if (!pattern->onMenuItemClickWithText_) {
                 return false;
             }
-            return pattern->onMenuItemClickWithText_(menuItemParam, pattern->GetSelectionText());
+            return pattern->onMenuItemClickWithText_(
+                menuItemParam, pattern->GetSelectionTextForMenuItemClick(menuItemParam));
         };
     }
     overlay->OnSelectionMenuOptionsUpdate(
@@ -465,19 +510,19 @@ void SelectionContainerPattern::HandleOnCopy()
         static_cast<int32_t>(copyOption), data.allowedChildren.size(), data.clipboardText.length());
 
     if (data.clipboardText.empty()) {
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     bool containerAllowed = FireOnWillCopy(data.clipboardText);
     if (!containerAllowed) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy blocked by container onWillCopy");
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     WriteClipboard(data.clipboardText, data.mergedSpanString, data.hasSpanString, copyOption);
-    overlay->HideMenu(true);
+    DismissMenuAfterCopy();
 
     for (const auto& item : data.allowedChildren) {
         item.child->FireOnCopy(item.payload.plainText);

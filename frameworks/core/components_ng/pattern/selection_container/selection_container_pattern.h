@@ -164,6 +164,9 @@ public:
     }
 
 private:
+    std::u16string GetSelectAllText();
+    std::u16string GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam);
+    void DismissMenuAfterCopy();
     void ApplySelectionSummaryDelta(const ChildSelectionSummary& summary, int32_t delta);
     void RecomputeSelectedTypeFromSummary();
     TextResponseType textResponseType_ = TextResponseType::NONE;

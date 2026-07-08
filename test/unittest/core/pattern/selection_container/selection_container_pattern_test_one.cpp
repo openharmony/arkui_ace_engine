@@ -18,10 +18,40 @@
 
 #include "selection_container_test_common.h"
 
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+
+#include "core/components_ng/pattern/text/text_selection_child.h"
+
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+class MockSelectionContainerPatternForCopyDismiss : public SelectionContainerPattern {
+    DECLARE_ACE_TYPE(MockSelectionContainerPatternForCopyDismiss, SelectionContainerPattern);
+
+public:
+    void CloseSelectOverlay(bool animation = false, CloseReason reason = CloseReason::CLOSE_REASON_NORMAL) override
+    {
+        closeCalled_ = true;
+        closeAnimation_ = animation;
+        closeReason_ = reason;
+    }
+
+    void HideMenu(bool noAnimation = false, bool showSubMenu = false) override
+    {
+        hideCalled_ = true;
+        hideNoAnimation_ = noAnimation;
+        hideShowSubMenu_ = showSubMenu;
+    }
+
+    bool closeCalled_ = false;
+    bool closeAnimation_ = false;
+    CloseReason closeReason_ = CloseReason::CLOSE_REASON_NORMAL;
+    bool hideCalled_ = false;
+    bool hideNoAnimation_ = false;
+    bool hideShowSubMenu_ = false;
+};
 
 /* ==================== GetSelectionText ==================== */
 
@@ -860,7 +890,73 @@ HWTEST_F(SelectionContainerPatternTestNg, OnSelectionRangeChanged002, TestSize.L
     EXPECT_EQ(pattern_->lastSelectionState_, selectionState);
 }
 
+/**
+ * @tc.name: OnModifyDoneBase001
+ * @tc.desc: Test OnModifyDone initializes key handling when selection is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, OnModifyDoneBase001, TestSize.Level1)
+{
+    pattern_->RegisterChild(child1_);
+    child1_->SetHasSelectableText(true);
+
+    EXPECT_FALSE(pattern_->keyEventInitialized_);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->keyEventInitialized_);
+}
+
+/**
+ * @tc.name: GetSelectAllText001
+ * @tc.desc: Test GetSelectAllText joins selectable children full text for SELECT_ALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, GetSelectAllText001, TestSize.Level1)
+{
+    child1_->SetHasSelectableText(true);
+    child1_->SetSelectAllText(SCT_TEST_SELECTION_TEXT1);
+    child2_->SetHasSelectableText(true);
+    child2_->SetSelectAllText(SCT_TEST_SELECTION_TEXT2);
+    pattern_->RegisterChild(child1_);
+    pattern_->RegisterChild(child2_);
+
+    auto text = pattern_->GetSelectAllText();
+
+    EXPECT_EQ(text, SCT_TEST_SELECTION_TEXT1 + u"\n" + SCT_TEST_SELECTION_TEXT2);
+}
+
 /* ==================== HandleOnCopy ==================== */
+
+/**
+ * @tc.name: DismissMenuAfterCopy001
+ * @tc.desc: Test DismissMenuAfterCopy closes overlay in mouse mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, DismissMenuAfterCopy001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<MockSelectionContainerPatternForCopyDismiss>();
+    pattern->SetSourceType(SourceType::MOUSE);
+    pattern->DismissMenuAfterCopy();
+    EXPECT_TRUE(pattern->closeCalled_);
+    EXPECT_FALSE(pattern->closeAnimation_);
+    EXPECT_EQ(pattern->closeReason_, CloseReason::CLOSE_REASON_NORMAL);
+    EXPECT_FALSE(pattern->hideCalled_);
+}
+
+/**
+ * @tc.name: DismissMenuAfterCopy002
+ * @tc.desc: Test DismissMenuAfterCopy hides menu in touch mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, DismissMenuAfterCopy002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<MockSelectionContainerPatternForCopyDismiss>();
+    pattern->SetSourceType(SourceType::TOUCH);
+    pattern->DismissMenuAfterCopy();
+    EXPECT_FALSE(pattern->closeCalled_);
+    EXPECT_TRUE(pattern->hideCalled_);
+    EXPECT_TRUE(pattern->hideNoAnimation_);
+    EXPECT_FALSE(pattern->hideShowSubMenu_);
+}
 
 /**
  * @tc.name: HandleOnCopy001
@@ -1153,6 +1249,82 @@ HWTEST_F(SelectionContainerPatternTestNg, GetContainerPaintOffset001, TestSize.L
     auto offset = pattern_->GetContainerPaintOffsetWithTransform();
     EXPECT_FLOAT_EQ(offset.GetX(), 0.0f);
     EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: HandleClickOnTextAndSpanForContainer001
+ * @tc.desc: Test click clears selectionContainer selection even when overlay is already closed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleClickOnTextAndSpanForContainer001, TestSize.Level1)
+{
+    auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+    pattern_->RegisterChild(selectionChild);
+
+    EXPECT_EQ(pattern_->GetSelectionText(), SCT_TEST_SELECTION_TEXT1);
+
+    pattern_->ResetAllSelection();
+
+    EXPECT_TRUE(pattern_->GetSelectionText().empty());
+}
+
+/**
+ * @tc.name: CalcAIEntityRectWithHandles001
+ * @tc.desc: Test CalcAIEntityRectWithHandles in SelectionContainer mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, CalcAIEntityRectWithHandles001, TestSize.Level1)
+{
+    auto offset = pattern_->GetContainerPaintOffsetWithTransform();
+    EXPECT_FLOAT_EQ(offset.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: HandleMouseLeftPressActionForContainer001
+ * @tc.desc: Test mouse press in selection container creates a selection session owner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftPressActionForContainer001, TestSize.Level1)
+{
+    auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    pattern_->RegisterChild(selectionChild);
+
+    EXPECT_FALSE(pattern_->IsSelectionSessionOwner(selectionChild));
+    EXPECT_TRUE(pattern_->GetSelectionText().empty());
+}
+
+/**
+ * @tc.name: HandleMouseLeftMoveActionForContainer001
+ * @tc.desc: Test mouse move updates selection range in selection container mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftMoveActionForContainer001, TestSize.Level1)
+{
+    auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+    pattern_->RegisterChild(selectionChild);
+
+    EXPECT_EQ(pattern_->GetSelectionText(), SCT_TEST_SELECTION_TEXT1);
+}
+
+/**
+ * @tc.name: HandleMouseLeftReleaseActionForContainer001
+ * @tc.desc: Test mouse click clears previous selection instead of re-updating selection in selection container mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftReleaseActionForContainer001, TestSize.Level1)
+{
+    auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    selectionChild->selectionText_ = SCT_TEST_SELECTION_TEXT1;
+    pattern_->RegisterChild(selectionChild);
+
+    EXPECT_FALSE(pattern_->GetSelectionText().empty());
+
+    pattern_->ResetAllSelection();
+
+    EXPECT_TRUE(pattern_->GetSelectionText().empty());
 }
 
 } // namespace OHOS::Ace::NG

@@ -52,6 +52,15 @@ std::u16string TextSelectionChild::GetSelectionText()
         false, false, true);
 }
 
+std::u16string TextSelectionChild::GetSelectAllText()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, u"");
+    auto textLength = GetSelectableTextLength(pattern);
+    CHECK_NULL_RETURN(CanSelect() && textLength > 0, u"");
+    return pattern->GetSelectedText(0, textLength, false, false, true);
+}
+
 RefPtr<FrameNode> TextSelectionChild::GetHostNode() const
 {
     auto pattern = pattern_.Upgrade();

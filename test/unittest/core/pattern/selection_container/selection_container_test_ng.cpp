@@ -20,6 +20,7 @@
 #define protected public
 
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
@@ -63,12 +64,12 @@ const Color TEST_CARET_COLOR = Color(0xFF0000FF);
 const Color TEST_SELECTED_BG_COLOR = Color(0xFFFF0000);
 } // namespace
 
-class MockSelectionContainerChild : public SelectionContainerChild {
-    DECLARE_ACE_TYPE(MockSelectionContainerChild, SelectionContainerChild);
+class LegacyMockSelectionContainerChild : public SelectionContainerChild {
+    DECLARE_ACE_TYPE(LegacyMockSelectionContainerChild, SelectionContainerChild);
 
 public:
-    MockSelectionContainerChild() = default;
-    ~MockSelectionContainerChild() override = default;
+    LegacyMockSelectionContainerChild() = default;
+    ~LegacyMockSelectionContainerChild() override = default;
 
     void SetHostNode(const RefPtr<FrameNode>& node)
     {
@@ -81,6 +82,11 @@ public:
     }
 
     std::u16string GetSelectionText() override
+    {
+        return selectionText_;
+    }
+
+    std::u16string GetSelectAllText() override
     {
         return selectionText_;
     }
@@ -340,9 +346,9 @@ public:
 
     RefPtr<SelectionContainerPattern> pattern_;
     RefPtr<FrameNode> containerNode_;
-    RefPtr<MockSelectionContainerChild> child1_;
+    RefPtr<LegacyMockSelectionContainerChild> child1_;
     RefPtr<FrameNode> childNode1_;
-    RefPtr<MockSelectionContainerChild> child2_;
+    RefPtr<LegacyMockSelectionContainerChild> child2_;
     RefPtr<FrameNode> childNode2_;
 };
 
@@ -354,6 +360,7 @@ void SelectionContainerPatternTest::SetUpTestSuite()
 
 void SelectionContainerPatternTest::TearDownTestSuite()
 {
+    MockParagraph::TearDown();
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
@@ -369,7 +376,7 @@ void SelectionContainerPatternTest::SetUp()
         containerNode_->layoutProperty_ = layoutProperty;
     }
 
-    child1_ = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    child1_ = AceType::MakeRefPtr<LegacyMockSelectionContainerChild>();
     childNode1_ = FrameNode::CreateFrameNode("Child1", TEST_NODE_ID_CHILD1, AceType::MakeRefPtr<Pattern>());
     child1_->SetHostNode(childNode1_);
     auto geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
@@ -377,7 +384,7 @@ void SelectionContainerPatternTest::SetUp()
     childNode1_->geometryNode_ = geometryNode1;
     childNode1_->SetParent(containerNode_);
 
-    child2_ = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    child2_ = AceType::MakeRefPtr<LegacyMockSelectionContainerChild>();
     childNode2_ = FrameNode::CreateFrameNode("Child2", TEST_NODE_ID_CHILD2, AceType::MakeRefPtr<Pattern>());
     child2_->SetHostNode(childNode2_);
     auto geometryNode2 = AceType::MakeRefPtr<GeometryNode>();

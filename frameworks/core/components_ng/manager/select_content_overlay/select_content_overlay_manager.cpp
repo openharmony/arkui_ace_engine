@@ -291,7 +291,7 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
             weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
         }
         TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Stop move %{public}d handle %{public}s", isFirst, ownerInfo.c_str());
-        overlayCallback->OnHandleMoveDone(rect, isFirst);
+        overlayCallback->OnHandleMoveDone(handle, isFirst);
     };
     info.onHandleReverse = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isReverse) {
         auto overlayCallback = weakCallback.Upgrade();

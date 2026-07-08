@@ -1175,3 +1175,4 @@ HWTEST_F(SelectionContainerPatternTestNg, OnSelectionMenuOptionsUpdate002, TestS
 }
 
 } // namespace OHOS::Ace::NG
+

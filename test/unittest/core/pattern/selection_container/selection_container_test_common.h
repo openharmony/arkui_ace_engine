@@ -29,6 +29,7 @@
 #define protected public
 
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -99,6 +100,16 @@ public:
     void SetSelectionText(const std::u16string& text)
     {
         selectionText_ = text;
+    }
+
+    std::u16string GetSelectAllText() override
+    {
+        return selectAllText_.empty() ? selectionText_ : selectAllText_;
+    }
+
+    void SetSelectAllText(const std::u16string& text)
+    {
+        selectAllText_ = text;
     }
 
     SelectionIndexRange GetSelectionIndexes() const override
@@ -200,7 +211,8 @@ public:
     void SelectAll() override
     {
         isSelectAll_ = true;
-        selectionText_ = SCT_TEST_SELECTION_TEXT1;
+        auto selectAllText = GetSelectAllText();
+        selectionText_ = selectAllText.empty() ? SCT_TEST_SELECTION_TEXT1 : selectAllText;
         startIndex_ = 0;
         endIndex_ = SCT_TEST_SELECT_ALL_END_INDEX;
     }
@@ -330,6 +342,7 @@ public:
 private:
     RefPtr<FrameNode> hostNode_;
     std::u16string selectionText_;
+    std::u16string selectAllText_;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     bool hasSelectableText_ = false;
@@ -381,6 +394,7 @@ inline void SelectionContainerPatternTestNg::SetUpTestSuite()
 
 inline void SelectionContainerPatternTestNg::TearDownTestSuite()
 {
+    MockParagraph::TearDown();
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
