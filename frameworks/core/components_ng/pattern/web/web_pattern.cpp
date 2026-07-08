@@ -6284,11 +6284,14 @@ bool WebPattern::HandleAutoFillEvent()
     }
 
     if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
+        MergeHint2TypeAndMsdpType();
         return RequestAutoSave();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
+        MergeHint2TypeAndMsdpType();
         return UpdateAutoFillPopup();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
         if (autoFillMenuType_ != WebMenuType::TYPE_UNKNOWN_MENU) {
+            MergeHint2TypeAndMsdpType();
             return UpdateAutoFillPopup();
         }
         return CloseAutoFillPopup();
