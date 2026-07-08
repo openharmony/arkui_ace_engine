@@ -276,8 +276,7 @@
         "tab_content_pattern": "frameworks/core/components_ng/pattern/tabs/tab_content_pattern.cpp",
         "tab_content_model": "frameworks/core/components_ng/pattern/tabs/tab_content_model_ng.cpp",
         "tab_content_static_model": "frameworks/core/components_ng/pattern/tabs/tab_content_model_static.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_tabs.cpp",
-        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_tabs_feature.cpp",
         "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/tabs_modifier.ts"
       },
       "api_paths": {
@@ -331,7 +330,6 @@
         "arc_swiper": "frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
         "node_modifier": "frameworks/core/interfaces/native/node/node_swiper_modifier.cpp",
         "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp",
-        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.cpp",
         "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts",
         "native_enums": "interfaces/native/native_node.h"
       },
@@ -344,6 +342,65 @@
       },
       "test_paths": [
         "test/unittest/core/pattern/swiper/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
+    },
+    {
+      "id": "NavDestination",
+      "name": "NavDestination",
+      "name_cn": "导航目标页组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "NavDestination",
+        "导航目标页",
+        "NavRouter",
+        "页面生命周期",
+        "转场动画",
+        "沉浸式",
+        "NavDestinationContext",
+        "onShown",
+        "onHidden",
+        "systemBarStyle",
+        "返回值"
+      ],
+      "aliases": [
+        "NavDestination组件",
+        "导航目标页",
+        "目标页组件",
+        "NavDestinationPattern"
+      ],
+      "kb": "docs/kb/components/container/navdestination.md",
+      "spec_domain": "specs/05-ui-components/02-navigation-components/02-nav-router",
+      "func_id": "05-02-02",
+      "spec_status": "pending",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/navrouter/navdestination_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/navrouter/navdestination_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/navrouter/navdestination_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h",
+        "context": "frameworks/core/components_ng/pattern/navrouter/navdestination_context.cpp",
+        "group_node": "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.cpp",
+        "scrollable_processor": "frameworks/core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h",
+        "pattern_base": "frameworks/core/components_ng/pattern/navigation/navdestination_pattern_base.cpp",
+        "node_base": "frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_navdestination.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/nav_destination_modifier.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/nav_destination.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/nav_destination.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/NavDestinationModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/NavDestinationModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/navrouter/",
+        "test/unittest/core/pattern/navigation/"
       ],
       "status": "active",
       "last_verified": "2026-07-08"
