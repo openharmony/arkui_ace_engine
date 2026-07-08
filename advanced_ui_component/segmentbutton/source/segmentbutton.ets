@@ -34,6 +34,7 @@ const RESOURCE_TYPE_INTEGER = 10007;
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
+const SDK_API_VERSION_TWENTY_SIX: number = 26;
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -1434,7 +1435,7 @@ export struct SegmentButton {
     this.updateAnimatedProperty(null)
     if (this.isFirstOptionsChange) {
       this.isFirstOptionsChange = false;
-    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       let abilityContext = this.getUIContext().getHostContext()
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback)
@@ -1480,7 +1481,7 @@ export struct SegmentButton {
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
-    if (deviceInfo.sdkApiVersion >= 26) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       this.updateLanguageLineHeight();
       let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
@@ -1490,7 +1491,7 @@ export struct SegmentButton {
   }
 
   aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID != undefined) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX && this.environmentCallbackID !== undefined) {
       let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
