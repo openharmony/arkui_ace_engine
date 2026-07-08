@@ -2673,6 +2673,7 @@
       "OHOS::Ace::NG::TextPattern::UpdateFontColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::NG::TextPattern::UpdatePropertyImpl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::PropertyValueBase>)";
       "OHOS::Ace::NG::TextPattern::UpdateSelectionType(OHOS::Ace::SelectionInfo const&)";
+      "OHOS::Ace::NG::TextPattern::UpdateStyledStringByColorMode(bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSelectorOnHandleMove(OHOS::Ace::NG::OffsetT<float> const&, float, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSelectOverlayOrCreate(OHOS::Ace::NG::SelectOverlayInfo&, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSpanItemDragStatus(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&, bool)";

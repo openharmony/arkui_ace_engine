@@ -51,6 +51,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
@@ -908,6 +909,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -923,7 +926,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+            auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+            auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
@@ -943,8 +947,6 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         ParseUserGesture(args, gestureOption, "TextSpan");
         options.userGestureOption = std::move(gestureOption);
     }
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     int32_t spanIndex = 0;
     if (richEditorController) {
         spanIndex = richEditorController->AddTextSpan(options);
@@ -968,7 +970,8 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
-
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
         JSRef<JSVal> offset = spanObject->GetProperty("offset");
@@ -983,16 +986,14 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+            auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+            auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
             ParseJsCustomSymbolStyle(args[0], style, symbolId);
             options.style = style;
         }
     }
-
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     int32_t spanIndex = 0;
     if (richEditorController) {
         spanIndex = richEditorController->AddSymbolSpan(options);
@@ -1459,7 +1460,10 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
+    auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+    auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
     auto richEditorTextStyle = JSObjectCast(jsObject->GetProperty("textStyle"));
@@ -1480,8 +1484,6 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
     ParseTextUrlStyle(jsObject, updateSpanStyle_.updateUrlAddress);
 
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
     richEditorController->SetUpdateSpanStyle(updateSpanStyle_);
     richEditorController->UpdateSpanStyle(start, end, textStyle, imageStyle);
@@ -1638,7 +1640,9 @@ void JSRichEditorBaseControllerBinding::SetTypingStyle(const JSCallbackInfo& inf
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+    auto richEditorController = AceType::DynamicCast<NG::RichEditorController>(controller);
+    auto host = richEditorController ? richEditorController->GetHost() : nullptr;
+    auto theme = host ? host->GetTheme<NG::RichEditorTheme>(true) : nullptr;
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     bool isUndefined = false;
     if (info[0]->IsObject()) {

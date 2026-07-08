@@ -898,10 +898,16 @@ HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level0
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+ 	 * @tc.steps: step1. set selector
+ 	 */
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->isEditing_ = true;
     richEditorPattern->ResetSelectionAfterAddSpan(false);
+    /**
+ 	 * @tc.steps: step2. test caretTwinklingTask
+ 	 */
     EXPECT_TRUE(richEditorPattern->caretTwinklingTask_.Cancel());
 }
 

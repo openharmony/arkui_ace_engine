@@ -186,7 +186,8 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
 #endif
     isAPI16Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)),
     isAPI18Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)),
-    isAPI20Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY))
+    isAPI20Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)),
+    isAPI26Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX))
 {
     SetSpanStringMode(isStyledStringMode);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -6105,17 +6106,27 @@ void RichEditorPattern::UpdatePlaceholderFontColor(const Color& color)
     IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
 }
 
-void RichEditorPattern::OnColorConfigurationUpdate()
+void RichEditorPattern::UpdateLayoutPropertyColor()
 {
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(richEditorTheme && layoutProperty);
+
+    const auto& themeTextStyle = richEditorTheme->GetTextStyle();
+    layoutProperty->UpdateTextColor(themeTextStyle.GetTextColor());
+    layoutProperty->UpdateTextDecorationColor(themeTextStyle.GetTextDecorationColor());
+}
+
+void RichEditorPattern::UpdateSpanNodeByColorMode()
+{
+    CHECK_NULL_VOID(!isSpanStringMode_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateSpanNodeByColorMode");
     auto host = GetContentHost();
     auto theme = GetTheme<RichEditorTheme>();
-    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(host && theme && layoutProperty);
+    CHECK_NULL_VOID(host && theme);
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
     auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
-    layoutProperty->UpdateTextColor(themeTextColor);
-    layoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
     auto themeUrlSpanColor = GetUrlSpanColor();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
         themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
@@ -6139,6 +6150,22 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
         spanNode->ReloadResources();
     }
+}
+ 
+void RichEditorPattern::UpdateStyledStringByColorMode()
+{
+    CHECK_NULL_VOID(isSpanStringMode_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateStyledStringByColorMode");
+    TextPattern::UpdateStyledStringByColorMode();
+}
+
+void RichEditorPattern::HandleColorConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleColorConfigurationUpdate");
+    UpdateLayoutPropertyColor();
+    UpdateSpanNodeByColorMode();
+    UpdateStyledStringByColorMode();
+
     paragraphCache_.Clear();
     IF_PRESENT(typingTextStyle_, ReloadResources());
     IF_PRESENT(typingStyle_, ReloadResources());
@@ -6146,6 +6173,24 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     floatingCaretState_.UpdateOriginCaretColor();
     UpdateScrollBarColor(GetScrollBarColor());
+    auto host = GetContentHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
+}
+
+// dark_light callback
+void RichEditorPattern::OnColorConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnColorConfigurationUpdate");
+    HandleColorConfigurationUpdate();
+}
+
+// withTheme callback
+bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    CHECK_NULL_RETURN(isAPI26Plus, true);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnThemeScopeUpdate, id=%{public}d", themeScopeId);
+    HandleColorConfigurationUpdate();
+    return true;
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
