@@ -19,6 +19,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
@@ -66,6 +67,9 @@ public:
     void ClearAllRecognizers();
 
     void DumpRecognizerStates() const;
+
+    void CleanFinishedRecognizersWithStaleFingers(
+        int32_t currentFingerId, const std::unordered_map<int32_t, int32_t>& downFingerIds);
 
 private:
     bool CheckPendingTimeout(const RefPtr<NGGestureRecognizer>& recognizer, const RecognizerInfo& info);
