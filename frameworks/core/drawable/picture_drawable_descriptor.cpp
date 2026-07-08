@@ -15,53 +15,85 @@
 
 #include "picture_drawable_descriptor.h"
 
+#include <vector>
+
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/image_provider/image_utils.h"
 
 namespace OHOS::Ace {
+namespace {
+// Serialize FOV composition because the VPE contrast enhancer backend uses
+// shared native resources and is not assumed to be safe for concurrent calls.
+std::mutex g_vpeMutex;
+} // namespace
+
 PictureDrawableDescriptor::PictureDrawableDescriptor(const RefPtr<Picture>& picture)
     : picture_(picture)
 {}
 
 void PictureDrawableDescriptor::SetPicture(const RefPtr<Picture>& picture)
 {
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     picture_ = picture;
 }
 
 void PictureDrawableDescriptor::SetHdrComposition(const HdrCompositionConfig& config)
 {
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     hdrConfig_ = config;
 }
 
 RefPtr<PixelMap> PictureDrawableDescriptor::GetPixelMap()
 {
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     return cachedPixelMap_;
 }
 
 bool PictureDrawableDescriptor::IsHdrConfigValid() const
 {
-    return hdrConfig_.rect.width > 0 && hdrConfig_.rect.height > 0;
+    std::scoped_lock<std::mutex> lock(stateMutex_);
+    return IsHdrConfigValid(hdrConfig_);
 }
 
-RefPtr<PixelMap> PictureDrawableDescriptor::DoComposeFOV()
+bool PictureDrawableDescriptor::IsHdrConfigValid(const HdrCompositionConfig& config)
 {
-    if (!picture_ || !picture_->GetMainPixel()) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "DoComposeFOV picture is null");
+    return config.rect.width > 0 && config.rect.height > 0;
+}
+
+PictureDrawableDescriptor::LoadSnapshot PictureDrawableDescriptor::CreateLoadSnapshot() const
+{
+    std::scoped_lock<std::mutex> lock(stateMutex_);
+    return CreateLoadSnapshotLocked();
+}
+
+PictureDrawableDescriptor::LoadSnapshot PictureDrawableDescriptor::CreateLoadSnapshotLocked() const
+{
+    return { picture_, hdrConfig_ };
+}
+
+RefPtr<PixelMap> PictureDrawableDescriptor::DoComposeFOV(const LoadSnapshot& snapshot)
+{
+    if (!snapshot.picture) {
         return nullptr;
     }
     ACE_SCOPED_TRACE("DoComposeFOV");
-    auto oriPixelMap = picture_->GetMainPixel();
-    if (!oriPixelMap->IsHdr()) {
-        oriPixelMap = picture_->GetHdrComposedPixelMap(PixelFormat::UNKNOWN);
+    auto oriPixelMap = snapshot.picture->GetMainPixel();
+    if (!oriPixelMap) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "DoComposeFOV picture is null");
+        return nullptr;
     }
-    auto lhdrPixelMap = picture_->GetAuxPicturePixelMap(AuxiliaryPictureType::LHDR_GAINMAP);
+    if (!oriPixelMap->IsHdr()) {
+        oriPixelMap = snapshot.picture->GetHdrComposedPixelMap(PixelFormat::UNKNOWN);
+    }
+    auto lhdrPixelMap = snapshot.picture->GetAuxPicturePixelMap(AuxiliaryPictureType::LHDR_GAINMAP);
     if (!oriPixelMap || !lhdrPixelMap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "DoComposeFOV pixelMap is null, ori=%{public}d lhdr=%{public}d",
             oriPixelMap != nullptr, lhdrPixelMap != nullptr);
         return nullptr;
     }
+    std::scoped_lock<std::mutex> vpeLock(g_vpeMutex);
     if (!enhancer_) {
 #ifdef VPE_ENABLED
         enhancer_ = ContrastEnhancerImage::Create();
@@ -79,9 +111,8 @@ RefPtr<PixelMap> PictureDrawableDescriptor::DoComposeFOV()
             static_cast<int32_t>(setRet));
         return nullptr;
     }
-    ContrastEnhancerRect displayArea = {
-        hdrConfig_.rect.x, hdrConfig_.rect.y, hdrConfig_.rect.width, hdrConfig_.rect.height
-    };
+    auto rect = snapshot.hdrConfig.rect;
+    ContrastEnhancerRect displayArea = { rect.x, rect.y, rect.width, rect.height };
     ContrastEnhancerInfo info;
     RefPtr<PixelMap> outPixelMap;
     auto ret = enhancer_->ComposeFOVImage(displayArea, oriPixelMap, lhdrPixelMap, outPixelMap, info);
@@ -93,21 +124,29 @@ RefPtr<PixelMap> PictureDrawableDescriptor::DoComposeFOV()
     return outPixelMap;
 }
 
-DrawableDescriptorLoadResult PictureDrawableDescriptor::LoadSync()
+RefPtr<PixelMap> PictureDrawableDescriptor::LoadPixelMap(const LoadSnapshot& snapshot)
 {
-    if (!picture_) {
-        return { 0, 0, -1 };
+    if (!snapshot.picture) {
+        return nullptr;
     }
     RefPtr<PixelMap> pixelMap;
-    if (IsHdrConfigValid()) {
-        pixelMap = DoComposeFOV();
+    if (IsHdrConfigValid(snapshot.hdrConfig)) {
+        pixelMap = DoComposeFOV(snapshot);
     }
     if (!pixelMap) {
-        pixelMap = picture_->GetMainPixel();
+        pixelMap = snapshot.picture->GetMainPixel();
     }
+    return pixelMap;
+}
+
+DrawableDescriptorLoadResult PictureDrawableDescriptor::LoadSync()
+{
+    auto snapshot = CreateLoadSnapshot();
+    auto pixelMap = LoadPixelMap(snapshot);
     if (!pixelMap) {
         return { 0, 0, -1 };
     }
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     cachedPixelMap_ = pixelMap;
     return { pixelMap->GetWidth(), pixelMap->GetHeight(), 0 };
 }
@@ -126,31 +165,84 @@ void PictureDrawableDescriptor::LoadAsync(const LoadCallback&& callback)
 
 void PictureDrawableDescriptor::RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback)
 {
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     updateCallbacks_[nodeId] = std::move(callback);
 }
 
 void PictureDrawableDescriptor::UnRegisterUpdateCallback(int32_t nodeId)
 {
+    std::scoped_lock<std::mutex> lock(stateMutex_);
     updateCallbacks_.erase(nodeId);
 }
 
 void PictureDrawableDescriptor::Invalidate()
 {
-    NG::ImageUtils::PostToBg(
-        [weak = WeakClaim(this)]() {
-            auto self = weak.Upgrade();
-            CHECK_NULL_VOID(self);
-            self->LoadSync();
-            auto pixelMap = self->GetPixelMap();
-            if (!pixelMap) {
-                return;
+    PostInvalidateTask(EnqueueInvalidateTask());
+}
+
+CancelableCallback<void()> PictureDrawableDescriptor::EnqueueInvalidateTask()
+{
+    std::scoped_lock<std::mutex> lock(stateMutex_);
+    auto snapshot = CreateLoadSnapshotLocked();
+    if (!isInvalidateTaskInFlight_) {
+        isInvalidateTaskInFlight_ = true;
+        CancelableCallback<void()> task(MakeInvalidateTask(snapshot));
+        return task;
+    }
+
+    // A task is already posted or running. Keep a single pending slot and
+    // replace it with the newest invalidate request.
+    latestPendingInvalidateTask_.Reset(MakeInvalidateTask(snapshot));
+    return {};
+}
+
+std::function<void()> PictureDrawableDescriptor::MakeInvalidateTask(const LoadSnapshot& snapshot)
+{
+    return [weak = WeakClaim(this), snapshot]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->RunInvalidateTask(snapshot);
+    };
+}
+
+CancelableCallback<void()> PictureDrawableDescriptor::TakeNextInvalidateTask()
+{
+    std::scoped_lock<std::mutex> lock(stateMutex_);
+    if (!latestPendingInvalidateTask_) {
+        isInvalidateTaskInFlight_ = false;
+        return {};
+    }
+    auto pendingTask = latestPendingInvalidateTask_;
+    latestPendingInvalidateTask_ = CancelableCallback<void()>();
+    return pendingTask;
+}
+
+void PictureDrawableDescriptor::PostInvalidateTask(CancelableCallback<void()> task)
+{
+    if (!task) {
+        return;
+    }
+    NG::ImageUtils::PostToBg(task, "PictureDrawableInvalidate");
+}
+
+void PictureDrawableDescriptor::RunInvalidateTask(const LoadSnapshot& snapshot)
+{
+    auto pixelMap = LoadPixelMap(snapshot);
+    std::vector<UpdateCallback> callbacks;
+    {
+        std::scoped_lock<std::mutex> lock(stateMutex_);
+        if (pixelMap) {
+            cachedPixelMap_ = pixelMap;
+            for (auto& [_, callback] : updateCallbacks_) {
+                callbacks.emplace_back(callback);
             }
-            for (auto& [nodeId, callback] : self->updateCallbacks_) {
-                if (callback) {
-                    callback(pixelMap);
-                }
-            }
-        },
-        "PictureDrawableInvalidate");
+        }
+    }
+    for (auto& callback : callbacks) {
+        if (callback) {
+            callback(pixelMap);
+        }
+    }
+    PostInvalidateTask(TakeNextInvalidateTask());
 }
 } // namespace OHOS::Ace

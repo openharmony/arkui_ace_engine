@@ -24,13 +24,13 @@ test_sources = [
 if (is_host_product) {
   ace_unittest("image_animator_test_ng") {
     type = "host_components"
-    module_name = "ImageSet-DrawableDescriptor"
+    module_name = "ImageSet-ImageAnimator"
     sources = test_sources
   }
 } else {
   ace_unittest("image_animator_test_ng") {
     type = "new"
-    module_name = "ImageSet-DrawableDescriptor"
+    module_name = "ImageSet-ImageAnimator"
     sources = test_sources
     if (!ace_enable_full_test_suite) {
       sources -= [

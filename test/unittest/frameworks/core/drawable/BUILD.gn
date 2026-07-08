@@ -13,8 +13,16 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("drawable_descriptor_test") {
-  type = "new"
-  module_name = "DrawableSet-Drawable"
-  sources = [ "drawable_descriptor_test.cpp" ]
+if (is_host_product) {
+  ace_unittest("drawable_descriptor_test") {
+    type = "host_components"
+    module_name = "ImageSet-DrawableDescriptor"
+    sources = [ "drawable_descriptor_test.cpp" ]
+  }
+} else {
+  ace_unittest("drawable_descriptor_test") {
+    type = "new"
+    module_name = "ImageSet-DrawableDescriptor"
+    sources = [ "drawable_descriptor_test.cpp" ]
+  }
 }

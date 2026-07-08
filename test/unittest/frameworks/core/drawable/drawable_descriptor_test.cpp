@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/error/error_code.h"
+#include "base/thread/cancelable_callback.h"
 #include "core/components_ng/render/drawing.h"
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 #include "test/mock/frameworks/base/image/mock_picture.h"
@@ -1453,6 +1454,103 @@ HWTEST_F(DrawableDescriptorTest, PictureDrawableDescTest011, TestSize.Level1)
     config.rect.height = 200;
     desc.SetHdrComposition(config);
     EXPECT_TRUE(desc.IsHdrConfigValid());
+}
+
+/**
+ * @tc.name: PictureDrawableDescTest012
+ * @tc.desc: EnqueueInvalidateTask posts immediately when no task is running
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, PictureDrawableDescTest012, TestSize.Level1)
+{
+    PictureDrawableDescriptor desc;
+
+    auto firstTask = desc.EnqueueInvalidateTask();
+
+    EXPECT_TRUE(firstTask);
+    EXPECT_TRUE(desc.isInvalidateTaskInFlight_);
+    EXPECT_FALSE(desc.latestPendingInvalidateTask_);
+}
+
+/**
+ * @tc.name: PictureDrawableDescTest013
+ * @tc.desc: EnqueueInvalidateTask keeps only one latest pending task when a task is running
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, PictureDrawableDescTest013, TestSize.Level1)
+{
+    PictureDrawableDescriptor desc;
+    bool oldPendingTaskCalled = false;
+
+    auto firstTask = desc.EnqueueInvalidateTask();
+    EXPECT_TRUE(firstTask);
+    desc.latestPendingInvalidateTask_.Reset([&oldPendingTaskCalled]() { oldPendingTaskCalled = true; });
+    auto oldPendingTask = desc.latestPendingInvalidateTask_;
+
+    auto task = desc.EnqueueInvalidateTask();
+
+    EXPECT_FALSE(task);
+    oldPendingTask();
+    EXPECT_FALSE(oldPendingTaskCalled);
+
+    auto latestTask = desc.TakeNextInvalidateTask();
+    EXPECT_TRUE(latestTask);
+    EXPECT_TRUE(desc.isInvalidateTaskInFlight_);
+    EXPECT_FALSE(desc.latestPendingInvalidateTask_);
+}
+
+/**
+ * @tc.name: PictureDrawableDescTest014
+ * @tc.desc: RunInvalidateTask publishes the result captured by a started task
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, PictureDrawableDescTest014, TestSize.Level1)
+{
+    PictureDrawableDescriptor desc;
+    bool callbackCalled = false;
+    auto picture = AceType::MakeRefPtr<MockPicture>();
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*picture, GetMainPixel()).WillOnce(Return(pixelMap));
+    desc.SetPicture(picture);
+    desc.RegisterUpdateCallback(1, [&callbackCalled](const RefPtr<PixelMap>&) { callbackCalled = true; });
+    auto snapshot = desc.CreateLoadSnapshot();
+    HdrCompositionConfig config;
+    config.rect.width = 100;
+    config.rect.height = 100;
+    desc.SetHdrComposition(config);
+
+    desc.isInvalidateTaskInFlight_ = true;
+    desc.RunInvalidateTask(snapshot);
+
+    EXPECT_EQ(desc.cachedPixelMap_, pixelMap);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(desc.isInvalidateTaskInFlight_);
+}
+
+/**
+ * @tc.name: PictureDrawableDescTest015
+ * @tc.desc: RunInvalidateTask caches current result and invokes callbacks outside state lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, PictureDrawableDescTest015, TestSize.Level1)
+{
+    PictureDrawableDescriptor desc;
+    bool callbackCalled = false;
+    auto picture = AceType::MakeRefPtr<MockPicture>();
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*picture, GetMainPixel()).WillOnce(Return(pixelMap));
+    desc.SetPicture(picture);
+    desc.RegisterUpdateCallback(1, [&desc, &callbackCalled](const RefPtr<PixelMap>&) {
+        callbackCalled = true;
+        desc.UnRegisterUpdateCallback(1);
+    });
+    desc.isInvalidateTaskInFlight_ = true;
+    desc.RunInvalidateTask(desc.CreateLoadSnapshot());
+
+    EXPECT_EQ(desc.cachedPixelMap_, pixelMap);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_TRUE(desc.updateCallbacks_.empty());
+    EXPECT_FALSE(desc.isInvalidateTaskInFlight_);
 }
 
 /*============================================================================
