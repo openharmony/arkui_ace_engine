@@ -1137,13 +1137,14 @@ bool GetDialogBaseOptions(napi_env env, napi_value options, DialogProperties& di
     }
     {
         napi_value levelOrderApi = nullptr;
-        napi_valuetype loType = napi_undefined;
         napi_get_named_property(env, options, "levelOrder", &levelOrderApi);
-        napi_typeof(env, levelOrderApi, &loType);
-        if (loType == napi_number) {
-            double levelOrder = 0.0;
-            napi_get_value_double(env, levelOrderApi, &levelOrder);
-            dialogProps.levelOrder = levelOrder;
+        NG::LevelOrder* levelOrder = nullptr;
+        if (levelOrderApi) {
+            napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
+        }
+
+        if (levelOrder) {
+            dialogProps.levelOrder = std::make_optional(levelOrder->GetOrder());
         }
     }
 

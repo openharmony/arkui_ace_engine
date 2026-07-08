@@ -205,8 +205,10 @@ napi_value JSPresentCustomDialog(napi_env env, napi_callback_info info)
         return result;
     }
 
-    if (argc >= MAX_PARAM_COUNT) {
-        GetCustomDialogOptions(env, argv[PARAM_INDEX_SECOND], dialogProps);
+    if (argc >= MAX_PARAM_COUNT && !GetCustomDialogOptions(env, argv[PARAM_INDEX_SECOND], dialogProps)) {
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
     auto finishCallback = CreatePresentCustomFinishCallback(context);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -292,8 +294,10 @@ napi_value JSUpdateCustomDialog(napi_env env, napi_callback_info info)
     }
 
     DialogProperties dialogProps;
-    if (argc >= MAX_PARAM_COUNT) {
-        GetDialogBaseOptions(env, argv[PARAM_INDEX_SECOND], dialogProps);
+    if (argc >= MAX_PARAM_COUNT && !GetDialogBaseOptions(env, argv[PARAM_INDEX_SECOND], dialogProps)) {
+        RejectPromise(env, context->deferred, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        context->deferred = nullptr;
+        return result;
     }
 
     auto finishCallback = CreateUpdateFinishCallback(context);
@@ -335,7 +339,6 @@ napi_value JSDismissDialog(napi_env env, napi_callback_info info)
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[PARAM_INDEX_FIRST], &valueType);
-    TAG_LOGI(AceLogTag::ACE_MENU, "hxw valueType: %{public}d", (int)valueType);
 
     if (valueType == napi_number) {
         int32_t dialogId = 0;
@@ -374,7 +377,6 @@ napi_value JSDismissDialog(napi_env env, napi_callback_info info)
         context->deferred = nullptr;
         return result;
     }
-    TAG_LOGI(AceLogTag::ACE_MENU, "hxw GetFrameNodePtr success");
 
     auto finishCallback = CreateDismissFinishCallback(context);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
