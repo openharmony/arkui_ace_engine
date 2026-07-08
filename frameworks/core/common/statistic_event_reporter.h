@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STATISTIC_EVENT_REPORTRE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STATISTIC_EVENT_REPORTRE_H
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -111,16 +112,37 @@ public:
     StatisticEventReporter();
     explicit StatisticEventReporter(int32_t instanceId);
     virtual ~StatisticEventReporter() = default;
+
+    /**
+     * Send statistic event. This method should ONLY be called from the main thread.
+     * Calling from non-main threads may cause data race and undefined behavior.
+     * For multi-thread scenarios, use SendEventSafe() instead.
+     *
+     * @param eventType The type of statistic event to send.
+     */
     ACE_FORCE_EXPORT void SendEvent(StatisticEventType eventType);
+
+    /**
+     * Send statistic event safely. This method is thread-safe and can be called from
+     * any thread (main thread or worker threads). It uses mutex to protect concurrent
+     * access to internal event map and atomic counter.
+     *
+     * @param eventType The type of statistic event to send.
+     */
+    void SendEventSafe(StatisticEventType eventType);
     void TryReportStatisticEvents(PipelineBase* pipeline);
     void ForceReportStatisticEvents();
 private:
     void ReportStatisticEvents(const std::map<StatisticEventType, StatisticEventInfo>& events);
     StatisticEventInfo ConvertToEvent(StatisticEventType eventType);
+    void MergeEvents(std::map<StatisticEventType, StatisticEventInfo>& target,
+                     const std::map<StatisticEventType, StatisticEventInfo>& source);
     int32_t totalEventCount_ = 0;
+    std::atomic<int32_t> concurrentEventCount_{0};
     StatisticAppInfo appInfo_;
     std::map<StatisticEventType, StatisticEventInfo> statisitcEventMap_;
-    std::mutex statisitcEventMutex_;
+    std::map<StatisticEventType, StatisticEventInfo> concurrentEventMap_;
+    std::mutex concurrentMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STATISTIC_EVENT_REPORTRE_H

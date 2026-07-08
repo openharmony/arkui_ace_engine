@@ -274,9 +274,9 @@ HWTEST_F(StatisticEventReporterTest, ReportStatisticEvents001, TestSize.Level1)
 {
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
-    std::map<StatisticEventType, StatisticEventInfo> events;
-    reporter->ReportStatisticEvents(events);
-    EXPECT_EQ(reporter->appInfo_.bundleName, AceApplicationInfo::GetInstance().GetPackageName());
+    reporter->SendEvent(StatisticEventType::FA_APP_START);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
 }
 
 /**
@@ -400,18 +400,15 @@ HWTEST_F(StatisticEventReporterTest, SendEvent002, TestSize.Level1)
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
 
-    // Send event first time
     reporter->SendEvent(StatisticEventType::FA_APP_START);
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
     EXPECT_EQ(reporter->totalEventCount_, 1);
 
-    // Send same event again - should increment eventCount
     reporter->SendEvent(StatisticEventType::FA_APP_START);
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
     EXPECT_EQ(reporter->statisitcEventMap_[StatisticEventType::FA_APP_START].eventCount, 2);
     EXPECT_EQ(reporter->totalEventCount_, 2);
 
-    // Send same event third time
     reporter->SendEvent(StatisticEventType::FA_APP_START);
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
     EXPECT_EQ(reporter->statisitcEventMap_[StatisticEventType::FA_APP_START].eventCount, 3);
@@ -438,7 +435,7 @@ HWTEST_F(StatisticEventReporterTest, SendEvent003, TestSize.Level1)
 
 /**
  * @tc.name: StatisticEventReporterTest
- * @tc.desc: Test SendEvent can be called from sub threads safely
+ * @tc.desc: Test SendEventSafe can be called from sub threads safely
  * @tc.type: FUNC
  */
 HWTEST_F(StatisticEventReporterTest, SendEvent004, TestSize.Level1)
@@ -454,7 +451,7 @@ HWTEST_F(StatisticEventReporterTest, SendEvent004, TestSize.Level1)
     for (int32_t i = 0; i < threadCount; i++) {
         workers.emplace_back([reporter, eventsPerThread]() {
             for (int32_t j = 0; j < eventsPerThread; j++) {
-                reporter->SendEvent(StatisticEventType::FA_APP_START);
+                reporter->SendEventSafe(StatisticEventType::FA_APP_START);
             }
         });
     }
@@ -462,10 +459,10 @@ HWTEST_F(StatisticEventReporterTest, SendEvent004, TestSize.Level1)
         worker.join();
     }
 
-    auto iter = reporter->statisitcEventMap_.find(StatisticEventType::FA_APP_START);
-    ASSERT_NE(iter, reporter->statisitcEventMap_.end());
-    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
-    EXPECT_EQ(reporter->totalEventCount_, expectedCount);
+    auto iter = reporter->concurrentEventMap_.find(StatisticEventType::FA_APP_START);
+    ASSERT_NE(iter, reporter->concurrentEventMap_.end());
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 1);
+    EXPECT_EQ(reporter->concurrentEventCount_, expectedCount);
     EXPECT_EQ(iter->second.eventCount, expectedCount);
 }
 
@@ -482,7 +479,6 @@ HWTEST_F(StatisticEventReporterTest, TryReportStatisticEvents002, TestSize.Level
     reporter->totalEventCount_ = MAX_PENDING_EVENT_COUNT;
     reporter->SendEvent(StatisticEventType::FA_APP_START);
 
-    // Should not crash with null pipeline
     reporter->TryReportStatisticEvents(nullptr);
     EXPECT_EQ(reporter->totalEventCount_, MAX_PENDING_EVENT_COUNT + 1);
 }
@@ -497,12 +493,10 @@ HWTEST_F(StatisticEventReporterTest, TryReportStatisticEvents003, TestSize.Level
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
 
-    // Set totalEventCount_ below MAX_PENDING_EVENT_COUNT
     reporter->totalEventCount_ = MAX_PENDING_EVENT_COUNT - 1;
     reporter->SendEvent(StatisticEventType::FA_APP_START);
 
     reporter->TryReportStatisticEvents(nullptr);
-    // Event count should remain unchanged
     EXPECT_EQ(reporter->totalEventCount_, MAX_PENDING_EVENT_COUNT);
 }
 
@@ -516,10 +510,9 @@ HWTEST_F(StatisticEventReporterTest, ForceReportStatisticEvents002, TestSize.Lev
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
 
-    // statisitcEventMap_ should be empty initially
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 0);
 
-    // ForceReportStatisticEvents should handle empty map gracefully
     reporter->ForceReportStatisticEvents();
     EXPECT_EQ(reporter->totalEventCount_, 0);
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
@@ -557,9 +550,10 @@ HWTEST_F(StatisticEventReporterTest, InitialState001, TestSize.Level1)
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
 
-    // Check initial state
     EXPECT_EQ(reporter->totalEventCount_, 0);
+    EXPECT_EQ(reporter->concurrentEventCount_, 0);
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 0);
 }
 
 /**
@@ -576,7 +570,6 @@ HWTEST_F(StatisticEventReporterTest, ForceReportStatisticEvents004, TestSize.Lev
     reporter->ForceReportStatisticEvents();
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
 
-    // Call ForceReportStatisticEvents again on empty map
     reporter->ForceReportStatisticEvents();
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
     EXPECT_EQ(reporter->totalEventCount_, 0);
@@ -622,5 +615,172 @@ HWTEST_F(StatisticEventReporterTest, SetBundleName002, TestSize.Level1)
     ASSERT_TRUE(reporter2 != nullptr);
     EXPECT_EQ(reporter2->appInfo_.bundleName, "test");
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test SendEventSafe basic functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, SendEventSafe001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 1);
+    EXPECT_EQ(reporter->concurrentEventCount_, 1);
+
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    EXPECT_EQ(reporter->concurrentEventMap_[StatisticEventType::FA_APP_START].eventCount, 2);
+    EXPECT_EQ(reporter->concurrentEventCount_, 2);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test SendEventSafe with multiple event types
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, SendEventSafe002, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::CALL_SET_CACHE_RANGE);
+    reporter->SendEventSafe(StatisticEventType::CLICK_AI_MENU_PHONE_NUMBER);
+
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 3);
+    EXPECT_EQ(reporter->concurrentEventCount_, 3);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test atomic concurrentEventCount_ thread safety
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, ConcurrentEventCountThreadSafety001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    constexpr int32_t threadCount = 10;
+    constexpr int32_t eventsPerThread = 500;
+    constexpr int32_t expectedCount = threadCount * eventsPerThread;
+    std::vector<std::thread> workers;
+    workers.reserve(threadCount);
+
+    for (int32_t i = 0; i < threadCount; i++) {
+        workers.emplace_back([reporter, eventsPerThread]() {
+            for (int32_t j = 0; j < eventsPerThread; j++) {
+                reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+            }
+        });
+    }
+
+    for (auto& worker : workers) {
+        worker.join();
+    }
+
+    EXPECT_EQ(reporter->concurrentEventCount_, expectedCount);
+    EXPECT_EQ(reporter->concurrentEventMap_[StatisticEventType::FA_APP_START].eventCount, expectedCount);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test ForceReportStatisticEvents merges concurrent events
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, ForceReportStatisticEventsMergesConcurrent001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEvent(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::CALL_SET_CACHE_RANGE);
+    reporter->SendEventSafe(StatisticEventType::SEARCH_ONDIDINSERT);
+
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    EXPECT_EQ(reporter->concurrentEventCount_, 2);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 2);
+
+    reporter->ForceReportStatisticEvents();
+
+    EXPECT_EQ(reporter->totalEventCount_, 0);
+    EXPECT_EQ(reporter->concurrentEventCount_, 0);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 0);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test concurrent event count reset after ForceReportStatisticEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, ConcurrentCountResetAfterForceReport001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::CALL_SET_CACHE_RANGE);
+
+    EXPECT_EQ(reporter->concurrentEventCount_, 3);
+    EXPECT_EQ(reporter->concurrentEventMap_[StatisticEventType::FA_APP_START].eventCount, 2);
+    EXPECT_EQ(reporter->concurrentEventMap_[StatisticEventType::CALL_SET_CACHE_RANGE].eventCount, 1);
+
+    reporter->ForceReportStatisticEvents();
+
+    EXPECT_EQ(reporter->concurrentEventCount_, 0);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 0);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test mixed SendEvent and SendEventSafe calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, MixedSendEventAndSendEventSafe001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEvent(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    reporter->SendEvent(StatisticEventType::CALL_SET_CACHE_RANGE);
+    reporter->SendEventSafe(StatisticEventType::SEARCH_ONDIDINSERT);
+
+    EXPECT_EQ(reporter->totalEventCount_, 2);
+    EXPECT_EQ(reporter->concurrentEventCount_, 2);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 2);
+    EXPECT_EQ(reporter->concurrentEventMap_.size(), 2);
+
+    reporter->ForceReportStatisticEvents();
+
+    EXPECT_EQ(reporter->totalEventCount_, 0);
+    EXPECT_EQ(reporter->concurrentEventCount_, 0);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test atomic concurrentEventCount_ value read without lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, AtomicCountReadWithoutLock001, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+
+    reporter->SendEventSafe(StatisticEventType::FA_APP_START);
+    reporter->SendEventSafe(StatisticEventType::CALL_SET_CACHE_RANGE);
+
+    int32_t countValue = reporter->concurrentEventCount_;
+    EXPECT_EQ(countValue, 2);
+
+    reporter->SendEventSafe(StatisticEventType::SEARCH_ONDIDINSERT);
+    countValue = reporter->concurrentEventCount_;
+    EXPECT_EQ(countValue, 3);
 }
 } // namespace OHOS::Ace

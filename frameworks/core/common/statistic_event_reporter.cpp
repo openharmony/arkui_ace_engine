@@ -167,7 +167,6 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
 
 void StatisticEventReporter::SendEvent(StatisticEventType eventType)
 {
-    std::unique_lock<std::mutex> lock(statisitcEventMutex_);
     auto iter = statisitcEventMap_.find(eventType);
     if (iter == statisitcEventMap_.end()) {
         StatisticEventInfo event = ConvertToEvent(eventType);
@@ -182,6 +181,36 @@ void StatisticEventReporter::SendEvent(StatisticEventType eventType)
     totalEventCount_++;
 }
 
+void StatisticEventReporter::SendEventSafe(StatisticEventType eventType)
+{
+    std::lock_guard<std::mutex> lock(concurrentMutex_);
+    auto iter = concurrentEventMap_.find(eventType);
+    if (iter == concurrentEventMap_.end()) {
+        StatisticEventInfo event = ConvertToEvent(eventType);
+        if (event.eventName == "") {
+            TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "invalid statistic event type");
+            return;
+        }
+        concurrentEventMap_[eventType] = event;
+    } else {
+        iter->second.eventCount++;
+    }
+    concurrentEventCount_++;
+}
+
+void StatisticEventReporter::MergeEvents(std::map<StatisticEventType, StatisticEventInfo>& target,
+    const std::map<StatisticEventType, StatisticEventInfo>& source)
+{
+    for (const auto& pair : source) {
+        auto iter = target.find(pair.first);
+        if (iter == target.end()) {
+            target[pair.first] = pair.second;
+        } else {
+            iter->second.eventCount += pair.second.eventCount;
+        }
+    }
+}
+
 void StatisticEventReporter::ReportStatisticEvents(const std::map<StatisticEventType, StatisticEventInfo>& events)
 {
     StatisticEventAdapter::ReportStatisticEvents(appInfo_, events);
@@ -190,17 +219,25 @@ void StatisticEventReporter::ReportStatisticEvents(const std::map<StatisticEvent
 void StatisticEventReporter::TryReportStatisticEvents(PipelineBase* pipeline)
 {
     CHECK_NULL_VOID(pipeline);
+    if ((totalEventCount_ + concurrentEventCount_) < MAX_PENDING_EVENT_COUNT) {
+        return;
+    }
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+
     std::map<StatisticEventType, StatisticEventInfo> statisitcEvents;
+    std::swap(statisitcEvents, statisitcEventMap_);
+    totalEventCount_ = 0;
+
+    std::map<StatisticEventType, StatisticEventInfo> concurrentEvents;
     {
-        std::unique_lock<std::mutex> lock(statisitcEventMutex_);
-        if (totalEventCount_ < MAX_PENDING_EVENT_COUNT) {
-            return;
-        }
-        std::swap(statisitcEvents, statisitcEventMap_);
-        totalEventCount_ = 0;
+        std::lock_guard<std::mutex> lock(concurrentMutex_);
+        std::swap(concurrentEvents, concurrentEventMap_);
+        concurrentEventCount_ = 0;
     }
+
+    MergeEvents(statisitcEvents, concurrentEvents);
+
     executor->PostTask(
         [statisitcEvents = std::move(statisitcEvents), reporter = shared_from_this()] () {
             if (reporter) {
@@ -211,15 +248,22 @@ void StatisticEventReporter::TryReportStatisticEvents(PipelineBase* pipeline)
 
 void StatisticEventReporter::ForceReportStatisticEvents()
 {
-    std::map<StatisticEventType, StatisticEventInfo> statisitcEvents;
-    {
-        std::unique_lock<std::mutex> lock(statisitcEventMutex_);
-        if (statisitcEventMap_.size() == 0) {
-            return;
-        }
-        std::swap(statisitcEvents, statisitcEventMap_);
-        totalEventCount_ = 0;
+    if (totalEventCount_ == 0 && concurrentEventCount_ == 0) {
+        return;
     }
+
+    std::map<StatisticEventType, StatisticEventInfo> statisitcEvents;
+    std::swap(statisitcEvents, statisitcEventMap_);
+    totalEventCount_ = 0;
+
+    std::map<StatisticEventType, StatisticEventInfo> concurrentEvents;
+    {
+        std::lock_guard<std::mutex> lock(concurrentMutex_);
+        std::swap(concurrentEvents, concurrentEventMap_);
+        concurrentEventCount_ = 0;
+    }
+
+    MergeEvents(statisitcEvents, concurrentEvents);
     ReportStatisticEvents(statisitcEvents);
 }
 } // namespace OHOS::Ace
