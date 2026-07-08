@@ -8478,6 +8478,10 @@ void WebDelegate::OnNativeEmbedAllDestory()
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetSurfaceIdByHtmlElementId html element id is empty");
+        return "";
+    }
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
@@ -8516,6 +8520,10 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
         return -1;
     }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetWebAccessibilityIdBySurfaceId html element id is empty");
+        return -1;
+    }
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;
 }

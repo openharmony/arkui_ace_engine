@@ -8129,6 +8129,16 @@ void JsAccessibilityManager::ExecuteWebAction(const int64_t elementId, const Act
     }
 
     actionResult = ExecuteWebActionNG(elementId, action, actionArguments, webPattern);
+    if (action == ActionType::ACCESSIBILITY_ACTION_CLICK && webPattern) {
+        auto node = webPattern->GetTransitionalNodeById(elementId);
+        if (node && !node->GetIsClickable()) {
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "ExecuteWebAction click action result is false because node is not clickable, "
+                "elementId: %{public}" PRId64 ", requestId: %{public}d",
+                elementId, requestId);
+            actionResult = false;
+        }
+    }
     SetExecuteActionResult(callback, actionResult, requestId);
 }
 
