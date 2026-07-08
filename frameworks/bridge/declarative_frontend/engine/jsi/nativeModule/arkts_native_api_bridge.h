@@ -79,7 +79,6 @@ private:
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #endif
-    static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGlobalMethods(Local<panda::ObjectRef> object, EcmaVM* vm);

@@ -837,6 +837,7 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeShown_;
+#else
         return connection_;
 #endif
     }
