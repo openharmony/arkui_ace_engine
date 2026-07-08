@@ -249,6 +249,15 @@ protected:
     std::map<int32_t, float> unLayoutedItems_;
 
 private:
+    bool IsVsyncExecutionTimeExceeded(LayoutWrapper* layoutWrapper) const;
+
+    float EstimatePlaceholderMainSize(LayoutWrapper* layoutWrapper);
+
+    RefPtr<LayoutWrapper> CreateGridItemPlaceholder(LayoutWrapper* layoutWrapper);
+
+    RefPtr<LayoutWrapper> GetGridItemOrPlaceholder(
+        LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree = true, bool isCache = false);
+
     /**
      * @brief Measure items on a line previously recorded
      *
@@ -292,6 +301,7 @@ private:
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
+    std::map<int32_t, RefPtr<LayoutWrapper>> placeholderGridItems_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
     GridReloadReason reason_ = GridReloadReason::INIT;

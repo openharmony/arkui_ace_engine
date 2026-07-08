@@ -18,8 +18,10 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/feature_param.h"
+#include "base/utils/time_util.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
@@ -27,10 +29,13 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint64_t GRID_VSYNC_PLACEHOLDER_THRESHOLD_NS = 8 * 1000 * 1000;
+
 void AddCacheItemsInFront(
     int32_t startIdx, LayoutWrapper* host, int32_t cacheCnt, std::list<GridPreloadItem>& buildList)
 {
@@ -46,9 +51,94 @@ void AddCacheItemsInFront(
 }
 } // namespace
 
+bool GridScrollLayoutAlgorithm::IsVsyncExecutionTimeExceeded(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto vsyncTime = context->GetVsyncTime();
+    if (vsyncTime == 0) {
+        return false;
+    }
+    auto currentTime = GetSysTimestamp();
+    if (currentTime < 0 || static_cast<uint64_t>(currentTime) <= vsyncTime) {
+        return false;
+    }
+    return static_cast<uint64_t>(currentTime) - vsyncTime > GRID_VSYNC_PLACEHOLDER_THRESHOLD_NS;
+}
+
+RefPtr<LayoutWrapper> GridScrollLayoutAlgorithm::GetGridItemOrPlaceholder(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    auto existingWrapper = layoutWrapper->GetChildByIndex(index, isCache);
+    if (existingWrapper) {
+        return GetGridItem(layoutWrapper, index, addToRenderTree, isCache);
+    }
+    auto placeholderIter = placeholderGridItems_.find(index);
+    if (placeholderIter != placeholderGridItems_.end()) {
+        return placeholderIter->second;
+    }
+    if (addToRenderTree && !isCache && !syncLoad_ && IsVsyncExecutionTimeExceeded(layoutWrapper)) {
+        auto placeholder = CreateGridItemPlaceholder(layoutWrapper);
+        if (placeholder) {
+            placeholderGridItems_[index] = placeholder;
+        }
+        return placeholder;
+    }
+    return GetGridItem(layoutWrapper, index, addToRenderTree, isCache);
+}
+
+float GridScrollLayoutAlgorithm::EstimatePlaceholderMainSize(LayoutWrapper* layoutWrapper)
+{
+    auto lineHeight = info_.lineHeightMap_.find(currentMainLineIndex_);
+    if (lineHeight != info_.lineHeightMap_.end() && GreatNotEqual(lineHeight->second, 0.0f)) {
+        return lineHeight->second;
+    }
+    auto averageLineHeight = info_.GetAverageLineHeight();
+    if (GreatNotEqual(averageLineHeight, 0.0f)) {
+        return averageLineHeight;
+    }
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    if (LessNotEqual(mainCount_, Infinity<uint32_t>()) && mainCount_ > 0) {
+        auto mainSize = geometryNode->GetFrameSize().MainSize(info_.axis_);
+        if (GreatNotEqual(mainSize, 0.0f) && LessNotEqual(mainSize, Infinity<float>())) {
+            auto totalGap = mainGap_ * (static_cast<float>(mainCount_) - 1.0f);
+            auto estimatedMainSize = std::max((mainSize - totalGap) / static_cast<float>(mainCount_), 0.0f);
+            if (GreatNotEqual(estimatedMainSize, 0.0f)) {
+                return estimatedMainSize;
+            }
+        }
+    }
+    if (!itemsCrossSize_.empty()) {
+        return GetOrDefault(itemsCrossSize_, 0, 0.0f);
+    }
+    return 0.0f;
+}
+
+RefPtr<LayoutWrapper> GridScrollLayoutAlgorithm::CreateGridItemPlaceholder(LayoutWrapper* layoutWrapper)
+{
+    auto placeholder = GridItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    CHECK_NULL_RETURN(placeholder, nullptr);
+    auto placeholderMainSize = EstimatePlaceholderMainSize(layoutWrapper);
+    if (GreatNotEqual(placeholderMainSize, 0.0f)) {
+        auto layoutProperty = placeholder->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, placeholder);
+        layoutProperty->UpdateUserDefinedIdealSize(info_.axis_ == Axis::VERTICAL
+                                                       ? CalcSize(std::nullopt, CalcLength(placeholderMainSize))
+                                                       : CalcSize(CalcLength(placeholderMainSize), std::nullopt));
+    }
+    return placeholder;
+}
+
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     wrapper_ = layoutWrapper;
+    placeholderGridItems_.clear();
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
 
@@ -344,8 +434,15 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 offset.SetY(crossOffset);
             }
-            auto wrapper = isCache ? layoutWrapper->GetChildByIndex(itemIdex, true)
-                                   : GetGridItem(layoutWrapper, itemIdex);
+            RefPtr<LayoutWrapper> wrapper;
+            auto placeholderIter = placeholderGridItems_.find(itemIdex);
+            if (isCache) {
+                wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
+            } else if (placeholderIter != placeholderGridItems_.end()) {
+                wrapper = placeholderIter->second;
+            } else {
+                wrapper = GetGridItem(layoutWrapper, itemIdex);
+            }
             if (!wrapper) {
                 continue;
             }
@@ -829,7 +926,7 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
             if (currentIndex >= childrenCount) {
                 break;
             }
-            auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
+            auto itemWrapper = GetGridItemOrPlaceholder(layoutWrapper, currentIndex);
             if (!itemWrapper) {
                 break;
             }
@@ -1529,7 +1626,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         currentIndex = itemIter->second;
 
         // Step1. Get wrapper of [GridItem]
-        auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
+        auto itemWrapper = GetGridItemOrPlaceholder(layoutWrapper, currentIndex);
         if (!itemWrapper) {
             break;
         }
@@ -1575,7 +1672,7 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     auto endMainLineIndex = info_.endMainLineIndex_;
     auto endIndex = info_.endIndex_;
     auto firstItem = GetStartingItem(layoutWrapper, currentIndex - 1);
-    auto itemWrapper = GetGridItem(layoutWrapper, firstItem);
+    auto itemWrapper = GetGridItemOrPlaceholder(layoutWrapper, firstItem);
     CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = info_.axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
@@ -1676,7 +1773,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             break;
         }
         // Step1. Get wrapper of [GridItem]
-        auto itemWrapper = GetGridItem(layoutWrapper, currentIndex);
+        auto itemWrapper = GetGridItemOrPlaceholder(layoutWrapper, currentIndex);
         if (!itemWrapper) {
             if (currentIndex < info_.GetChildrenCount()) {
                 TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
@@ -2065,7 +2162,7 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     auto index = currentIndex;
     if (info_.hasBigItem_) {
         while (index > 0) {
-            auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
+            auto childLayoutWrapper = GetGridItemOrPlaceholder(layoutWrapper, index);
             if (!childLayoutWrapper) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
                 break;
@@ -2082,7 +2179,7 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     } else {
         while (index > 0) {
             // need to obtain the item node in order and by step one
-            auto childLayoutWrapper = GetGridItem(layoutWrapper, index);
+            auto childLayoutWrapper = GetGridItemOrPlaceholder(layoutWrapper, index);
             if (!childLayoutWrapper) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "item [%{public}d] does not exist, reload to [0]", index);
                 break;
