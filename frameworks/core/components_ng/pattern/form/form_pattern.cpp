@@ -2122,7 +2122,12 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
-    RemoveDelayResetManuallyClickFlagTask();
+    ContainerScope containerScope(scopeId_);
+    PostUITask([weak = WeakClaim(this)] {
+                auto formPattern = weak.Upgrade();
+                CHECK_NULL_VOID(formPattern);
+                formPattern->RemoveDelayResetManuallyClickFlagTask();
+        }, "ArkUIFormRemoveDelayResetManuallyClickFlagTask");
     auto subContainer = GetSubContainer();
     CHECK_NULL_VOID(subContainer);
     if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
@@ -2136,23 +2141,12 @@ void FormPattern::OnActionEvent(const std::string& action)
 
     if ("router" == type) {
         isManuallyClick_ = false;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        if (uiTaskExecutor.IsRunOnCurrentThread()) {
-            FireOnRouterEvent(eventAction);
-        } else {
-            uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
+        PostUITask([weak = WeakClaim(this), action] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
-                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-                }, "ArkUIFormFireRouterEvent", GetFormTaskPriority());
-        }
+            }, "ArkUIFormFireRouterEvent");
     }
 
     formManagerBridge_->OnActionEvent(action, isManuallyClick_);
