@@ -747,7 +747,7 @@ if (globalThis.Swiper === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkswiper');
       module.exportView();
       module.loadComponent();
-      getUINativeModule().swiper.create(controller);
+      getUINativeModule().swiper.setSwiperInitialize(true, controller);
     },
     name: 'JSSwiper'
   };
