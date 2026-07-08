@@ -1431,12 +1431,6 @@ export struct SegmentButton {
     this.layoutAlgorithm.multiply = this.options.type === 'capsule' && (this.options.multiply ?? false)
     this.layoutAlgorithm.shouldMirror = this.shouldMirror
     this.updateAnimatedProperty(null)
-    if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
-      let abilityContext = this.getUIContext().getHostContext()
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback)
-      }
-    }
   }
 
   onSelectedChange() {
@@ -1479,7 +1473,7 @@ export struct SegmentButton {
     this.updateAnimatedProperty(null)
     if (deviceInfo.sdkApiVersion >= 26) {
       this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
       }
@@ -1487,8 +1481,8 @@ export struct SegmentButton {
   }
 
   aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
-      let abilityContext = this.getUIContext().getHostContext();
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID != undefined) {
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
       }
