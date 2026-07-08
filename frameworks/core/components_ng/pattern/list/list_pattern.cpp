@@ -5161,7 +5161,7 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     if (!focusIndex_.has_value() || focusIndex_.value() < 0) {
         return false;
     }
-    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value()));
+    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value() + itemStartIndex_));
     if (child && focusGroupIndex_.has_value()) {
         auto childNode = child->GetHostNode();
         CHECK_NULL_RETURN(childNode, false);
@@ -5223,7 +5223,7 @@ void ListPattern::FireFocus()
 
     if (IsInViewport(focusIndex_.value())) {
         if (focusGroupIndex_.has_value()) {
-            auto groupWrapper = host->GetChildByIndex(focusIndex_.value());
+            auto groupWrapper = host->GetChildByIndex(focusIndex_.value() + itemStartIndex_);
             CHECK_NULL_VOID(groupWrapper);
             auto groupNode = groupWrapper->GetHostNode();
             CHECK_NULL_VOID(groupNode);
@@ -5232,7 +5232,7 @@ void ListPattern::FireFocus()
             FireFocusInListItemGroup(focusIndex_.value());
             return;
         }
-        auto child = host->GetChildByIndex(focusIndex_.value());
+        auto child = host->GetChildByIndex(focusIndex_.value() + itemStartIndex_);
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
         CHECK_NULL_VOID(childNode);
