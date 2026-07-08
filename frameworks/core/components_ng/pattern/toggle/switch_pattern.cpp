@@ -1044,15 +1044,6 @@ void SwitchPattern::CreateDragFrameNode()
 
     dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
-
-    if (paintProperty->HasSwitchPointColor()) {
-        ViewAbstract::SetLightPosition(AceType::RawPtr(dragFrameNode_),
-            CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
-            CalcDimension(pointDiameter, DimensionUnit::PX));
-        ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 1.5f);
-        ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
-    }
 }
 
 void SwitchPattern::CreateDragPointNode()
