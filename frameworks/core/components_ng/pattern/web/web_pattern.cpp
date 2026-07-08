@@ -7399,6 +7399,8 @@ void WebPattern::OnWindowShow()
         if (offlineWebInited_ && isOfflineWebEvictFrameBuffersEnable_) {
             delegate_->SetOfflineWebActiveStatus(true);
         }
+        // Set isWindowShow_ here to prevent OnWindowHide from returning early and skipping SetActiveStatusInner
+        isWindowShow_ = true;
         return;
     }
 
@@ -7423,6 +7425,7 @@ void WebPattern::OnWindowHide()
     delegate_->OnRenderToBackground();
 
     if (!isWindowShow_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, " OnWindowHide returns early when isWindowShow_ is false.");
         return;
     }
     if (offlineWebInited_ && !isActive_) {
