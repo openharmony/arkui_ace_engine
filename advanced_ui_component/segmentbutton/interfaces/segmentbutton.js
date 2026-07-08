@@ -50,6 +50,7 @@ const RESOURCE_TYPE_INTEGER = 10007;
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 const CAPSULE_FOCUS_SELECTED_OFFSET = 4;
+const SDK_API_VERSION_TWENTY_SIX = 26;
 const segmentButtonTheme = {
   FONT_COLOR: {
     id: 125834608,
@@ -2677,7 +2678,7 @@ export class SegmentButton extends ViewPU {
     this.updateAnimatedProperty(null);
     if (this.isFirstOptionsChange) {
       this.isFirstOptionsChange = false;
-    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       let abilityContext = this.getUIContext().getHostContext();
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
@@ -2718,7 +2719,7 @@ export class SegmentButton extends ViewPU {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
-    if (deviceInfo.sdkApiVersion >= 26) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       this.updateLanguageLineHeight();
       let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
@@ -2727,7 +2728,7 @@ export class SegmentButton extends ViewPU {
     }
   }
   aboutToDisappear() {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID != undefined) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX && this.environmentCallbackID !== undefined) {
       let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
