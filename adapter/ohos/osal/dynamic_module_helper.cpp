@@ -111,6 +111,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ImageSpan", "span" },
         { "SymbolSpan", "span" },
         { "TimePickerDialog", "timepicker" },
+        { "ToolBarItem", "toolbaritem" },
         { "WaterFlow", "waterflow" },
         { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "LoadingProgress", "loadingprogress" },

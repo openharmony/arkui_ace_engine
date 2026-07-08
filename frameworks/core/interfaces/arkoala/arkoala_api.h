@@ -8538,6 +8538,10 @@ struct ArkUISelectionContainerModifier {
     void (*resetBindSelectionMenu)(ArkUINodeHandle node, ArkUI_Int32 spanType, ArkUI_Int32 responseType);
 };
 
+struct ArkUIToolBarItemModifier {
+    void (*create)(ArkUI_Uint32 value);
+};
+
 struct ArkUIDatePickerModifier {
     ArkUI_CharPtr (*getSelectedTextStyle)(ArkUINodeHandle node);
     void (*setSelectedTextStyle)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Uint32 color, ArkUI_Int32 style);
@@ -10030,6 +10034,7 @@ struct ArkUINodeModifiers {
     const ArkUICalendarPickerDialogModifier* (*getCalendarPickerDialogModifier)();
     const ArkUITextInputModifier* (*getTextInputModifier)();
     const ArkUITabsModifier* (*getTabsModifier)();
+    const ArkUIToolBarItemModifier* (*getToolBarItemModifier)();
     const ArkUIStepperItemModifier* (*getStepperItemModifier)();
     const ArkUIHyperlinkModifier* (*getHyperlinkModifier)();
     const ArkUIMarqueeModifier* (*getMarqueeModifier)();

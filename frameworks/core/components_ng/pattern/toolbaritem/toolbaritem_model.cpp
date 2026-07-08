@@ -13,19 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
-
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 
-namespace OHOS::Ace::NG {
+#include "core/common/container.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_model_ng.h"
 
-class ACE_EXPORT ToolBarItemModelStatic {
-public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetPlacement(FrameNode* frameNode, int32_t placement);
-};
+namespace OHOS::Ace {
 
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
+ToolBarItemModel* ToolBarItemModel::GetInstance()
+{
+#ifdef NG_BUILD
+    static NG::ToolBarItemModelNG instance;
+    return &instance;
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
+    } else {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
+    }
+#endif
+}
+
+void ToolBarItemModel::Create(int32_t value) {}
+
+void ToolBarItemModel::SetIsFirstCreate(bool value) {}
+
+} // namespace OHOS::Ace

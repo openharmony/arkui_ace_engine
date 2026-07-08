@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_model_static.h"
+#include "core/interfaces/native/utility/converter.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ToolBarItemModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = ToolBarItemModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // namespace ToolBarItemModifier
+
+namespace ToolBarItemInterfaceModifier {
+void SetToolBarItemOptionsImpl(Ark_NativePointer node, const Opt_ToolBarItemOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optOptions = Converter::GetOptPtr(options);
+    CHECK_NULL_VOID(optOptions);
+    auto placement = Converter::OptConvert<Ark_ToolBarItemPlacement>(optOptions->placement)
+                         .value_or(Ark_ToolBarItemPlacement::ARK_TOOL_BAR_ITEM_PLACEMENT_TOP_BAR_LEADING);
+    ToolBarItemModelStatic::SetPlacement(frameNode, static_cast<int32_t>(placement));
+}
+} // namespace ToolBarItemInterfaceModifier
+
+namespace ToolBarItemAttributeModifier {
+void SetDebugLineImpl(Ark_NativePointer node, const Ark_String* sourceLine, const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+} // namespace ToolBarItemAttributeModifier
+
+const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemStaticModifier()
+{
+    static const GENERATED_ArkUIToolBarItemModifier arkUIToolBarItemModifierImpl {
+        ToolBarItemModifier::ConstructImpl,
+        ToolBarItemInterfaceModifier::SetToolBarItemOptionsImpl,
+        ToolBarItemAttributeModifier::SetDebugLineImpl,
+    };
+    return &arkUIToolBarItemModifierImpl;
+}
+} // namespace OHOS::Ace::NG::GeneratedModifier

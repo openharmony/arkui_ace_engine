@@ -614,6 +614,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkslider.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimagespan.ts @arkui001
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoolbaritem.ts @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkcolumnsplit.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arkrowsplit.js @arkuilayout1
@@ -1371,8 +1372,6 @@ frameworks/bridge/declarative_frontend/jsview/js_textinput.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_textinput.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_textpicker.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_textpicker.h @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @ArkUI_ability_group
-frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @ArkUI_ability_group
@@ -3059,6 +3058,8 @@ frameworks/core/interfaces/native/node/text_timer_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/text_timer_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/theme_modifier.cpp @arkui_framework_resource
 frameworks/core/interfaces/native/node/theme_modifier.h @arkui_framework_resource
+frameworks/core/interfaces/native/node/toolbaritem_modifier.cpp @ArkUI_ability_group
+frameworks/core/interfaces/native/node/toolbaritem_modifier.h @ArkUI_ability_group
 frameworks/core/interfaces/native/node/touch_event_convertor.h @ArkUI_Event
 frameworks/core/interfaces/native/node/util_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/node/util_modifier.h @arkui_framework_xnode

@@ -531,6 +531,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Progress" },
         { "TextTimer" },
         { "Search" },
+        { "ToolBarItem" },
         { "Stepper" },
         { "StepperItem" },
         {"Radio"},

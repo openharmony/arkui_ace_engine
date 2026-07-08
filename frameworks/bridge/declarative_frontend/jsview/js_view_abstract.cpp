@@ -86,6 +86,7 @@
 #include "interfaces/native/node/resource.h"
 
 #include "core/common/card_scope.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -125,6 +126,19 @@ constexpr int NUM2 = 2;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+
+ToolBarItemModel* GetToolBarItemModelForBuilder()
+{
+    static ToolBarItemModel* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ToolBarItem");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find ToolBarItem dynamic module");
+        }
+        cachedModel = reinterpret_cast<ToolBarItemModel*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
@@ -2601,7 +2615,9 @@ void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CrateToolbarItems");
-            ToolBarItemModel::GetInstance()->SetIsFirstCreate(true);
+            auto* toolBarItemModel = GetToolBarItemModelForBuilder();
+            CHECK_NULL_VOID(toolBarItemModel);
+            toolBarItemModel->SetIsFirstCreate(true);
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->SetToolbarBuilder(std::move(buildFunc));
