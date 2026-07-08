@@ -628,11 +628,11 @@ struct SimpleSegmentButtonV2 {
           .accessibilitySelected(this.isSelected(repeatItem))
           .accessibilityText(this.getItemAccessibilityText(repeatItem))
           .accessibilityDescription(this.getItemAccessibilityDescription(repeatItem))
-          .accessibilityLevel(repeatItem.item.accessibilityLevel)
+          .accessibilityLevel(repeatItem.item?.accessibilityLevel)
           .backgroundColor(Color.Transparent)
           .borderRadius(this.getItemBorderRadius())
           .direction(this.languageDirection)
-          .enabled(repeatItem.item.enabled)
+          .enabled(repeatItem.item?.enabled)
           .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .hoverEffect(HoverEffect.None)
           .layoutWeight(1)
@@ -1026,13 +1026,13 @@ struct SimpleSegmentButtonV2 {
         Stack()
           .backgroundColor(this.getEffectBackgroundColor(repeatItem))
           .borderRadius(this.getItemBorderRadius())
-          .height(repeatItem.item.size.height)
+          .height(repeatItem.item?.size?.height)
           .position({
-            x: repeatItem.item.position.x,
-            y: repeatItem.item.position.y
+            x: repeatItem.item?.position?.x,
+            y: repeatItem.item?.position?.y
           })
           .scale(this.getItemScale(repeatItem.index))
-          .width(repeatItem.item.size.width)
+          .width(repeatItem.item?.size?.width)
       })
   }
 
@@ -1231,11 +1231,11 @@ struct SimpleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    return repeatItem.item.accessibilityDescription as ESObject as string;
+    return repeatItem.item?.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    return repeatItem.item.accessibilityText as ESObject as string;
+    return repeatItem.item?.accessibilityText as ESObject as string;
   }
 
   private isSelected(repeatItem: RepeatItem<SegmentButtonV2Item>): boolean | undefined {
@@ -1411,13 +1411,13 @@ export struct MultiCapsuleSegmentButtonV2 {
           .accessibilityChecked(this.isSelected(repeatItem))
           .accessibilityText(this.getItemAccessibilityText(repeatItem))
           .accessibilityDescription(this.getItemAccessibilityDescription(repeatItem))
-          .accessibilityLevel(repeatItem.item.accessibilityLevel)
+          .accessibilityLevel(repeatItem.item?.accessibilityLevel)
           .backgroundColor(this.getItemBackgroundColor(repeatItem))
           .backgroundEffect(this.itemBackgroundEffect, { disableSystemAdaptation: true })
           .borderRadius(this.getItemButtonBorderRadius(repeatItem))
           .constraintSize({ minHeight: this.getItemMinHeight() })
           .direction(this.languageDirection)
-          .enabled(repeatItem.item.enabled)
+          .enabled(repeatItem.item?.enabled)
           .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .layoutWeight(1)
           .padding(0)
@@ -1472,11 +1472,11 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    return repeatItem.item.accessibilityDescription as ESObject as string;
+    return repeatItem.item?.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    return repeatItem.item.accessibilityText as ESObject as string;
+    return repeatItem.item?.accessibilityText as ESObject as string;
   }
 
   private getItemSpace(): LengthMetrics {
