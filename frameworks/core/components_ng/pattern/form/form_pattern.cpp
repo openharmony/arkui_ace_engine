@@ -2141,12 +2141,23 @@ void FormPattern::OnActionEvent(const std::string& action)
 
     if ("router" == type) {
         isManuallyClick_ = false;
-        PostUITask([weak = WeakClaim(this), action] {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskExecutor.IsRunOnCurrentThread()) {
+            FireOnRouterEvent(eventAction);
+        } else {
+            uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-            }, "ArkUIFormFireRouterEvent");
+                }, "ArkUIFormFireRouterEvent", GetFormTaskPriority());
+        }
     }
 
     formManagerBridge_->OnActionEvent(action, isManuallyClick_);
