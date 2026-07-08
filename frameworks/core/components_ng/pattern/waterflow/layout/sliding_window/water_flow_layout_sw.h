@@ -190,8 +190,15 @@ private:
      */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
+    void DeactivateFooter() const;
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+    void PreloadFixOffsetCacheIfNeeded(int32_t cacheCount);
+    void SyncPreloadFixOffsetCache(int32_t cacheCount);
+    bool GetItemMainRange(int32_t itemIdx, float& itemStart, float& itemEnd) const;
+    bool ItemIntersectsActiveBounds(int32_t itemIdx, float startBound, float endBound) const;
+    void ExpandActiveRangeInFixOffset(int32_t cacheCount, int32_t& activeStartIndex, int32_t& activeEndIndex) const;
+
     /**
      * @brief shared implementation to preload a cache item.
      * @return true if the item is successfully preloaded.

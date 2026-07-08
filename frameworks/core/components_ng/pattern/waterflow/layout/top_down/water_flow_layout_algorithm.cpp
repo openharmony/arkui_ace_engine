@@ -38,6 +38,25 @@ float WaterFlowLayoutAlgorithm::ComputeCrossPosition(int32_t crossIndex) const
     return position;
 }
 
+bool WaterFlowLayoutAlgorithm::GetCrossOffset(
+    int32_t crossIndex, float crossSize, bool isRtl, float& crossOffset) const
+{
+    auto itemCrossPosition = itemsCrossPosition_.find(crossIndex);
+    if (itemCrossPosition == itemsCrossPosition_.end()) {
+        return false;
+    }
+    crossOffset = itemCrossPosition->second;
+    if (!isRtl) {
+        return true;
+    }
+    auto itemCrossSize = itemsCrossSize_.find(crossIndex);
+    if (itemCrossSize == itemsCrossSize_.end()) {
+        return false;
+    }
+    crossOffset = crossSize - crossOffset - itemCrossSize->second;
+    return true;
+}
+
 void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
     const SizeF& frameSize, int32_t childrenCount, double originalWidth)
 {
@@ -280,16 +299,12 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 item.first > layoutInfo_->endIndex_ + cachedCount) {
                 continue;
             }
-            auto itemCrossPosition = itemsCrossPosition_.find(mainPositions.first);
-            if (itemCrossPosition == itemsCrossPosition_.end()) {
+            float crossOffset = 0.0f;
+            if (!GetCrossOffset(mainPositions.first, crossSize, isRtl, crossOffset)) {
                 return;
             }
             auto currentOffset = childFrameOffset;
-            auto crossOffset = itemCrossPosition->second;
             auto mainOffset = item.second.first + layoutInfo_->currentOffset_;
-            if (isRtl) {
-                crossOffset = crossSize - crossOffset - itemsCrossSize_.at(mainPositions.first);
-            }
             if (layoutProperty->IsReverse()) {
                 mainOffset = mainSize_ - item.second.second - mainOffset;
             }
@@ -583,7 +598,11 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
             CHECK_NULL_VOID(itemWrapper);
 
-            float crossSize = itemsCrossSize_.at(layoutInfo_->GetCrossIndex(i));
+            auto itemCrossSize = itemsCrossSize_.find(layoutInfo_->GetCrossIndex(i));
+            if (itemCrossSize == itemsCrossSize_.end()) {
+                continue;
+            }
+            float crossSize = itemCrossSize->second;
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { crossSize, mainSize_, axis_ }, layoutProperty, itemWrapper));
         }
@@ -593,7 +612,11 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(itemWrapper);
 
             auto pos = GetItemPosition(i);
-            float crossSize = itemsCrossSize_.at(layoutInfo_->GetCrossIndex(i));
+            auto itemCrossSize = itemsCrossSize_.find(layoutInfo_->GetCrossIndex(i));
+            if (itemCrossSize == itemsCrossSize_.end()) {
+                continue;
+            }
+            float crossSize = itemCrossSize->second;
             auto ref = CreateLazyChildViewPosReference(
                 layoutInfo_, mainSize_, pos.startMainPos + layoutInfo_->currentOffset_, ReferenceEdge::START, axis_,
                 std::nullopt, false);

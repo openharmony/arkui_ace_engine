@@ -288,6 +288,8 @@ public:
 
     // record the new startIndex_ after changing the datasource, corresponding to the old startIndex_.
     int32_t newStartIndex_ = EMPTY_NEW_START_INDEX;
+    // Set when lane cache maps are reset and consumed once to prime cache items in the fix-offset extension.
+    bool needFixOffsetCache_ = false;
 
 private:
     inline void PrepareJump();
