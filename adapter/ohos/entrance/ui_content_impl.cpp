@@ -2249,10 +2249,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
     });
     NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
+    // Read the idsForRepeatAnimationAllowReuse configuration from metadata
+    auto it = std::find_if(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "idsForRepeatAnimationAllowReuse";
     });
-    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
+    if (it != metaData.end()) {
+        NG::LazyForEachUtils::SetIdsForRepeatAnimationAllowReuse(it->value);
+    }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);

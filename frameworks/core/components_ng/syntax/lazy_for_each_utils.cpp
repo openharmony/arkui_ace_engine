@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "base/utils/string_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 
 namespace OHOS::Ace::NG {
 
 bool LazyForEachUtils::enableCustomComponentFreeze_ = false;
 
-bool LazyForEachUtils::enableRepeatAnimation_ = false;
+std::vector<std::string> LazyForEachUtils::idsForRepeatAnimationAllowReuse_;
 
 void LazyForEachUtils::SetEnableCustomComponentFreeze(bool enableCustomComponentFreeze)
 {
@@ -31,14 +32,15 @@ bool LazyForEachUtils::GetEnableCustomComponentFreeze()
     return enableCustomComponentFreeze_;
 }
 
-void LazyForEachUtils::SetEnableRepeatAnimation(bool enableRepeatAnimation)
+void LazyForEachUtils::SetIdsForRepeatAnimationAllowReuse(const std::string& ids)
 {
-    enableRepeatAnimation_ = enableRepeatAnimation;
+    StringUtils::SplitStr(ids, ",", idsForRepeatAnimationAllowReuse_);
 }
 
-bool LazyForEachUtils::GetEnableRepeatAnimation()
+bool LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet(const std::string& id)
 {
-    return enableRepeatAnimation_;
+    return std::find(idsForRepeatAnimationAllowReuse_.begin(), idsForRepeatAnimationAllowReuse_.end(), id) !=
+        idsForRepeatAnimationAllowReuse_.end();
 }
 
 } // namespace OHOS::Ace::NG

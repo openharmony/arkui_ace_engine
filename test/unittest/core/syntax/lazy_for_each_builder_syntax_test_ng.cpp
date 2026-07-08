@@ -1605,6 +1605,45 @@ HWTEST_F(LazyForEachSyntaxTestNg, SetIsSyncLoadTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessSyncLoadTempChildrenTest001
+ * @tc.desc: Test LazyForEachBuilder::ProcessSyncLoadTempChildren when enableSyncLoad is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessSyncLoadTempChildrenTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    std::list<RefPtr<UINode>> children;
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("node", 666, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->activeRangeStart_ = 0;
+    lazyForEachBuilder->activeRangeEnd_ = 5;
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_FALSE(children.empty());
+}
+
+/**
  * @tc.name: ReduceCacheCountTest001
  * @tc.desc: Test ReduceCacheCount with various conditions
  * @tc.type: FUNC
@@ -2033,6 +2072,33 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataReloadedWithReuseImmediately0
      */
     lazyForEachBuilder->OnDataReloaded(true);
     EXPECT_TRUE(lazyForEachBuilder->recyclableNodeSet_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachTryTriggleAdditionalLayout001
+ * @tc.desc: Test TryTriggleAdditionalLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachTryTriggleAdditionalLayout001, TestSize.Level1)
+{
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachNode->childrenDepth_ = 0;
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0, false);
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->childrenDepth_ = 1;
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0, false);
+    EXPECT_TRUE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->TryTriggleAdditionalLayout();
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->hasSetActiveChildRangeInGetChildren_ = true;
+    lazyForEachNode->TryTriggleAdditionalLayout();
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
 }
 
 } // namespace OHOS::Ace::NG

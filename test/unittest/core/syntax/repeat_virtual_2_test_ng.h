@@ -59,13 +59,11 @@ public:
     void SetUp() override
     {
         MockPipelineContext::SetUp();
-        LazyForEachUtils::SetEnableRepeatAnimation(true);
     }
 
     void TearDown() override
     {
         MockPipelineContext::TearDown();
-        LazyForEachUtils::SetEnableRepeatAnimation(false);
     }
 
     RefPtr<TestUINode> CreateTestUINode(int32_t nodeId)

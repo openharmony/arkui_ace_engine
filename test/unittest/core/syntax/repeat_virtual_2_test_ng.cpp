@@ -1022,12 +1022,10 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation003, TestSize.Level1)
  */
 HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation004, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
     auto listNode = CreateNode(V2::LIST_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
     listNode->AddChild(repeatNode);
-    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
 }
 
 /**
@@ -1037,12 +1035,10 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation004, TestSize.Level1)
  */
 HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation005, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
-    auto gridNode = CreateNode(V2::LIST_ETS_TAG);
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
     gridNode->AddChild(repeatNode);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
 }
 
 /**
