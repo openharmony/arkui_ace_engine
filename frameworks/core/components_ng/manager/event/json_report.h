@@ -20,7 +20,7 @@
 #include <limits>
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/point.h"
-#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+#include "base/json/json_util.h"
 
 #include "core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 class JsonReport {
 public:
-    virtual std::shared_ptr<InspectorJsonValue> GetJsonData() const
+    virtual std::shared_ptr<JsonValue> GetJsonData() const
     {
         return nullptr;
     };

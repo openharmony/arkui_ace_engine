@@ -398,9 +398,9 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
 void CounterModelNG::ReportComponentChangeEvent(int32_t id, const std::string& value)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("Counter", value.data());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(id, "event", json,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(id, "event", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
 #endif
 }

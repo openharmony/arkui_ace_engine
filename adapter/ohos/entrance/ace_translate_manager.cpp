@@ -17,7 +17,6 @@
 
 #include <cinttypes>
 
-#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/utils/time_util.h"
 #include "base/error/error_code.h"
@@ -32,6 +31,8 @@ bool HasScope(int32_t scope, int32_t target)
 {
     return (scope & target) != 0;
 }
+
+inline constexpr int32_t ARKWEB_TRANSLATE_SCOPE = static_cast<int32_t>(TranslateContentScope::ARKWEB_ONLY);
 
 RefPtr<NG::WebPattern> GetWebPattern(const WeakPtr<NG::PageTranslateNode>& node)
 {
@@ -48,12 +49,12 @@ void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> n
     int32_t nodeId = translateNode->GetPageTranslateNodeId();
     CHECK_NULL_VOID(nodeId >= 0);
     listenerMap_[nodeId] = { node, WeakPtr<NG::PageTranslateNode>(translateNode) };
-    LOGI("AddTranslateListener nodeId:%{public}d", nodeId);
+    LOGD("AddTranslateListener nodeId:%{public}d", nodeId);
 }
 void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
 {
     listenerMap_.erase(nodeId);
-    LOGI("RemoveTranslateListener nodeId:%{public}d", nodeId);
+    LOGD("RemoveTranslateListener nodeId:%{public}d", nodeId);
 }
 
 bool UiTranslateManagerImpl::IsArkWebTranslateListener(const TranslateListener& listener) const
@@ -147,7 +148,7 @@ void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isCont
 
 void UiTranslateManagerImpl::GetPageTranslateText(int32_t scope, const std::string& extraData)
 {
-    if (HasScope(scope, PageTranslateRequestUtil::ARKWEB_TRANSLATE_SCOPE)) {
+    if (HasScope(scope, ARKWEB_TRANSLATE_SCOPE)) {
         if (!HasArkWebTranslateListener()) {
             UiSessionManager::GetInstance()->SendPageTextToAI(-1, "empty", 0);
         }
@@ -170,7 +171,7 @@ void UiTranslateManagerImpl::GetPageTranslateText(int32_t scope, const std::stri
 
 void UiTranslateManagerImpl::StartPageTranslate(int32_t scope, const std::string& extraData)
 {
-    if (HasScope(scope, PageTranslateRequestUtil::ARKWEB_TRANSLATE_SCOPE)) {
+    if (HasScope(scope, ARKWEB_TRANSLATE_SCOPE)) {
         if (!HasArkWebTranslateListener()) {
             UiSessionManager::GetInstance()->SendPageTextToAI(-1, "empty", 0);
         }
@@ -193,7 +194,7 @@ void UiTranslateManagerImpl::StartPageTranslate(int32_t scope, const std::string
 
 void UiTranslateManagerImpl::EndPageTranslate(int32_t scope)
 {
-    if (HasScope(scope, PageTranslateRequestUtil::ARKWEB_TRANSLATE_SCOPE)) {
+    if (HasScope(scope, ARKWEB_TRANSLATE_SCOPE)) {
         ResetTranslate(-1);
     }
 }
@@ -203,13 +204,8 @@ void UiTranslateManagerImpl::ResetPageTranslate(int32_t nodeId)
     ResetTranslate(nodeId);
 }
 
-void UiTranslateManagerImpl::SendPageTranslateResult(const std::string& result)
+void UiTranslateManagerImpl::SendPageTranslateResult(const std::vector<TranslateResult>& translateResults)
 {
-    std::vector<TranslateResult> translateResults;
-    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
-        LOGW("SendPageTranslateResult parse result failed");
-        return;
-    }
     for (const auto& translateResult : translateResults) {
         SendTranslateResult(translateResult.nodeId, translateResult.translatedText);
     }
@@ -575,7 +571,7 @@ void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
             }
         }
     }
-    
+
     SendPixelMap();
 }
 

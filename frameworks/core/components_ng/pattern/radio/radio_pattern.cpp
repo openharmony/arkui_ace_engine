@@ -1250,16 +1250,16 @@ bool RadioPattern::ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool forc
         }
     }
 
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("checked", isChecked);
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("Radio", "onChange");
     value->Put("params", params);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
         "ReportOnChangeEvent radio report: %{public}s!", value->ToString().c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
 }

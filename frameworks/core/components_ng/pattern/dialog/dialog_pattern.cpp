@@ -3032,7 +3032,7 @@ void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string r
     if (btnIndex >= 0 && static_cast<size_t>(btnIndex) < dialogProperties_.buttons.size()) {
         btnText = dialogProperties_.buttons.at(btnIndex).text;
     }
-    auto jsonResult = InspectorJsonUtil::CreateObject();
+    auto jsonResult = JsonUtil::Create();
     CHECK_NULL_VOID(jsonResult);
     jsonResult->Put("dialogNodeId", nodeId);
     jsonResult->Put("event", "alertDialogButtonClick");
@@ -3044,7 +3044,7 @@ void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string r
     }
     jsonResult->Put("buttonText", btnText.c_str());
     jsonResult->Put("buttonIndex", btnIndex);
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("alertDialogButtonClickResult", jsonResult);
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report info:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
@@ -3082,12 +3082,12 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
         if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
             btnText = dialogProperties_.buttons.at(buttonIdx).text;
         }
-        auto json = InspectorJsonUtil::Create();
+        auto json = JsonUtil::CreateSharedPtrJson();
         json->Put("buttonText", btnText.c_str());
         json->Put("autoCancel", false);
         TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
-            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+            "destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
     if (dialogProperties_.type == DialogType::ACTION_SHEET) {
         std::string title = "";
@@ -3097,13 +3097,13 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
         } else if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
             buttonText = dialogProperties_.buttons.at(buttonIdx).text;
         }
-        auto json = InspectorJsonUtil::Create();
+        auto json = JsonUtil::CreateSharedPtrJson();
         json->Put("sheetTitle", title.c_str());
         json->Put("buttonText", buttonText.c_str());
         json->Put("autoCancel", false);
         TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
-            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+            "ActionSheet.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
     if (dialogProperties_.isMenu) {
         ReportDestroyActionMenu(buttonIdx);
@@ -3121,20 +3121,20 @@ void DialogPattern::ReportDestroyAutoCancel()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
-        auto json = InspectorJsonUtil::Create();
+        auto json = JsonUtil::CreateSharedPtrJson();
         json->Put("autoCancel", true);
         TAG_LOGD(AceLogTag::ACE_DIALOG,
             "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
-            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+            "destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
     if (dialogProperties_.type == DialogType::ACTION_SHEET) {
-        auto json = InspectorJsonUtil::Create();
+        auto json = JsonUtil::CreateSharedPtrJson();
         json->Put("autoCancel", true);
         TAG_LOGD(AceLogTag::ACE_DIALOG,
             "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
-            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+            "ActionSheet.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
 }
 
@@ -3162,11 +3162,11 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
     auto textPattern = textNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("buttonText", textDisplay.c_str());
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
-        "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+        "ActionMenu.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
 
 void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
@@ -3186,7 +3186,7 @@ void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     if (buttonIndex >= 0 && static_cast<size_t>(buttonIndex) < dialogProperties_.buttons.size()) {
         buttonText = dialogProperties_.buttons.at(buttonIndex).text;
     }
-    auto actionSheetResult = InspectorJsonUtil::CreateObject();
+    auto actionSheetResult = JsonUtil::Create();
     CHECK_NULL_VOID(actionSheetResult);
     actionSheetResult->Put("nodeId", nodeId);
     actionSheetResult->Put("event", "actionSheetClick");
@@ -3200,7 +3200,7 @@ void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     actionSheetResult->Put("sheetIndex", sheetIndex);
     actionSheetResult->Put("buttonText", buttonText.c_str());
     actionSheetResult->Put("buttonIndex", buttonIndex);
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("actionSheetClickResult", actionSheetResult);
     TAG_LOGD(AceLogTag::ACE_DIALOG, "ReportActionSheetOnInjectionEvent report: %{public}s!", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
@@ -3332,7 +3332,7 @@ void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::str
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
-    auto clickResult = InspectorJsonUtil::CreateObject();
+    auto clickResult = JsonUtil::Create();
     CHECK_NULL_VOID(clickResult);
     clickResult->Put("nodeId", nodeId);
     clickResult->Put("event", "actionMenuClick");
@@ -3343,7 +3343,7 @@ void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::str
         clickResult->Put("failReason", reason.c_str());
     }
     clickResult->Put("menuText", text.c_str());
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("actionMenuClickResult", clickResult);
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportActionMenuOnInjectionEvent:%{public}s",
         json->ToString().c_str());

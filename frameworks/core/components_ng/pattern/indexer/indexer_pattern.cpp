@@ -2420,7 +2420,7 @@ void IndexerPattern::ReportPoupSelectEvent()
 
 void IndexerPattern::ReportInjectionEvent(bool result, std::string reason)
 {
-    auto alphabetIndexerResult = InspectorJsonUtil::CreateObject();
+    auto alphabetIndexerResult = JsonUtil::Create();
     CHECK_NULL_VOID(alphabetIndexerResult);
     alphabetIndexerResult->Put("event", "setAlphabetIndexer");
     if (result) {
@@ -2430,7 +2430,7 @@ void IndexerPattern::ReportInjectionEvent(bool result, std::string reason)
         alphabetIndexerResult->Put("reason", reason.c_str());
     }
 
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
     json->Put("alphabetIndexerResult", alphabetIndexerResult);
 

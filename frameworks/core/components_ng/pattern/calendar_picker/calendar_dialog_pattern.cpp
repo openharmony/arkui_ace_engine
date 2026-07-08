@@ -1683,7 +1683,7 @@ int32_t CalendarDialogPattern::OnInjectionEvent(const std::string& command)
 bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::string& event,
     bool isSuccess, const std::string& reason)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
 
     value->Put("event", event.c_str());
@@ -1694,7 +1694,7 @@ bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::
         value->Put("reason", reason.c_str());
     }
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }

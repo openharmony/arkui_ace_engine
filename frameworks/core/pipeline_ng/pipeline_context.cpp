@@ -48,7 +48,6 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
-#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -7931,14 +7930,9 @@ void PipelineContext::ResetArkUIPageTranslate(int32_t nodeId)
     contentChangeMgr_->ResetTranslateTextNode(nodeId);
 }
 
-void PipelineContext::SendArkUIPageTranslateResult(const std::string& result)
+void PipelineContext::SendArkUIPageTranslateResult(const std::vector<TranslateResult>& translateResults)
 {
     CHECK_NULL_VOID(contentChangeMgr_);
-    std::vector<TranslateResult> translateResults;
-    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
-        LOGW("SendArkUIPageTranslateResult parse result failed");
-        return;
-    }
     size_t appliedCount = 0;
     for (const auto& translateResult : translateResults) {
         if (contentChangeMgr_->ApplyTranslateResult(

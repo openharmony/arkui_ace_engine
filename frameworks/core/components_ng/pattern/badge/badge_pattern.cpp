@@ -327,9 +327,9 @@ void BadgePattern::ReportComponentChangeEvent(const std::string& event)
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("Badge", event.data());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(), "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(), "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
 #endif
 }

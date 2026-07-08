@@ -44,7 +44,7 @@ public:
     void StartPageTranslate(int32_t scope, const std::string& extraData) override;
     void EndPageTranslate(int32_t scope) override;
     void ResetPageTranslate(int32_t nodeId) override;
-    void SendPageTranslateResult(const std::string& result) override;
+    void SendPageTranslateResult(const std::vector<TranslateResult>& translateResults) override;
     void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
     void ResetTranslate(int32_t nodeId) override;
     void SendTranslateResult(int32_t nodeId, std::string res) override;

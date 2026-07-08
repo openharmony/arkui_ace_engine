@@ -6291,14 +6291,14 @@ void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>&
             },
             TaskExecutor::TaskType::UI, "UiSessionResetArkUIPageTranslate");
     };
-    auto resultFunction = [weakTaskExecutor = taskExecutor](const std::string& result) {
+    auto resultFunction = [weakTaskExecutor = taskExecutor](const std::vector<TranslateResult>& translateResults) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [result]() {
+            [translateResults]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                pipeline->SendArkUIPageTranslateResult(result);
+                pipeline->SendArkUIPageTranslateResult(translateResults);
             },
             TaskExecutor::TaskType::UI, "UiSessionSendArkUIPageTranslateResult");
     };
