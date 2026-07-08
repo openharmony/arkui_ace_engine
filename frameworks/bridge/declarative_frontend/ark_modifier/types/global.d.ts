@@ -117,6 +117,10 @@ interface GaugeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface GridContainerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface NavigatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

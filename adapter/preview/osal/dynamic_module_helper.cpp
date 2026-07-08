@@ -129,6 +129,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Hyperlink", "hyperlink" },
         { "GridCol", "gridlayout" },
         { "GridRow", "gridlayout" },
+        { "GridContainer", "gridlayout" },
         {"SymbolGlyph", "symbol"},
         {"Richeditor", "richeditor"},
         { "LoadingProgress", "loadingprogress" },

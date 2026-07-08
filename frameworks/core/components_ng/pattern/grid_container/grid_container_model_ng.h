@@ -19,9 +19,12 @@
 #include "core/components_ng/pattern/grid_container/grid_container_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT GridContainerModelNG : public GridContainerModel {
+class FrameNode;
+
+class ACE_FORCE_EXPORT GridContainerModelNG : public GridContainerModel {
 public:
     void Create(const RefPtr<GridContainerInfo>& containerInfo) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

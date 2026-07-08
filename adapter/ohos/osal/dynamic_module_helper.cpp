@@ -86,6 +86,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "GridItem", "grid" },
         { "GridCol", "gridlayout" },
         { "GridRow", "gridlayout" },
+        { "GridContainer", "gridlayout" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },

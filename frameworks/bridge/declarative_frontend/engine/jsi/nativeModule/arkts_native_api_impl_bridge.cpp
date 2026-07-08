@@ -507,6 +507,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Button" },
         {"Counter"},
         {"Gauge" },
+        {"GridContainer"},
         {"PatternLock"},
         {"Sidebar"},
         {"Indexer"},
