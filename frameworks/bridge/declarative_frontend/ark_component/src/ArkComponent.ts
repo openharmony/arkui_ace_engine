@@ -4452,6 +4452,12 @@ class ArkComponent {
 
   expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
     let opts = new ArkSafeAreaExpandOpts();
+    if (types && types.length == 0) {
+      opts.type = SAFE_AREA_TYPE_NONE;
+    }
+    if (edges && edges.length == 0) {
+      opts.edges = SAFE_AREA_EDGE_NONE;
+    }
     if (types && types.length > 0) {
       let safeAreaType: string | number = '';
       for (let param of types) {
