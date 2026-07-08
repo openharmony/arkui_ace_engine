@@ -1727,7 +1727,6 @@ ArkUINativeModuleValue CanvasRenderingContext2DBridge::PutImageData(ArkUIRuntime
     panda::Local<panda::ArrayBufferRef> arrayBuffer = colorArray->GetArrayBuffer(vm);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer(vm));
     CHECK_NULL_RETURN(buffer, panda::JSValueRef::Undefined(vm));
-    int32_t bufferLength = arrayBuffer->ByteLength(vm);
     CopyPixelsToImageData(buffer, arrayBuffer->ByteLength(vm), imgWidth, imageData);
     pattern->PutImageData(imageData);
     return panda::JSValueRef::Undefined(vm);

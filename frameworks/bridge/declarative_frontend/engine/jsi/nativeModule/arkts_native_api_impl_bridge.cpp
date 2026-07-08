@@ -2921,6 +2921,7 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
         RegisterArkUINativeModuleFormLite(object, vm);
     }
     RegisterCanvasAttributes(object, vm);
+    RegisterCommonShapeAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);

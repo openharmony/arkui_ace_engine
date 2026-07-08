@@ -715,6 +715,11 @@ ArkUINativeModuleValue OffscreenCanvasRenderingContext2DBridge::SetTransform(Ark
     EcmaVM* vm = nullptr;
     auto p = GetPatternForStub(runtimeCallInfo, vm);
     CHECK_NULL_RETURN(p, panda::JSValueRef::Undefined(vm));
+    constexpr size_t MIN_ARGS_FOR_TRANSFORM = 2;
+    if (runtimeCallInfo->GetArgsNumber() < MIN_ARGS_FOR_TRANSFORM) {
+        p->ResetTransform();
+        return panda::JSValueRef::Undefined(vm);
+    }
     // setTransform(a, b, c, d, e, f): Canvas matrix [a b c d e f] maps to
     // scaleX=a, skewY=b, skewX=c, scaleY=d, translateX=e, translateY=f
     // (b=skewY, c=skewX — the same order as the old JSCanvasRenderer::JsSetTransform)
