@@ -2334,6 +2334,7 @@ export class SegmentButton extends ViewPU {
     this.addProvidedVar('selectedItemScale', this.__selectedItemScale, false);
     this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
     this.addProvidedVar('useAdaptiveLineHeight', this.__useAdaptiveLineHeight, false);
+    this.isFirstOptionsChange = true;
     this.environmentCallbackID = undefined;
     this.environmentCallback = {
       onConfigurationUpdated: configuration => {
@@ -2674,6 +2675,14 @@ export class SegmentButton extends ViewPU {
     this.layoutAlgorithm.multiply = this.options.type === 'capsule' && (this.options.multiply ?? false);
     this.layoutAlgorithm.shouldMirror = this.shouldMirror;
     this.updateAnimatedProperty(null);
+    if (this.isFirstOptionsChange) {
+      this.isFirstOptionsChange = false;
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
   }
   onSelectedChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {

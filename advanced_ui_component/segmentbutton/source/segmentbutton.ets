@@ -1357,6 +1357,7 @@ export struct SegmentButton {
   @Provide openSelectedItemSystemMaterial?: boolean = false;
   @Provide selectedItemScale?: ScaleOptions = undefined;
   @Provide useAdaptiveLineHeight: boolean = false;
+  private isFirstOptionsChange: boolean = true;
   private environmentCallbackID?: number = undefined;
   private environmentCallback: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
@@ -1436,6 +1437,14 @@ export struct SegmentButton {
     this.layoutAlgorithm.multiply = this.options.type === 'capsule' && (this.options.multiply ?? false)
     this.layoutAlgorithm.shouldMirror = this.shouldMirror
     this.updateAnimatedProperty(null)
+    if (this.isFirstOptionsChange) {
+      this.isFirstOptionsChange = false;
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+      let abilityContext = this.getUIContext().getHostContext()
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback)
+      }
+    }
   }
 
   onSelectedChange() {
