@@ -1040,6 +1040,10 @@ void SwiperLayoutAlgorithm::SetInactive(
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
+        auto item = measuredItems_.find(index);
+        if (item != measuredItems_.end()) {
+            measuredItems_.erase(item);
+        }
     }
 }
 
