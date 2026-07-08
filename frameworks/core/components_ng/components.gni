@@ -248,6 +248,13 @@ template("build_component_ng") {
         }
       }
 
+      if (defined(config.enable_auto_fill_controller) &&
+          config.enable_auto_fill_controller) {
+        if (defined(invoker.auto_fill_controller_sources)) {
+          sources += invoker.auto_fill_controller_sources
+        }
+      }
+
       if (defined(config.gesture_debug_boundary_support) &&
           config.gesture_debug_boundary_support &&
           defined(invoker.gesture_debug_sources)) {
