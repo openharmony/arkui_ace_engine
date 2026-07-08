@@ -2035,4 +2035,31 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataReloadedWithReuseImmediately0
     EXPECT_TRUE(lazyForEachBuilder->recyclableNodeSet_.empty());
 }
 
+/**
+ * @tc.name: LazyForEachTryTriggleAdditionalLayout001
+ * @tc.desc: Test TryTriggleAdditionalLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachTryTriggleAdditionalLayout001, TestSize.Level1)
+{
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachNode->childrenDepth_ = 0;
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0, false);
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->childrenDepth_ = 1;
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0, false);
+    EXPECT_TRUE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->TryTriggleAdditionalLayout();
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->hasSetActiveChildRangeInGetChildren_ = true;
+    lazyForEachNode->TryTriggleAdditionalLayout();
+    EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+}
+
 } // namespace OHOS::Ace::NG
