@@ -68,6 +68,7 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
         // 1 -> 2 or 1 -> 3, and mode did change
         ChangeForceSplitModeTo(mode);
         OnForceSplitEnableChange();
+        NotifyMediaQueryUpdate();
         return;
     }
     if (!isForceSplitEnable_) {
@@ -77,6 +78,7 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
     }
     // only mode change
     ChangeForceSplitModeTo(mode);
+    NotifyMediaQueryUpdate();
 }
 
 bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
@@ -124,7 +126,6 @@ void ForceSplitManager::ChangeForceSplitModeTo(ForceSplitMode mode)
     }
     splitRatio_ = splitRatio;
     OnForceSplitRatioUpdate(splitRatio_);
-    NotifyMediaQueryUpdate();
 }
 
 void ForceSplitManager::OnForceSplitEnableChange()
@@ -132,7 +133,6 @@ void ForceSplitManager::OnForceSplitEnableChange()
     UpdateIsInForceSplitMode();
     FlushArkUIHook();
     NotifyForceSplitStateChange();
-    NotifyMediaQueryUpdate();
 }
 
 void ForceSplitManager::FlushArkUIHook()
