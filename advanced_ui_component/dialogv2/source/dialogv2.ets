@@ -84,6 +84,9 @@ const CONTENT_FONT_SIZE = getNumberByResourceId(125835677, BODY_L);
 const SCROLL_BAR_OFFSET: number = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
 
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
+
 export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
 
 export type AdvancedDialogV2ButtonAction = () => void;
@@ -241,7 +244,7 @@ export struct TipsDialogV2 {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
           .orphanCharOptimization(true)
-          .punctuationOverflow(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
     }
     .accessibilityGroup(true)
@@ -312,7 +315,7 @@ export struct TipsDialogV2 {
               .width('100%')
               .fallbackLineSpacing(true)
               .orphanCharOptimization(true)
-              .punctuationOverflow(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -336,7 +339,7 @@ export struct TipsDialogV2 {
               })
               .fallbackLineSpacing(true)
               .orphanCharOptimization(true)
-              .punctuationOverflow(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }
         }
       }
@@ -529,7 +532,7 @@ export struct SelectDialogV2 {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
               .orphanCharOptimization(true)
-              .punctuationOverflow(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -546,7 +549,7 @@ export struct SelectDialogV2 {
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
                       .orphanCharOptimization(true)
-                      .punctuationOverflow(true)
+                      .punctuationOverflow(getPunctuationOverflowEnabled())
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -774,7 +777,7 @@ export struct ConfirmDialogV2 {
             .width('100%')
             .fallbackLineSpacing(true)
             .orphanCharOptimization(true)
-            .punctuationOverflow(true)
+            .punctuationOverflow(getPunctuationOverflowEnabled())
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -808,7 +811,7 @@ export struct ConfirmDialogV2 {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
         .orphanCharOptimization(true)
-        .punctuationOverflow(true)
+        .punctuationOverflow(getPunctuationOverflowEnabled())
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
@@ -933,7 +936,7 @@ export struct AlertDialogV2 {
           })
           .fallbackLineSpacing(true)
           .orphanCharOptimization(true)
-          .punctuationOverflow(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
@@ -1304,7 +1307,7 @@ struct CustomDialogContentComponent {
           .width('100%')
           .fallbackLineSpacing(true)
           .orphanCharOptimization(true)
-          .punctuationOverflow(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .width('100%')
 
@@ -1326,7 +1329,7 @@ struct CustomDialogContentComponent {
           .width('100%')
           .fallbackLineSpacing(true)
           .orphanCharOptimization(true)
-          .punctuationOverflow(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .width('100%')
     }
@@ -1689,6 +1692,29 @@ function getNumberByResourceId(resourceId: number, defaultValue: number, allowZe
   }
 }
 
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'AdvanceDialogV2', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'AdvanceDialogV2', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
 /**
  * get enum number
  *
@@ -1831,7 +1857,7 @@ export struct LoadingDialogV2 {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
           .orphanCharOptimization(true)
-          .punctuationOverflow(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)
