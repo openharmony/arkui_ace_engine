@@ -1,0 +1,3708 @@
+top_levels:
+- id: '01'
+  slug: 01-architecture
+  title: 架构通用设计
+  description: 编译构建、目录结构、部件化、兼容性设计、架构优化
+- id: '02'
+  slug: 02-cross-platform
+  title: 跨平台适配层
+  description: 多平台适配、平台抽象、渲染后端适配
+- id: '03'
+  slug: 03-engine-framework
+  title: 引擎框架层
+  description: 渲染管线、动效、资源主题、事件框架、窗口、多实例、无障碍、DFX
+- id: '04'
+  slug: 04-common-capability
+  title: 通用能力层
+  description: 通用属性、通用事件、自定义扩展、自定义节点、路由、焦点、输入交互等通用能力
+- id: '05'
+  slug: 05-ui-components
+  title: 组件层
+  description: 布局、导航、滚动容器、表单、选择、弹窗、文本、图片、绘制等组件
+- id: '06'
+  slug: 06-common-interface
+  title: 通用接口层
+  description: 前端桥接、Inner 接口、其它范式接入
+- id: '07'
+  slug: 07-frontend
+  title: 前端层
+  description: ArkTS 高级组件、状态管理、自定义组件、生成式 UI
+- id: 08
+  slug: 08-ndk
+  title: NDK
+  description: Node C-API、XComponent C-API 等 NDK 接口
+- id: 09
+  slug: 09-developer-tools
+  title: 开发者工具
+  description: 预览器、工具链、开发者文档、Sample、ComponentTest
+- id: '10'
+  slug: 10-product-customization
+  title: 产品化定制
+  description: 穿戴等产品化定制能力
+functions:
+- id: 01-01-01
+  l1:
+    id: '01'
+    title: 架构通用设计
+  l2:
+    id: '01'
+    title: 架构设计
+  l3:
+    id: '01'
+    title: 编译构建
+  path: 01-architecture/01-architecture-design/01-build-system/
+  design: 01-architecture/01-architecture-design/01-build-system/design.md
+  status: active
+- id: 01-01-02
+  l1:
+    id: '01'
+    title: 架构通用设计
+  l2:
+    id: '01'
+    title: 架构设计
+  l3:
+    id: '02'
+    title: 目录结构
+  path: 01-architecture/01-architecture-design/02-directory-structure/
+  design: null
+  status: active
+- id: 01-01-03
+  l1:
+    id: '01'
+    title: 架构通用设计
+  l2:
+    id: '01'
+    title: 架构设计
+  l3:
+    id: '03'
+    title: 部件化
+  path: 01-architecture/01-architecture-design/03-modularization/
+  design: null
+  status: active
+- id: 01-02-01
+  l1:
+    id: '01'
+    title: 架构通用设计
+  l2:
+    id: '02'
+    title: 架构优化
+  l3:
+    id: '01'
+    title: 产品化解耦
+  path: 01-architecture/02-architecture-optimization/01-product-decoupling/
+  design: null
+  status: active
+- id: 02-01-01
+  l1:
+    id: '02'
+    title: 跨平台适配层
+  l2:
+    id: '01'
+    title: 跨平台适配层
+  l3:
+    id: '01'
+    title: OH平台适配
+  path: 02-cross-platform/01-platform-adapter/01-oh-platform-adapter/
+  design: null
+  status: active
+- id: 02-01-02
+  l1:
+    id: '02'
+    title: 跨平台适配层
+  l2:
+    id: '01'
+    title: 跨平台适配层
+  l3:
+    id: '02'
+    title: Android平台适配
+  path: 02-cross-platform/01-platform-adapter/02-android-platform-adapter/
+  design: null
+  status: active
+- id: 02-01-03
+  l1:
+    id: '02'
+    title: 跨平台适配层
+  l2:
+    id: '01'
+    title: 跨平台适配层
+  l3:
+    id: '03'
+    title: iOS平台适配
+  path: 02-cross-platform/01-platform-adapter/03-ios-platform-adapter/
+  design: null
+  status: active
+- id: 02-01-04
+  l1:
+    id: '02'
+    title: 跨平台适配层
+  l2:
+    id: '01'
+    title: 跨平台适配层
+  l3:
+    id: '04'
+    title: 预览器平台适配
+  path: 02-cross-platform/01-platform-adapter/04-previewer-platform-adapter/
+  design: null
+  status: active
+- id: 02-02-01
+  l1:
+    id: '02'
+    title: 跨平台适配层
+  l2:
+    id: '02'
+    title: 渲染后端适配
+  l3:
+    id: '01'
+    title: 渲染后端适配
+  path: 02-cross-platform/02-render-backend-adapter/01-render-backend-adapter/
+  design: null
+  status: active
+- id: 03-01-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '01'
+    title: 渲染管线
+  l3:
+    id: '01'
+    title: 渲染管线
+  path: 03-engine-framework/01-render-pipeline/01-basic-render-pipeline/
+  design: 03-engine-framework/01-render-pipeline/01-basic-render-pipeline/design.md
+  status: active
+- id: 03-01-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '01'
+    title: 渲染管线
+  l3:
+    id: '02'
+    title: 多级渲染管线
+  path: 03-engine-framework/01-render-pipeline/02-multi-level-render-pipeline/
+  design: null
+  status: active
+- id: 03-02-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '01'
+    title: 动效框架
+  path: 03-engine-framework/02-animation-capability/01-animation-framework/
+  design: null
+  status: active
+- id: 03-02-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '02'
+    title: 属性动画
+  path: 03-engine-framework/02-animation-capability/02-property-animation/
+  design: null
+  status: active
+- id: 03-02-03
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '03'
+    title: 显式动画
+  path: 03-engine-framework/02-animation-capability/03-explicit-animation/
+  design: null
+  status: active
+- id: 03-02-04
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '04'
+    title: 关键帧动画
+  path: 03-engine-framework/02-animation-capability/04-keyframe-animation/
+  design: null
+  status: active
+- id: 03-02-05
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '05'
+    title: 转场动画
+  path: 03-engine-framework/02-animation-capability/05-transition-animation/
+  design: null
+  status: active
+- id: 03-02-06
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '06'
+    title: 共享元素动画
+  path: 03-engine-framework/02-animation-capability/06-shared-transition/
+  design: null
+  status: active
+- id: 03-02-07
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '07'
+    title: 组件共享元素动画
+  path: 03-engine-framework/02-animation-capability/07-geometry-transition/
+  design: null
+  status: active
+- id: 03-02-08
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: 08
+    title: 路径动画
+  path: 03-engine-framework/02-animation-capability/08-motion-path/
+  design: null
+  status: active
+- id: 03-02-09
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: 09
+    title: 物理动画
+  path: 03-engine-framework/02-animation-capability/09-physics-animation/
+  design: null
+  status: active
+- id: 03-02-10
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '02'
+    title: 动效能力
+  l3:
+    id: '10'
+    title: 动画接口
+  path: 03-engine-framework/02-animation-capability/10-animation-interface/
+  design: null
+  status: active
+- id: 03-03-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '03'
+    title: 资源主题
+  l3:
+    id: '01'
+    title: 资源访问
+  path: 03-engine-framework/03-resource-theme/01-resource-access/
+  design: null
+  status: active
+- id: 03-03-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '03'
+    title: 资源主题
+  l3:
+    id: '02'
+    title: 主题分层访问
+  path: 03-engine-framework/03-resource-theme/02-theme-layered-access/
+  design: null
+  status: active
+- id: 03-03-03
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '03'
+    title: 资源主题
+  l3:
+    id: '03'
+    title: Theme框架
+  path: 03-engine-framework/03-resource-theme/03-theme-framework/
+  design: null
+  status: active
+- id: 03-03-04
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '03'
+    title: 资源主题
+  l3:
+    id: '04'
+    title: 资源动态切换
+  path: 03-engine-framework/03-resource-theme/04-resource-dynamic-switching/
+  design: null
+  status: active
+- id: 03-04-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '04'
+    title: 事件框架
+  l3:
+    id: '01'
+    title: 事件基础框架
+  path: 03-engine-framework/04-event-framework/01-event-base-framework/
+  design: null
+  status: active
+- id: 03-04-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '04'
+    title: 事件框架
+  l3:
+    id: '02'
+    title: 拖拽框架
+  path: 03-engine-framework/04-event-framework/02-drag-framework/
+  design: null
+  status: active
+- id: 03-05-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '05'
+    title: 窗口机制
+  l3:
+    id: '01'
+    title: 窗口机制
+  path: 03-engine-framework/05-window-mechanism/01-window-mechanism/
+  design: null
+  status: active
+- id: 03-05-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '05'
+    title: 窗口机制
+  l3:
+    id: '02'
+    title: 子窗机制
+  path: 03-engine-framework/05-window-mechanism/02-subwindow-mechanism/
+  design: null
+  status: active
+- id: 03-06-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '06'
+    title: 多实例管理
+  l3:
+    id: '01'
+    title: 多实例管理
+  path: 03-engine-framework/06-multi-instance-management/01-multi-instance-management/
+  design: null
+  status: active
+- id: 03-07-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '07'
+    title: 无障碍机制
+  l3:
+    id: '01'
+    title: 无障碍能力
+  path: 03-engine-framework/07-accessibility-mechanism/01-accessibility-capability/
+  design: null
+  status: active
+- id: 03-07-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: '07'
+    title: 无障碍机制
+  l3:
+    id: '02'
+    title: Inspector
+  path: 03-engine-framework/07-accessibility-mechanism/02-inspector/
+  design: null
+  status: active
+- id: 03-08-01
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '01'
+    title: 日志
+  path: 03-engine-framework/08-dfx/01-logging/
+  design: null
+  status: active
+- id: 03-08-02
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '02'
+    title: 内存管理
+  path: 03-engine-framework/08-dfx/02-memory-management/
+  design: null
+  status: active
+- id: 03-08-03
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '03'
+    title: Trace打点
+  path: 03-engine-framework/08-dfx/03-trace/
+  design: null
+  status: active
+- id: 03-08-04
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '04'
+    title: Dump机制
+  path: 03-engine-framework/08-dfx/04-dump-mechanism/
+  design: null
+  status: active
+- id: 03-08-05
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '05'
+    title: Benchmark
+  path: 03-engine-framework/08-dfx/05-benchmark/
+  design: null
+  status: active
+- id: 03-08-06
+  l1:
+    id: '03'
+    title: 引擎框架层
+  l2:
+    id: 08
+    title: DFX
+  l3:
+    id: '06'
+    title: 布局边界显示
+  path: 03-engine-framework/08-dfx/06-layout-boundary-display/
+  design: null
+  status: active
+- id: 04-01-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '01'
+    title: 图片加载能力
+  l3:
+    id: '01'
+    title: 图片加载机制
+  path: 04-common-capability/01-image-loading/01-image-loading-mechanism/
+  design: 04-common-capability/01-image-loading/01-image-loading-mechanism/design.md
+  status: active
+- id: 04-01-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '01'
+    title: 图片加载能力
+  l3:
+    id: '02'
+    title: Svg解析
+  path: 04-common-capability/01-image-loading/02-svg-parsing/
+  design: null
+  status: active
+- id: 04-01-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '01'
+    title: 图片加载能力
+  l3:
+    id: '03'
+    title: DrawableDescriptor 能力
+  path: 04-common-capability/01-image-loading/03-drawable-descriptor/
+  design: 04-common-capability/01-image-loading/03-drawable-descriptor/design.md
+  status: active
+- id: 04-02-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '02'
+    title: 安全区机制
+  l3:
+    id: '01'
+    title: 安全区机制
+  path: 04-common-capability/02-safe-area/01-safe-area-mechanism/
+  design: null
+  status: active
+- id: 04-03-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '01'
+    title: 布局属性
+  path: 04-common-capability/03-common-attributes/01-layout-attributes/
+  design: 04-common-capability/03-common-attributes/01-layout-attributes/design.md
+  status: active
+- id: 04-03-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '02'
+    title: 视效属性
+  path: 04-common-capability/03-common-attributes/02-visual-effect-attributes/
+  design: 04-common-capability/03-common-attributes/02-visual-effect-attributes/design.md
+  status: active
+- id: 04-03-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '03'
+    title: 基础属性
+  path: 04-common-capability/03-common-attributes/03-basic-attributes/
+  design: null
+  status: active
+- id: 04-03-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '04'
+    title: 交互属性
+  path: 04-common-capability/03-common-attributes/04-interaction-attributes/
+  design: null
+  status: active
+- id: 04-03-05
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '05'
+    title: 弹窗类属性
+  path: 04-common-capability/03-common-attributes/05-popup-attributes/
+  design: null
+  status: active
+- id: 04-03-06
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '06'
+    title: 模态属性
+  path: 04-common-capability/03-common-attributes/06-modal-attributes/
+  design: null
+  status: active
+- id: 04-03-07
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '07'
+    title: 样式属性
+  path: 04-common-capability/03-common-attributes/07-style-attributes/
+  design: null
+  status: active
+- id: 04-03-08
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: 08
+    title: 基础单位
+  path: 04-common-capability/03-common-attributes/08-basic-units/
+  design: null
+  status: active
+- id: 04-03-09
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: 09
+    title: 无障碍属性
+  path: 04-common-capability/03-common-attributes/09-accessibility-attributes/
+  design: null
+  status: active
+- id: 04-03-10
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '10'
+    title: 图片相关属性
+  path: 04-common-capability/03-common-attributes/10-image-related-attributes/
+  design: null
+  status: active
+- id: 04-03-11
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '03'
+    title: 通用属性
+  l3:
+    id: '11'
+    title: 文本通用属性
+  path: 04-common-capability/03-common-attributes/11-text-common-attributes/
+  design: null
+  status: active
+- id: 04-04-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '01'
+    title: 触摸事件
+  path: 04-common-capability/04-common-events/01-touch-events/
+  design: null
+  status: active
+- id: 04-04-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '02'
+    title: 按键事件
+  path: 04-common-capability/04-common-events/02-key-events/
+  design: null
+  status: active
+- id: 04-04-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '03'
+    title: 事件分发和拦截
+  path: 04-common-capability/04-common-events/03-event-dispatch-intercept/
+  design: null
+  status: active
+- id: 04-04-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '04'
+    title: 组件组合键
+  path: 04-common-capability/04-common-events/04-component-shortcuts/
+  design: null
+  status: active
+- id: 04-04-05
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '05'
+    title: 鼠标事件
+  path: 04-common-capability/04-common-events/05-mouse-events/
+  design: null
+  status: active
+- id: 04-04-06
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '06'
+    title: 手势能力
+  path: 04-common-capability/04-common-events/06-gesture-capability/
+  design: 04-common-capability/04-common-events/06-gesture-capability/design.md
+  status: active
+- id: 04-04-07
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '07'
+    title: 拖拽能力
+  path: 04-common-capability/04-common-events/07-drag-capability/
+  design: null
+  status: active
+- id: 04-04-08
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: 08
+    title: 手写笔能力
+  path: 04-common-capability/04-common-events/08-stylus-capability/
+  design: null
+  status: active
+- id: 04-04-09
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: 09
+    title: 组件相关事件
+  path: 04-common-capability/04-common-events/09-component-related-events/
+  design: null
+  status: active
+- id: 04-04-10
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '10'
+    title: 可见区域机制
+  path: 04-common-capability/04-common-events/10-visible-area-mechanism/
+  design: null
+  status: active
+- id: 04-04-11
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '04'
+    title: 通用事件
+  l3:
+    id: '11'
+    title: 交互归一化
+  path: 04-common-capability/04-common-events/11-interaction-normalization/
+  design: null
+  status: active
+- id: 04-05-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '01'
+    title: 动态绘制属性
+  path: 04-common-capability/05-custom-extension/01-draw-modifier/
+  design: null
+  status: active
+- id: 04-05-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '02'
+    title: 动态属性
+  path: 04-common-capability/05-custom-extension/02-dynamic-attributes/
+  design: null
+  status: active
+- id: 04-05-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '03'
+    title: 自定义内容 -（表单类组件）
+  path: 04-common-capability/05-custom-extension/03-content-modifier-form/
+  design: null
+  status: active
+- id: 04-05-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '04'
+    title: 自定义内容 -（信息展示类）
+  path: 04-common-capability/05-custom-extension/04-content-modifier-display/
+  design: null
+  status: active
+- id: 04-05-05
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '05'
+    title: 自定义属性
+  path: 04-common-capability/05-custom-extension/05-custom-property/
+  design: null
+  status: active
+- id: 04-05-06
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '05'
+    title: 自定义扩展能力
+  l3:
+    id: '06'
+    title: 组件Modifier
+  path: 04-common-capability/05-custom-extension/06-component-modifier/
+  design: null
+  status: active
+- id: 04-06-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '01'
+    title: 占位组件
+  path: 04-common-capability/06-custom-node/01-placeholder-component/
+  design: null
+  status: active
+- id: 04-06-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '02'
+    title: FrameNode
+  path: 04-common-capability/06-custom-node/02-frame-node/
+  design: null
+  status: active
+- id: 04-06-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '03'
+    title: RenderNode
+  path: 04-common-capability/06-custom-node/03-render-node/
+  design: null
+  status: active
+- id: 04-06-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '04'
+    title: BuilderNode
+  path: 04-common-capability/06-custom-node/04-builder-node/
+  design: null
+  status: active
+- id: 04-06-05
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '05'
+    title: ComponentContent
+  path: 04-common-capability/06-custom-node/05-component-content/
+  design: null
+  status: active
+- id: 04-06-06
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '06'
+    title: NodeAdapter
+  path: 04-common-capability/06-custom-node/06-node-adapter/
+  design: null
+  status: active
+- id: 04-06-07
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '06'
+    title: 自定义节点能力
+  l3:
+    id: '07'
+    title: TypedFrameNode
+  path: 04-common-capability/06-custom-node/07-typed-frame-node/
+  design: null
+  status: active
+- id: 04-07-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '07'
+    title: 迁移恢复
+  l3:
+    id: '01'
+    title: 分布式路由迁移能力
+  path: 04-common-capability/07-migration-recovery/01-distributed-router-migration/
+  design: null
+  status: active
+- id: 04-07-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '07'
+    title: 迁移恢复
+  l3:
+    id: '02'
+    title: 路由栈恢复
+  path: 04-common-capability/07-migration-recovery/02-router-stack-recovery/
+  design: null
+  status: active
+- id: 04-07-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '07'
+    title: 迁移恢复
+  l3:
+    id: '03'
+    title: 组件迁移机制
+  path: 04-common-capability/07-migration-recovery/03-component-migration/
+  design: null
+  status: active
+- id: 04-08-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: 08
+    title: 根视图
+  l3:
+    id: '01'
+    title: 窗口工具栏
+  path: 04-common-capability/08-root-view/01-window-toolbar/
+  design: null
+  status: active
+- id: 04-08-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: 08
+    title: 根视图
+  l3:
+    id: '02'
+    title: 元服务AppBar
+  path: 04-common-capability/08-root-view/02-atomic-service-appbar/
+  design: null
+  status: active
+- id: 04-08-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: 08
+    title: 根视图
+  l3:
+    id: '03'
+    title: 浮层能力
+  path: 04-common-capability/08-root-view/03-overlay-capability/
+  design: null
+  status: active
+- id: 04-09-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: 09
+    title: 焦点框架
+  l3:
+    id: '01'
+    title: 焦点机制
+  path: 04-common-capability/09-focus-framework/01-focus-mechanism/
+  design: null
+  status: active
+- id: 04-10-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '10'
+    title: 组件截图
+  l3:
+    id: '01'
+    title: 离屏截图
+  path: 04-common-capability/10-component-screenshot/01-offscreen-screenshot/
+  design: null
+  status: active
+- id: 04-11-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '11'
+    title: 组件信息获取
+  l3:
+    id: '01'
+    title: ComponentUtils
+  path: 04-common-capability/11-component-info/01-component-utils/
+  design: null
+  status: active
+- id: 04-11-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '11'
+    title: 组件信息获取
+  l3:
+    id: '02'
+    title: 无感监听（observer）
+  path: 04-common-capability/11-component-info/02-observer/
+  design: null
+  status: active
+- id: 04-11-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '11'
+    title: 组件信息获取
+  l3:
+    id: '03'
+    title: 布局回调（inspector）
+  path: 04-common-capability/11-component-info/03-inspector-layout-callback/
+  design: null
+  status: active
+- id: 04-12-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '12'
+    title: UI上下文
+  l3:
+    id: '01'
+    title: UIContext接口
+  path: 04-common-capability/12-ui-context/01-ui-context-interface/
+  design: null
+  status: active
+- id: 04-12-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '12'
+    title: UI上下文
+  l3:
+    id: '02'
+    title: Ability上下文
+  path: 04-common-capability/12-ui-context/02-ability-context/
+  design: null
+  status: active
+- id: 04-12-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '12'
+    title: UI上下文
+  l3:
+    id: '03'
+    title: Frame回调接口
+  path: 04-common-capability/12-ui-context/03-frame-callback/
+  design: null
+  status: active
+- id: 04-13-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '13'
+    title: 字体文本
+  l3:
+    id: '01'
+    title: 字体注册
+  path: 04-common-capability/13-font-text/01-font-registration/
+  design: null
+  status: active
+- id: 04-13-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '13'
+    title: 字体文本
+  l3:
+    id: '02'
+    title: 文本测量
+  path: 04-common-capability/13-font-text/02-text-measurement/
+  design: null
+  status: active
+- id: 04-14-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '14'
+    title: 输入交互
+  l3:
+    id: '01'
+    title: 文本选择
+  path: 04-common-capability/14-input-interaction/01-text-selection/
+  design: null
+  status: active
+- id: 04-14-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '14'
+    title: 输入交互
+  l3:
+    id: '02'
+    title: 文本快捷键
+  path: 04-common-capability/14-input-interaction/02-text-shortcuts/
+  design: null
+  status: active
+- id: 04-14-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '14'
+    title: 输入交互
+  l3:
+    id: '03'
+    title: 文本交互
+  path: 04-common-capability/14-input-interaction/03-text-interaction/
+  design: null
+  status: active
+- id: 04-14-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '14'
+    title: 输入交互
+  l3:
+    id: '04'
+    title: 键盘控制
+  path: 04-common-capability/14-input-interaction/04-keyboard-control/
+  design: null
+  status: active
+- id: 04-14-05
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '14'
+    title: 输入交互
+  l3:
+    id: '05'
+    title: 自动补全能力（AutoFill）
+  path: 04-common-capability/14-input-interaction/05-autofill/
+  design: null
+  status: active
+- id: 04-15-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '15'
+    title: 路由机制
+  l3:
+    id: '01'
+    title: 路由管理
+  path: 04-common-capability/15-router-mechanism/01-router-management/
+  design: null
+  status: active
+- id: 04-15-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '15'
+    title: 路由机制
+  l3:
+    id: '03'
+    title: 命名路由
+  path: 04-common-capability/15-router-mechanism/03-named-router/
+  design: null
+  status: active
+- id: 04-16-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '16'
+    title: UIAppearance
+  l3:
+    id: '01'
+    title: UIAppearance
+  path: 04-common-capability/16-ui-appearance/01-ui-appearance/
+  design: null
+  status: active
+- id: 04-17-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '17'
+    title: 嵌入显示能力
+  l3:
+    id: '01'
+    title: UIExtension机制
+  path: 04-common-capability/17-embedded-display/01-ui-extension/
+  design: null
+  status: active
+- id: 04-17-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '17'
+    title: 嵌入显示能力
+  l3:
+    id: '02'
+    title: IsolateComponent机制
+  path: 04-common-capability/17-embedded-display/02-isolate-component/
+  design: null
+  status: active
+- id: 04-17-03
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '17'
+    title: 嵌入显示能力
+  l3:
+    id: '03'
+    title: From卡片机制
+  path: 04-common-capability/17-embedded-display/03-form-card/
+  design: null
+  status: active
+- id: 04-17-04
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '17'
+    title: 嵌入显示能力
+  l3:
+    id: '04'
+    title: PluginComponent机制
+  path: 04-common-capability/17-embedded-display/04-plugin-component/
+  design: null
+  status: active
+- id: 04-18-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '18'
+    title: 端侧渲染
+  l3:
+    id: '01'
+    title: 同层渲染机制
+  path: 04-common-capability/18-on-device-rendering/01-same-layer-rendering/
+  design: null
+  status: active
+- id: 04-19-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '19'
+    title: 组件复用
+  l3:
+    id: '01'
+    title: 组件复用框架
+  path: 04-common-capability/19-component-reuse/01-component-reuse-framework/
+  design: null
+  status: active
+- id: 04-20-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '20'
+    title: 媒体查询能力
+  l3:
+    id: '01'
+    title: MediaQuery
+  path: 04-common-capability/20-media-query/01-media-query/
+  design: null
+  status: active
+- id: 04-21-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '21'
+    title: 适老化
+  l3:
+    id: '01'
+    title: 大字体
+  path: 04-common-capability/21-aging-adaptation/01-large-font/
+  design: null
+  status: active
+- id: 04-22-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '22'
+    title: 国际化能力
+  l3:
+    id: '01'
+    title: 多语言能力
+  path: 04-common-capability/22-internationalization/01-multilingual/
+  design: null
+  status: active
+- id: 04-22-02
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '22'
+    title: 国际化能力
+  l3:
+    id: '02'
+    title: 镜像能力
+  path: 04-common-capability/22-internationalization/02-mirroring/
+  design: null
+  status: active
+- id: 04-23-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '23'
+    title: AI能力
+  l3:
+    id: '01'
+    title: Image分析能力
+  path: 04-common-capability/23-ai-capability/01-image-analysis/
+  design: null
+  status: active
+- id: 04-24-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '24'
+    title: 布局通用能力
+  l3:
+    id: '01'
+    title: 像素取整能力
+  path: 04-common-capability/24-layout-common-capability/01-pixel-rounding/
+  design: null
+  status: active
+- id: 04-25-01
+  l1:
+    id: '04'
+    title: 通用能力层
+  l2:
+    id: '25'
+    title: 热重载能力
+  l3:
+    id: '01'
+    title: 热重载机制
+  path: 04-common-capability/25-hot-reload/01-hot-reload-mechanism/
+  design: null
+  status: active
+- id: 05-01-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '01'
+    title: Blank
+  path: 05-ui-components/01-layout-components/01-blank/
+  design: 05-ui-components/01-layout-components/01-blank/design.md
+  status: active
+- id: 05-01-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '02'
+    title: Divider
+  path: 05-ui-components/01-layout-components/02-divider/
+  design: 05-ui-components/01-layout-components/02-divider/design.md
+  status: active
+- id: 05-01-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '03'
+    title: Column
+  path: 05-ui-components/01-layout-components/03-column/
+  design: null
+  status: active
+- id: 05-01-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '04'
+    title: ColumnSplit
+  path: 05-ui-components/01-layout-components/04-column-split/
+  design: null
+  status: active
+- id: 05-01-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '05'
+    title: Flex
+  path: 05-ui-components/01-layout-components/05-flex/
+  design: null
+  status: active
+- id: 05-01-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '06'
+    title: GridCol
+  path: 05-ui-components/01-layout-components/06-grid-col/
+  design: null
+  status: active
+- id: 05-01-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '07'
+    title: GridRow
+  path: 05-ui-components/01-layout-components/07-grid-row/
+  design: null
+  status: active
+- id: 05-01-08
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: 08
+    title: RelativeContainer
+  path: 05-ui-components/01-layout-components/08-relative-container/
+  design: null
+  status: active
+- id: 05-01-09
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: 09
+    title: Row
+  path: 05-ui-components/01-layout-components/09-row/
+  design: null
+  status: active
+- id: 05-01-10
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '10'
+    title: RowSplit
+  path: 05-ui-components/01-layout-components/10-row-split/
+  design: null
+  status: active
+- id: 05-01-11
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '11'
+    title: Stack
+  path: 05-ui-components/01-layout-components/11-stack/
+  design: null
+  status: active
+- id: 05-01-12
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '12'
+    title: FolderStack
+  path: 05-ui-components/01-layout-components/12-folder-stack/
+  design: null
+  status: active
+- id: 05-01-13
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '01'
+    title: 布局类组件
+  l3:
+    id: '13'
+    title: DynamicLayout
+  path: 05-ui-components/01-layout-components/13-dynamic-layout/
+  design: null
+  status: active
+- id: 05-02-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '01'
+    title: Navigation
+  path: 05-ui-components/02-navigation-components/01-navigation/
+  design: 05-ui-components/02-navigation-components/01-navigation/design.md
+  status: active
+- id: 05-02-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '02'
+    title: NavRouter
+  path: 05-ui-components/02-navigation-components/02-nav-router/
+  design: null
+  status: active
+- id: 05-02-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '03'
+    title: NavDestination
+  path: 05-ui-components/02-navigation-components/03-nav-destination/
+  design: null
+  status: active
+- id: 05-02-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '04'
+    title: Stepper/SetpperItem
+  path: 05-ui-components/02-navigation-components/04-stepper-stepper-item/
+  design: null
+  status: active
+- id: 05-02-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '05'
+    title: Navigator
+  path: 05-ui-components/02-navigation-components/05-navigator/
+  design: null
+  status: active
+- id: 05-02-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '02'
+    title: 导航类组件
+  l3:
+    id: '06'
+    title: SideBarContainer
+  path: 05-ui-components/02-navigation-components/06-sidebar-container/
+  design: 05-ui-components/02-navigation-components/06-sidebar-container/design.md
+  status: active
+- id: 05-03-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '01'
+    title: 滚动公共能力
+  path: 05-ui-components/03-scroll-container-components/01-scroll-common-capability/
+  design: null
+  status: active
+- id: 05-03-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '02'
+    title: AlaphabetIndexer
+  path: 05-ui-components/03-scroll-container-components/02-alphabet-indexer/
+  design: null
+  status: active
+- id: 05-03-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '03'
+    title: ScrollBar
+  path: 05-ui-components/03-scroll-container-components/03-scroll-bar/
+  design: null
+  status: active
+- id: 05-03-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '04'
+    title: Grid/GridItem
+  path: 05-ui-components/03-scroll-container-components/04-grid-grid-item/
+  design: null
+  status: active
+- id: 05-03-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '05'
+    title: List/ListItem/ListItemGroup
+  path: 05-ui-components/03-scroll-container-components/05-list-list-item-list-item-group/
+  design: null
+  status: active
+- id: 05-03-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '06'
+    title: Refresh
+  path: 05-ui-components/03-scroll-container-components/06-refresh/
+  design: null
+  status: active
+- id: 05-03-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '07'
+    title: Scroll
+  path: 05-ui-components/03-scroll-container-components/07-scroll/
+  design: null
+  status: active
+- id: 05-03-08
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: 08
+    title: Swiper
+  path: 05-ui-components/03-scroll-container-components/08-swiper/
+  design: 05-ui-components/03-scroll-container-components/08-swiper/design.md
+  status: active
+- id: 05-03-09
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: 09
+    title: Tabs/TabContent
+  path: 05-ui-components/03-scroll-container-components/09-tabs-tab-content/
+  design: 05-ui-components/03-scroll-container-components/09-tabs-tab-content/design.md
+  status: active
+- id: 05-03-10
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '03'
+    title: 滚动容器类组件
+  l3:
+    id: '10'
+    title: WaterFlow/FlowItem
+  path: 05-ui-components/03-scroll-container-components/10-water-flow-flow-item/
+  design: null
+  status: active
+- id: 05-04-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '01'
+    title: Button
+  path: 05-ui-components/04-input-form-components/01-button/
+  design: null
+  status: active
+- id: 05-04-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '02'
+    title: Checkbox/CheckboxGroup
+  path: 05-ui-components/04-input-form-components/02-checkbox-checkbox-group/
+  design: null
+  status: active
+- id: 05-04-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '03'
+    title: Rating
+  path: 05-ui-components/04-input-form-components/03-rating/
+  design: null
+  status: active
+- id: 05-04-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '04'
+    title: Radio
+  path: 05-ui-components/04-input-form-components/04-radio/
+  design: null
+  status: active
+- id: 05-04-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '05'
+    title: Slider
+  path: 05-ui-components/04-input-form-components/05-slider/
+  design: null
+  status: active
+- id: 05-04-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '04'
+    title: 输入表单类
+  l3:
+    id: '06'
+    title: Toggle
+  path: 05-ui-components/04-input-form-components/06-toggle/
+  design: 05-ui-components/04-input-form-components/06-toggle/design.md
+  status: active
+- id: 05-05-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '01'
+    title: Calendar/CalendarPicker
+  path: 05-ui-components/05-picker-components/01-calendar-calendar-picker/
+  design: null
+  status: active
+- id: 05-05-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '02'
+    title: DatePicker
+  path: 05-ui-components/05-picker-components/02-date-picker/
+  design: null
+  status: active
+- id: 05-05-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '03'
+    title: TextPicker
+  path: 05-ui-components/05-picker-components/03-text-picker/
+  design: null
+  status: active
+- id: 05-05-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '04'
+    title: TimePicker
+  path: 05-ui-components/05-picker-components/04-time-picker/
+  design: null
+  status: active
+- id: 05-05-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '05'
+    title: Select
+  path: 05-ui-components/05-picker-components/05-select/
+  design: null
+  status: active
+- id: 05-05-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '05'
+    title: 选择类组件
+  l3:
+    id: '06'
+    title: Picker
+  path: 05-ui-components/05-picker-components/06-picker/
+  design: null
+  status: active
+- id: 05-06-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '01'
+    title: Menu/MenuItem/MenuItemGroup
+  path: 05-ui-components/06-popup-components/01-menu-menu-item-menu-item-group/
+  design: null
+  status: active
+- id: 05-06-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '02'
+    title: 警告弹窗
+  path: 05-ui-components/06-popup-components/02-alert-dialog/
+  design: null
+  status: active
+- id: 05-06-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '03'
+    title: 列表选择弹窗
+  path: 05-ui-components/06-popup-components/03-list-selection-dialog/
+  design: null
+  status: active
+- id: 05-06-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '04'
+    title: 自定义弹窗
+  path: 05-ui-components/06-popup-components/04-custom-dialog/
+  design: null
+  status: active
+- id: 05-06-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '05'
+    title: CalendarPickerDialog
+  path: 05-ui-components/06-popup-components/05-calendar-picker-dialog/
+  design: null
+  status: active
+- id: 05-06-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '06'
+    title: DatePickerDialog
+  path: 05-ui-components/06-popup-components/06-date-picker-dialog/
+  design: null
+  status: active
+- id: 05-06-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '07'
+    title: TimePickerDialog
+  path: 05-ui-components/06-popup-components/07-time-picker-dialog/
+  design: null
+  status: active
+- id: 05-06-08
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: 08
+    title: TextPickerDialog
+  path: 05-ui-components/06-popup-components/08-text-picker-dialog/
+  design: null
+  status: active
+- id: 05-06-09
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: 09
+    title: ContextMenu接口
+  path: 05-ui-components/06-popup-components/09-context-menu/
+  design: null
+  status: active
+- id: 05-06-10
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '10'
+    title: promptAction接口
+  path: 05-ui-components/06-popup-components/10-prompt-action/
+  design: null
+  status: active
+- id: 05-06-11
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '06'
+    title: 弹窗类组件
+  l3:
+    id: '11'
+    title: popup弹窗
+  path: 05-ui-components/06-popup-components/11-popup/
+  design: null
+  status: active
+- id: 05-07-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '07'
+    title: 模态类组件
+  l3:
+    id: '01'
+    title: 半模态弹窗
+  path: 05-ui-components/07-modal-components/01-sheet-modal/
+  design: null
+  status: active
+- id: 05-07-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '07'
+    title: 模态类组件
+  l3:
+    id: '02'
+    title: 全模态弹窗
+  path: 05-ui-components/07-modal-components/02-full-modal/
+  design: null
+  status: active
+- id: 05-07-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '07'
+    title: 模态类组件
+  l3:
+    id: '03'
+    title: Panel
+  path: 05-ui-components/07-modal-components/03-panel/
+  design: null
+  status: active
+- id: 05-08-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 08
+    title: 图片类组件
+  l3:
+    id: '01'
+    title: Image
+  path: 05-ui-components/08-image-components/01-image/
+  design: 05-ui-components/08-image-components/01-image/design.md
+  status: active
+- id: 05-08-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 08
+    title: 图片类组件
+  l3:
+    id: '02'
+    title: ImageAnimator
+  path: 05-ui-components/08-image-components/02-image-animator/
+  design: null
+  status: active
+- id: 05-08-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 08
+    title: 图片类组件
+  l3:
+    id: '03'
+    title: MediaCachedImage
+  path: 05-ui-components/08-image-components/03-media-cached-image/
+  design: null
+  status: active
+- id: 05-09-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '01'
+    title: Marquee
+  path: 05-ui-components/09-text-components/01-marquee/
+  design: null
+  status: active
+- id: 05-09-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '02'
+    title: RichEditor
+  path: 05-ui-components/09-text-components/02-rich-editor/
+  design: null
+  status: active
+- id: 05-09-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '03'
+    title: Search
+  path: 05-ui-components/09-text-components/03-search/
+  design: null
+  status: active
+- id: 05-09-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '04'
+    title: Text
+  path: 05-ui-components/09-text-components/04-text/
+  design: 05-ui-components/09-text-components/04-text/design.md
+  status: active
+- id: 05-09-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '05'
+    title: TextArea
+  path: 05-ui-components/09-text-components/05-text-area/
+  design: null
+  status: active
+- id: 05-09-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '06'
+    title: Span类
+  path: 05-ui-components/09-text-components/06-span-components/
+  design: null
+  status: active
+- id: 05-09-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '07'
+    title: SymbolGlyph
+  path: 05-ui-components/09-text-components/07-symbol-glyph/
+  design: null
+  status: active
+- id: 05-09-08
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: 08
+    title: TextInput
+  path: 05-ui-components/09-text-components/08-text-input/
+  design: null
+  status: active
+- id: 05-09-09
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: 09
+    title: HyperLink
+  path: 05-ui-components/09-text-components/09-hyperlink/
+  design: null
+  status: active
+- id: 05-09-10
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: 09
+    title: 文本类组件
+  l3:
+    id: '10'
+    title: 属性字符串
+  path: 05-ui-components/09-text-components/10-attributed-string/
+  design: null
+  status: active
+- id: 05-10-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '01'
+    title: DataPanel
+  path: 05-ui-components/10-information-display-components/01-data-panel/
+  design: null
+  status: active
+- id: 05-10-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '02'
+    title: Gauge
+  path: 05-ui-components/10-information-display-components/02-gauge/
+  design: null
+  status: active
+- id: 05-10-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '03'
+    title: LoadingProgress
+  path: 05-ui-components/10-information-display-components/03-loading-progress/
+  design: null
+  status: active
+- id: 05-10-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '04'
+    title: PatternLock
+  path: 05-ui-components/10-information-display-components/04-pattern-lock/
+  design: null
+  status: active
+- id: 05-10-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '05'
+    title: Progress
+  path: 05-ui-components/10-information-display-components/05-progress/
+  design: null
+  status: active
+- id: 05-10-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '06'
+    title: QRCode
+  path: 05-ui-components/10-information-display-components/06-qr-code/
+  design: null
+  status: active
+- id: 05-10-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '07'
+    title: TextClock
+  path: 05-ui-components/10-information-display-components/07-text-clock/
+  design: null
+  status: active
+- id: 05-10-08
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: 08
+    title: TextTimer
+  path: 05-ui-components/10-information-display-components/08-text-timer/
+  design: null
+  status: active
+- id: 05-10-09
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: 09
+    title: Badge
+  path: 05-ui-components/10-information-display-components/09-badge/
+  design: null
+  status: active
+- id: 05-10-10
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '10'
+    title: 信息展示类组件
+  l3:
+    id: '10'
+    title: Counter
+  path: 05-ui-components/10-information-display-components/10-counter/
+  design: null
+  status: active
+- id: 05-11-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '11'
+    title: 卡片框架组件
+  l3:
+    id: '01'
+    title: FormComponent
+  path: 05-ui-components/11-card-framework-components/01-form-component/
+  design: null
+  status: active
+- id: 05-11-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '11'
+    title: 卡片框架组件
+  l3:
+    id: '02'
+    title: FormLink
+  path: 05-ui-components/11-card-framework-components/02-form-link/
+  design: null
+  status: active
+- id: 05-12-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '01'
+    title: PluginComponent
+  path: 05-ui-components/12-embedded-display-components/01-plugin-component/
+  design: null
+  status: active
+- id: 05-12-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '02'
+    title: AbilityComponent
+  path: 05-ui-components/12-embedded-display-components/02-ability-component/
+  design: null
+  status: active
+- id: 05-12-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '03'
+    title: UIExtensionComponent
+  path: 05-ui-components/12-embedded-display-components/03-ui-extension-component/
+  design: null
+  status: active
+- id: 05-12-04
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '04'
+    title: EmbeddedComponent
+  path: 05-ui-components/12-embedded-display-components/04-embedded-component/
+  design: null
+  status: active
+- id: 05-12-05
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '05'
+    title: IsolatedComponent
+  path: 05-ui-components/12-embedded-display-components/05-isolated-component/
+  design: null
+  status: active
+- id: 05-12-06
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '06'
+    title: SecurityUIExtensionComponent
+  path: 05-ui-components/12-embedded-display-components/06-security-ui-extension-component/
+  design: null
+  status: active
+- id: 05-12-07
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '12'
+    title: 显示嵌入组件
+  l3:
+    id: '07'
+    title: DynamicComponent
+  path: 05-ui-components/12-embedded-display-components/07-dynamic-component/
+  design: null
+  status: active
+- id: 05-13-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '13'
+    title: 平台类组件
+  l3:
+    id: '01'
+    title: XComponent
+  path: 05-ui-components/13-platform-components/01-xcomponent/
+  design: null
+  status: active
+- id: 05-13-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '13'
+    title: 平台类组件
+  l3:
+    id: '02'
+    title: Video
+  path: 05-ui-components/13-platform-components/02-video/
+  design: null
+  status: active
+- id: 05-14-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '14'
+    title: 绘制类组件
+  l3:
+    id: '01'
+    title: Shape相关
+  path: 05-ui-components/14-drawing-components/01-shape/
+  design: null
+  status: active
+- id: 05-14-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '14'
+    title: 绘制类组件
+  l3:
+    id: '02'
+    title: Canvas
+  path: 05-ui-components/14-drawing-components/02-canvas/
+  design: null
+  status: active
+- id: 05-14-03
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '14'
+    title: 绘制类组件
+  l3:
+    id: '03'
+    title: OffscreenCanvas
+  path: 05-ui-components/14-drawing-components/03-offscreen-canvas/
+  design: null
+  status: active
+- id: 05-15-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '15'
+    title: 主题组件
+  l3:
+    id: '01'
+    title: WithTheme
+  path: 05-ui-components/15-theme-components/01-with-theme/
+  design: null
+  status: active
+- id: 05-16-01
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '16'
+    title: 自定义占位组件
+  l3:
+    id: '01'
+    title: NodeContainer
+  path: 05-ui-components/16-custom-placeholder-components/01-node-container/
+  design: null
+  status: active
+- id: 05-16-02
+  l1:
+    id: '05'
+    title: 组件层
+  l2:
+    id: '16'
+    title: 自定义占位组件
+  l3:
+    id: '02'
+    title: ContentSlot
+  path: 05-ui-components/16-custom-placeholder-components/02-content-slot/
+  design: null
+  status: active
+- id: 06-01-01
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '01'
+    title: 前端桥接
+  l3:
+    id: '01'
+    title: 跨语言封装
+  path: 06-common-interface/01-frontend-bridge/01-cross-language-wrapper/
+  design: null
+  status: active
+- id: 06-01-02
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '01'
+    title: 前端桥接
+  l3:
+    id: '02'
+    title: JS引擎管理
+  path: 06-common-interface/01-frontend-bridge/02-js-engine-management/
+  design: null
+  status: active
+- id: 06-01-03
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '01'
+    title: 前端桥接
+  l3:
+    id: '03'
+    title: IDL工具
+  path: 06-common-interface/01-frontend-bridge/03-idl-tool/
+  design: null
+  status: active
+- id: 06-02-01
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '02'
+    title: Inner接口
+  l3:
+    id: '01'
+    title: Inner-组件能力接口
+  path: 06-common-interface/02-inner-interface/01-inner-component-interface/
+  design: null
+  status: active
+- id: 06-02-02
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '02'
+    title: Inner接口
+  l3:
+    id: '02'
+    title: Inner-基础能力接口
+  path: 06-common-interface/02-inner-interface/02-inner-basic-interface/
+  design: null
+  status: active
+- id: 06-03-01
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '03'
+    title: 其它范式接入
+  l3:
+    id: '01'
+    title: 类Web范式
+  path: 06-common-interface/03-paradigm-integration/01-web-like-paradigm/
+  design: null
+  status: active
+- id: 06-03-02
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '03'
+    title: 其它范式接入
+  l3:
+    id: '02'
+    title: ArkTS卡片
+  path: 06-common-interface/03-paradigm-integration/02-arkts-card/
+  design: null
+  status: active
+- id: 06-03-03
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '03'
+    title: 其它范式接入
+  l3:
+    id: '03'
+    title: JS卡片
+  path: 06-common-interface/03-paradigm-integration/03-js-card/
+  design: null
+  status: active
+- id: 06-03-04
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '03'
+    title: 其它范式接入
+  l3:
+    id: '04'
+    title: FA模型
+  path: 06-common-interface/03-paradigm-integration/04-fa-model/
+  design: null
+  status: active
+- id: 06-03-05
+  l1:
+    id: '06'
+    title: 通用接口层
+  l2:
+    id: '03'
+    title: 其它范式接入
+  l3:
+    id: '05'
+    title: 仓颉接入层
+  path: 06-common-interface/03-paradigm-integration/05-cangjie-integration/
+  design: null
+  status: active
+- id: 07-01-01
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '01'
+    title: Chip
+  path: 07-frontend/01-arkts-advanced-components/01-chip/
+  design: null
+  status: active
+- id: 07-01-02
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '02'
+    title: ChipGroup
+  path: 07-frontend/01-arkts-advanced-components/02-chip-group/
+  design: null
+  status: active
+- id: 07-01-03
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '03'
+    title: ComposeListItem
+  path: 07-frontend/01-arkts-advanced-components/03-compose-list-item/
+  design: null
+  status: active
+- id: 07-01-04
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '04'
+    title: ComposeTitleBar
+  path: 07-frontend/01-arkts-advanced-components/04-compose-title-bar/
+  design: null
+  status: active
+- id: 07-01-05
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '05'
+    title: Counter
+  path: 07-frontend/01-arkts-advanced-components/05-counter/
+  design: null
+  status: active
+- id: 07-01-06
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '06'
+    title: Dialog
+  path: 07-frontend/01-arkts-advanced-components/06-dialog/
+  design: null
+  status: active
+- id: 07-01-07
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '07'
+    title: DownloadFileButton
+  path: 07-frontend/01-arkts-advanced-components/07-download-file-button/
+  design: null
+  status: active
+- id: 07-01-08
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: 08
+    title: EditableTitleBar
+  path: 07-frontend/01-arkts-advanced-components/08-editable-title-bar/
+  design: null
+  status: active
+- id: 07-01-09
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: 09
+    title: ExceptionPrompt
+  path: 07-frontend/01-arkts-advanced-components/09-exception-prompt/
+  design: null
+  status: active
+- id: 07-01-10
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '10'
+    title: Filter
+  path: 07-frontend/01-arkts-advanced-components/10-filter/
+  design: null
+  status: active
+- id: 07-01-11
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '11'
+    title: FormMenu
+  path: 07-frontend/01-arkts-advanced-components/11-form-menu/
+  design: null
+  status: active
+- id: 07-01-12
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '12'
+    title: ProgressButton
+  path: 07-frontend/01-arkts-advanced-components/12-progress-button/
+  design: null
+  status: active
+- id: 07-01-13
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '13'
+    title: FullScreenLaunchComponent
+  path: 07-frontend/01-arkts-advanced-components/13-full-screen-launch-component/
+  design: null
+  status: active
+- id: 07-01-14
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '14'
+    title: GridObjectSortComponent
+  path: 07-frontend/01-arkts-advanced-components/14-grid-object-sort-component/
+  design: null
+  status: active
+- id: 07-01-15
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '15'
+    title: ProgressButton
+  path: 07-frontend/01-arkts-advanced-components/15-progress-button/
+  design: null
+  status: active
+- id: 07-01-16
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '16'
+    title: Popup
+  path: 07-frontend/01-arkts-advanced-components/16-popup/
+  design: null
+  status: active
+- id: 07-01-17
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '17'
+    title: SegmentButton
+  path: 07-frontend/01-arkts-advanced-components/17-segment-button/
+  design: null
+  status: active
+- id: 07-01-18
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '18'
+    title: SelectionMenu
+  path: 07-frontend/01-arkts-advanced-components/18-selection-menu/
+  design: null
+  status: active
+- id: 07-01-19
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '19'
+    title: SelectTitleBar
+  path: 07-frontend/01-arkts-advanced-components/19-select-title-bar/
+  design: null
+  status: active
+- id: 07-01-20
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '20'
+    title: SplitLayout
+  path: 07-frontend/01-arkts-advanced-components/20-split-layout/
+  design: null
+  status: active
+- id: 07-01-21
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '21'
+    title: SubHeader
+  path: 07-frontend/01-arkts-advanced-components/21-sub-header/
+  design: null
+  status: active
+- id: 07-01-22
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '22'
+    title: SwipeRefresher
+  path: 07-frontend/01-arkts-advanced-components/22-swipe-refresher/
+  design: null
+  status: active
+- id: 07-01-23
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '23'
+    title: TabTitleBar
+  path: 07-frontend/01-arkts-advanced-components/23-tab-title-bar/
+  design: null
+  status: active
+- id: 07-01-24
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '24'
+    title: ToolBar
+  path: 07-frontend/01-arkts-advanced-components/24-tool-bar/
+  design: null
+  status: active
+- id: 07-01-25
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '25'
+    title: TreeView
+  path: 07-frontend/01-arkts-advanced-components/25-tree-view/
+  design: null
+  status: active
+- id: 07-01-26
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '01'
+    title: ArkTS高级组件
+  l3:
+    id: '26'
+    title: FoldSplitContainer
+  path: 07-frontend/01-arkts-advanced-components/26-fold-split-container/
+  design: null
+  status: active
+- id: 07-02-01
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '02'
+    title: 状态管理框架
+  l3:
+    id: '01'
+    title: 组件状态管理
+  path: 07-frontend/02-state-management/01-component-state-management/
+  design: null
+  status: active
+- id: 07-02-02
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '02'
+    title: 状态管理框架
+  l3:
+    id: '02'
+    title: 应用状态管理
+  path: 07-frontend/02-state-management/02-application-state-management/
+  design: null
+  status: active
+- id: 07-02-03
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '02'
+    title: 状态管理框架
+  l3:
+    id: '03'
+    title: 数据同步
+  path: 07-frontend/02-state-management/03-data-synchronization/
+  design: null
+  status: active
+- id: 07-02-04
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '02'
+    title: 状态管理框架
+  l3:
+    id: '04'
+    title: 状态管理V2
+  path: 07-frontend/02-state-management/04-state-management-v2/
+  design: null
+  status: active
+- id: 07-02-05
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '02'
+    title: 状态管理框架
+  l3:
+    id: '05'
+    title: ArkTS静态化
+  path: 07-frontend/02-state-management/05-arkts-staticization/
+  design: null
+  status: active
+- id: 07-03-01
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '01'
+    title: 组件化
+  path: 07-frontend/03-custom-components/01-componentization/
+  design: null
+  status: active
+- id: 07-03-02
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '02'
+    title: 页面生命周期
+  path: 07-frontend/03-custom-components/02-page-lifecycle/
+  design: null
+  status: active
+- id: 07-03-03
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '03'
+    title: 组件扩展
+  path: 07-frontend/03-custom-components/03-component-extension/
+  design: null
+  status: active
+- id: 07-03-04
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '04'
+    title: 渲染控制语法
+  path: 07-frontend/03-custom-components/04-render-control-syntax/
+  design: null
+  status: active
+- id: 07-03-05
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '05'
+    title: LazyForEach
+  path: 07-frontend/03-custom-components/05-lazy-foreach/
+  design: null
+  status: active
+- id: 07-03-06
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '06'
+    title: 自定义测量/布局
+  path: 07-frontend/03-custom-components/06-custom-measure-layout/
+  design: null
+  status: active
+- id: 07-03-07
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '03'
+    title: 自定义组件
+  l3:
+    id: '07'
+    title: 组件复用前端
+  path: 07-frontend/03-custom-components/07-frontend-component-reuse/
+  design: null
+  status: active
+- id: 07-04-01
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '04'
+    title: 生成式UI
+  l3:
+    id: '01'
+    title: A2UI标准协议
+  path: 07-frontend/04-generative-ui/01-a2ui-standard-protocol/
+  design: null
+  status: active
+- id: 07-04-02
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '04'
+    title: 生成式UI
+  l3:
+    id: '02'
+    title: A2UI扩展协议
+  path: 07-frontend/04-generative-ui/02-a2ui-extension-protocol/
+  design: null
+  status: active
+- id: 07-04-03
+  l1:
+    id: '07'
+    title: 前端层
+  l2:
+    id: '04'
+    title: 生成式UI
+  l3:
+    id: '03'
+    title: A2UI高级垂域组件
+  path: 07-frontend/04-generative-ui/03-a2ui-advanced-domain-components/
+  design: null
+  status: active
+- id: 08-01-01
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '01'
+    title: 基础机制NativeModule
+  path: 08-ndk/01-node-c-api/01-native-module-base/
+  design: null
+  status: active
+- id: 08-01-02
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '02'
+    title: 组件API
+  path: 08-ndk/01-node-c-api/02-component-api/
+  design: null
+  status: active
+- id: 08-01-03
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '03'
+    title: 动效NativeAnimate
+  path: 08-ndk/01-node-c-api/03-native-animate/
+  design: null
+  status: active
+- id: 08-01-04
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '04'
+    title: 视效接口
+  path: 08-ndk/01-node-c-api/04-visual-effect-api/
+  design: null
+  status: active
+- id: 08-01-05
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '05'
+    title: 事件EventModule
+  path: 08-ndk/01-node-c-api/05-event-module/
+  design: null
+  status: active
+- id: 08-01-06
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '06'
+    title: 弹窗NativeDialog
+  path: 08-ndk/01-node-c-api/06-native-dialog/
+  design: null
+  status: active
+- id: 08-01-07
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '07'
+    title: 手势NativeGesture
+  path: 08-ndk/01-node-c-api/07-native-gesture/
+  design: null
+  status: active
+- id: 08-01-08
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: 08
+    title: 文本StyledString
+  path: 08-ndk/01-node-c-api/08-styled-string/
+  design: null
+  status: active
+- id: 08-01-09
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: 09
+    title: 绘制DrawableDescriptor
+  path: 08-ndk/01-node-c-api/09-drawable-descriptor/
+  design: null
+  status: active
+- id: 08-01-10
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '10'
+    title: 组件扩展
+  path: 08-ndk/01-node-c-api/10-component-extension/
+  design: null
+  status: active
+- id: 08-01-11
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '01'
+    title: Node C-API
+  l3:
+    id: '11'
+    title: 布局接口
+  path: 08-ndk/01-node-c-api/11-layout-api/
+  design: null
+  status: active
+- id: 08-02-01
+  l1:
+    id: 08
+    title: NDK
+  l2:
+    id: '02'
+    title: XComponent C-API
+  l3:
+    id: '01'
+    title: Native XComponent
+  path: 08-ndk/02-xcomponent-c-api/01-native-xcomponent/
+  design: null
+  status: active
+- id: 09-01-01
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '01'
+    title: 预览器
+  l3:
+    id: '01'
+    title: 组件预览
+  path: 09-developer-tools/01-previewer/01-component-preview/
+  design: null
+  status: active
+- id: 09-01-02
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '01'
+    title: 预览器
+  l3:
+    id: '02'
+    title: 基础预览
+  path: 09-developer-tools/01-previewer/02-basic-preview/
+  design: null
+  status: active
+- id: 09-01-03
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '01'
+    title: 预览器
+  l3:
+    id: '03'
+    title: 动态预览
+  path: 09-developer-tools/01-previewer/03-dynamic-preview/
+  design: null
+  status: active
+- id: 09-01-04
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '01'
+    title: 预览器
+  l3:
+    id: '04'
+    title: 热加载
+  path: 09-developer-tools/01-previewer/04-hot-reload/
+  design: null
+  status: active
+- id: 09-02-01
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '02'
+    title: 工具链
+  l3:
+    id: '01'
+    title: 工具链
+  path: 09-developer-tools/02-toolchain/01-toolchain/
+  design: null
+  status: active
+- id: 09-03-01
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '03'
+    title: 开发者文档
+  l3:
+    id: '01'
+    title: 入门指南文档
+  path: 09-developer-tools/03-developer-docs/01-getting-started-docs/
+  design: null
+  status: active
+- id: 09-03-02
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '03'
+    title: 开发者文档
+  l3:
+    id: '02'
+    title: API指南文档
+  path: 09-developer-tools/03-developer-docs/02-api-guide-docs/
+  design: null
+  status: active
+- id: 09-04-01
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '04'
+    title: Sample应用
+  l3:
+    id: '01'
+    title: 能力示范sample
+  path: 09-developer-tools/04-sample-apps/01-capability-sample/
+  design: null
+  status: active
+- id: 09-05-01
+  l1:
+    id: 09
+    title: 开发者工具
+  l2:
+    id: '05'
+    title: ComponnetTest
+  l3:
+    id: '01'
+    title: ComponnetTest测试框架
+  path: 09-developer-tools/05-component-test/01-component-test-framework/
+  design: null
+  status: active
+- id: 10-01-01
+  l1:
+    id: '10'
+    title: 产品化定制
+  l2:
+    id: '01'
+    title: 穿戴
+  l3:
+    id: '01'
+    title: 弧形组件
+  path: 10-product-customization/01-wearable/01-arc-component/
+  design: null
+  status: active
