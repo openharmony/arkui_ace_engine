@@ -134,6 +134,10 @@ config("ace_unittest_config") {
     defines += [ "ENABLE_SPLIT_MODE" ]
   }
 
+  if (!is_arkui_x) {
+    defines += [ "SUPPORT_IMAGE_ANALYZER" ]
+  }
+
   if (ace_engine_feature_enable_digital_crown) {
     defines += [ "SUPPORT_DIGITAL_CROWN" ]
   }
@@ -186,6 +190,10 @@ config("ace_unittest_config_ext") {
 
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
+  }
+
+  if (!is_arkui_x) {
+    defines += [ "SUPPORT_IMAGE_ANALYZER" ]
   }
 
   if (ace_engine_feature_enable_digital_crown) {
