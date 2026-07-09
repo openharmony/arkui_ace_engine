@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include "base/utils/string_utils.h"
@@ -38,7 +39,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
 constexpr float DEFAULT_GRADIENT_ANGLE = 180.0f;
 const std::map<std::string, Ace::SymbolGradientType> SYMBOL_SHADER_TYPE_MAP = {
     { "ColorShaderStyle", SymbolGradientType::COLOR_SHADER },
@@ -563,7 +565,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::CreateSymbolGlyph(ArkUIRuntimeCallInfo
         familyNames.push_back(symbolFontFamilyName);
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphType(customType);
     } else {
-        familyNames.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        familyNames.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphType(systemType);
     }
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolFontFamilies(familyNames);

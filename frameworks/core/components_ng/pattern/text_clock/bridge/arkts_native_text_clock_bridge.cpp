@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/text_clock/bridge/arkts_native_text_clock_bridge.h"
 
+#include <string_view>
+
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -42,12 +44,12 @@ constexpr int32_t NUM_7 = 7;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
-const std::string DEFAULT_STR = "-1";
+constexpr std::string_view DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
-const std::string TEXTCLOCK_DATE_TIME_OPTIONS_HOUR = "hour";
-const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
-const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
-const std::string DEFAULT_FORMAT_API_TEN = "hms";
+constexpr std::string_view TEXTCLOCK_DATE_TIME_OPTIONS_HOUR = "hour";
+constexpr std::string_view TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+constexpr std::string_view TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
+constexpr std::string_view DEFAULT_FORMAT_API_TEN = "hms";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
@@ -118,7 +120,7 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
                 nodeModifiers->getTextClockModifier()->setFormat(nativeNode, "");
             } else {
-                nodeModifiers->getTextClockModifier()->setFormat(nativeNode, DEFAULT_FORMAT_API_TEN.c_str());
+                nodeModifiers->getTextClockModifier()->setFormat(nativeNode, DEFAULT_FORMAT_API_TEN.data());
             }
             nodeModifiers->getTextClockModifier()->removeResObjByKey(
                 reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode()),
@@ -131,7 +133,7 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
         if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             std::regex pattern(TEXT_CLOCK_FORMAT_REGEX);
             if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
-                nodeModifiers->getTextClockModifier()->setFormat(nativeNode, DEFAULT_FORMAT_API_TEN.c_str());
+                nodeModifiers->getTextClockModifier()->setFormat(nativeNode, DEFAULT_FORMAT_API_TEN.data());
                 return panda::JSValueRef::Undefined(vm);
             }
         }
@@ -563,7 +565,7 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
         nodeModifiers->getTextClockModifier()->setDateTimeOptions(nativeNode, static_cast<ArkUI_Int32>(hourType));
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
+    std::string hour = std::string(TEXTCLOCK_DATE_TIME_OPTIONS_HOUR);
     auto paramObject = hourArg->ToObject(vm);
     auto hourValue = paramObject->Get(vm, panda::StringRef::NewFromUtf8(vm, hour.c_str()));
     if (hourValue->IsString(vm)) {

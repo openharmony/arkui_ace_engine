@@ -21,13 +21,14 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include <string_view>
 
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::string FORMAT_FONT = "%s|%s|%s";
-const std::string DEFAULT_ERR_CODE = "-1";
+constexpr std::string_view DEFAULT_ERR_CODE = "-1";
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -124,12 +125,12 @@ void SetFontOptions(EcmaVM* vm, std::vector<Local<JSValueRef>>& args, ArkUIMenuF
     menuFontOptions.size.units = static_cast<int32_t>(size.Unit());
     menuFontOptions.sizeRawPtr = AceType::RawPtr(sizeResObj);
 
-    std::string weight = DEFAULT_ERR_CODE;
+    std::string weight = std::string(DEFAULT_ERR_CODE);
     if (args[NUM_1]->IsNumber()) {
         weight = std::to_string(args[NUM_1]->Int32Value(vm));
     } else {
         if (!ArkTSUtils::ParseJsString(vm, args[NUM_1], weight) || weight.empty()) {
-            weight = DEFAULT_ERR_CODE;
+            weight = std::string(DEFAULT_ERR_CODE);
         }
     }
     menuFontOptions.weight = static_cast<int32_t>(Framework::ConvertStrToFontWeight(weight));
@@ -151,7 +152,7 @@ void SetFontFamily(EcmaVM* vm, bool isJsView, std::vector<Local<JSValueRef>>& ar
     } else {
         std::string family;
         if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, args[NUM_2], family, familyResObj) || family.empty()) {
-            family = DEFAULT_ERR_CODE;
+            family = std::string(DEFAULT_ERR_CODE);
         }
         menuFontOptions.family = family.c_str();
         menuFontOptions.familyRawPtr = AceType::RawPtr(familyResObj);

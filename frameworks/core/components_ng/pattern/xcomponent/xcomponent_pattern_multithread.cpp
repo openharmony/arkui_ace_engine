@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
+#include <string_view>
+
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
@@ -55,7 +57,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
 }
 
 void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
@@ -78,7 +80,7 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext(true);
         if (!SystemProperties::GetExtSurfaceEnabled()) {

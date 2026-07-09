@@ -15,6 +15,7 @@
 
 #include <list>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "arkoala_api_generated.h"
@@ -40,10 +41,10 @@ constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-const std::string FORM_FORMAT = "hh:mm";
-const std::string FORM_FORMAT_24H = "HH:mm";
-const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
-const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
+constexpr std::string_view FORM_FORMAT = "hh:mm";
+constexpr std::string_view FORM_FORMAT_24H = "HH:mm";
+constexpr std::string_view DEFAULT_FORMAT = "aa hh:mm:ss";
+constexpr std::string_view DEFAULT_FORMAT_24H = "HH:mm:ss";
 struct TextClockOptions {
     std::optional<float> timeZoneOffset = std::nullopt;
     TextClockControllerPeer* peerController = nullptr;

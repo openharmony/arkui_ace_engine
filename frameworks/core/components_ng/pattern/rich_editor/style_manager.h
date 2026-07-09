@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_TYPING_STYLE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_TYPING_STYLE_MANAGER_H
 
+#include <string_view>
+
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
@@ -28,19 +30,19 @@ public:
     StyleManager(const WeakPtr<RichEditorPattern>& pattern) : weakPattern_(pattern) {}
 
     // color in RichEditor
-    inline static const std::string CARET_COLOR_KEY = "caretColor";
-    inline static const std::string SCROLL_BAR_COLOR_KEY = "scrollBarColor";
-    inline static const std::string PLACEHOLDER_FONT_COLOR_KEY = "placeholderFontColor";
-    inline static const std::string SELECTED_DRAG_PREVIEW_COLOR_KEY = "selectedDragPreviewColor";
-    inline static const std::string SELECTED_BACKGROUND_COLOR_KEY = "selectedBackgroundColor";
+    static constexpr std::string_view CARET_COLOR_KEY = "caretColor";
+    static constexpr std::string_view SCROLL_BAR_COLOR_KEY = "scrollBarColor";
+    static constexpr std::string_view PLACEHOLDER_FONT_COLOR_KEY = "placeholderFontColor";
+    static constexpr std::string_view SELECTED_DRAG_PREVIEW_COLOR_KEY = "selectedDragPreviewColor";
+    static constexpr std::string_view SELECTED_BACKGROUND_COLOR_KEY = "selectedBackgroundColor";
 
     // color in TextStyle
-    inline static const std::string TEXT_COLOR_KEY = "textColor";
-    inline static const std::string TEXT_DECORATION_COLOR_KEY = "textDecorationColor";
-    inline static const std::string DRAG_BACKGROUND_COLOR_KEY = "dragBackgroundColor";
-    inline static const std::string SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
-    inline static const std::string STROKE_COLOR_KEY = "strokeColor";
-    inline static const std::string COLOR_SHADER_STYLE_KEY = "colorShaderStyle";
+    static constexpr std::string_view TEXT_COLOR_KEY = "textColor";
+    static constexpr std::string_view TEXT_DECORATION_COLOR_KEY = "textDecorationColor";
+    static constexpr std::string_view DRAG_BACKGROUND_COLOR_KEY = "dragBackgroundColor";
+    static constexpr std::string_view SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
+    static constexpr std::string_view STROKE_COLOR_KEY = "strokeColor";
+    static constexpr std::string_view COLOR_SHADER_STYLE_KEY = "colorShaderStyle";
 
     // color updater
     inline static const auto TEXT_COLOR_UPDATER = [](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
@@ -133,7 +135,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_STYLE_TEXT_COLOR_UPDATER;
-        textStyle.AddResource(key, colorResObj, updater);
+        textStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void AddTextColorResource(struct UpdateSpanStyle& updateSpanStyle, const RefPtr<ResourceObject>& colorResObj)
@@ -141,7 +143,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = UPDATE_SPAN_STYLE_TEXT_COLOR_UPDATER;
-        updateSpanStyle.AddResource(key, colorResObj, updater);
+        updateSpanStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void UpdateTextColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
@@ -149,8 +151,9 @@ public:
         CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_COLOR_UPDATER;
-        auto colorResObj = textStyle.GetResource(key);
-        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
+        auto colorResObj = textStyle.GetResource(std::string(key));
+        colorResObj ? spanNode->AddResource(std::string(key), colorResObj, updater)
+                    : (void)spanNode->RemoveResource(std::string(key));
     }
 
     static void AddStrokeColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
@@ -158,7 +161,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = STROKE_COLOR_KEY;
         const auto& updater = TEXT_STYLE_STROKE_COLOR_UPDATER;
-        textStyle.AddResource(key, colorResObj, updater);
+        textStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void AddStrokeColorResource(struct UpdateSpanStyle& updateSpanStyle,
@@ -167,7 +170,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = STROKE_COLOR_KEY;
         const auto& updater = UPDATE_SPAN_STYLE_STROKE_COLOR_UPDATER;
-        updateSpanStyle.AddResource(key, colorResObj, updater);
+        updateSpanStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void UpdateStrokeColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
@@ -175,8 +178,9 @@ public:
         CHECK_NULL_VOID(spanNode);
         const auto& key = STROKE_COLOR_KEY;
         const auto& updater = STROKE_COLOR_UPDATER;
-        auto colorResObj = textStyle.GetResource(key);
-        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
+        auto colorResObj = textStyle.GetResource(std::string(key));
+        colorResObj ? spanNode->AddResource(std::string(key), colorResObj, updater)
+                    : (void)spanNode->RemoveResource(std::string(key));
     }
 
     static void AddColorShaderStyleResource(struct UpdateParagraphStyle& updateParagraphStyle,
@@ -185,14 +189,14 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = COLOR_SHADER_STYLE_KEY;
         const auto& updater = UPDATE_PARAGRAPH_STYLE_COLOR_SHADER_STYLE_UPDATER;
-        updateParagraphStyle.AddResource(key, colorResObj, updater);
+        updateParagraphStyle.AddResource(std::string(key), colorResObj, updater);
     }
  
     static void UpdateColorShaderStyleResource(RefPtr<SpanNode>& spanNode,
         const UpdateParagraphStyle& updateParagraphStyle)
     {
         CHECK_NULL_VOID(spanNode);
-        const auto& key = COLOR_SHADER_STYLE_KEY;
+        std::string key = std::string(COLOR_SHADER_STYLE_KEY);
         const auto& updater = TEXT_LINE_STYLE_COLOR_SHADER_STYLE_UPDATER;
         auto colorResObj = updateParagraphStyle.GetResource(key);
         colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
@@ -203,7 +207,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER;
-        textStyle.AddResource(key, colorResObj, updater);
+        textStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void AddTextDecorationColorResource(struct UpdateSpanStyle& updateSpanStyle,
@@ -212,7 +216,7 @@ public:
         CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = UPDATE_SPAN_STYLE_TEXT_DECORATION_COLOR_UPDATER;
-        updateSpanStyle.AddResource(key, colorResObj, updater);
+        updateSpanStyle.AddResource(std::string(key), colorResObj, updater);
     }
 
     static void UpdateTextDecorationColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
@@ -220,8 +224,9 @@ public:
         CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = TEXT_DECORATION_COLOR_UPDATER;
-        auto colorResObj = textStyle.GetResource(key);
-        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
+        auto colorResObj = textStyle.GetResource(std::string(key));
+        colorResObj ? spanNode->AddResource(std::string(key), colorResObj, updater)
+                    : (void)spanNode->RemoveResource(std::string(key));
     }
 
     static void AddDragBackgroundColorResource(const RefPtr<PlaceholderSpanItem>& spanItem,
@@ -234,7 +239,7 @@ public:
             auto spanItem = weak.Upgrade();
             DRAG_BACKGROUND_COLOR_UPDATER(spanItem, colorResObj);
         };
-        spanItem->AddResObj(key, colorResObj, updater);
+        spanItem->AddResObj(std::string(key), colorResObj, updater);
     }
 
     static void AddSymbolColorResource(
@@ -249,7 +254,7 @@ public:
                 ResourceParseUtils::ParseResColor(colorResObj, fontColor);
                 colorVec[i] = fontColor;
             };
-            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(resObjIndex);
+            auto key = std::string(SYMBOL_COLOR_KEY_PREFIX) + std::to_string(resObjIndex);
             textStyle.AddResource(key, colorResObj, std::move(updater));
         }
     }
@@ -258,7 +263,7 @@ public:
     {
         CHECK_NULL_VOID(spanNode);
         for (size_t i = 0;; ++i) {
-            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(i);
+            auto key = std::string(SYMBOL_COLOR_KEY_PREFIX) + std::to_string(i);
             CHECK_NULL_BREAK(spanNode->RemoveResource(key) != 0);
         }
         auto& symbolColorList = textStyle.GetSymbolColorList();
@@ -271,7 +276,7 @@ public:
                 ResourceParseUtils::ParseResColor(colorResObj, colorValue);
                 symbolColorList[i] = colorValue;
             };
-            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(i);
+            auto key = std::string(SYMBOL_COLOR_KEY_PREFIX) + std::to_string(i);
             spanNode->AddResource(key, textStyle.GetResource(key), std::move(updater));
         }
     }

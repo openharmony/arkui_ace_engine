@@ -22,6 +22,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <string_view>
 #include <cstdint>
 #include <functional>
 #include <future>
@@ -142,7 +143,7 @@ constexpr int32_t MAGNIFIER_ANIMATION_DURATION = 100;
 constexpr int32_t ERROR_BAD_PARAMETERS = -1;
 constexpr char PREVIEW_STYLE_NORMAL[] = "normal";
 constexpr char PREVIEW_STYLE_UNDERLINE[] = "underline";
-const std::u16string LINE_SEPARATOR = u"\n";
+static constexpr char16_t LINE_SEPARATOR[] = u"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -152,14 +153,14 @@ constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
-const std::u16string PLACEHOLDER_MARK = u"![id";
-const std::string SPACE_CHARS = "^\\s+|\\s+$";
-const std::string RICHEDITOR = "RichEditor.";
-const std::string EVENT = "event";
-const std::string EDITOR_TEXT_CHANGE_EVENT = "textChange";
-const std::string EDITOR_BLUR_EVENT = "blur";
-const std::string EDITOR_FOCUS_EVENT = "focus";
-const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
+static constexpr char16_t PLACEHOLDER_MARK[] = u"![id";
+constexpr std::string_view SPACE_CHARS = "^\\s+|\\s+$";
+constexpr std::string_view RICHEDITOR = "RichEditor.";
+constexpr std::string_view EVENT = "event";
+constexpr std::string_view EDITOR_TEXT_CHANGE_EVENT = "textChange";
+constexpr std::string_view EDITOR_BLUR_EVENT = "blur";
+constexpr std::string_view EDITOR_FOCUS_EVENT = "focus";
+const static std::regex REMOVE_SPACE_CHARS{std::string(SPACE_CHARS)};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
 const auto LPX_UNIT_SPAN_FILTER = [](const RefPtr<SpanItem>& span) { return span && span->HasLpxUnitStyle(); };
 
@@ -623,7 +624,7 @@ void RichEditorPattern::ReportTextChange()
     auto inspectorId = host->GetInspectorId().value_or("");
     TextChangeEventInfo info = { inspectorId, uniqueId, currentContent };
     UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
-    ReportEditorEvent(EDITOR_TEXT_CHANGE_EVENT);
+    ReportEditorEvent(std::string(EDITOR_TEXT_CHANGE_EVENT));
 }
 
 void RichEditorPattern::ReportEditorEvent(const std::string& eventType)
@@ -4209,7 +4210,7 @@ void RichEditorPattern::HandleBlurEvent()
     }
     HandleOnEditChanged(false);
     ReportComponentChangeEvent();
-    ReportEditorEvent(EDITOR_BLUR_EVENT);
+    ReportEditorEvent(std::string(EDITOR_BLUR_EVENT));
 }
 
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
@@ -4222,7 +4223,7 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
     IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
-    ReportEditorEvent(EDITOR_FOCUS_EVENT);
+    ReportEditorEvent(std::string(EDITOR_FOCUS_EVENT));
     if (previewLongPress_ || isOnlyRequestFocus_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
             "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
@@ -6081,11 +6082,14 @@ void RichEditorPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Proper
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateProperty, key=%{public}s, color=%{public}s",
         key.c_str(), color->ToString().c_str());
     const std::unordered_map<std::string, std::function<void(const Color& color)>> UPDATER_MAP = {
-        { StyleManager::CARET_COLOR_KEY,  [this](const Color& c){ SetCaretColor(c); } },
-        { StyleManager::SCROLL_BAR_COLOR_KEY,  [this](const Color& c){ UpdateScrollBarColor(c); } },
-        { StyleManager::PLACEHOLDER_FONT_COLOR_KEY,  [this](const Color& c){ UpdatePlaceholderFontColor(c); } },
-        { StyleManager::SELECTED_BACKGROUND_COLOR_KEY,  [this](const Color& c){ SetSelectedBackgroundColor(c); } },
-        { StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY,  [this](const Color& c){ SetSelectedDragPreviewColor(c); } },
+        { std::string(StyleManager::CARET_COLOR_KEY), [this](const Color& c) { SetCaretColor(c); } },
+        { std::string(StyleManager::SCROLL_BAR_COLOR_KEY), [this](const Color& c) { UpdateScrollBarColor(c); } },
+        { std::string(StyleManager::PLACEHOLDER_FONT_COLOR_KEY),
+            [this](const Color& c) { UpdatePlaceholderFontColor(c); } },
+        { std::string(StyleManager::SELECTED_BACKGROUND_COLOR_KEY),
+            [this](const Color& c) { SetSelectedBackgroundColor(c); } },
+        { std::string(StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY),
+            [this](const Color& c) { SetSelectedDragPreviewColor(c); } },
     };
     auto iter = UPDATER_MAP.find(key);
     IF_TRUE(iter != UPDATER_MAP.end(), iter->second(*color));
@@ -14232,8 +14236,8 @@ RectF RichEditorPattern::GetCaretRelativeRect()
 
 void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
 {
-    std::string value = RICHEDITOR + event;
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value,
+    std::string value = std::string(RICHEDITOR) + event;
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(std::string(EVENT), value,
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
         event.c_str());

@@ -64,7 +64,7 @@ std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 constexpr int32_t INHERIT_INDEX = 2;
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 static std::atomic<int32_t> spanStringControllerStoreIndex_;
 
 RichEditorModel* RichEditorModel::GetInstance()
@@ -589,7 +589,7 @@ void JSRichEditorController::ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValu
         style.SetFontFamilies(fontFamilies);
     } else {
         style.SetSymbolType(SymbolType::SYSTEM);
-        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        fontFamilies.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
         style.SetFontFamilies(fontFamilies);
     }
 }
@@ -1950,9 +1950,10 @@ void JSRichEditorBaseControllerBinding::ParseJsStrokeColorTextStyle(const JSRef<
         updateSpanStyle.strokeColorFollowFontColor = true;
         style.SetStrokeColor(style.GetTextColor());
         if (updateSpanStyle.updateTextColor.has_value()) {
-            NG::StyleManager::AddStrokeColorResource(style, style.GetResource(NG::StyleManager::TEXT_COLOR_KEY));
+            NG::StyleManager::AddStrokeColorResource(style,
+                style.GetResource(std::string(NG::StyleManager::TEXT_COLOR_KEY)));
             NG::StyleManager::AddStrokeColorResource(updateSpanStyle,
-                updateSpanStyle.GetResource(NG::StyleManager::TEXT_COLOR_KEY));
+                updateSpanStyle.GetResource(std::string(NG::StyleManager::TEXT_COLOR_KEY)));
         }
         return;
     }

@@ -25,8 +25,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::u16string ELLIPSIS = u"\u2026";
-const std::u16string SYMBOL_TRANS = u"\uF0001";
+static constexpr char16_t ELLIPSIS[] = u"\u2026";
+static constexpr char16_t SYMBOL_TRANS[] = u"\uF0001";
 const int32_t LENGTH_INCREMENT = 2;
 constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';

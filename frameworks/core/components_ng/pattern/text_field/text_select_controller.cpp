@@ -15,10 +15,11 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/common/container.h"
 
+#include <string_view>
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/log/log_wrapper.h"
-#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -27,8 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string NEWLINE = "\n";
-const std::u16string WIDE_NEWLINE = UtfUtils::Str8DebugToStr16(NEWLINE);
+static constexpr char16_t WIDE_NEWLINE[] = u"\n";
 constexpr uint32_t DEFAULT_MINLINES = 1;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)

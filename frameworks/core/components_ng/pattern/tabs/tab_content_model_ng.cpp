@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -49,11 +50,11 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_F
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 const auto IMAGE_INDICATOR_COUNT = 1;
-const std::string KEY_PADDING = "tabContent.tabBarPadding";
-const std::string KEY_PADDING_LEFT = "tabContent.tabBarPadding.left";
-const std::string KEY_PADDING_RIGHT = "tabContent.tabBarPadding.right";
-const std::string KEY_PADDING_TOP = "tabContent.tabBarPadding.top";
-const std::string KEY_PADDING_BOTTOM = "tabContent.tabBarPadding.bottom";
+constexpr std::string_view KEY_PADDING = "tabContent.tabBarPadding";
+constexpr std::string_view KEY_PADDING_LEFT = "tabContent.tabBarPadding.left";
+constexpr std::string_view KEY_PADDING_RIGHT = "tabContent.tabBarPadding.right";
+constexpr std::string_view KEY_PADDING_TOP = "tabContent.tabBarPadding.top";
+constexpr std::string_view KEY_PADDING_BOTTOM = "tabContent.tabBarPadding.bottom";
 const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 }
 
@@ -776,10 +777,10 @@ bool TabContentModelNG::CreatePaddingWithResourceObj(FrameNode* frameNode, const
     CHECK_NULL_RETURN(pattern, false);
     const std::string key = "tabContent.tabBarPadding";
     pattern->RemoveResObj(key);
-    pattern->RemoveResObj(KEY_PADDING_LEFT);
-    pattern->RemoveResObj(KEY_PADDING_RIGHT);
-    pattern->RemoveResObj(KEY_PADDING_TOP);
-    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    pattern->RemoveResObj(std::string(KEY_PADDING_LEFT));
+    pattern->RemoveResObj(std::string(KEY_PADDING_RIGHT));
+    pattern->RemoveResObj(std::string(KEY_PADDING_TOP));
+    pattern->RemoveResObj(std::string(KEY_PADDING_BOTTOM));
     CHECK_NULL_RETURN(resObj, true);
 
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -831,8 +832,8 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_LEFT);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_LEFT));
     CHECK_NULL_RETURN(resObjLeft, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -854,7 +855,7 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_LEFT, resObjLeft, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_LEFT), resObjLeft, std::move(updateFunc));
     return true;
 }
 
@@ -864,8 +865,8 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_RIGHT);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_RIGHT));
     CHECK_NULL_RETURN(resObjRight, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -887,7 +888,7 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_RIGHT, resObjRight, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_RIGHT), resObjRight, std::move(updateFunc));
     return true;
 }
 
@@ -897,8 +898,8 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_TOP);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_TOP));
     CHECK_NULL_RETURN(resObjTop, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -919,7 +920,7 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_TOP, resObjTop, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_TOP), resObjTop, std::move(updateFunc));
     return true;
 }
 
@@ -929,8 +930,8 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_BOTTOM));
     CHECK_NULL_RETURN(resObjBottom, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -952,7 +953,7 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_BOTTOM, resObjBottom, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_BOTTOM), resObjBottom, std::move(updateFunc));
     return true;
 }
 

@@ -35,11 +35,13 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 
+#include <string_view>
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TEXTFIELD_INDEX = 0;
-const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
-const std::string INSPECTOR_PREFIX = "__SearchField__";
+constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
 constexpr int32_t DIVIDER_INDEX = 5;
@@ -58,10 +60,12 @@ void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentN
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({
+        DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     auto parentInspector = parentNode->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) +
+        SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto textValue = pattern->GetTextUtf16Value();
@@ -124,7 +128,8 @@ void SearchModelNG::CreateDividerMultiThread(const RefPtr<SearchNode>& parentNod
         DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     CHECK_NULL_VOID(dividerNode);
     ACE_UINODE_TRACE(dividerNode);
-    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) +
+        SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
     auto searchPattern = parentNode->GetPattern<SearchPattern>();
