@@ -121,6 +121,13 @@ public:
 private:
     static RefPtr<TextComponentV2> GetComponent();
     static void SetMarqueeSpacing(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
+    static void ParseTailIndentDimension(const JSRef<JSVal>& value, 
+        NG::TailIndentsArray& indentsArray,
+        std::vector<RefPtr<ResourceObject>>& allResObjs);
+    static void UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node, 
+        const std::vector<RefPtr<ResourceObject>>& resObjArray);
+    static void RegisterTailIndentsResources(NG::FrameNode* frameNode,
+        const std::vector<RefPtr<ResourceObject>>& allResObjs);
 };
 
 class JSTextController final : public Referenced {
