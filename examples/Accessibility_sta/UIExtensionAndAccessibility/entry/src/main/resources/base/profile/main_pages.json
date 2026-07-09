@@ -1,0 +1,26 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/UIExtensionComponent/Index",
+    "pages/UIExtensionComponent/UIExtension",
+    "pages/UIExtensionComponent/Extension",
+    "pages/EmbeddedComponent/Index",
+    "pages/EmbeddedComponent/Embedded",
+    "pages/EmbeddedComponent/Extension",
+    "pages/FullScreenLaunchComponent/Index",
+    "pages/FullScreenLaunchComponent/FullScreenLaunch",
+    "pages/UniversalAttributesAccessibility/Index",
+    "pages/UniversalAttributesAccessibility/AccessibilityText",
+    "pages/UniversalAttributesAccessibility/AccessibilityGroup",
+    "pages/UniversalAttributesAccessibility/AccessibilityFocusDrawLevel",
+    "pages/UniversalAttributesAccessibility/AccessibilityTextCase01",
+    "pages/UniversalAttributesAccessibility/AccessibilityTextCase02",
+    "pages/UniversalAttributesAccessibility/AccessibilityDescriptionCase01",
+    "pages/UniversalAttributesAccessibility/AccessibilityDescriptionCase02",
+    "pages/UniversalAttributesAccessibility/AccessibilityGroupCase01",
+    "pages/UniversalAttributesAccessibility/AccessibilityGroupCase02",
+    "pages/UniversalAttributesAccessibility/AccessibilityLevelCase01",
+    "pages/UniversalAttributesAccessibility/VirtualNodeExample",
+    "pages/ShowEmbeddedComponent/ShowPage"
+  ]
+}

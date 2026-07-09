@@ -1,0 +1,21 @@
+{
+    "devices": {
+        "general": [
+            "default",
+            "tablet"
+        ],
+        "custom": [
+            {
+                "xts": [
+                    "SystemCapability.ArkUI.ArkUI.Full",
+                    "SystemCapability.ArkUI.ArkUI.Circle",
+                    "SystemCapability.Test.UiTest",
+                    "SystemCapability.Ability.AbilityRuntime.Core",
+                    "SystemCapability.Notification.Emitter",
+                    "SystemCapability.MiscServices.Time",
+                    "SystemCapability.FileManagement.File.FileIO"
+                ]
+            }
+        ]
+    }
+}
