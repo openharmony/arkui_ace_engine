@@ -100,13 +100,6 @@ struct ArkUIButtonCustomModifier {
     const std::optional<OHOS::Ace::Color>& (*getFontColorFromLayoutProp)(ArkUINodeHandle node);
     const std::string& (*getLabelFromLayoutProp)(ArkUINodeHandle node);
     void (*resetFontSizeToLayoutProp)(ArkUINodeHandle node);
-    void (*setSingleBorderRadius)(const OHOS::Ace::Dimension& radius);
-    void (*setLocalizedBorderRadius)(
-        const std::optional<OHOS::Ace::Dimension>& radiusTopStart,
-        const std::optional<OHOS::Ace::Dimension>& radiusTopEnd,
-        const std::optional<OHOS::Ace::Dimension>& radiusBottomStart,
-        const std::optional<OHOS::Ace::Dimension>& radiusBottomEnd);
-    void (*resetBorderRadius)();
     void (*setFontColorDefault)(const OHOS::Ace::Color& color);
     void (*setBackgroundColorDefault)(const OHOS::Ace::Color& color);
     void (*setBackgroundColorToModelStatic)(FrameNode* frameNode, const std::optional<OHOS::Ace::Color>& color);

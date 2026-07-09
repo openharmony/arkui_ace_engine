@@ -47,17 +47,18 @@
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/components/button/button_theme.h"
 
-#ifndef CROSS_PLATFORM
 namespace OHOS::Ace {
+#ifndef CROSS_PLATFORM
 Framework::ButtonModelImpl* GetButtonImpl()
 {
     static Framework::ButtonModelImpl instance;
     return &instance;
 }
+#endif
 
 ButtonModel* ButtonModel::GetInstance()
 {
-#ifdef NG_BUILD
+#if defined(NG_BUILD) || defined(CROSS_PLATFORM)
     static NG::ButtonModelNG instance;
     return &instance;
 #else
@@ -71,7 +72,6 @@ ButtonModel* ButtonModel::GetInstance()
 #endif
 }
 } // namespace OHOS::Ace
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1392,24 +1392,6 @@ void ResetFontSizeToLayoutPropForCustom(ArkUINodeHandle node)
     ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, frameNode);
 }
 
-void SetSingleBorderRadiusForCustom(const Dimension& radius)
-{
-    ButtonModel::GetInstance()->SetBorderRadius(radius);
-}
-
-void SetLocalizedBorderRadiusForCustom(const std::optional<Dimension>& radiusTopStart,
-    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
-    const std::optional<Dimension>& radiusBottomEnd)
-{
-    ButtonModel::GetInstance()->SetLocalizedBorderRadius(
-        radiusTopStart, radiusTopEnd, radiusBottomStart, radiusBottomEnd);
-}
-
-void ResetBorderRadiusForCustom()
-{
-    ButtonModel::GetInstance()->ResetBorderRadius();
-}
-
 void SetFontColorDefaultForCustom(const Color& color)
 {
     auto buttonModel = ButtonModel::GetInstance();
@@ -2099,9 +2081,6 @@ const ArkUIButtonCustomModifier* GetButtonCustomModifier()
         .getFontColorFromLayoutProp = GetFontColorFromLayoutPropForCustom,
         .getLabelFromLayoutProp = GetLabelFromLayoutPropForCustom,
         .resetFontSizeToLayoutProp = ResetFontSizeToLayoutPropForCustom,
-        .setSingleBorderRadius = SetSingleBorderRadiusForCustom,
-        .setLocalizedBorderRadius = SetLocalizedBorderRadiusForCustom,
-        .resetBorderRadius = ResetBorderRadiusForCustom,
         .setFontColorDefault = SetFontColorDefaultForCustom,
         .setBackgroundColorDefault = SetBackgroundColorDefaultForCustom,
         .setBackgroundColorToModelStatic = SetBackgroundColorToModelStaticForCustom,
