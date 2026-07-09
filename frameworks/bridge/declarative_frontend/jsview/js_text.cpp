@@ -2016,8 +2016,6 @@ void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
     CHECK_NULL_VOID(layoutProperty);
     
     NG::TailIndentsArray newIndentsArray;
-    
-    // Use ParseResDimensionFpNG to parse new values from ResourceObjects (auto adapts to color mode!)
     for (size_t i = 0; i < resObjArray.size(); i++) {
         CalcDimension dimension;
         bool parsed = ResourceParseUtils::ParseResDimensionFpNG(resObjArray[i], dimension);
