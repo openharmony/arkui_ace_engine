@@ -251,6 +251,9 @@ void EventManager::CleanRefereeBeforeTouchTestForPost(
     TouchEvent touchPoint, const RefPtr<NG::GestureReferee>& currentReferee)
 {
     int32_t key = touchPoint.eventHandleId / EVENT_HANDLE;
+    if (activeRecognizerManager_) {
+        activeRecognizerManager_->CleanFinishedRecognizersWithStaleFingersForPost(downFingerIds_, currentReferee);
+    }
     if (currentReferee->QueryAllDone(touchPoint.id)) {
         currentReferee->CleanGestureScope(touchPoint.id);
         bool isEventHandleResultsEmpty = true;
@@ -305,7 +308,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
         return;
     }
     if (activeRecognizerManager_) {
-        activeRecognizerManager_->CleanFinishedRecognizersWithStaleFingers(touchPoint.id, downFingerIds_);
+        activeRecognizerManager_->CleanFinishedRecognizersWithStaleFingers(downFingerIds_, currentReferee);
     }
     if (currentReferee->QueryAllDone(touchPoint.id)) {
         currentReferee->CleanGestureScope(touchPoint.id);
