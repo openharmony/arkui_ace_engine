@@ -1281,6 +1281,201 @@ HWTEST_F(NodeTransitionTest, NodeTransitionTest049, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NodeTransitionTest050
+ * @tc.desc: Test OH_ArkUI_CreateIdentityTransitionEffect returns valid object with correct type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest050, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_IDENTITY);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest051
+ * @tc.desc: Test ConvertToEffectOption for identity effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest051, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(option, nullptr);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest052
+ * @tc.desc: Test identity effect Combine with opacity effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest052, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(option, nullptr);
+    ArkUI_TransitionEffect* combine = OH_ArkUI_CreateOpacityTransitionEffect(0.0f);
+    ASSERT_NE(combine, nullptr);
+    int32_t result = OH_ArkUI_TransitionEffect_Combine(option, combine);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(combine);
+    combine = nullptr;
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest053
+ * @tc.desc: Test identity effect SetAnimation (no-op, returns success).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest053, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(option, nullptr);
+
+    ArkUI_AnimateOption* animation = OH_ArkUI_AnimateOption_Create();
+    ASSERT_NE(animation, nullptr);
+    int32_t result = OH_ArkUI_TransitionEffect_SetAnimation(option, animation);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    OH_ArkUI_AnimateOption_Dispose(animation);
+    animation = nullptr;
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest054
+ * @tc.desc: Test identity effect Combine + SetAnimation + ConvertToEffectOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest054, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(option, nullptr);
+    ArkUI_TransitionEffect* combine = OH_ArkUI_CreateOpacityTransitionEffect(0.0f);
+    ASSERT_NE(combine, nullptr);
+    OH_ArkUI_TransitionEffect_Combine(option, combine);
+
+    ArkUI_AnimateOption* animation = OH_ArkUI_AnimateOption_Create();
+    ASSERT_NE(animation, nullptr);
+    OH_ArkUI_TransitionEffect_SetAnimation(option, animation);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    OH_ArkUI_AnimateOption_Dispose(animation);
+    animation = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(combine);
+    combine = nullptr;
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest055
+ * @tc.desc: Test identity as Asymmetric appear parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest055, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* appear = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(appear, nullptr);
+    ArkUI_TransitionEffect* disappear = OH_ArkUI_CreateOpacityTransitionEffect(0.0f);
+    ASSERT_NE(disappear, nullptr);
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(appear, disappear);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_ASYMMETRIC);
+    EXPECT_EQ(option->appear, appear);
+    EXPECT_EQ(option->disappear, disappear);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(appear);
+    appear = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(disappear);
+    disappear = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest056
+ * @tc.desc: Test identity as Asymmetric disappear parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest056, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* appear = OH_ArkUI_CreateOpacityTransitionEffect(0.0f);
+    ASSERT_NE(appear, nullptr);
+    ArkUI_TransitionEffect* disappear = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(disappear, nullptr);
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(appear, disappear);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_ASYMMETRIC);
+    EXPECT_EQ(option->appear, appear);
+    EXPECT_EQ(option->disappear, disappear);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(appear);
+    appear = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(disappear);
+    disappear = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest057
+ * @tc.desc: Test identity as both Asymmetric appear and disappear parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest057, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* appear = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(appear, nullptr);
+    ArkUI_TransitionEffect* disappear = OH_ArkUI_CreateIdentityTransitionEffect();
+    ASSERT_NE(disappear, nullptr);
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(appear, disappear);
+    ASSERT_NE(option, nullptr);
+    ArkUITransitionEffectOption* toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(option);
+    ASSERT_NE(toEffectOption, nullptr);
+
+    option->toEffectOption = toEffectOption;
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(appear);
+    appear = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(disappear);
+    disappear = nullptr;
+}
+
+/**
  * @tc.name: TransitionEffect_Combine_NullOption_001
  * @tc.desc: Test OH_ArkUI_TransitionEffect_Combine with null option.
  * @tc.type: FUNC
