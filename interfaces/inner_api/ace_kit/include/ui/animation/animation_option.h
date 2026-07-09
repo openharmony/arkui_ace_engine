@@ -19,6 +19,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include "ui/animation/animation_constants.h"
@@ -27,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-inline const std::unordered_map<AnimationInterface, std::string> animationTypeToStrMap = {
+inline const std::unordered_map<AnimationInterface, std::string_view> animationTypeToStrMap = {
     { AnimationInterface::ANIMATION, "animation" },
     { AnimationInterface::ANIMATE_TO, "animateTo" },
     { AnimationInterface::ANIMATE_TO_IMMEDIATELY, "animateToImmediately" },
@@ -181,7 +182,7 @@ public:
     const std::string GetAnimationInterfaceString() const
     {
         auto it = animationTypeToStrMap.find(animationInterface_);
-        return it != animationTypeToStrMap.end() ? it->second : "unknown";
+        return it != animationTypeToStrMap.end() ? std::string(it->second) : "unknown";
     }
 
     std::string ToString() const

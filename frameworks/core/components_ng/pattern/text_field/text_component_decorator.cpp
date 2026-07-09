@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 
+#include <string_view>
+
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/base/utils/multi_thread.h"
 #include "frameworks/base/utils/utils.h"
@@ -28,8 +30,8 @@ namespace {
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr int32_t CONSTANT_TWO_FOR_CENTER = 2;
-const std::string INSPECTOR_PREFIX = "__SearchField__";
-const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
+constexpr std::string_view ERRORNODE_PREFIX = "ErrorNodeField__";
 
 } // namespace
 
@@ -587,7 +589,7 @@ void ErrorDecorator::UpdateErrorStyle()
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel("yes");
     auto parentID = decoratedNode->GetInspectorIdValue("");
-    textNode->UpdateInspectorId(INSPECTOR_PREFIX + ERRORNODE_PREFIX + parentID);
+    textNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) + std::string(ERRORNODE_PREFIX) + parentID);
     textNode->SetIsCalculateInnerClip(true);
 
     textNode->MarkModifyDone();

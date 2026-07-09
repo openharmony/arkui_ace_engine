@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 
+#include <string_view>
+
 #include "base/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string COLON = ":";
+constexpr std::string_view COLON = ":";
 
 const DatePickerUtil::DatepickerCustomModifier* GetDatepickerCustomModifier()
 {
@@ -71,7 +73,7 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
     }
     if (options.find(minuteColumn) != options.end()) {
         std::string minute = options[minuteColumn][minutePickerColumnPattern->GetCurrentIndex()];
-        result += COLON + minute;
+        result += std::string(COLON) + minute;
     }
     if (timePickerRowPattern->GetHasSecond()) {
         auto secondColumn = allChildNode["second"].Upgrade();
@@ -80,7 +82,7 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
         CHECK_NULL_RETURN(secondPickerColumnPattern, "");
         if (options.find(secondColumn) != options.end()) {
             std::string second = options[secondColumn][secondPickerColumnPattern->GetCurrentIndex()];
-            result += COLON + second;
+            result += std::string(COLON) + second;
         }
     }
     if (!timePickerRowPattern->GetHour24()) {

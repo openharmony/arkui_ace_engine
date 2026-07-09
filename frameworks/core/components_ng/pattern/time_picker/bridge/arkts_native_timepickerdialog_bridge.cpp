@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/time_picker/bridge/arkts_native_timepickerdialog_bridge.h"
 
+#include <string_view>
+
 #include "ark_native_engine.h"
 #include "jsnapi_expo.h"
 #include "native_engine.h"
@@ -40,8 +42,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
 const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
-const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
-const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+constexpr std::string_view TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
+constexpr std::string_view TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,

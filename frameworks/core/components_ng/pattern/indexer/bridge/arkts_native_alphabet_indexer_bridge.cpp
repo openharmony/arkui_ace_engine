@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/indexer/bridge/arkts_native_alphabet_indexer_bridge.h"
+
+#include <string_view>
+
 #include "jsnapi_expo.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/utils/utils.h"
@@ -34,11 +37,11 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
-const std::string FORMAT_FONT = "%s|%s|%s";
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
+constexpr std::string_view FORMAT_FONT = "%s|%s|%s";
+constexpr std::string_view DEFAULT_FAMILY = "HarmonyOS Sans";
 constexpr double DEFAULT_POPUP_ITEM_FONT_SIZE = 24.0;
 constexpr Dimension DEFAULT_FONT_SIZE_VAL = 12.0_fp;
-const std::string DEFAULT_POPUP_ITEM_FONT_WEIGHT = "medium";
+constexpr std::string_view DEFAULT_POPUP_ITEM_FONT_WEIGHT = "medium";
 constexpr Dimension DEFAULT_POPUP_POSITION_X = 60.0_vp;
 constexpr Dimension DEFAULT_POPUP_POSITION_Y = 48.0_vp;
 constexpr double RADIUS_OFFSET = 4.0;
@@ -138,7 +141,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
             fontSize = fontSizeData;
         }
     }
-    std::string weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
+    std::string weight = std::string(DEFAULT_POPUP_ITEM_FONT_WEIGHT);
     if (!weightArg->IsNull() && !weightArg->IsUndefined()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
@@ -260,14 +263,14 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
+        fontFamily = std::string(DEFAULT_FAMILY);
     }
     int32_t styleVal = 0;
     if (!styleValArg->IsNull() && !styleValArg->IsUndefined() && styleValArg->IsNumber()) {
         styleVal = styleValArg->Int32Value(vm);
     }
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedFont(nativeNode, fontInfo.c_str(), styleVal);
     if (SystemProperties::ConfigChangePerform()) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
@@ -352,14 +355,14 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
+        fontFamily = std::string(DEFAULT_FAMILY);
     }
     int32_t styleVal = 0;
     if (!styleValArg->IsNull() && !styleValArg->IsUndefined() && styleValArg->IsNumber()) {
         styleVal = styleValArg->Int32Value(vm);
     }
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupFont(nativeNode, fontInfo.c_str(), styleVal);
     if (SystemProperties::ConfigChangePerform()) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->createWithResourceObj(nativeNode,
@@ -444,14 +447,14 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_FAMILY;
+        fontFamily = std::string(DEFAULT_FAMILY);
     }
     int32_t styleVal = 0;
     if (!styleValArg->IsNull() && !styleValArg->IsUndefined() && styleValArg->IsNumber()) {
         styleVal = styleValArg->Int32Value(vm);
     }
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerFont(
         nativeNode, fontInfo.c_str(), styleVal);
     if (SystemProperties::ConfigChangePerform()) {

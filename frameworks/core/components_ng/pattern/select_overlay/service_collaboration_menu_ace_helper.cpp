@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/select_overlay/service_collaboration_menu_ace_helper.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 
+#include <string_view>
 #include "base/geometry/calc_dimension.h"
 #include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
@@ -60,8 +61,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t TOAST_DURATION = 2000;
-const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
-const std::string IMAGE_PROPERTY_ORIENTATION = "Orientation";
+constexpr std::string_view END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
+constexpr std::string_view IMAGE_PROPERTY_ORIENTATION = "Orientation";
 } // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
@@ -774,7 +775,7 @@ RefPtr<FrameNode> ServiceCollaborationAceCallback::CreateCustomPopUpNode(
         CHECK_NULL_RETURN(rowProperty, nullptr);
         CreateStartIcon(GetSymbolId(ability_), row);
         CreateText(value, row);
-        CreateEndIcon(END_ICON_PATH, row);
+        CreateEndIcon(std::string(END_ICON_PATH), row);
         row_ = row;
         row_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return row_;
@@ -947,7 +948,7 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
     }
     CHECK_NULL_RETURN(imageSource, nullptr);
     std::string currentOrientation;
-    imageSource->GetImagePropertyString(0, IMAGE_PROPERTY_ORIENTATION, currentOrientation);
+    imageSource->GetImagePropertyString(0, std::string(IMAGE_PROPERTY_ORIENTATION), currentOrientation);
     Media::DecodeOptions decodeOpts;
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {

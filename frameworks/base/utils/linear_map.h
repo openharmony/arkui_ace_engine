@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_LINEAR_MAP_H
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
+#include <type_traits>
+#include <utility>
 
 namespace OHOS::Ace {
 template<typename T>
@@ -25,6 +28,97 @@ struct LinearMapNode {
     const char* key;
     T value;
 };
+
+constexpr int ConstexprStrCmp(const char* lhs, const char* rhs)
+{
+    std::size_t index = 0;
+    while (lhs[index] != '\0' && rhs[index] != '\0') {
+        if (lhs[index] != rhs[index]) {
+            return (lhs[index] < rhs[index]) ? -1 : 1;
+        }
+        ++index;
+    }
+    if (lhs[index] == rhs[index]) {
+        return 0;
+    }
+    return (lhs[index] == '\0') ? -1 : 1;
+}
+
+template<typename T, std::size_t N>
+constexpr bool IsSorted(const LinearMapNode<T> (&nodes)[N])
+{
+    for (std::size_t index = 1; index < N; ++index) {
+        if (ConstexprStrCmp(nodes[index - 1].key, nodes[index].key) > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T, std::size_t N>
+constexpr std::size_t FirstUnsortedIndex(const LinearMapNode<T> (&nodes)[N])
+{
+    for (std::size_t index = 1; index < N; ++index) {
+        if (ConstexprStrCmp(nodes[index - 1].key, nodes[index].key) > 0) {
+            return index;
+        }
+    }
+    return N;
+}
+
+template<auto& Nodes>
+struct LinearMapSortInfo {
+    using ArrayType = typename std::remove_reference<decltype(Nodes)>::type;
+    static constexpr std::size_t kSize = std::extent<ArrayType>::value;
+    static constexpr std::size_t kErrorIndex = []() constexpr {
+        for (std::size_t index = 1; index < kSize; ++index) {
+            if (ConstexprStrCmp(Nodes[index - 1].key, Nodes[index].key) > 0) {
+                return index;
+            }
+        }
+        return kSize;
+    }();
+};
+
+// Encodes a key string as a template parameter pack so the compiler diagnostic lists the characters.
+template<char... Cs>
+struct LinearMapSortKeyChars {};
+
+template<typename KeyChars>
+struct LinearMapSortOrderFailed; // intentionally incomplete; diagnostic lists KeyChars (the key as char literals)
+
+template<auto& Nodes, std::size_t Idx>
+struct LinearMapSortErrorKey {
+    static constexpr const auto& arr = Nodes;
+    static constexpr std::size_t Len()
+    {
+        const char* k = arr[Idx].key;
+        std::size_t i = 0;
+        while (k[i] != '\0') {
+            ++i;
+        }
+        return i;
+    }
+    template<typename Seq>
+    struct KeyCharsFromSeqImpl;
+    template<std::size_t... Is>
+    struct KeyCharsFromSeqImpl<std::index_sequence<Is...>> {
+        using type = LinearMapSortKeyChars<arr[Idx].key[Is]...>;
+    };
+    using type = typename KeyCharsFromSeqImpl<std::make_index_sequence<Len()>>::type;
+};
+
+template<auto& Nodes>
+constexpr bool IsSortedWithDetailedLog()
+{
+    static_assert(LinearMapSortInfo<Nodes>::kSize > 0, "LinearMapNode array must not be empty");
+    if constexpr (LinearMapSortInfo<Nodes>::kErrorIndex == LinearMapSortInfo<Nodes>::kSize) {
+        return true;
+    } else {
+        using BadKey = typename LinearMapSortErrorKey<Nodes, LinearMapSortInfo<Nodes>::kErrorIndex>::type;
+        return sizeof(LinearMapSortOrderFailed<BadKey>) != 0;
+    }
+}
 
 // the key type K must can be compared.
 template<typename K, typename V>

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include "core/components_ng/base/frame_node.h"
 #ifdef FORM_SUPPORTED
 #include "core/components_ng/pattern/form/form_model_ng.h"
@@ -68,7 +70,7 @@ const auto FORM_COMPONENT_ID_KEY = "id";
 const auto FORM_COMPONENT_ID_STRING_KEY = "idString";
 const auto FORM_COMPONENT_IS_LOCKED_KEY = "isLocked";
 const uint32_t FORM_ON_ACQUIRED_ID_INVALID = -1;
-const std::string FORM_ON_ACQUIRED_ID_STRING_INVALID = "-1";
+constexpr std::string_view FORM_ON_ACQUIRED_ID_STRING_INVALID = "-1";
 const uint32_t MIN_UNSIGNED_NUMBER_OF_ARK = 0;
 const uint32_t MAX_UNSIGNED_NUMBER_OF_ARK = UINT_MAX;
 const auto FORM_ON_ERROR_CODE_KEY = "errcode";
@@ -79,7 +81,7 @@ const auto ROUTER_CODE_MODULE_NAME_KEY = "moduleName";
 const auto ROUTER_CODE_ABILITY_NAME_KEY = "abilityName";
 const auto ROUTER_CODE_PARAMS_KEY = "params";
 const int32_t FORM_ON_ERROR_CODE_INVALID = -1;
-const std::string FORM_EMPTY_STRING = "";
+constexpr std::string_view FORM_EMPTY_STRING = "";
 const int32_t MIN_SIGNED_NUMBER_OF_ARK = INT_MIN;
 const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
 const int32_t TYPE_INT = 0;
@@ -260,13 +262,15 @@ void SetOnAcquiredImpl(Ark_NativePointer node,
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_FormCallbackInfo_Void>();
     auto onAcquired = [arkCallback](const std::string& param) {
         int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
-        std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
+        std::string idString = std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID);
         bool isLocked = false;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr = nullptr;
-            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            auto jsonId = sourceJson->GetString(
+                FORM_COMPONENT_ID_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
+            idString = sourceJson->GetString(
+                FORM_COMPONENT_ID_STRING_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
             isLocked = sourceJson->GetBool(FORM_COMPONENT_IS_LOCKED_KEY, false);
             int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
@@ -293,12 +297,12 @@ void SetOnErrorImpl(Ark_NativePointer node,
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_ErrorInformation_Void>();
     auto onError = [arkCallback](const std::string& param) {
         int32_t code = FORM_ON_ERROR_CODE_INVALID;
-        std::string msg = FORM_EMPTY_STRING;
+        std::string msg = std::string(FORM_EMPTY_STRING);
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr = nullptr;
-            auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
-            msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
+            auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, std::string(FORM_EMPTY_STRING));
+            msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, std::string(FORM_EMPTY_STRING));
             int32_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK
                 && result <= MAX_SIGNED_NUMBER_OF_ARK) {
@@ -321,11 +325,11 @@ void SetOnRouterImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_RouterCallbackInfo_Void>();
     auto onRouter = [arkCallback](const std::string& param) {
-        std::string action = FORM_EMPTY_STRING;
-        std::string bundleName = FORM_EMPTY_STRING;
-        std::string moduleName = FORM_EMPTY_STRING;
-        std::string abilityName = FORM_EMPTY_STRING;
-        std::string params = FORM_EMPTY_STRING;
+    std::string action = std::string(FORM_EMPTY_STRING);
+    std::string bundleName = std::string(FORM_EMPTY_STRING);
+    std::string moduleName = std::string(FORM_EMPTY_STRING);
+    std::string abilityName = std::string(FORM_EMPTY_STRING);
+    std::string params = std::string(FORM_EMPTY_STRING);
         auto sourceJson = JsonUtil::ParseJsonString(param);
         do {
             if (!sourceJson || sourceJson->IsNull()) {
@@ -335,10 +339,10 @@ void SetOnRouterImpl(Ark_NativePointer node,
             if (!actionInfo || actionInfo->IsNull()) {
                 break;
             }
-            action = actionInfo->GetString(ROUTER_CODE_ACTION_KEY, FORM_EMPTY_STRING);
-            bundleName = actionInfo->GetString(ROUTER_CODE_BUNDLE_NAME_KEY, FORM_EMPTY_STRING);
-            moduleName = actionInfo->GetString(ROUTER_CODE_MODULE_NAME_KEY, FORM_EMPTY_STRING);
-            abilityName = actionInfo->GetString(ROUTER_CODE_ABILITY_NAME_KEY, FORM_EMPTY_STRING);
+            action = actionInfo->GetString(ROUTER_CODE_ACTION_KEY, std::string(FORM_EMPTY_STRING));
+            bundleName = actionInfo->GetString(ROUTER_CODE_BUNDLE_NAME_KEY, std::string(FORM_EMPTY_STRING));
+            moduleName = actionInfo->GetString(ROUTER_CODE_MODULE_NAME_KEY, std::string(FORM_EMPTY_STRING));
+            abilityName = actionInfo->GetString(ROUTER_CODE_ABILITY_NAME_KEY, std::string(FORM_EMPTY_STRING));
             auto paramsValue = actionInfo->GetValue(ROUTER_CODE_PARAMS_KEY);
             if (!paramsValue || paramsValue->IsNull()) {
                 break;
@@ -367,13 +371,15 @@ void SetOnUninstallImpl(Ark_NativePointer node,
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_FormCallbackInfo_Void>();
     auto onUninstall = [arkCallback](const std::string& param) {
         int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
-        std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
+        std::string idString = std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID);
         bool isLocked = false;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr = nullptr;
-            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            auto jsonId = sourceJson->GetString(
+                FORM_COMPONENT_ID_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
+            idString = sourceJson->GetString(
+                FORM_COMPONENT_ID_STRING_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
             isLocked = sourceJson->GetBool(FORM_COMPONENT_IS_LOCKED_KEY, false);
             int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
@@ -414,12 +420,14 @@ void SetOnUpdateImpl(Ark_NativePointer node,
     auto arkCallback = optValue ? CallbackHelper(*optValue) : CallbackHelper<Callback_FormCallbackInfo_Void>();
     auto onUpdate = [arkCallback](const std::string& param) {
         int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
-        std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
+        std::string idString = std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID);
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr = nullptr;
-            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            auto jsonId = sourceJson->GetString(
+                FORM_COMPONENT_ID_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
+            idString = sourceJson->GetString(
+                FORM_COMPONENT_ID_STRING_KEY, std::string(FORM_ON_ACQUIRED_ID_STRING_INVALID));
             int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
                 id = result;

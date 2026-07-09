@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #include "core/common/container.h"
 
+#include <string_view>
+
 #include "base/input_manager/input_manager.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -23,10 +25,10 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
-const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
-const std::string AUTO_FILL_PARAMS_OTHERACCOUNT = "com.autofill.params.otherAccount";
-const std::string VOICE_KBD_KEY = "voiceTextStatus";
+constexpr std::string_view AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
+constexpr std::string_view AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
+constexpr std::string_view AUTO_FILL_PARAMS_OTHERACCOUNT = "com.autofill.params.otherAccount";
+constexpr std::string_view VOICE_KBD_KEY = "voiceTextStatus";
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
     if (text.empty()) {
@@ -386,19 +388,19 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(patternPtr);
     CHECK_NULL_VOID(textFieldPattern);
     bool isPopup = false;
-    if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
-        auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
+    if (privateCommand.find(std::string(AUTO_FILL_PARAMS_USERNAME)) != privateCommand.end()) {
+        auto userName = privateCommand.find(std::string(AUTO_FILL_PARAMS_USERNAME));
         textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
         textFieldPattern->ProcessAutoFill(isPopup, true);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName size: %{public}zu",
             std::get<std::string>(userName->second).size());
-    } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
-        auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
+    } else if (privateCommand.find(std::string(AUTO_FILL_PARAMS_NEWPASSWORD)) != privateCommand.end()) {
+        auto newPassword = privateCommand.find(std::string(AUTO_FILL_PARAMS_NEWPASSWORD));
         textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
         textFieldPattern->ProcessAutoFill(isPopup, true, true);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword size: %{public}zu",
             std::get<std::string>(newPassword->second).size());
-    } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
+    } else if (privateCommand.find(std::string(AUTO_FILL_PARAMS_OTHERACCOUNT)) != privateCommand.end()) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.otherAccount");
         textFieldPattern->SetAutoFillOtherAccount(true);
         textFieldPattern->ProcessAutoFill(isPopup, true);

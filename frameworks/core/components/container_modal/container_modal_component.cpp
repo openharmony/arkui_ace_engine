@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <string_view>
 #include "core/components/container_modal/container_modal_component.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -40,10 +41,10 @@ constexpr int32_t WINDOW_MINIMIZE_BUTTON = ROOT_DECOR_BASE + 8;
 constexpr int32_t WINDOW_CLOSE_BUTTON = ROOT_DECOR_BASE + 10;
 constexpr int32_t WINDOW_BUTTON_INVALID = ROOT_DECOR_BASE + 12;
 
-const std::string SPLIT_LEFT_KEY = "container_modal_split_left_button";
-const std::string MAXIMIZE_KEY = "container_modal_maximize_button";
-const std::string MINIMIZE_KEY = "container_modal_minimize_button";
-const std::string CLOSE_KEY = "container_modal_close_button";
+constexpr std::string_view SPLIT_LEFT_KEY = "container_modal_split_left_button";
+constexpr std::string_view MAXIMIZE_KEY = "container_modal_maximize_button";
+constexpr std::string_view MINIMIZE_KEY = "container_modal_minimize_button";
+constexpr std::string_view CLOSE_KEY = "container_modal_close_button";
 }  // namespace
 
 RefPtr<Component> ContainerModalComponent::Create(
@@ -146,20 +147,26 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus, bool isFloating)
 {
     static std::unordered_map<InternalResource::ResourceId, std::pair<int32_t, std::string>> controlButtonIdMap = {
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, { WINDOW_SPLIT_BUTTON, SPLIT_LEFT_KEY } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
+            { WINDOW_SPLIT_BUTTON, std::string(SPLIT_LEFT_KEY) } },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
-            { WINDOW_SPLIT_BUTTON, SPLIT_LEFT_KEY } },
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER, { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+            { WINDOW_SPLIT_BUTTON, std::string(SPLIT_LEFT_KEY) } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER,
+            { WINDOW_MAX_RECOVER_BUTTON, std::string(MAXIMIZE_KEY) } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+            { WINDOW_MAX_RECOVER_BUTTON, std::string(MAXIMIZE_KEY) } },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER,
-            { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
+            { WINDOW_MAX_RECOVER_BUTTON, std::string(MAXIMIZE_KEY) } },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE,
-            { WINDOW_MAX_RECOVER_BUTTON, MAXIMIZE_KEY } },
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, { WINDOW_MINIMIZE_BUTTON, MINIMIZE_KEY } },
+            { WINDOW_MAX_RECOVER_BUTTON, std::string(MAXIMIZE_KEY) } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+            { WINDOW_MINIMIZE_BUTTON, std::string(MINIMIZE_KEY) } },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
-            { WINDOW_MINIMIZE_BUTTON, MINIMIZE_KEY } },
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, { WINDOW_CLOSE_BUTTON, CLOSE_KEY } },
-        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, { WINDOW_CLOSE_BUTTON, CLOSE_KEY } },
+            { WINDOW_MINIMIZE_BUTTON, std::string(MINIMIZE_KEY) } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
+            { WINDOW_CLOSE_BUTTON, std::string(CLOSE_KEY) } },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE,
+            { WINDOW_CLOSE_BUTTON, std::string(CLOSE_KEY) } },
     };
 
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);

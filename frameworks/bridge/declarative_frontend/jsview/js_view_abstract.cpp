@@ -115,8 +115,8 @@ constexpr int32_t DEFAULT_GRID_OFFSET = 0;
 
 namespace OHOS::Ace {
 namespace {
-const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
-const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
+constexpr std::string_view RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
+constexpr std::string_view RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
 constexpr int32_t FLOAT_PRECISION = 6;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
@@ -124,7 +124,7 @@ constexpr int NUM1 = 1;
 constexpr int NUM2 = 2;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
-const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+constexpr std::string_view CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 } // namespace
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
@@ -179,9 +179,9 @@ constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
-const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
-const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
-const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+constexpr std::string_view BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
+constexpr std::string_view BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+constexpr std::string_view ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 const std::vector<std::string> SLICE_KEYS = { "left", "right", "top", "bottom" };
 const std::vector<int32_t> LENGTH_METRICS_KEYS {
     static_cast<int32_t>(ArkUIIndex::START), static_cast<int32_t>(ArkUIIndex::END),
@@ -955,7 +955,7 @@ void CompleteResourceObjectFromParams(int32_t resId, int32_t typeNum, JSRef<JSOb
         return;
     }
 
-    std::regex resNameRegex(RESOURCE_NAME_PATTERN);
+    std::regex resNameRegex(std::string(RESOURCE_NAME_PATTERN.data()));
     std::smatch resNameResults;
     if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), resNameResults[1]);
@@ -6424,7 +6424,7 @@ bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::strin
     }
     std::string resPath = jsValue->ToString();
     std::smatch results;
-    std::regex tokenRegex(RESOURCE_TOKEN_PATTERN);
+    std::regex tokenRegex(std::string(RESOURCE_TOKEN_PATTERN.data()));
     if (!std::regex_match(resPath, results, tokenRegex)) {
         return false;
     }
@@ -7497,7 +7497,7 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     CHECK_NULL_VOID(resourceObject);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
-    auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+    auto customSymbolFamilyName = bundleName + "_" + moduleName + std::string(CUSTOM_SYMBOL_SUFFIX);
     std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
     customFamilyNames.push_back(customSymbolFamilyName);
 }
@@ -8332,7 +8332,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(jsVal);
     for (auto values : SCREEN_SIZE_VALUES) {
-        JSRef<JSVal> val = sizeObj->GetProperty(values.second.c_str());
+        JSRef<JSVal> val = sizeObj->GetProperty(values.second.data());
         if (val->IsNull() || val->IsEmpty()) {
             continue;
         }
@@ -10161,9 +10161,9 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
     if (!resourceAdapter) {
         return;
     }
-    double bloomRadius = resourceAdapter->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
-    Color bloomColor = resourceAdapter->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
-    Dimension illuminatedBorderWidth = resourceAdapter->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+    double bloomRadius = resourceAdapter->GetDoubleByName(std::string(BLOOM_RADIUS_SYS_RES_NAME));
+    Color bloomColor = resourceAdapter->GetColorByName(std::string(BLOOM_COLOR_SYS_RES_NAME));
+    Dimension illuminatedBorderWidth = resourceAdapter->GetDimensionByName(std::string(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME));
 
     JSRef<JSVal> illuminated = object->GetProperty("illuminated");
     if (illuminated->IsNumber()) {
