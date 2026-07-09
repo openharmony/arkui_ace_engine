@@ -80,6 +80,9 @@ public:
     // Check whether this rect intersects with another
     bool Intersects(const NG::RectT<int32_t>& other) const;
 
+    bool CanAccessibilityFocus(const RefPtr<VirtualAccessibilityNode>& node,
+        const RefPtr<NG::FrameNode>& containerNode) const;
+
     // Hit test: find virtual node by coordinates (returns the last matching child via right node)
     RefPtr<VirtualAccessibilityNode> HitTest(int32_t x, int32_t y) const;
 
@@ -127,6 +130,8 @@ public:
 
     // Traverse all child nodes (depth-first)
     void TraverseChildren(const std::function<void(const RefPtr<VirtualAccessibilityNode>&)>& visitor) const;
+
+    RefPtr<VirtualAccessibilityNode> CloneTree() const;
 
     void OnAccessibilityHover(
         const PointF& point, AccessibilityHoverEventType eventType, const RefPtr<FrameNode>& containerNode);

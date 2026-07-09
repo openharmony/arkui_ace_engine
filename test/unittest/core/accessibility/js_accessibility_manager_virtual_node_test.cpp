@@ -28,6 +28,7 @@
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "test/unittest/core/accessibility/js_accessibility_manager_test.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -805,6 +806,518 @@ HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeOnAccess
     virtualNode->SetNodeId(1);
     NG::PointF point(50.0f, 50.0f);
     virtualNode->OnAccessibilityHover(point, NG::AccessibilityHoverEventType::MOVE, nullptr);
+}
+
+// ==================== VirtualAccessibilityNode::CloneTree ====================
+
+/**
+ * @tc.name: VirtualAccessibilityNodeCloneTree001
+ * @tc.desc: Clone a single node, properties and rect are preserved
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeCloneTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create source node with all properties set
+     * @tc.expected: clone has identical nodeId/rect/text/level/role/group/checkable/checked/enabled/selected
+     */
+    auto src = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    src->SetNodeId(TEST_ROOT_NODE_ID);
+    src->SetRect(TEST_ROOT_RECT_LEFT, TEST_ROOT_RECT_TOP, TEST_ROOT_RECT_WIDTH, TEST_ROOT_RECT_HEIGHT);
+    src->SetAccessibilityText("cloneMe");
+    src->SetAccessibilityLevel("yes");
+    src->SetRole("button");
+    src->SetAccessibilityGroup(true);
+    src->SetCheckable(true);
+    src->SetChecked(true);
+    src->SetEnabled(true);
+    src->SetSelected(true);
+
+    auto clone = src->CloneTree();
+    ASSERT_NE(clone, nullptr);
+    EXPECT_EQ(clone->GetNodeId(), TEST_ROOT_NODE_ID);
+    EXPECT_EQ(clone->GetLeft(), TEST_ROOT_RECT_LEFT);
+    EXPECT_EQ(clone->GetTop(), TEST_ROOT_RECT_TOP);
+    EXPECT_EQ(clone->GetWidth(), TEST_ROOT_RECT_WIDTH);
+    EXPECT_EQ(clone->GetHeight(), TEST_ROOT_RECT_HEIGHT);
+    EXPECT_EQ(clone->GetAccessibilityText(), "cloneMe");
+    EXPECT_EQ(clone->GetAccessibilityLevel(), "yes");
+    EXPECT_EQ(clone->GetRole(), "button");
+    EXPECT_EQ(clone->GetAccessibilityGroup(), true);
+    EXPECT_EQ(clone->GetCheckable(), true);
+    EXPECT_EQ(clone->GetChecked(), true);
+    EXPECT_EQ(clone->GetEnabled(), true);
+    EXPECT_EQ(clone->GetSelected(), true);
+    EXPECT_EQ(clone->GetChildCount(), 0U);
+}
+
+/**
+ * @tc.name: VirtualAccessibilityNodeCloneTree002
+ * @tc.desc: Clone a tree with children, structure is preserved
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeCloneTree002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a 2-level tree, clone it
+     * @tc.expected: clone has same shape and child properties
+     */
+    auto src = CreateVirtualNodeTree();
+    auto clone = src->CloneTree();
+    ASSERT_NE(clone, nullptr);
+    ASSERT_EQ(clone->GetChildCount(), 2U);
+    EXPECT_EQ(clone->GetNodeId(), TEST_ROOT_NODE_ID);
+
+    auto cloneChild1 = clone->GetChild(0);
+    ASSERT_NE(cloneChild1, nullptr);
+    EXPECT_EQ(cloneChild1->GetNodeId(), TEST_CHILD1_NODE_ID);
+    EXPECT_EQ(cloneChild1->GetAccessibilityText(), "child1");
+
+    auto cloneChild2 = clone->GetChild(1);
+    ASSERT_NE(cloneChild2, nullptr);
+    EXPECT_EQ(cloneChild2->GetNodeId(), TEST_CHILD2_NODE_ID);
+    EXPECT_EQ(cloneChild2->GetAccessibilityText(), "child2");
+}
+
+/**
+ * @tc.name: VirtualAccessibilityNodeCloneTree003
+ * @tc.desc: Clone must be a deep copy, modifying clone does not affect source
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeCloneTree003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. clone source, then mutate clone's text and add a new child
+     * @tc.expected: source text and child count are unchanged
+     */
+    auto src = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    src->SetNodeId(TEST_ROOT_NODE_ID);
+    src->SetAccessibilityText("original");
+
+    auto clone = src->CloneTree();
+    ASSERT_NE(clone, nullptr);
+    clone->SetAccessibilityText("mutated");
+    auto extra = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    extra->SetNodeId(TEST_CHILD1_NODE_ID);
+    clone->AddChild(extra);
+
+    EXPECT_EQ(src->GetAccessibilityText(), "original");
+    EXPECT_EQ(src->GetChildCount(), 0U);
+    EXPECT_EQ(clone->GetAccessibilityText(), "mutated");
+    EXPECT_EQ(clone->GetChildCount(), 1U);
+}
+
+/**
+ * @tc.name: VirtualAccessibilityNodeCloneTree004
+ * @tc.desc: Clone a 3-level tree, grandchildren are also deep-copied
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, VirtualAccessibilityNodeCloneTree004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build root -> child -> grandchild, clone root
+     * @tc.expected: clone's child also has the grandchild with same properties
+     */
+    auto root = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    root->SetNodeId(TEST_ROOT_NODE_ID);
+    root->SetAccessibilityText("root");
+    root->SetEnabled(true);
+
+    auto child = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    child->SetNodeId(TEST_CHILD1_NODE_ID);
+    child->SetAccessibilityText("child");
+
+    auto grand = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    grand->SetNodeId(TEST_CHILD2_NODE_ID);
+    grand->SetAccessibilityText("grand");
+    child->AddChild(grand);
+    root->AddChild(child);
+
+    auto clone = root->CloneTree();
+    ASSERT_NE(clone, nullptr);
+    ASSERT_EQ(clone->GetChildCount(), 1U);
+    auto cloneChild = clone->GetChild(0);
+    ASSERT_NE(cloneChild, nullptr);
+    ASSERT_EQ(cloneChild->GetChildCount(), 1U);
+    auto cloneGrand = cloneChild->GetChild(0);
+    ASSERT_NE(cloneGrand, nullptr);
+    EXPECT_EQ(cloneGrand->GetNodeId(), TEST_CHILD2_NODE_ID);
+    EXPECT_EQ(cloneGrand->GetAccessibilityText(), "grand");
+}
+
+// ==================== JsAccessibilityManager::AddAccessibilityVirtualNode ====================
+
+/**
+ * @tc.name: AddAccessibilityVirtualNode001
+ * @tc.desc: With null pipeline (windowId mismatch), returns INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, AddAccessibilityVirtualNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. do not attach pipeline to manager, call AddAccessibilityVirtualNode
+     * @tc.expected: callback receives INTERNAL_ERROR because GetPipelineByWindowId returns null
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    std::vector<Accessibility::AccessibilityVirtualNode> nodes;
+    manager->AddAccessibilityVirtualNode(0, nodes, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.addVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: AddAccessibilityVirtualNode002
+ * @tc.desc: With empty nodes input, returns ADD_NODE_IS_EMPTY
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, AddAccessibilityVirtualNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline and a host node, but pass empty nodes vector
+     * @tc.expected: callback receives ADD_NODE_IS_EMPTY (ConvertOuterNodesToVirtualTree returns null)
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    std::vector<Accessibility::AccessibilityVirtualNode> emptyNodes;
+    manager->AddAccessibilityVirtualNode(-1, emptyNodes, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.addVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::ADD_NODE_IS_EMPTY);
+}
+
+/**
+ * @tc.name: AddAccessibilityVirtualNode003
+ * @tc.desc: With valid nodes and host node (root), returns SUCCESS and attaches virtual tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, AddAccessibilityVirtualNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, build a small outer tree, call with elementId=-1
+     * @tc.expected: callback receives SUCCESS, host node's VirtualNodeTreeRoot is set
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+
+    std::vector<Accessibility::AccessibilityVirtualNode> nodes;
+    Accessibility::AccessibilityVirtualNode outerRoot;
+    outerRoot.SetId(1);
+    outerRoot.SetParentId(-1);
+    outerRoot.SetAccessibilityText("outerRoot");
+    outerRoot.SetAccessibilityLevel("yes");
+    outerRoot.SetCustomComponentType("container");
+    outerRoot.SetEnabled(true);
+    nodes.push_back(outerRoot);
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->AddAccessibilityVirtualNode(-1, nodes, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.addVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_, Accessibility::OperateVirtualNodeResult::SUCCESS);
+
+    auto property = rootNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_TRUE(property->HasVirtualNodeTreeRoot());
+}
+
+/**
+ * @tc.name: AddAccessibilityVirtualNode004
+ * @tc.desc: With valid pipeline but non-existing elementId, returns ACCESSIBILITY_ELEMENT_NOT_EXIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, AddAccessibilityVirtualNode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, request a non-existing elementId
+     * @tc.expected: callback receives ACCESSIBILITY_ELEMENT_NOT_EXIST
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    std::vector<Accessibility::AccessibilityVirtualNode> nodes;
+    Accessibility::AccessibilityVirtualNode outerRoot;
+    outerRoot.SetId(1);
+    outerRoot.SetParentId(-1);
+    nodes.push_back(outerRoot);
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->AddAccessibilityVirtualNode(TEST_NONEXISTENT_NODE_ID, nodes, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.addVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::ACCESSIBILITY_ELEMENT_NOT_EXIST);
+}
+
+// ==================== JsAccessibilityManager::RemoveAccessibilityVirtualNode ====================
+
+/**
+ * @tc.name: RemoveAccessibilityVirtualNode001
+ * @tc.desc: With null pipeline, returns INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, RemoveAccessibilityVirtualNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. do not attach pipeline, call RemoveAccessibilityVirtualNode
+     * @tc.expected: callback receives INTERNAL_ERROR
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->RemoveAccessibilityVirtualNode(0, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.removeVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: RemoveAccessibilityVirtualNode002
+ * @tc.desc: With valid host node that has a virtual tree, returns SUCCESS and clears root
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, RemoveAccessibilityVirtualNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, set a virtual tree root on rootNode, then remove
+     * @tc.expected: callback receives SUCCESS, VirtualNodeTreeRoot becomes null
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto property = rootNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    auto virtualRoot = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    virtualRoot->SetNodeId(TEST_ROOT_NODE_ID);
+    property->SetVirtualNodeTreeRoot(virtualRoot);
+    ASSERT_TRUE(property->HasVirtualNodeTreeRoot());
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->RemoveAccessibilityVirtualNode(-1, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.removeVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_, Accessibility::OperateVirtualNodeResult::SUCCESS);
+    EXPECT_FALSE(property->HasVirtualNodeTreeRoot());
+}
+
+/**
+ * @tc.name: RemoveAccessibilityVirtualNode003
+ * @tc.desc: With non-existing elementId, returns ACCESSIBILITY_ELEMENT_NOT_EXIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, RemoveAccessibilityVirtualNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, remove with non-existing elementId
+     * @tc.expected: callback receives ACCESSIBILITY_ELEMENT_NOT_EXIST
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->RemoveAccessibilityVirtualNode(TEST_NONEXISTENT_NODE_ID, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.removeVirtualNodeCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::ACCESSIBILITY_ELEMENT_NOT_EXIST);
+}
+
+// ==================== JsAccessibilityManager::UpdateAccessibilityElementInfo ====================
+
+/**
+ * @tc.name: UpdateAccessibilityElementInfo001
+ * @tc.desc: With null pipeline, returns INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, UpdateAccessibilityElementInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. do not attach pipeline, call UpdateAccessibilityElementInfo
+     * @tc.expected: callback receives INTERNAL_ERROR
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    Accessibility::AccessibilityVirtualNode node;
+    node.SetAccessibilityText("ignored");
+    manager->UpdateAccessibilityElementInfo(0, node, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.updatePropertyCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: UpdateAccessibilityElementInfo002
+ * @tc.desc: With valid host node, custom property is written via public setters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, UpdateAccessibilityElementInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, update root node with all fields set
+     * @tc.expected: callback receives SUCCESS, AccessibilityProperty has CustomAccessibilityProperty
+     *               with matching fields
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+
+    Accessibility::AccessibilityVirtualNode src;
+    src.SetAccessibilityText("hello");
+    src.SetAccessibilityLevel("yes");
+    src.SetCustomComponentType("button");
+    src.SetCheckable(true);
+    src.SetChecked(true);
+    src.SetEnabled(true);
+    src.SetSelected(true);
+    src.SetAccessibilityGroup(true);
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->UpdateAccessibilityElementInfo(-1, src, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.updatePropertyCalled_);
+    EXPECT_EQ(callback.mockOperateResult_, Accessibility::OperateVirtualNodeResult::SUCCESS);
+
+    auto property = rootNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    const auto& custom = property->GetCustomAccessibilityProperty();
+    ASSERT_NE(custom, nullptr);
+    EXPECT_EQ(custom->GetAccessibilityText(), "hello");
+    EXPECT_EQ(custom->GetAccessibilityLevel(), "yes");
+    EXPECT_EQ(custom->GetRole(), "button");
+    EXPECT_EQ(custom->GetCheckable(), true);
+    EXPECT_EQ(custom->GetChecked(), true);
+    EXPECT_EQ(custom->GetEnabled(), true);
+    EXPECT_EQ(custom->GetSelected(), true);
+    EXPECT_EQ(custom->GetAccessibilityGroup(), true);
+}
+
+/**
+ * @tc.name: UpdateAccessibilityElementInfo003
+ * @tc.desc: With non-existing elementId, returns ACCESSIBILITY_ELEMENT_NOT_EXIST
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, UpdateAccessibilityElementInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach pipeline, call UpdateAccessibilityElementInfo with non-existing id
+     * @tc.expected: callback receives ACCESSIBILITY_ELEMENT_NOT_EXIST
+     */
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    Accessibility::AccessibilityVirtualNode src;
+    src.SetAccessibilityText("ignored");
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->UpdateAccessibilityElementInfo(TEST_NONEXISTENT_NODE_ID, src, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.updatePropertyCalled_);
+    EXPECT_EQ(callback.mockOperateResult_,
+        Accessibility::OperateVirtualNodeResult::ACCESSIBILITY_ELEMENT_NOT_EXIST);
+}
+
+/**
+ * @tc.name: UpdateAccessibilityElementInfo004
+ * @tc.desc: Updating an existing virtual node by encoded container ID, returns SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerVirtualNodeTest, UpdateAccessibilityElementInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. attach a virtual tree to hostNode, encode the root virtual id,
+     *           call UpdateAccessibilityElementInfo with that encoded id
+     * @tc.expected: callback receives SUCCESS and the virtual node's text is updated
+     */
+    auto& mgr = NG::VirtualNodeContainerIdManager::GetInstance();
+    auto manager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto pipelineContext = MockContainer::Current()->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    manager->context_ = pipelineContext;
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(ngPipeline, nullptr);
+    ngPipeline->SetWindowId(TEST_WINDOW_ID);
+    manager->windowId_ = TEST_WINDOW_ID;
+
+    auto rootNode = ngPipeline->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto containerId = mgr.AllocateContainerId(rootNode);
+    ASSERT_NE(containerId, 0);
+
+    auto virtualRoot = AceType::MakeRefPtr<NG::VirtualAccessibilityNode>();
+    virtualRoot->SetNodeId(TEST_ROOT_NODE_ID);
+    virtualRoot->SetAccessibilityText("before");
+    auto property = rootNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    property->SetVirtualNodeTreeRoot(virtualRoot);
+
+    int64_t encodedId =
+        NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(containerId, TEST_ROOT_NODE_ID);
+
+    Accessibility::AccessibilityVirtualNode src;
+    src.SetAccessibilityText("after");
+    src.SetEnabled(true);
+
+    MockAccessibilityElementOperatorCallback callback;
+    callback.Reset();
+    manager->UpdateAccessibilityElementInfo(encodedId, src, 1, callback, TEST_WINDOW_ID);
+    EXPECT_TRUE(callback.updatePropertyCalled_);
+    EXPECT_EQ(callback.mockOperateResult_, Accessibility::OperateVirtualNodeResult::SUCCESS);
+    EXPECT_EQ(virtualRoot->GetAccessibilityText(), "after");
 }
 
 } // namespace OHOS::Ace

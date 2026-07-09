@@ -51,6 +51,12 @@ enum class DumpMode {
     CUSTOM_ACTION_TEST,
     SET_COMPONENT_TYPE_TEST,
     CLEAR_COMPONENT_TYPE_TEST,
+    SET_CUSTOM_PROPERTY,
+    GET_CUSTOM_PROPERTY,
+    ADD_VIRTUAL_NODE,
+    REMOVE_VIRTUAL_NODE,
+    GET_VIRTUAL_NODE,
+    PERFORM_VIRTUAL_NODE_ACTION_TEST,
 };
 
 struct DumpInfoArgument {
@@ -64,6 +70,21 @@ struct DumpInfoArgument {
     int64_t nodeId = -1;
     int32_t action = 0;
     int32_t eventId = -1;
+    int32_t virtualNodeId = -1;
+    int32_t containerId = -1;
+    int32_t virtualNodeLeft = 0;
+    int32_t virtualNodeTop = 0;
+    int32_t virtualNodeWidth = 0;
+    int32_t virtualNodeHeight = 0;
+    std::string customAccessibilityText;
+    std::string customAccessibilityLevel;
+    std::string customRole;
+    bool customCheckable = false;
+    bool customChecked = false;
+    bool customEnabled = true;
+    bool customSelected = false;
+    bool customGroup = false;
+    int32_t performAction = 0;
     int64_t webAccId = -1;
     int32_t focusMoveRule = -1;
     std::string webAccFun = "tree";

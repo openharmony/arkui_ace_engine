@@ -15,8 +15,11 @@
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_ng.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_virtual_node_utils.h"
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
@@ -75,6 +78,8 @@ bool FocusStrategyOsalNG::UpdateOriginNodeInfo(int64_t elementId)
     NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node); // to improve performance
     rootNode_ = rootNode;
     baseNode_ = node;
+    hostFrameNode_ = nullptr;
+    baseVirtualNode_ = nullptr;
     return true;
 }
 
