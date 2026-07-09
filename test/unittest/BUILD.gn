@@ -25,6 +25,7 @@ group("unittest") {
       deps += [
         "base:base_unittest",
         "core:core_unittest",
+        "frameworks:frameworks_unittest",
       ]
     } else {
       deps += [
@@ -293,7 +294,7 @@ ohos_static_library("ace_components_base") {
   configs = [ ":ace_unittest_config" ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   defines += [ "SMART_GESTURE_SUPPORTED" ]
-  external_deps = [ "cJSON:cjson" ]
+  external_deps = [ "cJSON:cjson_static" ]
   if (current_os == "ohos") {
     external_deps += [ "c_utils:utils" ]
   }

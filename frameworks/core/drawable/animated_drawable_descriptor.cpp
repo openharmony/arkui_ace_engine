@@ -182,8 +182,12 @@ std::vector<int32_t> AnimatedDrawableDescriptor::GetDurations()
         return userDurations_;
     }
     if (totalDuration_ >= 0) {
+        auto frameCount = GetFrameCount();
+        if (frameCount == 0) {
+            return {};
+        }
         std::vector<int32_t> result;
-        result.resize(GetFrameCount(), totalDuration_ / GetFrameCount());
+        result.resize(frameCount, totalDuration_ / frameCount);
         return result;
     }
     if (totalDuration_ < 0 && pixelMapList_.size() > 0) {
