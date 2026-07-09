@@ -6208,13 +6208,18 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString(vm);
         safeAreaType = ParseStrToUint(typeCppStr);
-    } else {
+    } else if (secondArg->IsNumber()) {
+        safeAreaType = secondArg->ToNumber(vm)->Value();
+    }
+     else {
         safeAreaType = NG::SAFE_AREA_TYPE_ALL;
     }
 
     if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
         safeAreaEdge = ParseStrToUint(edgesCppStr);
+    } else if (thirdArg->IsNumber()) {
+        safeAreaEdge = thirdArg->ToNumber(vm)->Value();
     } else {
         safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
     }
