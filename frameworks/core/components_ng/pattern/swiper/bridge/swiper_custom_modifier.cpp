@@ -78,6 +78,15 @@ ArkUI_Int32 GetSwiperTotalCountCustom(ArkUINodeHandle node)
     return pattern->TotalCount();
 }
 
+ArkUI_Int32 GetSwiperCurrentShownIndexCustom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetCurrentShownIndex();
+}
+
 ArkUI_Int32 GetSwiperDirectionCustom(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -464,6 +473,7 @@ const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
         .swipeTo = SwipeToCustom,
         .isAnimationStopped = IsAnimationStoppedCustom,
         .setCurveLinear = SetCurveLinearCustom,
+        .getCurrentShownIndex = GetSwiperCurrentShownIndexCustom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
